@@ -77,44 +77,47 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         context['url_externe_locaties'] = reverse('Vereniging:externe-locaties',
                                                   kwargs={'vereniging_pk': ver.pk})
 
-        if self.rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
+        comps = list()
+        deelcomps = list()
+        deelcomps_rk = list()
+
+        if self.rol_nu == Rollen.ROL_SEC:
             # SEC
-            comps = list()
-            deelcomps = list()
-            deelcomps_rk = list()
+            pass
         else:
             # HWL of WL
-            context['toon_competities'] = True
-
             if self.rol_nu == Rollen.ROL_HWL:
                 context['toon_wedstrijdkalender'] = True
 
-            comps = (Competitie
-                     .objects
-                     .filter(is_afgesloten=False)
-                     .order_by('afstand',
-                               'begin_jaar'))
+            if not ver.regio.is_administratief:
+                context['toon_competities'] = True
 
-            deelcomps = (DeelCompetitie
+                comps = (Competitie
                          .objects
-                         .filter(laag=LAAG_REGIO,
-                                 competitie__is_afgesloten=False,
-                                 nhb_regio=ver.regio)
-                         .select_related('competitie'))
+                         .filter(is_afgesloten=False)
+                         .order_by('afstand',
+                                   'begin_jaar'))
 
-            deelcomps_rk = (DeelCompetitie
-                            .objects
-                            .filter(laag=LAAG_RK,
-                                    competitie__is_afgesloten=False,
-                                    nhb_rayon=ver.regio.rayon)
-                            .select_related('competitie'))
+                deelcomps = (DeelCompetitie
+                             .objects
+                             .filter(laag=LAAG_REGIO,
+                                     competitie__is_afgesloten=False,
+                                     nhb_regio=ver.regio)
+                             .select_related('competitie'))
 
-            if (DeelcompetitieRonde
-                .objects
-                .filter(deelcompetitie__is_afgesloten=False,
-                        matches__vereniging=ver)).count() > 0:
-                # er zijn wedstrijden voor deze vereniging
-                context['heeft_wedstrijden'] = True
+                deelcomps_rk = (DeelCompetitie
+                                .objects
+                                .filter(laag=LAAG_RK,
+                                        competitie__is_afgesloten=False,
+                                        nhb_rayon=ver.regio.rayon)
+                                .select_related('competitie'))
+
+                if (DeelcompetitieRonde
+                    .objects
+                    .filter(deelcompetitie__is_afgesloten=False,
+                            matches__vereniging=ver)).count() > 0:
+                    # er zijn wedstrijden voor deze vereniging
+                    context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden
         # 1 - aanmelden
