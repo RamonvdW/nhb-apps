@@ -588,7 +588,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
                                   .select_related('deelcompetitie',
                                                   'vereniging',
                                                   'team_type')
-                                  .filter(deelcompetitie=self.obj.deelcompetitie)
+                                  .filter(deelcompetitie=self.deelcomp)
                                   .order_by('team_naam', 'pk'))
         else:
             kwargs['queryset'] = (RegiocompetitieTeam
