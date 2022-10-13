@@ -23,6 +23,8 @@ def init_hoogste_bestel_nr(apps, _):
 
 class Migration(migrations.Migration):
 
+    """ Migratie class voor dit deel van de applicatie """
+
     replaces = [('Bestel', 'm0010_squashed'),
                 ('Bestel', 'm0011_migratie_1'),
                 ('Bestel', 'm0012_betaal_methode'),

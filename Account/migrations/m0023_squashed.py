@@ -12,6 +12,8 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
+    """ Migratie class voor dit deel van de applicatie """
+
     replaces = [('Account', 'm0021_squashed'),
                 ('Account', 'm0022_otp_gelukt_op')]
 

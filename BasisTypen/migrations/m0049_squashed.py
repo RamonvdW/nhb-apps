@@ -673,6 +673,8 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
 
 class Migration(migrations.Migration):
 
+    """ Migratie class voor dit deel van de applicatie """
+
     replaces = [('BasisTypen', 'm0042_squashed'),
                 ('BasisTypen', 'm0043_jongens'),
                 ('BasisTypen', 'm0044_verwijder_ib'),
