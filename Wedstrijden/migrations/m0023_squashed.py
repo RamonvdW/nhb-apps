@@ -11,9 +11,9 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Wedstrijden', 'm0020_squashed'),
-                ('Wedstrijden', 'm0021_nieuwe_uitslag'),
-                ('Wedstrijden', 'm0022_migreer_wedstrijden')]
+    # replaces = [('Wedstrijden', 'm0020_squashed'),
+    #             ('Wedstrijden', 'm0021_nieuwe_uitslag'),
+    #             ('Wedstrijden', 'm0022_migreer_wedstrijden')]
 
     # dit is de eerste
     initial = True

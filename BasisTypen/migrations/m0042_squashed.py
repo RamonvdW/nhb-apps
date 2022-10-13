@@ -675,20 +675,20 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('BasisTypen', 'm0028_squashed'),
-                ('BasisTypen', 'm0029_template'),
-                ('BasisTypen', 'm0030_organisatie'),
-                ('BasisTypen', 'm0031_repair_tr'),
-                ('BasisTypen', 'm0032_organisatie_nhb'),
-                ('BasisTypen', 'm0033_buiten_gebruik'),
-                ('BasisTypen', 'm0034_ifaa_bogen'),
-                ('BasisTypen', 'm0035_team_buiten_gebruik'),
-                ('BasisTypen', 'm0036_corrigeer_kalender_140'),
-                ('BasisTypen', 'm0037_ifaa_leeftijdsklassen'),
-                ('BasisTypen', 'm0038_ifaa_wedstrijdklassen'),
-                ('BasisTypen', 'm0039_ifaa_afkortingen'),
-                ('BasisTypen', 'm0040_nhb_onder12'),
-                ('BasisTypen', 'm0041_ifaa_volwassenen')]
+    # replaces = [('BasisTypen', 'm0028_squashed'),
+    #             ('BasisTypen', 'm0029_template'),
+    #             ('BasisTypen', 'm0030_organisatie'),
+    #             ('BasisTypen', 'm0031_repair_tr'),
+    #             ('BasisTypen', 'm0032_organisatie_nhb'),
+    #             ('BasisTypen', 'm0033_buiten_gebruik'),
+    #             ('BasisTypen', 'm0034_ifaa_bogen'),
+    #             ('BasisTypen', 'm0035_team_buiten_gebruik'),
+    #             ('BasisTypen', 'm0036_corrigeer_kalender_140'),
+    #             ('BasisTypen', 'm0037_ifaa_leeftijdsklassen'),
+    #             ('BasisTypen', 'm0038_ifaa_wedstrijdklassen'),
+    #             ('BasisTypen', 'm0039_ifaa_afkortingen'),
+    #             ('BasisTypen', 'm0040_nhb_onder12'),
+    #             ('BasisTypen', 'm0041_ifaa_volwassenen')]
 
     # dit is de eerste
     initial = True

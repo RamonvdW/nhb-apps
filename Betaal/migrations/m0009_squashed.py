@@ -11,14 +11,14 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Betaal', 'm0001_initial'),
-                ('Betaal', 'm0002_minor_changes'),
-                ('Betaal', 'm0003_betaalmutatie_ontvanger'),
-                ('Betaal', 'm0004_mutatie_url_checkout'),
-                ('Betaal', 'm0005_betaalactief_ontvanger'),
-                ('Betaal', 'm0006_betaalactief_meer'),
-                ('Betaal', 'm0007_transactie_bedragen'),
-                ('Betaal', 'm0008_admin')]
+    # replaces = [('Betaal', 'm0001_initial'),
+    #             ('Betaal', 'm0002_minor_changes'),
+    #             ('Betaal', 'm0003_betaalmutatie_ontvanger'),
+    #             ('Betaal', 'm0004_mutatie_url_checkout'),
+    #             ('Betaal', 'm0005_betaalactief_ontvanger'),
+    #             ('Betaal', 'm0006_betaalactief_meer'),
+    #             ('Betaal', 'm0007_transactie_bedragen'),
+    #             ('Betaal', 'm0008_admin')]
 
     # dit is de eerste
     initial = True

@@ -110,9 +110,9 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('NhbStructuur', 'm0024_squashed'),
-                ('NhbStructuur', 'm0025_kvk_website_phone'),
-                ('NhbStructuur', 'm0026_adres_email')]
+    # replaces = [('NhbStructuur', 'm0024_squashed'),
+    #             ('NhbStructuur', 'm0025_kvk_website_phone'),
+    #             ('NhbStructuur', 'm0026_adres_email')]
 
     # dit is de eerste
     initial = True

@@ -22,16 +22,16 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Competitie', 'm0065_squashed'),
-                ('Competitie', 'm0066_competitie_typen'),
-                ('Competitie', 'm0067_klasse_split_1'),
-                ('Competitie', 'm0068_klasse_split_2'),
-                ('Competitie', 'm0069_klasse_split_3'),
-                ('Competitie', 'm0070_klasse_split_4'),
-                ('Competitie', 'm0071_matches'),
-                ('Competitie', 'm0072_limiet_split'),
-                ('Competitie', 'm0073_inschrijf_voorkeur_rk_bk'),
-                ('Competitie', 'm0074_ingeschreven_door')]
+    # replaces = [('Competitie', 'm0065_squashed'),
+    #             ('Competitie', 'm0066_competitie_typen'),
+    #             ('Competitie', 'm0067_klasse_split_1'),
+    #             ('Competitie', 'm0068_klasse_split_2'),
+    #             ('Competitie', 'm0069_klasse_split_3'),
+    #             ('Competitie', 'm0070_klasse_split_4'),
+    #             ('Competitie', 'm0071_matches'),
+    #             ('Competitie', 'm0072_limiet_split'),
+    #             ('Competitie', 'm0073_inschrijf_voorkeur_rk_bk'),
+    #             ('Competitie', 'm0074_ingeschreven_door')]
 
     # dit is de eerste
     initial = True

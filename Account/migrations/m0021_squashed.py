@@ -14,8 +14,8 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Account', 'm0019_squashed'),
-                ('Account', 'm0020_rate_limiter')]
+    # replaces = [('Account', 'm0019_squashed'),
+    #             ('Account', 'm0020_rate_limiter')]
 
     # dit is de eerste
     initial = True

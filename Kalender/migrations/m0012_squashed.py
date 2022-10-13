@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Kalender', 'm0006_squashed'), ('Kalender', 'm0007_organisatie'), ('Kalender', 'm0008_inschrijving'), ('Kalender', 'm0009_combi_korting'), ('Kalender', 'm0010_delete_kalendermutatie'), ('Kalender', 'm0011_kosten')]
+    # replaces = [('Kalender', 'm0006_squashed'), ('Kalender', 'm0007_organisatie'), ('Kalender', 'm0008_inschrijving'), ('Kalender', 'm0009_combi_korting'), ('Kalender', 'm0010_delete_kalendermutatie'), ('Kalender', 'm0011_kosten')]
 
     # dit is de eerste
     initial = True
