@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0021_squashed'),
-        ('BasisTypen', 'm0042_squashed'),
+        ('BasisTypen', 'm0049_squashed'),
         ('NhbStructuur', 'm0027_squashed'),
         ('Sporter', 'm0010_squashed'),
         ('Wedstrijden', 'm0023_squashed'),

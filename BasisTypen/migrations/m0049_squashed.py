@@ -338,24 +338,24 @@ def init_boogtypen(apps, _):
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
     # maak de standaard boogtypen aan
-    bulk = [boogtype_klas(pk=1, afkorting='R',  volgorde='A', beschrijving='Recurve'),
-            boogtype_klas(pk=2, afkorting='C',  volgorde='D', beschrijving='Compound'),
-            boogtype_klas(pk=3, afkorting='BB', volgorde='I', beschrijving='Barebow'),
+    bulk = [boogtype_klas(pk=1, afkorting='R',  volgorde=10, beschrijving='Recurve'),
+            boogtype_klas(pk=2, afkorting='C',  volgorde=11, beschrijving='Compound'),
+            boogtype_klas(pk=3, afkorting='BB', volgorde=12, beschrijving='Barebow'),
             # oud: boogtype IB met pk=4
-            boogtype_klas(pk=5, afkorting='LB', volgorde='S', beschrijving='Longbow'),
-            boogtype_klas(pk=6, afkorting='TR', volgorde='K', beschrijving='Traditional'),
-            boogtype_klas(pk=7, organisatie=ORGANISATIE_IFAA, afkorting='BBR', volgorde='A', beschrijving='Barebow Recurve'),
-            boogtype_klas(pk=8, organisatie=ORGANISATIE_IFAA, afkorting='BBC', volgorde='B', beschrijving='Barebow Compound'),
-            boogtype_klas(pk=9, organisatie=ORGANISATIE_IFAA, afkorting='FSR', volgorde='F', beschrijving='Freestyle Limited Recurve'),
-            boogtype_klas(pk=10, organisatie=ORGANISATIE_IFAA, afkorting='FSC', volgorde='G', beschrijving='Freestyle Limited Compound'),
-            boogtype_klas(pk=11, organisatie=ORGANISATIE_IFAA, afkorting='FU',  volgorde='H', beschrijving='Freestyle Unlimited'),
-            boogtype_klas(pk=12, organisatie=ORGANISATIE_IFAA, afkorting='BHR', volgorde='K', beschrijving='Bowhunter Recurve'),
-            boogtype_klas(pk=13, organisatie=ORGANISATIE_IFAA, afkorting='BHC', volgorde='L', beschrijving='Bowhunter Compound'),
-            boogtype_klas(pk=14, organisatie=ORGANISATIE_IFAA, afkorting='BHU', volgorde='M', beschrijving='Bowhunter Unlimited'),
-            boogtype_klas(pk=15, organisatie=ORGANISATIE_IFAA, afkorting='BHL', volgorde='N', beschrijving='Bowhunter Limited'),
-            boogtype_klas(pk=16, organisatie=ORGANISATIE_IFAA, afkorting='ITR', volgorde='P', beschrijving='Traditional Recurve Bow'),
-            boogtype_klas(pk=17, organisatie=ORGANISATIE_IFAA, afkorting='ILB', volgorde='R', beschrijving='Longbow'),
-            boogtype_klas(pk=18, organisatie=ORGANISATIE_IFAA, afkorting='IHB', volgorde='T', beschrijving='Historical Bow')]
+            boogtype_klas(pk=5, afkorting='LB', volgorde=14, beschrijving='Longbow'),
+            boogtype_klas(pk=6, afkorting='TR', volgorde=13, beschrijving='Traditional'),
+            boogtype_klas(pk=7, organisatie=ORGANISATIE_IFAA, afkorting='BBR', volgorde=20, beschrijving='Barebow Recurve'),
+            boogtype_klas(pk=8, organisatie=ORGANISATIE_IFAA, afkorting='BBC', volgorde=21, beschrijving='Barebow Compound'),
+            boogtype_klas(pk=9, organisatie=ORGANISATIE_IFAA, afkorting='FSR', volgorde=22, beschrijving='Freestyle Limited Recurve'),
+            boogtype_klas(pk=10, organisatie=ORGANISATIE_IFAA, afkorting='FSC', volgorde=23, beschrijving='Freestyle Limited Compound'),
+            boogtype_klas(pk=11, organisatie=ORGANISATIE_IFAA, afkorting='FU',  volgorde=24, beschrijving='Freestyle Unlimited'),
+            boogtype_klas(pk=12, organisatie=ORGANISATIE_IFAA, afkorting='BHR', volgorde=25, beschrijving='Bowhunter Recurve'),
+            boogtype_klas(pk=13, organisatie=ORGANISATIE_IFAA, afkorting='BHC', volgorde=26, beschrijving='Bowhunter Compound'),
+            boogtype_klas(pk=14, organisatie=ORGANISATIE_IFAA, afkorting='BHU', volgorde=27, beschrijving='Bowhunter Unlimited'),
+            boogtype_klas(pk=15, organisatie=ORGANISATIE_IFAA, afkorting='BHL', volgorde=28, beschrijving='Bowhunter Limited'),
+            boogtype_klas(pk=16, organisatie=ORGANISATIE_IFAA, afkorting='ITR', volgorde=29, beschrijving='Traditional Recurve Bow'),
+            boogtype_klas(pk=17, organisatie=ORGANISATIE_IFAA, afkorting='ILB', volgorde=30, beschrijving='Longbow'),
+            boogtype_klas(pk=18, organisatie=ORGANISATIE_IFAA, afkorting='IHB', volgorde=31, beschrijving='Historical Bow')]
 
     boogtype_klas.objects.bulk_create(bulk)
 
@@ -518,13 +518,13 @@ def init_wedstrijdklassen_individueel(apps, _):
 
 
 def init_wedstrijdklassen_team(apps, _):
-    """ Maak de team wedstrijdklassen aan"""
+    """ Maak de team-wedstrijdklassen aan"""
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     team_type_klas = apps.get_model('BasisTypen', 'TeamType')
     team_comp_klasse_klas = apps.get_model('BasisTypen', 'TemplateCompetitieTeamKlasse')
 
-    # maak een look-up table voor de team type afkortingen
+    # maak een look-up table voor de teamtype afkortingen
     boog_afkorting2teamtype = dict()
     for team_type in team_type_klas.objects.all():
         boog_afkorting2teamtype[team_type.afkorting] = team_type
@@ -673,22 +673,13 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
 
 class Migration(migrations.Migration):
 
-    """ Migratie class voor dit deel van de applicatie """
-
-    # replaces = [('BasisTypen', 'm0028_squashed'),
-    #             ('BasisTypen', 'm0029_template'),
-    #             ('BasisTypen', 'm0030_organisatie'),
-    #             ('BasisTypen', 'm0031_repair_tr'),
-    #             ('BasisTypen', 'm0032_organisatie_nhb'),
-    #             ('BasisTypen', 'm0033_buiten_gebruik'),
-    #             ('BasisTypen', 'm0034_ifaa_bogen'),
-    #             ('BasisTypen', 'm0035_team_buiten_gebruik'),
-    #             ('BasisTypen', 'm0036_corrigeer_kalender_140'),
-    #             ('BasisTypen', 'm0037_ifaa_leeftijdsklassen'),
-    #             ('BasisTypen', 'm0038_ifaa_wedstrijdklassen'),
-    #             ('BasisTypen', 'm0039_ifaa_afkortingen'),
-    #             ('BasisTypen', 'm0040_nhb_onder12'),
-    #             ('BasisTypen', 'm0041_ifaa_volwassenen')]
+    replaces = [('BasisTypen', 'm0042_squashed'),
+                ('BasisTypen', 'm0043_jongens'),
+                ('BasisTypen', 'm0044_verwijder_ib'),
+                ('BasisTypen', 'm0045_wkl_afk_beschr'),
+                ('BasisTypen', 'm0046_wkl_refresh'),
+                ('BasisTypen', 'm0047_ifaa_open_klasse'),
+                ('BasisTypen', 'm0048_ordering')]
 
     # dit is de eerste
     initial = True
@@ -704,7 +695,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('beschrijving', models.CharField(max_length=50)),
                 ('afkorting', models.CharField(max_length=5)),
-                ('volgorde', models.CharField(default='?', max_length=1)),
+                ('volgorde', models.PositiveSmallIntegerField(default=0)),
                 ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
                 ('buiten_gebruik', models.BooleanField(default=False)),
             ],
@@ -768,7 +759,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Template Competitie Indiv Klasse',
-                'verbose_name_plural': 'Template Competitie Indiv Klassen'
+                'verbose_name_plural': 'Template Competitie Indiv Klassen',
             },
         ),
         migrations.CreateModel(
@@ -789,7 +780,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Template Competitie Team Klasse',
-                'verbose_name_plural': 'Template Competitie Team Klassen'
+                'verbose_name_plural': 'Template Competitie Team Klassen',
             },
         ),
         migrations.CreateModel(
@@ -806,7 +797,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Kalender Wedstrijdklasse',
-                'verbose_name_plural': 'Kalender Wedstrijdklassen'
+                'verbose_name_plural': 'Kalender Wedstrijdklassen',
             },
         ),
         migrations.RunPython(init_boogtypen),
@@ -819,10 +810,6 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name='boogtype',
             index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='boogtype',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_81dcc1_idx'),
         ),
         migrations.AddIndex(
             model_name='teamtype',
@@ -843,6 +830,30 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name='templatecompetitieteamklasse',
             index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx'),
+        ),
+        migrations.AlterModelOptions(
+            name='boogtype',
+            options={'ordering': ['volgorde'], 'verbose_name': 'Boog type', 'verbose_name_plural': 'Boog typen'},
+        ),
+        migrations.AlterModelOptions(
+            name='kalenderwedstrijdklasse',
+            options={'ordering': ['volgorde'], 'verbose_name': 'Kalender Wedstrijdklasse', 'verbose_name_plural': 'Kalender Wedstrijdklassen'},
+        ),
+        migrations.AlterModelOptions(
+            name='leeftijdsklasse',
+            options={'ordering': ['volgorde'], 'verbose_name': 'Leeftijdsklasse', 'verbose_name_plural': 'Leeftijdsklassen'},
+        ),
+        migrations.AlterModelOptions(
+            name='teamtype',
+            options={'ordering': ['volgorde'], 'verbose_name': 'Team type', 'verbose_name_plural': 'Team typen'},
+        ),
+        migrations.AlterModelOptions(
+            name='templatecompetitieindivklasse',
+            options={'ordering': ['volgorde'], 'verbose_name': 'Template Competitie Indiv Klasse', 'verbose_name_plural': 'Template Competitie Indiv Klassen'},
+        ),
+        migrations.AlterModelOptions(
+            name='templatecompetitieteamklasse',
+            options={'ordering': ['volgorde'], 'verbose_name': 'Template Competitie Team Klasse', 'verbose_name_plural': 'Template Competitie Team Klassen'},
         ),
     ]
 
