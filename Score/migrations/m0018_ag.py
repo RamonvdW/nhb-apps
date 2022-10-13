@@ -92,8 +92,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0021_squashed'),
-        ('BasisTypen', 'm0046_wkl_refresh'),
+        ('Account', 'm0023_squashed'),
+        ('BasisTypen', 'm0049_squashed'),
         ('Sporter', 'm0011_geboorteplaats_telefoon'),
         ('Score', 'm0017_squashed'),
     ]
