@@ -70,7 +70,7 @@
                 {% for sessie in sessies %}
                     <tr>
                         <td>{{ sessie.beschrijving }}</td>
-                        <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                        <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }}<br>{% endif %}{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
                         <td class="center">{{ sessie.aantal_inschrijvingen }} / {{ sessie.max_sporters }}</td>
                         <!--
                         <td>
