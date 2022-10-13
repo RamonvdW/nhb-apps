@@ -153,7 +153,7 @@ class Migration(migrations.Migration):
                 ('sporterboog', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
                 ('wedstrijd', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Wedstrijden.wedstrijd')),
                 ('log', models.TextField(blank=True)),
-                ('wedstrijdklasse', models.ForeignKey(default=None, on_delete=models.deletion.PROTECT, to='BasisTypen.kalenderwedstrijdklasse')),
+                ('wedstrijdklasse', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.kalenderwedstrijdklasse')),
             ],
             options={
                 'verbose_name': 'Wedstrijd inschrijving',
