@@ -11,17 +11,17 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Score', 'm0014_squashed'),
-                ('Score', 'm0015_uitslag_1'),
-                ('Score', 'm0016_uitslag_2')]
+    replaces = [('Score', 'm0017_squashed'),
+                ('Score', 'm0018_ag')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0021_squashed'),
-        ('Sporter', 'm0010_squashed'),
+        ('Account', 'm0023_squashed'),
+        ('BasisTypen', 'm0049_squashed'),
+        ('Sporter', 'm0013_squashed'),
     ]
 
     # migratie functies
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('waarde', models.PositiveSmallIntegerField()),
                 ('afstand_meter', models.PositiveSmallIntegerField()),
-                ('type', models.CharField(choices=[('S', 'Score'), ('I', 'Indiv AG'), ('T', 'Team AG'), ('G', 'Geen score')], default='S', max_length=1)),
+                ('type', models.CharField(choices=[('S', 'Score'), ('G', 'Geen score')], default='S', max_length=1)),
                 ('sporterboog', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
             ],
         ),
@@ -77,6 +77,33 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Uitslag',
                 'verbose_name_plural': 'Uitslagen',
             },
+        ),
+        migrations.CreateModel(
+            name='Aanvangsgemiddelde',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('doel', models.CharField(choices=[('i', 'Individueel'), ('t', 'Teamcompetitie')], default='i', max_length=1)),
+                ('waarde', models.DecimalField(decimal_places=3, max_digits=6)),
+                ('afstand_meter', models.PositiveSmallIntegerField()),
+                ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
+                ('sporterboog', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AanvangsgemiddeldeHist',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('when', models.DateTimeField(auto_now_add=True)),
+                ('oude_waarde', models.DecimalField(decimal_places=3, max_digits=6)),
+                ('nieuwe_waarde', models.DecimalField(decimal_places=3, max_digits=6)),
+                ('notitie', models.CharField(max_length=100)),
+                ('ag', models.ForeignKey(null=True, on_delete=models.deletion.CASCADE, related_name='ag_hist', to='Score.aanvangsgemiddelde')),
+                ('door_account', models.ForeignKey(null=True, on_delete=models.deletion.SET_NULL, to='Account.account')),
+            ],
+        ),
+        migrations.AddIndex(
+            model_name='aanvangsgemiddeldehist',
+            index=models.Index(fields=['when'], name='Score_aanva_when_9de5cf_idx'),
         ),
     ]
 

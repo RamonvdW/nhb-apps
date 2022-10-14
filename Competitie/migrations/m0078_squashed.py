@@ -22,29 +22,22 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Competitie', 'm0065_squashed'),
-                ('Competitie', 'm0066_competitie_typen'),
-                ('Competitie', 'm0067_klasse_split_1'),
-                ('Competitie', 'm0068_klasse_split_2'),
-                ('Competitie', 'm0069_klasse_split_3'),
-                ('Competitie', 'm0070_klasse_split_4'),
-                ('Competitie', 'm0071_matches'),
-                ('Competitie', 'm0072_limiet_split'),
-                ('Competitie', 'm0073_inschrijf_voorkeur_rk_bk'),
-                ('Competitie', 'm0074_ingeschreven_door')]
+    replaces = [('Competitie', 'm0075_squashed'),
+                ('Competitie', 'm0076_klasse_beschrijving'),
+                ('Competitie', 'm0077_regiocompetitieschutterboog_wanneer')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0021_squashed'),
-        ('BasisTypen', 'm0042_squashed'),
-        ('Functie', 'm0012_squashed'),
-        ('NhbStructuur', 'm0027_squashed'),
-        ('Score', 'm0017_squashed'),
-        ('Sporter', 'm0010_squashed'),
-        ('Wedstrijden', 'm0023_squashed'),
+        ('Account', 'm0023_squashed'),
+        ('BasisTypen', 'm0049_squashed'),
+        ('Functie', 'm0015_squashed'),
+        ('NhbStructuur', 'm0029_squashed'),
+        ('Score', 'm0019_squashed'),
+        ('Sporter', 'm0013_squashed'),
+        ('Wedstrijden', 'm0031_squashed'),
     ]
 
     # migratie functies
@@ -220,12 +213,20 @@ class Migration(migrations.Migration):
                 ('ag_voor_team', models.DecimalField(decimal_places=3, default=0.0, max_digits=5)),
                 ('ag_voor_team_mag_aangepast_worden', models.BooleanField(default=False)),
                 ('inschrijf_gekozen_matches', models.ManyToManyField(blank=True, to='Competitie.CompetitieMatch')),
-                ('inschrijf_voorkeur_dagdeel', models.CharField(choices=[('GN', 'Geen voorkeur'), ('AV', "'s Avonds"), ('MA', 'Maandag'), ('MAa', 'Maandagavond'), ('DI', 'Dinsdag'), ('DIa', 'Dinsdagavond'), ('WO', 'Woensdag'), ('WOa', 'Woensdagavond'), ('DO', 'Donderdag'), ('DOa', 'Donderdagavond'), ('VR', 'Vrijdag'), ('VRa', 'Vrijdagavond'), ('ZAT', 'Zaterdag'), ('ZAo', 'Zaterdagochtend'), ('ZAm', 'Zaterdagmiddag'), ('ZAa', 'Zaterdagavond'), ('ZON', 'Zondag'), ('ZOo', 'Zondagochtend'), ('ZOm', 'Zondagmiddag'), ('ZOa', 'Zondagavond'), ('WE', 'Weekend')], default='GN', max_length=3)),
+                ('inschrijf_voorkeur_dagdeel', models.CharField(
+                    choices=[('GN', 'Geen voorkeur'), ('AV', "'s Avonds"), ('MA', 'Maandag'), ('MAa', 'Maandagavond'),
+                             ('DI', 'Dinsdag'), ('DIa', 'Dinsdagavond'), ('WO', 'Woensdag'), ('WOa', 'Woensdagavond'),
+                             ('DO', 'Donderdag'), ('DOa', 'Donderdagavond'), ('VR', 'Vrijdag'), ('VRa', 'Vrijdagavond'),
+                             ('ZAT', 'Zaterdag'), ('ZAo', 'Zaterdagochtend'), ('ZAm', 'Zaterdagmiddag'),
+                             ('ZAa', 'Zaterdagavond'), ('ZON', 'Zondag'), ('ZOo', 'Zondagochtend'),
+                             ('ZOm', 'Zondagmiddag'), ('ZOa', 'Zondagavond'), ('WE', 'Weekend')], default='GN',
+                    max_length=3)),
                 ('gemiddelde_begin_team_ronde', models.DecimalField(decimal_places=3, default=0.0, max_digits=5)),
                 ('sporterboog', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
                 ('inschrijf_voorkeur_rk_bk', models.BooleanField(default=True)),
                 ('aangemeld_door', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('indiv_klasse', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Competitie.competitieindivklasse')),
+                ('wanneer_aangemeld', models.DateField(auto_now_add=True)),
             ],
             options={
                 'verbose_name': 'Regiocompetitie Schutterboog',

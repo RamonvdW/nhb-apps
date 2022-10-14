@@ -11,8 +11,8 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Feedback', 'm0001_migrate'),
-                ('Feedback', 'm0002_in_rol')]
+    # replaces = [('Feedback', 'm0001_migrate'),
+    #             ('Feedback', 'm0002_in_rol')]
 
     # dit is de eerste
     initial = True

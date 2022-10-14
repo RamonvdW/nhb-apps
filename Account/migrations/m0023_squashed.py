@@ -14,16 +14,16 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Account', 'm0019_squashed'),
-                ('Account', 'm0020_rate_limiter')]
+    replaces = [('Account', 'm0021_squashed'),
+                ('Account', 'm0022_otp_gelukt_op')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('auth', '0001_initial'),
         ('sessions', '0001_initial'),
+        ('auth', '0001_initial'),
     ]
 
     # migratie functies
@@ -53,6 +53,7 @@ class Migration(migrations.Migration):
                 ('otp_is_actief', models.BooleanField(default=False, help_text='Is OTP verificatie gelukt')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
+                ('otp_controle_gelukt_op', models.DateTimeField(blank=True, null=True)),
             ],
             options={
                 'verbose_name': 'Account',
@@ -74,7 +75,7 @@ class Migration(migrations.Migration):
                 ('laatste_email_over_taken', models.DateTimeField(blank=True, null=True)),
                 ('optout_functie_koppeling', models.BooleanField(default=False)),
                 ('optout_reactie_klacht', models.BooleanField(default=False)),
-                ('account', models.ForeignKey(on_delete=models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'AccountEmail',
@@ -85,8 +86,8 @@ class Migration(migrations.Migration):
             name='AccountSessions',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('account', models.ForeignKey(on_delete=models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('session', models.ForeignKey(on_delete=models.deletion.CASCADE, to='sessions.session')),
+                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('session', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sessions.session')),
             ],
         ),
         migrations.CreateModel(
@@ -95,7 +96,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('uur_nummer', models.PositiveBigIntegerField(default=0)),
                 ('teller', models.PositiveIntegerField(default=0)),
-                ('account', models.ForeignKey(on_delete=models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

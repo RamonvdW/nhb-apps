@@ -12,19 +12,18 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Sporter', 'm0006_squashed'),
-                ('Sporter', 'm0007_voorkeuren'),
-                ('Sporter', 'm0008_adres_code'),
-                ('Sporter', 'm0009_para_met_rolstoel')]
+    replaces = [('Sporter', 'm0010_squashed'),
+                ('Sporter', 'm0011_geboorteplaats_telefoon'),
+                ('Sporter', 'm0012_sporterboog_ordering')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0021_squashed'),
-        ('BasisTypen', 'm0042_squashed'),
-        ('NhbStructuur', 'm0027_squashed'),
+        ('Account', 'm0023_squashed'),
+        ('BasisTypen', 'm0049_squashed'),
+        ('NhbStructuur', 'm0029_squashed'),
     ]
 
     # migratie functies
@@ -119,6 +118,20 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name='sporterboog',
             index=models.Index(fields=['voor_wedstrijd'], name='Sporter_spo_voor_we_c6b357_idx'),
+        ),
+        migrations.AddField(
+            model_name='sporter',
+            name='geboorteplaats',
+            field=models.CharField(blank=True, default='', max_length=100),
+        ),
+        migrations.AddField(
+            model_name='sporter',
+            name='telefoon',
+            field=models.CharField(blank=True, default='', max_length=25),
+        ),
+        migrations.AlterModelOptions(
+            name='sporterboog',
+            options={'ordering': ['sporter__lid_nr', 'boogtype__volgorde'], 'verbose_name': 'SporterBoog', 'verbose_name_plural': 'SporterBoog'},
         ),
     ]
 

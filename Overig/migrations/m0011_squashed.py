@@ -11,18 +11,18 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Overig', 'm0009_squashed'),
-                ('Overig', 'm0010_delete_sitefeedback')]
+    # replaces = [('Overig', 'm0009_squashed'),
+    #             ('Overig', 'm0010_delete_sitefeedback')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0021_squashed'),
-        ('Competitie', 'm0075_squashed'),
+        ('Account', 'm0023_squashed'),
+        ('Competitie', 'm0078_squashed'),
         ('Feedback', 'm0003_squashed'),
-        ('Functie', 'm0012_squashed'),
+        ('Functie', 'm0015_squashed'),
     ]
 
     # migratie functies

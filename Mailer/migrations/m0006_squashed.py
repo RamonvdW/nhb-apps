@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,6 +10,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('Mailer', 'm0003_squashed'),
+                ('Mailer', 'm0004_html_body'),
+                ('Mailer', 'm0005_autotest')]
 
     # dit is de eerste
     initial = True
@@ -33,6 +37,8 @@ class Migration(migrations.Migration):
                 ('mail_text', models.TextField()),
                 ('log', models.TextField()),
                 ('is_blocked', models.BooleanField(default=False)),
+                ('mail_html', models.TextField(default='')),
+                ('template_used', models.CharField(default='', max_length=100)),
             ],
             options={
                 'verbose_name': 'Mail queue',

@@ -10,7 +10,8 @@ from django.db import migrations, models
 ADMINISTRATIEVE_REGIO = 100
 
 
-def init_functies_2019(apps, _):
+def init_functies_bondscompetitie_2019(apps, _):
+
     """ Functies voor de NHB structuur van 2019 """
 
     # haal de klassen op die van toepassing zijn op het moment van migratie
@@ -61,21 +62,48 @@ def init_functies_2019(apps, _):
     functie_klas.objects.bulk_create(bulk)
 
 
+def init_functies_extra(apps, _):
+    """ maak rollen uit die niet met de bondscompetities te doen hebben """
+
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    functie_klas = apps.get_model('Functie', 'Functie')
+
+    functie_klas(rol='MO', beschrijving='Manager Opleidingen').save()
+    functie_klas(rol='MWZ', beschrijving='Manager Wedstrijdzaken').save()
+    functie_klas(rol='SUP', beschrijving='Support').save()
+
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('Functie', 'm0012_squashed'),
+                ('Functie', 'm0013_telefoon_en_rol_mo'),
+                ('Functie', 'm0014_taken_en_rollen_mwz_sup')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0021_squashed'),
-        ('NhbStructuur', 'm0027_squashed'),
+        ('Account', 'm0023_squashed'),
+        ('NhbStructuur', 'm0029_squashed'),
     ]
 
     # migratie functies
     operations = [
+        migrations.CreateModel(
+            name='VerklaringHanterenPersoonsgegevens',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('acceptatie_datum', models.DateTimeField()),
+                ('account', models.OneToOneField(on_delete=models.deletion.CASCADE, related_name='vhpg', to='Account.account')),
+            ],
+            options={
+                'verbose_name': 'Verklaring Hanteren Persoonsgegevens',
+                'verbose_name_plural': 'Verklaring Hanteren Persoonsgegevens',
+            },
+        ),
         migrations.CreateModel(
             name='Functie',
             fields=[
@@ -89,21 +117,14 @@ class Migration(migrations.Migration):
                 ('accounts', models.ManyToManyField(blank=True, to='Account.account')),
                 ('bevestigde_email', models.EmailField(blank=True, max_length=254)),
                 ('nieuwe_email', models.EmailField(blank=True, max_length=254)),
+                ('telefoon', models.CharField(blank=True, default='', max_length=25)),
+                ('laatste_email_over_taken', models.DateTimeField(blank=True, null=True)),
+                ('optout_herinnering_taken', models.BooleanField(default=False)),
+                ('optout_nieuwe_taak', models.BooleanField(default=False)),
             ],
         ),
-        migrations.CreateModel(
-            name='VerklaringHanterenPersoonsgegevens',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('acceptatie_datum', models.DateTimeField()),
-                ('account', models.OneToOneField(on_delete=models.deletion.CASCADE, related_name='vhpg', to='Account.account')),
-            ],
-            options={
-                'verbose_name': 'Verklaring Hanteren Persoonsgegevens',
-                'verbose_name_plural': 'Verklaring Hanteren Persoonsgegevens',
-            },
-        ),
-        migrations.RunPython(init_functies_2019),
+        migrations.RunPython(init_functies_bondscompetitie_2019),
+        migrations.RunPython(init_functies_extra),
     ]
 
 # end of file

@@ -37,12 +37,6 @@ class Command(BaseCommand):
                             help="Aantal minuten actief blijven")
         parser.add_argument('--quick', action='store_true')     # for testing
 
-    def _scrub_bondspas_cache(self):
-        """ Als de bondspas cache bijna vol zit (meer dan 90% in gebruik),
-            verwijder dan de oudste passen.
-        """
-        self.stderr.write('[TODO] Implement bondspas cache scrubbing')
-
     def _bondspas_ophalen(self, bondspas):
         """ Haal een bondspas op """
 
@@ -159,8 +153,6 @@ class Command(BaseCommand):
             return
 
         self._set_stop_time(**options)
-
-        self._scrub_bondspas_cache()
 
         # vang generieke fouten af
         try:

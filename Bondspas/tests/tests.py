@@ -238,8 +238,7 @@ class TestBondspas(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20, check_duration=False):
             management.call_command('bondspas_downloader', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue('[TODO] Implement bondspas cache scrubbing' in f1.getvalue())
-        # self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f1.getvalue(), '')
         self.assertTrue('[INFO] Taak loopt tot ' in f2.getvalue())
 
         # maak een ophaal verzoek aan, maar kan niet verbinden met server
