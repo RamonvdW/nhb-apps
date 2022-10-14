@@ -7,9 +7,9 @@
 from django.db import migrations, models
 
 RAYONS = (
-    (1, "Rayon 1"),     # Noord Nederland
+    (1, "Rayon 1"),     # Noord-Nederland
     (2, "Rayon 2"),     # Zuid-West Nederland
-    (3, "Rayon 3"),     # Oost Brabant en Noord Limburg
+    (3, "Rayon 3"),     # Oost-Brabant en Noord-Limburg
     (4, "Rayon 4"),     # Zuid- en Midden-Limburg
 )
 
@@ -110,9 +110,8 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    # replaces = [('NhbStructuur', 'm0024_squashed'),
-    #             ('NhbStructuur', 'm0025_kvk_website_phone'),
-    #             ('NhbStructuur', 'm0026_adres_email')]
+    replaces = [('NhbStructuur', 'm0027_squashed'),
+                ('NhbStructuur', 'm0028_iban_bic')]
 
     # dit is de eerste
     initial = True
@@ -176,6 +175,8 @@ class Migration(migrations.Migration):
                 ('adres_regel1', models.CharField(blank=True, default='', max_length=100)),
                 ('adres_regel2', models.CharField(blank=True, default='', max_length=100)),
                 ('contact_email', models.EmailField(blank=True, max_length=254)),
+                ('bank_bic', models.CharField(blank=True, default='', max_length=11)),
+                ('bank_iban', models.CharField(blank=True, default='', max_length=18)),
             ],
             options={
                 'verbose_name': 'Nhb vereniging',

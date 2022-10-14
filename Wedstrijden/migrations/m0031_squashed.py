@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0023_squashed'),
         ('BasisTypen', 'm0049_squashed'),
-        ('NhbStructuur', 'm0027_squashed'),
+        ('NhbStructuur', 'm0029_squashed'),
         ('Score', 'm0019_squashed'),
         ('Sporter', 'm0013_squashed'),
     ]
