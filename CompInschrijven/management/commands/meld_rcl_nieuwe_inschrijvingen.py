@@ -22,8 +22,8 @@ class Command(BaseCommand):
 
         # dit commando wordt elk uur uitgevoerd
         # we willen pas vanaf 08:00 een taak / mailtje
-        # voor het geval het commando een keer niet kan draaien herhalen we dit tot 14:00
-        if now.hour < 8 or now.hour > 14:
+        # voor het geval het commando een keer niet kan draaien herhalen we dit tot 12:00
+        if now.hour < 8 or now.hour > 12:
             self.stdout.write('[INFO] meld_rcl_nieuwe_inschrijvingen: skipping want uur=%s' % now.hour)
             return
 
@@ -99,11 +99,12 @@ class Command(BaseCommand):
                     beschrijving = '\n'.join(regels)
 
                     # maak een taak aan met alle details
-                    taak_log = "[%s] Taak aangemaakt" % now
+                    taak_log = "[%s] Taak aangemaakt" % timezone.localtime(now)
                     taak_deadline = now + timedelta(days=7)
 
-                    # voorkom dubbele meldingen
-                    if not check_taak_bestaat(toegekend_aan_functie=functie,
+                    # voorkom dubbele meldingen (ook als deze al afgehandeld is)
+                    if not check_taak_bestaat(skip_afgerond=False,
+                                              toegekend_aan_functie=functie,
                                               beschrijving=beschrijving):
 
                         self.stdout.write('[INFO] %s: %s nieuwe aanmeldingen' % (functie, aantal))

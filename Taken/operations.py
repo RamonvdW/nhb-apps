@@ -120,7 +120,7 @@ def stuur_email_nieuwe_taak(emailadres, aantal_open):
                        mail_body)
 
 
-def check_taak_bestaat(**kwargs):
+def check_taak_bestaat(skip_afgerond=True, **kwargs):
     """ Kijk of een taak al bestaat. Gebruikt dit om niet onnodig dubbele taken aan te maken.
 
         Kies uit de volgende argumenten om op te filteren:
@@ -133,11 +133,13 @@ def check_taak_bestaat(**kwargs):
 
             beschrijving = "beschrijving van de taak - call for action of informatie"
     """
-    aantal = (Taak
-              .objects
-              .exclude(is_afgerond=True)
-              .filter(**kwargs)
-              .count())
+    qset = Taak.objects.filter(**kwargs)
+
+    if skip_afgerond:
+        qset = qset.exclude(is_afgerond=True)
+
+    aantal = qset.count()
+
     return aantal > 0
 
 
