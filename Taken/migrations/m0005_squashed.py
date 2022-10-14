@@ -11,6 +11,9 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Taken', 'm0003_squashed'),
+                ('Taken', 'm0004_toegekend_aan_functie')]
+
     # dit is de eerste
     initial = True
 
@@ -18,6 +21,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0023_squashed'),
         ('Competitie', 'm0078_squashed'),
+        ('Functie', 'm0013_telefoon_en_rol_mo'),
     ]
 
     # migratie functies
@@ -28,12 +32,10 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('is_afgerond', models.BooleanField(default=False)),
                 ('deadline', models.DateField()),
-                ('beschrijving', models.TextField(max_length=1000)),
-                ('handleiding_pagina', models.CharField(max_length=75, blank=True)),
-                ('log', models.TextField(max_length=50000, blank=True)),
+                ('beschrijving', models.TextField(max_length=5000)),
+                ('log', models.TextField(blank=True, max_length=5000)),
                 ('aangemaakt_door', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, related_name='account_taken_aangemaakt', to='Account.account')),
-                ('deelcompetitie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.DeelCompetitie')),
-                ('toegekend_aan', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, related_name='account_taken_toegekend', to='Account.account')),
+                ('toegekend_aan_functie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, related_name='functie_taken', to='Functie.functie')),
             ],
             options={
                 'verbose_name': 'Taak',
