@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         ('Account', 'm0023_squashed'),
         ('BasisTypen', 'm0049_squashed'),
         ('NhbStructuur', 'm0027_squashed'),
-        ('Score', 'm0017_squashed'),
+        ('Score', 'm0019_squashed'),
         ('Sporter', 'm0013_squashed'),
     ]
 
