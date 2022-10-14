@@ -28,6 +28,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 # this is used to keep site feedback separated by version
 SITE_VERSIE = '2022-10-14'
 
+
 # modules van de site
 INSTALLED_APPS = [
     'Plein.apps.PleinConfig',           # must go first: provides admin template override
