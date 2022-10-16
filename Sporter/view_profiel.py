@@ -55,7 +55,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         objs = list()
         for obj in (HistCompetitieIndividueel
                     .objects
-                    .filter(schutter_nr=sporter.lid_nr)
+                    .filter(sporter_lid_nr=sporter.lid_nr)
                     .exclude(totaal=0)
                     .select_related('histcompetitie')
                     .order_by('histcompetitie__comp_type',      # 18/25

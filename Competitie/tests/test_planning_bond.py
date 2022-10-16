@@ -499,7 +499,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         hist = HistCompetitie(
                         seizoen='2019/2020',
                         is_openbaar=False,
-                        klasse='Test',
+                        boog_str='Test',
                         comp_type='18')
         hist.save()
 

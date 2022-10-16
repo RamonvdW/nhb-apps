@@ -21,24 +21,33 @@ class HistCompetitie(models.Model):
     comptype2str = {'18': '18m Indoor',
                     '25': '25m 1pijl'}
 
-    # primary key = los uniek nummer
-    seizoen = models.CharField(max_length=9)          # 20xx/20yy
-    comp_type = models.CharField(max_length=2, choices=COMP_TYPE)  # 18/25
-    klasse = models.CharField(max_length=20)          # Recurve / Compound
+    # 20xx/20yy (yy = xx+1)
+    seizoen = models.CharField(max_length=9)
+
+    # '18' = 18m = Indoor
+    # '25' = 25m = 25m1pijl
+    comp_type = models.CharField(max_length=2, choices=COMP_TYPE)
+
+    # boogtype
+    boog_str = models.CharField(max_length=20)          # Recurve / Compound
+
+    # is dit voor teams of individueel?
     is_team = models.BooleanField(default=False)
+
+    # beste aantal scores waarover het gemiddelde berekend is
+    # normaal 6, maar in de corona-jaren is dit verlaagd geweest naar 5
+    aantal_beste_scores = models.PositiveSmallIntegerField(default=6)
 
     # is deze al openbaar?
     # staat op True als de huidige competitie nog loopt, maar de eindstand van de regiocompetitie
-    # alvast overgezet is ivm nieuwe AG's
+    # alvast overgezet is i.v.m. berekenen nieuwe AG's
     is_openbaar = models.BooleanField(default=True)
-
-    # FUTURE: voeg vertaaltabellen toe voor klasse2url en url2klasse (zie records)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "%s (%s) %s (team=%s)" % (self.seizoen,
                                          self.comp_type,
-                                         self.klasse,
+                                         self.boog_str,
                                          self.is_team)
 
     class Meta:
@@ -59,8 +68,8 @@ class HistCompetitieIndividueel(models.Model):
     rank = models.PositiveIntegerField()
 
     # lid nummer en volledige naam
-    schutter_nr = models.PositiveIntegerField()
-    schutter_naam = models.CharField(max_length=50)
+    sporter_lid_nr = models.PositiveIntegerField()
+    sporter_naam = models.CharField(max_length=50)
 
     # R/C/BB/IB/LB/TR (indien beschikbaar)
     boogtype = models.CharField(max_length=5,
@@ -90,7 +99,7 @@ class HistCompetitieIndividueel(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "rank %s: %s %s" % (self.rank, self.schutter_naam, self.gemiddelde)
+        return "rank %s: %s %s" % (self.rank, self.sporter_naam, self.gemiddelde)
 
     def tel_aantal_scores(self):
         count = 0

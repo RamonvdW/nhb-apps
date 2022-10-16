@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,7 +58,7 @@ class Command(BaseCommand):         # pragma: no cover
             histcompetitie = HistCompetitie()
             histcompetitie.seizoen = seizoen
             histcompetitie.comp_type = comp_type
-            histcompetitie.klasse = klasse
+            histcompetitie.boog_str = klasse
             histcompetitie.is_team = False
             histcompetitie.save()
 
@@ -189,9 +189,9 @@ class Command(BaseCommand):         # pragma: no cover
             hist = HistCompetitieIndividueel()
             hist.histcompetitie = histcompetitie
             hist.rank = 0
-            hist.schutter_nr = lid_nr
+            hist.sporter_lid_nr = lid_nr
             if sporter:
-                hist.schutter_naam = " ".join([sporter.voornaam, sporter.achternaam])
+                hist.sporter_naam = " ".join([sporter.voornaam, sporter.achternaam])
             hist.boogtype = boogtype
             hist.vereniging_nr = ver_nr
             hist.vereniging_naam = ver_naam
@@ -226,7 +226,7 @@ class Command(BaseCommand):         # pragma: no cover
             # check if the record already exists
             dupe = HistCompetitieIndividueel.objects.filter(
                         histcompetitie=hist.histcompetitie,
-                        schutter_nr=hist.schutter_nr,
+                        schutter_nr=hist.sporter_lid_nr,
                         vereniging_nr=hist.vereniging_nr)
             if len(dupe) > 0:
                 tup = (gemiddelde, scores, len(indiv_scores), dupe[0])
@@ -287,7 +287,7 @@ class Command(BaseCommand):         # pragma: no cover
                 try:
                     robj = HistCompetitieIndividueel.objects.get(boogtype='R',
                                                                  histcompetitie=histcomp_r,
-                                                                 schutter_nr=houtobj.schutter_nr)
+                                                                 schutter_nr=houtobj.sporter_lid_nr)
                 except HistCompetitieIndividueel.DoesNotExist:
                     pass
                 else:

@@ -137,14 +137,14 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = "2009/2010"
         histcomp.comp_type = "18"
-        histcomp.klasse = "don't care"
+        histcomp.boog_str = "don't care"
         histcomp.save()
 
         indiv = HistCompetitieIndividueel()
         indiv.histcompetitie = histcomp
         indiv.rank = 1
-        indiv.schutter_nr = 100001
-        indiv.schutter_naam = "Ramon de Tester"
+        indiv.sporter_lid_nr = 100001
+        indiv.sporter_naam = "Ramon de Tester"
         indiv.boogtype = "R"
         indiv.vereniging_nr = 1000
         indiv.vereniging_naam = "don't care"

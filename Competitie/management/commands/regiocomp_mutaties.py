@@ -740,7 +740,7 @@ class Command(BaseCommand):
         for boogtype in comp.boogtypen.all():
             histcomp = HistCompetitie(seizoen=seizoen,
                                       comp_type=comp.afstand,
-                                      klasse=boogtype.beschrijving,     # 'Recurve'
+                                      boog_str=boogtype.beschrijving,   # 'Recurve'
                                       is_team=False,
                                       is_openbaar=False)                # nog niet laten zien
             histcomp.save()
@@ -769,8 +769,8 @@ class Command(BaseCommand):
                     hist = HistCompetitieIndividueel(
                                 histcompetitie=histcomp,
                                 rank=rank,
-                                schutter_nr=sporter.lid_nr,
-                                schutter_naam=sporter.volledige_naam(),
+                                sporter_lid_nr=sporter.lid_nr,
+                                sporter_naam=sporter.volledige_naam(),
                                 boogtype=boogtype.afkorting,
                                 vereniging_nr=ver.ver_nr,
                                 vereniging_naam=ver.naam,

@@ -25,24 +25,24 @@ class TestHistComp(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2018/2019'
         obj.comp_type = '18'
-        obj.klasse = 'Compound'
+        obj.boog_str = 'Compound'
         obj.is_team = False
         obj.save()
 
         obj.pk = None
-        obj.klasse = 'Special Type'
+        obj.boog_str = 'Special Type'
         obj.save()
 
         obj.pk = None
-        obj.klasse = 'Recurve'
+        obj.boog_str = 'Recurve'
         obj.save()
         self.indiv_histcomp_pk = obj.pk
 
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = 123456
-        rec.schutter_naam = 'Schuttie van de Test'
+        rec.sporter_lid_nr = 123456
+        rec.sporter_naam = 'Schuttie van de Test'
         rec.vereniging_nr = 1234
         rec.vereniging_naam = 'Test Club'
         rec.score1 = 10
@@ -79,7 +79,7 @@ class TestHistComp(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2017/2018'
         obj.comp_type = '18'
-        obj.klasse = 'Too old'
+        obj.boog_str = 'Too old'
         obj.is_team = False
         obj.save()
 
@@ -200,7 +200,7 @@ class TestHistComp(E2EHelpers, TestCase):
 
     def test_view_indiv_few_filter(self):
         rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
-        rec.schutter_naam = "Dhr Blazoengatenmaker"
+        rec.sporter_naam = "Dhr Blazoengatenmaker"
         rec.save()
         url = self.url_hist_indiv % self.indiv_histcomp_pk
 
@@ -222,7 +222,7 @@ class TestHistComp(E2EHelpers, TestCase):
 
         # filter on a lid_nr
         with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': rec.schutter_nr})
+            resp = self.client.get(url, {'filter': rec.sporter_lid_nr})
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -235,7 +235,7 @@ class TestHistComp(E2EHelpers, TestCase):
 
         # filter on a string
         with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': rec.schutter_naam})
+            resp = self.client.get(url, {'filter': rec.sporter_naam})
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -258,11 +258,11 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertNotContains(resp, "Test Club")
 
-    def test_correct_histcomp(self):
+    def test_correct_histcomp_2017(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('correct_histcomp_indiv', stderr=f1, stdout=f2)
+            management.call_command('correct_histcomp_indiv2', stderr=f1, stdout=f2)
         # print('f1: %s' % f1.getvalue())
         # print('f2: %s' % f1.getvalue())
         self.assertEqual("", f1.getvalue())

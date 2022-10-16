@@ -42,13 +42,13 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2018/2019'
         obj.comp_type = '25'
-        obj.klasse = 'Compound'
+        obj.boog_str = 'Compound'
         obj.is_team = False
         obj.save()
         self.klasse_pk_leeg = obj.pk
 
         obj.pk = None
-        obj.klasse = 'Recurve'
+        obj.boog_str = 'Recurve'
         obj.save()
         self.klasse_pk = obj.pk
 
@@ -68,8 +68,8 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = sporter.lid_nr
-        rec.schutter_naam = "wordt niet gebruikt"
+        rec.sporter_lid_nr = sporter.lid_nr
+        rec.sporter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
@@ -101,8 +101,8 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = sporter.lid_nr
-        rec.schutter_naam = "wordt niet gebruikt"
+        rec.sporter_lid_nr = sporter.lid_nr
+        rec.sporter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
@@ -133,8 +133,8 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = sporter.lid_nr
-        rec.schutter_naam = "wordt niet gebruikt"
+        rec.sporter_lid_nr = sporter.lid_nr
+        rec.sporter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
@@ -153,8 +153,8 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = 999999
-        rec.schutter_naam = "wordt niet gebruikt"
+        rec.sporter_lid_nr = 999999
+        rec.sporter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
@@ -185,8 +185,8 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = sporter.lid_nr
-        rec.schutter_naam = "wordt niet gebruikt"
+        rec.sporter_lid_nr = sporter.lid_nr
+        rec.sporter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
@@ -255,7 +255,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2017/2018'
         obj.comp_type = '25'
-        obj.klasse = 'Compound'
+        obj.boog_str = 'Compound'
         obj.is_team = False
         obj.save()
         with self.assert_max_queries(20):

@@ -48,11 +48,11 @@ class HistCompTop(TemplateView):
             # neem de data van het nieuwste seizoen
             context['seizoen'] = seizoen = qset[0].seizoen
 
-            qset = HistCompetitie.objects.filter(seizoen=seizoen, is_team=False).distinct('comp_type', 'klasse')
+            qset = HistCompetitie.objects.filter(seizoen=seizoen, is_team=False).distinct('comp_type', 'boog_str')
 
             gevonden = dict()       # [(comp_type, klasse)] = HistCompetitie
             for obj in qset:
-                tup = (obj.comp_type, obj.klasse)
+                tup = (obj.comp_type, obj.boog_str)
                 gevonden[tup] = obj
             # for
 
@@ -151,11 +151,11 @@ class HistCompIndivView(ListView):
                                             histcompetitie=histcomp).order_by('rank')
                     else:
                         return HistCompetitieIndividueel.objects.filter(
-                                            schutter_nr__exact=filter_nr,
+                                            sporter_lid_nr__exact=filter_nr,
                                             histcompetitie=histcomp).order_by('rank')
                 else:
                     return HistCompetitieIndividueel.objects.filter(
-                                        Q(schutter_naam__icontains=self.get_filter) |
+                                        Q(sporter_naam__icontains=self.get_filter) |
                                         Q(vereniging_naam__icontains=self.get_filter),
                                         histcompetitie=histcomp).order_by('rank')
 
@@ -231,7 +231,7 @@ class HistCompIndivView(ListView):
         # else: we laten de 'all' lijst zien dus laat de 'all' knop weg
 
         for obj in context['object_list']:
-            obj.schutter_nr_str = str(obj.schutter_nr)
+            obj.sporter_lid_nr_str = str(obj.sporter_lid_nr)
         # for
 
         context['aantal_regels'] = 2 + len(context['object_list'])
@@ -240,7 +240,7 @@ class HistCompIndivView(ListView):
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('HistComp:top'), 'Uitslag vorig seizoen'),
             (None, COMP_TYPE_STR[self.histcomp.comp_type]),
-            (None, self.histcomp.klasse)
+            (None, self.histcomp.boog_str)
         )
 
         menu_dynamics(self.request, context)
