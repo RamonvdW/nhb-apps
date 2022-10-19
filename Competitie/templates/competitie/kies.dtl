@@ -110,47 +110,66 @@
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
                 <table class="white">
                     <tr>
-                        <th rowspan="2">Aantal sporters ingeschreven</th>
-                        <td>Indoor</td>
-                        <td>{{ aantal_18m_indiv }}</td>
-                    </tr>
-                    <tr>
-                        <td>25m1pijl</td>
-                        <td>{{ aantal_25m_indiv }}</td>
+                        <th>Aanmeldingen</th>
+                        <td class="right-align"><br>Sporters<br>Teams</td>
+                        <td class="right-align"><b>Indoor</b><br>{{ totaal_18m_indiv }}<br>{{ totaal_18m_teams }}</td>
+                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b><br>{{ totaal_25m_indiv }}<br>{{ totaal_25m_teams }}</td>
                     </tr>
 
                     <tr>
-                        <th>Aantal unieke sporters</th>
-                        <td></td>
-                        <td>{{ aantal_sporters }}{% if aantal_multiboog > 0 %} ({{ aantal_multiboog }} met meerdere bogen){% endif %}</td>
+                        <th>Unieke sporters</th>
+                        <td class="right-align">{{ aantal_sporters }}</td>
+                        <td colspan="2"></td>
                     </tr>
 
                     <tr>
-                        <th>Aantal zelfstandig aangemeld</th>
-                        <td></td>
-                        <td>{{ aantal_zelfstandig }}{% if procent_zelfstandig %} ({{ procent_zelfstandig }}%){% endif %}</td>
+                        <th>Zelfstandig aangemeld</th>
+                        <td class="right-align">{{ aantal_zelfstandig }}{% if procent_zelfstandig %}<br>({{ procent_zelfstandig }}%){% endif %}</td>
+                        <td colspan="2"></td>
                     </tr>
 
                     <tr>
-                        <th>Aantal alvast afgemeld voor RK:</th>
-                        <td>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
-                        <td>
-                            <span>{{ aantal_geen_rk1 }} van de {{ aantal_r1 }}</span><br>
-                            <span>{{ aantal_geen_rk2 }} van de {{ aantal_r2 }}</span><br>
-                            <span>{{ aantal_geen_rk3 }} van de {{ aantal_r3 }}</span><br>
-                            <span>{{ aantal_geen_rk4 }} van de {{ aantal_r4 }}</span>
-                        </td>
+                        <th>Sporters met meerdere bogen</th>
+                        <td class="right-align">{{ aantal_multiboog }}</td>
+                        <td colspan="2"></td>
                     </tr>
 
                     <tr>
-                        <th rowspan="2">Aantal teams ingeschreven</th>
-                        <td>Indoor</td>
-                        <td>{{ aantal_18m_teams }}{% if aantal_18m_teams_niet_af > 0%} ({{ aantal_18m_teams_niet_af }} nog niet af){% endif %}</td>
+                        <th>Deelnemers per rayon</th>
+                        <td class="right-align"><br>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
+                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_rayon %}<br>{{ aantal }}{% endfor %}</td>
+                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_rayon %}<br>{{ aantal }}{% endfor %}</td>
                     </tr>
+
                     <tr>
-                        <td>25m1pijl</td>
-                        <td>{{ aantal_25m_teams }}{% if aantal_25m_teams_niet_af > 0 %} ({{ aantal_25m_teams_niet_af }} nog niet af){% endif %}</td>
+                        <th>Deelnemers per regio</th>
+                        <td class="right-align"><br>Regio 101<br>Regio 102<br>Regio 103<br>Regio 104<br>Regio 105<br>Regio 106<br>Regio 107<br>Regio 108<br>Regio 109<br>Regio 110<br>Regio 111<br>Regio 112<br>Regio 113<br>Regio 114<br>Regio 115<br>Regio 116</td>
+                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_regio%}<br>{{ aantal }}{% endfor %}</td>
+                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_18m_regio%}<br>{{ aantal }}{% endfor %}</td>
                     </tr>
+
+                    <tr>
+                        <th>Bij inschrijving afgemeld voor RK</th>
+                        <td class="right-align"><br>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
+                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_geen_rk %}<br>{{ aantal }}{% endfor %}</td>
+                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_geen_rk %}<br>{{ aantal }}{% endfor %}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Teams per rayon</th>
+                        <td class="right-align"><br>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
+                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_teams %}<br>{{ aantal }}{% endfor %}</td>
+                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_teams %}<br>{{ aantal }}{% endfor %}</td>
+                    </tr>
+
+                    {% if aantal_18m_teams_niet_af > 0 or aantal_25m_teams_niet_af > 0%}
+                        <tr>
+                            <th class="red-text">Aantal teams nog niet af</th>
+                            <td></td>
+                            <td class="right-align">{{ aantal_18m_teams_niet_af }}</td>
+                            <td class="right-align" style="padding-right:15px">{{ aantal_25m_teams_niet_af }}</td>
+                        </tr>
+                    {% endif %}
 
                 </table>
             </div>

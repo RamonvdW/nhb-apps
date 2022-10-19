@@ -31,13 +31,18 @@ class CompetitieKiesView(TemplateView):
     def _tel_aantallen(self, context):
         context['toon_aantal_inschrijvingen'] = True
 
-        context['aantal_18m_indiv'] = 0
-        context['aantal_18m_teams'] = 0
+        context['totaal_18m_indiv'] = 0
         context['aantal_18m_teams_niet_af'] = 0
 
-        context['aantal_25m_indiv'] = 0
-        context['aantal_25m_teams'] = 0
+        context['totaal_25m_indiv'] = 0
         context['aantal_25m_teams_niet_af'] = 0
+
+        aantal_18m_teams = dict()
+        aantal_25m_teams = dict()
+        for rayon_nr in range(1, 4+1):
+            aantal_18m_teams[rayon_nr] = 0
+            aantal_25m_teams[rayon_nr] = 0
+        # for
 
         pks = list()
         for comp in self.actuele_regio_comps:
@@ -47,35 +52,93 @@ class CompetitieKiesView(TemplateView):
                             .filter(deelcompetitie__competitie=comp)
                             .count())
 
-            qset = RegiocompetitieTeam.objects.filter(deelcompetitie__competitie=comp)
-            aantal_teams = qset.count()
+            qset = RegiocompetitieTeam.objects.filter(deelcompetitie__competitie=comp).select_related('vereniging__regio__rayon')
             aantal_teams_ag_nul = qset.filter(aanvangsgemiddelde__lt=0.001).count()
 
             if comp.afstand == '18':
-                context['aantal_18m_indiv'] = aantal_indiv
-                context['aantal_18m_teams'] = aantal_teams
+                context['totaal_18m_indiv'] = aantal_indiv
                 context['aantal_18m_teams_niet_af'] = aantal_teams_ag_nul
             else:
-                context['aantal_25m_indiv'] = aantal_indiv
-                context['aantal_25m_teams'] = aantal_teams
+                context['totaal_25m_indiv'] = aantal_indiv
                 context['aantal_25m_teams_niet_af'] = aantal_teams_ag_nul
+
+            for team in qset:
+                rayon_nr = team.vereniging.regio.rayon.rayon_nr
+                if comp.afstand == '18':
+                    aantal_18m_teams[rayon_nr] += 1
+                else:
+                    aantal_25m_teams[rayon_nr] += 1
+            # for
         # for
 
-        qset = (RegioCompetitieSchutterBoog
-                .objects
-                .filter(deelcompetitie__competitie__pk__in=pks)
-                .select_related('sporterboog__sporter__bij_vereniging__regio__rayon'))
+        context['aantal_18m_teams'] = list()
+        context['aantal_25m_teams'] = list()
+        context['totaal_18m_teams'] = 0
+        context['totaal_25m_teams'] = 0
+        for rayon_nr in range(1, 4+1):
+            context['aantal_18m_teams'].append(aantal_18m_teams[rayon_nr])
+            context['aantal_25m_teams'].append(aantal_25m_teams[rayon_nr])
+            context['totaal_18m_teams'] += aantal_18m_teams[rayon_nr]
+            context['totaal_25m_teams'] += aantal_25m_teams[rayon_nr]
+        # for
 
-        context['aantal_r1'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=1).count()
-        context['aantal_r2'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=2).count()
-        context['aantal_r3'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=3).count()
-        context['aantal_r4'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=4).count()
+        aantal_18m_rayon = dict()
+        aantal_25m_rayon = dict()
+        aantal_18m_regio = dict()
+        aantal_25m_regio = dict()
+        aantal_18m_geen_rk = dict()
+        aantal_25m_geen_rk = dict()
 
-        qset_geen_rk = qset.filter(inschrijf_voorkeur_rk_bk=False)
-        context['aantal_geen_rk1'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=1).count()
-        context['aantal_geen_rk2'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=2).count()
-        context['aantal_geen_rk3'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=3).count()
-        context['aantal_geen_rk4'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=4).count()
+        for rayon_nr in range(1, 4+1):
+            aantal_18m_rayon[rayon_nr] = 0
+            aantal_25m_rayon[rayon_nr] = 0
+            aantal_18m_geen_rk[rayon_nr] = 0
+            aantal_25m_geen_rk[rayon_nr] = 0
+        # for
+
+        for regio_nr in range(101, 116+1):
+            aantal_18m_regio[regio_nr] = 0
+            aantal_25m_regio[regio_nr] = 0
+        # for
+
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie__competitie__pk__in=pks)
+                          .select_related('sporterboog__sporter__bij_vereniging__regio__rayon',
+                                          'deelcompetitie__competitie')):
+
+            rayon_nr = deelnemer.sporterboog.sporter.bij_vereniging.regio.rayon.rayon_nr
+            regio_nr = deelnemer.sporterboog.sporter.bij_vereniging.regio.regio_nr
+
+            if deelnemer.deelcompetitie.competitie.afstand == '18':
+                aantal_18m_rayon[rayon_nr] += 1
+                aantal_18m_regio[regio_nr] += 1
+                if not deelnemer.inschrijf_voorkeur_rk_bk:
+                    aantal_18m_geen_rk[rayon_nr] += 1
+            else:
+                aantal_25m_rayon[rayon_nr] += 1
+                aantal_25m_regio[regio_nr] += 1
+                if not deelnemer.inschrijf_voorkeur_rk_bk:
+                    aantal_25m_geen_rk[rayon_nr] += 1
+        # for
+
+        context['aantal_18m_rayon'] = list()
+        context['aantal_25m_rayon'] = list()
+        context['aantal_18m_geen_rk'] = list()
+        context['aantal_25m_geen_rk'] = list()
+        for rayon_nr in range(1, 4+1):
+            context['aantal_18m_rayon'].append(aantal_18m_rayon[rayon_nr])
+            context['aantal_25m_rayon'].append(aantal_25m_rayon[rayon_nr])
+            context['aantal_18m_geen_rk'].append(aantal_18m_geen_rk[rayon_nr])
+            context['aantal_25m_geen_rk'].append(aantal_25m_geen_rk[rayon_nr])
+        # for
+
+        context['aantal_18m_regio'] = list()
+        context['aantal_25m_regio'] = list()
+        for regio_nr in range(101, 116+1):
+            context['aantal_18m_regio'].append(aantal_18m_regio[regio_nr])
+            context['aantal_25m_regio'].append(aantal_25m_regio[regio_nr])
+        # for
 
         qset = (RegioCompetitieSchutterBoog
                 .objects
