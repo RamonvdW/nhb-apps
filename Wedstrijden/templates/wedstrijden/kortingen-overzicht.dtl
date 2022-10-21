@@ -56,7 +56,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="6" class="center"><i>Er zijn nog geen codes</i></td>
+                        <td colspan="6" class="center"><i>Er zijn nog geen kortingen</i></td>
                     </tr>
                 {% endfor %}
 
@@ -65,13 +65,6 @@
                         <td colspan="6" class="center">
                             <a class="btn-nhb-rood" href="{{ url_nieuwe_korting }}">
                                 <i class="material-icons-round">add</i></a>
-                            <!--
-                            <form action="{{ url_nieuwe_korting }}" method="post">
-                                {% csrf_token %}
-                                <button class="btn-nhb-rood">
-                                    <i class="material-icons-round">add</i></button>
-                            </form>
-                            -->
                         </td>
                     </tr>
                 {% endif %}
