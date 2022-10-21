@@ -12,7 +12,7 @@ cachetools==5.2.0
     # via
     #   -r requirements.txt
     #   google-auth
-certifi==2022.9.14
+certifi==2022.9.24
     # via
     #   -r requirements.txt
     #   requests
@@ -20,19 +20,19 @@ charset-normalizer==2.1.1
     # via
     #   -r requirements.txt
     #   requests
-django==3.2.15
+django==3.2.16
     # via -r requirements.txt
 et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-google-api-core==2.10.1
+google-api-core==2.10.2
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.62.0
+google-api-python-client==2.65.0
     # via -r requirements.txt
-google-auth==2.11.1
+google-auth==2.13.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -57,7 +57,7 @@ idna==3.4
     #   requests
 mollie-api-python==2.13.0
     # via -r requirements.txt
-oauthlib==3.2.1
+oauthlib==3.2.2
     # via
     #   -r requirements.txt
     #   requests-oauthlib
@@ -65,12 +65,12 @@ openpyxl==3.0.10
     # via -r requirements.txt
 pillow==9.2.0
     # via reportlab
-protobuf==4.21.6
+protobuf==4.21.8
     # via
     #   -r requirements.txt
     #   google-api-core
     #   googleapis-common-protos
-psycopg2-binary==2.9.3
+psycopg2-binary==2.9.4
     # via -r requirements.txt
 pyasn1==0.4.8
     # via
@@ -87,7 +87,7 @@ pyparsing==3.0.9
     # via
     #   -r requirements.txt
     #   httplib2
-pytz==2022.2.1
+pytz==2022.5
     # via
     #   -r requirements.txt
     #   django
@@ -114,7 +114,7 @@ six==1.16.0
     #   -r requirements.txt
     #   google-auth
     #   google-auth-httplib2
-sqlparse==0.4.2
+sqlparse==0.4.3
     # via
     #   -r requirements.txt
     #   django
