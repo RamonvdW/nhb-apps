@@ -22,8 +22,6 @@ SCORE_WAARDE_VERWIJDERD = 32767
 # gebruik 'geen score' om bij te houden dat gekozen is deze sporterboog te markeren als 'niet geschoten'
 # zonder een echt score record aan te maken. Elke sporterboog heeft genoeg aan 1 'geen score' record.
 SCORE_TYPE_SCORE = 'S'
-# SCORE_TYPE_INDIV_AG = 'I'       # voor de bondscompetities
-# SCORE_TYPE_TEAM_AG = 'T'        # voor de bondscompetities
 SCORE_TYPE_GEEN = 'G'           # niet geschoten
 
 SCORE_CHOICES = (
@@ -78,7 +76,7 @@ class AanvangsgemiddeldeHist(models.Model):
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # waar gaat dit over?
-    ag = models.ForeignKey(Aanvangsgemiddelde, on_delete=models.CASCADE, null=True, related_name='ag_hist')
+    ag = models.ForeignKey(Aanvangsgemiddelde, on_delete=models.CASCADE, null=True, related_name='ag_hist')     # TODO: null=True kan weg?
 
     # oude en nieuwe waarde
     oude_waarde = models.DecimalField(max_digits=6, decimal_places=3)     # max = 10,000
@@ -99,6 +97,7 @@ class AanvangsgemiddeldeHist(models.Model):
         return "[%s] %s --> %s: %s / door %s" % (localize(self.when), self.oude_waarde, self.nieuwe_waarde, self.notitie, account_str)
 
     class Meta:
+        # TODO: constraint toevoegen voor maximaal 1 AG per SporterBoog?
         indexes = [
             # help sorteren op datum
             models.Index(fields=['when'])
@@ -114,12 +113,11 @@ class Score(models.Model):
     type = models.CharField(max_length=1, choices=SCORE_CHOICES, default=SCORE_TYPE_SCORE)
 
     # bij wie hoort deze score
-    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)           # TOOD: null=True niet meer nodig?
 
     # TODO: kopie toevoegen van het boogtype van de sporterboog, om eenvoudiger op te kunnen filteren
 
     # waarde van de score, bijvoorbeeld 360
-    # bij indiv/team ag is dit de AG * 1000, dus 9.123 --> 9123
     waarde = models.PositiveSmallIntegerField()     # max = 32767
 
     # 18, 25, 70, etc.

@@ -68,7 +68,7 @@ class OpleidingMoment(models.Model):
 
     # naam en contactgegevens van de opleider
     opleider_naam = models.CharField(max_length=150, default='')
-    opleider_email = models.CharField(max_length=150)
+    opleider_email = models.CharField(max_length=150)       # TODO: verander in EmailField?
     opleider_telefoon = models.CharField(max_length=25, default='', blank=True)
 
     class Meta:
