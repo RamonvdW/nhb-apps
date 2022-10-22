@@ -294,13 +294,15 @@ class SporterBoog(models.Model):
 
         ordering = ['sporter__lid_nr', 'boogtype__volgorde']
 
+        unique_together = ('sporter', 'boogtype')
+
         indexes = [
             # ondersteuning voor filteren op voor_wedstrijd=True
             models.Index(fields=['voor_wedstrijd'])
         ]
 
     def __str__(self):
-        # voorkom exceptie als nhblid op None staat
+        # voorkom exceptie als sporter op None staat
         if self.sporter:
             return "%s - %s" % (self.sporter.lid_nr, self.boogtype.beschrijving)
         else:
