@@ -70,6 +70,8 @@ GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
                          1377,      # persoonlijk lid, geen wedstrijden
                          )
 
+BEHOUD_CLUB = (1999,)               # voor demo
+
 
 class Command(BaseCommand):
 
@@ -673,10 +675,12 @@ class Command(BaseCommand):
         # kijk of er verenigingen verwijderd moeten worden
         while len(ver_nrs) > 0:
             ver_nr = ver_nrs.pop(0)
+            if ver_nr in BEHOUD_CLUB:
+                continue
             obj = self._vind_vereniging(ver_nr)
             self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
             if not self.dryrun:
-                # kan alleen als er geen leden maar aan hangen --> de modellen beschermen dit automatisch
+                # kan alleen als er geen leden meer aan hangen --> de modellen beschermen dit automatisch
                 # vang de gerelateerde exceptie af
                 try:
                     del self._cache_ver[obj.pk]
