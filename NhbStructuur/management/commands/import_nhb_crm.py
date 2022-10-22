@@ -1260,6 +1260,11 @@ class Command(BaseCommand):
         while len(lid_nrs) > 0:
             lid_nr = lid_nrs.pop(0)
             obj = self._vind_sporter(lid_nr)
+
+            # behoud fictieve leden
+            if obj.bij_vereniging and obj.bij_vereniging.ver_nr in BEHOUD_CLUB:
+                continue
+
             if obj.is_actief_lid:
                 self.stdout.write('[INFO] Lid %s: is_actief_lid: ja --> nee' % repr(lid_nr))
                 obj.is_actief_lid = False
