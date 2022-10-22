@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from Account.models import Account, AccountEmail, AccountVerzoekenTeller
+from Overig.helpers import maak_unaccented
 from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from Mailer.operations import mailer_email_is_valide
 import time
@@ -96,6 +97,7 @@ def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_b
     account.set_password(wachtwoord)
     account.first_name = voornaam
     account.last_name = achternaam
+    account.unaccented_naam = maak_unaccented(voornaam + ' ' + achternaam)
     account.save()
 
     # geeft dit account een e-mail
