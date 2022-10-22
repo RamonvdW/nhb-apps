@@ -79,7 +79,6 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             objs = (NhbVereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
-                    .exclude(regio__regio_nr=100)
                     .prefetch_related('wedstrijdlocatie_set',
                                       'functie_set',
                                       'clusters')
@@ -100,7 +99,6 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             return (NhbVereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
-                    .exclude(regio__regio_nr=100)
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
