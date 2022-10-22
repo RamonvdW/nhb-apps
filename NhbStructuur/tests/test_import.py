@@ -302,7 +302,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # maak een test vereniging die verwijderd kan worden
         ver = NhbVereniging()
         ver.naam = "Wegisweg Club"
-        ver.ver_nr = "1999"
+        ver.ver_nr = "1998"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
 
@@ -312,7 +312,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1999] Wegisweg Club wordt nu verwijderd" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1998] Wegisweg Club wordt nu verwijderd" in f2.getvalue())
 
     def test_weer_actief(self):
         # mutatie van inactief lid naar actief lid

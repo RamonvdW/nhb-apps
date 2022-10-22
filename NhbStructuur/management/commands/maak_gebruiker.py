@@ -80,7 +80,7 @@ class Command(BaseCommand):
 
             try:
                 sporterboog.save()
-            except IntegrityError:
+            except IntegrityError:      # pragma: no cover
                 pass
         # for
 
