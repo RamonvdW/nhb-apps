@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,7 @@ BONDSPAS_STATUS = [
 ]
 
 
+# TODO: deze tabel is niet meer nodig
 class Bondspas(models.Model):
 
     """ administratie van de Bondspas bestanden """

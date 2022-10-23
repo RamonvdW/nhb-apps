@@ -15,9 +15,9 @@ urlpatterns = [
          views.ToonBondspasView.as_view(),
          name='toon-bondspas'),
 
-    path('check-status/',
-         views.DynamicBondspasCheckStatus.as_view(),
-         name='dynamic-check-status'),
+    #path('check-status/',
+    #     views.DynamicBondspasCheckStatus.as_view(),
+    #     name='dynamic-check-status'),
 ]
 
 # end of file
