@@ -149,7 +149,7 @@ def teken_barcode(lid_nr, draw, end_x, end_y, font):
 
 
 def maak_bondspas_image(lid_nr, jaar, regels):
-    fpath = os.path.join(settings.STATIC_ROOT, 'bondspas', 'achtergrond_bondspas.png')
+    fpath = os.path.join(settings.INSTALL_PATH, settings.STATIC_ROOT, 'bondspas', 'achtergrond_bondspas.png')
     image = Image.open(fpath)
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype(settings.BONDSPAS_FONT, size=18)
