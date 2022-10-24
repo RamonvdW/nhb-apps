@@ -14,7 +14,7 @@ from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4S
                                BLAZOEN2STR, BLAZOEN2STR_COMPACT)
 from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                RegioCompetitieSchutterBoog, DAGDEEL2LABEL,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL)
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
@@ -288,6 +288,8 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         except DeelCompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
+        context['deelcomp'] = deelcomp
+
         objs = (RegioCompetitieSchutterBoog
                 .objects
                 .select_related('indiv_klasse',
@@ -350,12 +352,17 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")  # ; is good for import with dutch regional settings
 
-        # voorkeur dagdelen per vereniging
-        writer.writerow(['Ver nr', 'Vereniging',
-                         'Lid nr', 'Naam',
-                         'Boog', 'Voorkeur team', 'Voorkeur eigen blazoen',
-                         'Inschrijf notitie', 'Voorwerpen op lijn', 'Para notitie',
-                         'Wedstrijdklasse'])
+        heeft_dagdeel = context['deelcomp'].inschrijf_methode == INSCHRIJF_METHODE_3
+
+        headers = ['Ver nr', 'Vereniging',
+                   'Lid nr', 'Naam',
+                   'Boog', 'Voorkeur team', 'Voorkeur eigen blazoen']
+        if heeft_dagdeel:
+            headers.append('Voorkeur dagdeel')
+        headers.extend(['Inschrijf notitie', 'Voorwerpen op lijn', 'Para notitie',
+                        'Wedstrijdklasse'])
+
+        writer.writerow(headers)
 
         for deelnemer in context['object_list']:
 
@@ -370,11 +377,20 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
             eigen_str = 'Ja' if voorkeuren.voorkeur_eigen_blazoen else 'Nee'
             para_voorwerpen = 'Ja' if voorkeuren.para_met_rolstoel else 'Nee'
 
-            tup = (ver.ver_nr, ver.naam,
-                   sporter.lid_nr, sporter.volledige_naam(),
-                   boog.beschrijving, team_str, eigen_str,
-                   deelnemer.inschrijf_notitie, para_voorwerpen, voorkeuren.opmerking_para_sporter,
-                   klasse.beschrijving)
+            if heeft_dagdeel:
+                dagdeel_str = DAGDEEL2LABEL[deelnemer.inschrijf_voorkeur_dagdeel][1]  # lange beschrijving
+                tup = (ver.ver_nr, ver.naam,
+                       sporter.lid_nr, sporter.volledige_naam(),
+                       boog.beschrijving, team_str, eigen_str, dagdeel_str,
+                       deelnemer.inschrijf_notitie, para_voorwerpen, voorkeuren.opmerking_para_sporter,
+                       klasse.beschrijving)
+            else:
+                tup = (ver.ver_nr, ver.naam,
+                       sporter.lid_nr, sporter.volledige_naam(),
+                       boog.beschrijving, team_str, eigen_str,
+                       deelnemer.inschrijf_notitie, para_voorwerpen, voorkeuren.opmerking_para_sporter,
+                       klasse.beschrijving)
+
             writer.writerow(tup)
         # for
 
