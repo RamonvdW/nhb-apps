@@ -145,7 +145,7 @@
                         <th>Deelnemers per regio</th>
                         <td class="right-align"><br>Regio 101<br>Regio 102<br>Regio 103<br>Regio 104<br>Regio 105<br>Regio 106<br>Regio 107<br>Regio 108<br>Regio 109<br>Regio 110<br>Regio 111<br>Regio 112<br>Regio 113<br>Regio 114<br>Regio 115<br>Regio 116</td>
                         <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_regio%}<br>{{ aantal }}{% endfor %}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_18m_regio%}<br>{{ aantal }}{% endfor %}</td>
+                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_regio%}<br>{{ aantal }}{% endfor %}</td>
                     </tr>
 
                     <tr>
