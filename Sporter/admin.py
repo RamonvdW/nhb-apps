@@ -8,6 +8,23 @@ from django.contrib import admin
 from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Secretaris, Speelsterkte
 
 
+class HeeftWaIdListFilter(admin.SimpleListFilter):
+
+    title = 'Heeft WA Id'
+
+    parameter_name = 'heeft_wa_id'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ja', 'Heeft een WA id'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ja':
+            queryset = queryset.exclude(wa_id='')
+        return queryset
+
+
 class SporterAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Sporter klasse """
 
@@ -16,7 +33,7 @@ class SporterAdmin(admin.ModelAdmin):
     search_fields = ('unaccented_naam', 'lid_nr')
 
     # filter mogelijkheid
-    list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid')
+    list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid', HeeftWaIdListFilter)
 
     list_select_related = True
 

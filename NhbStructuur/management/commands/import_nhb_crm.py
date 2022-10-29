@@ -56,7 +56,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from',
                         'para_code', 'address', 'postal_code', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private',
-                        'iso_abbr', 'latitude', 'longitude', 'blocked')
+                        'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id')
 OPTIONAL_MEMBER_KEYS = ('skill_levels',)
 
 # administratieve entries (met fouten) die overslagen moeten worden
@@ -814,7 +814,8 @@ class Command(BaseCommand):
              'iso_abbr': 'NL',      ???
              'latitude',
              'longitude',
-             'blocked'              bool
+             'blocked':             bool
+             'wa':                  string
         """
         for member in data:
             is_valid = True
@@ -985,6 +986,11 @@ class Command(BaseCommand):
             except KeyError:
                 lid_sterk = list()
 
+            lid_wa_id = member['wa_id']
+            if not lid_wa_id:
+                # verander None in leeg
+                lid_wa_id = ''
+
             self._count_members += 1
 
             is_nieuw = False
@@ -1129,6 +1135,12 @@ class Command(BaseCommand):
                             lid_nr, repr(obj.geboorteplaats), repr(lid_geboorteplaats)))
                         obj.geboorteplaats = lid_geboorteplaats
                         updated.append('geboorteplaats')
+                        self._count_wijzigingen += 1
+
+                    if obj.wa_id != lid_wa_id:
+                        self.stdout.write('[INFO] Lid %s: wa_id %s --> %s' % (lid_nr, repr(obj.wa_id), repr(lid_wa_id)))
+                        obj.wa_id = lid_wa_id
+                        updated.append('wa_id')
                         self._count_wijzigingen += 1
 
                     if not self.dryrun:

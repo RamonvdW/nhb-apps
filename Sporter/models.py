@@ -65,6 +65,9 @@ class Sporter(models.Model):
     # het unieke lidmaatschapsnummer
     lid_nr = models.PositiveIntegerField(primary_key=True)
 
+    # World Archery nummer van deze sporter
+    wa_id = models.CharField(max_length=8, default='')
+
     # volledige naam
     # let op: voornaam kan ook een afkorting zijn
     voornaam = models.CharField(max_length=100)
