@@ -127,13 +127,9 @@ fi
 python3 ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
 
-# start the bondspas service simulator
-python3 ./Bondspas/test-tools/websim_bondspas.py &
-PID_WEBSIM2=$!
-
 # start the payment service simulator
 python3 ./Betaal/test-tools/websim_betaal_test.py &
-PID_WEBSIM3=$!
+PID_WEBSIM2=$!
 
 # check all websim programs have started properly
 sleep 0.5               # give python some time to load everything
@@ -145,13 +141,6 @@ then
 fi
 
 kill -0 $PID_WEBSIM2    # check the simulator is running
-if [ $? -ne 0 ]
-then
-    echo "[ERROR] Bondspas service simulator failed to start"
-    exit
-fi
-
-kill -0 $PID_WEBSIM3    # check the simulator is running
 if [ $? -ne 0 ]
 then
     echo "[ERROR] Betaal service simulator failed to start"
