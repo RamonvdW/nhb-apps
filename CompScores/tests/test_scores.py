@@ -18,7 +18,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, module Scores """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_planning_regio',)
+    test_after = ('Competitie.tests.test_fase', 'CompLaagRegio.tests.test_planning',)
 
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
     url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
