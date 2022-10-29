@@ -62,7 +62,8 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
                    .sessies
                    .prefetch_related('wedstrijdklassen')
                    .order_by('datum',
-                             'tijd_begin'))
+                             'tijd_begin',
+                             'beschrijving'))
         for sessie in sessies:
             # sessie.klassen_ordered = sessie.wedstrijdklassen.order_by('volgorde')
             #

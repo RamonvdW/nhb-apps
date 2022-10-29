@@ -235,7 +235,8 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 regels.append('Restitutie')
                 transacties_euro -= transactie.bedrag_euro_klant
             else:
-                regels.append('Ontvangen van %s' % transactie.klant_naam)
+                if transactie.klant_naam:
+                    regels.append('Ontvangen van %s' % transactie.klant_naam)
                 transacties_euro += transactie.bedrag_euro_klant
         # for
 

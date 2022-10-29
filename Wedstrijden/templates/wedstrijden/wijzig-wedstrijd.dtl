@@ -325,7 +325,7 @@
                             </tr>
 
                             <tr>
-                                <th>Onder 18</th>
+                                <th>Tot 18 jaar</th>
                                 <td>
                                     <span style="font-size:16px">&euro;&nbsp;</span>
                                     <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
