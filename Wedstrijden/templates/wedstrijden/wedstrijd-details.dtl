@@ -162,7 +162,7 @@
                 </tr>
 
                 <tr>
-                    <th>Onder 18</th>
+                    <th>Tot 18 jaar</th>
                     <td>&euro;&nbsp;{{ wed.prijs_euro_onder18 }}</td>
                 </tr>
             </table>
