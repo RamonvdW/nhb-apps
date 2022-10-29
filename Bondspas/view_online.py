@@ -37,7 +37,7 @@ def maak_bondspas_regels(lid_nr, jaar):
     voorkeur = get_sporter_voorkeuren(sporter)
 
     regels.append(("lid_nr", str(sporter.lid_nr)))
-    regels.append(("WA_id", '12345'))    # sporter.wa_id
+    regels.append(("WA_id", ''))    # sporter.wa_id            # TODO: beschikbaar krijgen uit CRM
 
     regels.append(("Naam", sporter.volledige_naam()))
     regels.append(("Geboren", date_format(sporter.geboorte_datum, "j F Y")))
@@ -78,7 +78,7 @@ def maak_bondspas_regels(lid_nr, jaar):
     regels.append(("WA", lkl_wa))
 
     lkl_nhb = bereken_leeftijdsklasse_nhb(wedstrijdleeftijd_wa, wedstrijdgeslacht_nhb)
-    if lkl_nhb != lkl_wa or True:
+    if lkl_nhb != lkl_wa:
         regels.append(("NHB", lkl_nhb))
 
     lkl_ifaa_1 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_voor_verjaardag, wedstrijdgeslacht)
