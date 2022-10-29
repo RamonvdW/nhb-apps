@@ -38,6 +38,12 @@
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die jullie vereniging organiseert." icon="event_note" url=card_url %}
             {% endif %}
 
+            <!-- webwinkel -->
+            {% if rol_is_mww %}
+                {% url 'Webwinkel:prototype' as card_url %}
+                {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+            {% endif %}
+
             <!-- opleidingen -->
             {% if rol_is_mo %}
                 {% url 'Opleidingen:overzicht' as card_url %}

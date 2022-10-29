@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',
     'Vereniging.apps.VerenigingConfig',
+    'Webwinkel.apps.WebwinkelConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user

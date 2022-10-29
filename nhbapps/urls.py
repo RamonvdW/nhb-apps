@@ -47,6 +47,7 @@ urlpatterns = [
     path('score/',                          include('Score.urls')),
     path('taken/',                          include('Taken.urls')),
     path('vereniging/',                     include('Vereniging.urls')),
+    path('webwinkel/',                      include('Webwinkel.urls')),
     path('wedstrijden/',                    include('Wedstrijden.urls')),
 
     # direct van oude urls naar nieuwe urls

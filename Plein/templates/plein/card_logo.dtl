@@ -6,7 +6,7 @@
 
 {% comment %}
 
-    Deze file formateert een kaartje aan de hand van de vier parameters:
+    Deze file formateert een kaartje aan de hand van deze parameters:
 
         title          = "Account activiteit"
         img_src        = src
@@ -48,7 +48,7 @@
                 <div class="card-title">{{ title }}</div>
             {% endif %}
 
-            <!-- icoon -->
+            <!-- plaatje -->
             <div style="margin-bottom:8px">
                 <img src="{{ img_src }}" height="{{ img_height }}" {% if img_width %}width="{{ img_width }}" {% endif %}alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %}>
             </div>
