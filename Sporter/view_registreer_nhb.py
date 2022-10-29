@@ -12,12 +12,14 @@ from django.views.generic import TemplateView
 from Account.operations import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
 from Functie.models import Functie
+from Functie.operations import maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
 from Sporter.forms import RegistreerForm
-from Sporter.models import Sporter, Secretaris, SporterGeenEmail, SporterInactief
+from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
+from Vereniging.models import Secretaris
 import logging
 
 
@@ -65,13 +67,7 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
     sporter.account = account
     sporter.save()
 
-    # indien dit een secretaris is, ook meteen koppelen aan SEC functie van zijn vereniging
-    secs = Secretaris.objects.filter(vereniging=sporter.bij_vereniging)
-    if secs.count() > 0:
-        sec = secs[0]
-        if sec.sporter == sporter:
-            functie = Functie.objects.get(rol='SEC', nhb_ver=sporter.bij_vereniging)
-            functie.accounts.add(account)
+    # bij de volgende CRM import wordt dit account gekoppeld aan de SEC functie en wordt een e-mail gestuurd met instructies
 
     account_vraag_email_bevestiging(accountmail, nhb_nummer=lid_nr_str, email=email)
 
@@ -106,10 +102,14 @@ class RegistreerNhbNummerView(TemplateView):
                            'email_bb': settings.EMAIL_BONDSBUREAU}
                 ver = exc.sporter.bij_vereniging
                 if ver:
-                    secs = Secretaris.objects.filter(vereniging=ver).exclude(sporter=None).all()
-                    if secs.count() > 0:
-                        sec = secs[0].sporter
-                        context['sec_naam'] = sec.volledige_naam()
+                    try:
+                        sec = Secretaris.objects.get(vereniging=ver)
+                    except Secretaris.DoesNotExist:
+                        pass
+                    else:
+                        if sec.sporters.count() > 0:
+                            sporter = sec.sporters.all()[0]
+                            context['sec_naam'] = sporter.volledige_naam()
 
                     functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
                     context['sec_email'] = functie.bevestigde_email

@@ -18,7 +18,8 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Secretaris
+from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
+from Vereniging.models import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -84,7 +85,10 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_sec.save()
         self.functie_sec = functie_sec
 
-        Secretaris(vereniging=ver, sporter=sporter).save()
+        sec = Secretaris(vereniging=ver)
+        sec.save()
+        sec.sporters.add(sporter)
+        self.sec = sec
 
         # geef dit account een record
         rec = IndivRecord()
@@ -340,7 +344,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # als er geen SEC gekoppeld is, dan wordt de secretaris van de vereniging gebruikt
         self.functie_sec.accounts.remove(self.account_normaal)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

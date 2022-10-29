@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Secretaris, Speelsterkte
+from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Speelsterkte
 
 
 class HeeftWaIdListFilter(admin.SimpleListFilter):
@@ -82,37 +82,6 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
     )
 
 
-class SecretarisAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor Secretaris klasse """
-
-    search_fields = ('vereniging__ver_nr',
-                     'vereniging__naam',)
-
-    list_filter = ('vereniging',)
-
-    list_select_related = ('vereniging', 'sporter')
-
-    auto_complete = ('vereniging', 'sporter')
-
-    def __init__(self, model, admin_site):
-        super().__init__(model, admin_site)
-        self.obj = None
-
-    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
-        if obj:
-            self.obj = obj
-        return super().get_form(request, obj, **kwargs)
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'sporter' and self.obj:
-            kwargs['queryset'] = (Sporter
-                                  .objects
-                                  .filter(bij_vereniging=self.obj.vereniging)
-                                  .order_by('unaccented_naam'))
-
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
 class SpeelsterkteAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Speelsterkte klasse """
 
@@ -128,7 +97,6 @@ class SpeelsterkteAdmin(admin.ModelAdmin):
 admin.site.register(Sporter, SporterAdmin)
 admin.site.register(SporterBoog, SporterBoogAdmin)
 admin.site.register(SporterVoorkeuren, SporterVoorkeurenAdmin)
-admin.site.register(Secretaris, SecretarisAdmin)
 admin.site.register(Speelsterkte, SpeelsterkteAdmin)
 
 # end of file

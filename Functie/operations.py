@@ -26,14 +26,18 @@ def maak_functie(beschrijving, rol):
 
 def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschrijving, add=False, remove=False):
 
-    """ Stuur een e-mail naar 'account' om te melden dat de rollen gewijzigd zijn """
+    """ Stuur een e-mail naar 'account' om te melden dat de rollen gewijzigd zijn
+
+        Returns: True = success: e-mail is klaargezet
+                 False = failure (typisch: geen bevestigd e-mailadres)
+    """
 
     if add:
         actie = "Toegevoegde rol"
     elif remove:                    # pragma: no branch
         actie = 'Verwijderde rol'
     else:                           # pragma: no cover
-        return
+        return False
 
     context = {
         'voornaam': account.get_first_name(),
@@ -50,9 +54,14 @@ def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschr
     mail_body = render_email_template(context, EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD)
 
     email = account.accountemail_set.all()[0]
-    mailer_queue_email(email.bevestigde_email,
-                       'Wijziging rollen op ' + settings.NAAM_SITE,
-                       mail_body)
+    if email.email_is_bevestigd:
+        if mailer_queue_email(email.bevestigde_email,
+                              'Wijziging rollen op ' + settings.NAAM_SITE,
+                              mail_body):
+            # het is gelukt een mail klaar te zetten
+            return True
+
+    return False
 
 
 def functie_vraag_email_bevestiging(functie):
@@ -88,11 +97,13 @@ def maak_account_vereniging_secretaris(nhb_ver, account):
     # kijk of dit lid al in de groep zit
     if functie.accounts.filter(pk=account.pk).count() == 0:
         # nog niet gekoppeld aan de functie --> koppel dit account nu
-        functie.accounts.add(account)
 
         # stuur eem e-mail, welke ook een link naar de handleiding kan bevatten
-        functie_wijziging_stuur_email_notificatie(account, 'Systeem', functie.beschrijving, add=True)
-        return True
+        if functie_wijziging_stuur_email_notificatie(account, 'Systeem', functie.beschrijving, add=True):
+            # het is gelukt een e-mail te sturen, dus maak het koppeling definitief
+            # (als het e-mailadres nog niet bevestigd is, dan blijven we het proberen)
+            functie.accounts.add(account)
+            return True
 
     return False
 

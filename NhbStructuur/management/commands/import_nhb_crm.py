@@ -21,7 +21,8 @@ from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_err
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
-from Sporter.models import Sporter, Secretaris, Speelsterkte
+from Sporter.models import Sporter, Speelsterkte
+from Vereniging.models import Secretaris
 from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
 import traceback
 import datetime
@@ -30,12 +31,6 @@ import json
 import sys
 
 my_logger = logging.getLogger('NHBApps.NhbStructuur')
-
-
-def get_secretaris_str(sporter):
-    if sporter:
-        return "%s %s" % (sporter.lid_nr, sporter.volledige_naam())
-    return "geen"
 
 
 def get_vereniging_str(ver):
@@ -104,6 +99,7 @@ class Command(BaseCommand):
 
         self.dryrun = False
 
+        self._cache_account = dict()    # [username] = Account()
         self._cache_rayon = dict()      # [rayon_nr] = NhbRayon()
         self._cache_regio = dict()      # [regio_nr] = NhbRegio()
         self._cache_ver = dict()        # [ver_nr] = NhbVereniging()
@@ -115,6 +111,10 @@ class Command(BaseCommand):
         self._speelsterkte2volgorde = dict()    # [(discipline, beschrijving)] = volgorde
 
     def _maak_cache(self):
+        for account in Account.objects.all():
+            self._cache_account[account.username] = account
+        # for
+
         for rayon in NhbRayon.objects.all():
             self._cache_rayon[rayon.rayon_nr] = rayon
         # for
@@ -133,8 +133,8 @@ class Command(BaseCommand):
 
         for sec in (Secretaris
                     .objects
-                    .select_related('vereniging',
-                                    'sporter')
+                    .select_related('vereniging')
+                    .prefetch_related('sporters')
                     .all()):
             self._cache_sec[sec.vereniging.ver_nr] = sec
         # for
@@ -146,6 +146,7 @@ class Command(BaseCommand):
         for functie in (Functie
                         .objects
                         .select_related('nhb_ver')
+                        .prefetch_related('accounts')
                         .all()):
             tup = (functie.rol, functie.beschrijving)
             self._cache_functie[tup] = functie
@@ -162,6 +163,13 @@ class Command(BaseCommand):
             # discipline, beschrijving, volgorde
             self._speelsterkte2volgorde[(disc, beschr)] = volgorde
         # for
+
+    def _vind_account(self, username):
+        try:
+            account = self._cache_account[str(username)]
+        except KeyError:
+            account = None
+        return account
 
     def _vind_rayon(self, rayon_nr):
         try:
@@ -251,7 +259,7 @@ class Command(BaseCommand):
             try:
                 keys.remove(key)
             except ValueError:
-                self.stderr.write("[ERROR] Verplichte sleutel %s niet aanwezig in de %s data" % (repr(key), repr(level)))
+                self.stderr.write("[ERROR] [FATAL] Verplichte sleutel %s niet aanwezig in de %s data" % (repr(key), repr(level)))
                 self._exit_code = 2
                 has_error = True
         # for
@@ -707,24 +715,23 @@ class Command(BaseCommand):
 
             ver_naam = club['name']
 
+            ver_secretarissen = list()
             club_secs = club['secretaris']
-            if len(club_secs) < 1:
-                ver_secretaris = None
-            else:
-                if len(club_secs) > 1:
-                    # onverwacht meer dan 1 secretaris
-                    lid_nrs = [str(sec['member_number']) for sec in club_secs]
-                    lid_nrs_str = ", ".join(lid_nrs)
-                    self.stdout.write(
-                        '[WARNING] Meerdere secretarissen voor vereniging %s is niet ondersteund: %s' % (
-                            ver_nr, lid_nrs_str))
+            if len(club_secs):
+                for sec in club_secs:
+                    sec_lid_nr = sec['member_number']
+                    sporter = self._vind_sporter(sec_lid_nr)
+                    if not sporter:
+                        self.stderr.write('[ERROR] Kan secretaris %s van vereniging %s niet vinden' % (
+                                                sec_lid_nr, ver_nr))
+                        self._count_errors += 1
+                    else:
+                        if sporter.bij_vereniging is None or sporter.bij_vereniging.ver_nr != ver_nr:
+                            self.stdout.write('[WARNING] Secretaris %s is geen lid bij vereniging %s' % (
+                                sporter.lid_nr, ver_nr))
 
-                ver_secretaris_nr = club['secretaris'][0]['member_number']
-                ver_secretaris = self._vind_sporter(ver_secretaris_nr)
-                if ver_secretaris is None:
-                    self.stderr.write('[ERROR] Kan secretaris %s van vereniging %s niet vinden' % (
-                                            ver_secretaris_nr, ver_nr))
-                    self._count_errors += 1
+                        ver_secretarissen.append(sporter)
+                # for
 
             # zoek de vereniging op
             obj = self._vind_vereniging(ver_nr)
@@ -733,44 +740,70 @@ class Command(BaseCommand):
                 self.stderr.write('[ERROR] Kan vereniging %s niet terugvinden' % ver_nr)
                 self._count_errors += 1
             else:
-                # zoek het secretaris record op
+                # zoek het Secretaris-record op
                 sec = self._vind_sec(ver_nr)
                 if not sec:
                     # maak een nieuw record aan
-                    sec = Secretaris(vereniging=obj, sporter=None)
+                    sec = Secretaris(vereniging=obj)
                     sec.save()
                     self._cache_sec[obj.ver_nr] = sec
 
-                if sec.sporter != ver_secretaris:
-                    if ver_nr not in self._nieuwe_clubs:
-                        old_sec_str = get_secretaris_str(sec.sporter)
-                        new_sec_str = get_secretaris_str(ver_secretaris)
-                        self.stdout.write('[INFO] Wijziging van secretaris voor vereniging %s: %s --> %s' % (
-                                                ver_nr, old_sec_str, new_sec_str))
-                        self._count_wijzigingen += 1
+                lid_nrs_oud = [sporter.lid_nr for sporter in sec.sporters.all()]
+                lid_nrs_new = [sporter.lid_nr for sporter in ver_secretarissen]
 
-                    sec.sporter = ver_secretaris
+                if set(lid_nrs_oud) != set(lid_nrs_new):
+
+                    str_oud = "+".join([str(lid_nr) for lid_nr in lid_nrs_oud])
+                    if str_oud == '':
+                        str_oud = 'geen'
+                    str_new = "+".join([str(lid_nr) for lid_nr in lid_nrs_new])
+                    if str_new == '':
+                        str_new = 'geen'
+
+                    self.stdout.write('[INFO] Vereniging %s secretarissen: %s --> %s' % (
+                                        ver_nr, str_oud, str_new))
+
+                    self._count_wijzigingen += 1
+
                     if not self.dryrun:
-                        sec.save(update_fields=['sporter'])
+                        sec.sporters.set(ver_secretarissen)
 
-                if not ver_secretaris:
+                # forceer de juiste secretarissen in de SEC functie
+                functie_sec = self._vind_functie('SEC', 'Secretaris vereniging %s' % ver_nr)
+                functie_account_pks = list(functie_sec.accounts.values_list('pk', flat=True))
+                sec_account_pks = list()
+                for sporter in ver_secretarissen:
+                    account = self._vind_account(sporter.lid_nr)
+                    if not account:
+                        # SEC heeft nog geen account
+                        self.stdout.write("[INFO] Secretaris %s van vereniging %s heeft nog geen account" % (
+                                                sporter.lid_nr, obj.ver_nr))
+                        self._count_sec_no_account += 1
+                    else:
+                        if account.pk in functie_account_pks:
+                            sec_account_pks.append(account.pk)
+                        else:
+                            # nog niet gekoppeld
+                            if maak_account_vereniging_secretaris(obj, account):
+                                self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie en heeft krijgt een e-mail" % (
+                                                        sporter.lid_nr, obj.ver_nr))
+                                sec_account_pks.append(account.pk)
+                            else:
+                                self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen bevestigd e-mailadres" % (
+                                                        sporter.lid_nr, obj.ver_nr))
+                # for
+
+                for account in functie_sec.accounts.all():
+                    if account.pk not in sec_account_pks:
+                        self.stdout.write("[INFO] Account %s wordt losgekoppeld van de rol %s" % (
+                                            account.username, functie_sec.beschrijving))
+                        functie_sec.accounts.remove(account)
+                # for
+
+                if len(ver_secretarissen) == 0:
                     if ver_nr not in GEEN_SECRETARIS_NODIG:
                         self.stderr.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
                         self._count_warnings += 1
-
-                # forceer de secretaris in de SEC groep
-                if ver_secretaris:
-                    try:
-                        account = Account.objects.get(sporter=ver_secretaris)
-                    except Account.DoesNotExist:
-                        # SEC heeft nog geen account
-                        self.stdout.write("[INFO] Secretaris %s van vereniging %s heeft nog geen account" % (
-                                                ver_secretaris.lid_nr, obj.ver_nr))
-                        self._count_sec_no_account += 1
-                    else:
-                        if maak_account_vereniging_secretaris(obj, account):
-                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie" % (
-                                                    ver_secretaris.lid_nr, obj.ver_nr))
         # for
 
     @staticmethod
@@ -990,6 +1023,9 @@ class Command(BaseCommand):
             if not lid_wa_id:
                 # verander None in leeg
                 lid_wa_id = ''
+            else:
+                lid_wa_id = str(lid_wa_id)
+            # print('lid %s wa_id: %s' % (lid_nr, lid_wa_id))
 
             self._count_members += 1
 
@@ -1184,6 +1220,7 @@ class Command(BaseCommand):
 
                 obj = Sporter()
                 obj.lid_nr = lid_nr
+                obj.wa_id = lid_wa_id
                 obj.voornaam = lid_voornaam
                 obj.achternaam = lid_achternaam
                 obj.email = lid_email
@@ -1290,7 +1327,7 @@ class Command(BaseCommand):
                 # FUTURE: afhandelen van het inactiveren/verwijderen van een lid dat in een team zit in een competitie
                 # FUTURE: afhandelen van het inactiveren/verwijderen van een lid dat secretaris is
             elif obj.lid_nr in self._recordhouder_lid_nrs:
-                # lid heeft een record op zijn/haar naam --> behoud het hele record
+                # lid heeft een record op zijn naam --> behoud het hele record
                 # de CRM applicatie heeft hier nog geen veld voor
                 self.stdout.write('[INFO] Lid %s is recordhouder en wordt daarom niet verwijderd' % obj.lid_nr)
             else:
@@ -1471,7 +1508,7 @@ class Command(BaseCommand):
         except DataError as exc:        # pragma: no cover
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
-            self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('[ERROR] [FATAL] Onverwachte database fout: %s' % str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
             self._exit_code = 1

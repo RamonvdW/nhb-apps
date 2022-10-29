@@ -19,6 +19,9 @@ def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True)
         Het feitelijk versturen van de e-mail wordt door een achtergrondtaak gedaan
 
         mail_body kan een string zijn, of een tuple van (text body, html body)
+
+        Returns: True = success
+                 False = failure because of to_address
     """
 
     if isinstance(mail_body, tuple):
@@ -26,7 +29,7 @@ def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True)
     else:
         mail_text = mail_body
         mail_html = ''
-        template_name =''
+        template_name = ''
     del mail_body
 
     # e-mailadres is verplicht
@@ -54,6 +57,9 @@ def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True)
                 obj.is_blocked = True
 
         obj.save()
+        return True
+
+    return False
 
 
 def mailer_obfuscate_email(email):

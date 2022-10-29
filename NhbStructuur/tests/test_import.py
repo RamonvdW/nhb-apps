@@ -7,6 +7,7 @@
 from django.test import TestCase
 from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
+from Account.models import AccountEmail
 from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Mailer.models import MailQueue
@@ -14,6 +15,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Vereniging.models import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -23,7 +25,7 @@ IMPORT_COMMAND = 'import_nhb_crm'
 OPTION_DRY_RUN = '--dryrun'
 OPTION_SIM = '--sim_now=2020-07-01'
 
-TESTFILES_PATH = './NhbStructuur/management/testfiles/'
+TESTFILES_PATH = './NhbStructuur/tests/testfiles/'
 
 TESTFILE_NOT_EXISTING = TESTFILES_PATH + 'notexisting.json'
 TESTFILE_01_EMPTY = TESTFILES_PATH + 'testfile_01.json'
@@ -101,15 +103,16 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_02_INCOMPLETE,
                                                  report_exit_code=False)
-
-        self.assertTrue("[ERROR] Verplichte sleutel 'rayons' niet aanwezig in de 'top-level' data" in f1.getvalue())
-        self.assertTrue("[ERROR] Verplichte sleutel 'regions' niet aanwezig in de 'top-level' data" in f1.getvalue())
-        self.assertTrue("[ERROR] Verplichte sleutel 'clubs' niet aanwezig in de 'top-level' data" in f1.getvalue())
-        self.assertTrue("[ERROR] Verplichte sleutel 'members' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        # print("\nf1:\n%s" % f1.getvalue())
+        # print("f2:\n%s" % f2.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'rayons' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'regions' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'clubs' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'members' niet aanwezig in de 'top-level' data" in f1.getvalue())
         # self.assertEqual(f2.getvalue(), '')
 
     def test_import(self):
-        with self.assert_max_queries(93):
+        with self.assert_max_queries(104):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_03_BASE_DATA,
                                                  OPTION_SIM)
@@ -150,10 +153,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                              report_exit_code=False)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'rayon' data" in f1.getvalue())
-        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'regio' data" in f1.getvalue())
-        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'club' data" in f1.getvalue())
-        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'member' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'name' niet aanwezig in de 'rayon' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'name' niet aanwezig in de 'regio' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'name' niet aanwezig in de 'club' data" in f1.getvalue())
+        self.assertTrue("[ERROR] [FATAL] Verplichte sleutel 'name' niet aanwezig in de 'member' data" in f1.getvalue())
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'rayon' data: ['name1']" in f1.getvalue())
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'regio' data: ['name2']" in f1.getvalue())
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'club' data: ['name3']" in f1.getvalue())
@@ -162,7 +165,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_extra_geo_structuur(self):
         # extra rayon/regio
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(37):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_06_BAD_RAYON_REGIO)
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
@@ -178,7 +181,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_vereniging_mutaties(self):
         # vereniging mutaties
-        with self.assert_max_queries(93):
+        with self.assert_max_queries(104):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_03_BASE_DATA,
                                                  OPTION_SIM)
@@ -187,7 +190,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
         self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan wedstrijdlocatie 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
 
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(59):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -197,7 +200,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Wijziging van naam van vereniging 1000: "Grote Club" --> "Nieuwe Grote Club"' in f2.getvalue())
         self.assertTrue("[ERROR] Kan vereniging 1001 niet wijzigen naar onbekende regio 199" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1002 hoort bij onbekende regio 199" in f1.getvalue())
-        self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1001: geen --> 100001" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging 1001 secretarissen: geen --> 100001" in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van plaats van vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van secretaris email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
         self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
@@ -208,7 +211,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_lid_mutaties(self):
         # lid mutaties
-        with self.assert_max_queries(93):
+        with self.assert_max_queries(104):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)
@@ -223,7 +226,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(sporter.geboorteplaats, 'Papendal')
         self.assertEqual(sporter.telefoon, '+31234567890')
 
-        with self.assert_max_queries(51):
+        sporter = Sporter.objects.get(lid_nr=100025)
+        self.assertEqual(sporter.wa_id, '90025')
+
+        with self.assert_max_queries(58):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_09_LID_MUTATIES,
                                                  OPTION_SIM)
@@ -257,7 +263,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # andere leden hebben een toevoeging achter hun voornaam: "Tineke (Tini)" - niet over klagen
         # some ontbreekt er een haakje
         # import verwijderd dit
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(46):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_10_TOEVOEGING_NAAM,
                                                  OPTION_SIM)
@@ -269,7 +275,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
-        with self.assert_max_queries(37):
+        with self.assert_max_queries(42):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_11_BAD_DATE,
                                                  OPTION_SIM)
@@ -306,7 +312,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
 
-        with self.assert_max_queries(46):
+        with self.assert_max_queries(51):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_12_MEMBER_INCOMPLETE_1,
                                                  OPTION_SIM)
@@ -330,7 +336,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter.is_actief_lid = False
         sporter.save()
 
-        with self.assert_max_queries(33):
+        with self.assert_max_queries(38):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_13_WIJZIG_GESLACHT_1,
                                                  OPTION_SIM)
@@ -345,13 +351,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
     def test_wijzig_geslacht(self):
         # mutatie van geslacht M naar X voor sporter 100001
 
-        with self.assert_max_queries(34):
+        with self.assert_max_queries(39):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_13_WIJZIG_GESLACHT_1,
                                                  OPTION_SIM)
-            # print("f1: %s" % f1.getvalue())
-            # print("f2: %s" % f2.getvalue())
-            self.assertTrue("[INFO] Lid 100001 geslacht: M --> X" in f2.getvalue())
+
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 geslacht: M --> X" in f2.getvalue())
 
         sporter = Sporter.objects.get(lid_nr=100001)
         self.assertEqual(sporter.geslacht, 'X')
@@ -365,7 +372,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                        wedstrijd_geslacht='V')
         voorkeuren.save()
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_13_WIJZIG_GESLACHT_1,
                                                  OPTION_SIM)
@@ -373,7 +380,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100001 voorkeuren: wedstrijd geslacht instelbaar gemaakt" in f2.getvalue())
 
         # nu weer de andere kant op (X --> M)
-        with self.assert_max_queries(61):
+        with self.assert_max_queries(64):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -384,45 +391,67 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_maak_secretaris(self):
         # een lid secretaris maken
-        with self.assert_max_queries(63):
+        with self.assert_max_queries(76):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue('[WARNING] Vereniging 1000 heeft geen adres' in f2.getvalue())
-        self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1000: geen --> 100001 Ramon de Tester" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging 1000 secretarissen: geen --> 100001" in f2.getvalue())
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
-        self.assertTrue("[WARNING] Meerdere secretarissen voor vereniging 2000 is niet ondersteund: 100024, 100001" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging 2000 secretarissen: geen --> 100024+100001" in f2.getvalue())
+        self.assertTrue("[WARNING] Secretaris 100001 is geen lid bij vereniging 2000" in f2.getvalue())
 
-        # lid = Sporter.objects.get(lid_nr="100001")
         ver = NhbVereniging.objects.get(ver_nr="1000")
         functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
-        sporter = Sporter.objects.get(lid_nr="100024")
-        ver = NhbVereniging.objects.get(ver_nr="2000")
-        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
-        self.assertEqual(functie.accounts.count(), 0)
-        # 100024 is nog geen SEC omdat ze geen account heeft
-
-        # maak het account van 100024 aan en probeer het nog een keer
-        sporter.account = self.e2e_create_account(sporter.lid_nr, 'maakt.niet.uit@gratis.net', sporter.voornaam)
-        sporter.save()
-
-        with self.assert_max_queries(29):
-            f1, f2 = self.run_management_command(IMPORT_COMMAND,
-                                                 TESTFILE_14_WIJZIG_GESLACHT_2,
-                                                 OPTION_SIM)
-        self.assertTrue('[WARNING] Vereniging 1000 heeft geen adres' in f2.getvalue())
-        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
+        secs = Secretaris.objects.prefetch_related('sporters').get(vereniging__ver_nr=2000)
+        self.assertEqual(2, secs.sporters.count())
 
         ver = NhbVereniging.objects.get(ver_nr="2000")
         functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
+        # 100024 is nog geen SEC omdat ze geen account heeft
+        # maak het account van 100024 aan en probeer het nog een keer
+        sporter = Sporter.objects.get(lid_nr="100024")
+        sporter.account = self.e2e_create_account(sporter.lid_nr, 'maakt.niet.uit@gratis.net', sporter.voornaam)
+        sporter.save()
+
+        # corner-case: nog geen bevestigde emailadres
+        account = Sporter.objects.get(lid_nr=100001)
+        email = AccountEmail.objects.get(account=sporter.account)
+        email.email_is_bevestigd = False
+        email.save(update_fields=['email_is_bevestigd'])
+
+        with self.assert_max_queries(34):
+            f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                                 TESTFILE_14_WIJZIG_GESLACHT_2,
+                                                 OPTION_SIM)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[WARNING] Secretaris 100024 van vereniging 2000 heeft nog geen bevestigd e-mailadres" in f2.getvalue())
+        self.assertEqual(functie.accounts.count(), 1)
+
+        # koppelen aan functie SEC na bevestigen e-mailadres
+        email.email_is_bevestigd = True
+        email.save(update_fields=['email_is_bevestigd'])
+
+        with self.assert_max_queries(34):
+            f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                                 TESTFILE_14_WIJZIG_GESLACHT_2,
+                                                 OPTION_SIM)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
+        self.assertEqual(functie.accounts.count(), 2)
+
     def test_club_1377(self):
         # een paar speciale import gevallen
 
-        with self.assert_max_queries(67):
+        with self.assert_max_queries(68):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_15_CLUB_1377,
                                         OPTION_SIM)
@@ -446,7 +475,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.geen_wedstrijden = False
         ver.save()
 
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(27):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_15_CLUB_1377,
                                                  OPTION_SIM)
@@ -459,7 +488,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # verwijderen van de secretaris geeft een fout
 
         # maak 100024 aan
-        with self.assert_max_queries(63):
+        with self.assert_max_queries(76):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM)
@@ -471,7 +500,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter.save()
 
         # maak 100024 secretaris
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(32):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -479,7 +508,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(33):
+        with self.assert_max_queries(41):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -487,7 +516,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_verwijder_recordhouder_fail(self):
         # maak 100024 aan
-        with self.assert_max_queries(63):
+        with self.assert_max_queries(76):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM)
@@ -502,7 +531,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                     datum="2018-01-01").save()
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(30):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -510,7 +539,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_verwijder_score_fail(self):
         # maak 100024 aan
-        with self.assert_max_queries(63):
+        with self.assert_max_queries(76):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM)
@@ -524,7 +553,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(sporterboog, 18, 5.678, None, "")
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(42):
+        with self.assert_max_queries(46):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -535,14 +564,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_import_nhb_crm_dryrun(self):
         # dryrun
-        with self.assert_max_queries(42):
+        with self.assert_max_queries(47):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM,
                                                  OPTION_DRY_RUN)
         self.assertTrue("DRY RUN" in f2.getvalue())
 
-        with self.assert_max_queries(69):
+        with self.assert_max_queries(78):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)
@@ -551,17 +580,17 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.geen_wedstrijden = True
         ver.save()
 
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(37):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_08_VER_MUTATIES,
                                         OPTION_SIM,
                                         OPTION_DRY_RUN)
-        with self.assert_max_queries(19):
+        with self.assert_max_queries(24):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_09_LID_MUTATIES,
                                         OPTION_SIM,
                                         OPTION_DRY_RUN)
-        with self.assert_max_queries(36):
+        with self.assert_max_queries(37):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM,
@@ -573,7 +602,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.ver_nr = "1999"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
-        with self.assert_max_queries(19):
+        with self.assert_max_queries(21):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_12_MEMBER_INCOMPLETE_1,
                                         OPTION_SIM,
@@ -581,7 +610,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_incomplete_data(self):
         # test import met een incomplete entry van een nieuw lid
-        with self.assert_max_queries(48):
+        with self.assert_max_queries(53):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_17_MEMBER_INCOMPLETE_2,
                                                  OPTION_SIM)
@@ -602,7 +631,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_uitschrijven(self):
         # lid schrijft zich uit bij een vereniging en mag tot einde jaar diensten gebruiken
-        with self.assert_max_queries(93):
+        with self.assert_max_queries(104):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)
@@ -624,7 +653,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue(sporter.bij_vereniging is not None)
 
         # lid 100001 is nog steeds uitgeschreven - geen verandering tot 15 januari
-        with self.assert_max_queries(45):
+        with self.assert_max_queries(49):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_18_LID_UITGESCHREVEN,
                                         '--sim_now=2021-01-15')
@@ -635,13 +664,13 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue(sporter.bij_vereniging is not None)
 
         # lid 100001 is nog steeds uitgeschreven - verandering komt na 15 januari
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(29):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_18_LID_UITGESCHREVEN,
                                         OPTION_DRY_RUN,
                                         '--sim_now=2021-01-16')
 
-        with self.assert_max_queries(34):
+        with self.assert_max_queries(37):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_18_LID_UITGESCHREVEN,
                                         '--sim_now=2021-01-16')
@@ -680,7 +709,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_speelsterkte(self):
         # controleer dat de import tegen niet-nummers kan
-        with self.assert_max_queries(93):
+        with self.assert_max_queries(104):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)

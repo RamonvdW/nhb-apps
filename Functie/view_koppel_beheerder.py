@@ -381,6 +381,8 @@ class OntvangBeheerderWijzigingenView(View):
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s is beheerder gemaakt voor functie %s" % (wie, functie.beschrijving))
 
+            # TODO: functie_wijziging_stuur_email_notificatie geef False terug indien account geen e-mail kan ontvangen
+
             functie_wijziging_stuur_email_notificatie(account, wie, functie.beschrijving, add=True)
 
             if account.functie_set.count() == 1:

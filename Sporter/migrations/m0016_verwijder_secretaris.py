@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
@@ -13,15 +13,13 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Sporter', 'm0014_sporterboog_unique'),
+        ('Sporter', 'm0015_sporter_wa_id'),
     ]
 
     # migratie functies
     operations = [
-        migrations.AddField(
-            model_name='sporter',
-            name='wa_id',
-            field=models.CharField(default='', max_length=8, blank=True),
+        migrations.DeleteModel(
+            name='Secretaris',
         ),
     ]
 

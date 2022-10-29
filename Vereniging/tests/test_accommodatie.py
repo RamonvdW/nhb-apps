@@ -8,7 +8,8 @@ from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
-from Sporter.models import Sporter, Secretaris
+from Sporter.models import Sporter
+from Vereniging.models import Secretaris
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -157,7 +158,9 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100002 = sporter
 
-        Secretaris(vereniging=ver, sporter=sporter).save()
+        sec = Secretaris(vereniging=ver)
+        sec.save()
+        sec.sporters.add(sporter)
 
     def test_anon(self):
         # anon
@@ -220,7 +223,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
         # TODO: check alleen rayon
 
-        # details van een vereniging binnen de rayon
+        # details van een vereniging binnen het rayon
         url = self.url_accommodatie_details % self.nhbver2.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -447,10 +450,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # zet het aantal banen op 0,0
         self.e2e_wissel_naar_functie(self.functie_hwl)
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'baan_type': 'H',
-                                          'banen_18m': 1,
-                                          'banen_25m': 0,
-                                          'notities': 'dit is een test'})
+            self.client.post(url, {'baan_type': 'H',
+                                   'banen_18m': 1,
+                                   'banen_25m': 0,
+                                   'notities': 'dit is een test'})
         # haal op als WL, dan krijg je read-only zonder DT
         self.e2e_wissel_naar_functie(self.functie_wl)
         with self.assert_max_queries(20):
@@ -706,7 +709,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(len(urls), 2)      # wijzig knop is erbij gekomen
+        self.assertEqual(len(urls), 2)      # wijzig-knop is erbij gekomen
 
         # probeer een locatie toe te voegen van een andere vereniging
         with self.assert_max_queries(20):
