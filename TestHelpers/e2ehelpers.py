@@ -178,6 +178,8 @@ class E2EHelpers(TestCase):
             self.assert_is_redirect(resp, '/opleidingen/manager/')
         elif functie.rol == "SUP":
             self.assert_is_redirect(resp, '/feedback/inzicht/')
+        elif functie.rol == "MWW":
+            self.assert_is_redirect(resp, '/webwinkel/prototype/')
         else:
             self.assert_is_redirect(resp, '/functie/wissel-van-rol/')                               # pragma: no cover
 

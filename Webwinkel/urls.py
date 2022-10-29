@@ -15,6 +15,11 @@ urlpatterns = [
     path('prototype/',
          view_proto.PrototypeView.as_view(),
          name='prototype'),
+
+    # inschrijven
+    path('prototype/',
+         view_proto.PrototypeView.as_view(),
+         name='manager'),
 ]
 
 # end of file
