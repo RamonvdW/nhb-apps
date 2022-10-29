@@ -28,7 +28,6 @@ class TestFunctieCli(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = 1001
         ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 

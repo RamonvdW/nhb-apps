@@ -59,7 +59,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         ver.naam = "Noordelijke Club"
         ver.ver_nr = 1000
         ver.regio = regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 
@@ -161,6 +160,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         sec = Secretaris(vereniging=ver)
         sec.save()
         sec.sporters.add(sporter)
+        self.sec = sec
 
     def test_anon(self):
         # anon
@@ -173,6 +173,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp)
+
+        self.assertTrue(str(self.sec) != '')
 
     def test_bb(self):
         # login als BB
@@ -970,7 +972,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         ver.naam = "Extra Club"
         ver.ver_nr = 1099
         ver.regio = NhbRegio.objects.get(regio_nr=101)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         # maak de SEC, HWL en WL functies aan voor deze vereniging

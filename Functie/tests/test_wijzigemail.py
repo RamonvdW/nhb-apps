@@ -45,7 +45,6 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = regio_105
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 

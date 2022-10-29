@@ -77,7 +77,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.naam = "Zuidelijke Club"
         ver.ver_nr = "1111"
         ver.regio = self.regio_112
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver_112 = ver
 
@@ -86,7 +85,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver_101 = ver
 
@@ -164,7 +162,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.naam = "Kleine Club"
         ver.ver_nr = "1100"
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
     def _regioschutters_inschrijven(self):

@@ -25,7 +25,6 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 

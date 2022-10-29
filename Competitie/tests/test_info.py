@@ -29,7 +29,6 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = 1000
         ver.regio = regio
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)

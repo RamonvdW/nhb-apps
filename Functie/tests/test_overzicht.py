@@ -49,7 +49,6 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         sporter = Sporter()
@@ -82,7 +81,6 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         ver2.naam = "Extra Club"
         ver2.ver_nr = "1900"
         ver2.regio = NhbRegio.objects.get(regio_nr=112)
-        # secretaris kan nog niet ingevuld worden
         ver2.save()
 
         self.functie_hwl2 = maak_functie("HWL test 2", "HWL")

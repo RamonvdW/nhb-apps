@@ -58,7 +58,6 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver = ver
 

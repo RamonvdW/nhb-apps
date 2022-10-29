@@ -45,7 +45,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         self.functie_sec = maak_functie("SEC test", "SEC")
@@ -78,7 +77,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         ver2.naam = "Grote Club"
         ver2.ver_nr = "1001"
         ver2.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver2.save()
 
         self.functie_bko = maak_functie("BKO test", "BKO")

@@ -100,7 +100,6 @@ class TestSporterCli(E2EHelpers, TestCase):
         ver = NhbVereniging(
                     ver_nr=ver_nr,
                     naam="Grote Club",
-                    # secretaris kan nog niet ingevuld worden
                     regio=self.regio_111)
         ver.save()
 

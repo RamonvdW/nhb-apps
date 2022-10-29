@@ -208,7 +208,6 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         ver.plaats = "Boogstad"
         ver.ver_nr = 1000
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.ver = ver
 
@@ -461,7 +460,6 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         ver.plaats = "Grensstad"
         ver.ver_nr = 1100
         ver.regio = regio_116
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         sporter.bij_vereniging = ver
