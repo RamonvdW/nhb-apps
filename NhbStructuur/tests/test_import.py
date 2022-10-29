@@ -479,7 +479,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(33):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -502,7 +502,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                     datum="2018-01-01").save()
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -524,7 +524,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(sporterboog, 18, 5.678, None, "")
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(42):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)
@@ -551,7 +551,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.geen_wedstrijden = True
         ver.save()
 
-        with self.assert_max_queries(31):
+        with self.assert_max_queries(32):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_08_VER_MUTATIES,
                                         OPTION_SIM,

@@ -126,14 +126,14 @@ class TestFunctieCli(E2EHelpers, TestCase):
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
 
     def test_check_beheerders(self):
-        with self.assert_max_queries(51):
+        with self.assert_max_queries(52):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')        # geen foutmeldingen
 
         # koppel een account aan een functie, maar geen sporter
         self.functie_hwl.accounts.add(self.account_normaal)
 
-        with self.assert_max_queries(53):
+        with self.assert_max_queries(54):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: account heeft geen koppeling met NHB lid" in f2.getvalue())
@@ -154,7 +154,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
                     account=self.account_normaal)
         sporter.save()
 
-        with self.assert_max_queries(54):
+        with self.assert_max_queries(55):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen lid meer bij een vereniging" in f2.getvalue())
@@ -170,7 +170,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         sporter.bij_vereniging = ver
         sporter.save()
 
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen lid bij deze vereniging" in f2.getvalue())
@@ -180,7 +180,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         sporter.account = self.account_normaal
         sporter.save()
 
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
         self.assertFalse("LET OP:" in f2.getvalue())
@@ -192,7 +192,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         sporter.save()
         self.functie_hwl.accounts.clear()
 
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue('maar niet meer gekoppeld aan een functie:\n  [100042] Kees Pijlpunt' in f2.getvalue())
         self.assertFalse('LET OP: geen actief lid' in f2.getvalue())
@@ -201,7 +201,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         sporter.is_actief_lid = False
         sporter.save(update_fields=['is_actief_lid'])
 
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(56):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue('[100042] Kees Pijlpunt' in f2.getvalue())
         self.assertTrue('LET OP: geen actief lid' in f2.getvalue())
@@ -212,7 +212,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         sporter.is_actief_lid = True
         sporter.save(update_fields=['is_actief_lid'])
 
-        with self.assert_max_queries(53):
+        with self.assert_max_queries(54):
             f1, f2 = self.run_management_command('check_beheerders')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
