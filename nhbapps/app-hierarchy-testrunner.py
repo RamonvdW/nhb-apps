@@ -92,7 +92,7 @@ class HierarchyRunner(DiscoverRunner):
                 for dep in test.test_after:
                     if dep[-1] == '.':      # remove terminating dot used to avoid circular dependency false positives
                         dep = dep[:-1]
-                    if dep not in known_tests:
+                    if dep not in known_tests:      # pragma: no cover
                         warning = 'Unknown test_after dependency %s in %s' % (repr(dep), ref)
                         if warning not in reported_warnings:
                             reported_warnings.append(warning)
