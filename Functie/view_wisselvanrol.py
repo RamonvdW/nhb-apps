@@ -83,6 +83,8 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             volgorde = 4
         elif functie.rol == "MO":
             volgorde = 5
+        elif functie.rol == "MWW":
+            volgorde = 6
         elif functie.rol == "BKO":
             volgorde = 10  # 10
         elif functie.rol == "RKO":

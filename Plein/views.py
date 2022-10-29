@@ -115,6 +115,8 @@ class PleinView(View):
                     context['rol_is_mo'] = True
                 elif rol_nu == Rollen.ROL_MWZ:
                     context['rol_is_mwz'] = True
+                elif rol_nu == Rollen.ROL_MWW:
+                    context['rol_is_mww'] = True
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
