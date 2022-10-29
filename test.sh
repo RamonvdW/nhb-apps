@@ -202,8 +202,6 @@ kill $PID_WEBSIM1
 wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
 wait $PID_WEBSIM2 2>/dev/null
-kill $PID_WEBSIM3
-wait $PID_WEBSIM3 2>/dev/null
 
 ASK_LAUNCH=0
 COVERAGE_RED=0
