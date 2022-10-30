@@ -37,7 +37,7 @@ def maak_bondspas_regels(lid_nr, jaar):
     voorkeur = get_sporter_voorkeuren(sporter)
 
     regels.append(("lid_nr", str(sporter.lid_nr)))
-    regels.append(("WA_id", ''))    # sporter.wa_id            # TODO: beschikbaar krijgen uit CRM
+    regels.append(("WA_id", sporter.wa_id))
 
     regels.append(("Naam", sporter.volledige_naam()))
     regels.append(("Geboren", date_format(sporter.geboorte_datum, "j F Y")))
