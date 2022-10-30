@@ -131,7 +131,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        # een parallel competitie is noodzakelijk om corner-cases te raken
+        # een parallelle competitie is noodzakelijk om corner-cases te raken
         competities_aanmaken(jaar=2020)
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen

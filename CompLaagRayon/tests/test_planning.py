@@ -8,8 +8,9 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                KampioenschapSchutterBoog, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelcompetitieIndivKlasseLimiet,
-                               CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1)
+                               DeelcompetitieIndivKlasseLimiet, RegioCompetitieSchutterBoog,
+                               CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND,
+                               INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -116,6 +117,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
         self.lid_sporter = Sporter.objects.get(lid_nr=self.account_schutter.username)
+        self.lid_sporter2 = Sporter.objects.get(lid_nr=self.account_rcl101_18.username)
 
         self.boog_r = BoogType.objects.get(afkorting='R')
 
@@ -123,6 +125,11 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                        boogtype=self.boog_r,
                                        voor_wedstrijd=True)
         self.sporterboog.save()
+
+        self.sporterboog2 = SporterBoog(sporter=self.lid_sporter2,
+                                        boogtype=self.boog_r,
+                                        voor_wedstrijd=True)
+        self.sporterboog2.save()
 
         # creëer een competitie met deelcompetities
         competities_aanmaken(jaar=2019)
@@ -614,6 +621,56 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                                           'aanvang': '12:34',
                                           'nhbver_pk': self.nhbver_101.ver_nr})
         self.assert403(resp)
+
+    def test_alvast_afgemeld(self):
+
+        # maak een deelnemer aan die wel mee wilt doen met het RK
+        deelnemer = RegioCompetitieSchutterBoog(
+                                sporterboog=self.sporterboog,
+                                bij_vereniging=self.sporterboog.sporter.bij_vereniging,
+                                deelcompetitie=self.deelcomp_regio101_18,
+                                indiv_klasse=self.klasse_r,
+                                aantal_scores=6,
+                                inschrijf_voorkeur_rk_bk=True)
+        deelnemer.save()
+
+        # maak een deelnemer aan die alvast afgemeld is voor het RK
+        deelnemer2 = RegioCompetitieSchutterBoog(
+                                sporterboog=self.sporterboog2,
+                                bij_vereniging=self.sporterboog2.sporter.bij_vereniging,
+                                deelcompetitie=self.deelcomp_regio101_18,
+                                indiv_klasse=self.klasse_r,
+                                aantal_scores=6,
+                                inschrijf_voorkeur_rk_bk=False)
+        deelnemer2.save()
+
+        # RKO
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        url = self.url_lijst_rk % self.deelcomp_rayon1_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
+
+        # nu doorzetten naar RK fase
+        self.competitie_sluit_alle_regiocompetities(self.comp_18)
+        self.e2e_login_and_pass_otp(self.account_bko_18)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+        resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        self.assert_is_redirect_not_plein(resp)  # check for success
+
+        # laat de mutaties verwerken
+        self.verwerk_regiocomp_mutaties()
+
+        # controleer de 'deelname' instelling voor de KampioenschapSchutterBoog
+        kampioen = KampioenschapSchutterBoog.objects.get(sporterboog=self.sporterboog)
+        self.assertEqual(kampioen.deelname, DEELNAME_ONBEKEND)
+
+        kampioen2 = KampioenschapSchutterBoog.objects.get(sporterboog=self.sporterboog2)
+        self.assertEqual(kampioen2.deelname, DEELNAME_NEE)
 
     def test_lijst_rk(self):
         # RKO

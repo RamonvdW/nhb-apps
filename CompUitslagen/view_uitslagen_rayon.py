@@ -52,7 +52,7 @@ def get_sporter_rayon_nr(request):
 
 class UitslagenRayonIndivView(TemplateView):
 
-    """ Django class-based view voor de de uitslagen van de rayonkampioenschappen individueel """
+    """ Django class-based view voor de uitslagen van de rayonkampioenschappen individueel """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_RAYON_INDIV
@@ -236,8 +236,10 @@ class UitslagenRayonIndivView(TemplateView):
         klasse = -1
         limiet = 24
         curr_teller = None
-        toon_uitslag = False
         for deelnemer in deelnemers:
+            # deelnemer kan zijn:
+            #   is_lijst_rk == False --> RegioCompetitieSchutterBoog
+            #   is_lijst_rk == True  --> KampioenschapSchutterBoog
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 if klasse == -1:
@@ -269,6 +271,13 @@ class UitslagenRayonIndivView(TemplateView):
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
             deelnemer.geen_deelname_risico = deelnemer.sporterboog.sporter.bij_vereniging != deelnemer.bij_vereniging
+
+            if not is_lijst_rk:
+                # regio lijst
+                if not deelnemer.inschrijf_voorkeur_rk_bk:
+                    # zet alvast op "afgemeld"
+                    # deelnemer.deelname = DEELNAME_NEE       # wordt niet gebruikt?!
+                    deelnemer.geen_deelname = True
 
             if deelcomp_rk.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
