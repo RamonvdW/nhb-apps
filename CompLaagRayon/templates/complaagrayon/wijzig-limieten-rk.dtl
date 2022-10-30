@@ -26,10 +26,6 @@
         <div class="col s12">
             <h3 class="page-banner">RK limieten</h3>
             <p>De cut' instellen voor elke wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
-            <p>
-                <a class="btn-small btn-nhb-rood" href="{{ wiki_rk_schutters }}" target="_blank" rel="noopener noreferrer">
-                    <i class="material-icons-round left white-text">help_outline</i>Handleiding</a>
-            </p>
         </div>
     </div>
 

@@ -13,9 +13,9 @@ EXCLUDE+="|plein/andere-sites-van-de-nhb.dtl"
 EXCLUDE+="|logboek/common"
 EXCLUDE+="|competitie/tijdlijn"
 EXCLUDE+="|competitie/menu.dtl"
-EXCLUDE+="|handleiding/menu.dtl"
 EXCLUDE+="|site_layout.dtl"
 EXCLUDE+="|site_layout_minimaal.dtl"
+EXCLUDE+="|webwinkel/card_product.dtl"
 
 INCLUDES=$(grep '{% include' */templates/*/*dtl | grep -vE "$EXCLUDE")
 RES=$?

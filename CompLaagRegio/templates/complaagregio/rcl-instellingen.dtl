@@ -183,11 +183,6 @@
 
     <p class="center">De eerste twee instellingen kunnen alleen in <b>fase A</b> van de competitie aangepast worden;<br>de andere twee instellingen tot en met <b>fase C</b>.</p>
 
-    <p class="center">
-        <a class="btn-nhb-rood" href="{{ wiki_rcl_regio_instellingen_url }}" target="_blank" rel="noopener noreferrer">
-            <i class="material-icons-round left">help_outline</i>Handleiding</a>
-    </p>
-
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-rcl-instellingen" %}
 
 {% endblock %}

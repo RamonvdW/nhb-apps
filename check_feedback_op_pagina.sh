@@ -6,8 +6,8 @@
 
 # helper to check the uniqueness of the "op_pagina" for the feedback form
 
-DTL_INCLUDES=$(echo "/menu.dtl /andere-sites-van-de-nhb.dtl /site_layout.dtl /site_layout_minimaal.dtl /fout_403.dtl /fout_404.dtl /fout_500.dtl /competitie/tijdlijn.dtl /card.dtl /card_logo.dtl /card_nog-niet-beschikbaar /card_logo_nog-niet-beschikbaar /ga-naar-live-server.dtl" | tr ' ' '|')
-DTL_BEWUST_NIET=$(echo "/templates/email nhbapps/templates/snippets.dtl /plein-bezoeker.dtl /niet-ondersteund.dtl /feedback/ /tijdelijke-url- /Logboek/ /Handleiding/ /templates/plein/menu- /records_specifiek.dtl" | tr ' ' '|')
+DTL_INCLUDES=$(echo "/menu.dtl /andere-sites-van-de-nhb.dtl /site_layout.dtl /site_layout_minimaal.dtl /fout_403.dtl /fout_404.dtl /fout_500.dtl /competitie/tijdlijn.dtl /card.dtl /card_logo.dtl /card_nog-niet-beschikbaar /card_logo_nog-niet-beschikbaar /ga-naar-live-server.dtl /card_product.dtl" | tr ' ' '|')
+DTL_BEWUST_NIET=$(echo "/templates/email nhbapps/templates/snippets.dtl /plein-bezoeker.dtl /niet-ondersteund.dtl /feedback/ /tijdelijke-url- /Logboek/ /templates/plein/menu- /records_specifiek.dtl" | tr ' ' '|')
 
 DTL_FILES=$(find . -name \*.dtl | grep -vE "$DTL_BEWUST_NIET" | grep -vE "$DTL_INCLUDES")
 

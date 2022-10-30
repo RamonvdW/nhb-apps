@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.utils.formats import localize
@@ -15,7 +14,6 @@ from Competitie.models import (LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHOD
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
                                Competitie, DeelCompetitie)
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Handleiding.views import reverse_handleiding
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 import datetime
@@ -113,8 +111,6 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('CompLaagRegio:regio-instellingen',
                                          kwargs={'comp_pk': deelcomp.competitie.pk,
                                                  'regio_nr': deelcomp.nhb_regio.regio_nr})
-
-        context['wiki_rcl_regio_instellingen_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_RCL_INSTELLINGEN_REGIO)
 
         comp = deelcomp.competitie
 

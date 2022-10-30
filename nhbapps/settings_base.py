@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-10-29'
+SITE_VERSIE = '2022-10-30'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',
     'Functie.apps.FunctieConfig',
-    'Handleiding.apps.HandleidingConfig',
     'HistComp.apps.HistCompConfig',
     'Kalender.apps.KalenderConfig',
     'Logboek.apps.LogboekConfig',
@@ -375,54 +374,6 @@ SPEELSTERKTE_VOLGORDE = (
     ('Algemeen', 'Witte Pijl', 0),
     ('Algemeen', 'Zwarte Pijl', 0),
 )
-
-
-# pagina's van de handleiding
-HANDLEIDING_TOP = 'Hoofdpagina'
-HANDLEIDING_SEC = 'Handleiding_Secretaris'
-HANDLEIDING_WL = 'Handleiding_Wedstrijdleider'
-HANDLEIDING_HWL = 'Handleiding_Hoofdwedstrijdleider'
-HANDLEIDING_RCL = 'Handleiding_RCL'
-HANDLEIDING_PLANNING_REGIO = 'Planning_Regio'
-HANDLEIDING_RKO = 'Handleiding_RKO'
-HANDLEIDING_BKO = 'Handleiding_BKO'
-HANDLEIDING_BB = 'Handleiding_BB'
-HANDLEIDING_MO = 'Handleiding_MO'
-HANDLEIDING_2FA = 'Twee-factor_authenticatie'
-HANDLEIDING_ROLLEN = 'Rollen'
-HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
-HANDLEIDING_SPORTERBOOG = 'Sporter-boog'
-HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
-HANDLEIDING_CLUSTERS = 'Clusters'
-HANDLEIDING_RK_SELECTIE = 'RK_selectie'
-HANDLEIDING_RCL_INSTELLINGEN_REGIO = 'RCL_instellingen_regio'
-HANDLEIDING_POULES = 'Poules'
-HANDLEIDING_WEDSTRIJDKALENDER_HWL = 'Wedstrijdkalender_HWL'
-
-HANDLEIDING_PAGINAS = [
-    HANDLEIDING_TOP,
-    HANDLEIDING_SEC,
-    HANDLEIDING_WL,
-    HANDLEIDING_HWL,
-    HANDLEIDING_RCL,
-    HANDLEIDING_RKO,
-    HANDLEIDING_BKO,
-    HANDLEIDING_BB,
-    HANDLEIDING_MO,
-    HANDLEIDING_2FA,
-    HANDLEIDING_ROLLEN,
-    HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,
-    HANDLEIDING_SPORTERBOOG,
-    HANDLEIDING_PLANNING_REGIO,
-    HANDLEIDING_INSCHRIJFMETHODES,
-    HANDLEIDING_CLUSTERS,
-    HANDLEIDING_RK_SELECTIE,
-    HANDLEIDING_RCL_INSTELLINGEN_REGIO,
-    HANDLEIDING_POULES,
-    HANDLEIDING_WEDSTRIJDKALENDER_HWL,
-    # pagina's van de handleiding die intern gerefereerd worden
-    'Koppelen_beheerders'
-]
 
 
 # logging to syslog

@@ -25,10 +25,6 @@
                 <p>Dit kan om praktische redenen nodig zijn in jouw regio, bijvoorbeeld in verband met onredelijke reistijden.</p>
 
                 <p>Bij gebruik van clusters wordt voor de regiocompetitie voor elk cluster een aparte wedstrijdplanning gemaakt.<br>De Indoor en 25m 1pijl competities hebben onafhankelijke clusters.</p>
-
-                <p>Handleiding: <a class="btn-nhb-rood" href="{{ handleiding_clusters_url }}" target="_blank" rel="noopener noreferrer">
-                    <i class="material-icons-round white-text left">help_outline</i>Clusters</a>
-                </p>
             </div>
         </div>
     </div>

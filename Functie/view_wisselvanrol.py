@@ -16,7 +16,6 @@ from Functie.operations import account_needs_vhpg
 from Functie.rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
                          rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_evalueer_opnieuw)
-from Handleiding.views import reverse_handleiding
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
@@ -331,15 +330,6 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         else:
             # tweede factor is al gekoppeld, maar misschien nog niet gecontroleerd
             context['show_otp_controle'] = not account_rechten_is_otp_verified(self.request)
-
-        if context['show_vhpg']:
-            context['show_beheerder_intro'] = True
-
-        # TODO: handleidingen vervangen door link naar pdf
-        context['wiki_2fa_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_2FA)
-        context['wiki_rollen'] = reverse_handleiding(self.request, settings.HANDLEIDING_ROLLEN)
-        context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(self.request,
-                                                                      settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
         # zoek de rollen (eigen + helpen)
         context['eigen_rollen'], hierarchy = self._get_functies_eigen()

@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.db.models import Count
@@ -13,7 +12,6 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import LAAG_REGIO, DeelCompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Handleiding.views import reverse_handleiding
 from Plein.menu import menu_dynamics
 
 
@@ -104,8 +102,6 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         if not readonly:
             context['url_nieuwe_poule'] = reverse('CompLaagRegio:regio-poules',
                                                   kwargs={'deelcomp_pk': deelcomp.pk})
-
-        context['wiki_rcl_poules_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_POULES)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

@@ -10,7 +10,6 @@ from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from Bestel.mandje import eval_mandje_inhoud
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
-from Handleiding.views import reverse_handleiding
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 
@@ -20,17 +19,6 @@ TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'     # niet ingelogd
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'   # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
-
-ROL2HANDLEIDING_PAGINA = {
-    Rollen.ROL_BB: settings.HANDLEIDING_BB,
-    Rollen.ROL_MO: settings.HANDLEIDING_MO,
-    Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
-    Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
-    Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
-    Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
-    Rollen.ROL_WL:  settings.HANDLEIDING_WL,
-    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
-}
 
 
 def is_browser_supported(request):

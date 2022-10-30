@@ -35,7 +35,6 @@ urlpatterns = [
     path('bondscompetities/',               include('Competitie.urls')),
     path('functie/',                        include('Functie.urls')),
     path('feedback/',                       include('Feedback.urls')),
-    path('handleiding/',                    include('Handleiding.urls')),
     path('kalender/',                       include('Kalender.urls')),
     path('logboek/',                        include('Logboek.urls')),
     path('opleidingen/',                    include('Opleidingen.urls')),

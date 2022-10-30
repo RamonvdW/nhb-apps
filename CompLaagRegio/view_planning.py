@@ -95,8 +95,6 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
     def _get_methode_1(self, context, deelcomp):
         self.template_name = self.template2
 
-        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
-
         # zoek de regio planning op
         regio_ronde = None
         for ronde in (DeelcompetitieRonde
@@ -160,7 +158,6 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
     def _get_methode_2_3(self, context, deelcomp, mag_wijzigen):
         self.template_name = self.template1
-        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
 
         rondes = planning_sorteer_weeknummers(
                                 DeelcompetitieRonde
@@ -346,8 +343,6 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
             context['url_nieuwe_week'] = reverse('CompLaagRegio:regio-cluster-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk,
                                                          'cluster_pk': cluster.pk})
-
-        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
 
         comp = deelcomp.competitie
 
