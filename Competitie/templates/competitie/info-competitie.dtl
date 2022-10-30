@@ -274,6 +274,9 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                         <td class="center">
                             <img src="{% static 'plein/blazoen_40cm_330x328.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
                         </td>
+                        <td class="center">
+                            <img src="{% static 'plein/blazoen_compound_4spot_271x271.jpg' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="Compound 4-spot blazoen" >
+                        </td>
                     </tr>
                     <tr>
                         <td class="center">
@@ -282,10 +285,13 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                         <td class="center">
                             <code style="font-size:12px">het 40cm / 60cm blazoen</code>
                         </td>
+                        <td class="center">
+                            <code style="font-size:12px">het Compound 4-spot blazoen</code>
+                        </td>
                     </tr>
                 </table>
 
-                <p>Het blazoen rechts heeft 10 scorende ringen van 1 (buitenste) tot 10 (binnenste) punten.<br>Het DT heeft dezelfde maat als de binnenste 5 ringen van het 40cm blazoen.</p>
+                <p>Het middelste blazoen heeft 10 scorende ringen van 1 (buitenste) tot 10 (binnenste) punten.<br>De andere twee blazoenen hebben dezelfde maat als de binnenste 5 ringen van het 40cm blazoen.</p>
             </div>
         </div>
     </div>
