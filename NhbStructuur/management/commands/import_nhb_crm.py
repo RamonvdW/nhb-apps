@@ -849,6 +849,8 @@ class Command(BaseCommand):
              'longitude',
              'blocked':             bool
              'wa':                  string
+             'educations':          lijst van opleidingen
+             'skill_level':         lijst van speelsterktes
         """
         for member in data:
             is_valid = True
@@ -1007,8 +1009,10 @@ class Command(BaseCommand):
 
             # try:
             #     lid_edu = member['educations']
-            #     print('lid: %s, edu: %s' % (lid_nr, repr(lid_edu)))
-            #     #"educations": [
+            #     print('lid: %s, edu:' % lid_nr)
+            #     for edu in lid_edu:
+            #         print('        code: %s name: %s' % (repr(edu['code']), repr(edu['name'])))
+            #     # "educations": [
             #     #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
             #     #    {"code": "031", "name": "WEDSTRIJDLEIDER INDOOR\/OUTDOOR", "date_start": "1990-01-01", "date_stop": "1990-01-01"}]
             # except KeyError:
