@@ -74,10 +74,13 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
             {'fields': ('wedstrijd_geslacht_gekozen',
                         'wedstrijd_geslacht'),
              }),
+        ('Para',
+            {'fields': ('para_met_rolstoel',
+                        'opmerking_para_sporter',)
+             }),
         ('Overig',
             {'fields': ('voorkeur_eigen_blazoen',
-                        'voorkeur_meedoen_competitie',
-                        'opmerking_para_sporter')
+                        'voorkeur_meedoen_competitie')
              }),
     )
 
