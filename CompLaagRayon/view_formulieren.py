@@ -157,7 +157,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
                 try:
                     voorkeuren = lid2voorkeuren[deelnemer.lid_nr]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     pass
                 else:
                     if voorkeuren.para_met_rolstoel:
@@ -213,7 +213,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
                     try:
                         voorkeuren = lid2voorkeuren[sporter.lid_nr]
-                    except KeyError:
+                    except KeyError:        # pragma: no cover
                         pass
                     else:
                         if voorkeuren.para_met_rolstoel or len(voorkeuren.opmerking_para_sporter) > 1:
@@ -376,7 +376,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             para_notities = ''
             try:
                 voorkeuren = lid2voorkeuren[deelnemer.sporterboog.sporter.lid_nr]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 pass
             else:
                 if voorkeuren.para_met_rolstoel:
@@ -599,7 +599,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                 para_mark = False
                 try:
                     voorkeuren = lid2voorkeuren[sporter.lid_nr]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     pass
                 else:
                     if voorkeuren.para_met_rolstoel or voorkeuren.opmerking_para_sporter:
@@ -723,7 +723,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             para_notities = ''
             try:
                 voorkeuren = lid2voorkeuren[sporter.lid_nr]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 pass
             else:
                 if voorkeuren.para_met_rolstoel:
