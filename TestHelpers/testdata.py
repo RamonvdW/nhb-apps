@@ -402,24 +402,24 @@ class TestData(object):
             (20, 'M', 'Jun20b', 'LB', False),
             (21, 'V', 'Sen21',  'R+C',  False),         # schiet twee bogen
             (21, 'V', 'Sen21b', 'C',  False),
-            (22, 'M', 'Sen22',  'R',  False),
+            (22, 'M', 'Sen22',  'R*1',  False),         # *1 = para
             (22, 'M', 'Sen22b', 'C',  False),
             (22, 'M', 'Sen23',  'r',  False),           # kleine letter: geen voorkeur voor de competitie
-            (31, 'V', 'Sen31',  'R',  False),
+            (31, 'V', 'Sen31',  'R*1',  False),         # *1 = para
             (32, 'M', 'Sen32',  'C',  False),
             (32, 'M', 'Sen32b', 'BB', True),            # account
             (33, 'V', 'Sen33',  'R',  False),
             (33, 'V', 'Sen33b', 'BB', False),
             (34, 'M', 'Sen34',  'LB', True),            # Sen34 = HWL
             (35, 'V', 'Sen35',  'R+C+BB',  False),      # schiet 3 bogen
-            (36, 'M', 'Sen36',  'C',  False),
+            (36, 'M', 'Sen36',  'C*1',  False),         # *1 = para
             (36, 'M', 'Sen36b', 'BB', False),
-            (37, 'V', 'Sen37',  'R',  False),
+            (37, 'V', 'Sen37',  'R*2',  False),         # *2 = para
             (38, 'M', 'Sen38',  'LB', False),
             (39, 'V', 'Sen39',  'R',  True),            # Sen39 = BKO/RKO/RCL
             (40, 'M', 'Sen40',  'C+FSC',  False),
             (41, 'V', 'Sen41',  'R',  False),
-            (42, 'M', 'Sen42',  'R',  False),
+            (42, 'M', 'Sen42',  'R*2',  False),         # *2 = para
             (42, 'M', 'Sen42b', 'C',  False),
             (49, 'V', 'Sen49',  'R',  False),
             (49, 'V', 'Sen49b', 'BB+BBR', False),
@@ -583,6 +583,15 @@ class TestData(object):
                                 sporter=sporter)
 
             for gewenst_boogtype in gewenste_boogtypen:
+                if gewenst_boogtype[-2:] in ('*1', '*2'):
+                    voorkeuren.opmerking_para_sporter = 'Para opmerking van redelijke lengte om mee te testen'
+
+                    if gewenst_boogtype[-2:] == '*1':
+                        voorkeuren.para_met_rolstoel = True
+
+                    # hak de laatste twee tekens eraf
+                    gewenst_boogtype = gewenst_boogtype[:-2]
+
                 if gewenst_boogtype.islower():
                     voorkeuren.voorkeur_meedoen_competitie = False
                     gewenst_boogtype = gewenst_boogtype.upper()
@@ -590,6 +599,7 @@ class TestData(object):
                 # alle junioren willen een eigen blazoen
                 if gewenst_boogtype == 'R' and sporter.voornaam.startswith('Jun'):
                     voorkeuren.voorkeur_eigen_blazoen = True
+            # for
 
             bulk_voorkeuren.append(voorkeuren)
             if len(bulk_voorkeuren) > 100:
@@ -604,8 +614,14 @@ class TestData(object):
                                     # voor_wedstrijd=False
                                     boogtype=boogtype)
 
-                if boogtype.afkorting in gewenste_boogtypen:
-                    sporterboog.voor_wedstrijd = True
+                for gewenst_boogtype in gewenste_boogtypen:
+                    if gewenst_boogtype[-2:] in ('*1', '*2'):
+                        # hak de laatste twee tekens eraf
+                        gewenst_boogtype = gewenst_boogtype[:-2]
+
+                    if boogtype.afkorting == gewenst_boogtype:
+                        sporterboog.voor_wedstrijd = True
+                # for
 
                 bulk_sporter.append(sporterboog)
 
@@ -713,7 +729,8 @@ class TestData(object):
         for sporterboog in (SporterBoog
                             .objects
                             .filter(sporter__bij_vereniging__ver_nr=ver_nr,
-                                    voor_wedstrijd=True)):
+                                    voor_wedstrijd=True)
+                            .order_by('pk')):
             # even pk get an AG
             if sporterboog.pk % 1 == 0:                                             # pragma: no branch
                 volgende_ag = 6000 if volgende_ag > 9800 else volgende_ag + 25
