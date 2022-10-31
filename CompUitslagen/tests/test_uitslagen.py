@@ -241,6 +241,8 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie niet gevonden')
 
     def test_rayon_indiv(self):
+        self.testdata.geef_regio_deelnemers_genoeg_scores_voor_rk(18)
+
         url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -275,6 +277,43 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_rayon_n % (self.testdata.comp18.pk, 'R', '0')
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
+
+        # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
+        zet_competitie_fase(self.testdata.comp18, 'G')
+
+        url = self.url_doorzetten_rk % self.testdata.comp18.pk
+        resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+        self.verwerk_regiocomp_mutaties()
+
+        comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
+        comp.bepaal_fase()
+        self.assertEqual(comp.fase, 'J')
+
+        # ophalen in fase J geeft "bevestig tot datum"
+        url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
+
+        from Competitie.models import KampioenschapSchutterBoog
+        print('aantal KampioenschapSchutterBoog: %s' % KampioenschapSchutterBoog.objects.count())
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp18.pk
+        resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
+
 
     def test_rayon_teams(self):
         url = self.url_uitslagen_rayon_teams % (self.testdata.comp18.pk, 'R2')
@@ -339,6 +378,39 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R2', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-teams.dtl', 'plein/site_layout.dtl'))
+
+        # wissel naar een HWL
+        self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])
+        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R2', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-teams.dtl', 'plein/site_layout.dtl'))
+
+        # wissel naar een sporter
+        self.e2e_wisselnaarrol_sporter()
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R2', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-teams.dtl', 'plein/site_layout.dtl'))
+
+        # corner case: sporter is niet meer actief
+        sporter = self.testdata.account_hwl[self.ver_nr].sporter_set.all()[0]
+        sporter.is_actief_lid = False
+        sporter.save(update_fields=['is_actief_lid'])
 
         url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R2', 1)
         with self.assert_max_queries(20):
