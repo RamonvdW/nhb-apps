@@ -211,7 +211,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
-        # regio 100 is valide maar heeft geen deelcompetitie
+        # regio 100 is valide, maar heeft geen deelcompetitie
         url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'R', 'alle', 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -300,9 +300,6 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
-        from Competitie.models import KampioenschapSchutterBoog
-        print('aantal KampioenschapSchutterBoog: %s' % KampioenschapSchutterBoog.objects.count())
-
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp18.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
@@ -313,7 +310,6 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
-
 
     def test_rayon_teams(self):
         url = self.url_uitslagen_rayon_teams % (self.testdata.comp18.pk, 'R2')
@@ -459,7 +455,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
-        # als je de pagina ophaalt als een ingelogd lid, dan krijg je je eigen vereniging
+        # als je de pagina ophaalt als een ingelogd lid, dan wordt jouw vereniging getoond
         sporter = self.testdata.ver_sporters_met_account[self.ver_nr][0]
         self.e2e_login(sporter.account)
 
@@ -471,7 +467,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
-        # tenzij je geen lid meer bent bij een vereniging
+        # corner-case: geen lid meer bent bij een vereniging
         sporter.is_actief_lid = False
         sporter.save()
         with self.assert_max_queries(20):

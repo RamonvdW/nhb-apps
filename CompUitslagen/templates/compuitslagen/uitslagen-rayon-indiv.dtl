@@ -215,7 +215,7 @@
                         {% else %}
                             <td></td>
                         {% endif %}
-                        <td colspan="2"><i class="grey-text">volgt later</i><!-- RK scores --></td>
+                        <td><i class="grey-text">volgt later</i><!-- RK scores --></td><td>&nbsp;</td>
                     {% endif %}
                 </tr>
 
