@@ -57,7 +57,7 @@
 
                     {% elif banner %}
 
-                        <div class="nhb-card-vanaf" style="top:revert; bottom:40px; background-color: #03628c; padding:3px; opacity:0.9">{{ banner }}</div>
+                        <div class="nhb-card-vanaf" style="top:unset; bottom:40px; background-color: #03628c; padding:3px; opacity:0.9">{{ banner }}</div>
 
                     {% endif %}
 
