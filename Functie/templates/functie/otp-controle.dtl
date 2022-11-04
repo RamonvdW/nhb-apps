@@ -59,7 +59,7 @@
 
     <!-- blauw balk met wit informatie veld -->
     <div class="row-nhb-blauw">
-        <div class="col s12">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="white" style="padding:10px">
                 <p>Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel).</p>
 
