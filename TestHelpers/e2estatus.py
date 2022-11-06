@@ -26,7 +26,6 @@ included_templates = (
     'competitie/tijdlijn.dtl',
     'snippets.dtl',
     'email_mailer/email_basis.dtl',
-    'webwinkel/card_product.dtl'
 )
 
 # end of file

@@ -86,7 +86,7 @@ class Command(BaseCommand):
                     self.stdout.write('[INFO] Foto %s was al gekoppeld als omslagfoto' % repr(locatie))
             else:
                 # maak een thumbnail
-                print('[INFO] Maak thumbnail %s' % repr(locatie_thumb))
+                self.stdout.write('[INFO] Maak thumbnail %s' % repr(locatie_thumb))
                 im = Image.open(foto_pad)
                 im.thumbnail(THUMB_SIZE)
                 im.save(thumb_pad)

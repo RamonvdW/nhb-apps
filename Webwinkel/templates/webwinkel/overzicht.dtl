@@ -98,40 +98,6 @@
     </div>
 
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Prototype kaartjes</h4>
-        </div>
-    </div>
-
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
-        <div class="col s12">
-
-            {% static 'plein/logo_chrome_256x256.png' as img_src %}
-            {% url 'Webwinkel:product' 1 as card_url %}
-            {% include 'webwinkel/card_product.dtl' with title="Product 1" img=img_src prijs="10,00" url=card_url %}
-
-            {% url 'Webwinkel:product' '001' as card_url %}
-            {% static 'plein/logo_hero_512x512.png' as img_src %}
-            {% include 'webwinkel/card_product.dtl' with title="Product 2" img=img_src banner="Nog maar 3 beschikbaar" prijs="5,00" url=card_url %}
-
-            {% url 'Webwinkel:product' 5 as card_url %}
-            {% static 'plein/logo_freeotp_230x230.png' as img_src %}
-            {% include 'webwinkel/card_product.dtl' with title="Product 3" img=img_src prijs="10,00" url=card_url %}
-
-            {% url 'Webwinkel:product' 2 as card_url %}
-            {% static 'plein/indoor_sfeer_1.jpg' as img_src %}
-            {% include 'webwinkel/card_product.dtl' with title="Special" img=img_src banner="Nog maar 1 beschikbaar" prijs="50,00" url=card_url %}
-
-            {% url 'Webwinkel:product' 'donotcare' as card_url %}
-            {% static 'plein/logo_nhb_192x192.png' as img_src %}
-            {% include 'webwinkel/card_product.dtl' with title="Product 5" img=img_src uitverkocht=1 prijs="10,00" url=card_url %}
-
-        </div>
-    </div>
-
     {% include 'feedback/sidebar.dtl' with op_pagina="webwinkel-overzicht" %}
 
 {% endblock %}

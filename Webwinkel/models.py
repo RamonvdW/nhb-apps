@@ -6,10 +6,36 @@
 
 from django.db import models
 from django.templatetags.static import static
+from Account.models import Account
 from decimal import Decimal
 
 
 THUMB_SIZE = (96, 96)
+
+KEUZE_STATUS_RESERVERING_MANDJE = 'M'        # in mandje; moet nog omgezet worden in een bestelling
+KEUZE_STATUS_RESERVERING_BESTELD = 'B'       # besteld; moet nog betaald worden
+KEUZE_STATUS_BACKOFFICE = 'BO'               # betaling voldaan; ligt bij backoffice voor afhandeling
+# FUTURE: KEUZE_STATUS_VERSTUURD        # afgehandeld door backoffice en verstuurd
+# FUTURE: track en trace code voor in de mail naar koper
+
+
+KEUZE_STATUS_CHOICES = (
+    (KEUZE_STATUS_RESERVERING_MANDJE, "Reservering"),
+    (KEUZE_STATUS_RESERVERING_BESTELD, "Besteld"),
+    (KEUZE_STATUS_BACKOFFICE, "Betaald")
+)
+
+KEUZE_STATUS_TO_STR = {
+    KEUZE_STATUS_RESERVERING_MANDJE: 'Gereserveerd, in mandje',
+    KEUZE_STATUS_RESERVERING_BESTELD: 'Gereserveerd, wacht op betaling',
+    KEUZE_STATUS_BACKOFFICE: 'Betaald; doorgegeven aan backoffice voor afhandeling'
+}
+
+KEUZE_STATUS_TO_SHORT_STR = {
+    KEUZE_STATUS_RESERVERING_MANDJE: 'In mandje',
+    KEUZE_STATUS_RESERVERING_BESTELD: 'Besteld',
+    KEUZE_STATUS_BACKOFFICE: 'Betaald'
+}
 
 
 class WebwinkelFoto(models.Model):
@@ -73,7 +99,7 @@ class WebwinkelProduct(models.Model):
     eenheid = models.CharField(max_length=50, default='', blank=True)
 
     # de prijs voor dit product
-    prijs_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))     # max 9999,99
+    prijs_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))        # max 9999,99
 
     # wordt dit product gemaakt als het besteld wordt?
     onbeperkte_voorraad = models.BooleanField(default=False)
@@ -93,5 +119,43 @@ class WebwinkelProduct(models.Model):
         verbose_name = "Webwinkel product"
         verbose_name_plural = "Webwinkel producten"
 
+
+class WebwinkelKeuze(models.Model):
+    """ Een type product uit de webwinkel gekozen voor in het mandje en later bestelling """
+
+    # wanneer is dit record aangemaakt?
+    wanneer = models.DateTimeField()
+
+    # status van deze keuze: in het mandje, bestelling, betaald
+    status = models.CharField(max_length=2, choices=KEUZE_STATUS_CHOICES,
+                              default=KEUZE_STATUS_RESERVERING_MANDJE)
+
+    # wie is de koper?
+    # (BestelProduct verwijst naar dit record)
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT)
+
+    # om welk product gaat het
+    product = models.ForeignKey(WebwinkelProduct, on_delete=models.PROTECT)
+
+    # aantal producten wat gekozen is
+    aantal = models.PositiveSmallIntegerField(default=1)
+
+    # TODO: ondersteun kortingen
+
+    # hoeveel moet er betaald worden?
+    totaal_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))       # max 9999,99
+
+    # hoeveel is ontvangen?
+    # (wordt ingevuld als de bestelling volledig betaald is)
+    ontvangen_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
+
+    # log van bestelling, betalingen en eventuele wijzigingen
+    log = models.TextField(blank=True)
+
+    def korte_beschrijving(self):
+        return "%s x %s" % (self.aantal, self.product.omslag_titel)
+
+    def __str__(self):
+        return self.korte_beschrijving()
 
 # end of file

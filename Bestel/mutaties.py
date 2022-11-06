@@ -6,10 +6,11 @@
 
 from django.conf import settings
 from Bestel.models import (BestelMutatie, Bestelling,
-                           BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
-                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN)
+                           BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
+                           BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
+                           BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
+                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
+                           BESTELLING_STATUS_WACHT_OP_BETALING)
 from Overig.background_sync import BackgroundSync
 import time
 
@@ -45,6 +46,22 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving, snel):
                                     code=BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN,
                                     account=account,
                                     wedstrijd_inschrijving=inschrijving,
+                                    is_verwerkt=False)
+    mutatie.save()
+
+    if is_created:                                          # pragma: no branch
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_webwinkel_keuze(account, keuze, snel):
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                    code=BESTEL_MUTATIE_WEBWINKEL_KEUZE,
+                                    account=account,
+                                    webwinkel_keuze=keuze,
                                     is_verwerkt=False)
     mutatie.save()
 

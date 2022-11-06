@@ -6,17 +6,21 @@
 
 from django.http import Http404
 from django.urls import reverse
-from django.utils import formats
+from django.utils import formats, timezone
+from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Bestel.mandje import mandje_tel_inhoud
+from Bestel.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
-from Webwinkel.models import WebwinkelProduct
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
 
 TEMPLATE_WEBWINKEL_OVERZICHT = 'webwinkel/overzicht.dtl'
 TEMPLATE_WEBWINKEL_PRODUCT = 'webwinkel/product.dtl'
+TEMPLATE_WEBWINKEL_TOEGEVOEGD_AAN_MANDJE = 'webwinkel/toegevoegd-aan-mandje.dtl'
 
 
 class OverzichtView(UserPassesTestMixin, TemplateView):
@@ -65,6 +69,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
         # for
 
+        context['menu_toon_mandje'] = True
+
         context['kruimels'] = (
             (None, 'Webwinkel'),
         )
@@ -88,6 +94,7 @@ class ProductView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # TODO: elke gebruiker mag hier gebruik van maken
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu == Rollen.ROL_MWW
 
@@ -154,6 +161,8 @@ class ProductView(UserPassesTestMixin, TemplateView):
 
         context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
 
+        context['menu_toon_mandje'] = True
+
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
             (None, 'Product')
@@ -187,7 +196,49 @@ class ProductView(UserPassesTestMixin, TemplateView):
         except (ValueError, TypeError):
             raise Http404('Foutieve parameter')
 
-        print('aantal:', repr(aantal))
+        account_koper = request.user
+        now = timezone.now()
+        totaal_euro = product.prijs_euro * aantal
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] %s producten toegevoegd aan het mandje van %s\n" % (stamp_str,
+                                                                        aantal,
+                                                                        account_koper.get_account_full_name())
+
+        keuze = WebwinkelKeuze(
+                        wanneer=now,
+                        koper=account_koper,
+                        product=product,
+                        aantal=aantal,
+                        totaal_euro=totaal_euro,
+                        log=msg)
+        keuze.save()
+
+        # zet dit verzoek door naar de achtergrondtaak
+        snel = str(request.POST.get('snel', ''))[:1]
+        bestel_mutatieverzoek_webwinkel_keuze(account_koper, keuze, snel == '1')
+
+        mandje_tel_inhoud(self.request)
+
+        # geeft de gebruiker een pagina om naar het mandje te gaan of verder te winkelen
+        context = dict()
+
+        url_overzicht = reverse('Webwinkel:overzicht')
+        url_product = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+
+        context['menu_toon_mandje'] = True
+        context['url_verder'] = url_overzicht
+        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+
+        context['kruimels'] = (
+            (url_overzicht, 'Webwinkel'),
+            (url_product, 'Product'),
+            (None, 'Toegevoegd aan mandje')
+        )
+
+        menu_dynamics(self.request, context)
+
+        return render(request, TEMPLATE_WEBWINKEL_TOEGEVOEGD_AAN_MANDJE, context)
 
 
 # end of file
