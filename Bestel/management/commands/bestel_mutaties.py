@@ -22,13 +22,14 @@ from Bestel.models import (BestelProduct, BestelMandje,
                            Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
                            BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
-                           BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
+                           BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
+                           BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
                            BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
+from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering)
 from Mailer.operations import mailer_queue_email, render_email_template
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
@@ -327,6 +328,30 @@ class Command(BaseCommand):
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
+    def _verwerk_mutatie_webwinkel_keuze(self, mutatie):
+        mandje = self._get_mandje(mutatie)
+        if mandje:                                  # pragma: no branch
+            webwinkel_keuze = mutatie.webwinkel_keuze
+
+            prijs_euro = webwinkel_plug_reserveren(webwinkel_keuze)
+
+            # maak een product regel aan voor de bestelling
+            product = BestelProduct(
+                            webwinkel_keuze=webwinkel_keuze,
+                            prijs_euro=prijs_euro)
+            product.save()
+
+            # leg het product in het mandje
+            mandje.producten.add(product)
+
+            # TODO: kijk of er automatische kortingen zijn die toegepast kunnen worden
+            # wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
+
+            # bereken het totaal opnieuw
+            mandje.bepaal_totaalprijs_opnieuw()
+        else:
+            self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
+
     def _verwerk_mutatie_verwijder(self, mutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
 
@@ -360,6 +385,23 @@ class Command(BaseCommand):
                     # inschrijving.delete()     # geeft db integratie error i.v.m. referenties die nog ergens bestaan
 
                     handled = True
+
+                elif product.webwinkel_keuze:
+                    mandje.producten.remove(product)
+
+                    webwinkel_keuze = product.webwinkel_keuze
+
+                    webwinkel_plugin_verwijder_reservering(self.stdout, webwinkel_keuze)
+
+                    mutatie.webwinkel_keuze = None
+                    mutatie.product = None
+                    mutatie.save()
+
+                    # verwijder het BestelProduct, dan verdwijnt deze ook uit het mandje
+                    product.delete()
+
+                    handled = True
+
                 else:
                     self.stderr.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
                                         product.pk, mandje.pk))
@@ -673,6 +715,10 @@ class Command(BaseCommand):
         if code == BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
             self._verwerk_mutatie_wedstrijd_inschrijven(mutatie)
+
+        elif code == BESTEL_MUTATIE_WEBWINKEL_KEUZE:
+            self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
+            self._verwerk_mutatie_webwinkel_keuze(mutatie)
 
         elif code == BESTEL_MUTATIE_VERWIJDER:
             self.stdout.write('[INFO] Verwerk mutatie %s: verwijder product uit mandje' % mutatie.pk)

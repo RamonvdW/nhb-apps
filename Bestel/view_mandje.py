@@ -160,6 +160,15 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         ontvanger2product_pks[ver_nr].append(product.pk)
                     except KeyError:
                         ontvanger2product_pks[ver_nr] = [product.pk]
+
+                elif product.webwinkel_keuze:
+                    webwinkel_keuze = product.webwinkel_keuze
+
+                    tup = ('Product', '%s' % webwinkel_keuze.korte_beschrijving())
+                    beschrijving.append(tup)
+
+                    controleer_euro += product.prijs_euro
+
                 else:
                     tup = ('Fout', 'Onbekend product')
                     beschrijving.append(tup)

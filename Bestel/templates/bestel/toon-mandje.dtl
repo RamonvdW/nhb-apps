@@ -45,7 +45,33 @@
         </div>
     </div>
 
-    {% if not mandje_is_leeg %}
+
+    {% if mandje_is_leeg %}
+
+        <!-- toon een paar keuzes om verder te gaan -->
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                {% url 'Plein:plein' as card_url %}
+                {% include 'plein/card.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
+
+                <!-- wedstrijdkalender -->
+                {% url 'Kalender:landing-page' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+
+                <!-- TODO: toon opleidingen -->
+
+                <!-- webwinkel -->
+                {% url 'Webwinkel:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+
+            </div>
+        </div>
+
+
+    {% else %}
 
         <!-- blauwe balk met dialoog venster -->
         <div class="row-nhb-blauw">

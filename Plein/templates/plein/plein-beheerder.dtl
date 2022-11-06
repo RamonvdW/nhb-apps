@@ -39,10 +39,8 @@
             {% endif %}
 
             <!-- webwinkel -->
-            {% if rol_is_mww %}
-                {% url 'Webwinkel:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
-            {% endif %}
+            {% url 'Webwinkel:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
 
             <!-- opleidingen -->
             {% if rol_is_mo %}

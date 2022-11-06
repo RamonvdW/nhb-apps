@@ -32,14 +32,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu = None
-
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_MWW
+        return self.request.user.is_authenticated
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -88,15 +83,9 @@ class ProductView(UserPassesTestMixin, TemplateView):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu = None
-
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # TODO: elke gebruiker mag hier gebruik van maken
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_MWW
+        return self.request.user.is_authenticated
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

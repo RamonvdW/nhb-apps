@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module levert functionaliteit voor de Bestel applicatie met kennis van de Kalender, zoals kortingen. """
+""" Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de Wedstrijden, zoals kortingen. """
 
 from django.utils import timezone
 from Wedstrijden.models import (WedstrijdKorting, WedstrijdInschrijving,
