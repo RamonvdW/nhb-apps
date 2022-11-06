@@ -39,7 +39,6 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver = ver
 
@@ -414,7 +413,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
 
     def test_sec(self):
-        # lid dat zich registreert is secretaris van een vereniging
+        # lid dat zich registreert, is secretaris van een vereniging
         # en wordt meteen gekoppeld aan de SEC rol
 
         Secretaris(

@@ -50,7 +50,6 @@ class TestPlein(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         self.functie_sec = maak_functie('Secretaris vereniging 1000', 'SEC')

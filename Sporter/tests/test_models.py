@@ -58,7 +58,7 @@ class TestSporterModels(TestCase):
         sporter.clean_fields()      # run field validators
         sporter.clean()             # run model validator
 
-        # test validate_geboorte_datum, de field validator voor geboorte_datum
+        # test validate_geboorte_datum, de field-validator voor geboorte_datum
 
         # geboortejaar in de toekomst
         now = datetime.datetime.now()
@@ -71,7 +71,7 @@ class TestSporterModels(TestCase):
         with self.assertRaises(ValidationError):
             sporter.clean_fields()
 
-        # test de clean methode op het Sporter object
+        # test de clean methode op het Sporter-object
         # deze controleert dat de geboorte_datum en [lid] sinds_datum niet te dicht op elkaar liggen
 
         # sinds_datum (2010) te dicht op geboortejaar (moet 5 jaar tussen zitten)
@@ -79,7 +79,7 @@ class TestSporterModels(TestCase):
         with self.assertRaises(ValidationError):
             sporter.clean()
 
-        # test validate_sinds_datum, de field validator voor sinds_datum
+        # test validate_sinds_datum, de field-validator voor sinds_datum
 
         # mag niet lid worden in de toekomst
         sporter.sinds_datum = datetime.date(year=now.year + 1, month=11, day=12)

@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-10-29'
+SITE_VERSIE = '2022-11-06'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -167,7 +167,7 @@ ROOT_URLCONF = 'nhbapps.urls'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-STATIC_URL = '/static/'     # url
+STATIC_URL = '/static/'             # url
 STATIC_ROOT = 'nhbapps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
     os.path.join(PROJ_DIR, "compiled_static"),

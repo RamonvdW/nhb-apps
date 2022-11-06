@@ -58,7 +58,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         ver.naam = "Noordelijke Club"
         ver.ver_nr = 1000
         ver.regio = regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 
@@ -220,7 +219,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
         # TODO: check alleen rayon
 
-        # details van een vereniging binnen de rayon
+        # details van een vereniging binnen het rayon
         url = self.url_accommodatie_details % self.nhbver2.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -967,7 +966,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         ver.naam = "Extra Club"
         ver.ver_nr = 1099
         ver.regio = NhbRegio.objects.get(regio_nr=101)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         # maak de SEC, HWL en WL functies aan voor deze vereniging

@@ -6,7 +6,7 @@
 
 {% comment %}
 
-    Deze file formateert een kaartje aan de hand van de vier parameters:
+    Deze file formateert een kaartje aan de hand van deze parameters:
 
         title = "Account activiteit"
         icon  = "recent_actors"
@@ -19,7 +19,7 @@
 
 
 <!-- zet breedte, hoogte en side-by-side layout -->
-<!-- bij mouse-over licht de rand op -->
+<!-- bij mouse-over licht de rand NIET op -->
 <div class="nhb-card-disabled">
 
     <!-- padding om bij de rand weg te blijven -->
