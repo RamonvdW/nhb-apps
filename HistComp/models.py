@@ -21,18 +21,23 @@ class HistCompetitie(models.Model):
     comptype2str = {'18': '18m Indoor',
                     '25': '25m 1pijl'}
 
-    # primary key = los uniek nummer
-    seizoen = models.CharField(max_length=9)          # 20xx/20yy
-    comp_type = models.CharField(max_length=2, choices=COMP_TYPE)  # 18/25
+    # 20xx/20yy (yy = xx+1)
+    seizoen = models.CharField(max_length=9)
+
+    # '18' = 18m = Indoor
+    # '25' = 25m = 25m1pijl
+    comp_type = models.CharField(max_length=2, choices=COMP_TYPE)
+
+    # boogtype
     klasse = models.CharField(max_length=20)          # Recurve / Compound
+
+    # is dit voor teams of individueel?
     is_team = models.BooleanField(default=False)
 
     # is deze al openbaar?
     # staat op True als de huidige competitie nog loopt, maar de eindstand van de regiocompetitie
-    # alvast overgezet is ivm nieuwe AG's
+    # alvast overgezet is i.v.m. berekenen nieuwe AG's
     is_openbaar = models.BooleanField(default=True)
-
-    # FUTURE: voeg vertaaltabellen toe voor klasse2url en url2klasse (zie records)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

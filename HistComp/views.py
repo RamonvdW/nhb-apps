@@ -110,7 +110,6 @@ class HistCompIndivView(ListView):
         self.klasse = None
         self.jaar = None
         self.histcomp = None
-        self.histcomp_pk = None
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -119,16 +118,22 @@ class HistCompIndivView(ListView):
 
         # haal de GET parameters uit de request
         self.form = FilterForm(self.request.GET)
-        self.histcomp_pk = self.kwargs['histcomp_pk'][:6]       # afkappen voor de veiligheid
-        self.base_url = reverse('HistComp:indiv', kwargs={'histcomp_pk': self.histcomp_pk})
-        # pak het HistCompetitie object erbij
+
         try:
-            histcomp = HistCompetitie.objects.get(pk=self.histcomp_pk)
+            histcomp_pk = int(self.kwargs['histcomp_pk'][:6])       # afkappen voor de veiligheid
+        except (ValueError, TypeError):
+            # foute histcomp_pk
+            raise Http404('Competitie niet gevonden')
+
+        # zoek het HistCompetitie object erbij
+        try:
+            histcomp = HistCompetitie.objects.get(pk=histcomp_pk)
         except HistCompetitie.DoesNotExist:
             # foute histcomp_pk
             raise Http404('Competitie niet gevonden')
 
         self.histcomp = histcomp
+        self.base_url = reverse('HistComp:indiv', kwargs={'histcomp_pk': histcomp.pk})
 
         if self.form.is_valid():
             self.get_filter = self.form.cleaned_data['filter']
