@@ -31,6 +31,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Webwinkel foto',
                 'verbose_name_plural': "Webwinkel foto's",
+                'ordering': ('locatie', 'volgorde'),
             },
         ),
         migrations.CreateModel(
