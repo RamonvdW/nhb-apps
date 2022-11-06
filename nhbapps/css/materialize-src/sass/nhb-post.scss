@@ -106,8 +106,9 @@
   display: inline-flex;
   margin-right: 15px;
   margin-left: 15px;
-  padding: 3px;
+  padding: 0;
   border-radius: 5px;
+  border: 3px solid white;
 
   // forceer een vaste breedte van de kaartjes
   // dit voorkomt vervormen van de kaartjes door re-layout
@@ -116,7 +117,6 @@
   height: 250px;
 
   &:hover {
-    padding: 0;
     border-width: 3px;
     border-style: solid;
     border-color: $nhb-card-focus-border-color;
@@ -158,6 +158,38 @@
   color: $off-black;
   width: 246px;          // iets minder dan maximum ivm border
   border-radius: 0 0 5px 5px;
+}
+
+
+//--------------------------------------
+// foto thumbnails
+.nhb-foto-thumb {
+  margin: 0 0 5px 0;
+  padding: 0;
+  border-radius: 5px;   // knoppen en kaartjes hebben afronding
+  cursor: pointer;
+  border: 3px solid $nhb-blauw-color;
+  height: 90px;
+
+  &:hover {
+    border-color: $nhb-card-focus-border-color;
+  }
+}
+
+.nhb-foto-thumb-selected {
+  // enlarge from 90 to 100 px
+  // remove bottom margin from 5px to 0 to simulate center-align
+  height: 100px;
+  margin-bottom: 0px;
+}
+
+.nhb-foto {
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  width: 100%;
+  height:auto;
+  max-width:1280px;
 }
 
 

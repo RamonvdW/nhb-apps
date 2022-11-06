@@ -66,6 +66,6 @@ class TestWebwinkelPrototype(E2EHelpers, TestCase):
             resp = self.client.get(self.url_webwinkel_prototype)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('webwinkel/prototype.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
 
 # end of file

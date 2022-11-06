@@ -5,21 +5,26 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Webwinkel import view_proto
+from Webwinkel import view_overzicht
 
 app_name = 'Webwinkel'
 
 urlpatterns = [
 
     # inschrijven
-    path('prototype/',
-         view_proto.PrototypeView.as_view(),
-         name='prototype'),
+    path('',
+         view_overzicht.OverzichtView.as_view(),
+         name='overzicht'),
 
-    # inschrijven
-    path('prototype/',
-         view_proto.PrototypeView.as_view(),
+    # manager (wordt gebruikt door wissel van rol)
+    path('',
+         view_overzicht.OverzichtView.as_view(),
          name='manager'),
+
+    #
+    path('product-<product_pk>/',
+         view_overzicht.ProductView.as_view(),
+         name='product'),
 ]
 
 # end of file

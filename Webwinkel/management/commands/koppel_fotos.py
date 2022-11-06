@@ -1,0 +1,115 @@
+# -*- coding: utf-8 -*-
+
+#  Copyright (c) 2022 Ramon van der Winkel.
+#  All rights reserved.
+#  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+# stel de foto's in voor een product in de webwinkel
+
+from django.conf import settings
+from django.core.management.base import BaseCommand
+from Webwinkel.models import WebwinkelProduct, WebwinkelFoto, THUMB_SIZE
+from PIL import Image
+import sys
+import os
+
+
+class Command(BaseCommand):
+    help = "Koppel de foto's aan een webwinkel product"
+    verbose = False
+
+    def add_arguments(self, parser):
+        parser.add_argument('omslag_titel', nargs=1, help="Omslag titel van het (bestaande) product")
+        parser.add_argument('foto_locatie', type=str, nargs="+", action='store', help="Locatie van het foto bestand")
+
+    def handle(self, *args, **options):
+        # controleer dat de foto's bestaan
+        bad = False
+        foto_locaties = list()
+        for locatie in options['foto_locatie']:
+            spl = os.path.splitext(locatie)     # ('/pad/fname', '.ext')
+            locatie_thumb = spl[0] + '_thumb' + spl[1]
+
+            foto_pad = os.path.join(settings.PROJ_DIR, settings.WEBWINKEL_FOTOS_DIR, locatie)
+            if os.path.exists(foto_pad):
+                thumb_pad = os.path.join(settings.PROJ_DIR, settings.WEBWINKEL_FOTOS_DIR, locatie_thumb)
+                tup = (locatie, foto_pad, locatie_thumb, thumb_pad)
+                foto_locaties.append(tup)
+            else:
+                self.stderr.write('[ERROR] Kan foto niet vinden: %s' % repr(foto_pad))
+                bad = True
+        # for
+        if bad:
+            sys.exit(1)
+
+        # zoek het product
+        omslag_titel = options['omslag_titel'][0]
+        self.stdout.write('[INFO] Zoek product met omslag_titel %s' % repr(omslag_titel))
+
+        qset = (WebwinkelProduct
+                .objects
+                .select_related('omslag_foto')
+                .prefetch_related('fotos')
+                .filter(omslag_titel__icontains=omslag_titel))
+
+        if qset.count() == 0:
+            self.stderr.write('[ERROR] Product niet gevonden')
+            sys.exit(2)
+
+        if qset.count() > 1:
+            self.stderr.write('[ERROR] Meerdere producten gevonden:')
+            for product in qset:
+                self.stderr.write(product.omslag_titel)
+            # for
+            sys.exit(2)
+
+        product = qset[0]
+        self.stdout.write('[INFO] Gevonden product: %s' % repr(product.omslag_titel))
+
+        # zoek voor elk van de foto's het bestaande WebwinkelFoto objects op
+        volgorde = 0
+        foto_pks = list(product.fotos.values_list('pk', flat=True))
+        for locatie, foto_pad, locatie_thumb, thumb_pad in foto_locaties:
+            foto, is_created = WebwinkelFoto.objects.get_or_create(locatie=locatie)
+
+            if volgorde != foto.volgorde:
+                foto.volgorde = volgorde
+                foto.save(update_fields=['volgorde'])
+
+            # de eerste foto is de omslagfoto
+            if volgorde == 0:
+                if product.omslag_foto != foto:
+                    self.stdout.write('[INFO] Foto %s gekoppeld als omslagfoto' % repr(locatie))
+                    product.omslag_foto = foto
+                    product.save(update_fields=['omslag_foto'])
+                else:
+                    self.stdout.write('[INFO] Foto %s was al gekoppeld als omslagfoto' % repr(locatie))
+            else:
+                # maak een thumbnail
+                print('[INFO] Maak thumbnail %s' % repr(locatie_thumb))
+                im = Image.open(foto_pad)
+                im.thumbnail(THUMB_SIZE)
+                im.save(thumb_pad)
+
+                if locatie_thumb != foto.locatie_thumb:
+                    foto.locatie_thumb = locatie_thumb
+                    foto.save(update_fields=['locatie_thumb'])
+
+                if foto.pk in foto_pks:
+                    foto_pks.remove(foto.pk)
+                    self.stdout.write('[INFO] Foto %s was al gekoppeld aan product' % repr(locatie))
+                else:
+                    product.fotos.add(foto)
+                    self.stdout.write('[INFO] Foto %s + thumb gekoppeld aan product' % repr(locatie))
+
+            volgorde += 1
+        # for
+
+        # overgebleven foto pk's moeten verwijderd worden
+        if len(foto_pks):
+            self.stdout.write("[INFO] Volgende foto's worden losgekoppeld: %s" % repr(foto_pks))
+            qset = WebwinkelFoto.objects.filter(pk__in=foto_pks)
+            product.fotos.remove(*qset)
+
+# end of file
+

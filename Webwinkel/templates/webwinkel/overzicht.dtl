@@ -1,0 +1,137 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Webwinkel{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Webwinkel</h3>
+        </div>
+    </div>
+
+    {% for product in producten %}
+
+        {% if product.sectie_afsluiten %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if product.nieuwe_sectie %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>{{ product.sectie }}</h4>
+                </div>
+            </div>
+
+            <!-- blauwe balk met kaartjes -->
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+        {% endif %}
+
+        {% if product.is_uitverkocht %}
+
+            <!-- licht niet op bij mouse-over -->
+            <div class="nhb-card-disabled">
+
+        {% else %}
+
+            <!-- zet breedte, hoogte en side-by-side layout -->
+            <!-- bij mouse-over licht de rand op -->
+            <div class="nhb-card">
+
+        {% endif %}
+
+            {% if not product.is_uitverkocht %}
+
+                <!-- de hele kaart is klikbaar -->
+                <a href="{{ product.url_details }}">
+
+            {% endif %}
+
+                    <div class="nhb-card-content" style="padding:0">
+
+                        <div class="card-image" style="top:0px; left:0px; width:242px; height:242px; overflow:hidden">
+                            <!-- achtergrondplaatje -->
+                            <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} style="opacity:0.5"{% endif %}>
+
+                            <!-- titel
+                            <div class="card-title" style="bottom:revert; top:0; color:black; padding:0; width:100%">{{ title }}</div>
+                            -->
+                        </div>
+
+                        {% if product.is_uitverkocht %}
+
+                            <div class="nhb-card-vanaf" style="transform:rotate(-30deg); padding:3px">Tijdelijk uitverkocht</div>
+
+                        {% else %}
+
+                            <div class="nhb-card-vanaf" style="top:unset; bottom:40px; background-color: #03628c; padding:3px; opacity:0.9">{{ product.omslag_titel }}</div>
+
+                        {% endif %}
+
+                        <div style="position:absolute; bottom:10px; right:10px; color: white; background-color:rgba(0,0,0,.5); padding:3px">&euro;&nbsp;{{ product.prijs_euro }}</div>
+
+                    </div>
+
+            {% if not product.is_uitverkocht %}
+
+                </a>
+
+            {% endif %}
+
+            </div>
+
+    {% endfor %}
+
+    <!-- blauwe balk afsluiten -->
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Prototype kaartjes</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            {% static 'plein/logo_chrome_256x256.png' as img_src %}
+            {% url 'Webwinkel:product' 1 as card_url %}
+            {% include 'webwinkel/card_product.dtl' with title="Product 1" img=img_src prijs="10,00" url=card_url %}
+
+            {% url 'Webwinkel:product' '001' as card_url %}
+            {% static 'plein/logo_hero_512x512.png' as img_src %}
+            {% include 'webwinkel/card_product.dtl' with title="Product 2" img=img_src banner="Nog maar 3 beschikbaar" prijs="5,00" url=card_url %}
+
+            {% url 'Webwinkel:product' 5 as card_url %}
+            {% static 'plein/logo_freeotp_230x230.png' as img_src %}
+            {% include 'webwinkel/card_product.dtl' with title="Product 3" img=img_src prijs="10,00" url=card_url %}
+
+            {% url 'Webwinkel:product' 2 as card_url %}
+            {% static 'plein/indoor_sfeer_1.jpg' as img_src %}
+            {% include 'webwinkel/card_product.dtl' with title="Special" img=img_src banner="Nog maar 1 beschikbaar" prijs="50,00" url=card_url %}
+
+            {% url 'Webwinkel:product' 'donotcare' as card_url %}
+            {% static 'plein/logo_nhb_192x192.png' as img_src %}
+            {% include 'webwinkel/card_product.dtl' with title="Product 5" img=img_src uitverkocht=1 prijs="10,00" url=card_url %}
+
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="webwinkel-overzicht" %}
+
+{% endblock %}
