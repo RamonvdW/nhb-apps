@@ -42,6 +42,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['producten'] = producten = (WebwinkelProduct
                                             .objects
+                                            .exclude(mag_tonen=False)
                                             .select_related('omslag_foto')
                                             .order_by('sectie',
                                                       'volgorde'))
@@ -94,18 +95,12 @@ class ProductView(UserPassesTestMixin, TemplateView):
         try:
             product_pk = kwargs['product_pk'][:6]             # afkappen voor de veiligheid
             product_pk = int(product_pk)
-        except (ValueError, TypeError):
-            raise Http404('Product niet gevonden')
-
-        try:
             product = (WebwinkelProduct
                        .objects
                        .prefetch_related('fotos')
-                       .get(pk=product_pk))
-        except WebwinkelProduct.DoesNotExist:
-            raise Http404('Product niet gevonden')
-
-        if not product.mag_tonen:
+                       .get(pk=product_pk,
+                            mag_tonen=True))
+        except (ValueError, TypeError, WebwinkelProduct.DoesNotExist):
             raise Http404('Product niet gevonden')
 
         context['product'] = product
@@ -165,18 +160,12 @@ class ProductView(UserPassesTestMixin, TemplateView):
         try:
             product_pk = kwargs['product_pk'][:6]           # afkappen voor de veiligheid
             product_pk = int(product_pk)
-        except (ValueError, TypeError):
-            raise Http404('Product niet gevonden')
-
-        try:
             product = (WebwinkelProduct
                        .objects
                        .prefetch_related('fotos')
-                       .get(pk=product_pk))
-        except WebwinkelProduct.DoesNotExist:
-            raise Http404('Product niet gevonden')
-
-        if not product.mag_tonen:
+                       .get(pk=product_pk,
+                            mag_tonen=True))
+        except (ValueError, TypeError, WebwinkelProduct.DoesNotExist):
             raise Http404('Product niet gevonden')
 
         aantal = request.POST.get('aantal', '')[:6]         # afkappen voor de veiligheid
@@ -184,6 +173,30 @@ class ProductView(UserPassesTestMixin, TemplateView):
             aantal = int(aantal)
         except (ValueError, TypeError):
             raise Http404('Foutieve parameter')
+
+        # check of het aantal toegestaan is
+        is_goed = False
+
+        opties = product.bestel_begrenzing.strip()
+        if not opties:
+            opties = '1-5'
+
+        # voorbeeld: 1-10,20,25,30,50
+        spl = opties.split(',')
+        for optie in spl:
+            if '-' in optie:
+                van, tot = optie.split('-')
+                if int(van) <= aantal <= int(tot):
+                    is_goed = True
+                    break
+            else:
+                if aantal == int(optie):
+                    is_goed = True
+                    break
+        # for
+
+        if not is_goed:
+            raise Http404('Foutieve parameter (2)')
 
         account_koper = request.user
         now = timezone.now()
