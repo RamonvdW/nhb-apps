@@ -363,6 +363,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             # for
 
         context['bb_email'] = settings.EMAIL_BONDSBUREAU
+        context['url_vcp_contact'] = settings.URL_VCP_CONTACTGEGEVENS
 
     @staticmethod
     def _find_speelsterktes(sporter):
