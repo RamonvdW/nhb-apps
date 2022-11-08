@@ -7,6 +7,8 @@
 ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
+TEST_DIR="./nhbapps/data_test"
+TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
 [ -e "$LOG" ] && rm "$LOG"
@@ -35,6 +37,11 @@ then
     echo "[WARNING] simulators found running - cleaning up now"
     pkill -f websim
 fi
+
+# create empty test data directories
+rm -rf "$TEST_DIR" &> /dev/null
+mkdir "$TEST_DIR"
+mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
 
 echo
 echo "****************************** START OF TEST RUN ******************************"
@@ -202,6 +209,9 @@ kill $PID_WEBSIM1
 wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
 wait $PID_WEBSIM2 2>/dev/null
+
+# cleanup test data directories
+rm -rf "$TEST_DIR"
 
 ASK_LAUNCH=0
 COVERAGE_RED=0

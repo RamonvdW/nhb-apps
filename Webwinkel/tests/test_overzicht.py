@@ -51,6 +51,12 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         foto = WebwinkelFoto()
         foto.save()
 
+        foto2 = WebwinkelFoto(
+                        locatie='test_1.jpg',
+                        locatie_thumb='test_1_thumb.jpg')
+        foto2.save()
+        self.foto2 = foto2
+
         product = WebwinkelProduct(
                         omslag_titel='Test titel 1',
                         onbeperkte_voorraad=True,
@@ -75,11 +81,6 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
                         aantal_op_voorraad=0)           # uitverkocht
         product3.save()
         self.product3 = product3
-
-        foto2 = WebwinkelFoto(
-                        locatie='test_1.jpg',
-                        locatie_thumb='test_1_thumb.jpg')
-        foto2.save()
         self.product3.fotos.add(foto2)
 
     def test_anon(self):
@@ -92,6 +93,9 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_webwinkel_product % self.product.pk)
         self.assert403(resp)
+
+        self.assertTrue(str(self.foto2) != '')
+        self.assertTrue(str(self.product3) != '')
 
     def test_sporter(self):
         self.e2e_login_and_pass_otp(self.account_normaal)

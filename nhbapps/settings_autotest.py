@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,5 +20,7 @@ PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 # enable html validation using v.Nu (warning: triples test duration)
 # warning: increases test run duration significantly
 #TEST_VALIDATE_HTML = True
+
+WEBWINKEL_FOTOS_DIR = 'data_test/webwinkel'
 
 # end of file

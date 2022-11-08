@@ -22,13 +22,21 @@ class Command(BaseCommand):
         aantal_ok = 0
         aantal_nok = 0
         for foto in WebwinkelFoto.objects.all():
-            foto_pad = os.path.join(settings.PROJ_DIR, settings.WEBWINKEL_FOTOS_DIR, foto.locatie)
-
-            if os.path.exists(foto_pad):
-                aantal_ok += 1
-            else:
-                self.stderr.write('[ERROR] Foto pk=%s niet gevonden: %s' % (foto.pk, repr(foto_pad)))
+            if not foto.locatie:
+                self.stderr.write('[ERROR] Foto pk=%s heeft een lege locatie' % foto.pk)
                 aantal_nok += 1
+            if not foto.locatie_thumb:
+                self.stderr.write('[ERROR] Foto pk=%s heeft een lege locatie_thumb' % foto.pk)
+                aantal_nok += 1
+
+            for locatie in (foto.locatie, foto.locatie_thumb):
+                if locatie:
+                    foto_pad = os.path.join(settings.PROJ_DIR, settings.WEBWINKEL_FOTOS_DIR, locatie)
+                    if os.path.exists(foto_pad):
+                        aantal_ok += 1
+                    else:
+                        self.stderr.write('[ERROR] Foto pk=%s niet gevonden: %s' % (foto.pk, repr(foto_pad)))
+                        aantal_nok += 1
         # for
 
         self.stdout.write("[INFO] %s foto's OK; %s foto's NOK" % (aantal_ok, aantal_nok))

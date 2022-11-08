@@ -9,7 +9,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from Webwinkel.models import WebwinkelProduct, WebwinkelFoto, THUMB_SIZE
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import sys
 import os
 
@@ -87,27 +87,30 @@ class Command(BaseCommand):
             else:
                 # maak een thumbnail
                 self.stdout.write('[INFO] Maak thumbnail %s' % repr(locatie_thumb))
-                im = Image.open(foto_pad)
-                im.thumbnail(THUMB_SIZE)
-                im.save(thumb_pad)
-
-                if locatie_thumb != foto.locatie_thumb:
-                    foto.locatie_thumb = locatie_thumb
-                    foto.save(update_fields=['locatie_thumb'])
-
-                if foto.pk in foto_pks:
-                    foto_pks.remove(foto.pk)
-                    self.stdout.write('[INFO] Foto %s was al gekoppeld aan product' % repr(locatie))
+                try:
+                    im = Image.open(foto_pad)
+                    im.thumbnail(THUMB_SIZE)
+                    im.save(thumb_pad)
+                except UnidentifiedImageError as exc:
+                    self.stderr.write('[ERROR] Kan thumbnail niet maken: %s' % str(exc))
                 else:
-                    product.fotos.add(foto)
-                    self.stdout.write('[INFO] Foto %s + thumb gekoppeld aan product' % repr(locatie))
+                    if locatie_thumb != foto.locatie_thumb:
+                        foto.locatie_thumb = locatie_thumb
+                        foto.save(update_fields=['locatie_thumb'])
+
+                    if foto.pk in foto_pks:
+                        foto_pks.remove(foto.pk)
+                        self.stdout.write('[INFO] Foto %s was al gekoppeld aan product' % repr(locatie))
+                    else:
+                        product.fotos.add(foto)
+                        self.stdout.write('[INFO] Foto %s + thumb gekoppeld aan product' % repr(locatie))
 
             volgorde += 1
         # for
 
         # overgebleven foto pk's moeten verwijderd worden
         if len(foto_pks):
-            self.stdout.write("[INFO] Volgende foto's worden losgekoppeld: %s" % repr(foto_pks))
+            self.stdout.write("[INFO] De volgende foto's worden losgekoppeld: %s" % repr(foto_pks))
             qset = WebwinkelFoto.objects.filter(pk__in=foto_pks)
             product.fotos.remove(*qset)
 

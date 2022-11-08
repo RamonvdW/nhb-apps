@@ -54,9 +54,6 @@ class WebwinkelFoto(models.Model):
     def __str__(self):
         return "%s: %s" % (self.volgorde, self.locatie)
 
-    def get_static_url(self):
-        return static("webwinkel_fotos/" + self.locatie)
-
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "Webwinkel foto"
