@@ -90,7 +90,9 @@ class WedstrijdDetailsView(TemplateView):
                                                   'tijd_begin',
                                                   'pk'))
 
+        heeft_sessies = False
         for sessie in sessies:
+            heeft_sessies = True
             sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
             sessie.klassen = sessie.wedstrijdklassen.order_by('volgorde')
 
@@ -102,7 +104,9 @@ class WedstrijdDetailsView(TemplateView):
         # for
 
         # om aan te melden is een account nodig
-        context['kan_aanmelden'] = self.request.user.is_authenticated and not wedstrijd.extern_beheerd
+        # extern beheerder wedstrijden kan je niet voor aanmelden
+        # een wedstrijd zonder sessie is een placeholder op de agenda
+        context['kan_aanmelden'] = self.request.user.is_authenticated and not wedstrijd.extern_beheerd and heeft_sessies
 
         # inschrijven moet voor de sluitingsdatum
         context['kan_inschrijven'] = now_date < wedstrijd.inschrijven_voor
