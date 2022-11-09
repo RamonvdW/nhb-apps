@@ -190,6 +190,16 @@
   width: 100%;
   height:auto;
   max-width:1280px;
+
+  @media #{$small-and-down} {
+    max-width: 480px;
+  }
+  @media #{$medium-only} {
+    max-width: 600px;
+  }
+  @media #{$large-and-up} {
+    max-width: 800px;
+  }
 }
 
 

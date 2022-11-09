@@ -21,14 +21,14 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-nhb-blauw">
         <div class="col s12 center">
-            <!-- thumbnails boven de grote foto's -->
+            <!-- thumbnails boven de grote foto's
             <div>
                 {% for foto in fotos %}
                     <img id="thumb1_{{ foto.volgorde }}" class="nhb-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
                 {% endfor %}
             </div>
+            -->
 
-            <!-- TODO: lazy load images, maar pas tonen als er op een thumb geklikt wordt -->
             {% for foto in fotos %}
                 <img id="img_{{ foto.volgorde }}" class="nhb-foto" src="{{ foto.img_src }}" hidden loading="lazy" alt="product foto {{ foto.volgorde }}">
             {% endfor %}
@@ -49,7 +49,7 @@
             {% for foto in fotos %}
                 [
                     {{ foto.volgorde }},
-                    document.getElementById('thumb1_{{ foto.volgorde }}'),
+                    // document.getElementById('thumb1_{{ foto.volgorde }}'),
                     document.getElementById('thumb2_{{ foto.volgorde }}'),
                     document.getElementById('img_{{ foto.volgorde }}'),
                 ],
@@ -62,21 +62,22 @@
             //console.log('nr', nr);
 
             volgordes.forEach(arr => {
-                let [volgorde, el_thumb1, el_thumb2, el_img] = arr;
+                // let [volgorde, el_thumb1, el_thumb2, el_img] = arr;
+                let [volgorde, el_thumb2, el_img] = arr;
 
                 if (volgorde === nr) {
-                    el_thumb1.classList.add("nhb-foto-thumb-selected")
+                    // el_thumb1.classList.add("nhb-foto-thumb-selected")
                     el_thumb2.classList.add("nhb-foto-thumb-selected")
                     el_img.hidden = false;
                 } else {
-                    el_thumb1.classList.remove("nhb-foto-thumb-selected")
+                    // el_thumb1.classList.remove("nhb-foto-thumb-selected")
                     el_thumb2.classList.remove("nhb-foto-thumb-selected")
                     el_img.hidden = true;
-                };
+                }
 
                 if (volgorde === nr + 1) {
                     el_img.loading = 'eager';
-                };
+                }
             })
         }
 
@@ -94,7 +95,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">
-        <div class="col s12 m10 offset-m1 l8 offset-l2">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
