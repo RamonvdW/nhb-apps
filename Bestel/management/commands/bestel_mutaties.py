@@ -305,7 +305,8 @@ class Command(BaseCommand):
 
         return nummer
 
-    def _bepaal_btw(self, mandje):
+    @staticmethod
+    def _bepaal_btw(mandje):
         """ bereken de btw voor de producten in het mandje """
 
         # nog niet ondersteund: toon altijd 0% BTW
@@ -334,7 +335,7 @@ class Command(BaseCommand):
                 wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
 
                 # bereken het totaal opnieuw
-                self.bepaal_btw(self.stdout, mandje)
+                self._bepaal_btw(mandje)
                 mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
@@ -360,7 +361,7 @@ class Command(BaseCommand):
             webwinkel_plugin_bepaal_verzendkosten(self.stdout, mandje)
 
             # bereken het totaal opnieuw
-            self.bepaal_btw(self.stdout, mandje)
+            self._bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
@@ -427,7 +428,7 @@ class Command(BaseCommand):
                                         product.pk, mandje.pk))
 
             # bereken het totaal opnieuw
-            self.bepaal_btw(mandje)
+            self._bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
         if not handled:
@@ -673,7 +674,7 @@ class Command(BaseCommand):
                             bestelling.mh_bestel_nr(), bestelling.pk))
 
         # koppel een transactie aan de bestelling
-        bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
+        # bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
         transactie = BetaalTransactie(
                             when=timezone.now(),
                             is_handmatig=True,
