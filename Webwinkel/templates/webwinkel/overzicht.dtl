@@ -71,11 +71,11 @@
 
                         {% if product.is_uitverkocht %}
 
-                            <div class="nhb-card-vanaf" style="transform:rotate(-30deg); padding:3px">Tijdelijk uitverkocht</div>
+                            <div class="nhb-card-schuine-banner">Tijdelijk uitverkocht</div>
 
                         {% else %}
 
-                            <div class="nhb-card-vanaf" style="top:unset; bottom:40px; background-color: #03628c; padding:3px; opacity:0.9">{{ product.omslag_titel }}</div>
+                            <div class="nhb-card-webwinkel-titel">{{ product.omslag_titel }}</div>
 
                         {% endif %}
 

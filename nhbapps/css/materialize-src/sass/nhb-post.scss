@@ -151,6 +151,21 @@
   color: white;
 }
 
+.nhb-card-webwinkel-titel {
+  @extend .nhb-card-vanaf;
+  top: unset;
+  bottom: 40px;
+  background-color: $nhb-donkerblauw-color;
+  padding: 3px;
+  opacity: 0.9;
+}
+
+.nhb-card-schuine-banner {
+  @extend .nhb-card-vanaf;
+  transform: rotate(-30deg);
+  padding: 3px;
+}
+
 .nhb-card-content {
   @extend .card-content;
 
