@@ -136,7 +136,9 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
+                {% include 'plein/card.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
+
+                {% include 'plein/card.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
         </div>
     </div>
 

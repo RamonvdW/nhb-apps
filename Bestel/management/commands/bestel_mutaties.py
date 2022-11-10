@@ -29,7 +29,8 @@ from Bestel.models import (BestelProduct, BestelMandje,
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
-from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering)
+from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering,
+                                      webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten)
 from Mailer.operations import mailer_queue_email, render_email_template
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
@@ -304,6 +305,15 @@ class Command(BaseCommand):
 
         return nummer
 
+    def _bepaal_btw(self, mandje):
+        """ bereken de btw voor de producten in het mandje """
+
+        # nog niet ondersteund: toon altijd 0% BTW
+        mandje.btw_percentage_cat1 = "0%"
+        mandje.btw_euro_cat1 = Decimal(0)
+
+        mandje.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1'])
+
     def _verwerk_mutatie_wedstrijd_inschrijven(self, mutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
@@ -324,6 +334,7 @@ class Command(BaseCommand):
                 wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
 
                 # bereken het totaal opnieuw
+                self.bepaal_btw(self.stdout, mandje)
                 mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
@@ -344,10 +355,12 @@ class Command(BaseCommand):
             # leg het product in het mandje
             mandje.producten.add(product)
 
-            # TODO: kijk of er automatische kortingen zijn die toegepast kunnen worden
-            # wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
+            webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
+
+            webwinkel_plugin_bepaal_verzendkosten(self.stdout, mandje)
 
             # bereken het totaal opnieuw
+            self.bepaal_btw(self.stdout, mandje)
             mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
@@ -384,6 +397,9 @@ class Command(BaseCommand):
                     # verwijder de hele inschrijving, want bewaren heeft geen waarde op dit punt
                     # inschrijving.delete()     # geeft db integratie error i.v.m. referenties die nog ergens bestaan
 
+                    # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
+                    wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
+
                     handled = True
 
                 elif product.webwinkel_keuze:
@@ -400,16 +416,18 @@ class Command(BaseCommand):
                     # verwijder het BestelProduct, dan verdwijnt deze ook uit het mandje
                     product.delete()
 
+                    webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
+
+                    webwinkel_plugin_bepaal_verzendkosten(self.stdout, mandje)
+
                     handled = True
 
                 else:
                     self.stderr.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
                                         product.pk, mandje.pk))
 
-            # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
-            wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
-
             # bereken het totaal opnieuw
+            self.bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
         if not handled:

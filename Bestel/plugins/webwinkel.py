@@ -6,6 +6,9 @@
 
 """ Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de Webwinkel, zoals kortingen. """
 
+from django.conf import settings
+from decimal import Decimal
+
 
 def webwinkel_plug_reserveren(webwinkel_keuze):
     """
@@ -42,6 +45,30 @@ def webwinkel_plugin_verwijder_reservering(stdout, webwinkel_keuze):
     stdout.write('[INFO] Webwinkel keuze pk=%s wordt verwijderd' % webwinkel_keuze.pk)
 
     webwinkel_keuze.delete()
+
+
+def webwinkel_plugin_bepaal_kortingen(stdout, mandje):
+    # TODO: kortingen voor de webwinkel
+    pass
+
+
+def webwinkel_plugin_bepaal_verzendkosten(stdout, mandje):
+    """ bereken de verzendkosten voor fysieke producten in het mandje """
+
+    webwinkel_count = 0
+    for product in mandje.producten.all():
+        if product.webwinkel_keuze:
+            webwinkel_count += 1
+    # for
+
+    if webwinkel_count > 0:
+        # wel verzendkosten
+        mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_VERZENDKOSTEN_EURO)
+    else:
+        # geen verzendkosten
+        mandje.verzendkosten_euro = Decimal(0)
+
+    mandje.save(update_fields=['verzendkosten_euro'])
 
 
 # end of file

@@ -164,7 +164,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 elif product.webwinkel_keuze:
                     webwinkel_keuze = product.webwinkel_keuze
 
-                    tup = ('Product', '%s' % webwinkel_keuze.korte_beschrijving())
+                    tup = ('Webwinkel', '%s' % webwinkel_keuze.korte_beschrijving())
                     beschrijving.append(tup)
 
                     controleer_euro += product.prijs_euro
@@ -185,6 +185,11 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             # nooit een negatief totaalbedrag tonen want we geven geen geld weg
             if controleer_euro < 0.0:
                 controleer_euro = 0.0
+
+            controleer_euro += mandje.verzendkosten_euro
+            controleer_euro += mandje.btw_euro_cat1
+            controleer_euro += mandje.btw_euro_cat2
+            controleer_euro += mandje.btw_euro_cat3
 
             if controleer_euro != mandje.totaal_euro:
                 bevat_fout = True
@@ -210,7 +215,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
-        context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
+        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 
         if not (bevat_fout or mandje_is_leeg):
             context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')

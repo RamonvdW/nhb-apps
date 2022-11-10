@@ -44,8 +44,18 @@ class BestellingAdmin(admin.ModelAdmin):
         ('Koper',
             {'fields': ('bestel_nr',
                         'account',
-                        'aangemaakt',
-                        'totaal_euro')
+                        'aangemaakt')
+             }),
+        ('Kosten',
+            {'fields': ('verzendkosten_euro',
+                        'btw_percentage_cat1',
+                        'btw_percentage_cat2',
+                        'btw_percentage_cat3',
+                        'btw_euro_cat1',
+                        'btw_euro_cat2',
+                        'btw_euro_cat3',
+                        'totaal_euro'
+            )
              }),
         ('Verkoper',
             {'fields': ('verkoper_naam',

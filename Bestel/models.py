@@ -121,8 +121,20 @@ class BestelMandje(models.Model):
     # de gekozen producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 
+    # verzendkosten
+    verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
+
+    # belasting in verschillende categorieën: leeg = niet gebruikt
+    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat2 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat3 = models.CharField(max_length=5, default='', blank=True)
+
+    btw_euro_cat1 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat2 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat3 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+
     # het af te rekenen totaalbedrag
-    totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))       # max 99999,99
+    totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))           # max 99999,99
 
     def bepaal_totaalprijs_opnieuw(self):
         """ Bepaal het totaal_euro veld opnieuw, gebaseerd op alles wat in het mandje ligt
@@ -134,6 +146,10 @@ class BestelMandje(models.Model):
             self.totaal_euro += product.prijs_euro
             self.totaal_euro -= product.korting_euro
         # for
+        self.totaal_euro += self.verzendkosten_euro
+        self.totaal_euro += self.btw_euro_cat1
+        self.totaal_euro += self.btw_euro_cat2
+        self.totaal_euro += self.btw_euro_cat3
         self.save(update_fields=['totaal_euro'])
 
     def __str__(self):
@@ -180,6 +196,18 @@ class Bestelling(models.Model):
 
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
+
+    # verzendkosten
+    verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
+
+    # belasting in verschillende categorieën: leeg = niet gebruikt
+    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat2 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat3 = models.CharField(max_length=5, default='', blank=True)
+
+    btw_euro_cat1 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat2 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat3 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
 
     # het af te rekenen totaalbedrag
     totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))       # max 99999,99

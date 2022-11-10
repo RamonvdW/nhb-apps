@@ -272,7 +272,8 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
                                                    kwargs={'bestel_nr': bestelling.bestel_nr})
 
-        context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
+        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 
         context['producten'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
 
