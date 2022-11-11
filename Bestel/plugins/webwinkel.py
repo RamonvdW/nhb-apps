@@ -63,7 +63,7 @@ def webwinkel_plugin_bepaal_verzendkosten(stdout, mandje):
 
     if webwinkel_count > 0:
         # wel verzendkosten
-        mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_VERZENDKOSTEN_EURO)
+        mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO)
     else:
         # geen verzendkosten
         mandje.verzendkosten_euro = Decimal(0)

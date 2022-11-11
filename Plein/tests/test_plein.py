@@ -92,6 +92,7 @@ class TestPlein(E2EHelpers, TestCase):
 
         self.functie_mo = maak_functie('Manager Opleidingen', 'MO')
         self.functie_mwz = maak_functie('Manager Wedstrijdzaken', 'MWZ')
+        self.functie_mww = maak_functie('Manager Webwinkel', 'MWW')
         self.functie_sup = maak_functie('Support', 'SUP')
 
     def test_plein_anon(self):
@@ -219,6 +220,15 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Manager Wedstrijdzaken')
+
+        # mww
+        self.e2e_wissel_naar_functie(self.functie_mww)
+        self.e2e_check_rol('MWW')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Manager Webwinkel')
 
         # support
         self.e2e_wissel_naar_functie(self.functie_sup)

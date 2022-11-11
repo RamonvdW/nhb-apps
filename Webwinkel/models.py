@@ -38,6 +38,15 @@ KEUZE_STATUS_TO_SHORT_STR = {
 }
 
 
+VERZENDKOSTEN_KLASSE_PAKKET = "pak"
+VERZENDKOSTEN_KLASSE_BRIEF = "brief"
+
+VERZENDKOSTEN_CHOICES = (
+    (VERZENDKOSTEN_KLASSE_PAKKET, "Pakket"),
+    (VERZENDKOSTEN_KLASSE_BRIEF, "Brief"),
+)
+
+
 class WebwinkelFoto(models.Model):
     """ Een foto van een product.
     """
@@ -108,6 +117,8 @@ class WebwinkelProduct(models.Model):
     # hoeveel kunnen er besteld worden?
     # (programmeerbaar)
     bestel_begrenzing = models.CharField(max_length=100, default='1', help_text='1-10,20,25,30,50', blank=True)
+
+    # TODO: verzendkosten_klasse = models.CharField(max_length=5, default=VERZENDKOSTEN_KLASSE_PAKKET, choices=VERZENDKOSTEN_CHOICES)
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """

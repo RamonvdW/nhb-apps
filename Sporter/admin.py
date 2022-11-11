@@ -20,7 +20,7 @@ class HeeftWaIdListFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'Ja':
+        if self.value() == 'Ja':        # pragma: no cover
             queryset = queryset.exclude(wa_id='')
         return queryset
 

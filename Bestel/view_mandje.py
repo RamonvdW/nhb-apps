@@ -183,8 +183,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             # for
 
             # nooit een negatief totaalbedrag tonen want we geven geen geld weg
-            if controleer_euro < 0.0:
-                controleer_euro = 0.0
+            if controleer_euro < 0:
+                controleer_euro = Decimal(0)
 
             controleer_euro += mandje.verzendkosten_euro
             controleer_euro += mandje.btw_euro_cat1

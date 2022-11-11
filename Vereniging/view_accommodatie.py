@@ -57,7 +57,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         binnen_locatie = None
         buiten_locatie = None
         externe_locaties = list()
-        for loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
+        for loc in nhbver.wedstrijdlocatie_set.all():
             if loc.baan_type == BAAN_TYPE_EXTERN:
                 externe_locaties.append(loc)
             elif loc.baan_type == BAAN_TYPE_BUITEN:
@@ -126,7 +126,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             except Secretaris.DoesNotExist:
                 pass
             else:
-                if sec.sporters.count() > 0:
+                if sec.sporters.count() > 0:            # pragma: no branch
                     context['sec_names'] = [sporter.volledige_naam() for sporter in sec.sporters.all()]
                     context['geen_sec'] = False
 

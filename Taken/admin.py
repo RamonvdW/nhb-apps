@@ -28,13 +28,13 @@ class ToegekendAanFunctieListFilter(admin.SimpleListFilter):
         for functie in (Functie
                         .objects
                         .filter(pk__in=gevonden)
-                        .order_by('pk')):
+                        .order_by('pk')):                   # pragma: no cover
             tup = (functie.pk, functie.beschrijving)
             lijstje.append(tup)
         # for
         return lijstje
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset):                  # pragma: no cover
         pk = self.value()
         if pk:
             queryset = queryset.filter(toegekend_aan_functie__pk=pk)

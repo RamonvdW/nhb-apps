@@ -107,7 +107,7 @@ class RegistreerNhbNummerView(TemplateView):
                     except Secretaris.DoesNotExist:
                         pass
                     else:
-                        if sec.sporters.count() > 0:
+                        if sec.sporters.count() > 0:                # pragma: no branch
                             sporter = sec.sporters.all()[0]
                             context['sec_naam'] = sporter.volledige_naam()
 

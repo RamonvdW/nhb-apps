@@ -98,7 +98,7 @@ class TeamAGListFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'Ontbreekt':
+        if self.value() == 'Ontbreekt':     # pragma: no cover
             queryset = queryset.filter(deelcompetitie__regio_organiseert_teamcompetitie=True,
                                        inschrijf_voorkeur_team=True,
                                        ag_voor_team_mag_aangepast_worden=True,
@@ -119,9 +119,9 @@ class ZelfstandigIngeschrevenListFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'Zelf':
+        if self.value() == 'Zelf':      # pragma: no cover
             queryset = queryset.filter(sporterboog__sporter__account=F('aangemeld_door'))
-        if self.value() == 'HWL':
+        if self.value() == 'HWL':       # pragma: no cover
             queryset = queryset.exclude(sporterboog__sporter__account=F('aangemeld_door'))
         return queryset
 

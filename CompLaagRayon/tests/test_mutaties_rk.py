@@ -47,6 +47,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # for
 
         cls.testdata.maak_label_regiokampioenen(18, cls.regio_nr_begin, cls.regio_nr_einde)
+        cls.testdata.maak_label_regiokampioenen(25, cls.regio_nr_begin, cls.regio_nr_einde)
 
         # zet de competitie in fase J
         zet_competitie_fase(cls.testdata.comp18, 'J')

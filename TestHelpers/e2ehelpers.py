@@ -1024,7 +1024,7 @@ class E2EHelpers(TestCase):
                 else:                                                           # pragma: no cover
                     issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek2))
 
-                continue
+                continue        # pragma: no cover
 
             if line[-1] == ':':
                 # probeer een zonder de dubbele punt
@@ -1035,11 +1035,11 @@ class E2EHelpers(TestCase):
                     html = html[:pos + 1] + html[pos + len(zoek) - 1:]
                     continue
 
-            if line[0] == '[' and line[-1] == ']':
+            if line[0] == '[' and line[-1] == ']':                              # pragma: no cover
                 # [nr] staat in de html als nr.
                 zoek = '>' + line[1:-1] + '.<'
                 pos = html.find(zoek)
-                if pos > 0:                                                     # pragma: no branch
+                if pos > 0:
                     # verwijder de tekst maar behoud de > en <
                     html = html[:pos + 1] + html[pos + len(zoek) - 1:]
                     continue
