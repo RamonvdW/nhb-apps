@@ -25,6 +25,23 @@ class HeeftWaIdListFilter(admin.SimpleListFilter):
         return queryset
 
 
+class HeeftAccountFilter(admin.SimpleListFilter):
+
+    title = 'Heeft account'
+
+    parameter_name = 'heeft_account'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ja', 'Heeft account aangemaakt'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ja':        # pragma: no cover
+            queryset = queryset.exclude(account=None)
+        return queryset
+
+
 class SporterAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Sporter klasse """
 
@@ -33,7 +50,7 @@ class SporterAdmin(admin.ModelAdmin):
     search_fields = ('unaccented_naam', 'lid_nr')
 
     # filter mogelijkheid
-    list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid', HeeftWaIdListFilter)
+    list_filter = ('geslacht', 'is_actief_lid', HeeftWaIdListFilter, HeeftAccountFilter, 'para_classificatie')
 
     list_select_related = True
 

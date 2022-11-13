@@ -12,6 +12,7 @@ from django.utils.formats import date_format
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import GESLACHT_ANDERS
 from Functie.rol import rol_get_huidige, Rollen
+from Opleidingen.models import OpleidingDiploma
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, get_sporter_voorkeuren
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
@@ -47,8 +48,26 @@ def maak_bondspas_regels(lid_nr, jaar):
     else:
         regels.append(("Vereniging", "onbekend :-("))
 
-    # TODO: opleidingen
-    regels.append(("Opleidingen", "n.v.t."))
+    # opleidingen
+    opleiding_codes = dict()        # [code] =
+    for code, afkorting_voor_pas, _, vervangt_codes in settings.OPLEIDING_CODES:
+        opleiding_codes[code] = (afkorting_voor_pas, vervangt_codes)
+    # for
+
+    afkortingen = list()
+    diplomas = OpleidingDiploma.objects.filter(sporter=sporter, toon_op_pas=True).order_by('code')
+    alle_codes = [diploma.code for diploma in diplomas]
+    for diploma in diplomas:
+        afkorting_voor_pas, vervangt_codes = opleiding_codes[diploma.code]
+        onderdruk = any([code in alle_codes for code in vervangt_codes])
+        print(diploma.code, afkorting_voor_pas, onderdruk)
+        if not onderdruk:
+            afkortingen.append(afkorting_voor_pas)
+    # for
+    if len(afkortingen):
+        regels.append(("Opleidingen", ", ".join(afkortingen)))
+    else:
+        regels.append(("Opleidingen", "n.v.t."))
 
     # TODO: speelsterkte
     regels.append(("Speelsterkte", "n.v.t."))

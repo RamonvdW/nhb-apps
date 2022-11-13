@@ -378,16 +378,16 @@ SPEELSTERKTE_VOLGORDE = (
 
 
 OPLEIDING_CODES = (
-    # code, afk-voor-pas, beschrijving, verdrukt-codes-op-pas
-    ('011', 'HBT-A', 'Handboogtrainer A', ('012',)),
-    ('012', 'HBT-B', 'Handboogtrainer B', ()),
+    # code, afk-voor-pas, beschrijving, hogere-opleidingen
+    ('011', 'HBT-A', 'Handboogtrainer A', ('014', '015')),
+    ('012', 'HBT-B', 'Handboogtrainer B', ('011', '014', '015')),
 
-    ('013', 'HBT2', 'Handboogtrainer 2', ()),
-    ('014', 'HBT2', 'Handboogtrainer 3', ('011', '012', '013')),
-    ('015', 'HBT2', 'Handboogtrainer 4', ('011', '012', '013', '014')),
+    ('013', 'HBT2', 'Handboogtrainer 2', ('014', '015')),
+    ('014', 'HBT3', 'Handboogtrainer 3', ('015',)),
+    ('015', 'HBT4', 'Handboogtrainer 4', ()),
 
-    ('017', 'HBI2', 'Handboog instructeur 2', ()),
-    ('018', 'HBI3', 'Handboog instructeur 3', ('017',)),
+    ('017', 'HBI2', 'Handboog instructeur 2', ('018',)),
+    ('018', 'HBI3', 'Handboog instructeur 3', ()),
 
     ('030', 'WL', 'Wedstrijdleider 25m1pijl', ()),
     ('031', 'WL', 'Wedstrijdleider Indoor/Outdoor', ()),
@@ -398,9 +398,9 @@ OPLEIDING_CODES = (
 
     ('039', '', 'Praktijkbegeleider voor instructeurs', ()),
 
-    ('040', 'SR3', 'Verenigingsscheidsrechter', ()),
-    ('041', 'SR4', 'Bondsscheidsrechter', ('040',)),
-    ('042', 'SR5', 'Scheidsrechter internation', ('040', '041')),
+    ('040', 'SR3', 'Verenigingsscheidsrechter', ('041', '042')),
+    ('041', 'SR4', 'Bondsscheidsrechter', ('042',)),
+    ('042', 'SR5', 'Scheidsrechter internationaal', ()),
 
     ('043', '', 'Basisblok', ()),
 

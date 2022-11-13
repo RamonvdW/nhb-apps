@@ -49,7 +49,7 @@ class OpleidingDiploma(models.Model):
     datum_einde = models.DateField(default='9999-12-31')
 
     def __str__(self):
-        return "%s: %s" % (self.sporter.lid_nr, self.code)
+        return "%s: %s (%s)" % (self.sporter.lid_nr, self.code, self.beschrijving)
 
     class Meta:
         """ meta data voor de admin interface """

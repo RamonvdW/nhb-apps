@@ -25,6 +25,23 @@ class CreateOnlyAdmin(admin.ModelAdmin):
         return readonly_fields
 
 
+class HeeftAccountFilter(admin.SimpleListFilter):
+
+    title = 'Heeft account'
+
+    parameter_name = 'heeft_account'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ja', 'Heeft account aangemaakt'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ja':        # pragma: no cover
+            queryset = queryset.exclude(sporter__account=None)
+        return queryset
+
+
 class OpleidingAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Opleiding klasse """
 
@@ -93,9 +110,9 @@ class OpleidingDeelnemerAdmin(admin.ModelAdmin):
 class OpleidingDiplomaAdmin(CreateOnlyAdmin):
     """ Admin configuratie voor OpleidingDiploma klasse """
 
-    # search_fields = ('beschrijving', 'category', 'discipline', 'sporter__unaccented_naam')
+    search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
 
-    list_filter = ('code', 'toon_op_pas')
+    list_filter = ('toon_op_pas', HeeftAccountFilter, 'code')
 
     list_select_related = ('sporter',)
 
