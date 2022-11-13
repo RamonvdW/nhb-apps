@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.templatetags.static import static
 from Account.models import Account
 from decimal import Decimal
 

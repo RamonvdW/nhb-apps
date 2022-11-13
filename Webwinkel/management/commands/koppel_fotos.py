@@ -30,9 +30,9 @@ class Command(BaseCommand):
             spl = os.path.splitext(locatie)     # ('/pad/fname', '.ext')
             locatie_thumb = spl[0] + '_thumb' + spl[1]
 
-            foto_pad = os.path.join(settings.PROJ_DIR, settings.WEBWINKEL_FOTOS_DIR, locatie)
+            foto_pad = os.path.join(settings.WEBWINKEL_FOTOS_DIR, locatie)
             if os.path.exists(foto_pad):
-                thumb_pad = os.path.join(settings.PROJ_DIR, settings.WEBWINKEL_FOTOS_DIR, locatie_thumb)
+                thumb_pad = os.path.join(settings.WEBWINKEL_FOTOS_DIR, locatie_thumb)
                 tup = (locatie, foto_pad, locatie_thumb, thumb_pad)
                 foto_locaties.append(tup)
             else:
