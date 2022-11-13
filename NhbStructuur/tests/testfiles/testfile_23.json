@@ -1,0 +1,108 @@
+{"rayons": [
+  {"rayon_number":1,"name":"Rayon 1"},
+  {"rayon_number":2,"name":"Rayon 2"},
+  {"rayon_number":3,"name":"Rayon 3"},
+  {"rayon_number":4,"name":"Rayon 4"}
+ ],
+  "regions": [
+    {"region_number":111,
+     "name": "Regio 111",
+     "rayon_number": 3
+    }
+  ],
+  "clubs": [
+    {"club_number": 1000,
+     "region_number": 111,
+     "name": "Grote Club",
+     "prefix": null,
+     "secretaris": [],
+     "email": null,
+     "website": null,
+     "has_disabled_facilities": true,
+     "location_name": null,
+     "postal_code": null,
+     "address": null,
+     "phone_business": null,
+     "phone_private": null,
+     "phone_mobile": null,
+     "iso_abbr": null,
+     "latitude": null,
+     "longitude": null,
+     "coc_number": null,
+     "iban": "",
+     "bic": ""
+    }
+  ],
+  "members": [
+    {"member_number": 100001,
+     "club_number": 1000,
+     "name": "Tester",
+     "prefix": "de",
+     "first_name": "Ramon",
+     "initials": "V.",
+     "gender": "M",
+     "email": "rdetester@gmail.not",
+     "birthday": "1972-03-04",
+     "birthplace": null,
+     "member_from": "2010-11-12",
+     "para_code": null,
+     "address": null,
+     "postal_code": null,
+     "location_name": null,
+     "phone_business": null,
+     "phone_private": null,
+     "phone_mobile": null,
+     "iso_abbr": null,
+     "latitude": null,
+     "longitude": null,
+     "blocked": false,
+     "wa_id": null,
+     "educations": [
+          {
+            "code": "042",
+            "name": "not used",
+            "date_start": "2009-04-05",
+            "date_stop": "2012-04-24"
+          },
+          {
+            "code": "043",
+            "name": "not used",
+            "date_start": "2000-01-02",
+            "date_stop": "2000-04-04"
+          }
+     ]
+    },
+    {"member_number": 100100,
+     "club_number": null,
+     "name": "Wegwezer2",
+     "prefix": "van der",
+     "first_name": "Voornaam",
+     "initials": "W.",
+     "gender": "M",
+     "email": "",
+     "birthday": "2000-05-06",
+     "birthplace": null,
+     "member_from": "2000-06-06",
+     "para_code": null,
+     "address": null,
+     "postal_code": null,
+     "location_name": null,
+     "phone_business": null,
+     "phone_private": null,
+     "phone_mobile": null,
+     "iso_abbr": null,
+     "latitude": null,
+     "longitude": null,
+     "blocked": true,
+     "wa_id": null,
+     "educations": [
+          {
+            "code": "043",
+            "name": "not used",
+            "date_start": "2000-01-02",
+            "date_stop": "2000-04-04"
+          }
+     ]
+    }
+  ]
+}

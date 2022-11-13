@@ -24,6 +24,40 @@ OPLEIDING_STATUS_CHOICES = (
 )
 
 
+class OpleidingDiploma(models.Model):
+
+    # welke sporter heeft deze opleiding behaald?
+    sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
+
+    # unieke code voor koppeling met CRM data
+    # voorbeeld: 084 of 084a
+    code = models.CharField(max_length=5, default='')
+
+    # beschrijving van deze opleiding
+    beschrijving = models.CharField(max_length=50, default='')
+
+    # is deze om op de bondspas te tonen?
+    # (voor queryset filter)
+    toon_op_pas = models.BooleanField(default=False)
+
+    # wanneer is de opleiding begonnen
+    # 1990-01-01 = niet bekend, maar voor deze datum
+    datum_begin = models.DateField(default='1990-01-01')
+
+    # wanneer is de opleiding afgerond
+    # 9999-12-31 = niet bekend
+    datum_einde = models.DateField(default='9999-12-31')
+
+    def __str__(self):
+        return "%s: %s" % (self.sporter.lid_nr, self.code)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Opleiding diploma"
+
+    objects = models.Manager()  # for the editor only
+
+
 class OpleidingDeelnemer(models.Model):
     """ Deze klasse representeert een deelnemer aan een opleiding """
 

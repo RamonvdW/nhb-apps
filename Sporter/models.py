@@ -185,6 +185,7 @@ class Sporter(models.Model):
 class Speelsterkte(models.Model):
     """ Deze tabel houdt de behaalde spelden/veren/schilden bij """
 
+    # welke sporter heeft deze speelsterkte behaald?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
 
     datum = models.DateField()

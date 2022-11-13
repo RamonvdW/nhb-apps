@@ -377,6 +377,57 @@ SPEELSTERKTE_VOLGORDE = (
 )
 
 
+OPLEIDING_CODES = (
+    # code, afk-voor-pas, beschrijving, verdrukt-codes-op-pas
+    ('011', 'HBT-A', 'Handboogtrainer A', ('012',)),
+    ('012', 'HBT-B', 'Handboogtrainer B', ()),
+
+    ('013', 'HBT2', 'Handboogtrainer 2', ()),
+    ('014', 'HBT2', 'Handboogtrainer 3', ('011', '012', '013')),
+    ('015', 'HBT2', 'Handboogtrainer 4', ('011', '012', '013', '014')),
+
+    ('017', 'HBI2', 'Handboog instructeur 2', ()),
+    ('018', 'HBI3', 'Handboog instructeur 3', ('017',)),
+
+    ('030', 'WL', 'Wedstrijdleider 25m1pijl', ()),
+    ('031', 'WL', 'Wedstrijdleider Indoor/Outdoor', ()),
+    ('032', 'WL', 'Wedstrijdleider 25m1pijl + Indoor', ()),
+    ('033', 'WL', 'Wedstrijdleider Outdoor', ()),
+    ('034', 'WL', 'Wedstrijdleider Indoor', ()),
+    ('035', 'WL', 'Wedstrijdleider Allround (niveau 3)', ()),
+
+    ('039', '', 'Praktijkbegeleider voor instructeurs', ()),
+
+    ('040', 'SR3', 'Verenigingsscheidsrechter', ()),
+    ('041', 'SR4', 'Bondsscheidsrechter', ('040',)),
+    ('042', 'SR5', 'Scheidsrechter internation', ('040', '041')),
+
+    ('043', '', 'Basisblok', ()),
+
+    ('060', '', 'Autisme in de sport', ()),
+    ('061', '', 'Preventie seksuele intimidatie', ()),
+    ('062', '', 'Spec. aantekening aangepast sporten', ()),
+    ('063', '', 'Workshop doping', ()),
+    ('064', '', 'Experttraining arbitrage', ()),
+    ('065', 'TTR', 'Spec. aantekening Traditioneel (HBT2)', ()),
+    ('066', '', 'Basisschot bijscholing', ()),
+    ('066a', '', 'Bewijs deelname Basisschot (geen cert)', ()),
+    ('067', 'TTR', 'Certif. aantekening Traditioneel (HBT3)', ()),
+    ('068', '', 'Ianseo scoreverwerking', ()),
+
+    ('074', '', 'Sportief coachen', ()),
+
+    ('080', 'PB', 'Praktijkbegeleider voor trainer/coach', ()),
+    ('081', '', 'Mentor van cursisten Tr.A', ()),
+    ('082', '', 'Leercoach', ()),
+    ('083', '', 'Beoordelaar (portfolio/pvb)', ()),
+    ('084a', '', '(Bij-)scholing opl. opleiders-expert ASK', ()),
+
+    ('085', 'TCO', 'Technical Control Officer (IFAA/DFBV)', ()),
+    ('086', '', 'Certificaat WA level 1 Coach', ()),
+    ('087', '', 'Certificaat WA level 2 Coach', ()),
+)
+
 # logging to syslog
 # zie https://docs.djangoproject.com/en/3.0/topics/logging/
 # en  https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes

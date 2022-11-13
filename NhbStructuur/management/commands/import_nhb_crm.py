@@ -6,11 +6,11 @@
 
 """ importeer een JSON-file met data uit het CRM-systeem van de NHB """
 
-from django.core.management.base import BaseCommand
-from django.db.models import ProtectedError
-from django.db.utils import DataError
-from django.utils import timezone
 from django.conf import settings
+from django.utils import timezone
+from django.db.utils import DataError
+from django.db.models import ProtectedError
+from django.core.management.base import BaseCommand
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from Account.models import Account
@@ -19,6 +19,7 @@ from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Opleidingen.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Speelsterkte
@@ -52,7 +53,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'para_code', 'address', 'postal_code', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id')
-OPTIONAL_MEMBER_KEYS = ('skill_levels',)
+OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
 
 # administratieve entries (met fouten) die overslagen moeten worden
 SKIP_MEMBERS = (101711,)            # CRM developer
@@ -83,6 +84,7 @@ class Command(BaseCommand):
         self._count_regios = 0
         self._count_clubs = 0
         self._count_members = 0
+        self._count_admin = 0
         self._count_blocked = 0
         self._count_wijzigingen = 0
         self._count_verwijderingen = 0
@@ -107,8 +109,11 @@ class Command(BaseCommand):
         self._cache_sporter = dict()    # [lid_nr] = Sporter()
         self._cache_functie = dict()    # [(rol, beschrijving)] = Functie()
         self._cache_sterk = dict()      # [lid_nr] = [SpeelSterkte(), ...]
+        self._cache_diploma = dict()    # [lid_nr, code] = OpleidingDiploma()
 
         self._speelsterkte2volgorde = dict()    # [(discipline, beschrijving)] = volgorde
+        self._code2opleiding = dict()           # [opleiding code] = (beschrijving, toon_op_pas)
+        self._opleiding_onbekend = dict()       # [opleiding code] = aantal
 
     def _maak_cache(self):
         for account in Account.objects.all():
@@ -159,9 +164,19 @@ class Command(BaseCommand):
                 self._cache_sterk[sterkte.sporter.lid_nr] = [sterkte]
         # for
 
+        for diploma in OpleidingDiploma.objects.select_related('sporter').all():
+            tup = (diploma.sporter.lid_nr, diploma.code)
+            self._cache_diploma[tup] = diploma
+        # for
+
         for disc, beschr, volgorde in settings.SPEELSTERKTE_VOLGORDE:
             # discipline, beschrijving, volgorde
             self._speelsterkte2volgorde[(disc, beschr)] = volgorde
+        # for
+
+        for code, afkorting, beschrijving, _ in settings.OPLEIDING_CODES:
+            toon_op_pas = afkorting != ''
+            self._code2opleiding[code] = (beschrijving, toon_op_pas)
         # for
 
     def _vind_account(self, username):
@@ -269,7 +284,8 @@ class Command(BaseCommand):
             except ValueError:
                 pass
         if len(keys):
-            self.stderr.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
+            self.stdout.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
+            self._count_warnings += 1
         return has_error
 
     @staticmethod
@@ -442,8 +458,10 @@ class Command(BaseCommand):
             ver_kvk = ver_kvk.strip()
             if not ver_kvk:
                 self.stdout.write('[WARNING] Vereniging %s heeft geen KvK nummer' % ver_nr)
+                self._count_warnings += 1
             elif len(ver_kvk) != 8 or not ver_kvk.isdecimal():
                 self.stdout.write('[WARNING] Vereniging %s KvK nummer %s moet 8 cijfers bevatten' % (ver_nr, repr(ver_kvk)))
+                self._count_warnings += 1
 
             ver_website = club['website']
             if ver_website is None:
@@ -455,6 +473,7 @@ class Command(BaseCommand):
                 except ValidationError as exc:
                     self.stdout.write('[WARNING] Vereniging %s website url: %s bevat fout (%s)' % (
                                         ver_nr, repr(ver_website), str(exc)))
+                    self._count_warnings += 1
                     ver_website = ''
 
             ver_tel_nr = ''
@@ -475,6 +494,7 @@ class Command(BaseCommand):
             adres = club['address']
             if not adres:       # handles None and ''
                 self.stdout.write('[WARNING] Vereniging %s heeft geen adres' % ver_nr)
+                self._count_warnings += 1
             else:
                 adres_spl = adres.strip().split('\n')
                 if len(adres_spl) != 2:
@@ -503,15 +523,18 @@ class Command(BaseCommand):
                 if ver_bic and not ver_iban:
                     self.stdout.write('[WARNING] Vereniging %s heeft een BIC zonder IBAN: %s, %s' % (
                                             ver_nr, repr(ver_bic), repr(ver_iban)))
+                    self._count_warnings += 1
                 elif ver_iban and not ver_bic:
                     self.stdout.write('[WARNING] Vereniging %s heeft een IBAN zonder BIC: %s, %s' % (
                                             ver_nr, repr(ver_bic), repr(ver_iban)))
+                    self._count_warnings += 1
                 ver_bic = None
 
             if ver_bic:
                 if ver_bic not in settings.BEKENDE_BIC_CODES:
                     self.stdout.write('[WARNING] Vereniging %s heeft een onbekende BIC code %s horende bij IBAN %s' % (
                                         ver_nr, repr(ver_bic), repr(ver_iban)))
+                    self._count_warnings += 1
 
             if ver_bic:
                 # controleer de IBAN
@@ -729,6 +752,7 @@ class Command(BaseCommand):
                         if sporter.bij_vereniging is None or sporter.bij_vereniging.ver_nr != ver_nr:
                             self.stdout.write('[WARNING] Secretaris %s is geen lid bij vereniging %s' % (
                                 sporter.lid_nr, ver_nr))
+                            self._count_warnings += 1
 
                         ver_secretarissen.append(sporter)
                 # for
@@ -791,6 +815,7 @@ class Command(BaseCommand):
                             else:
                                 self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen bevestigd e-mailadres" % (
                                                         sporter.lid_nr, obj.ver_nr))
+                                self._count_warnings += 1
                 # for
 
                 for account in functie_sec.accounts.all():
@@ -802,7 +827,7 @@ class Command(BaseCommand):
 
                 if len(ver_secretarissen) == 0:
                     if ver_nr not in GEEN_SECRETARIS_NODIG:
-                        self.stderr.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
+                        self.stdout.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
                         self._count_warnings += 1
         # for
 
@@ -810,7 +835,7 @@ class Command(BaseCommand):
     def _corrigeer_tussenvoegsel(lid_nr, tussenvoegsel, achternaam):
         if tussenvoegsel and tussenvoegsel[0].isupper():
             laag = tussenvoegsel.lower()
-            if laag in ('de', 'den', 'van', 'van de', 'van der', 'van den', 'ter', 'van t'):
+            if laag in ('de', 'den', 'van', 'van de', 'van der', 'van den', 'ter', 'van t', 'op de', 'ten'):
                 tussenvoegsel = laag
             # else:
             #     print(lid_nr, tussenvoegsel, achternaam)
@@ -854,6 +879,7 @@ class Command(BaseCommand):
         """
         for member in data:
             is_valid = True
+            is_administratief_aanwezig = False
 
             lid_nr = member['member_number']
 
@@ -907,7 +933,9 @@ class Command(BaseCommand):
             lid_blocked = member['blocked']
 
             if not member['club_number']:
-                # ex-leden hebben geen vereniging, dus niet te veel klagen
+                # ex-leden hebben geen vereniging
+                # tijdens overstap kunnen leden ook (tijdelijk) geen club hebben
+                # dus niet te veel klagen
                 lid_ver = None
             else:
                 lid_ver = self._vind_vereniging(member['club_number'])
@@ -927,7 +955,7 @@ class Command(BaseCommand):
                             member['birthday'] = '20' + old_birthday[2:]
                         else:
                             member['birthday'] = '19' + old_birthday[2:]
-                        self.stderr.write('[WARNING] Lid %s geboortedatum gecorrigeerd van %s naar %s' % (
+                        self.stdout.write('[WARNING] Lid %s geboortedatum gecorrigeerd van %s naar %s' % (
                                                 lid_nr, old_birthday, member['birthday']))
                         self._count_warnings += 1
                     else:
@@ -1007,21 +1035,45 @@ class Command(BaseCommand):
             if not lid_geboorteplaats:
                 lid_geboorteplaats = ''     # vervang None to lege string
 
-            # try:
-            #     lid_edu = member['educations']
-            #     print('lid: %s, edu:' % lid_nr)
-            #     for edu in lid_edu:
-            #         print('        code: %s name: %s' % (repr(edu['code']), repr(edu['name'])))
-            #     # "educations": [
-            #     #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
-            #     #    {"code": "031", "name": "WEDSTRIJDLEIDER INDOOR\/OUTDOOR", "date_start": "1990-01-01", "date_stop": "1990-01-01"}]
-            # except KeyError:
-            #     lid_edu = ''
+            # "educations": [
+            #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
+            #    {"code": "031", "name": "WEDSTRIJDLEIDER INDOOR\/OUTDOOR", "date_start": "1990-01-01", "date_stop": "1990-01-01"}]
+            lid_edus = list()
+            try:
+                edus = member['educations']
+            except KeyError:
+                # geen opleidingen
+                pass
+            else:
+                if lid_blocked:
+                    # geen edus importeren voor oud-leden
+                    is_administratief_aanwezig = True
+                else:
+                    for edu in edus:
+                        code = edu['code']
+                        # kennen we deze opleiding?
+                        try:
+                            beschrijving, toon_op_pas = self._code2opleiding[code]
+                        except KeyError:
+                            try:
+                                self._opleiding_onbekend[code] += 1
+                            except KeyError:
+                                self._opleiding_onbekend[code] = 1
+                        else:
+                            date_start = edu['date_start']
+                            date_stop = edu['date_stop']
+                            tup = (code, beschrijving, toon_op_pas, date_start, date_stop)
+                            lid_edus.append(tup)
+                    # for
 
             try:
                 lid_sterk = member['skill_levels']
             except KeyError:
                 lid_sterk = list()
+            else:
+                if lid_blocked:
+                    is_administratief_aanwezig = True
+                    lid_sterk = list()
 
             lid_wa_id = member['wa_id']
             if not lid_wa_id:
@@ -1210,7 +1262,10 @@ class Command(BaseCommand):
             # else
 
             if lid_blocked:
-                self._count_blocked += 1
+                if is_administratief_aanwezig:
+                    self._count_admin += 1
+                else:
+                    self._count_blocked += 1
 
             if is_nieuw:
 
@@ -1237,6 +1292,9 @@ class Command(BaseCommand):
                 obj.bij_vereniging = lid_ver
                 obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
                 obj.adres_code = lid_adres_code
+                if not lid_ver:
+                    obj.lid_tot_einde_jaar -= 1
+                    obj.is_actief_lid = False
                 if lid_blocked:
                     obj.is_actief_lid = False
                 if not self.dryrun:
@@ -1251,63 +1309,97 @@ class Command(BaseCommand):
             except KeyError:
                 huidige_lijst = list()
 
-            for sterk in lid_sterk:
-                # sterk = {"date": "1990-01-01", "skill_level_code": "R1000", "skill_level_name": "Recurve 1000", "discipline_code": "REC", "discipline_name": "Recurve", "category_name": "Senior"}
-                cat = sterk['category_name']
-                disc = sterk['discipline_name']
-                datum_raw = sterk['date']
-                beschr = sterk['skill_level_name']
+            if obj.is_actief_lid:
+                for sterk in lid_sterk:
+                    # sterk = {"date": "1990-01-01", "skill_level_code": "R1000", "skill_level_name": "Recurve 1000", "discipline_code": "REC", "discipline_name": "Recurve", "category_name": "Senior"}
+                    cat = sterk['category_name']
+                    disc = sterk['discipline_name']
+                    datum_raw = sterk['date']
+                    beschr = sterk['skill_level_name']
 
-                try:
-                    datum = datetime.datetime.strptime(datum_raw, "%Y-%m-%d").date()  # YYYY-MM-DD
-                except (ValueError, TypeError):
-                    self.stderr.write('[ERROR] Lid %s heeft skill level met slechte datum: %s' % (
-                                            lid_nr, repr(datum_raw)))
-                    self._count_errors += 1
-                else:
-                    # kijk of deze al bestaat
-                    found = None
-                    for huidig in huidige_lijst:
-                        if huidig.beschrijving == beschr and huidig.discipline == disc and huidig.category == cat:
-                            # bestaat al
-                            found = huidig
-                            break   # from the for
-                    # for
-
-                    if found:
-                        # verwijderen uit de lijst zodat echt verwijderde speelsterktes kunnen vinden
-                        huidige_lijst.remove(found)
+                    try:
+                        datum = datetime.datetime.strptime(datum_raw, "%Y-%m-%d").date()  # YYYY-MM-DD
+                    except (ValueError, TypeError):
+                        self.stderr.write('[ERROR] Lid %s heeft skill level met slechte datum: %s' % (
+                                                lid_nr, repr(datum_raw)))
+                        self._count_errors += 1
                     else:
-                        # toevoegen
-                        self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nr, datum, disc, beschr))
+                        # kijk of deze al bestaat
+                        found = None
+                        for huidig in huidige_lijst:
+                            if huidig.beschrijving == beschr and huidig.discipline == disc and huidig.category == cat:
+                                # bestaat al
+                                found = huidig
+                                break   # from the for
+                        # for
 
-                        try:
-                            volgorde = self._speelsterkte2volgorde[(disc, beschr)]
-                        except KeyError:
-                            volgorde = 9999
-                            self.stderr.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (
-                                                    repr(disc), repr(beschr)))
-                            self._count_errors += 1
+                        if found:
+                            # verwijderen uit de lijst zodat echt verwijderde speelsterktes kunnen vinden
+                            huidige_lijst.remove(found)
+                        else:
+                            # toevoegen
+                            self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nr, datum, disc, beschr))
 
-                        sterk = Speelsterkte(
-                                     sporter=obj,
-                                     beschrijving=beschr,
-                                     discipline=disc,
-                                     category=cat,
-                                     volgorde=volgorde,
-                                     datum=datum)
-                        nieuwe_lijst.append(sterk)
-                        self._count_toevoegingen += 1
-            # for
+                            try:
+                                volgorde = self._speelsterkte2volgorde[(disc, beschr)]
+                            except KeyError:
+                                volgorde = 9999
+                                self.stdout.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (
+                                                        repr(disc), repr(beschr)))
+                                self._count_warnings += 1
+
+                            sterk = Speelsterkte(
+                                         sporter=obj,
+                                         beschrijving=beschr,
+                                         discipline=disc,
+                                         category=cat,
+                                         volgorde=volgorde,
+                                         datum=datum)
+                            nieuwe_lijst.append(sterk)
+                            self._count_toevoegingen += 1
+                # for
 
             if len(huidige_lijst):
                 # FUTURE: verwijder oude speelsterktes
-                self.stderr.write('[WARNING] Kan speelsterktes nog niet verwijderen: lid=%s, te verwijderen: %s' % (lid_nr, repr(huidige_lijst)))
+                self.stdout.write('[WARNING] Kan speelsterktes nog niet verwijderen: lid=%s, te verwijderen: %s' % (lid_nr, repr(huidige_lijst)))
+                self._count_warnings += 1
                 # self._count_verwijderingen += 1
 
             if len(nieuwe_lijst):
                 Speelsterkte.objects.bulk_create(nieuwe_lijst)
-        # for
+
+            if obj.is_actief_lid:
+                for code, beschrijving, toon_op_pas, date_start, date_stop in lid_edus:
+                    try:
+                        tup = (obj.lid_nr, code)
+                        diploma = self._cache_diploma[tup]
+                    except KeyError:
+                        diploma = OpleidingDiploma(
+                                        sporter=obj,
+                                        code=code,
+                                        beschrijving=beschrijving,
+                                        toon_op_pas=toon_op_pas,
+                                        datum_begin=date_start,
+                                        datum_einde=date_stop)
+                    else:
+                        if diploma.beschrijving != beschrijving:
+                            diploma.beschrijving = beschrijving
+
+                        if str(diploma.datum_begin) != date_start:
+                            self.stdout.write('[INFO] Lid %s: opleiding %s datum_begin: %s --> %s' % (
+                                                obj.lid_nr, code, diploma.datum_begin, date_start))
+                            diploma.datum_begin = date_start
+
+                        if str(diploma.datum_einde) != date_stop:
+                            self.stdout.write('[INFO] Lid %s: opleiding %s datum_einde: %s --> %s' % (
+                                                obj.lid_nr, code, diploma.datum_einde, date_stop))
+                            diploma.datum_einde = date_stop
+
+                    if not self.dryrun:
+                        diploma.save()
+                # for
+
+        # for member
 
         # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(lid_nrs), repr(lid_nrs)))
         while len(lid_nrs) > 0:
@@ -1322,9 +1414,10 @@ class Command(BaseCommand):
                 self.stdout.write('[INFO] Lid %s: is_actief_lid: ja --> nee' % repr(lid_nr))
                 obj.is_actief_lid = False
                 self._count_wijzigingen += 1
-                self.stdout.write('               vereniging %s --> geen' % get_vereniging_str(obj.bij_vereniging))
-                obj.bij_vereniging = None
-                self._count_wijzigingen += 1
+                if obj.bij_vereniging:
+                    self.stdout.write('               vereniging %s --> geen' % get_vereniging_str(obj.bij_vereniging))
+                    obj.bij_vereniging = None
+                    self._count_wijzigingen += 1
                 if not self.dryrun:
                     obj.save()
                     self._cache_sporter[obj.pk] = obj
@@ -1354,6 +1447,11 @@ class Command(BaseCommand):
                         self._count_errors += 1
                         self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
         # while
+
+        for code, aantal in self._opleiding_onbekend.items():
+            self.stdout.write('[WARNING] Opleiding code %s is niet bekend (%s keer in gebruik)' % (code, aantal))
+            self._count_warnings += 1
+        # for
 
     def _import_wedstrijdlocaties(self, data):
         """ Importeert data van verenigingen als basis voor wedstrijdlocaties """
@@ -1521,24 +1619,29 @@ class Command(BaseCommand):
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
 
         count_sterkte = Speelsterkte.objects.count()
+        count_diploma = OpleidingDiploma.objects.count()
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                       "%s leden, %s inactief, %s uitgeschreven; %s verenigingen; %s speelsterktes, %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
-                       (self._count_errors,
-                        self._count_warnings,
-                        self._count_toevoegingen,
-                        self._count_wijzigingen,
-                        self._count_verwijderingen,
-                        self._count_members - self._count_blocked,
-                        self._count_blocked,
-                        self._count_uitgeschreven,
-                        self._count_clubs,
-                        count_sterkte,
-                        self._count_sec_no_account,
-                        self._count_regios,
-                        self._count_rayons,
-                        self._count_lid_no_email)
+                       "%s leden, %s inactief, %s uitgeschreven; %s administratief aanwezig, %s verenigingen; "\
+                       "%s speelsterktes, %s opleiding diploma's, %s secretarissen zonder account; "\
+                       "%s regios; %s rayons; %s actieve leden zonder e-mail" % (
+                            self._count_errors,
+                            self._count_warnings,
+                            self._count_toevoegingen,
+                            self._count_wijzigingen,
+                            self._count_verwijderingen,
+                            self._count_members - self._count_blocked - self._count_admin,
+                            self._count_blocked,
+                            self._count_admin,
+                            self._count_uitgeschreven,
+                            self._count_clubs,
+                            count_sterkte,
+                            count_diploma,
+                            self._count_sec_no_account,
+                            self._count_regios,
+                            self._count_rayons,
+                            self._count_lid_no_email)
 
         if self.dryrun:
             self.stdout.write("\nDRY RUN")
