@@ -4,14 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from Functie.operations import Functie
 from Sporter.models import Sporter
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Webwinkel.models import WebwinkelProduct, WebwinkelFoto
 from PIL import Image
+import tempfile
 import os
 
 
@@ -56,7 +56,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
         foto2.save()
         self.foto2 = foto2
 
-        self.foto_dir = os.path.join(settings.PROJ_DIR, settings.WEBWINKEL_FOTOS_DIR)
+        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.foto_dir = self.tmp_dir.name
         if os.path.isdir(self.foto_dir):            # pragma: no branch
             # create a few placeholder fotos
             for fname in (foto2.locatie, foto2.locatie_thumb):
@@ -91,105 +92,110 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
         self.product3.fotos.add(foto2)
 
     def test_check_fotos(self):
-        # 1 product heeft een lege locatie en locatie_thumb
-        # 1 product heeft bestaande foto's
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue(" heeft een lege locatie_thumb" in f1.getvalue())
-        self.assertTrue("[INFO] 2 foto's OK; 2 foto's NOK" in f2.getvalue())
+        # 1 product heeft een omslagfoto met lege locatie en locatie_thumb
+        # 3 product heeft bestaande foto's
+        with override_settings(WEBWINKEL_FOTOS_DIR=self.foto_dir):
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue(" heeft een lege locatie" in f1.getvalue())
+            self.assertTrue("Test titel 2) heeft geen omslagfoto" in f2.getvalue())
+            self.assertTrue("Test titel 3) heeft geen omslagfoto" in f2.getvalue())
+            self.assertTrue("[INFO] 2 foto's OK; 3 foto's NOK" in f2.getvalue())
 
-        self.foto.locatie = 'non-existing.jpg'
-        self.foto.save()
+            self.foto.locatie = 'non-existing.jpg'
+            self.foto.save()
 
-        # 1 product heeft een niet bestaande foto
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue(" heeft een lege locatie_thumb" in f1.getvalue())
-        self.assertTrue('[ERROR] ' in f1.getvalue())
-        self.assertTrue(' niet gevonden: ' in f1.getvalue())
-        self.assertTrue(self.foto.locatie in f1.getvalue())
-        self.assertTrue("[INFO] 2 foto's OK; 2 foto's NOK" in f2.getvalue())
+            # 1 product heeft een niet bestaande foto
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue('[ERROR] ' in f1.getvalue())
+            self.assertTrue(' locatie bestand niet gevonden: ' in f1.getvalue())
+            self.assertTrue(self.foto.locatie in f1.getvalue())
+            self.assertTrue("[INFO] 2 foto's OK; 3 foto's NOK" in f2.getvalue())
 
-        # verwijder het probleemgeval
-        self.foto.delete()
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
-        self.assertTrue("[INFO] 2 foto's OK; 0 foto's NOK" in f2.getvalue())
+            # verwijder het probleemgeval
+            # de ERROR verandert in een WARNING: product 1 heeft nu ook geen omslagfoto
+            self.foto.delete()
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[INFO] 2 foto's OK; 3 foto's NOK" in f2.getvalue())
 
     def test_koppel_fotos(self):
         self.product3.fotos.clear()
 
-        # fotobestand niet gevonden
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', 'foto1.jpg', report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Kan foto niet vinden: " in f1.getvalue())
-        self.assertTrue("foto1.jpg" in f1.getvalue())
+        with override_settings(WEBWINKEL_FOTOS_DIR=self.foto_dir):
+            # fotobestand niet gevonden
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', 'foto1.jpg', report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[ERROR] Kan foto niet vinden: " in f1.getvalue())
+            self.assertTrue("foto1.jpg" in f1.getvalue())
 
-        # product niet gevonden
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', self.foto2.locatie, report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Product niet gevonden" in f1.getvalue())
-        self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 9999'" in f2.getvalue())
+            # product niet gevonden
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 9999', self.foto2.locatie, report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[ERROR] Product niet gevonden" in f1.getvalue())
+            self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 9999'" in f2.getvalue())
 
-        # meerdere producten matchen
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel', self.foto2.locatie, report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[ERROR] Meerdere producten gevonden:" in f1.getvalue())
+            # meerdere producten matchen
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel', self.foto2.locatie, report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[ERROR] Meerdere producten gevonden:" in f1.getvalue())
 
-        # koppel omslagfoto aan product
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, report_exit_code=False)
-        print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
-        self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
-        self.assertTrue("[INFO] Foto 'test_1.jpg' gekoppeld als omslagfoto" in f2.getvalue())
+            # koppel omslagfoto aan product
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Foto 'test_1.jpg' gekoppeld als omslagfoto" in f2.getvalue())
 
-        # koppel meerdere foto's aan product + maak thumbnail (van garbage)
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
-        self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
-        self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
+            # koppel meerdere foto's aan product + maak thumbnail (van garbage)
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
 
-        # maak een goede foto aan
-        fpath = os.path.join(self.foto_dir, self.foto2.locatie)
-        im = Image.new('RGB', (100, 100))
-        im.save(fpath, "jpeg")
+            # maak een goede foto aan
+            fpath = os.path.join(self.foto_dir, self.foto2.locatie)
+            im = Image.new('RGB', (100, 100))
+            im.save(fpath, "jpeg")
 
-        # koppel meerdere foto's aan product + maak thumbnail
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
-        self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
-        self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
-        self.assertTrue("[INFO] Maak thumbnail 'test_1_thumb.jpg'" in f2.getvalue())
-        self.assertTrue("[INFO] Foto 'test_1.jpg' + thumb gekoppeld aan product" in f2.getvalue())
+            # koppel meerdere foto's aan product + maak thumbnail
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[INFO] Zoek product met omslag_titel 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
+            self.assertTrue("[INFO] Maak thumbnail 'test_1_thumb.jpg'" in f2.getvalue())
+            self.assertTrue("[INFO] Foto 'test_1.jpg' + thumb gekoppeld aan product" in f2.getvalue())
 
-        # corner case: thumb pad is aangepast
-        self.foto2 = WebwinkelFoto.objects.get(pk=self.foto2.pk)
-        self.foto2.locatie_thumb = 'xxx'
-        self.foto2.save()
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
-        self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
-        self.assertTrue("[INFO] Maak thumbnail 'test_1_thumb.jpg'" in f2.getvalue())
-        self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld aan product" in f2.getvalue())
+            # corner case: thumb pad is aangepast
+            self.foto2 = WebwinkelFoto.objects.get(pk=self.foto2.pk)
+            self.foto2.locatie_thumb = 'xxx'
+            self.foto2.save()
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, self.foto2.locatie, report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[INFO] Gevonden product: 'Test titel 1'" in f2.getvalue())
+            self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
+            self.assertTrue("[INFO] Maak thumbnail 'test_1_thumb.jpg'" in f2.getvalue())
+            self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld aan product" in f2.getvalue())
 
-        # verwijder een foto
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, report_exit_code=False)
-        # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
-        self.assertFalse("[INFO] Foto 'test_1.jpg' was al gekoppeld aan product" in f2.getvalue())
-        self.assertTrue("[INFO] De volgende foto's worden losgekoppeld: [" in f2.getvalue())
+            # verwijder een foto
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('koppel_fotos', 'Test titel 1', self.foto2.locatie, report_exit_code=False)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[INFO] Foto 'test_1.jpg' was al gekoppeld als omslagfoto" in f2.getvalue())
+            self.assertFalse("[INFO] Foto 'test_1.jpg' was al gekoppeld aan product" in f2.getvalue())
+            self.assertTrue("[INFO] De volgende foto's worden losgekoppeld: [" in f2.getvalue())
 
 # end of file

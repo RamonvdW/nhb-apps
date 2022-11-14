@@ -43,15 +43,19 @@ class Command(BaseCommand):
             if os.path.exists(foto_pad):
                 self.aantal_ok += 1
             else:
-                self.stderr.write('[ERROR] Foto pk=%s bestand niet gevonden: %s' % (foto.pk, repr(foto_pad)))
+                self.stderr.write('[ERROR] Foto pk=%s %s bestand niet gevonden: %s' % (foto.pk, veld, repr(foto_pad)))
                 self.aantal_nok += 1
 
     def handle(self, *args, **options):
         for product in WebwinkelProduct.objects.select_related('omslag_foto').prefetch_related('fotos').order_by('pk'):
 
             foto = product.omslag_foto
-            self._check_foto_gebruik(product, foto, 'locatie')
-            self._check_foto_bestand(foto, 'locatie')
+            if foto:
+                self._check_foto_gebruik(product, foto, 'locatie')
+                self._check_foto_bestand(foto, 'locatie')
+            else:
+                self.stdout.write('[WARNING] Product pk=%s (%s) heeft geen omslagfoto' % (product.pk, product.omslag_titel))
+                self.aantal_nok += 1
 
             nr = 0
             for foto in product.fotos.all():
@@ -60,7 +64,6 @@ class Command(BaseCommand):
                 self._check_foto_gebruik(product, foto, veld)
                 self._check_foto_bestand(foto, 'locatie')
                 self._check_foto_bestand(foto, 'locatie_thumb')
-
         # for
 
         # rapporteer ongebruikte fotos

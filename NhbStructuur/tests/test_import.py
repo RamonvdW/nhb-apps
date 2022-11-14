@@ -790,8 +790,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with override_settings(OPLEIDING_CODES=test_opleiding_codes):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_23_DIPLOMA)
-        print("f1: %s" % f1.getvalue())
-        print("f2: %s" % f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         # controleer dat er mutaties zijn
         self.assertTrue('datum_begin' in f2.getvalue())
         self.assertTrue('datum_einde' in f2.getvalue())
