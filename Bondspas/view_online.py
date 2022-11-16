@@ -304,6 +304,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
         """ called by the template system to get the context data for the template """
         context = dict()
 
+        # bondspas wordt opgehaald nadat de pagina getoond kan worden
         context['url_dynamic'] = reverse('Bondspas:dynamic-ophalen')
 
         context['kruimels'] = (
@@ -341,8 +342,11 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
 
         regels = maak_bondspas_regels(lid_nr, jaar)
 
+        # let op: template verwacht png
         png_data = maak_bondspas_image(lid_nr, jaar, regels)
 
+        # base64 is nodig voor img in html
+        # alternatief is javascript laten tekenen op een canvas en base64 maken met dataToUrl
         out = dict()
         out['bondspas_base64'] = base64.b64encode(png_data).decode()
 
