@@ -5,8 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.http import JsonResponse
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.utils.formats import date_format
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -303,6 +304,34 @@ class ToonBondspasView(UserPassesTestMixin, View):
         """ called by the template system to get the context data for the template """
         context = dict()
 
+        context['url_dynamic'] = reverse('Bondspas:dynamic-ophalen')
+
+        context['kruimels'] = (
+            (None, 'Bondspas'),
+        )
+
+        # toon een pagina die wacht op de download
+        menu_dynamics(request, context)
+        return render(request, self.template_name, context)
+
+
+class DynamicBondspasOphalenView(UserPassesTestMixin, View):
+
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
+        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de webpagina via een stukje javascript de bondspas ophaalt
+            nadat de hele HTML binnen is en de pagina getoond kan worden.
+
+            Dit is een POST by-design, om caching te voorkomen.
+        """
+
         # bepaal het jaar voor de wedstrijdklasse
         now = timezone.localtime(timezone.now())
         jaar = now.year
@@ -314,15 +343,10 @@ class ToonBondspasView(UserPassesTestMixin, View):
 
         png_data = maak_bondspas_image(lid_nr, jaar, regels)
 
-        context['bondspas_base64'] = base64.b64encode(png_data).decode()
+        out = dict()
+        out['bondspas_base64'] = base64.b64encode(png_data).decode()
 
-        context['kruimels'] = (
-            (None, 'Bondspas'),
-        )
-
-        # toon een pagina die wacht op de download
-        menu_dynamics(request, context)
-        return render(request, self.template_name, context)
+        return JsonResponse(out)
 
 
 # end of file

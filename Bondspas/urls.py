@@ -14,6 +14,11 @@ urlpatterns = [
     path('toon/',
          view_online.ToonBondspasView.as_view(),
          name='toon-bondspas'),
+
+    path('dynamic/ophalen/',
+         view_online.DynamicBondspasOphalenView.as_view(),
+         name='dynamic-ophalen'),
+
 ]
 
 # end of file
