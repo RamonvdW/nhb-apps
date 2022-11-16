@@ -297,8 +297,8 @@ class ToonBondspasView(UserPassesTestMixin, View):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        # gebruiker moet ingelogd zijn. Rol is niet belangrijk.
+        return rol_get_huidige(self.request) != Rollen.ROL_NONE
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -323,8 +323,8 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        # gebruiker moet ingelogd zijn. Rol is niet belangrijk.
+        return rol_get_huidige(self.request) != Rollen.ROL_NONE
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de webpagina via een stukje javascript de bondspas ophaalt
