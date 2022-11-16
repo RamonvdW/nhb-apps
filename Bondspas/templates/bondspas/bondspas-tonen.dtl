@@ -10,6 +10,14 @@
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function pas_is_geladen()
+        {
+            const el = document.getElementById('id_even_wachten')
+            el.style.display = "none";
+        };
+    </script>
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -19,12 +27,14 @@
 
     <!-- blauw balk met wit informatie veld -->
     <div class="row-nhb-blauw">
-        <div class="col s12">
-            <div class="white" style="padding:10px">
-
-                <img alt="Bondspas" src="data:image/png;base64,{{ bondspas_base64 }}" style="max-width:100%"/>
-
+        <div class="col s12 m10 offset-m1 l6 offset-l3 xl6 offset-xl3">
+            <div id="id_even_wachten" class="white" style="padding:10px">
+                <p>Je bondspas wordt opgehaald</p>
             </div>
+        </div>
+
+        <div class="col s12">
+            <img alt="Bondspas" src="data:image/png;base64,{{ bondspas_base64 }}" loading="lazy" style="max-width:800px; width:100%; height:auto" onload="pas_is_geladen()"/>
         </div>
     </div>
 

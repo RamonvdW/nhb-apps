@@ -58,11 +58,15 @@ def maak_bondspas_regels(lid_nr, jaar):
     diplomas = OpleidingDiploma.objects.filter(sporter=sporter, toon_op_pas=True).order_by('code')
     alle_codes = [diploma.code for diploma in diplomas]
     for diploma in diplomas:
-        afkorting_voor_pas, vervangt_codes = opleiding_codes[diploma.code]
-        onderdruk = any([code in alle_codes for code in vervangt_codes])
-        print(diploma.code, afkorting_voor_pas, onderdruk)
-        if not onderdruk:
-            afkortingen.append(afkorting_voor_pas)
+        try:
+            afkorting_voor_pas, vervangt_codes = opleiding_codes[diploma.code]
+        except KeyError:
+            # onbekend diploma
+            pass
+        else:
+            onderdruk = any([code in alle_codes for code in vervangt_codes])
+            if not onderdruk:
+                afkortingen.append(afkorting_voor_pas)
     # for
     if len(afkortingen):
         regels.append(("Opleidingen", ", ".join(afkortingen)))
@@ -113,7 +117,7 @@ def maak_bondspas_regels(lid_nr, jaar):
     return regels
 
 
-def teken_barcode(lid_nr, draw, end_x, end_y, font):
+def teken_barcode(lid_nr, draw, begin_x, end_y, font):
     """
         Barcode volgens "Code 39", zonder checksum
         See https://en.wikipedia.org/wiki/Code_39
@@ -143,24 +147,25 @@ def teken_barcode(lid_nr, draw, end_x, end_y, font):
     # for
     code39 += sym_start_stop
 
+    digit_width, digit_height = draw.textsize("8", font=font)
+
     # teken de lijntjes van de barcode
-    pixels = 2
-    y = end_y
+    pixels = 3
+    y = end_y - digit_height - 10
     width = len(code39) * pixels
-    x = end_x - width
+    x = begin_x
     for code in code39:
         if code == "1":
-            draw.rectangle(((x, y - 60), (x + pixels - 1, y)), fill=(0, 0, 0))
+            draw.rectangle(((x, y - 80), (x + pixels - 1, y)), fill=(0, 0, 0))
         x += pixels
     # for
 
     # teken de cijfers onder de barcode
     margin = 10
     digit_count = len(lid_nr)
-    digit_width = draw.textlength("8", font=font)
     digit_step = round((width - 2 * margin - digit_count * digit_width) / (digit_count - 1))
     digit_step += digit_width
-    digit_x = end_x - width + margin
+    digit_x = begin_x
     for digit in lid_nr:
         draw.text((digit_x, y), digit, (0, 0, 0), font=font, anchor="la")
         digit_x += digit_step
@@ -168,31 +173,36 @@ def teken_barcode(lid_nr, draw, end_x, end_y, font):
 
 
 def maak_bondspas_image(lid_nr, jaar, regels):
-    fpath = os.path.join(settings.INSTALL_PATH, settings.STATIC_ROOT, 'bondspas', 'achtergrond_bondspas.png')
+    fpath = os.path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas.png')
     image = Image.open(fpath)
+    # image = image.resize((960, 1353))        # standard size = 1280 x 1804
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=18)
-    font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=25)
+    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=33)
+    font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=40)
     color_black = (0, 0, 0)
     color_grijs = (221, 217, 215)       # reverse engineered
+    # color_grijs = (200, 200, 200)
 
     # het grijze kader waarin de tekst moet komen
     # coördinaten: (0,0) = top-left
     _, _, width, height = image.getbbox()
-    kader_y1 = 239          # bovenkant
-    kader_y2 = 469          # onderkant
-    kader_x1 = 2            # border is 2 pixels
-    kader_x2 = width - 2
-
-    # zet een marge van 10 pixels
-    kader_y1 += 10
-    kader_y2 -= 10
-    kader_x1 += 30
-    kader_x2 -= 30
+    kader_y1 = 387          # bovenkant
+    kader_y2 = 1015         # onderkant
+    kader_x1 = 0            # border is 2 pixels
+    kader_x2 = width
 
     # teken het grijze vlak opnieuw
     # er zou geen kleurverschil moeten zijn
     draw.rectangle(((kader_x1, kader_y1), (kader_x2, kader_y2)), fill=color_grijs)
+
+    # zwart kader ronde het hele plaatje
+    draw.rectangle(((0, 0), (image.width -1 , image.height - 1)), width=2, fill=None, outline=color_black)
+
+    # zet een marge van 10 pixels
+    kader_y1 += 30
+    kader_y2 -= 20
+    kader_x1 += 50
+    kader_x2 -= 50
 
     # bondsnummer en WA id
     lid_nr = regels[0][1]
@@ -200,8 +210,11 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     regels = regels[2:]
 
     text_width, text_height = draw.textsize(lid_nr, font=font_bold)
+    text_height += 10       # extra spacing
+    barcode_margin_x = 20
+
     bondsnr_width = draw.textlength("Bondsnummer: ", font=font)
-    bondsnr_x = kader_x2 - text_width - bondsnr_width
+    bondsnr_x = kader_x2 - text_width - bondsnr_width - barcode_margin_x
     bondsnr_y = kader_y1 - text_height
 
     if len(wa_id):
@@ -213,16 +226,17 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     # text anchors: https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
     draw.text((bondsnr_x, bondsnr_y), "Bondsnummer: ", color_black, font=font, anchor="ls")
     draw.text((bondsnr_x + bondsnr_width, bondsnr_y), lid_nr, color_black, font=font_bold, anchor="ls")
+    bondsnr_y -= text_height
 
     # barcode
-    teken_barcode(lid_nr, draw, kader_x2, bondsnr_y - 3 * text_height, font)
+    teken_barcode(lid_nr, draw, bondsnr_x, bondsnr_y, font)
 
     # switch naar een kleiner font
-    del font_bold
-    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=17)
+    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=28)
+    font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=28)
     _, text_height = draw.textsize(lid_nr, font=font)
 
-    text_spacing = text_height + 5
+    text_spacing = text_height + 20
     wkl_indent = 30     # pixels
 
     # bepaal hoe breed de eerste kolom moet worden
@@ -232,7 +246,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     for header, _ in regels:
 
         header += ': '
-        text_width = draw.textlength(header, font=font)
+        text_width = draw.textlength(header, font=font_bold)
 
         if wkl:
             text_width += wkl_indent
@@ -251,7 +265,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
         header += ': '
 
         if wkl:
-            draw.text((kader_x1 + header_width - header_width_wkl + wkl_indent, next_y), header, color_black, font=font)
+            draw.text((kader_x1 + header_width - header_width_wkl + wkl_indent, next_y), header, color_black, font=font_bold)
         else:
             draw.text((kader_x1, next_y), header, color_black, font=font)
 
