@@ -136,14 +136,6 @@ class Command(BaseCommand):
             jaar -= 1
 
         lid_nr = options['lid_nr']
-        if lid_nr == 0:
-            for lid_nr in (176696,
-                           135553, 141988, 155666, 177392, 177394, 177395, 162651, 173086, 176324, 100773, 176341,
-                           176342, 176284, 177410, 177419, 176316, 177411):
-                pdf_naam = 'bondspas_%s.pdf' % lid_nr
-                self.maak_pdf(jaar, lid_nr, pdf_naam)
-            # for
-
         pdf_naam = 'bondspas_%s.pdf' % lid_nr
         self.maak_pdf(jaar, lid_nr, pdf_naam)
 
