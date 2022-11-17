@@ -171,7 +171,7 @@ STATIC_URL = '/static/'             # url
 STATIC_ROOT = 'nhbapps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
     os.path.join(PROJ_DIR, "compiled_static"),
-    ("webwinkel_fotos", os.path.join(PROJ_DIR, WEBWINKEL_FOTOS_DIR)),   # webwinkel_fotos is subdir under static
+    ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),
 ]
 STATICFILES_FINDER = [
     'django.contrib.staticfiles.finders.FileSystemFinder',

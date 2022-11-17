@@ -8,7 +8,7 @@
     Django settings for the NhbApps project during automated testing.
 """
 
-from nhbapps.settings_base import *
+from nhbapps.settings_base import *         # noqa
 
 DEBUG = True
 ENABLE_DEBUG_TOOLBAR = False
@@ -17,10 +17,10 @@ ENABLE_DJANGO_EXTENSIONS = False
 # significant speed up by reducing calculation time for secure password handling
 PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
+WEBWINKEL_FOTOS_DIR = 'data_test/webwinkel'
+
 # enable html validation using v.Nu (warning: triples test duration)
 # warning: increases test run duration significantly
 #TEST_VALIDATE_HTML = True
-
-WEBWINKEL_FOTOS_DIR = 'data_test/webwinkel'
 
 # end of file
