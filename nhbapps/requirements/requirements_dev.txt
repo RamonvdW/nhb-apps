@@ -41,9 +41,9 @@ google-api-core==2.10.2
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.65.0
+google-api-python-client==2.66.0
     # via -r requirements_test.txt
-google-auth==2.13.0
+google-auth==2.14.1
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -53,13 +53,13 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-googleapis-common-protos==1.56.4
+googleapis-common-protos==1.57.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
 html5validator==0.4.2
     # via -r requirements_dev.in
-httplib2==0.20.4
+httplib2==0.21.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
@@ -78,23 +78,23 @@ openpyxl==3.0.10
     # via -r requirements_test.txt
 packaging==21.3
     # via pip-review
-pillow==9.2.0
+pillow==9.3.0
     # via
     #   -r requirements_test.txt
     #   reportlab
-pip-licenses==3.5.5
+pip-licenses==4.0.1
     # via -r requirements_dev.in
 pip-review==1.2.0
     # via -r requirements_dev.in
-protobuf==4.21.8
+prettytable==3.5.0
+    # via pip-licenses
+protobuf==4.21.9
     # via
     #   -r requirements_test.txt
     #   google-api-core
     #   googleapis-common-protos
-psycopg2-binary==2.9.4
+psycopg2-binary==2.9.5
     # via -r requirements_test.txt
-ptable==0.9.2
-    # via pip-licenses
 pyasn1==0.4.8
     # via
     #   -r requirements_test.txt
@@ -111,7 +111,7 @@ pyparsing==3.0.9
     #   -r requirements_test.txt
     #   httplib2
     #   packaging
-pytz==2022.5
+pytz==2022.6
     # via
     #   -r requirements_test.txt
     #   django
@@ -119,7 +119,7 @@ pyyaml==6.0
     # via html5validator
 qrcode==7.3.1
     # via -r requirements_test.txt
-reportlab==3.6.11
+reportlab==3.6.12
     # via -r requirements_test.txt
 requests==2.28.1
     # via
@@ -156,6 +156,8 @@ urllib3==1.26.12
     #   -r requirements_test.txt
     #   mollie-api-python
     #   requests
+wcwidth==0.2.5
+    # via prettytable
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
