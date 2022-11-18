@@ -105,7 +105,7 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
 class SpeelsterkteAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Speelsterkte klasse """
 
-    search_fields = ('beschrijving', 'category', 'discipline', 'sporter__unaccented_naam')
+    search_fields = ('beschrijving', 'category', 'discipline', 'sporter__unaccented_naam', 'sporter__lid_nr')
 
     list_filter = ('discipline', 'beschrijving', 'category')
 
