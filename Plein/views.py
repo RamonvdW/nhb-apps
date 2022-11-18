@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
-from Bestel.mandje import eval_mandje_inhoud
+from Bestel.operations.mandje import eval_mandje_inhoud
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken

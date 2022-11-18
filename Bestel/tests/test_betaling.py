@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import BestelMandje, Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING
-from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond
+from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Mailer.models import MailQueue

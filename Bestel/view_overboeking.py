@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.models import Bestelling, BESTELLING_STATUS_AFGEROND
-from Bestel.mutaties import bestel_overboeking_ontvangen
+from Bestel.operations.mutaties import bestel_overboeking_ontvangen
 from Betaal.models import BetaalTransactie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics

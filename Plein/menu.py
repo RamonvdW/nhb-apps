@@ -8,7 +8,7 @@ from django.conf import settings
 from django.shortcuts import reverse
 from Account.rechten import account_rechten_is_otp_verified
 from Functie.rol import Rollen, rol_mag_wisselen, rol_get_huidige
-from Bestel.mandje import cached_aantal_in_mandje_get
+from Bestel.operations.mandje import cached_aantal_in_mandje_get
 from Taken.operations import aantal_open_taken
 
 

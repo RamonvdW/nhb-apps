@@ -12,8 +12,8 @@ from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
                            BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
                            BESTELLING_STATUS_MISLUKT)
-from Bestel.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
-                             bestel_mutatieverzoek_afmelden_wedstrijd)
+from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
+                                        bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
 from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging

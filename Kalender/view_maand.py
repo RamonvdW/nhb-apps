@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
-from Bestel.mandje import eval_mandje_inhoud
+from Bestel.operations.mandje import eval_mandje_inhoud
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import Wedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
 from datetime import date, timedelta

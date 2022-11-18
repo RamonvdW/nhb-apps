@@ -30,13 +30,15 @@ from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortinge
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
 from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering,
-                                      webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten)
+                                      webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten_mandje,
+                                      webwinkel_plugin_bepaal_verzendkosten_bestelling)
 from Mailer.operations import mailer_queue_email, render_email_template
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Wedstrijden.models import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                 WEDSTRIJD_KORTING_COMBI)
 from mollie.api.client import Client, RequestSetupError
+from types import SimpleNamespace
 from decimal import Decimal
 import traceback
 import datetime
@@ -60,7 +62,9 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
                                  'wedstrijd_inschrijving__sporterboog',
                                  'wedstrijd_inschrijving__sporterboog__boogtype',
                                  'wedstrijd_inschrijving__sporterboog__sporter',
-                                 'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
+                                 'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+                                 'webwinkel_keuze',
+                                 'webwinkel_keuze__product')
                  .order_by('pk'))       # vaste volgorde (primitief, maar functioneel)
 
     regel_nr = 0
@@ -70,7 +74,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
             inschrijving = product.wedstrijd_inschrijving
             wedstrijd = inschrijving.wedstrijd
 
-            # lege regel gevolgd door een regel nummer
+            # nieuwe regel op de bestelling
             regel_nr += 1
             product.regel_nr = regel_nr
 
@@ -105,7 +109,34 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
                 if korting.soort == WEDSTRIJD_KORTING_COMBI:
                     combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                     product.combi_reden = " en ".join(combi_redenen)
+
+        elif product.webwinkel_keuze:
+            keuze = product.webwinkel_keuze
+
+            # nieuwe regel op de bestelling
+            regel_nr += 1
+            product.regel_nr = regel_nr
+
+            product.keuze_titel = keuze.product.omslag_titel
+            product.keuze_unit_prijs_euro = keuze.product.prijs_euro
+            product.keuze_aantal = keuze.aantal
+            product.keuze_total_prijs_euro = keuze.totaal_euro
     # for
+
+    producten = list(producten)
+
+    # voeg de verzendkosten toe als aparte regel op de bestelling
+    if bestelling.verzendkosten_euro > 0.001:
+
+        # nieuwe regel op de bestelling
+        regel_nr += 1
+
+        product = SimpleNamespace(
+                        regel_nr=regel_nr,
+                        is_verzendkosten=True,
+                        beschrijving="Verzendkosten",       # TODO: specialiseren in pakket/briefpost
+                        prijs_euro=bestelling.verzendkosten_euro)
+        producten.append(product)
 
     context = {
         'voornaam': account.get_first_name(),
@@ -209,7 +240,8 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = None
 
-        self._instellingen_nhb = None
+        self._instellingen_via_nhb = None
+        self._instellingen_verkoper_webwinkel = None
         self._instellingen_cache = dict()     # [ver_nr] = BetaalInstellingenVereniging
 
     def add_arguments(self, parser):
@@ -265,12 +297,18 @@ class Command(BaseCommand):
 
         ver_nhb = NhbVereniging.objects.get(ver_nr=settings.BETAAL_VIA_NHB_VER_NR)
 
-        self._instellingen_nhb, _ = (BetaalInstellingenVereniging
-                                     .objects
-                                     .select_related('vereniging')
-                                     .get_or_create(vereniging=ver_nhb))
+        self._instellingen_via_nhb, _ = (BetaalInstellingenVereniging
+                                         .objects
+                                         .select_related('vereniging')
+                                         .get_or_create(vereniging=ver_nhb))
 
-        self._instellingen_cache[settings.BETAAL_VIA_NHB_VER_NR] = self._instellingen_nhb
+        self._instellingen_cache[settings.BETAAL_VIA_NHB_VER_NR] = self._instellingen_via_nhb
+
+        # geen foutafhandeling: deze instelling moet gewoon goed staan
+        self._instellingen_verkoper_webwinkel = (BetaalInstellingenVereniging
+                                                 .objects
+                                                 .select_related('vereniging')
+                                                 .get(vereniging__ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR))
 
     def _get_instellingen(self, ver):
         try:
@@ -282,7 +320,7 @@ class Command(BaseCommand):
                                .get_or_create(vereniging=ver))
 
             if instellingen.akkoord_via_nhb:
-                instellingen = self._instellingen_nhb
+                instellingen = self._instellingen_via_nhb
 
             self._instellingen_cache[ver.ver_nr] = instellingen
 
@@ -306,14 +344,40 @@ class Command(BaseCommand):
         return nummer
 
     @staticmethod
-    def _bepaal_btw(mandje):
+    def _mandje_bepaal_btw(mandje):
         """ bereken de btw voor de producten in het mandje """
 
         # nog niet ondersteund: toon altijd 0% BTW
         mandje.btw_percentage_cat1 = "0%"
         mandje.btw_euro_cat1 = Decimal(0)
 
-        mandje.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1'])
+        mandje.btw_percentage_cat2 = ""
+        mandje.btw_euro_cat2 = Decimal(0)
+
+        mandje.btw_percentage_cat3 = ""
+        mandje.btw_euro_cat3 = Decimal(0)
+
+        mandje.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1',
+                                   'btw_percentage_cat2', 'btw_euro_cat2',
+                                   'btw_percentage_cat3', 'btw_euro_cat3'])
+
+    @staticmethod
+    def _bestelling_bepaal_btw(bestelling):
+        """ bereken de btw voor de producten in een bestelling """
+
+        # nog niet ondersteund: toon altijd 0% BTW
+        bestelling.btw_percentage_cat1 = "0%"
+        bestelling.btw_euro_cat1 = Decimal(0)
+
+        bestelling.btw_percentage_cat2 = ""
+        bestelling.btw_euro_cat2 = Decimal(0)
+
+        bestelling.btw_percentage_cat3 = ""
+        bestelling.btw_euro_cat3 = Decimal(0)
+
+        bestelling.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1',
+                                       'btw_percentage_cat2', 'btw_euro_cat2',
+                                       'btw_percentage_cat3', 'btw_euro_cat3'])
 
     def _verwerk_mutatie_wedstrijd_inschrijven(self, mutatie):
         mandje = self._get_mandje(mutatie)
@@ -335,7 +399,7 @@ class Command(BaseCommand):
                 wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
 
                 # bereken het totaal opnieuw
-                self._bepaal_btw(mandje)
+                self._mandje_bepaal_btw(mandje)
                 mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
@@ -358,10 +422,10 @@ class Command(BaseCommand):
 
             webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
 
-            webwinkel_plugin_bepaal_verzendkosten(self.stdout, mandje)
+            webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
 
             # bereken het totaal opnieuw
-            self._bepaal_btw(mandje)
+            self._mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
@@ -419,7 +483,7 @@ class Command(BaseCommand):
 
                     webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
 
-                    webwinkel_plugin_bepaal_verzendkosten(self.stdout, mandje)
+                    webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
 
                     handled = True
 
@@ -428,7 +492,7 @@ class Command(BaseCommand):
                                         product.pk, mandje.pk))
 
             # bereken het totaal opnieuw
-            self._bepaal_btw(mandje)
+            self._mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
         if not handled:
@@ -452,13 +516,23 @@ class Command(BaseCommand):
                             .producten
                             .select_related('wedstrijd_inschrijving',
                                             'wedstrijd_inschrijving__wedstrijd',
-                                            'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging')
-                            .order_by('wedstrijd_inschrijving__pk')):
+                                            'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
+                                            'webwinkel_keuze')
+                            .order_by('wedstrijd_inschrijving__pk',
+                                      'webwinkel_keuze__pk')):
 
                 if product.wedstrijd_inschrijving:
                     # wedstrijd van de kalender
                     instellingen = self._get_instellingen(product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging)
-                    ontvanger_ver_nr = instellingen.vereniging.ver_nr
+                    ontvanger_ver_nr = instellingen.vereniging.ver_nr       # kan nu ook "via nhb" zijn
+                    try:
+                        ontvanger2producten[ontvanger_ver_nr].append(product)
+                    except KeyError:
+                        ontvanger2producten[ontvanger_ver_nr] = [product]
+
+                elif product.webwinkel_keuze:
+                    # keuze in de webwinkel
+                    ontvanger_ver_nr = self._instellingen_verkoper_webwinkel.vereniging.ver_nr
                     try:
                         ontvanger2producten[ontvanger_ver_nr].append(product)
                     except KeyError:
@@ -471,17 +545,15 @@ class Command(BaseCommand):
             for ver_nr, producten in ontvanger2producten.items():
 
                 instellingen = self._instellingen_cache[ver_nr]
+                ver = instellingen.vereniging
 
                 # neem een bestelnummer uit
                 bestel_nr = self._bestel_get_volgende_bestel_nr()
 
                 totaal_euro = Decimal('0')
-                ver = None
                 for product in producten:
                     totaal_euro += product.prijs_euro
                     totaal_euro -= product.korting_euro
-                    if ver is None:
-                        ver = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging
                 # for
 
                 bestelling = Bestelling(
@@ -509,6 +581,18 @@ class Command(BaseCommand):
 
                 bestelling.save()
                 bestelling.producten.set(producten)
+
+                webwinkel_plugin_bepaal_verzendkosten_bestelling(self.stdout, bestelling)
+
+                self._bestelling_bepaal_btw(bestelling)
+
+                totaal_euro += bestelling.verzendkosten_euro
+                totaal_euro += bestelling.btw_euro_cat1
+                totaal_euro += bestelling.btw_euro_cat2
+                totaal_euro += bestelling.btw_euro_cat3
+
+                bestelling.totaal_euro = totaal_euro
+                bestelling.save(update_fields=['totaal_euro'])
 
                 totaal_euro_str = "€ %s" % totaal_euro
                 totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
@@ -542,6 +626,7 @@ class Command(BaseCommand):
             for bestelling in nieuwe_bestellingen:
                 if bestelling.totaal_euro < Decimal('0.001'):
                     self.stdout.write('[INFO] Bestelling pk=%s wordt meteen afgerond' % bestelling.pk)
+                    # TODO: ondersteuning voor gratis producten in de webwinkel
                     for product in bestelling.producten.all():
                         if product.wedstrijd_inschrijving:
                             wedstrijden_plugin_inschrijving_is_betaald(product)
@@ -559,6 +644,8 @@ class Command(BaseCommand):
             # for
 
             # zorg dat het totaal van het mandje ook weer klopt
+            webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
+            self._mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
     def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie):

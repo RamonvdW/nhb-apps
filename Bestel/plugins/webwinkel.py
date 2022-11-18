@@ -52,7 +52,7 @@ def webwinkel_plugin_bepaal_kortingen(stdout, mandje):
     pass
 
 
-def webwinkel_plugin_bepaal_verzendkosten(stdout, mandje):
+def webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje):
     """ bereken de verzendkosten voor fysieke producten in het mandje """
 
     webwinkel_count = 0
@@ -69,6 +69,25 @@ def webwinkel_plugin_bepaal_verzendkosten(stdout, mandje):
         mandje.verzendkosten_euro = Decimal(0)
 
     mandje.save(update_fields=['verzendkosten_euro'])
+
+
+def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, bestelling):
+    """ bereken de verzendkosten voor fysieke producten in het mandje """
+
+    webwinkel_count = 0
+    for product in bestelling.producten.all():
+        if product.webwinkel_keuze:
+            webwinkel_count += 1
+    # for
+
+    if webwinkel_count > 0:
+        # wel verzendkosten
+        bestelling.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO)
+    else:
+        # geen verzendkosten
+        bestelling.verzendkosten_euro = Decimal(0)
+
+    bestelling.save(update_fields=['verzendkosten_euro'])
 
 
 # end of file

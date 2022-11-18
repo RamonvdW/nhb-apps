@@ -10,10 +10,10 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIE_IFAA
-from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
+from Bestel.operations.mandje import mandje_tel_inhoud, eval_mandje_inhoud
 from Bestel.models import BestelMandje
-from Bestel.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
-                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestel.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
+                                        bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.rol import Rollen, rol_get_huidige
 from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING

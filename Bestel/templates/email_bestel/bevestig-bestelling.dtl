@@ -42,11 +42,20 @@
                 {% endif %}
             {% endif %}
 
-            |    Prijs: € {{ product.prijs_euro }}
-            {% if product.korting_euro > 0.001 %}
-                |    Korting: -€ {{ product.korting_euro }}
-            {% endif %}
+        {% elif product.webwinkel_keuze %}
+            |    Product: {{ product.keuze_titel }}
+            |    Prijs per stuk: € {{ product.keuze_unit_prijs_euro }}
+            |    Aantal: {{ product.keuze_aantal }}
+
+        {% elif product.is_verzendkosten %}
+            |    {{ product.beschrijving }}
         {% endif %}
+
+        |    Prijs: € {{ product.prijs_euro }}
+        {% if product.korting_euro > 0.001 %}
+            |    Korting: -€ {{ product.korting_euro }}
+        {% endif %}
+
     {% endfor %}
 
     |
@@ -127,22 +136,46 @@
                     <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
                 </tr>
 
-                {% if product.korting_euro > 0.001 %}
-                    <tr>
-                        <td></td>
-                        <td>Verkregen korting:<br>
-                            {% if product.korting %}
-                                <span>{{ product.gebruikte_korting_str }}</span><br>
-                            {% endif %}
-                            {% if product.combi_reden %}
-                                <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
-                            {% endif %}
-                        </td>
+            {% elif product.keuze_wedstrijd %}
+                <tr>
+                    <td style="vertical-align:top">{{ product.regel_nr }}.</td>
+                    <td>
+                        <span>Product: {{ product.keuze_titel }}</span><br>
+                        <span>Prijs per stuk: € {{ product.keuze_unit_prijs_euro }}</span><br>
+                        <span>Aantal: {{ product.keuze_aantal }}</span>
+                    </td>
 
-                        <td style="text-align:right; vertical-align:top">-&euro;&nbsp;{{ product.korting_euro }}</td>
-                    </tr>
-                {% endif %}
+                    <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                </tr>
+
+            {% elif product.is_verzendkosten %}
+                <tr>
+                    <td style="vertical-align:top">{{ product.regel_nr }}.</td>
+                    <td>
+                        <span>{{ product.beschrijving }}</span><br>
+                    </td>
+
+                    <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                </tr>
+
             {% endif %}
+
+            {% if product.korting_euro > 0.001 %}
+                <tr>
+                    <td></td>
+                    <td>Verkregen korting:<br>
+                        {% if product.korting %}
+                            <span>{{ product.gebruikte_korting_str }}</span><br>
+                        {% endif %}
+                        {% if product.combi_reden %}
+                            <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
+                        {% endif %}
+                    </td>
+
+                    <td style="text-align:right; vertical-align:top">-&euro;&nbsp;{{ product.korting_euro }}</td>
+                </tr>
+            {% endif %}
+
         {% endfor %}
 
         <tr>

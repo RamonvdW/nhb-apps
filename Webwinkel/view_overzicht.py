@@ -11,8 +11,8 @@ from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.mandje import mandje_tel_inhoud
-from Bestel.mutaties import bestel_mutatieverzoek_webwinkel_keuze
+from Bestel.operations.mandje import mandje_tel_inhoud
+from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
