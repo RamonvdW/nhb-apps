@@ -1302,14 +1302,14 @@ class Command(BaseCommand):
                     self._cache_sporter[obj.pk] = obj
                 self._count_toevoegingen += 1
 
-            # speel sterkte verwerken
-            nieuwe_lijst = list()
+            # speelsterktes verwerken
             try:
                 huidige_lijst = self._cache_sterk[lid_nr]
             except KeyError:
                 huidige_lijst = list()
 
             if obj.is_actief_lid:
+                nieuwe_lijst = list()
                 for sterk in lid_sterk:
                     # sterk = {"date": "1990-01-01", "skill_level_code": "R1000", "skill_level_name": "Recurve 1000", "discipline_code": "REC", "discipline_name": "Recurve", "category_name": "Senior"}
                     cat = sterk['category_name']
@@ -1358,18 +1358,30 @@ class Command(BaseCommand):
                             nieuwe_lijst.append(sterk)
                             self._count_toevoegingen += 1
                 # for
+                if len(nieuwe_lijst):
+                    Speelsterkte.objects.bulk_create(nieuwe_lijst)
+            else:
+                # sporter is geen actief lid meer
+                # we behouden zijn behaalde speelsterktes in de administratie
+                huidige_lijst = list()
 
+            # verwijder oude speelsterktes
             if len(huidige_lijst):
-                # FUTURE: verwijder oude speelsterktes
-                self.stdout.write('[WARNING] Kan speelsterktes nog niet verwijderen: lid=%s, te verwijderen: %s' % (lid_nr, repr(huidige_lijst)))
-                self._count_warnings += 1
-                # self._count_verwijderingen += 1
-
-            if len(nieuwe_lijst):
-                Speelsterkte.objects.bulk_create(nieuwe_lijst)
+                for sterk in huidige_lijst:
+                    self.stdout.write('[INFO] Speelsterkte is vervallen: lid=%s: %s' % (lid_nr, sterk))
+                    self._count_verwijderingen += 1
+                    sterk.delete()
+                # for
 
             if obj.is_actief_lid:
+                dupe_codes = list()
                 for code, beschrijving, toon_op_pas, date_start, date_stop in lid_edus:
+                    # meld dubbele codes omdat we er niet tegen kunnen en het gejojo met de datums veroorzaakt
+                    if code in dupe_codes:
+                        self.stdout.write('[WARNING] Lid %s heeft een dubbele opleiding: code %s' % (lid_nr, code))
+                        self._count_warnings += 1
+                    dupe_codes.append(code)
+
                     try:
                         tup = (obj.lid_nr, code)
                         diploma = self._cache_diploma[tup]
