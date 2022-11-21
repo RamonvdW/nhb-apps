@@ -43,7 +43,7 @@
                     const rsp = JSON.parse(xhr.responseText);
                     const bondspas_data = rsp['bondspas_base64'];
 
-                    el_img.src = "data:image/png;base64," + bondspas_data;
+                    el_img.src = "data:image/jpeg;base64," + bondspas_data;
                     el_img.style.display = "inline-block";
 
                     // "Je bondspas wordt opgehaald" bericht weghalen

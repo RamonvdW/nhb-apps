@@ -20,7 +20,8 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_nhb,
                                       bereken_leeftijdsklasse_ifaa)
 from PIL import Image, ImageFont, ImageDraw
-from PIL.PngImagePlugin import PngInfo
+from PIL.TiffImagePlugin import ImageFileDirectory_v2
+# from PIL.PngImagePlugin import PngInfo
 import io
 import datetime
 import base64
@@ -28,6 +29,10 @@ import os
 
 
 TEMPLATE_BONDSPAS_TONEN = 'bondspas/bondspas-tonen.dtl'
+
+EXIF_TAG_COPYRIGHT = 0x8298
+EXIF_TAG_TITLE = 0x010D     # DocumentName
+# EXIF_TAG_TITLE = 0x010E     # ImageDescription
 
 
 def maak_bondspas_regels(lid_nr, jaar):
@@ -174,12 +179,13 @@ def teken_barcode(lid_nr, draw, begin_x, end_y, font):
 
 
 def maak_bondspas_image(lid_nr, jaar, regels):
-    fpath = os.path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas.png')
+    fpath = os.path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas.jpg')
     image = Image.open(fpath)
+
     # image = image.resize((960, 1353))        # standard size = 1280 x 1804
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=33)
-    font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=40)
+    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=40)
+    font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=45)
     color_black = (0, 0, 0)
     color_grijs = (221, 217, 215)       # reverse engineered
     # color_grijs = (200, 200, 200)
@@ -187,8 +193,8 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     # het grijze kader waarin de tekst moet komen
     # coördinaten: (0,0) = top-left
     _, _, width, height = image.getbbox()
-    kader_y1 = 387          # bovenkant
-    kader_y2 = 1015         # onderkant
+    kader_y1 = 510          # bovenkant
+    kader_y2 = 1115         # onderkant
     kader_x1 = 0            # border is 2 pixels
     kader_x2 = width
 
@@ -197,7 +203,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     draw.rectangle(((kader_x1, kader_y1), (kader_x2, kader_y2)), fill=color_grijs)
 
     # zwart kader ronde het hele plaatje
-    draw.rectangle(((0, 0), (image.width -1 , image.height - 1)), width=2, fill=None, outline=color_black)
+    draw.rectangle(((0, 0), (image.width - 1, image.height - 1)), width=2, fill=None, outline=color_black)
 
     # zet een marge van 10 pixels
     kader_y1 += 30
@@ -211,7 +217,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     regels = regels[2:]
 
     text_width, text_height = draw.textsize(lid_nr, font=font_bold)
-    text_height += 10       # extra spacing
+    text_height += 20       # extra spacing
     barcode_margin_x = 20
 
     bondsnr_width = draw.textlength("Bondsnummer: ", font=font)
@@ -233,11 +239,11 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     teken_barcode(lid_nr, draw, bondsnr_x, bondsnr_y, font)
 
     # switch naar een kleiner font
-    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=28)
-    font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=28)
+    font = ImageFont.truetype(settings.BONDSPAS_FONT, size=40)
+    font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=40)
     _, text_height = draw.textsize(lid_nr, font=font)
 
-    text_spacing = text_height + 20
+    text_spacing = text_height + 15
     wkl_indent = 30     # pixels
 
     # bepaal hoe breed de eerste kolom moet worden
@@ -277,12 +283,21 @@ def maak_bondspas_image(lid_nr, jaar, regels):
             wkl = True
     # for
 
-    metadata = PngInfo()
-    metadata.add_text("Copyright", "de Nederlandse Handboog Bonds (NHB)")
-    metadata.add_text("Title", "Bondspas %s voor lid %s" % (jaar, lid_nr))
+    # metadata = PngInfo()
+    # metadata.add_text("Copyright", "de Nederlandse Handboog Bonds (NHB)")
+    # metadata.add_text("Title", "Bondspas %s voor lid %s" % (jaar, lid_nr))
+    # image.save(output, format='PNG', pnginfo=metadata, optimize=True)
+
+    ifd = ImageFileDirectory_v2()
+    ifd[EXIF_TAG_COPYRIGHT] = "Nederlandse Handboog Bonds (NHB)"
+    ifd[EXIF_TAG_TITLE] = "Bondspas %s voor lid %s" % (jaar, lid_nr)
+
+    exif_out = io.BytesIO()
+    ifd.save(exif_out)
+    exif_bytes = b"Exif\x00\x00" + exif_out.getvalue()
 
     output = io.BytesIO()
-    image.save(output, format='PNG', pnginfo=metadata)
+    image.save(output, format='JPEG', exif=exif_bytes)
     output.seek(0)
     return output.getvalue()
 
@@ -341,14 +356,12 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
         lid_nr = account.username
 
         regels = maak_bondspas_regels(lid_nr, jaar)
-
-        # let op: template verwacht png
-        png_data = maak_bondspas_image(lid_nr, jaar, regels)
+        img_data = maak_bondspas_image(lid_nr, jaar, regels)
 
         # base64 is nodig voor img in html
         # alternatief is javascript laten tekenen op een canvas en base64 maken met dataToUrl
         out = dict()
-        out['bondspas_base64'] = base64.b64encode(png_data).decode()
+        out['bondspas_base64'] = base64.b64encode(img_data).decode()
 
         return JsonResponse(out)
 
