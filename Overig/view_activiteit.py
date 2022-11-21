@@ -234,8 +234,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
 
-                sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
-                                                    kwargs={'lid_nr': sporter.lid_nr})
+            sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
+                                                kwargs={'lid_nr': sporter.lid_nr})
         # for
 
         context['url_reset_tweede_factor'] = reverse('Functie:otp-loskoppelen')
