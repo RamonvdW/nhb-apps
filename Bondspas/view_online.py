@@ -297,7 +297,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     exif_bytes = b"Exif\x00\x00" + exif_out.getvalue()
 
     output = io.BytesIO()
-    image.save(output, format='JPEG', exif=exif_bytes)
+    image.save(output, format='JPEG', exif=exif_bytes, quality='web_medium')
     output.seek(0)
     return output.getvalue()
 
