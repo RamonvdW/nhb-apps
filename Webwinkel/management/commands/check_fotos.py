@@ -75,10 +75,13 @@ class Command(BaseCommand):
                 self._check_foto_bestand(foto, 'locatie')
         # for
 
-        self.stdout.write("[INFO] %s foto's OK; %s foto's NOK" % (self.aantal_ok, self.aantal_nok))
-
-        if self.aantal_nok > 0:
+        if self.aantal_nok:
+            self.stdout.write("[INFO] %s foto's OK" % self.aantal_ok)
+            self.stderr.write("[ERROR] %s foto's NOK" % self.aantal_nok)
             sys.exit(1)
+
+        # alles goed
+        self.stdout.write("[INFO] %s foto's OK; no problems found" % self.aantal_ok)
 
 # end of file
 
