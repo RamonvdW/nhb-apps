@@ -233,6 +233,9 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                             sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
+
+                sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
+                                                    kwargs={'lid_nr': sporter.lid_nr})
         # for
 
         context['url_reset_tweede_factor'] = reverse('Functie:otp-loskoppelen')

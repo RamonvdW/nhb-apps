@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.utils import timezone
 from django.shortcuts import render, reverse
 from django.views.generic import View
@@ -28,7 +28,8 @@ import base64
 import os
 
 
-TEMPLATE_BONDSPAS_TONEN = 'bondspas/bondspas-tonen.dtl'
+TEMPLATE_BONDSPAS_TONEN = 'bondspas/toon-bondspas-sporter.dtl'
+TEMPLATE_BONDSPAS_VAN_TONEN = 'bondspas/toon-bondspas-van.dtl'
 
 EXIF_TAG_COPYRIGHT = 0x8298
 EXIF_TAG_TITLE = 0x010D     # DocumentName
@@ -364,6 +365,46 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
         out['bondspas_base64'] = base64.b64encode(img_data).decode()
 
         return JsonResponse(out)
+
+
+class ToonBondspasBeheerderView(UserPassesTestMixin, View):
+
+    template_name = TEMPLATE_BONDSPAS_VAN_TONEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_get_huidige(self.request) == Rollen.ROL_BB
+
+    def get(self, request, *args, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = dict()
+
+        try:
+            lid_nr = kwargs['lid_nr'][:6]       # afkappen voor de veiligheid
+            lid_nr = int(lid_nr)
+            _ = Sporter.objects.get(lid_nr=lid_nr)
+        except Sporter.DoesNotExist:
+            raise Http404('Geen valide parameter')
+
+        # bepaal het jaar voor de wedstrijdklasse
+        now = timezone.localtime(timezone.now())
+        jaar = now.year
+
+        regels = maak_bondspas_regels(lid_nr, jaar)
+        img_data = maak_bondspas_image(lid_nr, jaar, regels)
+
+        # base64 is nodig voor img in html
+        context['bondspas_base64'] = base64.b64encode(img_data).decode()
+
+        context['kruimels'] = (
+            (reverse('Overig:activiteit'), 'Account activiteit'),
+            (None, 'Bondspas tonen'),
+        )
+
+        menu_dynamics(request, context)
+        return render(request, self.template_name, context)
 
 
 # end of file

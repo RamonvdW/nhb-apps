@@ -17,7 +17,8 @@ class TestBondspas(E2EHelpers, TestCase):
 
     """ tests voor de Bondspas applicatie """
 
-    url_toon = '/sporter/bondspas/toon/'
+    url_toon_sporter = '/sporter/bondspas/toon/'
+    url_toon_van = '/sporter/bondspas/toon/van-lid/%s/'    # lid_nr
     url_ophalen = '/sporter/bondspas/dynamic/ophalen/'
 
     def setUp(self):
@@ -50,9 +51,11 @@ class TestBondspas(E2EHelpers, TestCase):
 
         self.voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=self.sporter)
 
+        self.account_admin = self.e2e_create_account_admin()
+
     def test_toon(self):
         # anon
-        resp = self.client.get(self.url_toon)
+        resp = self.client.get(self.url_toon_sporter)
         self.assert403(resp)
 
         resp = self.client.get(self.url_ophalen)
@@ -61,16 +64,24 @@ class TestBondspas(E2EHelpers, TestCase):
         resp = self.client.post(self.url_ophalen)
         self.assert403(resp)
 
+        resp = self.client.get(self.url_toon_van % 99999)
+        self.assert403(resp)
+
         # sporter
         self.e2e_login(self.account)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_toon)
+            resp = self.client.get(self.url_toon_sporter)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bondspas/bondspas-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_toon)
+        resp = self.client.get(self.url_toon_van % 99999)
+        self.assert403(resp)
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_toon_sporter)
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_toon_van % 99999)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_ophalen, post=False)
 
@@ -138,4 +149,19 @@ class TestBondspas(E2EHelpers, TestCase):
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self._check_bondspas_resp(resp)
 
+    def test_beheerder(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        resp = self.client.get(self.url_toon_van % 99999)
+        self.assert404(resp, 'Geen valide parameter')
+
+        url = self.url_toon_van % self.sporter.lid_nr
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+
+    
 # end of file

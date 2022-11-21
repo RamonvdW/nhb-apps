@@ -17,14 +17,17 @@
         </div>
     </div>
 
-    <!-- blauw balk met wit informatie veld -->
+    <!-- blauw balk  -->
     <div class="row-nhb-blauw">
+
+        <!-- tijdelijk wit informatieveld, totdat de volledige bondspas opgehaald is -->
         <div class="col s12 m10 offset-m1 l6 offset-l3 xl6 offset-xl3">
             <div id="id_even_wachten" class="white" style="padding:10px">
                 <p>Je bondspas wordt opgehaald</p>
             </div>
         </div>
 
+        <!-- de bondspas (wordt pas getoond na ophalen bondspas plaatje) -->
         <div class="col s12">
             <img id="id_image" alt="Bondspas" src="#" style="max-width:800px; width:100%; height:auto; display:none"/>
         </div>
@@ -81,6 +84,6 @@
         });
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bondspas-tonen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="toon-bondspas-sporter" %}
 
 {% endblock %}
