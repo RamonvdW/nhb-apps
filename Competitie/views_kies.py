@@ -12,6 +12,7 @@ from Competitie.models import Competitie, RegioCompetitieSchutterBoog, Regiocomp
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
+from Sporter.models import Sporter
 
 
 TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
@@ -88,6 +89,9 @@ class CompetitieKiesView(TemplateView):
         aantal_25m_regio = dict()
         aantal_18m_geen_rk = dict()
         aantal_25m_geen_rk = dict()
+        aantal_zelfstandig_18m_regio = dict()
+        aantal_zelfstandig_25m_regio = dict()
+        aantal_leden_regio = dict()
 
         for rayon_nr in range(1, 4+1):
             aantal_18m_rayon[rayon_nr] = 0
@@ -99,27 +103,37 @@ class CompetitieKiesView(TemplateView):
         for regio_nr in range(101, 116+1):
             aantal_18m_regio[regio_nr] = 0
             aantal_25m_regio[regio_nr] = 0
+            aantal_zelfstandig_18m_regio[regio_nr] = 0
+            aantal_zelfstandig_25m_regio[regio_nr] = 0
+            aantal_leden_regio[regio_nr] = 0
         # for
 
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
                           .filter(deelcompetitie__competitie__pk__in=pks)
                           .select_related('sporterboog__sporter__bij_vereniging__regio__rayon',
+                                          'sporterboog__sporter__account',
+                                          'aangemeld_door',
                                           'deelcompetitie__competitie')):
 
             rayon_nr = deelnemer.sporterboog.sporter.bij_vereniging.regio.rayon.rayon_nr
             regio_nr = deelnemer.sporterboog.sporter.bij_vereniging.regio.regio_nr
+            zelfstandig = deelnemer.aangemeld_door == deelnemer.sporterboog.sporter.account
 
             if deelnemer.deelcompetitie.competitie.afstand == '18':
                 aantal_18m_rayon[rayon_nr] += 1
                 aantal_18m_regio[regio_nr] += 1
                 if not deelnemer.inschrijf_voorkeur_rk_bk:
                     aantal_18m_geen_rk[rayon_nr] += 1
+                if zelfstandig:
+                    aantal_zelfstandig_18m_regio[regio_nr] += 1
             else:
                 aantal_25m_rayon[rayon_nr] += 1
                 aantal_25m_regio[regio_nr] += 1
                 if not deelnemer.inschrijf_voorkeur_rk_bk:
                     aantal_25m_geen_rk[rayon_nr] += 1
+                if zelfstandig:
+                    aantal_zelfstandig_25m_regio[regio_nr] += 1
         # for
 
         context['aantal_18m_rayon'] = list()
@@ -151,6 +165,44 @@ class CompetitieKiesView(TemplateView):
         context['aantal_sporters'] = qset.distinct('sporterboog__sporter').count()
         context['aantal_multiboog'] = aantal_sportersboog - context['aantal_sporters']
         context['aantal_zelfstandig'] = qset.filter(aangemeld_door=F('sporterboog__sporter__account')).count()
+
+        for sporter in Sporter.objects.select_related('bij_vereniging__regio').filter(is_actief_lid=True).exclude(bij_vereniging=None):
+            regio_nr = sporter.bij_vereniging.regio.regio_nr
+            if regio_nr >= 101:
+                aantal_leden_regio[regio_nr] += 1
+        # for
+
+        context['perc_zelfstandig_18m_regio'] = perc_zelfstandig_18m_regio = list()
+        context['perc_zelfstandig_25m_regio'] = perc_zelfstandig_25m_regio = list()
+        context['perc_leden_18m_regio'] = perc_leden_18m_regio = list()
+        context['perc_leden_25m_regio'] = perc_leden_25m_regio = list()
+        for regio_nr in range(101, 116+1):
+            aantal = aantal_18m_regio[regio_nr]
+            if aantal > 0:
+                perc_str = '%.1f' % ((aantal_zelfstandig_18m_regio[regio_nr] / aantal) * 100.0)
+            else:
+                perc_str = '0.0'
+            perc_zelfstandig_18m_regio.append(perc_str)
+
+            aantal = aantal_25m_regio[regio_nr]
+            if aantal > 0:
+                perc_str = '%.1f' % ((aantal_zelfstandig_25m_regio[regio_nr] / aantal) * 100.0)
+            else:
+                perc_str = '0.0'
+            perc_zelfstandig_25m_regio.append(perc_str)
+
+            aantal = aantal_leden_regio[regio_nr]
+            if aantal > 0:
+                perc_str = '%.1f' % ((aantal_18m_regio[regio_nr] / aantal) * 100.0)
+                perc_leden_18m_regio.append(perc_str)
+
+                perc_str = '%.1f' % ((aantal_25m_regio[regio_nr] / aantal) * 100.0)
+                perc_leden_25m_regio.append(perc_str)
+            else:
+                perc_str = '0.0'
+                perc_leden_18m_regio.append(perc_str)
+                perc_leden_25m_regio.append(perc_str)
+        # for
 
         if aantal_sportersboog > 0:
             context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
