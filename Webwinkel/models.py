@@ -37,12 +37,12 @@ KEUZE_STATUS_TO_SHORT_STR = {
 }
 
 
-VERZENDKOSTEN_KLASSE_PAKKET = "pak"
-VERZENDKOSTEN_KLASSE_BRIEF = "brief"
+VERZENDKOSTEN_PAKKETPOST = "pak"
+VERZENDKOSTEN_BRIEFPOST = "brief"       # max 5 lang
 
 VERZENDKOSTEN_CHOICES = (
-    (VERZENDKOSTEN_KLASSE_PAKKET, "Pakket"),
-    (VERZENDKOSTEN_KLASSE_BRIEF, "Brief"),
+    (VERZENDKOSTEN_PAKKETPOST, "Pakketpost"),
+    (VERZENDKOSTEN_BRIEFPOST, "Briefpost"),
 )
 
 
@@ -101,6 +101,8 @@ class WebwinkelProduct(models.Model):
     bevat_aantal = models.PositiveSmallIntegerField(default=1)
 
     # toevoeging voor de aantallen te bestellen, bijvoorbeeld "6 dozen" or "3 containers"
+    # enkelvoud/meervoud moet met een komma gescheiden worden
+    # bij leeg wordt "stuks" gebruikt
     eenheid = models.CharField(max_length=50, default='', blank=True)
 
     # de prijs voor dit product
@@ -117,7 +119,8 @@ class WebwinkelProduct(models.Model):
     # (programmeerbaar)
     bestel_begrenzing = models.CharField(max_length=100, default='1', help_text='1-10,20,25,30,50', blank=True)
 
-    # TODO: verzendkosten_klasse = models.CharField(max_length=5, default=VERZENDKOSTEN_KLASSE_PAKKET, choices=VERZENDKOSTEN_CHOICES)
+    # verzendkosten
+    type_verzendkosten = models.CharField(max_length=5, default=VERZENDKOSTEN_PAKKETPOST, choices=VERZENDKOSTEN_CHOICES)
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
@@ -140,7 +143,7 @@ class WebwinkelKeuze(models.Model):
 
     # wie is de koper?
     # (BestelProduct verwijst naar dit record)
-    koper = models.ForeignKey(Account, on_delete=models.PROTECT)
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT)   # TODO: Bestelling heeft koper, dus waarom hier ook?
 
     # om welk product gaat het
     product = models.ForeignKey(WebwinkelProduct, on_delete=models.PROTECT)
@@ -150,10 +153,10 @@ class WebwinkelKeuze(models.Model):
 
     # TODO: ondersteun kortingen
 
-    # hoeveel moet er betaald worden?
+    # hoeveel moet er betaald worden voor het aantal gekozen producten?
     totaal_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))       # max 9999,99
 
-    # hoeveel is ontvangen?
+    # hoeveel is ontvangen?         # TODO: waarom tracken we dit hier? Dit hoort bij Betalen
     # (wordt ingevuld als de bestelling volledig betaald is)
     ontvangen_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 

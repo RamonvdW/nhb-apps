@@ -26,6 +26,7 @@ from Bestel.models import (BestelProduct, BestelMandje,
                            BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
                            BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
+from Bestel.plugins.product_info import beschrijf_product
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
@@ -63,64 +64,27 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
                                  'wedstrijd_inschrijving__sporterboog__boogtype',
                                  'wedstrijd_inschrijving__sporterboog__sporter',
                                  'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+                                 'wedstrijd_inschrijving__korting',
                                  'webwinkel_keuze',
                                  'webwinkel_keuze__product')
+                 # .prefetch_related('wedstrijd_inschrijving__korting__voor_wedstrijden')
                  .order_by('pk'))       # vaste volgorde (primitief, maar functioneel)
 
     regel_nr = 0
     for product in producten:
 
-        if product.wedstrijd_inschrijving:
-            inschrijving = product.wedstrijd_inschrijving
-            wedstrijd = inschrijving.wedstrijd
+        # nieuwe regel op de bestelling
+        regel_nr += 1
+        product.regel_nr = regel_nr
+        product.beschrijving = beschrijf_product(product)
 
-            # nieuwe regel op de bestelling
-            regel_nr += 1
-            product.regel_nr = regel_nr
+        if product.wedstrijd_inschrijving and product.wedstrijd_inschrijving.korting:
+            korting = product.wedstrijd_inschrijving.korting
+            product.korting = "Korting: %d%%" % korting.percentage
 
-            product.reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
-            product.wedstrijd_titel = wedstrijd.titel
-            product.wedstrijd_bij_vereniging = wedstrijd.organiserende_vereniging.ver_nr_en_naam()
-            product.wedstrijd_adres = wedstrijd.locatie.adres.replace('\n', ', ')
-            product.sessie_datum = inschrijving.sessie.datum
-            product.sessie_tijd = inschrijving.sessie.tijd_begin
-            product.sporter_lid_nr_naam = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
-            product.org_email = wedstrijd.contact_email
-            product.org_telefoon = wedstrijd.contact_telefoon
-
-            sporter_ver = inschrijving.sporterboog.sporter.bij_vereniging
-            if sporter_ver:
-                product.ver_nr_naam = sporter_ver.ver_nr_en_naam()
-            else:
-                product.ver_nr_naam = 'Onbekend'
-
-            if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                product.schietstijl = inschrijving.sporterboog.boogtype.beschrijving
-                product.klasse = '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
-                                              inschrijving.wedstrijdklasse.afkorting)
-            else:
-                product.boog = inschrijving.sporterboog.boogtype.beschrijving
-                product.klasse = inschrijving.wedstrijdklasse.beschrijving
-
-            if inschrijving.korting:
-                korting = inschrijving.korting
-                product.korting = "Korting: %d%%" % korting.percentage
-
-                if korting.soort == WEDSTRIJD_KORTING_COMBI:
-                    combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-                    product.combi_reden = " en ".join(combi_redenen)
-
-        elif product.webwinkel_keuze:
-            keuze = product.webwinkel_keuze
-
-            # nieuwe regel op de bestelling
-            regel_nr += 1
-            product.regel_nr = regel_nr
-
-            product.keuze_titel = keuze.product.omslag_titel
-            product.keuze_unit_prijs_euro = keuze.product.prijs_euro
-            product.keuze_aantal = keuze.aantal
-            product.keuze_total_prijs_euro = keuze.totaal_euro
+            if korting.soort == WEDSTRIJD_KORTING_COMBI:
+                combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
+                product.combi_reden = " en ".join(combi_redenen)
     # for
 
     producten = list(producten)
@@ -134,7 +98,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
         product = SimpleNamespace(
                         regel_nr=regel_nr,
                         is_verzendkosten=True,
-                        beschrijving="Verzendkosten",       # TODO: specialiseren in pakket/briefpost
+                        beschrijving=[("Verzendkosten", "")],       # TODO: specialiseren in pakket/briefpost
                         prijs_euro=bestelling.verzendkosten_euro)
         producten.append(product)
 
@@ -347,8 +311,8 @@ class Command(BaseCommand):
     def _mandje_bepaal_btw(mandje):
         """ bereken de btw voor de producten in het mandje """
 
-        # nog niet ondersteund: toon altijd 0% BTW
-        mandje.btw_percentage_cat1 = "0%"
+        # nog niet ondersteund: toon voorlopig helemaal niets
+        mandje.btw_percentage_cat1 = ""
         mandje.btw_euro_cat1 = Decimal(0)
 
         mandje.btw_percentage_cat2 = ""
@@ -365,8 +329,8 @@ class Command(BaseCommand):
     def _bestelling_bepaal_btw(bestelling):
         """ bereken de btw voor de producten in een bestelling """
 
-        # nog niet ondersteund: toon altijd 0% BTW
-        bestelling.btw_percentage_cat1 = "0%"
+        # nog niet ondersteund: toon voorlopig helemaal niets
+        bestelling.btw_percentage_cat1 = ""
         bestelling.btw_euro_cat1 = Decimal(0)
 
         bestelling.btw_percentage_cat2 = ""

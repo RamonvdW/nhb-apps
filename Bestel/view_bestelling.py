@@ -14,6 +14,7 @@ from BasisTypen.models import ORGANISATIE_IFAA
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Bestel.plugins.product_info import beschrijf_product
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
@@ -130,62 +131,17 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                                      'wedstrijd_inschrijving__sporterboog',
                                      'wedstrijd_inschrijving__sporterboog__boogtype',
                                      'wedstrijd_inschrijving__sporterboog__sporter',
-                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
+                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+                                     'webwinkel_keuze',
+                                     'webwinkel_keuze__product')
                      .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
 
         for product in producten:
             # maak een beschrijving van deze regel
-            product.beschrijving = beschrijving = list()
+            product.beschrijving = beschrijf_product(product)
 
             if product.wedstrijd_inschrijving:
                 inschrijving = product.wedstrijd_inschrijving
-
-                tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
-                beschrijving.append(tup)
-
-                tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
-                beschrijving.append(tup)
-
-                tup = ('Bij vereniging', inschrijving.wedstrijd.organiserende_vereniging)
-                beschrijving.append(tup)
-
-                sessie = inschrijving.sessie
-                tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
-                beschrijving.append(tup)
-
-                sporterboog = inschrijving.sporterboog
-                tup = ('Sporter', '%s' % sporterboog.sporter.lid_nr_en_volledige_naam())
-                beschrijving.append(tup)
-
-                sporter_ver = sporterboog.sporter.bij_vereniging
-                if sporter_ver:
-                    ver_naam = sporter_ver.ver_nr_en_naam()
-                else:
-                    ver_naam = 'Onbekend'
-                tup = ('Van vereniging', ver_naam)
-                beschrijving.append(tup)
-
-                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                    tup = ('Schietstijl', '%s' % sporterboog.boogtype.beschrijving)
-                else:
-                    tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
-                beschrijving.append(tup)
-
-                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                    tup = ('Wedstrijdklasse', '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
-                                                           inschrijving.wedstrijdklasse.afkorting))
-                else:
-                    tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
-                beschrijving.append(tup)
-
-                tup = ('Locatie', inschrijving.wedstrijd.locatie.adres.replace('\n', ', '))
-                beschrijving.append(tup)
-
-                tup = ('E-mail organisatie', inschrijving.wedstrijd.contact_email)
-                beschrijving.append(tup)
-
-                tup = ('Telefoon organisatie', inschrijving.wedstrijd.contact_telefoon)
-                beschrijving.append(tup)
 
                 if inschrijving.korting:
                     korting = inschrijving.korting
@@ -197,12 +153,17 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                     product.gebruikte_korting_str = "Onbekende korting"
                     bevat_fout = True
 
-                controleer_euro += product.prijs_euro
-                controleer_euro -= product.korting_euro
+            elif product.webwinkel_keuze:
+                # TODO: webwinkel korting
+                pass
+
             else:
                 tup = ('Fout', 'Onbekend product')
-                beschrijving.append(tup)
+                product.beschrijving.append(tup)
                 bevat_fout = True
+
+            controleer_euro += product.prijs_euro
+            controleer_euro -= product.korting_euro
         # for
 
         # nooit een negatief totaalbedrag tonen want we geven geen geld weg

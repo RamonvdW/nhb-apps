@@ -14,6 +14,7 @@ from Bestel.operations.mandje import mandje_tel_inhoud, eval_mandje_inhoud
 from Bestel.models import BestelMandje
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.rol import Rollen, rol_get_huidige
 from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING
@@ -79,70 +80,21 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'wedstrijd_inschrijving__sessie',
                                          'wedstrijd_inschrijving__sporterboog',
                                          'wedstrijd_inschrijving__sporterboog__boogtype',
-                                         'wedstrijd_inschrijving__sporterboog__sporter')
-                         .order_by('wedstrijd_inschrijving__pk'))
+                                         'wedstrijd_inschrijving__sporterboog__sporter',
+                                         'webwinkel_keuze',
+                                         'webwinkel_keuze__product')
+                         .order_by('pk'))       # volgorde waarop ze in het mandje gelegd zijn
 
             for product in producten:
                 # maak een beschrijving van deze regel
-                product.beschrijving = beschrijving = list()
+                product.beschrijving = beschrijf_product(product)
+
+                product.gebruikte_korting_str, product.combi_reden = beschrijf_korting(product)
+                product.is_combi_korting = len(product.combi_reden) > 0
                 product.kan_afrekenen = True
 
                 if product.wedstrijd_inschrijving:
                     inschrijving = product.wedstrijd_inschrijving
-
-                    tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
-                    beschrijving.append(tup)
-
-                    tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
-                    beschrijving.append(tup)
-
-                    tup = ('Bij vereniging', inschrijving.wedstrijd.organiserende_vereniging.ver_nr_en_naam())
-                    beschrijving.append(tup)
-
-                    sessie = inschrijving.sessie
-                    tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
-                    beschrijving.append(tup)
-
-                    sporterboog = inschrijving.sporterboog
-                    tup = ('Sporter', '%s' % sporterboog.sporter.lid_nr_en_volledige_naam())
-                    beschrijving.append(tup)
-
-                    sporter_ver = sporterboog.sporter.bij_vereniging
-                    if sporter_ver:
-                        ver_naam = sporter_ver.ver_nr_en_naam()
-                    else:
-                        ver_naam = 'Onbekend'
-                    tup = ('Lid bij', ver_naam)
-                    beschrijving.append(tup)
-
-                    tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
-                    beschrijving.append(tup)
-
-                    if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                        tup = ('Klasse', '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
-                                                      inschrijving.wedstrijdklasse.afkorting))
-                    else:
-                        tup = ('Klasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
-                    beschrijving.append(tup)
-
-                    if inschrijving.korting:
-                        korting = inschrijving.korting
-                        if korting.soort == WEDSTRIJD_KORTING_SPORTER:
-                            product.gebruikte_korting_str = "Persoonlijke korting"
-                        elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
-                            product.gebruikte_korting_str = "Verenigingskorting"
-                        elif korting.soort == WEDSTRIJD_KORTING_COMBI:
-                            product.gebruikte_korting_str = "Combinatiekorting"
-                            product.is_combi_korting = True
-                            product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-                        product.gebruikte_korting_str += ": %d%%" % korting.percentage
-                    elif product.korting_euro:
-                        # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (product, product.pk, product.korting_euro))
-                        product.gebruikte_korting_str = "Onbekende korting"
-                        bevat_fout = True
-
-                    controleer_euro += product.prijs_euro
-                    controleer_euro -= product.korting_euro
 
                     ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
                     try:
@@ -162,18 +114,22 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         ontvanger2product_pks[ver_nr] = [product.pk]
 
                 elif product.webwinkel_keuze:
-                    webwinkel_keuze = product.webwinkel_keuze
-
-                    tup = ('Webwinkel', '%s' % webwinkel_keuze.korte_beschrijving())
-                    beschrijving.append(tup)
-
-                    controleer_euro += product.prijs_euro
+                    # TODO: kortingen
+                    pass
 
                 else:
                     tup = ('Fout', 'Onbekend product')
-                    beschrijving.append(tup)
+                    product.beschrijving.append(tup)
                     bevat_fout = True
                     product.kan_afrekenen = False
+
+                if product.korting_euro and not product.gebruikte_korting_str:
+                    # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (product, product.pk, product.korting_euro))
+                    product.gebruikte_korting_str = "Onbekende korting"
+                    bevat_fout = True
+
+                controleer_euro += product.prijs_euro
+                controleer_euro -= product.korting_euro
 
                 # maak een knop om deze bestelling te verwijderen uit het mandje
                 product.url_verwijder = reverse('Bestel:mandje-verwijder-product',

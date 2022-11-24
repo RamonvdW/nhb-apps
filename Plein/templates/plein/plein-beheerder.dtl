@@ -39,8 +39,10 @@
             {% endif %}
 
             <!-- webwinkel -->
+            <!-- alleen maar tonen aan MWW (kopen doe je als sporter)
             {% url 'Webwinkel:overzicht' as card_url %}
             {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+            -->
 
             <!-- opleidingen -->
             {% if rol_is_mo %}

@@ -6,7 +6,8 @@
 
 from django.http import Http404
 from django.urls import reverse
-from django.utils import formats, timezone
+from django.utils import timezone
+from django.utils.formats import localize
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
@@ -132,9 +133,9 @@ class ProductView(UserPassesTestMixin, TemplateView):
                 prijs = product.prijs_euro * aantal
 
                 if aantal == 1:
-                    msg = '1 %s (€ %s)' % (aantal_enkel, formats.localize(prijs))
+                    msg = '1 %s (€ %s)' % (aantal_enkel, localize(prijs))
                 else:
-                    msg = '%s %s (€ %s)' % (aantal, aantal_meer, formats.localize(prijs))
+                    msg = '%s %s (€ %s)' % (aantal, aantal_meer, localize(prijs))
                 sel_opts.append((aantal, msg))
             # for
         # for

@@ -6,7 +6,9 @@
 
 """ Deze module levert functionaliteit voor de Bestel-applicatie, met kennis van de Wedstrijden, zoals kortingen. """
 
+from django.conf import settings
 from django.utils import timezone
+from BasisTypen.models import ORGANISATIE_IFAA
 from Wedstrijden.models import (WedstrijdKorting, WedstrijdInschrijving,
                                 WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                 INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
@@ -442,5 +444,83 @@ def wedstrijden_plugin_inschrijving_is_betaald(product):
     inschrijving.log += msg
     inschrijving.save(update_fields=['ontvangen_euro', 'status', 'log'])
 
+
+def wedstrijden_beschrijf_product(inschrijving):
+    """
+        Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
+    """
+    beschrijving = list()
+
+    tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
+    beschrijving.append(tup)
+
+    tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
+    beschrijving.append(tup)
+
+    tup = ('Bij vereniging', inschrijving.wedstrijd.organiserende_vereniging)
+    beschrijving.append(tup)
+
+    sessie = inschrijving.sessie
+    tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
+    beschrijving.append(tup)
+
+    sporterboog = inschrijving.sporterboog
+    tup = ('Sporter', '%s' % sporterboog.sporter.lid_nr_en_volledige_naam())
+    beschrijving.append(tup)
+
+    sporter_ver = sporterboog.sporter.bij_vereniging
+    if sporter_ver:
+        ver_naam = sporter_ver.ver_nr_en_naam()
+    else:
+        ver_naam = 'Onbekend'
+    tup = ('Lid bij vereniging', ver_naam)
+    beschrijving.append(tup)
+
+    if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+        tup = ('Schietstijl', '%s' % sporterboog.boogtype.beschrijving)
+    else:
+        tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
+    beschrijving.append(tup)
+
+    if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+        tup = ('Wedstrijdklasse', '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
+                                               inschrijving.wedstrijdklasse.afkorting))
+    else:
+        tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
+    beschrijving.append(tup)
+
+    tup = ('Locatie', inschrijving.wedstrijd.locatie.adres.replace('\n', ', '))
+    beschrijving.append(tup)
+
+    tup = ('E-mail organisatie', inschrijving.wedstrijd.contact_email)
+    beschrijving.append(tup)
+
+    tup = ('Telefoon organisatie', inschrijving.wedstrijd.contact_telefoon)
+    beschrijving.append(tup)
+
+    return beschrijving
+
+
+def wedstrijden_beschrijf_korting(inschrijving):
+
+    korting_str = None
+    korting_redenen = list()
+
+    if inschrijving.korting:
+        korting = inschrijving.korting
+
+        if korting.soort == WEDSTRIJD_KORTING_SPORTER:
+            korting_str = "Persoonlijke korting"
+
+        elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
+            korting_str = "Verenigingskorting"
+
+        elif korting.soort == WEDSTRIJD_KORTING_COMBI:
+            korting_str = "Combinatiekorting"
+            korting_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
+
+        korting_str += ": %d%%" % korting.percentage
+
+    return korting_str, korting_redenen
 
 # end of file
