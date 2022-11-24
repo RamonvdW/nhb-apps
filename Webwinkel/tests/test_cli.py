@@ -101,7 +101,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             self.assertTrue(" heeft een lege locatie" in f1.getvalue())
             self.assertTrue("Test titel 2) heeft geen omslagfoto" in f2.getvalue())
             self.assertTrue("Test titel 3) heeft geen omslagfoto" in f2.getvalue())
-            self.assertTrue("[INFO] 2 foto's OK; 3 foto's NOK" in f2.getvalue())
+            self.assertTrue("[INFO] 2 foto's OK" in f2.getvalue())
+            self.assertTrue("[ERROR] 3 foto's NOK" in f1.getvalue())
 
             self.foto.locatie = 'non-existing.jpg'
             self.foto.save()
@@ -113,7 +114,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             self.assertTrue('[ERROR] ' in f1.getvalue())
             self.assertTrue(' locatie bestand niet gevonden: ' in f1.getvalue())
             self.assertTrue(self.foto.locatie in f1.getvalue())
-            self.assertTrue("[INFO] 2 foto's OK; 3 foto's NOK" in f2.getvalue())
+            self.assertTrue("[INFO] 2 foto's OK" in f2.getvalue())
+            self.assertTrue("[ERROR] 3 foto's NOK" in f1.getvalue())
 
             # verwijder het probleemgeval
             # de ERROR verandert in een WARNING: product 1 heeft nu ook geen omslagfoto
@@ -121,7 +123,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-            self.assertTrue("[INFO] 2 foto's OK; 3 foto's NOK" in f2.getvalue())
+            self.assertTrue("[INFO] 2 foto's OK" in f2.getvalue())
+            self.assertTrue("[ERROR] 3 foto's NOK" in f1.getvalue())
 
     def test_koppel_fotos(self):
         self.product3.fotos.clear()
