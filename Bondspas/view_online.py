@@ -15,7 +15,7 @@ from BasisTypen.models import GESLACHT_ANDERS
 from Functie.rol import rol_get_huidige, Rollen
 from Opleidingen.models import OpleidingDiploma
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, get_sporter_voorkeuren
+from Sporter.models import Sporter, Speelsterkte, get_sporter_voorkeuren
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_nhb,
                                       bereken_leeftijdsklasse_ifaa)
@@ -81,7 +81,18 @@ def maak_bondspas_regels(lid_nr, jaar):
         regels.append(("Opleidingen", "n.v.t."))
 
     # TODO: speelsterkte
-    regels.append(("Speelsterkte", "n.v.t."))
+    afkortingen = list()
+    prev_disc = None
+    for sterkte in sporter.speelsterkte_set.order_by('volgorde'):    # laagste eerst = beste eerst
+        if sterkte.discipline != prev_disc:
+            afkortingen.append(sterkte.pas_code)
+            prev_disc = sterkte.discipline
+    # for
+
+    if len(afkortingen):
+        regels.append(("Speelsterkte", ", ".join(afkortingen)))
+    else:
+        regels.append(("Speelsterkte", "n.v.t."))
 
     wedstrijdleeftijd_wa = sporter.bereken_wedstrijdleeftijd_wa(jaar)
     wedstrijd_datum = datetime.date(year=jaar, month=sporter.geboorte_datum.month, day=sporter.geboorte_datum.day)

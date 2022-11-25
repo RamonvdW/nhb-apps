@@ -1316,6 +1316,7 @@ class Command(BaseCommand):
                     disc = sterk['discipline_name']
                     datum_raw = sterk['date']
                     beschr = sterk['skill_level_name']
+                    code = sterk['skill_level_code']        # voor op de bondspas
 
                     try:
                         datum = datetime.datetime.strptime(datum_raw, "%Y-%m-%d").date()  # YYYY-MM-DD
@@ -1324,6 +1325,14 @@ class Command(BaseCommand):
                                                 lid_nr, repr(datum_raw)))
                         self._count_errors += 1
                     else:
+                        try:
+                            volgorde = self._speelsterkte2volgorde[(disc, beschr)]
+                        except KeyError:
+                            volgorde = 9999
+                            self.stdout.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (
+                                                repr(disc), repr(beschr)))
+                            self._count_warnings += 1
+
                         # kijk of deze al bestaat
                         found = None
                         for huidig in huidige_lijst:
@@ -1354,7 +1363,8 @@ class Command(BaseCommand):
                                          discipline=disc,
                                          category=cat,
                                          volgorde=volgorde,
-                                         datum=datum)
+                                         datum=datum,
+                                         pas_code=code)
                             nieuwe_lijst.append(sterk)
                             self._count_toevoegingen += 1
                 # for

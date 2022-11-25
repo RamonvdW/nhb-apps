@@ -185,6 +185,8 @@ class Sporter(models.Model):
 class Speelsterkte(models.Model):
     """ Deze tabel houdt de behaalde spelden/veren/schilden bij """
 
+    # TODO: verminder duplicatie door BasisType speelsterkte aan te maken
+
     # welke sporter heeft deze speelsterkte behaald?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
 
@@ -200,6 +202,9 @@ class Speelsterkte(models.Model):
     # Senior / Master / Cadet
     # sommige spelden zijn apart te behalen in verschillende categorieën
     category = models.CharField(max_length=50)
+
+    # afkorting om te tonen op de bondspas
+    pas_code = models.CharField(max_length=8, default='', blank=True)
 
     # sorteervolgorde (lager = eerder tonen)
     volgorde = models.PositiveSmallIntegerField()
