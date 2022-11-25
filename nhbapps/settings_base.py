@@ -284,25 +284,25 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
 # volgorde: lager = beter
 SPEELSTERKTE_VOLGORDE = (
     # discipline, beschrijving, volgorde
-    ('NHB Graadspelden Schutter', 'Grootmeesterschutter', 1),       # 3e graad (4 van de 4)
+    ('NHB Graadspelden Schutter', 'Grootmeesterschutter', 1),       # 1e graad (3 van de 4)
     ('NHB Graadspelden Schutter', 'Meesterschutter', 2),            # 2e graad (3 van de 4)
-    ('NHB Graadspelden Schutter', 'Allroundschutter', 3),           # 1e graad (3 van de 4)
+    ('NHB Graadspelden Schutter', 'Allroundschutter', 3),           # 3e graad (4 van de 4)
 
-    ('NHB Graadspelden Indoor', '3e Graad Indoor', 10),
+    ('NHB Graadspelden Indoor', '1e Graad Indoor', 10),
     ('NHB Graadspelden Indoor', '2e Graad Indoor', 11),
-    ('NHB Graadspelden Indoor', '1e Graad Indoor', 12),
+    ('NHB Graadspelden Indoor', '3e Graad Indoor', 12),
 
-    ('NHB Graadspelden Outdoor', '3e Graad Outdoor', 20),
+    ('NHB Graadspelden Outdoor', '1e Graad Outdoor', 20),
     ('NHB Graadspelden Outdoor', '2e Graad Outdoor', 21),
-    ('NHB Graadspelden Outdoor', '1e Graad Outdoor', 22),
+    ('NHB Graadspelden Outdoor', '3e Graad Outdoor', 22),
 
-    ('NHB Graadspelden Veld', '3e Graad Veld', 30),
+    ('NHB Graadspelden Veld', '1e Graad Veld', 30),
     ('NHB Graadspelden Veld', '2e Graad Veld', 31),
-    ('NHB Graadspelden Veld', '1e Graad Veld', 32),
+    ('NHB Graadspelden Veld', '3e Graad Veld', 32),
 
-    ('NHB Graadspelden Short Metric', '3e Graad Short Metric', 40),
+    ('NHB Graadspelden Short Metric', '1e Graad Short Metric', 40),
     ('NHB Graadspelden Short Metric', '2e Graad Short Metric', 41),
-    ('NHB Graadspelden Short Metric', '1e Graad Short Metric', 42),
+    ('NHB Graadspelden Short Metric', '3e Graad Short Metric', 42),
 
     ('Compound', 'Compound 1400', 100),
     ('Compound', 'Compound 1350', 101),
