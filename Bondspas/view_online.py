@@ -90,7 +90,13 @@ def maak_bondspas_regels(lid_nr, jaar):
     # for
 
     if len(afkortingen):
-        regels.append(("Speelsterkte", ", ".join(afkortingen)))
+        msg = ", ".join(afkortingen)
+        if len(msg) > 30:
+            pos = msg.find(', ', int(len(msg)/2))
+            regels.append(("Speelsterkte", msg[:pos+1]))  # inclusief komma
+            regels.append(("", msg[pos+2:]))
+        else:
+            regels.append(("Speelsterkte", msg))
     else:
         regels.append(("Speelsterkte", "n.v.t."))
 
@@ -281,12 +287,12 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     next_y = kader_y1
     wkl = False
     for header, regel in regels:
-        header += ': '
-
-        if wkl:
-            draw.text((kader_x1 + header_width - header_width_wkl + wkl_indent, next_y), header, color_black, font=font_bold)
-        else:
-            draw.text((kader_x1, next_y), header, color_black, font=font)
+        if header:
+            header += ': '
+            if wkl:
+                draw.text((kader_x1 + header_width - header_width_wkl + wkl_indent, next_y), header, color_black, font=font_bold)
+            else:
+                draw.text((kader_x1, next_y), header, color_black, font=font)
 
         draw.text((kader_x1 + header_width, next_y), regel, color_black, font=font)
         next_y += text_spacing
