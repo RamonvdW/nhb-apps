@@ -215,6 +215,7 @@ rm -rf "$TEST_DIR"
 
 ASK_LAUNCH=0
 COVERAGE_RED=0
+PRECISION=2     # 2 decimalen achter de komma
 
 if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
@@ -225,18 +226,18 @@ then
 
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
+        python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
         res=$?
 
-        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT &>>"$LOG"
+        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
 
         if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
         then
             COVERAGE_RED=1
         fi
     else
-        python3 -m coverage report --precision=1 --include=$COV_INCLUDE
-        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered --include=$COV_INCLUDE &>>"$LOG"
+        python3 -m coverage report --precision=$PRECISION --include=$COV_INCLUDE
+        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered --include=$COV_INCLUDE &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"
