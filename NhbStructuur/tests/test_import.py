@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
@@ -62,22 +63,22 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         """ initialisatie van de test case """
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = NhbVereniging(
+                ver_nr="1000",
+                naam="Grote Club",
+                regio=NhbRegio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    email="rdetester@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
 
@@ -759,6 +760,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
 
         self.assertTrue("[WARNING] Opleiding code 043 is niet bekend (1 keer in gebruik)" in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100001 heeft een dubbele opleiding: code 042" in f2.getvalue())
 
         self.assertEqual(OpleidingDiploma.objects.count(), 1)
         diploma = OpleidingDiploma.objects.all()[0]
@@ -805,5 +807,53 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(str(diploma.datum_begin), '2009-04-05')
         self.assertEqual(str(diploma.datum_einde), '2012-04-24')
 
+    def test_demo_club(self):
+        # in settings.CRM_IMPORT_BEHOUD_CLUB kunnen we een clubnummer zetten dat niet verwijderd wordt
+        # dit wordt gebruikt voor demos en screenshots in de handleiding
+
+        ver_nr = settings.CRM_IMPORT_BEHOUD_CLUB[0]
+
+        self.assertEqual(0, NhbVereniging.objects.filter(ver_nr=ver_nr).count())
+
+        # maak de speciale club aan
+        ver = NhbVereniging(
+                ver_nr=ver_nr,
+                naam="Demo Club",
+                regio=NhbRegio.objects.get(pk=115))
+        ver.save()
+
+        # koppel een lid aan deze club
+        sporter = Sporter(
+                    lid_nr=100888,
+                    geslacht="M",
+                    voornaam="Demo",
+                    achternaam="Lid",
+                    email="demolid@nhb.not",
+                    geboorte_datum=datetime.date(year=1970, month=3, day=4),
+                    sinds_datum=datetime.date(year=2012, month=11, day=12),
+                    bij_vereniging=ver)
+        sporter.save()
+
+        self.assertEqual(2, Sporter.objects.count())
+
+        f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                             TESTFILE_23_DIPLOMA)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+
+        self.assertEqual(1, NhbVereniging.objects.filter(ver_nr=ver_nr).count())
+        self.assertEqual(3, Sporter.objects.count())
+
+        # nog een keer, maar dan met lege configuratie
+        # dus dan wordt de club wel verwijderd
+        sporter.delete()
+
+        with override_settings(CRM_IMPORT_BEHOUD_CLUB=()):
+            f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                                 TESTFILE_23_DIPLOMA)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+
+        self.assertEqual(0, NhbVereniging.objects.filter(ver_nr=ver_nr).count())
 
 # end of file

@@ -55,19 +55,6 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
 
-# administratieve entries (met fouten) die overslagen moeten worden
-SKIP_MEMBERS = (101711,)            # CRM developer
-
-GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
-
-GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijden
-
-GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
-                         1377,      # persoonlijk lid, geen wedstrijden
-                         )
-
-BEHOUD_CLUB = (1999,)               # voor demo
-
 
 class Command(BaseCommand):
 
@@ -450,7 +437,7 @@ class Command(BaseCommand):
                 self._count_warnings += 1
                 ver_email = ""      # voorkom None
 
-            ver_geen_wedstrijden = (ver_nr in GEEN_WEDSTRIJDEN)
+            ver_geen_wedstrijden = (ver_nr in settings.CRM_IMPORT_GEEN_WEDSTRIJDEN)
 
             ver_kvk = club['coc_number']
             if ver_kvk is None:
@@ -706,7 +693,7 @@ class Command(BaseCommand):
         # kijk of er verenigingen verwijderd moeten worden
         while len(ver_nrs) > 0:
             ver_nr = ver_nrs.pop(0)
-            if ver_nr in BEHOUD_CLUB:
+            if ver_nr in settings.CRM_IMPORT_BEHOUD_CLUB:
                 continue
             obj = self._vind_vereniging(ver_nr)
             self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
@@ -826,7 +813,7 @@ class Command(BaseCommand):
                 # for
 
                 if len(ver_secretarissen) == 0:
-                    if ver_nr not in GEEN_SECRETARIS_NODIG:
+                    if ver_nr not in settings.CRM_IMPORT_GEEN_SECRETARIS_NODIG:
                         self.stdout.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
                         self._count_warnings += 1
         # for
@@ -884,7 +871,7 @@ class Command(BaseCommand):
             lid_nr = member['member_number']
 
             # silently skip some numbers
-            if lid_nr in SKIP_MEMBERS:
+            if lid_nr in settings.CRM_IMPORT_SKIP_MEMBERS:
                 continue
 
             try:
@@ -1094,7 +1081,7 @@ class Command(BaseCommand):
                 try:
                     # krimp de lijst zodat verwijderde leden over blijven
                     lid_nrs.remove(lid_nr)
-                except ValueError:
+                except ValueError:          # pragma: no cover
                     self.stderr.write("[ERROR] Unexpected: lid_nr %s onverwacht niet in lijst bestaande nhb nrs" % (
                                             repr(lid_nr)))
                     self._count_errors += 1
@@ -1390,6 +1377,8 @@ class Command(BaseCommand):
                     if code in dupe_codes:
                         self.stdout.write('[WARNING] Lid %s heeft een dubbele opleiding: code %s' % (lid_nr, code))
                         self._count_warnings += 1
+                        continue        # niet importeren
+
                     dupe_codes.append(code)
 
                     try:
@@ -1429,7 +1418,7 @@ class Command(BaseCommand):
             obj = self._vind_sporter(lid_nr)
 
             # behoud fictieve leden
-            if obj.bij_vereniging and obj.bij_vereniging.ver_nr in BEHOUD_CLUB:
+            if obj.bij_vereniging and obj.bij_vereniging.ver_nr in settings.CRM_IMPORT_BEHOUD_CLUB:
                 continue
 
             if obj.is_actief_lid:
@@ -1499,7 +1488,7 @@ class Command(BaseCommand):
         for club in data:
             ver_nr = club['club_number']
 
-            if ver_nr in GEEN_WEDSTRIJDLOCATIE:
+            if ver_nr in settings.CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE:
                 continue
 
             nhb_ver = self._vind_vereniging(ver_nr)

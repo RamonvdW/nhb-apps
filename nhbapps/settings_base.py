@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-11-25'
+SITE_VERSIE = '2022-11-26'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -486,6 +486,18 @@ LOGGING = {
         }
     }
 }
+
+# CRM import flexibiliteit
+CRM_IMPORT_SKIP_MEMBERS = (101711,)            # CRM developer
+
+CRM_IMPORT_GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
+
+CRM_IMPORT_GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijden
+
+CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
+                                    1377)      # persoonlijk lid, geen wedstrijden
+
+CRM_IMPORT_BEHOUD_CLUB = (1999,)               # voor demo
 
 
 # begin waarden voor unieke ticket nummers

@@ -109,12 +109,14 @@
         {"category_name":  "Senior",
           "discipline_name": "Recurve",
           "skill_level_name": "Recurve 1100",
-          "date": "1991-01-01"
+          "date": "1991-01-01",
+          "skill_level_code": "R1100"
         },
         {"category_name":  "Senior",
           "discipline_name": "Recurve",
           "skill_level_name": "Recurve 1000",
-          "date": "1990-01-01"
+          "date": "1990-01-01",
+          "skill_level_code": "R1000"
         }
       ]
     },
