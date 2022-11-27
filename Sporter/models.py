@@ -121,6 +121,14 @@ class Sporter(models.Model):
     # koppeling met een account (indien aangemaakt)
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
 
+    # het postadres van deze sporter
+    postadres_1 = models.CharField(max_length=100, default='', blank=True)
+    postadres_2 = models.CharField(max_length=100, default='', blank=True)
+    postadres_3 = models.CharField(max_length=100, default='', blank=True)
+
+    # is dit een erelid (voor vermelding op de bondspas)
+    is_erelid = models.BooleanField(default=False)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus lid_nr eerst

@@ -894,12 +894,19 @@ class Command(BaseCommand):
                 self._count_errors += 1
                 continue        # data niet compleet voor dit lid
 
+            lid_is_erelid = False
             pos = lid_achternaam.find('(')
             if pos > 0:
+                toevoeging = lid_achternaam[pos:]
                 new_achternaam = lid_achternaam[:pos].strip()
-                self.stdout.write("[WARNING] Lid %s: verwijder toevoeging achternaam: %s --> %s" % (
-                                            lid_nr, repr(lid_achternaam), repr(new_achternaam)))
-                self._count_warnings += 1
+
+                if toevoeging in ('(Erelid NHB)', '(Erevoorzitter NHB)'):
+                    lid_is_erelid = True
+                else:
+                    self.stdout.write("[WARNING] Lid %s: verwijder toevoeging achternaam: %s --> %s" % (
+                                                lid_nr, repr(lid_achternaam), repr(new_achternaam)))
+                    self._count_warnings += 1
+
                 lid_achternaam = new_achternaam
 
             if member['prefix']:
@@ -993,6 +1000,7 @@ class Command(BaseCommand):
                 # silently skip due to missing mandatory fields
                 continue
 
+            # postcode + huisnummer maken
             lid_adres_code = ''
             postcode = member['postal_code']
             postadres = member['address']
@@ -1002,9 +1010,21 @@ class Command(BaseCommand):
                 if pos < 0:
                     self.stderr.write('[ERROR] Postcode %s niet gevonden in adres %s' % (repr(postcode), repr(postadres)))
                 else:
-                    postadres = postadres[:pos].strip()
-                    spl = postadres.split(' ')
-                    lid_adres_code = postcode.replace(' ', '') + spl[-1]
+                    # typisch: "Straatnaam 123\n1234 ZZ  Plaats\n"
+                    sub_postadres = postadres[:pos]             # postcode en verder eraf kappen
+                    sub_postadres = sub_postadres.strip()       # verwijder newlines
+                    spl = sub_postadres.split(' ')              # scheid straatnaam en huisnummer
+                    huis_nr = spl[-1]
+                    lid_adres_code = postcode.replace(' ', '') + huis_nr
+
+            lid_postadres = list()
+            for regel in postadres.split('\n'):
+                regel = regel.strip()
+                if regel != '':
+                    lid_postadres.append(regel)
+            while len(lid_postadres) < 3:
+                lid_postadres.append('')
+            # while
 
             lid_tel_nr = ''
             for field_name in ('phone_mobile', 'phone_private', 'phone_business'):      # hoogste voorkeur eerst
@@ -1220,6 +1240,22 @@ class Command(BaseCommand):
                         self.stdout.write('[INFO] Lid %s: wa_id %s --> %s' % (lid_nr, repr(obj.wa_id), repr(lid_wa_id)))
                         obj.wa_id = lid_wa_id
                         updated.append('wa_id')
+                        self._count_wijzigingen += 1
+
+                    if obj.postadres_1 != lid_postadres[0] or obj.postadres_2 != lid_postadres[1] or obj.postadres_3 != lid_postadres[2]:
+                        self.stdout.write('[INFO] Lid %s: postadres_1 %s --> %s' % (lid_nr, repr(obj.postadres_1), repr(lid_postadres[0])))
+                        self.stdout.write('[INFO] Lid %s: postadres_2 %s --> %s' % (lid_nr, repr(obj.postadres_2), repr(lid_postadres[1])))
+                        self.stdout.write('[INFO] Lid %s: postadres_3 %s --> %s' % (lid_nr, repr(obj.postadres_3), repr(lid_postadres[2])))
+                        obj.postadres_1 = lid_postadres[0]
+                        obj.postadres_2 = lid_postadres[1]
+                        obj.postadres_3 = lid_postadres[2]
+                        updated.extend(['postadres_1', 'postadres_2', 'postadres_3'])
+                        self._count_wijzigingen += 3
+
+                    if obj.is_erelid != lid_is_erelid:
+                        self.stdout.write('[INFO] Lid %s: is_erelid %s --> %s' % (lid_nr, obj.is_erelid, lid_is_erelid))
+                        obj.is_erelid = lid_is_erelid
+                        updated.append('is_erelid')
                         self._count_wijzigingen += 1
 
                     if not self.dryrun:
