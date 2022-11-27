@@ -16,16 +16,15 @@ from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db.models import Count
 from django.db import transaction
-from BasisTypen.models import ORGANISATIE_IFAA
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Bestel.models import (BestelProduct, BestelMandje,
                            Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
                            BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
-                           BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
-                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
-                           BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
+                           BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER,
+                           BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
+                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
 from Bestel.plugins.product_info import beschrijf_product
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -33,6 +32,7 @@ from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortinge
 from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering,
                                       webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten_mandje,
                                       webwinkel_plugin_bepaal_verzendkosten_bestelling)
+from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
@@ -45,16 +45,12 @@ import traceback
 import datetime
 import sys
 
+EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_bestel/backoffice-versturen.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BESTELLING = 'email_bestel/bevestig-bestelling.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BETALING = 'email_bestel/bevestig-betaling.dtl'
 
 
-def stuur_email_naar_koper_bestelling_details(bestelling):
-    """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
-
-    account = bestelling.account
-    email = account.accountemail_set.all()[0]
-
+def _beschrijf_bestelling(bestelling):
     producten = (bestelling
                  .producten
                  .select_related('wedstrijd_inschrijving',
@@ -115,6 +111,30 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
             producten.append(product)
     # for
 
+    return producten
+
+
+def _beschrijf_transacties(bestelling):
+    transacties = (bestelling
+                   .transacties
+                   .all()
+                   .order_by('when'))  # chronologisch
+
+    for transactie in transacties:
+        transactie.when_str = timezone.localtime(transactie.when).strftime('%Y-%m-%d om %H:%M')
+    # for
+
+    return transacties
+
+
+def stuur_email_naar_koper_bestelling_details(bestelling):
+    """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
+
+    account = bestelling.account
+    email = account.accountemail_set.all()[0]
+
+    producten = _beschrijf_bestelling(bestelling)
+
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
@@ -135,58 +155,9 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
     account = bestelling.account
     email = account.accountemail_set.all()[0]
 
-    producten = (bestelling
-                 .producten
-                 .select_related('wedstrijd_inschrijving',
-                                 'wedstrijd_inschrijving__wedstrijd',
-                                 'wedstrijd_inschrijving__sessie',
-                                 'wedstrijd_inschrijving__sporterboog',
-                                 'wedstrijd_inschrijving__sporterboog__boogtype',
-                                 'wedstrijd_inschrijving__sporterboog__sporter',
-                                 'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
-                 .order_by('pk'))       # vaste volgorde (primitief, maar functioneel)
+    producten = _beschrijf_bestelling(bestelling)
 
-    regel_nr = 0
-    for product in producten:
-
-        if product.wedstrijd_inschrijving:
-            inschrijving = product.wedstrijd_inschrijving
-
-            # lege regel gevolgd door een regel nummer
-            regel_nr += 1
-            product.regel_nr = regel_nr
-
-            product.reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
-            product.wedstrijd_titel = inschrijving.wedstrijd.titel
-            product.sessie_datum = inschrijving.sessie.datum
-            product.sessie_tijd = inschrijving.sessie.tijd_begin
-            product.sporter_lid_nr_naam = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
-
-            sporter_ver = inschrijving.sporterboog.sporter.bij_vereniging
-            if sporter_ver:
-                product.ver_nr_naam = sporter_ver.ver_nr_en_naam()
-            else:
-                product.ver_nr_naam = 'Onbekend'
-
-            product.boog = inschrijving.sporterboog.boogtype.beschrijving
-
-            if inschrijving.korting:
-                korting = inschrijving.korting
-                product.korting = "Korting: %d%%" % korting.percentage
-
-                if korting.soort == WEDSTRIJD_KORTING_COMBI:
-                    combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-                    product.combi_reden = " en ".join(combi_redenen)
-    # for
-
-    transacties = (bestelling
-                   .transacties
-                   .all()
-                   .order_by('when'))  # chronologisch
-
-    for transactie in transacties:
-        transactie.when_str = timezone.localtime(transactie.when).strftime('%Y-%m-%d om %H:%M')
-    # for
+    transacties = _beschrijf_transacties(bestelling)
 
     context = {
         'voornaam': account.get_first_name(),
@@ -200,6 +171,30 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
 
     mailer_queue_email(email.bevestigde_email,
                        'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
+                       mail_body)
+
+
+def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
+    """ Stuur een e-mail om de betaalde bestelling te bevestigen """
+
+    account = bestelling.account
+    sporter = account.sporter_set.all()[0]
+
+    producten = _beschrijf_bestelling(bestelling)
+    transacties = _beschrijf_transacties(bestelling)
+
+    context = {
+        'koper_sporter': sporter,       # bevat postadres
+        'naam_site': settings.NAAM_SITE,
+        'bestelling': bestelling,
+        'producten': producten,
+        'transacties': transacties,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN)
+
+    mailer_queue_email(email_backoffice,
+                       'Verstuur webwinkel producten (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 
 
@@ -220,6 +215,8 @@ class Command(BaseCommand):
         self._instellingen_via_nhb = None
         self._instellingen_verkoper_webwinkel = None
         self._instellingen_cache = dict()     # [ver_nr] = BetaalInstellingenVereniging
+
+        self._emailadres_backoffice = Functie.objects.get(rol='MWW').bevestigde_email
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -784,10 +781,17 @@ class Command(BaseCommand):
 
             bestelling.save(update_fields=['status', 'log'])
 
+            bevat_webwinkel = False
             for product in bestelling.producten.all():
                 if product.wedstrijd_inschrijving:
                     wedstrijden_plugin_inschrijving_is_betaald(product)
+                elif product.webwinkel_keuze:
+                    bevat_webwinkel = True
             # for
+
+            # stuur een e-mail naar het backoffice
+            if bevat_webwinkel:
+                stuur_email_webwinkel_backoffice(bestelling, self._emailadres_backoffice)
 
             # stuur een e-mail aan de koper
             stuur_email_naar_koper_betaalbevestiging(bestelling)

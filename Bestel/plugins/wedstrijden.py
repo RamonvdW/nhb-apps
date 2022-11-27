@@ -445,7 +445,7 @@ def wedstrijden_plugin_inschrijving_is_betaald(product):
     inschrijving.save(update_fields=['ontvangen_euro', 'status', 'log'])
 
 
-def wedstrijden_beschrijf_product(inschrijving):
+def wedstrijden_plugin_beschrijf_product(inschrijving):
     """
         Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
     """

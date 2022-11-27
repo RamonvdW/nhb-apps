@@ -164,6 +164,15 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
+        if producten:
+            for product in producten:
+                if product.webwinkel_keuze:
+                    context['toon_postadres'] = True
+                    sporter = account.sporter_set.all()[0]
+                    context['koper_sporter'] = sporter
+                    break
+            # for
+
         context['mandje_is_leeg'] = mandje_is_leeg
         context['mandje'] = mandje
         context['producten'] = producten

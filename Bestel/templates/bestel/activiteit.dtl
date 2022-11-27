@@ -114,7 +114,7 @@
                                                 {% if product.geen_beschrijving %}
                                                     <i>Onbekend</i>
                                                 {% else %}
-                                                    <span>{{ product.beschrijving_str1 }}<br>{{ product.beschrijving_str2|highlight:zoekterm }}<br>{{ product.beschrijving_str3 }}</span>
+                                                    <span>{% if product.beschrijving_str1 %}{{ product.beschrijving_str1 }}<br>{% endif %}{{ product.beschrijving_str2|highlight:zoekterm }}<br>{% if product.beschrijving_str3 %}{{ product.beschrijving_str3 }}{% endif %}</span>
                                                 {% endif %}
                                             </td>
                                         </tr>

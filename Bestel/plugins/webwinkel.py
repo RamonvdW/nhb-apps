@@ -91,7 +91,7 @@ def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, bestelling):
     bestelling.save(update_fields=['verzendkosten_euro'])
 
 
-def webwinkel_beschrijf_product(keuze):
+def webwinkel_plugin_beschrijf_product(keuze):
     """
         Geef een lijst van tuples terug waarin aspecten van het product beschreven staan.
     """

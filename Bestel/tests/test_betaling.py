@@ -223,7 +223,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail)
-        self.assert_consistent_email_html_text(mail)
+        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

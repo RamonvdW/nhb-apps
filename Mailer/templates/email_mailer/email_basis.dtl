@@ -25,11 +25,12 @@
 {% block footer_text %}
     |
     |Het bondsbureau
-    |
-    |
-    |(deze e-mail is automatisch gegenereerd op {{ basis_when }})
-    |
 {% endblock %}
+
+|
+|
+|(deze e-mail is automatisch gegenereerd op {{ basis_when }})
+|
 <!DOCTYPE html>
 
 {% load static %}
@@ -69,11 +70,12 @@
             <div>Het bondsbureau</div>
             <br>
             <img src="{{ logo_url }}" height="{{ logo_height }}" width="{{ logo_width }}" alt="NHB logo">
-            <br>
-            <br>
-            <div style="font-size:smaller">(deze e-mail is automatisch gegenereerd op {{ basis_when }})</div>
-            <br>
         {% endblock %}
+
+        <br>
+        <br>
+        <div style="font-size:smaller">(deze e-mail is automatisch gegenereerd op {{ basis_when }})</div>
+        <br>
     </body>
 </html>
 

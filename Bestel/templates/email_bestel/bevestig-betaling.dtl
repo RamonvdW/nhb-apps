@@ -13,35 +13,32 @@
     |Bestelnummer: {{ bestelling.mh_bestel_nr }}
     |Betaalstatus: Voldaan
 
-
+    |
+    |Producten
     {% for product in producten %}
         |
         |[{{ product.regel_nr }}]
 
-        {% if product.wedstrijd_inschrijving %}
-            |    Reserveringsnummer: {{ product.reserveringsnummer }}
-            |    Wedstrijd: {{ product.wedstrijd_titel }}
-            |    Sessie: {{ product.sessie_datum|date:"l j F Y" }} om {{ product.sessie_tijd|date:"H:i" }}
-            |    Sporter: {{ product.sporter_lid_nr_naam }}
-            |    Van vereniging: {{ product.ver_nr_naam }}
-            |    Boog: {{ product.boog }}
+        {% for onderwerp, tekst in product.beschrijving %}
+            |    {{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}
+        {% endfor %}
 
-            {% if product.korting %}
-                |    Gebruikte korting: {{ product.korting }}
-            {% endif %}
+        {% if product.korting_euro > 0.001 %}
+            |    Verkregen korting: {{ product.gebruikte_korting_str }}
             {% if product.combi_reden %}
                 |    (combinatie korting voor {{ product.combi_reden }}
             {% endif %}
-
-            |    Prijs: € {{ product.prijs_euro }}
-            {% if product.korting_euro > 0.001 %}
-                |    Korting: -€ {{ product.korting_euro }}
-            {% endif %}
         {% endif %}
+
+        |    Prijs: € {{ product.prijs_euro }}
+        {% if product.korting_euro > 0.001 %}
+            |    Korting: -€ {{ product.korting_euro }}
+        {% endif %}
+
     {% endfor %}
 
     |
-    |Totaal: € {{ bestelling.totaal_euro }}
+    |TOTAAL: € {{ bestelling.totaal_euro }}
 
     {% for transactie in transacties %}
         |
@@ -73,6 +70,11 @@
     |Bedankt voor je bestelling!
 {% endblock %}
 
+{% block footer_text %}
+    |
+    |De webwinkel
+{% endblock %}
+
 {% block inhoud_html %}
     <div>Hallo {{ voornaam }}!</div>
     <br>
@@ -92,50 +94,45 @@
             <tr>
                 <th>#</th>
                 <th>Product</th>
-                <th>Prijs</th>
+                <th>Bedrag</th>
             </tr>
         </thead>
 
         {% for product in producten %}
-            {% if product.wedstrijd_inschrijving %}
+            <tr>
+                <td style="vertical-align:top">{% if product.regel_nr > 0 %}{{ product.regel_nr }}.{% endif %}</td>
+                <td>
+                    {% for onderwerp, tekst in product.beschrijving %}
+                        <span>{{ onderwerp }}{% if tekst %}: {{ tekst }}{% endif %}</span><br>
+                    {% endfor %}
+                </td>
+                <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
+            </tr>
+
+            {% if product.korting_euro > 0.001 %}
                 <tr>
-                    <td style="vertical-align:top">{{ product.regel_nr }}</td>
-                    <td>
-                        <span>Reserveringsnummer: {{ product.reserveringsnummer }}</span><br>
-                        <span>Wedstrijd: {{ product.wedstrijd_titel }}</span><br>
-                        <span>Sessie: {{ product.sessie_datum|date:"l j F Y" }} om {{ product.sessie_tijd|date:"H:i" }}</span><br>
-                        <span>Sporter: {{ product.sporter_lid_nr_naam }}</span><br>
-                        <span>Van vereniging: {{ product.ver_nr_naam }}</span><br>
-                        <span>Boog: {{ product.boog }}</span><br>
+                    <td></td>
+                    <td>Verkregen korting:<br>
+                        {% if product.korting %}
+                            <span>{{ product.gebruikte_korting_str }}</span><br>
+                        {% endif %}
+                        {% if product.combi_reden %}
+                            <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
+                        {% endif %}
                     </td>
 
-                    <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                    <td style="text-align:right; vertical-align:top">-&euro;&nbsp;{{ product.korting_euro }}</td>
                 </tr>
-
-                {% if product.korting_euro > 0.001 %}
-                    <tr>
-                        <td></td>
-                        <td>Korting:<br>
-                            {% if product.korting %}
-                                <span>Gebruikte korting: {{ product.korting }}</span><br>
-                            {% endif %}
-                            {% if product.combi_reden %}
-                                <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
-                            {% endif %}
-                        </td>
-
-                        <td style="text-align:right; vertical-align:top">-&euro;&nbsp;{{ product.korting_euro }}</td>
-                    </tr>
-                {% endif %}
             {% endif %}
+
         {% endfor %}
 
+        <!-- Totaal regel toevoegen -->
         <tr>
             <td></td>
-            <td style="text-align:right">Totaal:</td>
+            <td style="text-align:right">TOTAAL:</td>
             <td style="text-align:right">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
         </tr>
-        <!-- Totaal regel toevoegen -->
     </table>
 
     <!-- TODO: als er nog geen betalingen zijn, dan instructie toevoegen hoe te betalen -->
@@ -178,4 +175,9 @@
 
     <br>
     <div>Bedankt voor je bestelling!</div>
+{% endblock %}
+
+{% block footer_html %}
+    <br>
+    <div>Jullie webwinkel</div>
 {% endblock %}

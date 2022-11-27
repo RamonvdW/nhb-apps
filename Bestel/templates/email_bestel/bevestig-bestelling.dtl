@@ -43,12 +43,12 @@
 
     {% if bestelling.verkoper_heeft_mollie %}
     |
-    |Betaling via online bankieren is mogelijk. Dit is de meest eenvoudige en snelste manier om te betalen.
+    |Betalen is mogelijk via online bankieren. Dit is de meest eenvoudige en snelste manier om te betalen.
     |Ga hiervoor naar MijnHandboogsport: onder Mijn pagina kan je de bestellingen vinden en de betaling starten.
     {% endif %}
 
     |
-    |Betaling is mogelijk door overboeking naar de volgende rekening:
+    |Betalen is mogelijk door overboeking naar de volgende rekening:
     |  Bedrag: € {{ bestelling.totaal_euro }}
     |  Naam: {{ bestelling.verkoper_naam }}
     |  IBAN: {{ bestelling.verkoper_iban }}
@@ -120,12 +120,12 @@
 
         {% endfor %}
 
+        <!-- Totaal regel toevoegen -->
         <tr>
             <td></td>
             <td style="text-align:right">TOTAAL:</td>
             <td style="text-align:right">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
         </tr>
-        <!-- Totaal regel toevoegen -->
     </table>
 
 
@@ -136,12 +136,12 @@
         <!-- TODO: meld hoeveel tijd de koper nog heeft om te betalen -->
 
         {% if bestelling.verkoper_heeft_mollie %}
-            <p>Betaling via online bankieren is mogelijk. Dit is de meest eenvoudige en snelste manier om te betalen.</p>
+            <p>Betalen is mogelijk via online bankieren. Dit is de meest eenvoudige en snelste manier om te betalen.</p>
             <p>Ga hiervoor naar MijnHandboogsport: onder Mijn pagina kan je de bestellingen vinden en de betaling starten.</p>
             <br>
         {% endif %}
 
-        <p>Betaling is mogelijk door overboeking naar de volgende rekening:</p>
+        <p>Betalen is mogelijk door overboeking naar de volgende rekening:</p>
         <table>
             <tr><th>Bedrag:</th><td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td></tr>
             <tr><th>Ontvanger:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
