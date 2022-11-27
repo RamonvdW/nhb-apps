@@ -51,11 +51,11 @@ class TestCompLaagRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
     def test_25m(self):
         # afstand NOK
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('import_uitslag_kamp', '999', 'bestand', 'blad', 'A', 'B', 'C')
+            self.run_management_command('import_uitslag_kamp', '999', 'bestand', 'blad', 'A', 'B', 'C')
         self.assertTrue('[ERROR] Afstand moet 18 of 25 zijn')
 
         # file NOK
-        f1, f2 = self.run_management_command('import_uitslag_kamp', '25', 'bestand', 'blad', 'A', 'B', 'C')
+        self.run_management_command('import_uitslag_kamp', '25', 'bestand', 'blad', 'A', 'B', 'C')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
         # blad NOK
@@ -94,8 +94,9 @@ class TestCompLaagRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
 
     def test_18m(self):
         f1, f2 = self.run_management_command('import_uitslag_kamp', '18', self.template_file, 'Voorronde', 'A', 'B', 'C')
-        print('f1:', f1.getvalue())
-        print('f2:', f2.getvalue())
+        _ = (f1, f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
         self.assertTrue('[ERROR] Indoor nog niet ondersteund' in f1.getvalue())
 
 

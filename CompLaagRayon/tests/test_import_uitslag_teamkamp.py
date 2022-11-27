@@ -67,11 +67,11 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
         # afstand NOK
         with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('import_uitslag_teamkamp', '999', 'bestand', 'blad', 'A', 'B', 'C')
+            self.run_management_command('import_uitslag_teamkamp', '999', 'bestand', 'blad', 'A', 'B', 'C')
         self.assertTrue('[ERROR] Afstand moet 18 of 25 zijn')
 
         # file NOK
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp', '25', 'bestand', 'blad', 'A', 'B', 'C')
+        self.run_management_command('import_uitslag_teamkamp', '25', 'bestand', 'blad', 'A', 'B', 'C')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
         # blad NOK
@@ -97,6 +97,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
         # echte import
         f1, f2 = self.run_management_command('import_uitslag_teamkamp', '25', self.real_file, 'Deelnemers en Scores', 'D', 'F', 'E', 'G', 'H', 'I')
+        _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         team1 = KampioenschapTeam.objects.filter(team_naam='rk-4111-1-R2')[0]
@@ -108,6 +109,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
     def test_18m(self):
         f1, f2 = self.run_management_command('import_uitslag_teamkamp', '18', self.real_file, 'Deelnemers en Scores', 'A', 'B', 'C')
+        _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue('[ERROR] Indoor nog niet ondersteund' in f1.getvalue())
