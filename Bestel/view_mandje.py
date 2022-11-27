@@ -94,8 +94,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 product.kan_afrekenen = True
 
                 if product.wedstrijd_inschrijving:
-                    inschrijving = product.wedstrijd_inschrijving
-
                     ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
                     try:
                         instellingen = ver_nr2instellingen[ver_nr]

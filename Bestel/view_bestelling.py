@@ -10,11 +10,10 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_IFAA
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
-from Bestel.plugins.product_info import beschrijf_product
+from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
@@ -66,6 +65,8 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
 
                 if product.wedstrijd_inschrijving:
                     beschrijving.append(product.wedstrijd_inschrijving.korte_beschrijving())
+                elif product.webwinkel_keuze:
+                    beschrijving.append(product.webwinkel_keuze.product.omslag_titel)
                 else:
                     beschrijving.append("??")
             # for
@@ -140,21 +141,13 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             # maak een beschrijving van deze regel
             product.beschrijving = beschrijf_product(product)
 
-            if product.wedstrijd_inschrijving:
-                inschrijving = product.wedstrijd_inschrijving
+            product.gebruikte_korting_str, product.combi_reden = beschrijf_korting(product)
+            product.is_combi_korting = len(product.combi_reden) > 0
 
-                if inschrijving.korting:
-                    korting = inschrijving.korting
-                    product.gebruikte_korting_str = "Korting: %d%%" % korting.percentage
-                    if korting.soort == WEDSTRIJD_KORTING_COMBI:
-                        product.is_combi_korting = True
-                        product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-                elif product.korting_euro:
-                    product.gebruikte_korting_str = "Onbekende korting"
-                    bevat_fout = True
+            if product.wedstrijd_inschrijving:
+                pass
 
             elif product.webwinkel_keuze:
-                # TODO: webwinkel korting
                 pass
 
             else:
@@ -167,8 +160,13 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         # for
 
         # nooit een negatief totaalbedrag tonen want we geven geen geld weg
-        if controleer_euro < 0.0:
-            controleer_euro = 0.0
+        if controleer_euro < 0:
+            controleer_euro = Decimal(0)
+
+        controleer_euro += bestelling.verzendkosten_euro
+        controleer_euro += bestelling.btw_euro_cat1
+        controleer_euro += bestelling.btw_euro_cat2
+        controleer_euro += bestelling.btw_euro_cat3
 
         if controleer_euro != bestelling.totaal_euro:
             bevat_fout = True

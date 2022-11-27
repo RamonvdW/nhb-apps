@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestelling</h3>
-            <p>Bestelnummer: {{ bestelling.mh_bestel_nr }}</p>
+            <p>Bestelnummer {{ bestelling.mh_bestel_nr }}</p>
         </div>
     </div>
 
@@ -30,7 +30,7 @@
 
                 {% for product in producten %}
                     <tr>
-                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}{{ hdr }}:<br>{% endfor %}</th>
+                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</th>
                         <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
                         <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ product.prijs_euro }}</td>
                     </tr>
@@ -44,10 +44,37 @@
                     {% endif %}
                 {% endfor %}
 
+                <!-- verzendkosten -->
+                {% if bestelling.verzendkosten_euro > 0 %}
+                    <tr>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
+                        <td>Verzendkosten</td>
+                        <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ bestelling.verzendkosten_euro }}</td>
+                    </tr>
+                {% endif %}
+
+                <!-- btw -->
+                {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
+                    <tr>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
+                        <td>
+                            {% if bestelling.btw_percentage_cat1 %}<span>BTW {{ bestelling.btw_percentage_cat1 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat2 %}<span>BTW {{ bestelling.btw_percentage_cat2 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat3 %}<span>BTW {{ bestelling.btw_percentage_cat3 }}</span><br>{% endif %}
+                        </td>
+                        <td class="right-align" style="padding-right:20px">
+                            {% if bestelling.btw_percentage_cat1 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat1 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat2 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat2 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat3 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat3 }}</span><br>{% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+
                 <!-- totaal -->
                 <tr>
                     <td class="hide-on-small-only"></td>
-                    <td class="right-align"><b>Totale kosten:</b></td>
+                    <td class="right-align"><b>Totale kosten</b></td>
                     <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
                 </tr>
 
@@ -64,13 +91,13 @@
                 {% if rest_euro %}
                     <tr>
                         <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td class="right-align"><b>Nog te voldoen:</b></td>
+                        <td class="right-align"><b>Nog te voldoen</b></td>
                         <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
                     </tr>
                 {% else %}
                     <tr>
                         <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td class="right-align"><b>Openstaand:</b></td>
+                        <td class="right-align"><b>Openstaand</b></td>
                         <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;0,00</b></td>
                     </tr>
                 {% endif %}
