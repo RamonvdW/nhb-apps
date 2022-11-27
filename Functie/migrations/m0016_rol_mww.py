@@ -4,10 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 ADMINISTRATIEVE_REGIO = 100
+VER_NR = 1368
 
 
 def maak_rol_mww(apps, _):
@@ -16,8 +17,14 @@ def maak_rol_mww(apps, _):
 
     # haal de klassen op die van toepassing zijn op het moment van migratie
     functie_klas = apps.get_model('Functie', 'Functie')
+    ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
 
-    functie_klas(rol='MWW', beschrijving='Manager Webwinkel').save()
+    ver = ver_klas.objects.get(ver_nr=VER_NR)
+
+    functie_klas(
+        rol='MWW',
+        beschrijving='Manager Webwinkel',
+        nhb_ver=ver).save()
 
 
 class Migration(migrations.Migration):
