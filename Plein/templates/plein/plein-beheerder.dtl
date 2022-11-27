@@ -26,8 +26,10 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- bondscompetities -->
-            {% url 'Competitie:kies' as card_url %}
-            {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+            {% if rol_is_bb or rol_is_mwz %}
+                {% url 'Competitie:kies' as card_url %}
+                {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+            {% endif %}
 
             <!-- wedstrijdkalender -->
             {% if rol_is_bb or rol_is_mwz %}
@@ -39,10 +41,10 @@
             {% endif %}
 
             <!-- webwinkel -->
-            <!-- alleen maar tonen aan MWW (kopen doe je als sporter)
-            {% url 'Webwinkel:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
-            -->
+            {% if rol_is_mww %}
+                {% url 'Webwinkel:manager' as card_url %}
+                {% include 'plein/card.dtl' with title="Webwinkel" text="Beheer de webwinkel." icon="local_mall" url=card_url %}
+            {% endif %}
 
             <!-- opleidingen -->
             {% if rol_is_mo %}
@@ -51,8 +53,10 @@
             {% endif %}
 
             <!-- records -->
-            {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+            {% if rol_is_bb or rol_is_mwz %}
+                {% url 'Records:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+            {% endif %}
         </div>
     </div>
 
