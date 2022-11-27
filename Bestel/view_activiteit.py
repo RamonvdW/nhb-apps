@@ -33,7 +33,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_BB
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWW)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -79,7 +79,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                 'ontvanger__vereniging')
                                 .filter(Q(account__unaccented_naam__icontains=zoekterm) |
                                         Q(ontvanger__vereniging__naam__icontains=zoekterm) |
-                                        Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm))
+                                        Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm) |
+                                        Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm))
                                 .order_by('-bestel_nr'))            # nieuwste eerst
         else:
             # toon de 50 nieuwste bestellingen
@@ -104,7 +105,10 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                          'wedstrijd_inschrijving__wedstrijd',
                                                          'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
                                                          'wedstrijd_inschrijving__sporterboog__sporter',
-                                                         'wedstrijd_inschrijving__sporterboog__boogtype')
+                                                         'wedstrijd_inschrijving__sporterboog__boogtype',
+                                                         'webwinkel_keuze',
+                                                         'webwinkel_keuze__product',
+                                                         'webwinkel_keuze__koper')
                                          .all())
 
             for product in bestelling.prods_list:
@@ -116,6 +120,10 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                         inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam(),
                         inschrijving.sporterboog.boogtype.beschrijving)
                     product.beschrijving_str3 = inschrijving.wedstrijd.titel
+
+                elif product.webwinkel_keuze:
+                    keuze = product.webwinkel_keuze
+                    product.beschrijving_str2 = keuze.product.omslag_titel
 
                 else:
                     product.geen_beschrijving = True
@@ -131,9 +139,15 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
         # for
 
-        context['kruimels'] = (
-            (None, 'Bestellingen en Betalingen'),
-        )
+        if self.rol_nu == Rollen.ROL_MWW:
+            context['kruimels'] = (
+                (reverse('Webwinkel:manager'), 'Webwinkel'),
+                (None, 'Bestellingen en Betalingen'),
+            )
+        else:
+            context['kruimels'] = (
+                (None, 'Bestellingen en Betalingen'),
+            )
 
         menu_dynamics(self.request, context)
         return context
