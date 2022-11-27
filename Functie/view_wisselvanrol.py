@@ -159,7 +159,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                           'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
 
             obj.ver_naam = ''
-            if obj.nhb_ver:
+            if obj.nhb_ver and obj.rol != 'MWW':
                 obj.ver_naam = obj.nhb_ver.naam
 
             if self.functie_nu:

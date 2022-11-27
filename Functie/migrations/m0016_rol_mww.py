@@ -34,6 +34,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Functie', 'm0015_squashed'),
+        ('NhbStructuur', 'm0030_bondsbureau')
     ]
 
     # migratie functies
