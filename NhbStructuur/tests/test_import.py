@@ -235,7 +235,6 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         locatie1 = WedstrijdLocatie.objects.get(pk=locatie1.pk)
         self.assertEqual(locatie1.plaats, 'Stadia')
 
-
     def test_lid_mutaties(self):
         # lid mutaties
         self.run_management_command(IMPORT_COMMAND,
@@ -455,7 +454,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter.save()
 
         # corner-case: nog geen bevestigde emailadres
-        account = Sporter.objects.get(lid_nr=100001)
+        # account = Sporter.objects.get(lid_nr=100001)
         email = AccountEmail.objects.get(account=sporter.account)
         email.email_is_bevestigd = False
         email.save(update_fields=['email_is_bevestigd'])
@@ -717,6 +716,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(sporter.lid_tot_einde_jaar, 2020)      # komt van sim_now=2020-07-01
         self.assertTrue(sporter.bij_vereniging is None)
 
+        _ = (f1 == f2)
+
     def test_bad_nrs(self):
         # controleer dat de import tegen niet-nummers kan
         f1, f2 = self.run_management_command(IMPORT_COMMAND,
@@ -871,6 +872,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                              TESTFILE_23_DIPLOMA)
+        _ = (f1 == f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -884,9 +886,11 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with override_settings(CRM_IMPORT_BEHOUD_CLUB=()):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_23_DIPLOMA)
+        _ = (f1 == f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
         self.assertEqual(0, NhbVereniging.objects.filter(ver_nr=ver_nr).count())
+
 
 # end of file
