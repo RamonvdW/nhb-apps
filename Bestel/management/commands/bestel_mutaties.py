@@ -89,7 +89,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
     producten = list(producten)
 
-    # voeg de verzendkosten toe als aparte regel op de bestelling
+    # voeg de eventuele verzendkosten toe als aparte regel op de bestelling
     if bestelling.verzendkosten_euro > 0.001:
 
         # nieuwe regel op de bestelling
@@ -97,10 +97,23 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
         product = SimpleNamespace(
                         regel_nr=regel_nr,
-                        is_verzendkosten=True,
+                        is_verzendkosten=True,                      # TODO: wordt niet gebruikt
                         beschrijving=[("Verzendkosten", "")],       # TODO: specialiseren in pakket/briefpost
                         prijs_euro=bestelling.verzendkosten_euro)
         producten.append(product)
+
+    # voeg de eventuele BTW toe
+    for btw_euro, btw_tekst in [(bestelling.btw_euro_cat1, bestelling.btw_percentage_cat1),
+                                (bestelling.btw_euro_cat2, bestelling.btw_percentage_cat2),
+                                (bestelling.btw_euro_cat3, bestelling.btw_percentage_cat3)]:
+
+        if btw_euro > 0.001:
+            product = SimpleNamespace(
+                            regel_nr=0,     # geen nummer tonen
+                            beschrijving=[(btw_tekst, "")],
+                            prijs_euro=btw_euro)
+            producten.append(product)
+    # for
 
     context = {
         'voornaam': account.get_first_name(),
