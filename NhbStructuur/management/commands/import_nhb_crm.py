@@ -1460,12 +1460,10 @@ class Command(BaseCommand):
 
             if obj.is_actief_lid:
                 self.stdout.write('[INFO] Lid %s: is_actief_lid: ja --> nee' % repr(lid_nr))
+                self.stdout.write('               vereniging %s --> geen' % get_vereniging_str(obj.bij_vereniging))
                 obj.is_actief_lid = False
-                self._count_wijzigingen += 1
-                if obj.bij_vereniging:
-                    self.stdout.write('               vereniging %s --> geen' % get_vereniging_str(obj.bij_vereniging))
-                    obj.bij_vereniging = None
-                    self._count_wijzigingen += 1
+                obj.bij_vereniging = None
+                self._count_wijzigingen += 2
                 if not self.dryrun:
                     obj.save()
                     self._cache_sporter[obj.pk] = obj
@@ -1537,7 +1535,6 @@ class Command(BaseCommand):
             plaats = ""
             if club['location_name']:
                 plaats = club['location_name']
-                plaats = plaats.strip()
                 adres = club['address']
                 if not adres:
                     adres = ""
@@ -1575,6 +1572,8 @@ class Command(BaseCommand):
             else:
                 # indien nog niet ingevuld, zet de plaats
                 if wedstrijdlocatie.plaats != plaats:
+                    self.stdout.write('[INFO] Vereniging %s: Aanpassing wedstrijdlocatie plaats %s --> %s' % (
+                                        ver_nr, repr(wedstrijdlocatie.plaats), repr(plaats)))
                     wedstrijdlocatie.plaats = plaats
                     wedstrijdlocatie.save(update_fields=['plaats'])
 

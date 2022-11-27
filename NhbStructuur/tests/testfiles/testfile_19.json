@@ -26,7 +26,7 @@
      "has_disabled_facilities": true,
      "location_name": "Stad",
      "postal_code": null,
-     "address": "Oude pijlweg 1, 1234 AB Doelstad",
+     "address": "Oude pijlweg 1\n1234 AB Doelstad\n",
      "phone_business": null,
      "phone_private": null,
      "phone_mobile": null,

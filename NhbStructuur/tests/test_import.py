@@ -18,6 +18,7 @@ from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Vereniging.models import Secretaris
+from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_BUITEN
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -189,10 +190,18 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                              OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan wedstrijdlocatie 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan wedstrijdlocatie 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
 
-        with self.assert_max_queries(72):
+        ver = NhbVereniging.objects.get(ver_nr=1000)
+
+        locatie = WedstrijdLocatie(
+                        naam="Ergens buiten",
+                        baan_type=BAAN_TYPE_BUITEN)
+        locatie.save()
+        locatie.verenigingen.add(ver)
+
+        with self.assert_max_queries(73):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -205,11 +214,27 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Vereniging 1001 secretarissen: geen --> 100001" in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van plaats van vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van secretaris email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
-        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van wedstrijdlocatie met adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan wedstrijdlocatie 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van wedstrijdlocatie met adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan wedstrijdlocatie 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1002 KvK nummer 'X15' moet 8 cijfers bevatten" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1042 KvK nummer '1234' moet 8 cijfers bevatten" in f2.getvalue())
+
+        locatie1 = ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_BUITEN).get(plaats='Stadia')
+        locatie1.plaats = 'Ja maar'
+        locatie1.save(update_fields=['plaats'])
+
+        with self.assert_max_queries(73):
+            f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                                 TESTFILE_08_VER_MUTATIES,
+                                                 OPTION_SIM)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Vereniging 1000: Aanpassing wedstrijdlocatie plaats 'Ja maar' --> 'Stadia'" in f2.getvalue())
+
+        locatie1 = WedstrijdLocatie.objects.get(pk=locatie1.pk)
+        self.assertEqual(locatie1.plaats, 'Stadia')
+
 
     def test_lid_mutaties(self):
         # lid mutaties
@@ -249,6 +274,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100098: adres_code '1111AA111' --> '1115AB5'" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100098: geboorteplaats 'Papendal' --> 'Arnhem'" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100098: telefoonnummer '+31234567890' --> 'phone_prio_1'" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100024: is_erelid False --> True" in f2.getvalue())
 
         # 100099 is geen lid meer, maar moet toch nog gebruik kunnen blijven maken van de diensten
         sporter = Sporter.objects.get(lid_nr=100098)
@@ -258,21 +284,28 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(sporter.adres_code, "1115AB5")
         self.assertEqual(sporter.geboorteplaats, 'Arnhem')
         self.assertEqual(sporter.telefoon, 'phone_prio_1')
+        self.assertFalse(sporter.is_erelid)
+
+        sporter = Sporter.objects.get(lid_nr=100024)
+        self.assertEqual(sporter.postadres_1, 'Dorpsstraat 50')
+        self.assertEqual(sporter.postadres_2, '9999ZZ Pijldorp')
+        self.assertEqual(sporter.postadres_3, 'Ander land')
+        self.assertTrue(sporter.is_erelid)
 
     def test_haakjes(self):
         # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd
         # andere leden hebben een toevoeging achter hun voornaam: "Tineke (Tini)" - niet over klagen
         # some ontbreekt er een haakje
         # import verwijderd dit
-        with self.assert_max_queries(68):
+        with self.assert_max_queries(70):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_10_TOEVOEGING_NAAM,
                                                  OPTION_SIM)
         # print(f2.getvalue())
-        # self.assertTrue("[WARNING] Lid 100999: verwijder toevoeging achternaam: 'Dienbaar (Erelid NHB)' --> 'Dienbaar'" in f2.getvalue())
         self.assertTrue("Lid 100998" not in f2.getvalue())
         self.assertTrue("[WARNING] Lid 100997: onbalans in haakjes in " in f2.getvalue())
         self.assertTrue("[WARNING] Lid 100996: rare tekens in naam " in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100995: verwijder toevoeging achternaam: 'Dienbaar (Tini)' --> 'Dienbaar'" in f2.getvalue())
 
     def test_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
