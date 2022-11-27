@@ -25,7 +25,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
 
     regio_nr = 101
-    ver_nr = 1012  # rayon 1, regio 101, vereniging 2
+    ver_nr = 0      # wordt in setupTestData ingevuld
 
     testdata = None
 
@@ -36,6 +36,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
+        cls.ver_nr = cls.testdata.regio_ver_nrs[101][2]
         cls.testdata.maak_bondscompetities()
         s2 = timezone.now()
         d = s2 - s1

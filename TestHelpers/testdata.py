@@ -380,8 +380,8 @@ class TestData(object):
             Maak in regios 108..116 elk twee verenigingen aan
             Maak in regio 100 twee verenigingen aan
 
-            ver_nr = regio_nr * 10 + volgnummer
-                     1053 is dus 3e vereniging in regio 105
+            ver_nr = MIN_VER_NR + regio_nr * 10 + volgnummer + 1
+                     3054 is dus 3e vereniging in regio 105
 
             de eerste 3 verenigingen in regio's 101 en 108 gaan in het eerste cluster van die regio
         """
@@ -903,7 +903,7 @@ class TestData(object):
         """ Schrijf alle leden van de vereniging in voor de competitie, voor een specifieke vereniging
 
             afstand = 18 / 25
-            ver_nr = regio_nr * 10 + volgnummer
+            ver_nr = MIN_VER_NR + regio_nr * 10 + volgnummer + 1
         """
 
         if afstand == 18:
@@ -1141,7 +1141,7 @@ class TestData(object):
             rk_deelnemers = self.comp25_rk_deelnemers
 
         ag = 7000       # 7.0
-        ag += ver_nr
+        ag += (ver_nr - MIN_VER_NR)
 
         max_ag = 9000
         if (regio_nr % 4) == 0:

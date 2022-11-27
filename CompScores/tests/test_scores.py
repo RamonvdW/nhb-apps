@@ -37,7 +37,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     url_regio_teams = '/bondscompetities/scores/teams/%s/'                          # deelcomp_pk
 
-    ver_nr = 1011  # regio 101, vereniging 1
+    ver_nr = 0      # wordt in setupTestData ingevuld
 
     testdata = None
 
@@ -48,6 +48,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
+        cls.ver_nr = cls.testdata.regio_ver_nrs[101][1]
         cls.testdata.maak_sporterboog_aanvangsgemiddelden(18, cls.ver_nr)
         cls.testdata.maak_sporterboog_aanvangsgemiddelden(25, cls.ver_nr)
         cls.testdata.maak_bondscompetities()
@@ -521,7 +522,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen competitie wedstrijd')
 
         self.assertTrue(str(wedstrijd2) != '')
-        wedstrijd2.vereniging = self.testdata.vereniging[1053]
+        wedstrijd2.vereniging = self.testdata.vereniging[self.testdata.regio_ver_nrs[111][0]]
         self.assertTrue(str(wedstrijd2) != '')
 
     def test_hwl(self):

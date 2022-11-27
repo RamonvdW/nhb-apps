@@ -37,8 +37,8 @@ class TestCompUitslagen(E2EHelpers, TestCase):
     url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                                       # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
 
-    ver_nr = 1012  # regio 101, vereniging 2
-    club_naam = '[%s] Club %s' % (ver_nr, ver_nr)
+    ver_nr = 0      # wordt in setupTestData ingevuld
+    club_naam = ''  # wordt in setupTestData ingevuld
 
     testdata = None
 
@@ -49,6 +49,8 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
+        cls.ver_nr = cls.testdata.regio_ver_nrs[101][2]
+        cls.club_naam = '[%s] Club %s' % (cls.ver_nr, cls.ver_nr)
         cls.testdata.maak_sporterboog_aanvangsgemiddelden(18, cls.ver_nr)
         cls.testdata.maak_sporterboog_aanvangsgemiddelden(25, cls.ver_nr)
         cls.testdata.maak_bondscompetities()
@@ -528,7 +530,8 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert404(resp, 'Boogtype niet bekend')
 
     def test_vereniging_regio_100(self):
-        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 'R', 1001)
+        ver_nr = self.testdata.regio_ver_nrs[100][0]
+        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 'R', ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
