@@ -1018,10 +1018,11 @@ class Command(BaseCommand):
                     lid_adres_code = postcode.replace(' ', '') + huis_nr
 
             lid_postadres = list()
-            for regel in postadres.split('\n'):
-                regel = regel.strip()
-                if regel != '':
-                    lid_postadres.append(regel)
+            if postadres is not None:
+                for regel in postadres.split('\n'):
+                    regel = regel.strip()
+                    if regel != '':
+                        lid_postadres.append(regel)
             while len(lid_postadres) < 3:
                 lid_postadres.append('')
             # while

@@ -32,6 +32,9 @@ import io
 
 # fixtures zijn overwogen, maar zijn lastig te onderhouden en geven geen recente datums (zoals voor VHPG)
 
+MIN_LID_NR = 300000
+MIN_VER_NR = 3000
+
 
 class TestData(object):
     """
@@ -394,7 +397,7 @@ class TestData(object):
                 aantal = 4
 
             for nr in range(aantal):
-                ver_nr = regio.regio_nr * 10 + nr + 1
+                ver_nr = MIN_VER_NR + regio.regio_nr * 10 + nr + 1
 
                 # vereniging 0, 1, 2 gaan in een cluster, 3 niet
                 if nr >= 3:
@@ -448,7 +451,7 @@ class TestData(object):
         # for
 
         # maak voor elke vereniging een paar accounts aan
-        lid_nr = 300000
+        lid_nr = MIN_LID_NR
         bulk = list()
         for ver in self.vereniging.values():
 
@@ -514,7 +517,7 @@ class TestData(object):
             lid_nr2account[account.username] = account
         # for
 
-        lid_nr = 300000
+        lid_nr = MIN_LID_NR
         bulk = list()
         for ver in self.vereniging.values():
 
@@ -669,7 +672,7 @@ class TestData(object):
 
         # maak de functies aan
         bulk = list()
-        for ver in NhbVereniging.objects.all():
+        for ver in NhbVereniging.objects.filter(ver_nr__gte=MIN_VER_NR):
             for rol, beschrijving in (('SEC', 'Secretaris vereniging %s'),
                                       ('HWL', 'Hoofdwedstrijdleider %s'),
                                       ('WL', 'Wedstrijdleider %s')):
