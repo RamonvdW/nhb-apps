@@ -155,7 +155,6 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
 
     def test_bestel(self):
-
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wisselnaarrol_sporter()
 

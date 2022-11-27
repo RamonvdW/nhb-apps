@@ -70,11 +70,6 @@
     |Bedankt voor je bestelling!
 {% endblock %}
 
-{% block footer_text %}
-    |
-    |De webwinkel
-{% endblock %}
-
 {% block inhoud_html %}
     <div>Hallo {{ voornaam }}!</div>
     <br>
@@ -175,9 +170,4 @@
 
     <br>
     <div>Bedankt voor je bestelling!</div>
-{% endblock %}
-
-{% block footer_html %}
-    <br>
-    <div>Jullie webwinkel</div>
 {% endblock %}
