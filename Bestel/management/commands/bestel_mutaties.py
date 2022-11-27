@@ -697,13 +697,20 @@ class Command(BaseCommand):
                 bestelling.log += msg
                 bestelling.save(update_fields=['log'])
 
+                bevat_webwinkel = False
                 for product in bestelling.producten.all():
                     if product.wedstrijd_inschrijving:
                         wedstrijden_plugin_inschrijving_is_betaald(product)
+                    elif product.webwinkel_keuze:
+                        bevat_webwinkel = True
                 # for
 
                 # stuur een e-mail aan de koper
                 stuur_email_naar_koper_betaalbevestiging(bestelling)
+
+                # stuur een e-mail naar het backoffice
+                if bevat_webwinkel:
+                    stuur_email_webwinkel_backoffice(bestelling, self._emailadres_backoffice)
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.mh_bestel_nr(), bestelling.pk))
@@ -739,7 +746,7 @@ class Command(BaseCommand):
         transactie = BetaalTransactie(
                             when=timezone.now(),
                             is_handmatig=True,
-                            beschrijving='Overschrijving ontvangen',
+                            beschrijving='Overboeking ontvangen',
                             is_restitutie=False,
                             bedrag_euro_klant=bedrag_euro,
                             bedrag_euro_boeking=bedrag_euro,

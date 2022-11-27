@@ -91,6 +91,9 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
         self.product3 = product3
         self.product3.fotos.add(foto2)
 
+        ongebruikte_foto = WebwinkelFoto(volgorde=66)
+        ongebruikte_foto.save()
+
     def test_check_fotos(self):
         # 1 product heeft een omslagfoto met lege locatie en locatie_thumb
         # 3 product heeft bestaande foto's
@@ -101,8 +104,9 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             self.assertTrue(" heeft een lege locatie" in f1.getvalue())
             self.assertTrue("Test titel 2) heeft geen omslagfoto" in f2.getvalue())
             self.assertTrue("Test titel 3) heeft geen omslagfoto" in f2.getvalue())
+            self.assertTrue("wordt niet (meer) gebruikt" in f2.getvalue())
             self.assertTrue("[INFO] 2 foto's OK" in f2.getvalue())
-            self.assertTrue("[ERROR] 3 foto's NOK" in f1.getvalue())
+            self.assertTrue("[ERROR] 4 foto's NOK" in f1.getvalue())
 
             self.foto.locatie = 'non-existing.jpg'
             self.foto.save()
@@ -115,16 +119,30 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             self.assertTrue(' locatie bestand niet gevonden: ' in f1.getvalue())
             self.assertTrue(self.foto.locatie in f1.getvalue())
             self.assertTrue("[INFO] 2 foto's OK" in f2.getvalue())
-            self.assertTrue("[ERROR] 3 foto's NOK" in f1.getvalue())
+            self.assertTrue("[ERROR] 4 foto's NOK" in f1.getvalue())
 
             # verwijder het probleemgeval
             # de ERROR verandert in een WARNING: product 1 heeft nu ook geen omslagfoto
             self.foto.delete()
+
+            # dubbel gebruik van een foto
+            self.product2.fotos.add(self.foto2)
+
             with self.assert_max_queries(20):
                 f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
             # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
-            self.assertTrue("[INFO] 2 foto's OK" in f2.getvalue())
-            self.assertTrue("[ERROR] 3 foto's NOK" in f1.getvalue())
+            self.assertTrue("[INFO] 4 foto's OK" in f2.getvalue())
+            self.assertTrue("[ERROR] 4 foto's NOK" in f1.getvalue())
+            self.assertTrue("wordt ook gebruikt door product pk=" in f1.getvalue())
+
+            # verwijder alles, dan zijn er geen fouten meer
+            WebwinkelProduct.objects.all().delete()
+            WebwinkelFoto.objects.all().delete()
+            with self.assert_max_queries(20):
+                f1, f2 = self.run_management_command('check_fotos', report_exit_code=False)
+            _ = (f1 == f2)
+            # print("\nf1:\n%s\nf2:\n%s" % (f1.getvalue(), f2.getvalue()))
+            self.assertTrue("[INFO] 0 foto's OK; no problems found" in f2.getvalue())
 
     def test_koppel_fotos(self):
         self.product3.fotos.clear()

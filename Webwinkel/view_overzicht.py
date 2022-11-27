@@ -197,6 +197,10 @@ class ProductView(UserPassesTestMixin, TemplateView):
                     break
         # for
 
+        # voorkom toevoegen als er niet genoeg voorraad is
+        if not product.onbeperkte_voorraad and aantal > product.aantal_op_voorraad:
+            is_goed = False
+
         if not is_goed:
             raise Http404('Foutieve parameter (2)')
 

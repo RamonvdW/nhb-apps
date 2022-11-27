@@ -24,7 +24,7 @@ def maak_ver_bondsbureau(apps, _):
     ver, is_created = ver_klas.objects.get_or_create(
                                     ver_nr=VER_NR,
                                     regio=regio_klas.objects.get(regio_nr=ADMINISTRATIEVE_REGIO))
-    if is_created:      # pragma: branch
+    if is_created:      # pragma: no branch
         ver.naam = 'Tijdelijk'
         ver.save()
 
