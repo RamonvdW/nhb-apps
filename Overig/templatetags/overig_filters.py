@@ -53,20 +53,78 @@ def filter_wbr_email(text):
     while len(text) > 0:
         pos1 = text.find('.')
         pos2 = text.find('@')
+        pos3 = text.find('handboogsport')
 
         if pos1 >= 0:
             # adres bevat nog een punt
-            if pos2 < 0 or pos1 < pos2:
-                # punt staat voor het apenstaartje, dus neem die eerst
+            if (pos2 < 0 or pos1 < pos2) and (pos3 < 0 or pos1 < pos3):
+                # punt staat eerst
                 new_text += escape(text[:pos1]) + '<wbr>' + escape(text[pos1])
                 text = text[pos1+1:]
                 continue        # with the while
 
         if pos2 >= 0:
-            # adres bevat nog een apenstaartje
-            new_text += escape(text[:pos2]) + '<wbr>' + escape(text[pos2])
-            text = text[pos2+1:]
-            continue            # with the while
+            if pos3 < 0 or pos2 < pos3:
+                # apenstaartje staat eerst
+                new_text += escape(text[:pos2]) + '<wbr>' + escape(text[pos2])
+                text = text[pos2+1:]
+                continue            # with the while
+
+        if pos3 >= 0:
+            new_text += escape(text[:pos3+8]) + '<wbr>'
+            text = text[pos3+8:]
+            continue
+
+        # niets meer gevonden
+        new_text += escape(text)
+        text = ''
+
+    # while
+
+    return mark_safe(new_text)
+
+
+def filter_wbr_www(text):
+    """  wbr_email filter looks for places where the e-mail address could be wrapped
+         and insert a <wbr> html tag before that character.
+    """
+    new_text = ""
+
+    pos = text.find('://')
+    if pos >= 0:
+        new_text += escape(text[:pos+3]) + '<wbr>'
+        text = text[pos+3:]
+
+    while len(text) > 0:
+        pos1 = text.find('handboogsport')
+        pos2 = text.find('grensoverschreiden')
+        pos3 = text.find('.')
+        pos4 = text.find('/')
+        if pos4 == len(text)-1:
+            pos4 = -1
+
+        if pos1 >= 0:
+            if (pos2 < 0 or pos1 < pos2) and (pos3 < 0 or pos1 < pos3) and (pos4 < 0 or pos1 < pos4):
+                new_text += escape(text[:pos1+8]) + '<wbr>' + escape('sport')
+                text = text[pos1+13:]
+                continue
+
+        if pos2 >= 0:
+            if (pos3 < 0 or pos2 < pos3) and (pos4 < 0 or pos2 < pos4):
+                new_text += escape(text[:pos2+5]) + '<wbr>' + escape('over') + '<wbr>'
+                text = text[pos2+9:]
+                continue        # with the while
+
+        if pos3 >= 0:
+            if pos4 < 0 or pos3 < pos4:
+                new_text += escape(text[:pos3+1:]) + '<wbr>'
+                text = text[pos3 + 1:]
+                continue
+
+        if pos4 >= 0:
+            new_text += escape(text[:pos4+1:]) + '<wbr>'
+            text = text[pos4+1:]
+            continue
 
         # niets meer gevonden
         new_text += escape(text)
@@ -119,6 +177,7 @@ def filter_wbr_dagdeel(text):
 register = template.Library()
 register.filter('highlight', filter_highlight)
 register.filter('wbr_email', filter_wbr_email)
+register.filter('wbr_www', filter_wbr_www)
 register.filter('wbr_dagdeel', filter_wbr_dagdeel)
 
 # end of file
