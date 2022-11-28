@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">{{ histcomp.klasse }}</h3>
+            <h3 class="page-banner">{{ histcomp.boog_str }}</h3>
             <p>{{ histcomp.comp_type_str }} seizoen {{ histcomp.seizoen }}</p>
         </div>
     </div>
