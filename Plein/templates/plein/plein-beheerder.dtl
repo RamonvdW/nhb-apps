@@ -26,7 +26,7 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- bondscompetities -->
-            {% if rol_is_bb or rol_is_mwz %}
+            {% if toon_bondscompetities %}
                 {% url 'Competitie:kies' as card_url %}
                 {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
             {% endif %}
@@ -53,7 +53,7 @@
             {% endif %}
 
             <!-- records -->
-            {% if rol_is_bb or rol_is_mwz %}
+            {% if rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl %}
                 {% url 'Records:overzicht' as card_url %}
                 {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
             {% endif %}

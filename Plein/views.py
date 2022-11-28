@@ -126,6 +126,9 @@ class PleinView(View):
                 if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
                     context['toon_manager_sectie'] = True
 
+                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL):
+                    context['toon_bondscompetities'] = True
+
                 context['huidige_rol'] = rol_get_beschrijving(request)
 
                 # kijk hoeveel taken er open staan
