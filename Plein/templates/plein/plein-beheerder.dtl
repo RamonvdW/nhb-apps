@@ -81,8 +81,8 @@
             {% url 'Functie:overzicht' as card_url %}
             {% include 'plein/card.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." icon="face" url=card_url %}
 
-            <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
-            {% if rol_is_bko or rol_is_bb %}
+            <!-- verenigingen/accommodaties overzicht BB/BKO/MWZ -->
+            {% if rol_is_bko or rol_is_bb or rol_is_mwz %}
                 {% url 'Vereniging:lijst-verenigingen' as card_url %}
                 {% include 'plein/card.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="share_location" url=card_url %}
             {% endif %}
@@ -113,11 +113,11 @@
             {% url 'Functie:wissel-van-rol' as card_url %}
             {% include 'plein/card.dtl' with title="Wissel van Rol" text="Wissel naar een andere beheerdersrol of naar Sporter." icon="switch_account" url=card_url %}
 
-            <!-- TODO: handleiding moet gaan verwijzen naar de pdf's
+            {% comment %} TODO: handleiding moet gaan verwijzen naar de pdf's
             {% if handleiding_url %}
                 {% include 'plein/card.dtl' with title="Handleiding Beheerder" text="Bekijk de handleiding voor (nieuwe) beheerders." icon="help" url=handleiding_url extern_open=True %}
             {% endif %}
-            -->
+            {% endcomment %}
         </div>
     </div>
 
