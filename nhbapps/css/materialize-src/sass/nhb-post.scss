@@ -189,6 +189,11 @@
   &:hover {
     border-color: $nhb-card-focus-border-color;
   }
+
+  @media #{$small-and-down} {
+    height: 50px;
+  }
+
 }
 
 .nhb-foto-thumb-selected {
@@ -196,6 +201,10 @@
   // remove bottom margin from 5px to 0 to simulate center-align
   height: 100px;
   margin-bottom: 0px;
+
+  @media #{$small-and-down} {
+    height: 60px;
+  }
 }
 
 .nhb-foto {
