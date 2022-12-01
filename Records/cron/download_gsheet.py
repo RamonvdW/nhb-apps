@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ Download de Nationale Records administratie uit gsheets """
-
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+import googleapiclient.errors
 import google.auth.exceptions
 import settings_local
 import socket
@@ -34,6 +34,8 @@ try:
         result = request.execute()
     except socket.timeout as exc:
         print('[ERROR] Socket timeout: %s' % exc)
+    except googleapiclient.errors.HttpError as exc:
+        print('[ERROR] HttpError from API: %s' % exc)
     else:
         with open(OUTFILE, "w", encoding='utf-8') as jsonfile:
             json.dump(result, jsonfile, ensure_ascii=False)
