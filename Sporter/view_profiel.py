@@ -21,7 +21,7 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_TEAM, AG_DOEL_INDIV
-from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog, Speelsterkte, get_sporter_voorkeuren
 import logging
 import copy
 
@@ -373,6 +373,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return sterktes
 
     @staticmethod
+    def _find_diplomas(sporter):
+        diplomas = list(sporter.opleidingdiploma_set.order_by('-datum_begin'))
+        if len(diplomas) == 0:           # pragma: no branch
+            diplomas = None
+        return diplomas
+
+    @staticmethod
     def _find_scores(sporter):
         scores = list()
 
@@ -443,6 +450,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     context['toon_bondscompetities'] = False
 
             context['speelsterktes'] = self._find_speelsterktes(sporter)
+            context['diplomas'] = self._find_diplomas(sporter)
 
         if Bestelling.objects.filter(account=account).count() > 0:
             context['toon_bestellingen'] = True

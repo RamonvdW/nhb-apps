@@ -46,7 +46,7 @@ class OpleidingDiploma(models.Model):
 
     # wanneer is de opleiding afgerond
     # 9999-12-31 = niet bekend
-    datum_einde = models.DateField(default='9999-12-31')
+    datum_einde = models.DateField(default='9999-12-31')        # TODO: wordt niet gebruikt en kan weg?
 
     def __str__(self):
         return "%s: %s (%s)" % (self.sporter.lid_nr, self.code, self.beschrijving)

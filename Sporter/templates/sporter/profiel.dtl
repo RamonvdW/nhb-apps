@@ -519,6 +519,40 @@
     {% endif %}     <!-- heeft_ags -->
 
 
+    {% if diplomas %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Opleidingen</h4>
+                <p>De volgende opleidingen zijn door jou gevolgd</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Titel</th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in diplomas %}
+                        <tr>
+                            <td>{{ obj.datum_begin }}</td>
+                            <td>{{ obj.beschrijving }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% endif %}
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
