@@ -30,7 +30,7 @@
             {% endif %}
         {% endif %}
 
-        |    Prijs: € {{ product.prijs_euro }}
+        |    Bedrag: € {{ product.prijs_euro }}
         {% if product.korting_euro > 0.001 %}
             |    Korting: -€ {{ product.korting_euro }}
         {% endif %}

@@ -185,7 +185,7 @@ def bestel_overboeking_ontvangen(bestelling, bedrag, snel=False):
                                     is_verwerkt=False)
     mutatie.save()
 
-    if is_created:
+    if is_created:                              # pragma: no branch
         # wacht kort op de achtergrondtaak
         _bestel_ping_achtergrondtaak(mutatie, snel)
 

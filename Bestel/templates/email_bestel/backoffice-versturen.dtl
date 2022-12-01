@@ -6,7 +6,7 @@
 {% endcomment %}
 
 {% block inhoud_text %}
-    |Hallo Backoffice!
+    |Hallo backoffice!
     |
     |Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochten producten.
     |
@@ -39,7 +39,7 @@
             {% endif %}
         {% endif %}
 
-        |    Prijs: € {{ product.prijs_euro }}
+        |    Bedrag: € {{ product.prijs_euro }}
         {% if product.korting_euro > 0.001 %}
             |    Korting: -€ {{ product.korting_euro }}
         {% endif %}
@@ -78,7 +78,7 @@
 
 
 {% block inhoud_html %}
-    <div>Hallo backoffice,</div>
+    <div>Hallo backoffice!</div>
     <br>
     <div>Deze e-mail is de bevestiging van een verkoop via {{ naam_site }} en opdracht tot het versturen van de gekochten producten.</div>
 
