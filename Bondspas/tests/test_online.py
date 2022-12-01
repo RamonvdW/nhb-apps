@@ -8,6 +8,7 @@ from django.test import TestCase, override_settings
 from Sporter.models import Sporter, SporterVoorkeuren, GESLACHT_ANDERS
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Opleidingen.models import OpleidingDiploma
+from Sporter.models import Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import json
@@ -111,11 +112,13 @@ class TestBondspas(E2EHelpers, TestCase):
         # speciaal geval: geslacht X
         # speciaal geval: geen vereniging
         # speciaal: NHB leeftijdsklassen die anders is dan WA: 60
+        # speciaal: para classificatie
         self.sporter.geboorte_datum = '%4d-01-01' % (now.year - 60)
         self.sporter.geslacht = GESLACHT_ANDERS
         self.sporter.bij_vereniging = None
         self.sporter.wa_id = '99999'
-        self.sporter.save(update_fields=['geboorte_datum', 'geslacht', 'bij_vereniging', 'wa_id'])
+        self.sporter.para_classificatie = 'ST'
+        self.sporter.save(update_fields=['geboorte_datum', 'geslacht', 'bij_vereniging', 'wa_id', 'para_classificatie'])
 
         self.voorkeuren.wedstrijd_geslacht_gekozen = False
         self.voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
@@ -143,6 +146,24 @@ class TestBondspas(E2EHelpers, TestCase):
                     beschrijving='n/a',
                     toon_op_pas=True).save()
 
+        Speelsterkte(
+            sporter=self.sporter,
+            datum='2000-01-01',
+            beschrijving='test',
+            discipline='test',
+            category='test',
+            pas_code='TST',
+            volgorde=100).save()
+
+        Speelsterkte(
+            sporter=self.sporter,
+            datum='2000-01-01',
+            beschrijving='test',
+            discipline='test',      # zelfde als hierboven
+            category='test',
+            pas_code='TST',
+            volgorde=101).save()
+
         with override_settings(OPLEIDING_CODES=test_opleiding_codes):
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_ophalen)
@@ -163,5 +184,26 @@ class TestBondspas(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
 
-    
+    def test_speelsterkte(self):
+
+        for lp in range(15):
+            Speelsterkte(
+                sporter=self.sporter,
+                datum='2000-01-01',
+                beschrijving='test',
+                discipline='uniek %s' % lp,
+                category='test',
+                pas_code='CodeLang',
+                volgorde=600 + lp).save()
+        # for
+
+        # sporter
+        self.e2e_login(self.account)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ophalen)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self._check_bondspas_resp(resp)
+
+
 # end of file
