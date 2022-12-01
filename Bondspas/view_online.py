@@ -55,6 +55,10 @@ def maak_bondspas_regels(lid_nr, jaar):
     else:
         regels.append(("Vereniging", "onbekend :-("))
 
+    # para classificatie
+    if sporter.para_classificatie:
+        regels.append(("Para classificatie", sporter.para_classificatie))
+
     # opleidingen
     opleiding_codes = dict()        # [code] =
     for code, afkorting_voor_pas, _, vervangt_codes in settings.OPLEIDING_CODES:
