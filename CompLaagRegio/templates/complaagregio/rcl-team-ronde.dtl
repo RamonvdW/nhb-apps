@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                     <th>Huidige ronde</th>
-                    <td>{{ deelcomp.huidige_team_ronde }}</td>
+                    <td>{% if deelcomp.huidige_team_ronde <= 7 %}{{ deelcomp.huidige_team_ronde }}{% else %}-{% endif %}</td>
                 </tr>
                 <tr>
                     <th>Punten model</th>

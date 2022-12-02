@@ -593,11 +593,18 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_team_ronde(self, deelcomp):
 
-        ronde_nr = deelcomp.huidige_team_ronde + 1
-
-        if ronde_nr > 7:
+        # bepaal de volgende ronde
+        if deelcomp.huidige_team_ronde > 7:
             # alle rondes al gehad - silently ignore
             return
+
+        if deelcomp.huidige_team_ronde == 7:
+            # afsluiten van de laatste ronde
+            deelcomp.huidige_team_ronde = 99
+            deelcomp.save(update_fields=['huidige_team_ronde'])
+            return
+
+        ronde_nr = deelcomp.huidige_team_ronde + 1
 
         if ronde_nr == 1:
             teams = (RegiocompetitieTeam
