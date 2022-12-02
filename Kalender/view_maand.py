@@ -58,6 +58,7 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
     # we willen in de eerstvolgende maand komen met een wedstrijd
     wedstrijden = (Wedstrijd
                    .objects
+                   .exclude(toon_op_kalender=False)
                    .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                            datum_begin__gte=now)
                    .order_by('datum_begin'))
@@ -155,6 +156,7 @@ class KalenderMaandView(TemplateView):
         context['wedstrijden'] = wedstrijden = (Wedstrijd
                                                 .objects
                                                 .select_related('locatie')
+                                                .exclude(toon_op_kalender=False)
                                                 .filter(datum_begin__gte=datum_vanaf,
                                                         datum_begin__lt=datum_voor,
                                                         status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD,
