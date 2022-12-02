@@ -314,6 +314,10 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         if request.POST.get('verwijder_sessie', ''):
             if wedstrijd.status == WEDSTRIJD_STATUS_GEANNULEERD:
                 raise Http404('Wedstrijd is geannuleerd')
+
+            if sessie.wedstrijdinschrijving_set.count() > 0:
+                raise Http404('Sessie heeft aanmeldingen')
+
             sessie.delete()
         else:
             updated = list()
