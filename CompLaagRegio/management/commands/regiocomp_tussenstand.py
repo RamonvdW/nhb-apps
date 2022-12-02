@@ -373,7 +373,7 @@ class Command(BaseCommand):
 
                     team_scores = list()
                     score_pks = list()
-                    for score in ronde_team.scores_feitelijk.all():
+                    for score in ronde_team.scores_feitelijk.exclude(waarde=SCORE_WAARDE_VERWIJDERD):
                         team_scores.append(score.waarde)
                         score_pks.append(score.pk)
                     # for
@@ -406,7 +406,7 @@ class Command(BaseCommand):
 
                     # is de team score aangepast?
                     if ronde_team.team_score != team_score:
-                        # print('nieuwe team_score voor team %s: %s --> %s' % (team, team.team_score, team_score))
+                        # print('nieuwe team_score voor team %s: %s --> %s' % (ronde_team, ronde_team.team_score, team_score))
                         ronde_team.team_score = team_score
                         ronde_team.save(update_fields=['team_score'])
 
