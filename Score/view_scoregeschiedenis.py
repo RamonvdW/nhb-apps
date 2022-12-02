@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Sporter.models import SporterBoog
 from Score.forms import ScoreGeschiedenisForm
-from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.models import AanvangsgemiddeldeHist, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Plein.menu import menu_dynamics
 
 
@@ -115,6 +115,9 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                         score.wedstrijd_str += " " + tijd
                                     if wedstrijd.vereniging:
                                         score.wedstrijd_waar = 'bij %s' % wedstrijd.vereniging
+                                    if score.waarde == SCORE_WAARDE_VERWIJDERD:
+                                        score.waarde = 'verwijderd'
+
                                 except IndexError:
                                     pass
 
