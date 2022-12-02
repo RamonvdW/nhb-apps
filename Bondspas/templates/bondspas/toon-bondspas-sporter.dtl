@@ -84,6 +84,6 @@
         });
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="toon-bondspas-sporter" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bondspas-toon-bondspas-sporter" %}
 
 {% endblock %}
