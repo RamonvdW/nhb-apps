@@ -112,8 +112,11 @@ class ProductView(UserPassesTestMixin, TemplateView):
         else:
             aantal_enkel = aantal_meer = 'stuks'
 
-        if not product.onbeperkte_voorraad:
+        if product.onbeperkte_voorraad:
+            limiet_aantal = 99999
+        else:
             product.aantal_str = '%s %s' % (product.aantal_op_voorraad, aantal_meer)
+            limiet_aantal = product.aantal_op_voorraad
 
         product.sel_opts = sel_opts = list()
         opties = product.bestel_begrenzing.strip()
@@ -129,15 +132,19 @@ class ProductView(UserPassesTestMixin, TemplateView):
                 van = tot = int(optie)
 
             for aantal in range(int(van), int(tot) + 1):
-                prijs = product.prijs_euro * aantal
+                if aantal <= limiet_aantal:
+                    prijs = product.prijs_euro * aantal
 
-                if aantal == 1:
-                    msg = '1 %s (€ %s)' % (aantal_enkel, localize(prijs))
-                else:
-                    msg = '%s %s (€ %s)' % (aantal, aantal_meer, localize(prijs))
-                sel_opts.append((aantal, msg))
+                    if aantal == 1:
+                        msg = '1 %s (€ %s)' % (aantal_enkel, localize(prijs))
+                    else:
+                        msg = '%s %s (€ %s)' % (aantal, aantal_meer, localize(prijs))
+                    sel_opts.append((aantal, msg))
             # for
         # for
+
+        if len(sel_opts) == 0:
+            sel_opts.append((0, 'Sorry, niet beschikbaar'))
 
         context['fotos'] = fotos = product.fotos.order_by('volgorde')
         for foto in fotos:
