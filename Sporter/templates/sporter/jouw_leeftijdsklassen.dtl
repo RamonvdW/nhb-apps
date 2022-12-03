@@ -207,7 +207,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Bondscompetitie</h4>
-            <p>Voor seizoen {{ huidige_jaar }}/{{ huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b class="red-text">{{ lkl_volgende_competitie }}</b></p>
+            <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} schiet je de bondscompetitie als <b class="red-text">{{ lkl_comp.1.tekst }}</b></p>
         </div>
     </div>
 
@@ -231,28 +231,28 @@
                 </thead>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"-1" }}/{{ huidige_jaar }}</td>
-                    <td>{{ lkl_comp.0 }}</td>
+                    <td>{{ lkl_comp.0.seizoen }}</td>
+                    <td>{{ lkl_comp.0.tekst }}</td>
                 </tr>
 
                 <tr class="nhb-rood white-text">
-                    <td>{{ huidige_jaar }}/{{ huidige_jaar|add:"1" }}</td>
-                    <td>{{ lkl_comp.1 }}</td>
+                    <td>{{ lkl_comp.1.seizoen }}</td>
+                    <td>{{ lkl_comp.1.tekst }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"1" }}/{{ huidige_jaar|add:"2" }}</td>
-                    <td>{{ lkl_comp.2 }}</td>
+                    <td>{{ lkl_comp.2.seizoen }}</td>
+                    <td>{{ lkl_comp.2.tekst }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"2" }}/{{ huidige_jaar|add:"3" }}</td>
-                    <td>{{ lkl_comp.3 }}</td>
+                    <td>{{ lkl_comp.3.seizoen }}</td>
+                    <td>{{ lkl_comp.3.tekst }}</td>
                 </tr>
 
                 <tr>
-                    <td>{{ huidige_jaar|add:"3" }}/{{ huidige_jaar|add:"4" }}</td>
-                    <td>{{ lkl_comp.4 }}</td>
+                    <td>{{ lkl_comp.4.seizoen }}</td>
+                    <td>{{ lkl_comp.4.tekst }}</td>
                 </tr>
 
             </table>
