@@ -9,7 +9,7 @@ from Bestel.models import (BestelMutatie, Bestelling,
                            BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
                            BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
                            BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
-                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
+                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_ANNULEER,
                            BESTELLING_STATUS_WACHT_OP_BETALING)
 from Overig.background_sync import BackgroundSync
 import time
@@ -158,6 +158,24 @@ def bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt, snel=False):
             _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
+def bestel_mutatieverzoek_annuleer(bestelling, snel=False):
+    """
+        Verzoek om een bestelling te annuleren.
+    """
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                    code=BESTEL_MUTATIE_ANNULEER,
+                                    bestelling=bestelling,
+                                    is_verwerkt=False)
+    mutatie.save()
+
+    if is_created:
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
 def bestel_betaling_is_gestart(bestelling, actief):
     """ Deze functie wordt aangeroepen vanuit de Betaal daemon om door te geven dat de betaling opgestart
         is en de checkout_url beschikbaar is in dit betaal_actief record
@@ -188,6 +206,7 @@ def bestel_overboeking_ontvangen(bestelling, bedrag, snel=False):
     if is_created:                              # pragma: no branch
         # wacht kort op de achtergrondtaak
         _bestel_ping_achtergrondtaak(mutatie, snel)
+
 
 
 # end of file

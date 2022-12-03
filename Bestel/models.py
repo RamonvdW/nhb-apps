@@ -19,12 +19,14 @@ BESTELLING_STATUS_NIEUW = 'N'
 BESTELLING_STATUS_WACHT_OP_BETALING = 'B'
 BESTELLING_STATUS_AFGEROND = 'A'
 BESTELLING_STATUS_MISLUKT = 'F'
+BESTELLING_STATUS_GEANNULEERD = 'G'
 
 BESTELLING_STATUS_CHOICES = (
     (BESTELLING_STATUS_NIEUW, 'Nieuw'),
     (BESTELLING_STATUS_WACHT_OP_BETALING, 'Te betalen'),
     (BESTELLING_STATUS_AFGEROND, 'Afgerond'),
-    (BESTELLING_STATUS_MISLUKT, 'Mislukt')
+    (BESTELLING_STATUS_MISLUKT, 'Mislukt'),
+    (BESTELLING_STATUS_GEANNULEERD, 'Geannuleerd')
 )
 
 BESTELLING_STATUS2STR = {
@@ -32,6 +34,7 @@ BESTELLING_STATUS2STR = {
     BESTELLING_STATUS_WACHT_OP_BETALING: 'Te betalen',
     BESTELLING_STATUS_AFGEROND: 'Afgerond',
     BESTELLING_STATUS_MISLUKT: 'Mislukt',
+    BESTELLING_STATUS_GEANNULEERD: 'Geannuleerd',
 }
 
 
@@ -43,6 +46,7 @@ BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 5           # afmelden (na betaling)
 BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN = 6        # overboeking ontvangen
 BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
 BESTEL_MUTATIE_WEBWINKEL_KEUZE = 8              # keuze uit webwinkel
+BESTEL_MUTATIE_ANNULEER = 9                     # annuleer een bestelling
 
 BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
@@ -53,6 +57,7 @@ BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
     BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN: "Overboeking ontvangen",
     BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",
+    BESTEL_MUTATIE_ANNULEER: "Annuleer bestelling"
 }
 
 
@@ -276,6 +281,7 @@ class BestelMutatie(models.Model):
     # BESTEL_MUTATIE_BETALING_AFGEROND:         bestelling, betaling_is_gelukt
     # BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
     # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
+    # BESTEL_MUTATIE_ANNULEER:                  bestelling
 
     # mandje van dit account
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)

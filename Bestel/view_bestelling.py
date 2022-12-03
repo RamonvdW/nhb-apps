@@ -12,11 +12,11 @@ from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
-from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
-from Functie.rol import Rollen, rol_get_huidige
+from Bestel.operations.mutaties import bestel_mutatieverzoek_annuleer
+from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Functie.rol import Functie, Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
 from decimal import Decimal
 
 
@@ -76,6 +76,7 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                 # nieuw is een interne state. Na een verlopen/mislukte betalen wordt deze status ook gezet.
                 # toon daarom als "te betalen"
                 status = BESTELLING_STATUS_WACHT_OP_BETALING
+
             bestelling.status_str = BESTELLING_STATUS2STR[status]
             bestelling.status_aandacht = (status == BESTELLING_STATUS_WACHT_OP_BETALING)
 
@@ -88,6 +89,11 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
         account = self.request.user
 
         self._get_bestellingen(account, context)
+
+        # contactgegevens voor hulpvragen
+        functie = Functie.objects.filter(rol='MWW')[0]
+        context['email_webshop'] = functie.bevestigde_email
+        context['email_support'] = settings.EMAIL_SUPPORT
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
@@ -230,6 +236,10 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 # betaling gaat via Mollie
                 context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
                                                    kwargs={'bestel_nr': bestelling.bestel_nr})
+
+        if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+            context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
+                                               kwargs={'bestel_nr': bestelling.bestel_nr})
 
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
@@ -483,6 +493,47 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
+
+
+class AnnuleerBestellingView(View):
+
+    """ Deze functie wordt gebruikt om een bestelling te annuleren. """
+
+    # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return self.rol_nu != Rollen.ROL_NONE
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als de gebruiker op de knop ANNULEREN drukt in de bestelling
+            de enige taak van deze functie is een bestelling aan te passen naar BESTEL_STATUS_.
+        """
+
+        account = request.user
+        snel = str(request.POST.get('snel', ''))[:1]
+
+        try:
+            bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
+            bestel_nr = int(bestel_nr)
+            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
+        except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
+            raise Http404('Niet gevonden')
+
+        if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+            # verzoek de achtergrondtaak om de annulering te verwerken
+            bestel_mutatieverzoek_annuleer(bestelling, snel == '1')
+
+        # redirect naar het bestellingen overzicht
+        url = reverse('Bestel:toon-bestellingen')
+        return HttpResponseRedirect(url)
 
 
 # end of file

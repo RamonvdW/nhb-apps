@@ -127,13 +127,13 @@
                             <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
                         </td>
                     </tr>
+
                 {% endif %}
             </table>
         </div>
 
-        <p>&nbsp;</p>
 
-        <div class="col s12 l8 offset-l2">
+        <div class="col s12 l8 offset-l2" style="margin-top:30px">
             <table class="white">
                 <tr>
                     <td colspan="4" class="center">
@@ -149,7 +149,38 @@
                 </tr>
             </table>
         </div>
+
     </div>
+
+    {% if url_annuleren %}
+
+        <p style="margin-left:10px">
+            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_annuleer">Annuleren</a>
+        </p>
+
+        <div class="modal" id="bevestig_annuleer">
+            <div class="modal-content center">
+                <h5>Bestelling annuleren?</h5>
+                <p>Weet je zeker dat je deze bestelling niet door wil laten gaan?</p>
+                <p>Gemaakte reserveringen voor wedstrijden / evenementen / producten vervallen.</p>
+                <p>Doet dit alleen als je nog geen betaling gedaan hebt.</p>
+
+                <form method="post" action="{{ url_annuleren }}">
+                    {% csrf_token %}
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    {% endif %}
 
 
     <!-- witruimte -->
