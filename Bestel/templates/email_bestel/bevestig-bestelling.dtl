@@ -38,7 +38,7 @@
     |
     |TOTAAL: € {{ bestelling.totaal_euro }}
 
-    {% if bestelling.status != BESTELLING_STATUS_AFGEROND and bestelling.status != BESTELLING_STATUS_GEANNULEERD %}
+    {% if kan_betalen %}
         |
         |Betaling:
 
@@ -131,7 +131,7 @@
     </table>
 
 
-    {% if bestelling.status != BESTELLING_STATUS_AFGEROND and bestelling.status != BESTELLING_STATUS_GEANNULEERD %}
+    {% if kan_betalen %}
 
         <h1>Betaling</h1>
 

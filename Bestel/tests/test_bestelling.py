@@ -15,6 +15,7 @@ from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
                                         bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
+from Functie.models import Functie
 from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -162,6 +163,10 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)
         self.mandje = mandje
+
+        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+        self.functie_mww.bevestigde_email = 'mww@bond.tst'
+        self.functie_mww.save(update_fields=['bevestigde_email'])
 
     def test_anon(self):
         self.client.logout()

@@ -52,7 +52,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                 overboekingen.append(transactie)
             # for
 
-            if len(overboekingen) >= 100:
+            if len(overboekingen) >= 100:       # pragma: no cover
                 break
         # for
 

@@ -8,14 +8,16 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.models import BestelProduct, BestelMandje, BestelMutatie, Bestelling
-from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
+from Bestel.models import (BestelProduct, Bestelling, BestelMutatie, BestelMandje,
+                           BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_AFGEROND)
 from Betaal.models import BetaalInstellingenVereniging
+from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                 WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_COMBI)
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
@@ -47,6 +49,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
                             mollie_api_key='test_1234')
         instellingen.save()
         self.instellingen_nhb = instellingen
+
+        self.assertEqual(settings.BETAAL_VIA_NHB_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
 
         ver = NhbVereniging(
                     ver_nr=1000,
@@ -136,6 +140,27 @@ class TestBestelMandje(E2EHelpers, TestCase):
         korting.voor_wedstrijden.add(wedstrijd)
         self.korting = korting
 
+        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+
+        product = WebwinkelProduct(
+                        omslag_titel='Test titel 1',
+                        onbeperkte_voorraad=True,
+                        bestel_begrenzing='',
+                        prijs_euro="1.23")
+        product.save()
+        self.product = product
+
+        keuze = WebwinkelKeuze(
+                        wanneer=now,
+                        koper=self.account_admin,
+                        product=product,
+                        aantal=1,
+                        totaal_euro=Decimal('1.23'),
+                        log='test')
+        keuze.save()
+        self.keuze = keuze
+
+
     def _vul_mandje(self, account):
 
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)
@@ -148,6 +173,12 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         # stop het product in het mandje
         mandje.producten.add(product)
+
+        product2 = BestelProduct(
+                        webwinkel_keuze=self.keuze,
+                        prijs_euro=Decimal(1.23))
+        product2.save()
+        mandje.producten.add(product2)
 
         return product
 
@@ -244,36 +275,6 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
-    # def test_korting(self):
-    #     self.e2e_login_and_pass_otp(self.account_admin)
-    #     self.e2e_check_rol('sporter')
-    #
-    #     # vul het mandje
-    #     product = self._vul_mandje(self.account_admin)
-    #
-    #     # dit doet Wedstrijden.inschrijven:
-    #     bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, True)
-    #
-    #     self.verwerk_bestel_mutaties()
-    #
-    #     # controleer dat de code toegepast is
-    #     inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-    #     self.assertIsNotNone(inschrijving.korting)
-    #
-    #     product = BestelProduct.objects.get(pk=product.pk)
-    #     self.assertTrue(str(product) != '')
-    #
-    #     # mandje tonen met korting
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(self.url_mandje_toon)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
-    #
-    #     self.assertContains(resp, '10,00')    # prijs sessie
-    #     self.assertContains(resp, '4,20')     # korting
-    #     self.assertContains(resp, '5,80')     # totaal
-
     def test_verwijder(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
@@ -334,6 +335,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        Bestelling.objects.all().delete()
 
         # doe de bestelling
         self.assertEqual(0, BestelMutatie.objects.count())

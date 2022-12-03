@@ -146,7 +146,8 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
         'producten': producten,
-        'bestel_status': BESTELLING_STATUS2STR[status]
+        'bestel_status': BESTELLING_STATUS2STR[status],
+        'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD)
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
@@ -976,7 +977,8 @@ class Command(BaseCommand):
                     .objects
                     .exclude(is_verwerkt=True))             # deferred
 
-        mutatie_pks = qset.values_list('pk', flat=True)     # deferred
+        # sorteren zodat ze in de juiste volgorde afgehandeld worden
+        mutatie_pks = qset.order_by('pk').values_list('pk', flat=True)     # deferred
 
         self._hoogste_mutatie_pk = mutatie_latest.pk
 

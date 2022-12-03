@@ -5,17 +5,20 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import (BestelProduct, Bestelling, BestelMutatie,
                            BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_AFGEROND)
 from Betaal.models import BetaalInstellingenVereniging
+from Functie.models import Functie
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                 WedstrijdInschrijving)
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
@@ -49,6 +52,13 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
                             akkoord_via_nhb=False)
         instellingen.save()
         self.instellingen = instellingen
+
+        ver_webshop = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+        instellingen_webshop = BetaalInstellingenVereniging(
+                                    vereniging=ver_webshop,
+                                    akkoord_via_nhb=False)
+        instellingen_webshop.save()
+        self.instellingen_webshop = instellingen_webshop
 
         sporter = Sporter(
                         lid_nr=100000,
@@ -148,6 +158,51 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
                     regio=NhbRegio.objects.get(regio_nr=113))
         ver2.save()
         self.ver2 = ver2
+
+        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+
+        product = WebwinkelProduct(
+                        omslag_titel='Test titel 1',
+                        onbeperkte_voorraad=True,
+                        bestel_begrenzing='',
+                        prijs_euro="1.23")
+        product.save()
+        self.product = product
+
+        keuze = WebwinkelKeuze(
+                        wanneer=now,
+                        koper=self.account_admin,
+                        product=product,
+                        aantal=1,
+                        totaal_euro=Decimal('1.23'),
+                        log='test')
+        keuze.save()
+
+        product2 = BestelProduct(
+                        webwinkel_keuze=keuze,
+                        prijs_euro=Decimal(1.23))
+        product2.save()
+        self.product2 = product2
+
+        bestelling2 = Bestelling(
+                        bestel_nr=1235,
+                        account=self.account_admin,
+                        ontvanger=instellingen_webshop,
+                        verkoper_naam='Ver naam',
+                        verkoper_adres1='Ver adres 1',
+                        verkoper_adres2='Ver adres 2',
+                        verkoper_kvk='Ver Kvk',
+                        verkoper_email='contact@ver.not',
+                        verkoper_telefoon='0123456799',
+                        verkoper_iban='NL2BANK0123456799',
+                        verkoper_bic='VER2BIC',
+                        verkoper_heeft_mollie=False,
+                        totaal_euro='1.23',
+                        status=BESTELLING_STATUS_WACHT_OP_BETALING,
+                        log='Een beginnetje\n')
+        bestelling2.save()
+        bestelling2.producten.add(product2)
+        self.bestelling2 = bestelling2
 
     def test_anon(self):
         self.client.logout()
@@ -265,5 +320,36 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Bestelnummer is niet voor jullie vereniging')
+
+    def test_mww(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_mww)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overboeking_ontvangen)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+
+        # juiste informatie en bevestiging van de gebruiker
+        self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(0, self.bestelling2.transacties.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_overboeking_ontvangen,
+                                    {'kenmerk': self.bestelling2.bestel_nr, 'bedrag': '1,23',
+                                     'actie': 'registreer', 'snel': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(1, BestelMutatie.objects.count())
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue("[INFO] Overboeking 1.23 euro ontvangen voor bestelling MH-1235" in f2.getvalue())
+        self.assertTrue("[INFO] Betaling is gelukt voor bestelling MH-1235" in f2.getvalue())
+        self.bestelling2 = Bestelling.objects.get(pk=self.bestelling2.pk)
+        self.assertEqual(self.bestelling2.status, BESTELLING_STATUS_AFGEROND)
+        self.assertEqual(1, self.bestelling2.transacties.count())
+
 
 # end of file
