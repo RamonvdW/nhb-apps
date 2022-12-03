@@ -50,6 +50,42 @@
         </div>
     </div>
 
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Hulp nodig?</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <td>Vragen over deelname aan een <b>wedstrijd of evenement</b></td>
+                    <td>Neem contact op met de organisator</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Vragen over bestellingen in de <b>webshop</b></td>
+                    <td><code>{{ email_webshop }}</code></td>
+                    <td>
+                        <a class="btn-nhb-rood" href="mailto:{{ email_webshop }}">
+                            <i class="material-icons-round">mail</i></a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Vragen over bestellen en betalen</td>
+                    <td><code>{{ email_support }}</code></td>
+                    <td>
+                        <a class="btn-nhb-rood" href="mailto:{{ email_support }}">
+                            <i class="material-icons-round">mail</i></a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
     {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-bestellingen" %}
 
 {% endblock %}
