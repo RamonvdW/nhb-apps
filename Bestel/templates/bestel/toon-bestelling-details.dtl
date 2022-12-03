@@ -88,47 +88,55 @@
                     </tr>
                 {% endfor %}
 
-                {% if rest_euro %}
+                {% if is_geannuleerd %}
                     <tr>
-                        <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td class="right-align"><b>Nog te voldoen</b></td>
-                        <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                        <td class="hide-on-small-only"></td>
+                        <td class="right-align">GEANNULEERD</td>
                     </tr>
                 {% else %}
-                    <tr>
-                        <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td class="right-align"><b>Openstaand</b></td>
-                        <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;0,00</b></td>
-                    </tr>
-                {% endif %}
-
-                <!-- afrekenen -->
-                {% if bevat_fout %}
-                    <tr>
-                        <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
-                    </tr>
-                {% else %}
-                    {% if url_afrekenen %}
+                    {% if rest_euro %}
                         <tr>
-                            <td class="hide-on-small-only"></td>
-                            <td class="right-align">
-                                <form action="{{ url_afrekenen }}" method="post">
-                                    {% csrf_token %}
-                                    <button class="btn-nhb-rood">
-                                        <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
-                                </form>
-                            </td>
-                            <td><!-- bedragen --></td>
+                            <td class="hide-on-small-only" style="padding-left:20px"></td>
+                            <td class="right-align"><b>Nog te voldoen</b></td>
+                            <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td class="hide-on-small-only" style="padding-left:20px"></td>
+                            <td class="right-align"><b>Openstaand</b></td>
+                            <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;0,00</b></td>
                         </tr>
                     {% endif %}
 
-                    <tr>
-                        <td colspan="3">
-                            <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
-                        </td>
-                    </tr>
+                    <!-- afrekenen -->
+                    {% if bevat_fout %}
+                        <tr>
+                            <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                        </tr>
+                    {% else %}
+                        {% if url_afrekenen %}
+                            <tr>
+                                <td class="hide-on-small-only"></td>
+                                <td class="right-align">
+                                    <form action="{{ url_afrekenen }}" method="post">
+                                        {% csrf_token %}
+                                        <button class="btn-nhb-rood">
+                                            <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
+                                    </form>
+                                </td>
+                                <td><!-- bedragen --></td>
+                            </tr>
+                        {% endif %}
 
+                        <tr>
+                            <td colspan="3">
+                                <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
+                            </td>
+                        </tr>
+
+                    {% endif %}
                 {% endif %}
+
             </table>
         </div>
 

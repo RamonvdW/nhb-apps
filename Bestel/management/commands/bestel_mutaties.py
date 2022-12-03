@@ -19,12 +19,14 @@ from django.db import transaction
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Bestel.models import (BestelProduct, BestelMandje,
                            Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
+                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
+                           BESTELLING_STATUS2STR,
                            BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
                            BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER,
                            BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
-                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
+                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
+                           BESTEL_MUTATIE_ANNULEER)
 from Bestel.plugins.product_info import beschrijf_product
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -135,11 +137,16 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
     producten = _beschrijf_bestelling(bestelling)
 
+    status = bestelling.status
+    if status == BESTELLING_STATUS_NIEUW:
+        status = BESTELLING_STATUS_WACHT_OP_BETALING
+
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
         'producten': producten,
+        'bestel_status': BESTELLING_STATUS2STR[status]
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
@@ -243,25 +250,72 @@ class Command(BaseCommand):
         verval_datum = timezone.now() - datetime.timedelta(days=settings.MANDJE_VERVAL_NA_DAGEN)
 
         # doorloop alle producten die nog in een mandje liggen en waarvan de datum verlopen is
+
+        mandje_pks = list()
+
+        # wedstrijden
         for product in (BestelProduct
                         .objects
                         .annotate(mandje_count=Count('bestelmandje'))
+                        .exclude(wedstrijd_inschrijving=None)
                         .select_related('wedstrijd_inschrijving',
                                         'wedstrijd_inschrijving__koper',
                                         'wedstrijd_inschrijving__sessie')
-                        .filter(mandje_count=1,
+                        .filter(mandje_count=1,         # product ligt nog in een mandje
                                 wedstrijd_inschrijving__wanneer__lt=verval_datum)):
 
             inschrijving = product.wedstrijd_inschrijving
 
-            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s (%s) in mandje van %s' % (
+            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s inschrijving (%s) in mandje van %s' % (
                                 product.pk, inschrijving, inschrijving.koper))
 
-            wedstrijden_plugin_verwijder_reservering(self.stdout, product.wedstrijd_inschrijving)
+            wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
+
+            mandje = product.bestelmandje_set.all()[0]
+            if mandje.pk not in mandje_pks:
+                mandje_pks.append(mandje.pk)
 
             # verwijder het product, dan verdwijnt deze ook uit het mandje
             self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
             product.delete()
+        # for
+
+        # webwinkel
+        for product in (BestelProduct
+                        .objects
+                        .annotate(mandje_count=Count('bestelmandje'))
+                        .exclude(webwinkel_keuze=None)
+                        .select_related('webwinkel_keuze')
+                        .filter(mandje_count=1,         # product ligt nog in een mandje
+                                webwinkel_keuze__wanneer__lt=verval_datum)):
+
+            keuze = product.webwinkel_keuze
+
+            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s webwinkel (%s) in mandje van %s' % (
+                                product.pk, keuze.product, keuze.koper))
+
+            # geef de reservering op de producten weer vrij
+            webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
+
+            mandje = product.bestelmandje_set.all()[0]
+            if mandje.pk not in mandje_pks:
+                mandje_pks.append(mandje.pk)
+
+            # verwijder de webwinkel keuze
+            self.stdout.write('[INFO] WebwinkelKeuze met pk=%s wordt verwijderd' % keuze.pk)
+            keuze.product = None
+            keuze.delete()
+
+            # verwijder het bestel product
+            self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
+            product.delete()
+        # for
+
+        # mandjes bijwerken
+        for mandje in BestelMandje.objects.filter(pk__in=mandje_pks):
+            wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
+            webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
+            webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
         # for
 
         self.stdout.write('[INFO] Opschonen mandjes klaar')
@@ -803,6 +857,63 @@ class Command(BaseCommand):
             # stuur een e-mail aan de koper
             stuur_email_naar_koper_betaalbevestiging(bestelling)
 
+    def _verwerk_mutatie_annuleer_bestelling(self, mutatie):
+        """ Annulering van een bestelling + verwijderen van de reserveringen + bevestig via e-mail """
+
+        bestelling = mutatie.bestelling
+
+        status = bestelling.status
+        if status not in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+            self.stdout.write('[WARNING] Kan bestelling %s (pk=%s) niet annuleren, want status = %s' % (
+                                bestelling.mh_bestel_nr(), bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
+            return
+
+        self.stdout.write('[INFO] Bestelling %s (pk=%s) wordt nu geannuleerd' % (bestelling.bestel_nr, bestelling.pk))
+
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
+        bestelling.status = BESTELLING_STATUS_GEANNULEERD
+        bestelling.log += '\n[%s] Bestelling is geannuleerd' % when_str
+        bestelling.save(update_fields=['status', 'log'])
+
+        # stuur een e-mail om de annulering te bevestigen
+        stuur_email_naar_koper_bestelling_details(bestelling)
+
+        # verwijder de reserveringen
+
+        # wedstrijden
+        for product in (bestelling
+                        .producten
+                        .exclude(wedstrijd_inschrijving=None)
+                        .select_related('wedstrijd_inschrijving',
+                                        'wedstrijd_inschrijving__koper',
+                                        'wedstrijd_inschrijving__sessie')
+                        .all()):
+
+            inschrijving = product.wedstrijd_inschrijving
+
+            self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s inschrijving (%s) in mandje van %s' % (
+                                product.pk, inschrijving, inschrijving.koper))
+
+            wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
+        # for
+
+        # webwinkel
+        for product in (bestelling
+                        .producten
+                        .exclude(webwinkel_keuze=None)
+                        .select_related('webwinkel_keuze')
+                        .all()):
+
+            keuze = product.webwinkel_keuze
+
+            self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s webwinkel (%s) in mandje van %s' % (
+                                product.pk, keuze.product, keuze.koper))
+
+            webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
+        # for
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
@@ -837,6 +948,10 @@ class Command(BaseCommand):
         elif code == BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
             self.stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)
             self._verwerk_mutatie_restitutie_uitbetaald(mutatie)
+
+        elif code == BESTEL_MUTATIE_ANNULEER:
+            self.stdout.write('[INFO] Verwerk mutatie %s: annuleer bestelling' % mutatie.pk)
+            self._verwerk_mutatie_annuleer_bestelling(mutatie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))

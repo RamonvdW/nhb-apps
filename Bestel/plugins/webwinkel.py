@@ -8,6 +8,7 @@
 
 from django.conf import settings
 from django.utils.formats import localize
+from Webwinkel.models import KEUZE_STATUS_GEANNULEERD
 from decimal import Decimal
 
 
@@ -43,9 +44,8 @@ def webwinkel_plugin_verwijder_reservering(stdout, webwinkel_keuze):
         product.aantal_op_voorraad += aantal
         product.save(update_fields=['aantal_op_voorraad'])
 
-    stdout.write('[INFO] Webwinkel keuze pk=%s wordt verwijderd' % webwinkel_keuze.pk)
-
-    webwinkel_keuze.delete()
+    webwinkel_keuze.status = KEUZE_STATUS_GEANNULEERD
+    webwinkel_keuze.save(update_fields=['status'])
 
 
 def webwinkel_plugin_bepaal_kortingen(stdout, mandje):

@@ -11,7 +11,8 @@ from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
+                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
+                           BESTELLING_STATUS_GEANNULEERD)
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.operations.mutaties import bestel_mutatieverzoek_annuleer
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
@@ -222,24 +223,27 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         context['transacties'], transacties_euro = self._beschrijf_transacties(bestelling)
 
-        rest_euro = bestelling.totaal_euro - transacties_euro
-        if rest_euro > 0:
-            context['rest_euro'] = rest_euro
+        if bestelling.status == BESTELLING_STATUS_GEANNULEERD:
+            context['is_geannuleerd'] = True
+        else:
+            rest_euro = bestelling.totaal_euro - transacties_euro
+            if rest_euro > 0:
+                context['rest_euro'] = rest_euro
 
-        if rest_euro >= Decimal('0.01'):
-            # betaling is vereist
+            if rest_euro >= Decimal('0.01'):
+                # betaling is vereist
 
-            if bestelling.ontvanger.moet_handmatig():
-                # betaling moet handmatig
-                context['moet_handmatig'] = True
-            else:
-                # betaling gaat via Mollie
-                context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                if bestelling.ontvanger.moet_handmatig():
+                    # betaling moet handmatig
+                    context['moet_handmatig'] = True
+                else:
+                    # betaling gaat via Mollie
+                    context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                                                       kwargs={'bestel_nr': bestelling.bestel_nr})
+
+            if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+                context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
                                                    kwargs={'bestel_nr': bestelling.bestel_nr})
-
-        if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
-            context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
-                                               kwargs={'bestel_nr': bestelling.bestel_nr})
 
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
