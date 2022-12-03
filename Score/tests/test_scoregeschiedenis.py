@@ -92,6 +92,17 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
                   door_account=self.account_hwl).save()
         uitslag18.scores.add(score)
 
+        # verwijderde score
+        score = Score(sporterboog=sporterboog,
+                      afstand_meter=18,
+                      waarde=SCORE_WAARDE_VERWIJDERD)
+        score.save()
+        ScoreHist(score=score,
+                  oude_waarde=289,
+                  nieuwe_waarde=SCORE_WAARDE_VERWIJDERD,
+                  door_account=self.account_hwl).save()
+        uitslag18.scores.add(score)
+
         score = Score(sporterboog=sporterboog,
                       afstand_meter=25,
                       waarde=234)
