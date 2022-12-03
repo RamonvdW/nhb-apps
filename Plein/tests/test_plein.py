@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Bestel.models import BestelMandje, BestelProduct
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -22,8 +23,10 @@ class TestPlein(E2EHelpers, TestCase):
     url_root = '/'
     url_plein = '/plein/'
     url_privacy = '/plein/privacy/'
+    url_handleidingen = '/plein/handleidingen/'
     url_niet_ondersteund = '/plein/niet-ondersteund/'
     url_speciale_pagina = '/plein/test-speciale-pagina/%s/'     # code
+    url_mandje = '/bestel/mandje/'
 
     @classmethod
     def setUpTestData(cls):
@@ -103,8 +106,13 @@ class TestPlein(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_handleidingen)
+        self.assert_is_redirect(resp, '/account/login/')
+
     def test_plein_normaal(self):
-        self.e2e_login(self.account_normaal)
+        self.e2e_login(self.account_normaal)        # account, maar geen Sporter
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -112,18 +120,26 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.e2e_logout()
 
-    def test_plein_nhblid(self):
+    def test_plein_sporter(self):
+        # leg iets in het mandje
+        mandje, _ = BestelMandje.objects.get_or_create(account=self.account_100001)
+        prod = BestelProduct()
+        prod.save()
+        mandje.producten.add(prod)
+
         self.e2e_login(self.account_100001)
+
+        # plein bekijken = mandje opnieuw evalueren
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertNotContains(resp, '/admin/')
-        self.assertNotContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.e2e_logout()
+
+        # check dat de mandje-knop erbij zit
+        urls = self.extract_all_urls(resp)
+        self.assertTrue(self.url_mandje in urls)
 
     def test_plein_admin(self):
         self.functie_mo.accounts.add(self.testdata.account_admin)
@@ -270,5 +286,15 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+
+    def test_handleidingen(self):
+        self.e2e_login(self.testdata.account_admin)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_handleidingen)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/handleidingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_handleidingen)
 
 # end of file
