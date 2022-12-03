@@ -136,6 +136,7 @@ class BepaalAutomatischeKorting(object):
             # self._stdout.write('mogelijke korting: %s (%d%%)' % (korting, korting.percentage))
 
             voor_wedstrijd_pks = list(korting.voor_wedstrijden.all().values_list('pk', flat=True))
+            # print('  voor wedstrijd_pks: %s' % repr(voor_wedstrijd_pks))
 
             if korting.soort == WEDSTRIJD_KORTING_SPORTER and korting.voor_sporter:
                 lid_nr = korting.voor_sporter.lid_nr
@@ -193,10 +194,15 @@ class BepaalAutomatischeKorting(object):
                         # voeg deze toe aan alle producten in het mandje waar deze bij hoort
                         for wedstrijd_pk in voor_wedstrijd_pks:
                             tup = (lid_nr, wedstrijd_pk)
-                            inschrijving = self._lid_nr_wedstrijd_pk2inschrijving[tup]
-                            inschrijving.mogelijke_kortingen.append(korting)
-                            inschrijving.mogelijke_combi_korting = True
-                            # self._stdout.write('    gevonden inschrijving: %s' % inschrijving)
+                            try:
+                                inschrijving = self._lid_nr_wedstrijd_pk2inschrijving[tup]
+                            except KeyError:
+                                # dit is een eerdere inschrijving
+                                pass
+                            else:
+                                inschrijving.mogelijke_kortingen.append(korting)
+                                inschrijving.mogelijke_combi_korting = True
+                                # self._stdout.write('    gevonden inschrijving: %s' % inschrijving)
                         # for
                 # for
         # for
