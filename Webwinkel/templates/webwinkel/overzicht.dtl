@@ -91,11 +91,13 @@
 
             </div>
 
-    {% endfor %}
+        {% if forloop.last %}
+            <!-- blauwe balk afsluiten -->
+                </div>
+            </div>
+        {% endif %}
 
-    <!-- blauwe balk afsluiten -->
-        </div>
-    </div>
+    {% endfor %}
 
 
     {% include 'feedback/sidebar.dtl' with op_pagina="webwinkel-overzicht" %}
