@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <!--
+    {% comment %}
     <h5>Cookies</h5>
 
     <p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
@@ -41,7 +41,7 @@
     Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
 
     <p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank" rel="noopener noreferrer">meer informatie over cookies</a> vinden.</p>
-    -->
+    {% endcomment %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="plein-privacy" %}
 

@@ -113,11 +113,8 @@
             {% url 'Functie:wissel-van-rol' as card_url %}
             {% include 'plein/card.dtl' with title="Wissel van Rol" text="Wissel naar een andere beheerdersrol of naar Sporter." icon="switch_account" url=card_url %}
 
-            {% comment %} TODO: handleiding moet gaan verwijzen naar de pdf's
-            {% if handleiding_url %}
-                {% include 'plein/card.dtl' with title="Handleiding Beheerder" text="Bekijk de handleiding voor (nieuwe) beheerders." icon="help" url=handleiding_url extern_open=True %}
-            {% endif %}
-            {% endcomment %}
+            {% url 'Plein:handleidingen' as card_url%}
+            {% include 'plein/card.dtl' with title="Handleidingen" text="Bekijk de handleidingen." icon="help" url=card_url %}
         </div>
     </div>
 

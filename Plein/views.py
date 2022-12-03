@@ -8,8 +8,9 @@ from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
+from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.operations.mandje import eval_mandje_inhoud
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 
@@ -17,6 +18,7 @@ from Taken.operations import eval_open_taken
 TEMPLATE_PLEIN_SPORTER = 'plein/plein-sporter.dtl'       # sporter (ROL_SPORTER)
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'     # niet ingelogd
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'   # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
+TEMPLATE_PLEIN_HANDLEIDINGEN = 'plein/handleidingen.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 
@@ -161,6 +163,37 @@ class PrivacyView(TemplateView):
 
         context['kruimels'] = (
             (None, 'Privacy'),
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+
+class HandleidingenView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view voor toegang tot de Handleidingen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_PLEIN_HANDLEIDINGEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        account = self.request.user
+        if account.is_authenticated:
+            return rol_mag_wisselen(self.request)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['url_handleiding_leden'] = settings.URL_PDF_HANDLEIDING_LEDEN
+        context['url_handleiding_beheerders'] = settings.URL_PDF_HANDLEIDING_BEHEERDERS
+        context['url_handleiding_vereniging'] = settings.URL_PDF_HANDLEIDING_VERENIGINGEN
+
+        context['kruimels'] = (
+            (None, 'Handleidingen'),
         )
 
         menu_dynamics(self.request, context)
