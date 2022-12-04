@@ -173,8 +173,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         product = WebwinkelProduct(
                         omslag_titel='Test titel 1',
-                        onbeperkte_voorraad=True,
-                        bestel_begrenzing='',
+                        onbeperkte_voorraad=False,
+                        aantal_op_voorraad=10,
+                        bestel_begrenzing='1-5',
                         prijs_euro="1.23")
         product.save()
         self.product = product
@@ -1032,6 +1033,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.e2e_check_rol('sporter')
 
         # leg producten in het mandje
+        self.product.onbeperkte_voorraad = True
+        self.product.save(update_fields=['onbeperkte_voorraad'])
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         self.verwerk_bestel_mutaties()
@@ -1049,6 +1052,12 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         MailQueue.objects.all().delete()
 
         # annuleer de bestelling
+        url = self.url_annuleer_bestelling % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
+        # dubbele annuleer werkt niet omdat de dubbele mutatie niet aangemaakt wordt
         url = self.url_annuleer_bestelling % bestelling.bestel_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})

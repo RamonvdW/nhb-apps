@@ -143,8 +143,11 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         product = WebwinkelProduct(
                         omslag_titel='Test titel 1',
-                        onbeperkte_voorraad=True,
-                        bestel_begrenzing='',
+                        onbeperkte_voorraad=False,
+                        aantal_op_voorraad=10,
+                        bestel_begrenzing='1-5',
+                        eenheid='test,tests',
+                        bevat_aantal=6,
                         prijs_euro="1.23")
         product.save()
         self.product = product
@@ -153,7 +156,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
                         wanneer=now,
                         koper=self.account_admin,
                         product=product,
-                        aantal=1,
+                        aantal=2,
                         totaal_euro=Decimal('1.23'),
                         log='test')
         keuze.save()
@@ -337,6 +340,10 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         # verwijderen zonder mandje
         product1, product2 = self._vul_mandje(self.account_admin)
+        product2.korting_euro = 1
+        self.assertTrue(str(product2) != '')
+        self.assertTrue(product2.korte_beschrijving() != '')
+
         mandje = BestelMandje.objects.get(account=self.account_admin)
         mandje.producten.clear()
         mandje.delete()
