@@ -116,6 +116,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
+        # maak een kalenderwedstrijd aan, met sessie
         sessie = WedstrijdSessie(
                     datum=datum,
                     tijd_begin='10:00',
@@ -123,9 +124,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                     max_sporters=50)
         sessie.save()
         self.sessie = sessie
-        # sessie.wedstrijdklassen.add()
 
-        # maak een kalenderwedstrijd aan, met sessie
         wedstrijd = Wedstrijd(
                         titel='Test',
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
