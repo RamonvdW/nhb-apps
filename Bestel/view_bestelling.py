@@ -273,12 +273,12 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu = None      # wordt gezet door dispatch()
         self.bestelling = None  # wordt gezet door dispatch()
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu not in (Rollen.ROL_NONE, None)
 
     def dispatch(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen voor get_queryset/get_context_data
@@ -324,28 +324,17 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als de gebruiker op de knop BETALEN drukt in de bestelling
             de enige taak van deze functie is een bestelling met status MISLUKT terug zetten naar NIEUW.
         """
-
-        account = request.user
-
-        try:
-            bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
-            bestel_nr = int(bestel_nr)
-            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
-        except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
-            raise Http404('Niet gevonden')
-
-        if bestelling.status == BESTELLING_STATUS_MISLUKT:
-            bestelling.status = BESTELLING_STATUS_NIEUW
-            bestelling.save(update_fields=['status'])
+        if self.bestelling.status == BESTELLING_STATUS_MISLUKT:
+            self.bestelling.status = BESTELLING_STATUS_NIEUW
+            self.bestelling.save(update_fields=['status'])
 
         # doorsturen naar de GET
         url = reverse('Bestel:bestelling-afrekenen',
-                      kwargs={'bestel_nr': bestelling.bestel_nr})
+                      kwargs={'bestel_nr': self.bestelling.bestel_nr})
         return HttpResponseRedirect(url)
 
 
@@ -423,6 +412,9 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
         elif bestelling.status == BESTELLING_STATUS_MISLUKT:
             out['status'] = 'mislukt'
+
+        else:       # pragma: no cover
+            raise Http404('Onbekende status')
 
         # niet gebruiken: raise Http404('Onbekende status')
         # want een 404 leidt tot een foutmelding pagina met status 200 ("OK")
