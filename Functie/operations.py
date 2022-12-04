@@ -55,7 +55,7 @@ def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschr
 
     email = account.accountemail_set.all()[0]
     if email.email_is_bevestigd:
-        if mailer_queue_email(email.bevestigde_email,
+        if mailer_queue_email(email.bevestigde_email,                       # pragma: no branch
                               'Wijziging rollen op ' + settings.NAAM_SITE,
                               mail_body):
             # het is gelukt een mail klaar te zetten

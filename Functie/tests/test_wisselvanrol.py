@@ -88,6 +88,15 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_mo = maak_functie("MO test", "MO")
         self.functie_mo.save()
 
+        self.functie_mww = maak_functie("MWW test", "MWW")
+        self.functie_mww.save()
+
+        self.functie_mwz = maak_functie("MWZ test", "MWZ")
+        self.functie_mwz.save()
+
+        self.functie_sup = maak_functie("SUP test", "SUP")
+        self.functie_sup.save()
+
     def _get_wissel_urls(self, resp):
         urls = self.extract_all_urls(resp)
         return [url for url in urls if url.startswith('/functie/activeer') or url == self.url_accountwissel]
@@ -387,6 +396,48 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_activeer_functie % self.functie_mo.pk, urls)
         self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
+    def test_mww(self):
+        self.functie_mww.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_mww)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Sporter")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_mww.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
+    def test_mwz(self):
+        self.functie_mwz.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_mwz)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Sporter")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_mwz.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
+    def test_sup(self):
+        self.functie_sup.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_sup)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Sporter")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_sup.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
     def test_functie_geen_rol(self):
         # test van een functie die niet resulteert in een rol
         functie = maak_functie('Haha', 'HAHA')
@@ -506,6 +557,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         rcl18r105 = Functie.objects.get(beschrijving="RCL Regio 105 Indoor")
 
         bko18.accounts.add(self.account_normaal)
+
+        Sporter.objects.all().delete()
+        NhbVereniging.objects.all().delete()        # om lege nhbver_cache te raken
 
         # log in en wordt BKO
         self.e2e_account_accepteert_vhpg(self.account_normaal)

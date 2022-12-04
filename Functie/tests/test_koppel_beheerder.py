@@ -301,6 +301,11 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
 
+        # variant: nog geen bevestigde email
+        email = self.account_beh2.accountemail_set.all()[0]
+        email.email_is_bevestigd = False
+        email.save(update_fields=['email_is_bevestigd'])
+
         LogboekRegel.objects.all().delete()
 
         # koppel de RKO
