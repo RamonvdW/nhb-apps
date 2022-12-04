@@ -94,13 +94,15 @@
                                     <tr>
                                         <th>Status:</th>
                                         <td>{% if bestelling.status == 'N' %}
-                                                <span>Nieuw</span><span class="grey-text"> | Te betalen | Afgerond | Mislukt</span>
+                                                <span>Nieuw</span><span class="grey-text"> | Te betalen | Afgerond | Mislukt | Geannuleerd</span>
                                             {% elif bestelling.status == 'B' %}
-                                                <span class="grey-text">Nieuw | </span>Te betalen<span class="grey-text"> | Afgerond | Mislukt</span>
+                                                <span class="grey-text">Nieuw | </span>Te betalen<span class="grey-text"> | Afgerond | Mislukt | Geannuleerd</span>
                                             {% elif bestelling.status == 'A' %}
-                                                <span class="grey-text">Nieuw | Te betalen | </span>Afgerond<span class="grey-text"> | Mislukt</span>
+                                                <span class="grey-text">Nieuw | Te betalen | </span>Afgerond<span class="grey-text"> | Mislukt | Geannuleerd</span>
                                             {% elif bestelling.status == 'F' %}
-                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | </span><span>Mislukt</span>
+                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | </span><span>Mislukt</span><span class="grey-text"> | Geannuleerd</span>
+                                            {% elif bestelling.status == 'G' %}
+                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | Mislukt | </span><span>Geannuleerd</span>
                                             {% else %}
                                                 <i class="red-text">Onverwacht ({{ bestelling.status }})</i>
                                             {% endif %}
