@@ -11,8 +11,10 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
                            BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
-                           BESTELLING_STATUS_MISLUKT)
-from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
+                           BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
+from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
+                                        bestel_mutatieverzoek_webwinkel_keuze,
+                                        bestel_mutatieverzoek_betaling_afgerond,
                                         bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
 from Functie.models import Functie
@@ -20,6 +22,7 @@ from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD, WedstrijdLocatie,
                                 WedstrijdInschrijving, WedstrijdKorting,
                                 INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
@@ -40,6 +43,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
     url_bestelling_afrekenen = '/bestel/afrekenen/%s/'      # bestel_nr
     url_check_status = '/bestel/check-status/%s/'           # bestel_nr
     url_na_de_betaling = '/bestel/na-de-betaling/%s/'       # bestel_nr
+    url_annuleer_bestelling = '/bestel/annuleer/%s/'        # bestel_nr
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -168,6 +172,24 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.functie_mww.bevestigde_email = 'mww@bond.tst'
         self.functie_mww.save(update_fields=['bevestigde_email'])
 
+        product = WebwinkelProduct(
+                        omslag_titel='Test titel 1',
+                        onbeperkte_voorraad=True,
+                        bestel_begrenzing='',
+                        prijs_euro="1.23")
+        product.save()
+        self.product = product
+
+        keuze = WebwinkelKeuze(
+                        wanneer=now,
+                        koper=self.account_admin,
+                        product=product,
+                        aantal=1,
+                        totaal_euro=Decimal('1.23'),
+                        log='test')
+        keuze.save()
+        self.keuze = keuze
+
     def test_anon(self):
         self.client.logout()
 
@@ -181,7 +203,16 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         resp = self.client.get(self.url_bestelling_afrekenen % 999999)
         self.assert403(resp)
 
+        resp = self.client.post(self.url_bestelling_afrekenen % 999999)
+        self.assert403(resp)
+
+        resp = self.client.post(self.url_check_status % 999999)
+        self.assert403(resp)
+
         resp = self.client.get(self.url_na_de_betaling % 999999)
+        self.assert403(resp)
+
+        resp = self.client.post(self.url_bestelling_details % 999999)
         self.assert403(resp)
 
     def test_bestelling(self):
@@ -190,6 +221,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # bestel wedstrijddeelname
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
         self.verwerk_bestel_mutaties()
 
         # bekijk de bestellingen (lege lijst)
@@ -207,8 +239,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(1, Bestelling.objects.count())
 
         bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
-        self.assertEqual(1, bestelling.producten.count())
-        product1 = bestelling.producten.all()[0]
+        self.assertEqual(2, bestelling.producten.count())
+        product1 = bestelling.producten.filter(webwinkel_keuze=None).all()[0]
 
         self.assertEqual(1, MailQueue.objects.count())
         mail = MailQueue.objects.all()[0]
@@ -907,5 +939,81 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_na_de_betaling % 99999)
         self.assert404(resp, "Niet gevonden")
+
+    def test_annuleer(self):
+        # maak een bestelling en annuleer deze weer
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # leg producten in het mandje
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_webwinkel_keuze(self.account_admin, self.keuze, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+
+        bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
+
+        MailQueue.objects.all().delete()
+
+        # annuleer de bestelling
+        url = self.url_annuleer_bestelling % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
+
+        self.verwerk_bestel_mutaties()
+
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_GEANNULEERD)
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
+
+        # bekijk de lijst van bestellingen, met de geannuleerde bestelling
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bestellingen_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+
+        # haal de details op van de geannuleerde bestelling
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+
+        # corner cases
+        resp = self.client.post(self.url_annuleer_bestelling % 999999, {'snel': 1})
+        self.assert404(resp, 'Niet gevonden')
+
+        # annulering van geannuleerde bestelling
+        url = self.url_annuleer_bestelling % bestelling.bestel_nr
+        bestelling.status = BESTELLING_STATUS_NIEUW
+        bestelling.save(update_fields=['status'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
+        bestelling.status = BESTELLING_STATUS_GEANNULEERD
+        bestelling.save(update_fields=['status'])
+
+        f1, f2 = self.verwerk_bestel_mutaties(show_warnings=False)
+        self.assertTrue(' niet annuleren, want status ' in f2.getvalue())
+
+        self.assertEqual(1, MailQueue.objects.count())
 
 # end of file

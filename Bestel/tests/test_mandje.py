@@ -160,7 +160,6 @@ class TestBestelMandje(E2EHelpers, TestCase):
         keuze.save()
         self.keuze = keuze
 
-
     def _vul_mandje(self, account):
 
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)

@@ -499,7 +499,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class AnnuleerBestellingView(View):
+class AnnuleerBestellingView(UserPassesTestMixin, View):
 
     """ Deze functie wordt gebruikt om een bestelling te annuleren. """
 
@@ -507,13 +507,10 @@ class AnnuleerBestellingView(View):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu = None
-
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.rol_nu != Rollen.ROL_NONE
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu != Rollen.ROL_NONE            # inlog vereist
 
     @staticmethod
     def post(request, *args, **kwargs):
