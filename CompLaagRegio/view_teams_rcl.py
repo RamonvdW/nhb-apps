@@ -35,7 +35,7 @@ TEMPLATE_COMPREGIO_RCL_TEAM_RONDE = 'complaagregio/rcl-team-ronde.dtl'
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
-class RegioTeamsView(TemplateView):
+class RegioTeamsTemplateView(TemplateView):
 
     """ Met deze view kan een lijst van teams getoond worden, zowel landelijk, rayon als regio """
 
@@ -45,6 +45,10 @@ class RegioTeamsView(TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        # template - zie override classes verderop
+        raise NotImplementedError("test_func is mandatory")     # pragma: no cover
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -262,7 +266,7 @@ class RegioTeamsView(TemplateView):
         return context
 
 
-class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsView):
+class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsTemplateView):
 
     """ Met deze view kan de RCL de aangemaakte teams inzien """
 
@@ -277,7 +281,7 @@ class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsView):
         return self.rol_nu == Rollen.ROL_RCL
 
 
-class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsView):
+class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsTemplateView):
 
     """ Met deze view kan de BKO / RKO de aangemaakte teams inzien, per rayon """
 
