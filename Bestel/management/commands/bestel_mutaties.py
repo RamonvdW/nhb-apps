@@ -623,7 +623,7 @@ class Command(BaseCommand):
                 bestelling.totaal_euro = totaal_euro
                 bestelling.save(update_fields=['totaal_euro'])
 
-                totaal_euro_str = "€ %s" % totaal_euro
+                totaal_euro_str = "€ %.2f" % totaal_euro
                 totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
 
                 msg = "[%s] Bestelling aangemaakt met %s producten voor totaal %s" % (
@@ -701,6 +701,9 @@ class Command(BaseCommand):
             # FUTURE: automatisch een restitutie beginnen
 
     def _verwerk_mutatie_betaling_afgerond(self, mutatie):
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
         bestelling = mutatie.bestelling
         is_gelukt = mutatie.betaling_is_gelukt
 
@@ -739,7 +742,7 @@ class Command(BaseCommand):
                                 bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
 
             msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
-                        mutatie.when, ontvangen_euro, bestelling.totaal_euro)
+                        when_str, ontvangen_euro, bestelling.totaal_euro)
             bestelling.log += msg
             bestelling.save(update_fields=['log'])
 
@@ -748,7 +751,7 @@ class Command(BaseCommand):
                                     bestelling.mh_bestel_nr(), bestelling.pk))
                 bestelling.status = BESTELLING_STATUS_AFGEROND
 
-                msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % mutatie.when
+                msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % when_str
                 bestelling.log += msg
                 bestelling.save(update_fields=['log'])
 
@@ -772,7 +775,7 @@ class Command(BaseCommand):
 
             bestelling.status = BESTELLING_STATUS_MISLUKT
 
-            msg = "\n[%s] Betaling is niet gelukt" % mutatie.when
+            msg = "\n[%s] Betaling is niet gelukt" % when_str
             bestelling.log += msg
             bestelling.save(update_fields=['log'])
 
@@ -780,6 +783,9 @@ class Command(BaseCommand):
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
     def _verwerk_mutatie_overboeking_ontvangen(self, mutatie):
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
         bestelling = mutatie.bestelling
         bedrag_euro = mutatie.bedrag_euro
 
@@ -812,7 +818,7 @@ class Command(BaseCommand):
         bestelling.transacties.add(transactie)
 
         msg = "\n[%s] Bestelling heeft een overboeking van %s euro ontvangen" % (
-                    mutatie.when, bedrag_euro)
+                    when_str, bedrag_euro)
         bestelling.log += msg
 
         # controleer of we voldoende ontvangen hebben
@@ -828,7 +834,7 @@ class Command(BaseCommand):
                             bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
 
         msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
-                    mutatie.when, ontvangen_euro, bestelling.totaal_euro)
+                    when_str, ontvangen_euro, bestelling.totaal_euro)
         bestelling.log += msg
 
         bestelling.save(update_fields=['log'])
@@ -838,7 +844,7 @@ class Command(BaseCommand):
                                 bestelling.mh_bestel_nr(), bestelling.pk))
             bestelling.status = BESTELLING_STATUS_AFGEROND
 
-            msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % mutatie.when
+            msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % when_str
             bestelling.log += msg
 
             bestelling.save(update_fields=['status', 'log'])
