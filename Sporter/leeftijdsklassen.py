@@ -25,16 +25,16 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_j
                 Voorbeeld:
                     huidige jaar = 2019
                     leeftijd = 17
-                    lkl_lst=(('Onder 18 Uniseks of Onder 18 Heren'),     # -1 = 16
-                             ('Onder 18 Uniseks of Onder 18 Heren'),     #  0 = 17
-                             ('Onder 21 Uniseks of Onder 21 Heren'),     # +1 = 18
-                             ('Onder 21 Uniseks of Onder 21 Heren'),     # +2 = 19
-                             ('Onder 21 Uniseks of Onder 21 Heren'))     # +3 = 20
+                    lkl_lst=(('Onder 18 Gemengd of Onder 18 Heren'),     # -1 = 16
+                             ('Onder 18 Gemengd of Onder 18 Heren'),     #  0 = 17
+                             ('Onder 21 Gemengd of Onder 21 Heren'),     # +1 = 18
+                             ('Onder 21 Gemengd of Onder 21 Heren'),     # +2 = 19
+                             ('Onder 21 Gemengd of Onder 21 Heren'))     # +3 = 20
     """
 
     leeftijd2tekst = dict()     # [leeftijd] = beschrijving
 
-    # begin met de Uniseks klassen
+    # begin met de Gemengd klassen
     if True:
         alle_lkl = list()
         prev_lkl = None
@@ -63,7 +63,7 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_j
         # maak de look-up tabel
         for lkl in alle_lkl:
             for leeftijd in range(lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd+1):
-                leeftijd2tekst[leeftijd] = lkl.beschrijving     # 21+ Uniseks
+                leeftijd2tekst[leeftijd] = lkl.beschrijving     # 21+ Gemengd
             # for
         # for
 
@@ -93,7 +93,7 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_j
         prev_lkl.max_wedstrijdleeftijd = 150
 
         # de look-up tabel uitbreiden met een tweede beschrijving
-        # 21+ Uniseks --> 21+ Uniseks of 21+ Heren
+        # 21+ Gemengd --> 21+ Gemengd of 21+ Heren
         for lkl in alle_lkl:
             for leeftijd in range(lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd+1):
                 leeftijd2tekst[leeftijd] += ' of ' + lkl.beschrijving
@@ -179,7 +179,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
             target = leeftijd2tekst_w
 
         for leeftijd in range(lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd + 1):
-            target[leeftijd] = lkl.beschrijving.replace(' Uniseks', '')
+            target[leeftijd] = lkl.beschrijving.replace(' Gemengd', '')
         # for
     # for
 
