@@ -6,18 +6,18 @@
 {% endcomment %}
 
 {% block inhoud_text %}
-    |Hallo!
+    |Hallo beheerder,
     |
-    |Er is zojuist een nieuwe taak voor jou aangemaakt op {{ site_url }}
+    |Er is zojuist een taak voor jou aangemaakt op {{ site_url }}
     |Op het moment van sturen {{ aantal_str }}.
     |
     |Bedankt voor je aandacht!
 {% endblock %}
 
 {% block inhoud_html %}
-    <div>Hallo!</div>
+    <div>Hallo beheerder,</div>
     <br>
-    <div>Er is zojuist een nieuwe taak voor jou aangemaakt op {{ site_url }}</div>
+    <div>Er is zojuist een taak voor jou aangemaakt op {{ site_url }}</div>
     <div>Op het moment van sturen {{ aantal_str }}.</div>
     <br>
     <div>Bedankt voor je aandacht!</div>
