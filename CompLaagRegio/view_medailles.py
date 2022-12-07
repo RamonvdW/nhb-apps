@@ -34,6 +34,106 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RCL
 
+    def bepaal_medailles(self, sub_uitslag):
+        aantal_medailles = 0
+        aantal = len(sub_uitslag)
+
+        # tot 4 deelnemers: 1 medaille
+        # tot 8 deelnemers: 2 medailles
+        # vanaf 9 deelnemers: 3 medailles
+
+        # TODO: we tellen nu dubbele medaille kleuren mee in bovenstaande aantallen. Correct??
+
+        if aantal > 0:
+            for deelnemer in sub_uitslag:
+                if deelnemer.rank == 1:
+                    deelnemer.toon_goud = True
+                    aantal_medailles += 1
+            # for
+
+        if aantal >= 5 and aantal_medailles < 2:
+            for deelnemer in sub_uitslag:
+                if deelnemer.rank == 2:
+                    deelnemer.toon_zilver = True
+                    aantal_medailles += 1
+            # for
+
+        if aantal >= 9 and aantal_medailles < 3:
+            for deelnemer in sub_uitslag:
+                if deelnemer.rank == 3:
+                    deelnemer.toon_brons = True
+                    # aantal_medailles += 1
+            # for
+
+    def bepaal_uitslag(self, deelcomp, min_aantal_scores):
+
+        uitslag = list()
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=deelcomp,
+                              aantal_scores__gte=min_aantal_scores)
+                      .exclude(indiv_klasse__is_onbekend=True)
+                      .select_related('sporterboog__sporter',
+                                      'bij_vereniging',
+                                      'indiv_klasse__boogtype')
+                      .order_by('indiv_klasse__volgorde',
+                                '-gemiddelde'))
+
+        klasse = -1
+        prev_gemiddelde = -1
+        prev_rank = 0
+        rank = 0
+        sub_uitslag = list()
+        is_asp = False
+        deelnemer_een = deelnemer_twee = deelnemer_drie = None
+        for deelnemer in deelnemers:
+
+            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
+            if deelnemer.break_klasse:
+                self.bepaal_medailles(sub_uitslag)
+
+                deelnemer.is_eerste_groep = (klasse == -1)
+                deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
+
+                is_asp = False
+                if not deelnemer.indiv_klasse.is_voor_rk_bk:
+                    # dit is een aspiranten klassen of een klasse onbekend
+                    for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():       # pragma: no branch
+                        if lkl.is_aspirant_klasse():                                # pragma: no branch
+                            is_asp = True
+                            break
+                    # for
+
+                rank = 0
+                prev_gemiddelde = -1
+                sub_uitslag = list()
+
+            klasse = deelnemer.indiv_klasse.volgorde
+
+            if len(sub_uitslag) < 9:
+
+                sporter = deelnemer.sporterboog.sporter
+                deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+                deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+                rank += 1
+                if deelnemer.gemiddelde == prev_gemiddelde:
+                    deelnemer.rank = prev_rank
+                else:
+                    deelnemer.rank = rank
+                    prev_rank = rank
+                    prev_gemiddelde = deelnemer.gemiddelde
+
+                if not is_asp:
+                    sub_uitslag.append(deelnemer)
+                    uitslag.append(deelnemer)
+        # for
+
+        self.bepaal_medailles(sub_uitslag)
+
+        return uitslag
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -60,88 +160,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
 
         context['min_aantal_scores'] = min_aantal_scores = comp.aantal_scores_voor_rk_deelname
 
-        deelnemers = (RegioCompetitieSchutterBoog
-                      .objects
-                      .filter(deelcompetitie=deelcomp,
-                              aantal_scores__gte=min_aantal_scores)
-                      .exclude(indiv_klasse__is_onbekend=True)
-                      .select_related('sporterboog__sporter',
-                                      'bij_vereniging',
-                                      'indiv_klasse__boogtype')
-                      .order_by('indiv_klasse__volgorde',
-                                '-gemiddelde'))
-
-        context['deelnemers'] = uitslag = list()
-
-        klasse = -1
-        rank = 0
-        asps = list()
-        is_asp = False
-        deelnemer_een = deelnemer_twee = deelnemer_drie = None
-        for deelnemer in deelnemers:
-
-            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
-            if deelnemer.break_klasse:
-                if rank >= 9:
-                    # vanaf 9 deelnemers: 3 medailles
-                    deelnemer_drie.toon_brons = True
-
-                if rank >= 5:
-                    # tot 8 deelnemers: 2 medailles
-                    deelnemer_twee.toon_zilver = True
-
-                if rank > 0:
-                    # tot 4 deelnemers: 1 medaille
-                    deelnemer_een.toon_goud = True
-
-                deelnemer.is_eerste_groep = (klasse == -1)
-                deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
-
-                is_asp = False
-                if not deelnemer.indiv_klasse.is_voor_rk_bk:
-                    # dit is een aspiranten klassen of een klasse onbekend
-                    for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():       # pragma: no branch
-                        if lkl.is_aspirant_klasse():                                # pragma: no branch
-                            is_asp = True
-                            break
-                    # for
-
-                rank = 0
-                deelnemer_een = deelnemer_twee = deelnemer_drie = None
-
-            klasse = deelnemer.indiv_klasse.volgorde
-
-            if rank < 9:
-                rank += 1
-                sporter = deelnemer.sporterboog.sporter
-                deelnemer.rank = rank
-                deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
-                deelnemer.ver_str = str(deelnemer.bij_vereniging)
-
-                if is_asp:
-                    asps.append(deelnemer)
-                else:
-                    uitslag.append(deelnemer)
-
-                if rank == 1:
-                    deelnemer_een = deelnemer
-                elif rank == 2:
-                    deelnemer_twee = deelnemer
-                elif rank == 3:
-                    deelnemer_drie = deelnemer
-        # for
-
-        if rank >= 9:
-            # vanaf 9 deelnemers: 3 medailles
-            deelnemer_drie.toon_brons = True
-
-        if rank >= 5:
-            # tot 8 deelnemers: 2 medailles
-            deelnemer_twee.toon_zilver = True
-
-        if rank > 0:
-            # tot 4 deelnemers: 1 medaille
-            deelnemer_een.toon_goud = True
+        context['deelnemers'] = self.bepaal_uitslag(deelcomp, min_aantal_scores)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
