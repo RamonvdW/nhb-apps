@@ -93,11 +93,14 @@ def _beschrijf_bestelling(bestelling):
         # nieuwe regel op de bestelling
         regel_nr += 1
 
+        verzendkosten_euro_str = "%.2f" % bestelling.verzendkosten_euro
+        verzendkosten_euro_str = verzendkosten_euro_str.replace('.', ',')       # nederlandse komma
+
         product = SimpleNamespace(
                         regel_nr=regel_nr,
                         is_verzendkosten=True,                      # TODO: wordt niet gebruikt
                         beschrijving=[("Verzendkosten", "")],       # TODO: specialiseren in pakket/briefpost
-                        prijs_euro=bestelling.verzendkosten_euro)
+                        prijs_euro=verzendkosten_euro_str)
         producten.append(product)
 
     # voeg de eventuele BTW toe
@@ -141,10 +144,14 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
     if status == BESTELLING_STATUS_NIEUW:
         status = BESTELLING_STATUS_WACHT_OP_BETALING
 
+    totaal_euro_str = "%.2f" % bestelling.totaal_euro
+    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
+
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
+        'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'bestel_status': BESTELLING_STATUS2STR[status],
         'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD)
@@ -167,10 +174,14 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
 
     transacties = _beschrijf_transacties(bestelling)
 
+    totaal_euro_str = "%.2f" % bestelling.totaal_euro
+    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
+
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
+        'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'transacties': transacties,
     }
@@ -191,10 +202,14 @@ def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
     producten = _beschrijf_bestelling(bestelling)
     transacties = _beschrijf_transacties(bestelling)
 
+    totaal_euro_str = "%.2f" % bestelling.totaal_euro
+    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
+
     context = {
         'koper_sporter': sporter,       # bevat postadres
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
+        'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'transacties': transacties,
     }
@@ -626,10 +641,10 @@ class Command(BaseCommand):
                 totaal_euro_str = "€ %.2f" % totaal_euro
                 totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
 
+                when_str = timezone.localtime(bestelling.aangemaakt).strftime('%Y-%m-%d om %H:%M')
+
                 msg = "[%s] Bestelling aangemaakt met %s producten voor totaal %s" % (
-                                                date_format(bestelling.aangemaakt.astimezone(to_tz), 'j F Y H:i'),
-                                                len(producten),
-                                                totaal_euro_str)
+                                                when_str, len(producten), totaal_euro_str)
                 bestelling.log = msg
                 bestelling.save(update_fields=['log'])
 
@@ -738,11 +753,17 @@ class Command(BaseCommand):
                     ontvangen_euro += transactie.bedrag_euro_klant
             # for
 
-            self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s euro ontvangen' % (
-                                bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
+            ontvangen_euro_str = "€ %.2f" % ontvangen_euro
+            ontvangen_euro_str = ontvangen_euro_str.replace('.', ',')  # nederlandse komma
+
+            totaal_euro_str = "€ %.2f" % bestelling.totaal_euro
+            totaal_euro_str = totaal_euro_str.replace('.', ',')  # nederlandse komma
+
+            self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s ontvangen' % (
+                                bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro_str, totaal_euro_str))
 
             msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
-                        when_str, ontvangen_euro, bestelling.totaal_euro)
+                        when_str, ontvangen_euro_str, totaal_euro_str)
             bestelling.log += msg
             bestelling.save(update_fields=['log'])
 

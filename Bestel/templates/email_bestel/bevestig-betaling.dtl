@@ -38,7 +38,7 @@
     {% endfor %}
 
     |
-    |TOTAAL: € {{ bestelling.totaal_euro }}
+    |TOTAAL: € {{ totaal_euro_str }}
 
     {% for transactie in transacties %}
         |
@@ -126,7 +126,7 @@
         <tr>
             <td></td>
             <td style="text-align:right">TOTAAL:</td>
-            <td style="text-align:right">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
+            <td style="text-align:right">&euro;&nbsp;{{ totaal_euro_str }}</td>
         </tr>
     </table>
 

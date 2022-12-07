@@ -214,7 +214,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         msg = f2.getvalue()
         msg = re.sub(r'pk=[0-9]+', 'pk=X', msg)
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling MH-1002001 (pk=X)' in msg)
-        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft 10.00 van de 10.00 euro ontvangen' in msg)
+        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft € 10,00 van de € 10,00 ontvangen' in msg)
         self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) is afgerond' in msg)
 
         self.assertEqual(1, bestelling.transacties.count())

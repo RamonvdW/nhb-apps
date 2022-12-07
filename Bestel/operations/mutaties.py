@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.utils import timezone
 from Bestel.models import (BestelMutatie, Bestelling,
                            BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
                            BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
@@ -183,7 +184,9 @@ def bestel_betaling_is_gestart(bestelling, actief):
     bestelling.betaal_actief = actief
     bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
 
-    msg = "\n[%s] Betaling is opgestart (wacht op betaling)" % actief.when
+    when_str = timezone.localtime(actief.when).strftime('%Y-%m-%d om %H:%M')
+
+    msg = "\n[%s] Betaling is opgestart (wacht op betaling)" % when_str
     bestelling.log += msg
 
     bestelling.save(update_fields=['betaal_actief', 'status', 'log'])

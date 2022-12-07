@@ -372,7 +372,9 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             out['status'] = 'nieuw'
 
             # start een nieuwe transactie op
-            beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.mh_bestel_nr())
+            # LET OP: deze tekst moeten we kort houden, want Mollie + iDEAL kapt af op 36 tekens
+            #         dus MijnHandboogsport bestelling MH-1234567 verliest de laatste 4 cijfers
+            beschrijving = "%s %s" % (bestelling.mh_bestel_nr(), settings.AFSCHRIFT_SITE_NAAM)
 
             # TODO: is het realistisch dat status NIEUW al transacties heeft?
             rest_euro = bestelling.totaal_euro
