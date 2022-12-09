@@ -61,7 +61,7 @@
 
                             {% for wkl in wkl_indiv %}
                                 <tr>
-                                    <td>{{ wkl.indiv.beschrijving }}</td>
+                                    <td>{{ wkl.beschrijving }}</td>
                                     <td>
                                         <select name="{{ wkl.sel }}" onchange="gewijzigd()">
                                             <option value="24"{%if wkl.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
@@ -103,7 +103,7 @@
 
                             {% for wkl in wkl_teams %}
                                 <tr>
-                                    <td>{{ wkl.team.beschrijving }}</td>
+                                    <td>{{ wkl.beschrijving }}</td>
                                     <td>
                                         <select name="{{ wkl.sel }}" onchange="gewijzigd()">
                                             <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
