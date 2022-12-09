@@ -16,37 +16,49 @@ from Plein.menu import menu_dynamics
 TEMPLATE_COMPREGIO_MEDAILLES = 'complaagregio/medailles.dtl'
 
 
-def bepaal_medailles(sub_uitslag):
+def bepaal_medailles(sub_uitslag, is_asp_klasse):
+
     aantal_medailles = 0
     aantal = len(sub_uitslag)
     # print('aantal: %s, sub_uitslag: %s' % (aantal, [deelnemer.rank for deelnemer in sub_uitslag]))
 
-    # tot 4 deelnemers: 1 medaille
-    # tot 8 deelnemers: 2 medailles
-    # vanaf 9 deelnemers: 3 medailles
-
-    # TODO: we tellen nu dubbele medaille kleuren mee in bovenstaande aantallen. Correct??
-
-    if aantal > 0:
+    if aantal > 0 and is_asp_klasse:
+        # aspirant klasse: altijd 3 medailles
         for deelnemer in sub_uitslag:
             if deelnemer.rank == 1:
                 deelnemer.toon_goud = True
-                aantal_medailles += 1
-        # for
-
-    if aantal >= 5 and aantal_medailles < 2:
-        for deelnemer in sub_uitslag:
-            if deelnemer.rank == 2:
+            elif deelnemer.rank == 2:
                 deelnemer.toon_zilver = True
-                aantal_medailles += 1
-        # for
-
-    if aantal >= 9 and aantal_medailles < 3:
-        for deelnemer in sub_uitslag:
-            if deelnemer.rank == 3:
+            elif deelnemer.rank == 3:
                 deelnemer.toon_brons = True
-                # aantal_medailles += 1
         # for
+    else:
+        # tot 4 deelnemers: 1 medaille
+        # tot 8 deelnemers: 2 medailles
+        # vanaf 9 deelnemers: 3 medailles
+
+        # TODO: we tellen nu dubbele medaille kleuren mee in bovenstaande aantallen. Correct??
+
+        if aantal > 0:
+            for deelnemer in sub_uitslag:
+                if deelnemer.rank == 1:
+                    deelnemer.toon_goud = True
+                    aantal_medailles += 1
+            # for
+
+        if aantal >= 5 and aantal_medailles < 2:
+            for deelnemer in sub_uitslag:
+                if deelnemer.rank == 2:
+                    deelnemer.toon_zilver = True
+                    aantal_medailles += 1
+            # for
+
+        if aantal >= 9 and aantal_medailles < 3:
+            for deelnemer in sub_uitslag:
+                if deelnemer.rank == 3:
+                    deelnemer.toon_brons = True
+                    # aantal_medailles += 1
+            # for
 
 
 class ToonMedailles(UserPassesTestMixin, TemplateView):
@@ -87,23 +99,23 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         prev_rank = 0
         rank = 0
         sub_uitslag = list()
-        is_asp = False
+        is_asp_klasse = False
         deelnemer_een = deelnemer_twee = deelnemer_drie = None
         for deelnemer in deelnemers:
 
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
-                bepaal_medailles(sub_uitslag)
+                bepaal_medailles(sub_uitslag, is_asp_klasse)
 
                 deelnemer.is_eerste_groep = (klasse == -1)
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
 
-                is_asp = False
+                is_asp_klasse = False
                 if not deelnemer.indiv_klasse.is_voor_rk_bk:
                     # dit is een aspiranten klassen of een klasse onbekend
                     for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():       # pragma: no branch
                         if lkl.is_aspirant_klasse():                                # pragma: no branch
-                            is_asp = True
+                            is_asp_klasse = True
                             break
                     # for
 
@@ -127,12 +139,11 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                     prev_rank = rank
                     prev_gemiddelde = deelnemer.gemiddelde
 
-                if not is_asp:
-                    sub_uitslag.append(deelnemer)
-                    uitslag.append(deelnemer)
+                sub_uitslag.append(deelnemer)
+                uitslag.append(deelnemer)
         # for
 
-        bepaal_medailles(sub_uitslag)
+        bepaal_medailles(sub_uitslag, is_asp_klasse)
 
         return uitslag
 

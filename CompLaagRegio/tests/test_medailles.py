@@ -137,7 +137,7 @@ class TestCompLaagRegioMedailles(E2EHelpers, TestCase):
             deelnemer = SimpleNamespace(rank=rank+1, toon_goud=False, toon_zilver=False, toon_brons=False)
             uitslag.append(deelnemer)
         # for
-        bepaal_medailles(uitslag)
+        bepaal_medailles(uitslag, False)
         self.assertEqual([uitslag[0].toon_goud, uitslag[0].toon_zilver, uitslag[0].toon_brons], [True, False, False])
         self.assertEqual([uitslag[1].toon_goud, uitslag[1].toon_zilver, uitslag[1].toon_brons], [False, True, False])
         self.assertEqual([uitslag[2].toon_goud, uitslag[2].toon_zilver, uitslag[2].toon_brons], [False, False, True])
@@ -150,10 +150,34 @@ class TestCompLaagRegioMedailles(E2EHelpers, TestCase):
             uitslag.append(deelnemer)
         # for
         uitslag[1].rank = 1
-        bepaal_medailles(uitslag)
+        bepaal_medailles(uitslag, False)
         self.assertEqual([uitslag[0].toon_goud, uitslag[0].toon_zilver, uitslag[0].toon_brons], [True, False, False])
         self.assertEqual([uitslag[1].toon_goud, uitslag[1].toon_zilver, uitslag[1].toon_brons], [True, False, False])
         self.assertEqual([uitslag[2].toon_goud, uitslag[2].toon_zilver, uitslag[2].toon_brons], [False, False, True])
         self.assertEqual([uitslag[3].toon_goud, uitslag[3].toon_zilver, uitslag[3].toon_brons], [False, False, False])
+
+        # maar 1 medaille bij 3 deelnemers
+        uitslag = list()
+        for rank in range(3):
+            deelnemer = SimpleNamespace(rank=rank+1, toon_goud=False, toon_zilver=False, toon_brons=False)
+            uitslag.append(deelnemer)
+        # for
+        bepaal_medailles(uitslag, False)
+        self.assertEqual([uitslag[0].toon_goud, uitslag[0].toon_zilver, uitslag[0].toon_brons], [True, False, False])
+        self.assertEqual([uitslag[1].toon_goud, uitslag[1].toon_zilver, uitslag[1].toon_brons], [False, False, False])
+        self.assertEqual([uitslag[2].toon_goud, uitslag[2].toon_zilver, uitslag[2].toon_brons], [False, False, False])
+
+        # altijd goud, zilver, brons voor aspiranten
+        uitslag = list()
+        for rank in range(4):
+            deelnemer = SimpleNamespace(rank=rank+1, toon_goud=False, toon_zilver=False, toon_brons=False)
+            uitslag.append(deelnemer)
+        # for
+        bepaal_medailles(uitslag, True)
+        self.assertEqual([uitslag[0].toon_goud, uitslag[0].toon_zilver, uitslag[0].toon_brons], [True, False, False])
+        self.assertEqual([uitslag[1].toon_goud, uitslag[1].toon_zilver, uitslag[1].toon_brons], [False, True, False])
+        self.assertEqual([uitslag[2].toon_goud, uitslag[2].toon_zilver, uitslag[2].toon_brons], [False, False, True])
+        self.assertEqual([uitslag[3].toon_goud, uitslag[3].toon_zilver, uitslag[3].toon_brons], [False, False, False])
+
 
 # end of file
