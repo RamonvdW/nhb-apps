@@ -16,6 +16,39 @@ from Plein.menu import menu_dynamics
 TEMPLATE_COMPREGIO_MEDAILLES = 'complaagregio/medailles.dtl'
 
 
+def bepaal_medailles(sub_uitslag):
+    aantal_medailles = 0
+    aantal = len(sub_uitslag)
+    # print('aantal: %s, sub_uitslag: %s' % (aantal, [deelnemer.rank for deelnemer in sub_uitslag]))
+
+    # tot 4 deelnemers: 1 medaille
+    # tot 8 deelnemers: 2 medailles
+    # vanaf 9 deelnemers: 3 medailles
+
+    # TODO: we tellen nu dubbele medaille kleuren mee in bovenstaande aantallen. Correct??
+
+    if aantal > 0:
+        for deelnemer in sub_uitslag:
+            if deelnemer.rank == 1:
+                deelnemer.toon_goud = True
+                aantal_medailles += 1
+        # for
+
+    if aantal >= 5 and aantal_medailles < 2:
+        for deelnemer in sub_uitslag:
+            if deelnemer.rank == 2:
+                deelnemer.toon_zilver = True
+                aantal_medailles += 1
+        # for
+
+    if aantal >= 9 and aantal_medailles < 3:
+        for deelnemer in sub_uitslag:
+            if deelnemer.rank == 3:
+                deelnemer.toon_brons = True
+                # aantal_medailles += 1
+        # for
+
+
 class ToonMedailles(UserPassesTestMixin, TemplateView):
 
     """ Met deze view kan een lijst van teams getoond worden, zowel landelijk, rayon als regio """
@@ -33,37 +66,6 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RCL
-
-    def bepaal_medailles(self, sub_uitslag):
-        aantal_medailles = 0
-        aantal = len(sub_uitslag)
-
-        # tot 4 deelnemers: 1 medaille
-        # tot 8 deelnemers: 2 medailles
-        # vanaf 9 deelnemers: 3 medailles
-
-        # TODO: we tellen nu dubbele medaille kleuren mee in bovenstaande aantallen. Correct??
-
-        if aantal > 0:
-            for deelnemer in sub_uitslag:
-                if deelnemer.rank == 1:
-                    deelnemer.toon_goud = True
-                    aantal_medailles += 1
-            # for
-
-        if aantal >= 5 and aantal_medailles < 2:
-            for deelnemer in sub_uitslag:
-                if deelnemer.rank == 2:
-                    deelnemer.toon_zilver = True
-                    aantal_medailles += 1
-            # for
-
-        if aantal >= 9 and aantal_medailles < 3:
-            for deelnemer in sub_uitslag:
-                if deelnemer.rank == 3:
-                    deelnemer.toon_brons = True
-                    # aantal_medailles += 1
-            # for
 
     def bepaal_uitslag(self, deelcomp, min_aantal_scores):
 
@@ -91,7 +93,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
 
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
-                self.bepaal_medailles(sub_uitslag)
+                bepaal_medailles(sub_uitslag)
 
                 deelnemer.is_eerste_groep = (klasse == -1)
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
@@ -130,7 +132,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                     uitslag.append(deelnemer)
         # for
 
-        self.bepaal_medailles(sub_uitslag)
+        bepaal_medailles(sub_uitslag)
 
         return uitslag
 
@@ -140,19 +142,22 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
 
         try:
             regio_nr = int(str(kwargs['regio'][:3]))       # afkappen voor de veiligheid
-            # TODO: filter op is_afgesloten=True zodat deze lijst niet te vroeg komt?
-            deelcomp = (DeelCompetitie
-                        .objects
-                        .select_related('competitie')
-                        .filter(competitie__afstand=self.functie_nu.comp_type,
-                                laag=LAAG_REGIO,
-                                nhb_regio__regio_nr=regio_nr)
-                        .order_by('competitie__begin_jaar'))[0]     # neem de oudste
-        except (ValueError, DeelCompetitie.DoesNotExist):
+            # niet nodig om te filteren op is_afgesloten=True
+            # want het kaartje wordt toch pas getoond bij is_afgesloten=True
+            deelcomps = (DeelCompetitie
+                         .objects
+                         .select_related('competitie')
+                         .filter(competitie__afstand=self.functie_nu.comp_type,
+                                 laag=LAAG_REGIO,
+                                 nhb_regio__regio_nr=regio_nr)
+                         .order_by('competitie__begin_jaar'))
+            if deelcomps.count() < 1:
+                raise Http404('Competitie niet gevonden')
+        except ValueError:
             raise Http404('Competitie niet gevonden')
 
         # elke RCL mag de medailles lijst van elke andere regio inzien, dus geen check hier
-        context['deelcomp'] = deelcomp
+        context['deelcomp'] = deelcomp = deelcomps[0]   # neem de oudste
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
