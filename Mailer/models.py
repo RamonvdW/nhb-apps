@@ -46,6 +46,8 @@ class MailQueue(models.Model):
                                         self.mail_subj)
         if self.is_verstuurd:
             msg = "(verstuurd) " + msg
+        elif self.is_blocked:
+            msg = "[BLOCKED] " + msg
         return msg
 
     class Meta:
