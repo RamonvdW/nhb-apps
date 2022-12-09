@@ -121,7 +121,7 @@
                                     <form action="{{ url_afrekenen }}" method="post">
                                         {% csrf_token %}
                                         <button class="btn-nhb-rood">
-                                            <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
+                                            <i class="material-icons-round left">shopping_cart_checkout</i>Betalen</button>
                                     </form>
                                 </td>
                                 <td><!-- bedragen --></td>
@@ -135,11 +135,25 @@
                         </tr>
 
                     {% endif %}
+
+
+                    {% if url_annuleren %}
+
+                        <tr>
+                            <td class="hide-on-small-only"></td>
+                            <td class="right-align">
+                                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_annuleer">
+                                    <i class="material-icons-round left">delete</i>Annuleer</a>
+                            </td>
+                        </tr>
+
+                    {% endif %}
+
+
                 {% endif %}
 
             </table>
         </div>
-
 
         <div class="col s12 l8 offset-l2" style="margin-top:30px">
             <table class="white">
@@ -160,14 +174,11 @@
 
     </div>
 
+
     {% if url_annuleren %}
 
-        <p style="margin-left:10px">
-            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_annuleer">Annuleren</a>
-        </p>
-
         <div class="modal" id="bevestig_annuleer">
-            <div class="modal-content center">
+            <div class="modal-content center black-text">
                 <h5>Bestelling annuleren?</h5>
                 <p>Weet je zeker dat je deze bestelling niet door wil laten gaan?</p>
                 <p>Gemaakte reserveringen voor wedstrijden / evenementen / producten vervallen.</p>
@@ -189,6 +200,7 @@
         </div>
 
     {% endif %}
+
 
 
     <!-- witruimte -->
