@@ -71,6 +71,7 @@ then
 fi
 
 FOCUS=""
+FOCUS_SPECIFIC_TEST=0
 if [ -z "$ARGS" ]
 then
     # no args = test all = remove database
@@ -81,6 +82,7 @@ else
     FOCUS1=""
     for arg in $ARGS;
     do
+        [[ "$arg" == *".tests."* ]] && FOCUS_SPECIFIC_TEST=1
         clean_focus=$(echo "$arg" | cut -d'.' -f1)
         FOCUS1="$clean_focus $FOCUS1"
     done
@@ -94,6 +96,8 @@ else
     [ ! -z "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 fi
+
+# echo "[DEBUG] FOCUS=$FOCUS, FOCUS_SPECIFIC_TEST=$FOCUS_SPECIFIC_TEST"
 
 if [ $KEEP_DB -eq 0 ]
 then
@@ -175,7 +179,7 @@ wait $PID_TAIL 2>/dev/null
 # launch log in editor
 [ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
 
-if [ $RES -eq 0 ] && [ "$FOCUS" != "" ]
+if [ $RES -eq 0 ] && [ "$FOCUS" != "" ] && [ $FOCUS_SPECIFIC_TEST -eq 0 ]
 then
     echo "[INFO] Discovering all management commands in $FOCUS"
     for cmd in $(python3 ./manage.py --help);
