@@ -15,7 +15,8 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_COMBI)
+                                WedstrijdInschrijving,
+                                WedstrijdKorting, WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_VERENIGING)
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
@@ -132,6 +133,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         korting = WedstrijdKorting(
                     geldig_tot_en_met=datum,
+                    soort=WEDSTRIJD_KORTING_VERENIGING,
                     uitgegeven_door=ver,
                     voor_vereniging=ver,
                     percentage=42)

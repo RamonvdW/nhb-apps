@@ -92,6 +92,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         product3 = WebwinkelProduct(
                         omslag_titel='Test titel 3',
                         sectie='x',
+                        eenheid='meervoud',
                         onbeperkte_voorraad=False,
                         aantal_op_voorraad=0)           # uitverkocht
         product3.save()

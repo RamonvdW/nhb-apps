@@ -24,7 +24,7 @@ from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD, WedstrijdLocatie,
-                                WedstrijdInschrijving, WedstrijdKorting,
+                                WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_VERENIGING,
                                 INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                 INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
 from decimal import Decimal
@@ -157,6 +157,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         korting = WedstrijdKorting(
                     geldig_tot_en_met=datum,
+                    soort=WEDSTRIJD_KORTING_VERENIGING,
                     uitgegeven_door=ver,
                     voor_vereniging=ver,
                     percentage=42)
@@ -175,6 +176,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                         omslag_titel='Test titel 1',
                         onbeperkte_voorraad=False,
                         aantal_op_voorraad=10,
+                        eenheid='meervoud',
                         bestel_begrenzing='1-5',
                         prijs_euro="1.23")
         product.save()
