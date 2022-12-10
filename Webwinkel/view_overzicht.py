@@ -44,8 +44,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                             .objects
                                             .exclude(mag_tonen=False)
                                             .select_related('omslag_foto')
-                                            .order_by('sectie',
-                                                      'volgorde'))
+                                            .order_by('volgorde'))
 
         prev_sectie = None
         for product in producten:
@@ -108,7 +107,10 @@ class ProductView(UserPassesTestMixin, TemplateView):
         context['product'] = product
 
         if product.eenheid:
-            aantal_enkel, aantal_meer = product.eenheid.split(',')
+            if ',' in product.eenheid:
+                aantal_enkel, aantal_meer = product.eenheid.split(',')
+            else:
+                aantal_enkel = aantal_meer = product.eenheid
         else:
             aantal_enkel = aantal_meer = 'stuks'
 

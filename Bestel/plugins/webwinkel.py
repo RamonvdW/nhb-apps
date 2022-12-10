@@ -106,7 +106,10 @@ def webwinkel_plugin_beschrijf_product(keuze):
     beschrijving.append(tup)
 
     if product.eenheid:
-        aantal_enkel, aantal_meer = product.eenheid.split(',')
+        if ',' in product.eenheid:
+            aantal_enkel, aantal_meer = product.eenheid.split(',')
+        else:
+            aantal_enkel = aantal_meer = product.eenheid
     else:
         aantal_enkel = aantal_meer = 'stuks'
 
