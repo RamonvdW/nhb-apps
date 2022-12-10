@@ -18,8 +18,11 @@ class WebwinkelProductAdmin(admin.ModelAdmin):
 
     filter_horizontal = ('fotos',)
 
+    ordering = ('volgorde',)
+
 
 class WebwinkelKeuzeAdmin(admin.ModelAdmin):
+
     list_filter = ('status',)
 
 

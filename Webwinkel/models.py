@@ -128,7 +128,7 @@ class WebwinkelProduct(models.Model):
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
-        return "[%s] %s" % (self.pk, self.omslag_titel)
+        return "[%s] %s" % (self.volgorde, self.omslag_titel)
 
     class Meta:
         verbose_name = "Webwinkel product"
