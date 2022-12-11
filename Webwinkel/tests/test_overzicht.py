@@ -72,6 +72,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         product = WebwinkelProduct(
                         omslag_titel='Test titel 1',
+                        volgorde=1,
                         onbeperkte_voorraad=True,
                         omslag_foto=foto,
                         bestel_begrenzing='',
@@ -81,6 +82,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         product2 = WebwinkelProduct(
                         omslag_titel='Test titel 2',
+                        volgorde=2,
                         onbeperkte_voorraad=False,
                         aantal_op_voorraad=10,
                         eenheid='doos,dozen',
@@ -91,6 +93,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         product3 = WebwinkelProduct(
                         omslag_titel='Test titel 3',
+                        volgorde=3,
                         sectie='x',
                         eenheid='meervoud',
                         onbeperkte_voorraad=False,
