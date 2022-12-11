@@ -12,7 +12,6 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.utils.timezone import get_default_timezone
-from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db.models import Count
 from django.db import transaction
@@ -27,7 +26,7 @@ from Bestel.models import (BestelProduct, BestelMandje,
                            BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                            BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
                            BESTEL_MUTATIE_ANNULEER)
-from Bestel.plugins.product_info import beschrijf_product
+from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
@@ -76,13 +75,12 @@ def _beschrijf_bestelling(bestelling):
         product.regel_nr = regel_nr
         product.beschrijving = beschrijf_product(product)
 
-        if product.wedstrijd_inschrijving and product.wedstrijd_inschrijving.korting:
+        if product.wedstrijd_inschrijving:
             korting = product.wedstrijd_inschrijving.korting
-            product.korting = "Korting: %d%%" % korting.percentage
-
-            if korting.soort == WEDSTRIJD_KORTING_COMBI:
-                combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-                product.combi_reden = " en ".join(combi_redenen)
+            if korting:
+                product.gebruikte_korting_str, combi_redenen = beschrijf_korting(product)
+                if korting.soort == WEDSTRIJD_KORTING_COMBI:
+                    product.combi_reden = " en ".join(combi_redenen)
     # for
 
     producten = list(producten)
@@ -582,8 +580,6 @@ class Command(BaseCommand):
                     except KeyError:
                         ontvanger2producten[ontvanger_ver_nr] = [product]
             # for
-
-            to_tz = get_default_timezone()
 
             nieuwe_bestellingen = list()
             for ver_nr, producten in ontvanger2producten.items():

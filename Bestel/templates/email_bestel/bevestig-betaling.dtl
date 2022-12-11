@@ -26,7 +26,7 @@
         {% if product.korting_euro > 0.001 %}
             |    Verkregen korting: {{ product.gebruikte_korting_str }}
             {% if product.combi_reden %}
-                |    (combinatie korting voor {{ product.combi_reden }}
+                |    (combinatie korting voor {{ product.combi_reden }})
             {% endif %}
         {% endif %}
 
@@ -108,11 +108,9 @@
                 <tr>
                     <td></td>
                     <td>Verkregen korting:<br>
-                        {% if product.korting %}
-                            <span>{{ product.gebruikte_korting_str }}</span><br>
-                        {% endif %}
+                        <span>{{ product.gebruikte_korting_str }}</span><br>
                         {% if product.combi_reden %}
-                            <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
+                            <span>(combinatie korting voor {{ product.combi_reden }})</span><br>
                         {% endif %}
                     </td>
 

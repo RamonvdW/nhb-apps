@@ -492,16 +492,14 @@ def wedstrijden_beschrijf_korting(inschrijving):
         korting = inschrijving.korting
 
         if korting.soort == WEDSTRIJD_KORTING_SPORTER:
-            korting_str = "Persoonlijke korting"
+            korting_str = "Persoonlijke korting: %d%%" % korting.percentage
 
         elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
-            korting_str = "Verenigingskorting"
+            korting_str = "Verenigingskorting: %d%%" % korting.percentage
 
         elif korting.soort == WEDSTRIJD_KORTING_COMBI:              # pragma: no branch
-            korting_str = "Combinatiekorting"
+            korting_str = "Combinatiekorting: %d%%" % korting.percentage
             korting_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-
-        korting_str += ": %d%%" % korting.percentage
 
     return korting_str, korting_redenen
 
