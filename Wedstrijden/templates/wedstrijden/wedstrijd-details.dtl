@@ -167,7 +167,7 @@
                 </tr>
             </table>
 
-            {% if kan_aanmelden %}
+            {% if toon_sessies %}
 
                 <ul id="sessies" class="collapsible expandable z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
                     <li>
