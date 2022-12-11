@@ -98,7 +98,7 @@ class OpleidingMoment(models.Model):
     duur_minuten = models.PositiveIntegerField(default=1)
 
     # waar moeten de deelnemers heen
-    locatie = models.ForeignKey(WedstrijdLocatie, on_delete = models.PROTECT, blank=True, null=True)
+    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT, blank=True, null=True)
 
     # naam en contactgegevens van de opleider
     opleider_naam = models.CharField(max_length=150, default='')

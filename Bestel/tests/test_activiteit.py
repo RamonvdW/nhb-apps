@@ -60,7 +60,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
                     kvk_nummer='KvK1234',
                     website='www.bb.not',
                     contact_email='info@bb.not',
-                    telefoonnummer = '12345678')
+                    telefoonnummer='12345678')
         ver.save()
 
         instellingen = BetaalInstellingenVereniging(
@@ -196,7 +196,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
     def _maak_bestellingen(self):
         bestel = Bestelling(
                     bestel_nr=1234567,
-                    #account=       # van wie is deze bestelling
+                    # account=       # van wie is deze bestelling
                     ontvanger=self.instellingen,
                     verkoper_naam='Test',
                     verkoper_adres1='Adres1',

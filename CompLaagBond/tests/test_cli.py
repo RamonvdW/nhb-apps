@@ -37,7 +37,7 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
                                               nhb_rayon__rayon_nr=3)
 
         team_klasse = CompetitieTeamKlasse.objects.filter(competitie=comp_25,
-                                                     is_voor_teams_rk_bk=True).all()[0]
+                                                          is_voor_teams_rk_bk=True).all()[0]
 
         indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=comp_25,
                                                             is_voor_rk_bk=True).all()[0]

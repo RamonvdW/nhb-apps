@@ -211,5 +211,4 @@ def bestel_overboeking_ontvangen(bestelling, bedrag, snel=False):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-
 # end of file

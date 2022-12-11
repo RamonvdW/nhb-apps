@@ -140,8 +140,6 @@ class Command(BaseCommand):
 
                     if do_save:
                         deelnemer.save(update_fields=['indiv_klasse'])
-
-
         # for
 
 # end of file
