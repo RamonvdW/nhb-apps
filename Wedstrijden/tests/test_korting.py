@@ -172,8 +172,6 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
 
         korting_ver = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_VERENIGING)
         self.assertEqual(korting_ver.uitgegeven_door, self.nhbver1)
-        korting_ver.voor_vereniging = self.nhbver1
-        korting_ver.save(update_fields=['voor_vereniging'])
         korting_ver.voor_wedstrijden.add(self.wedstrijd2)
 
         korting_combi = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_COMBI)
