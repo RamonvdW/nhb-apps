@@ -69,7 +69,6 @@ class KortingenView(UserPassesTestMixin, TemplateView):
             elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
                 korting.icon_name = 'home'
                 korting.voor_wie_str = 'Leden van vereniging %s' % ver.ver_nr
-                korting.voor_vereniging = ver
 
             elif korting.soort == WEDSTRIJD_KORTING_COMBI:       # pragma: no branch
                 korting.icon_name = 'join_full'
@@ -144,7 +143,6 @@ class KiesNieuweKortingView(UserPassesTestMixin, View):
             korting.soort = WEDSTRIJD_KORTING_SPORTER
         elif keuze == 'vereniging':
             korting.soort = WEDSTRIJD_KORTING_VERENIGING
-            korting.voor_vereniging = ver
         elif keuze == 'combi':
             korting.soort = WEDSTRIJD_KORTING_COMBI
         else:
@@ -185,8 +183,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
             korting_pk = int(korting_pk)
             korting = (WedstrijdKorting
                        .objects
-                       .select_related('voor_vereniging',
-                                       'voor_sporter')
+                       .select_related('voor_sporter')
                        .get(pk=korting_pk,
                             uitgegeven_door=ver))
         except (ValueError, TypeError, WedstrijdKorting.DoesNotExist):
@@ -196,18 +193,17 @@ class WijzigKortingView(UserPassesTestMixin, View):
 
         if korting.soort == WEDSTRIJD_KORTING_SPORTER:
             template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_SPORTER
+            context['voor_sporter_str'] = korting.voor_sporter.lid_nr_en_volledige_naam()
+
         elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
             template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_VERENIGING
-        elif korting.soort == WEDSTRIJD_KORTING_COMBI:                           # pragma: no branch
-            template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_COMBI
-        else:                                                                   # pragma: no cover
-            raise Http404('Niet ondersteund')
-
-        if korting.voor_vereniging:
             context['check_ver'] = True
 
-        if korting.voor_sporter:
-            context['voor_sporter_str'] = korting.voor_sporter.lid_nr_en_volledige_naam()
+        elif korting.soort == WEDSTRIJD_KORTING_COMBI:                           # pragma: no branch
+            template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_COMBI
+
+        else:                                                                   # pragma: no cover
+            raise Http404('Niet ondersteund')
 
         gekozen_pks = list(korting.voor_wedstrijden.all().values_list('pk', flat=True))
 

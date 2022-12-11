@@ -160,7 +160,6 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                     geldig_tot_en_met=datum,
                     soort=WEDSTRIJD_KORTING_VERENIGING,
                     uitgegeven_door=ver,
-                    voor_vereniging=ver,
                     percentage=42)
         korting.save()
         korting.voor_wedstrijden.add(wedstrijd)

@@ -111,8 +111,7 @@ class BepaalAutomatischeKorting(object):
         for korting in (WedstrijdKorting
                         .objects
                         .filter(uitgegeven_door__ver_nr__in=self._org_ver_nrs)
-                        .select_related('voor_sporter',
-                                        'voor_vereniging')
+                        .select_related('voor_sporter')
                         .prefetch_related('voor_wedstrijden')):
 
             # kijk of deze korting van toepassing is op het mandje
@@ -138,9 +137,9 @@ class BepaalAutomatischeKorting(object):
                             # self._stdout.write('    gevonden inschrijving: %s' % inschrijving)
                             inschrijving.mogelijke_kortingen.append(korting)
 
-            elif korting.soort == WEDSTRIJD_KORTING_VERENIGING and korting.voor_vereniging:
+            elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
                 # kijk of deze korting van toepassing is op het mandje
-                target_ver_nr = korting.voor_vereniging.ver_nr
+                target_ver_nr = korting.uitgegeven_door.ver_nr
                 for lid_nr in lid_nrs_in_mandje:
                     if self._lid_nr2ver_nr[lid_nr] == target_ver_nr:
                         # inschrijving voor sporter van de bedoelde vereniging is aanwezig in het mandje

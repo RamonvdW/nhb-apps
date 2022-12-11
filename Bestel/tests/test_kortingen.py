@@ -216,7 +216,6 @@ class TestBestelKortingen(E2EHelpers, TestCase):
                             geldig_tot_en_met=datum,
                             soort=WEDSTRIJD_KORTING_VERENIGING,
                             uitgegeven_door=self.ver,
-                            voor_vereniging=self.ver,
                             percentage=42)
         ver_korting.save()
         ver_korting.voor_wedstrijden.add(self.wedstrijd2)
@@ -265,8 +264,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         ver2_korting = WedstrijdKorting(
                             geldig_tot_en_met=datum,
                             soort=WEDSTRIJD_KORTING_VERENIGING,
-                            uitgegeven_door=self.ver,
-                            voor_vereniging=self.ver2,       # TODO: is dit mogelijk?
+                            uitgegeven_door=self.ver2,
                             percentage=42)
         ver2_korting.save()
 
