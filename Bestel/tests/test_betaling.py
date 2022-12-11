@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.models import BestelMandje, Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING
-from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond
+from Bestel.models import BestelMandje, Bestelling, BESTELLING_STATUS_AFGEROND
+from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Mailer.models import MailQueue
@@ -164,8 +164,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         url_betaling_gedaan = '/plein/'     # TODO: betere url kiezen
         description = 'Test betaling 421'       # 421 = paid, iDEAL
         betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal, url_betaling_gedaan, snel=True)
-        f1, f2 = self.verwerk_betaal_mutaties(self.url_websim_api)
-        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.verwerk_betaal_mutaties(self.url_websim_api)
 
         # check dat de transactie inderdaad opgestart is
         bestelling = Bestelling.objects.select_related('betaal_mutatie', 'betaal_actief').get(pk=bestelling.pk)

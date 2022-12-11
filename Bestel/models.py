@@ -87,13 +87,15 @@ class BestelProduct(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
+        msg = "[%s] " % self.pk
+
         if self.wedstrijd_inschrijving:
-            msg = str(self.wedstrijd_inschrijving)
+            msg += str(self.wedstrijd_inschrijving)
         elif self.webwinkel_keuze:
-            msg = str(self.webwinkel_keuze)
+            msg += str(self.webwinkel_keuze)
         else:
             # TODO: andere producten
-            msg = '?'
+            msg += '?'
 
         msg += ' %s' % self.prijs_euro
         if self.korting_euro > 0.0001:

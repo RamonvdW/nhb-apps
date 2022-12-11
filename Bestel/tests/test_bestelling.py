@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from django.conf import settings
 from django.utils import timezone
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIE_IFAA
 from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
                            BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
                            BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
@@ -25,6 +25,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD, WedstrijdLocatie,
                                 WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_VERENIGING,
+                                WEDSTRIJD_KORTING_SPORTER,
                                 INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                 INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
 from decimal import Decimal
@@ -491,6 +492,40 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
         f1, f2 = self.verwerk_bestel_mutaties(show_warnings=False)
         self.assertTrue('wacht niet op een betaling (status=' in f2.getvalue())
+
+    def test_kortingen_lid(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        self.wedstrijd.organisatie = ORGANISATIE_IFAA
+        self.wedstrijd.save(update_fields=['organisatie'])
+
+        # bestel wedstrijddeelname met korting
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        # korting wordt automatisch toegepast
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+
+        bestelling = Bestelling.objects.all()[0]
+
+        # fake de korting: persoonlijk
+        product = bestelling.producten.all()[0]
+        inschrijving = product.wedstrijd_inschrijving
+        korting = inschrijving.korting
+        korting.soort = WEDSTRIJD_KORTING_SPORTER
+        korting.save(update_fields=['soort'])
+
+        # haal de details op
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
 
     def test_opnieuw_afrekenen(self):
         self.e2e_login_and_pass_otp(self.account_admin)
