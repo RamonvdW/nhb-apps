@@ -25,4 +25,7 @@ google-api-python-client
 # collecting payment service provide
 mollie-api-python
 
+# voor bondspas plaatje maken
+pillow
+
 # end of file

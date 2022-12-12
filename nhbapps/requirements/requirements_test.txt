@@ -64,7 +64,9 @@ oauthlib==3.2.2
 openpyxl==3.0.10
     # via -r requirements.txt
 pillow==9.3.0
-    # via reportlab
+    # via
+    #   -r requirements.txt
+    #   reportlab
 protobuf==4.21.11
     # via
     #   -r requirements.txt

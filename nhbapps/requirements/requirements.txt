@@ -42,6 +42,8 @@ oauthlib==3.2.2
     # via requests-oauthlib
 openpyxl==3.0.10
     # via -r requirements.in
+pillow==9.3.0
+    # via -r requirements.in
 protobuf==4.21.11
     # via
     #   google-api-core
