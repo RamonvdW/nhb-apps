@@ -224,7 +224,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     # het grijze kader waarin de tekst moet komen
     # coördinaten: (0,0) = top-left
     _, _, width, height = image.getbbox()
-    kader_y1 = 510          # bovenkant
+    kader_y1 = 440          # bovenkant
     kader_y2 = 1115         # onderkant
     kader_x1 = 0            # border is 2 pixels
     kader_x2 = width
