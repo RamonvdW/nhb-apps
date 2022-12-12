@@ -47,7 +47,7 @@ def validate_geboorte_datum(datum):
 def validate_sinds_datum(datum):
     """ controleer of de sinds_datum redelijk is
         wordt alleen aangeroepen om de input op een formulier te checken
-        datum: moet datetime.date() zijn, dus is al een gevalideerde jaar/maand/dag combinatie
+        datum: moet datetime.date() zijn, dus is de combinatie jaar/maand/dag al gecontroleerd
                mag niet in de toekomst liggen
                moet 5 jaar ná het geboortejaar liggen --> geen toegang tot deze info hier
         raises ValidationError als de datum niet goed is
@@ -64,6 +64,9 @@ class Sporter(models.Model):
 
     # het unieke lidmaatschapsnummer
     lid_nr = models.PositiveIntegerField(primary_key=True)
+
+    # World Archery nummer van deze sporter
+    wa_id = models.CharField(max_length=8, default='', blank=True)
 
     # volledige naam
     # let op: voornaam kan ook een afkorting zijn
@@ -117,6 +120,14 @@ class Sporter(models.Model):
 
     # koppeling met een account (indien aangemaakt)
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
+
+    # het postadres van deze sporter
+    postadres_1 = models.CharField(max_length=100, default='', blank=True)
+    postadres_2 = models.CharField(max_length=100, default='', blank=True)
+    postadres_3 = models.CharField(max_length=100, default='', blank=True)
+
+    # is dit een erelid (voor vermelding op de bondspas)
+    is_erelid = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -179,29 +190,12 @@ class Sporter(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class Secretaris(models.Model):
-
-    """ de secretaris van een vereniging """
-
-    # deze constructie voorkomt een circulaire dependency
-
-    # FUTURE: dit record is dupe met Functie SEC? (gekoppeld aan Account)
-
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE)
-
-    sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name_plural = verbose_name = "Secretaris Vereniging"
-
-    def __str__(self):
-        return "[%s] %s: %s" % (self.vereniging.ver_nr, self.vereniging.naam, self.sporter)
-
-
 class Speelsterkte(models.Model):
     """ Deze tabel houdt de behaalde spelden/veren/schilden bij """
 
+    # TODO: verminder duplicatie door BasisType speelsterkte aan te maken
+
+    # welke sporter heeft deze speelsterkte behaald?
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE)
 
     datum = models.DateField()
@@ -217,7 +211,10 @@ class Speelsterkte(models.Model):
     # sommige spelden zijn apart te behalen in verschillende categorieën
     category = models.CharField(max_length=50)
 
-    # sorteer volgorde (lager = eerder tonen)
+    # afkorting om te tonen op de bondspas
+    pas_code = models.CharField(max_length=8, default='', blank=True)
+
+    # sorteervolgorde (lager = eerder tonen)
     volgorde = models.PositiveSmallIntegerField()
 
     class Meta:
@@ -274,7 +271,7 @@ class SporterVoorkeuren(models.Model):
 
 class SporterBoog(models.Model):
     """ Sporter met een specifiek type boog en zijn voorkeuren
-        voor elk type boog waar de sporter interesse in heeft is er een record
+        er is een record voor elk type boog
     """
     sporter = models.ForeignKey(Sporter, on_delete=models.CASCADE, null=True)
 
@@ -294,13 +291,15 @@ class SporterBoog(models.Model):
 
         ordering = ['sporter__lid_nr', 'boogtype__volgorde']
 
+        unique_together = ('sporter', 'boogtype')
+
         indexes = [
             # ondersteuning voor filteren op voor_wedstrijd=True
             models.Index(fields=['voor_wedstrijd'])
         ]
 
     def __str__(self):
-        # voorkom exceptie als nhblid op None staat
+        # voorkom exceptie als sporter op None staat
         if self.sporter:
             return "%s - %s" % (self.sporter.lid_nr, self.boogtype.beschrijving)
         else:

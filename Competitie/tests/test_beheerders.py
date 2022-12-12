@@ -65,7 +65,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver = ver
 
@@ -104,7 +103,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         ver.naam = "Kleine Club"
         ver.ver_nr = "1100"
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver2 = ver
 
@@ -113,10 +111,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         hwl.nhb_ver = ver
         hwl.save()
 
-    def _doe_inschrijven(self, comp):
-
-        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/' % comp.pk
-
+    def _zet_competities_naar_fase_b(self):
         # meld een bak leden aan voor de competitie
         self.e2e_wisselnaarrol_bb()
 
@@ -135,6 +130,67 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             zet_competitie_fase(comp, 'B')
         # for
 
+    def _maak_leden_met_voorkeuren(self):
+        lid_nr = 110000
+        do_barebow = True
+
+        # doorloop de 2 verenigingen in deze regio
+        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101):
+            # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
+            functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
+            self.e2e_wissel_naar_functie(functie_hwl)
+
+            # maak 3 leden aan
+            for lp in range(3):
+                lid_nr += 1
+                sporter = Sporter()
+                sporter.lid_nr = lid_nr
+                sporter.voornaam = "Lid %s" % lid_nr
+                sporter.achternaam = "de Tester"
+                sporter.bij_vereniging = nhb_ver
+                sporter.is_actief_lid = True
+                if do_barebow:
+                    sporter.geboorte_datum = datetime.date(2019 - 12, 1, 1)  # aspirant
+                else:
+                    sporter.geboorte_datum = datetime.date(2000, 1, 1)  # senior
+                sporter.sinds_datum = datetime.date(2010, 1, 1)
+                sporter.geslacht = 'M'
+                sporter.save()
+
+                # haal de sporter voorkeuren op, zodat de sporterboog records aangemaakt worden
+                url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
+                with self.assert_max_queries(20):
+                    resp = self.client.get(url_voorkeuren)
+                self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+                # zet de recurve boog aan
+                if lp == 1:
+                    # zet de voorkeur voor eigen blazoen aan voor een paar sporters
+                    with self.assert_max_queries(25):
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                                 'schiet_R': 'on',
+                                                                 'voorkeur_eigen_blazoen': 'on'})
+                elif lp == 2:
+                    with self.assert_max_queries(25):
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                                 'schiet_C': 'on'})
+                elif do_barebow:
+                    with self.assert_max_queries(25):
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                                 'schiet_BB': 'on'})
+                    do_barebow = False
+                else:
+                    with self.assert_max_queries(25):
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                                 'schiet_R': 'on'})
+
+                self.assert_is_redirect_not_plein(resp)  # check for success
+            # for
+        # for
+
+    def _doe_inschrijven(self, comp):
+        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/' % comp.pk
+
         lid_nr = 110000
         recurve_boog_pk = BoogType.objects.get(afkorting='R').pk
         compound_boog_pk = BoogType.objects.get(afkorting='C').pk
@@ -151,54 +207,19 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             # maak 3 leden aan
             for lp in range(3):
                 lid_nr += 1
-                sporter = Sporter()
-                sporter.lid_nr = lid_nr
-                sporter.voornaam = "Lid %s" % lid_nr
-                sporter.achternaam = "de Tester"
-                sporter.bij_vereniging = nhb_ver
-                sporter.is_actief_lid = True
-                if barebow_boog_pk:
-                    sporter.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
-                else:
-                    sporter.geboorte_datum = datetime.date(2000, 1, 1)      # senior
-                sporter.sinds_datum = datetime.date(2010, 1, 1)
-                sporter.geslacht = 'M'
-                sporter.save()
-
-                # haal de sporter voorkeuren op, zodat de sporterboog records aangemaakt worden
-                url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
-                with self.assert_max_queries(20):
-                    resp = self.client.get(url_voorkeuren)
-                self.assertEqual(resp.status_code, 200)     # 200 = OK
 
                 # zet de recurve boog aan
                 if lp == 1:
-                    # zet de voorkeur voor eigen blazoen aan voor een paar sporters
-                    with self.assert_max_queries(25):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on',
-                                                                 'voorkeur_eigen_blazoen': 'on'})
                     # onthoud deze sporterboog om straks in bulk aan te melden
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
-                    with self.assert_max_queries(25):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_C': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
-                    with self.assert_max_queries(25):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
-                    with self.assert_max_queries(25):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
-
-                self.assert_is_redirect_not_plein(resp)         # check for success
             # for
 
             # schrijf in voor de competitie
@@ -230,8 +251,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
+        self._zet_competities_naar_fase_b()
+        self._maak_leden_met_voorkeuren()
         self._doe_inschrijven(comp18)         # wisselt naar HWL rol
-        # self._doe_inschrijven(comp25)         # wisselt naar HWL rol
+        self._doe_inschrijven(comp25)         # wisselt naar HWL rol
 
         # BB
         self.e2e_wisselnaarrol_bb()

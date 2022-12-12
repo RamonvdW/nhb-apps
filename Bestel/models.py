@@ -7,6 +7,7 @@
 from django.db import models
 from Account.models import Account
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
+from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
 
@@ -18,12 +19,14 @@ BESTELLING_STATUS_NIEUW = 'N'
 BESTELLING_STATUS_WACHT_OP_BETALING = 'B'
 BESTELLING_STATUS_AFGEROND = 'A'
 BESTELLING_STATUS_MISLUKT = 'F'
+BESTELLING_STATUS_GEANNULEERD = 'G'
 
 BESTELLING_STATUS_CHOICES = (
     (BESTELLING_STATUS_NIEUW, 'Nieuw'),
     (BESTELLING_STATUS_WACHT_OP_BETALING, 'Te betalen'),
     (BESTELLING_STATUS_AFGEROND, 'Afgerond'),
-    (BESTELLING_STATUS_MISLUKT, 'Mislukt')
+    (BESTELLING_STATUS_MISLUKT, 'Mislukt'),
+    (BESTELLING_STATUS_GEANNULEERD, 'Geannuleerd')
 )
 
 BESTELLING_STATUS2STR = {
@@ -31,6 +34,7 @@ BESTELLING_STATUS2STR = {
     BESTELLING_STATUS_WACHT_OP_BETALING: 'Te betalen',
     BESTELLING_STATUS_AFGEROND: 'Afgerond',
     BESTELLING_STATUS_MISLUKT: 'Mislukt',
+    BESTELLING_STATUS_GEANNULEERD: 'Geannuleerd',
 }
 
 
@@ -41,15 +45,19 @@ BESTEL_MUTATIE_BETALING_AFGEROND = 4            # betaling is afgerond (gelukt o
 BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 5           # afmelden (na betaling)
 BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN = 6        # overboeking ontvangen
 BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
+BESTEL_MUTATIE_WEBWINKEL_KEUZE = 8              # keuze uit webwinkel
+BESTEL_MUTATIE_ANNULEER = 9                     # annuleer een bestelling
 
 BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
+    BESTEL_MUTATIE_WEBWINKEL_KEUZE: "Webwinkel keuze",
     BESTEL_MUTATIE_VERWIJDER: "Product verwijderen uit mandje",
     BESTEL_MUTATIE_MAAK_BESTELLINGEN: "Mandje omzetten in bestelling(en)",
     BESTEL_MUTATIE_BETALING_AFGEROND: "Betaling afgerond",
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
     BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN: "Overboeking ontvangen",
     BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",
+    BESTEL_MUTATIE_ANNULEER: "Annuleer bestelling"
 }
 
 
@@ -62,7 +70,10 @@ class BestelProduct(models.Model):
     # inschrijving voor een wedstrijd
     wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # FUTURE: andere mogelijke regels in dit mandje
+    # keuze in de webwinkel
+    webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # FUTURE: andere mogelijke producten (opleiding)
 
     # prijs van deze regel (een positief bedrag)
     prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
@@ -70,15 +81,21 @@ class BestelProduct(models.Model):
     # de korting op deze regel (ook een positief bedrag!)
     korting_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
-    # TODO: afmelding + gedeeltelijke terugstorting bijhouden
+    # TODO: gedeeltelijke terugstorting bijhouden
+
+    # TODO: traceer gestuurde e-mails (voor sturen herinnering)
 
     def __str__(self):
         """ beschrijving voor de admin interface """
+        msg = "[%s] " % self.pk
+
         if self.wedstrijd_inschrijving:
-            msg = str(self.wedstrijd_inschrijving)
+            msg += str(self.wedstrijd_inschrijving)
+        elif self.webwinkel_keuze:
+            msg += str(self.webwinkel_keuze)
         else:
             # TODO: andere producten
-            msg = '?'
+            msg += '?'
 
         msg += ' %s' % self.prijs_euro
         if self.korting_euro > 0.0001:
@@ -89,6 +106,8 @@ class BestelProduct(models.Model):
     def korte_beschrijving(self):
         if self.wedstrijd_inschrijving:
             return self.wedstrijd_inschrijving.korte_beschrijving()
+        if self.webwinkel_keuze:
+            return self.webwinkel_keuze.korte_beschrijving()
         return "?"
 
     class Meta:
@@ -109,8 +128,20 @@ class BestelMandje(models.Model):
     # de gekozen producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 
+    # verzendkosten
+    verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
+
+    # belasting in verschillende categorieën: leeg = niet gebruikt
+    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat2 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat3 = models.CharField(max_length=5, default='', blank=True)
+
+    btw_euro_cat1 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat2 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat3 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+
     # het af te rekenen totaalbedrag
-    totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))       # max 99999,99
+    totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))           # max 99999,99
 
     def bepaal_totaalprijs_opnieuw(self):
         """ Bepaal het totaal_euro veld opnieuw, gebaseerd op alles wat in het mandje ligt
@@ -122,6 +153,10 @@ class BestelMandje(models.Model):
             self.totaal_euro += product.prijs_euro
             self.totaal_euro -= product.korting_euro
         # for
+        self.totaal_euro += self.verzendkosten_euro
+        self.totaal_euro += self.btw_euro_cat1
+        self.totaal_euro += self.btw_euro_cat2
+        self.totaal_euro += self.btw_euro_cat3
         self.save(update_fields=['totaal_euro'])
 
     def __str__(self):
@@ -168,6 +203,18 @@ class Bestelling(models.Model):
 
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
+
+    # verzendkosten
+    verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
+
+    # belasting in verschillende categorieën: leeg = niet gebruikt
+    btw_percentage_cat1 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat2 = models.CharField(max_length=5, default='', blank=True)
+    btw_percentage_cat3 = models.CharField(max_length=5, default='', blank=True)
+
+    btw_euro_cat1 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat2 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
+    btw_euro_cat3 = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))         # max 9999,99
 
     # het af te rekenen totaalbedrag
     totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))       # max 99999,99
@@ -228,20 +275,24 @@ class BestelMutatie(models.Model):
     # is deze mutatie al verwerkt?
     is_verwerkt = models.BooleanField(default=False)
 
-    # BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN      account(=mandje), inschrijving
+    # BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN      account(=mandje), wedstrijd_inschrijving
+    # BESTEL_MUTATIE_WEBWINKEL_KEUZE            account(=mandje), webwinkel_keuze
     # BESTEL_MUTATIE_VERWIJDER:                 account(=mandje), product
-    # BESTEL_MUTATIE_KORTING:                   account(=mandje), korting
     # BESTEL_MUTATIE_MAAK_BESTELLING:           account(=mandje)
     # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
-    # BESTEL_MUTATIE_BETALING_ONTVANGEN:        bestelling, betaling_is_gelukt
+    # BESTEL_MUTATIE_BETALING_AFGEROND:         bestelling, betaling_is_gelukt
     # BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
     # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
+    # BESTEL_MUTATIE_ANNULEER:                  bestelling
 
-    # wiens mandje moet omgezet worden?
+    # mandje van dit account
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # de kalender inschrijving
+    # de wedstrijd inschrijving
     wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # de webwinkel keuze
+    webwinkel_keuze = models.ForeignKey(WebwinkelKeuze, on_delete=models.SET_NULL, null=True, blank=True)
 
     # het product waar deze mutatie betrekking op heeft
     product = models.ForeignKey(BestelProduct, on_delete=models.SET_NULL, null=True, blank=True)

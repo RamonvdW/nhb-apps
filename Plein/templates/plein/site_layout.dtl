@@ -30,7 +30,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-108.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-118.css' %}">
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -134,9 +134,7 @@
                     {% if kruimels %}
                         <a class="broodkruimels-link" href="{% url 'Plein:plein' %}">Plein</a>
                         {% for url, kruimel in kruimels %}
-                            <!-- <span style="font-size:11px">&#12297;</span> -->
-                            <!-- <span class="material-icons-round" style="font-size:11px; margin-right:5px">arrow_forward_ios</span> -->
-                            <span style="margin-right:5px; font-weight:800">&gt;</span>
+                            <span class="nhb-blauw-text" style="margin-right:5px; font-weight:800">&rsaquo;</span>
                             {% if not url %}
                                 <span class="broodkruimels-nolink">{{ kruimel }}</span>
                             {% else %}
@@ -151,7 +149,7 @@
             {% block pagina %}{% endblock %}
         </div>
 
-        <script src="{% static 'materialize-new-10_min.js' %}"></script>
+        <script src="{% static 'materialize-new-11_min.js' %}"></script>
         <script src="{% static 'site_layout-9_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->

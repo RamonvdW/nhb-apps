@@ -7,6 +7,7 @@
 from django.contrib import admin
 from django.db.models import F
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from BasisTypen.models import TeamType
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO, LAAG_RK,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
@@ -98,7 +99,7 @@ class TeamAGListFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'Ontbreekt':
+        if self.value() == 'Ontbreekt':     # pragma: no cover
             queryset = queryset.filter(deelcompetitie__regio_organiseert_teamcompetitie=True,
                                        inschrijf_voorkeur_team=True,
                                        ag_voor_team_mag_aangepast_worden=True,
@@ -119,9 +120,9 @@ class ZelfstandigIngeschrevenListFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'Zelf':
+        if self.value() == 'Zelf':      # pragma: no cover
             queryset = queryset.filter(sporterboog__sporter__account=F('aangemeld_door'))
-        if self.value() == 'HWL':
+        if self.value() == 'HWL':       # pragma: no cover
             queryset = queryset.exclude(sporterboog__sporter__account=F('aangemeld_door'))
         return queryset
 
@@ -243,12 +244,32 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
+class TeamTypeFilter(admin.SimpleListFilter):
+
+    title = 'Team type'
+
+    parameter_name = 'TeamType'
+
+    def lookups(self, request, model_admin):
+        tups = list()
+        for team_type in TeamType.objects.all():
+            tups.append((team_type.afkorting, team_type.beschrijving))
+        # for
+        return tups
+
+    def queryset(self, request, queryset):
+        if self.value():                # pragma: no cover
+            queryset = queryset.filter(team_type__afkorting=self.value())
+        return queryset
+
+
 class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('gekoppelde_schutters',)
 
     list_filter = ('deelcompetitie__competitie',
-                   'vereniging__regio',)
+                   'vereniging__regio',
+                   TeamTypeFilter)
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_regio',
@@ -525,6 +546,25 @@ class CompetitieMutatieAdmin(CreateOnlyAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class RondeTeamTypeFilter(admin.SimpleListFilter):
+
+    title = 'Team type'
+
+    parameter_name = 'RondeTeamType'
+
+    def lookups(self, request, model_admin):
+        tups = list()
+        for team_type in TeamType.objects.all():
+            tups.append((team_type.afkorting, team_type.beschrijving))
+        # for
+        return tups
+
+    def queryset(self, request, queryset):
+        if self.value():                # pragma: no cover
+            queryset = queryset.filter(team__team_type__afkorting=self.value())
+        return queryset
+
+
 class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('deelnemers_geselecteerd', 'deelnemers_feitelijk')
@@ -533,6 +573,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
     list_filter = ('team__deelcompetitie__competitie',
                    'team__vereniging__regio',
+                   RondeTeamTypeFilter,
                    'ronde_nr')
 
     list_select_related = ('team', 'team__vereniging')

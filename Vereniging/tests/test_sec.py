@@ -50,7 +50,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 
@@ -129,7 +128,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver2.naam = "Andere Club"
         ver2.ver_nr = "1222"
         ver2.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver2.save()
         self.nhbver2 = ver2
 
@@ -142,7 +140,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.klasse = 'Testcurve1'
+        histcomp.boog_str = 'Testcurve1'
         histcomp.is_team = False
         histcomp.save()
 
@@ -150,8 +148,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.sporter_100001.lid_nr
-        rec.schutter_naam = self.sporter_100001.volledige_naam()
+        rec.sporter_lid_nr = self.sporter_100001.lid_nr
+        rec.sporter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'R'
@@ -171,8 +169,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.sporter_100002.lid_nr
-        rec.schutter_naam = self.sporter_100002.volledige_naam()
+        rec.sporter_lid_nr = self.sporter_100002.lid_nr
+        rec.sporter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'BB'

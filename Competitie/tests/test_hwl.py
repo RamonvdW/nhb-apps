@@ -30,7 +30,6 @@ class TestCompetitieHWL(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         # maak de HWL functie

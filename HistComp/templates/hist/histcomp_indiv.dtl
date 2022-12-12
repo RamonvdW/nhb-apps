@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">{{ histcomp.klasse }}</h3>
+            <h3 class="page-banner">{{ histcomp.boog_str }}</h3>
             <p>{{ histcomp.comp_type_str }} seizoen {{ histcomp.seizoen }}</p>
         </div>
     </div>
@@ -54,7 +54,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <p>Het totaal en de gemiddelde pijl zijn berekend over de 6 hoogste scores.<br>Bij 7 scores is de laagste score doorgestreept.</p>
+            <p>Het totaal en de gemiddelde pijl zijn berekend over de {{ histcomp.aantal_beste_scores }} hoogste scores.<br>Bij 7 scores is de laagste score doorgestreept.</p>
 
             {% if is_paginated %}
                 <ul class="pagination">
@@ -111,7 +111,7 @@
             {% for obj in object_list %}
                 <tr>
                     <td class="center">{{ obj.rank }}</td>
-                    <td>[{{ obj.schutter_nr_str|highlight:zoekterm }}] {{ obj.schutter_naam|highlight:zoekterm }}</td>
+                    <td>[{{ obj.sporter_lid_nr_str|highlight:zoekterm }}] {{ obj.sporter_naam|highlight:zoekterm }}</td>
                     <td>[{{ obj.vereniging_nr }}]<span class="hide-on-med-and-down"> {{ obj.vereniging_naam|highlight:zoekterm }}</span></td>
                     <td class="center">{{ obj.gemiddelde }}</td>
 

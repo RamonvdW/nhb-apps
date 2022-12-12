@@ -25,7 +25,7 @@ included_templates = (
     'logboek/common.dtl',
     'competitie/tijdlijn.dtl',
     'snippets.dtl',
-    'email_mailer/email_basis.dtl'
+    'email_mailer/email_basis.dtl',
 )
 
 # end of file

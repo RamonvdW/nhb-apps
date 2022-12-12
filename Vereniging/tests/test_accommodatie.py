@@ -8,7 +8,8 @@ from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
-from Sporter.models import Sporter, Secretaris
+from Sporter.models import Sporter
+from Vereniging.models import Secretaris
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -156,7 +157,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100002 = sporter
 
-        Secretaris(vereniging=ver, sporter=sporter).save()
+        sec = Secretaris(vereniging=ver)
+        sec.save()
+        sec.sporters.add(sporter)
+        self.sec = sec
 
     def test_anon(self):
         # anon
@@ -169,6 +173,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp)
+
+        self.assertTrue(str(self.sec) != '')
 
     def test_bb(self):
         # login als BB
@@ -356,6 +362,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 0,
                                           'banen_25m': 0,
+                                          'max_sporters_18m': 18,       # no change
+                                          'max_sporters_25m': 25,       # no change
                                           'notities': 'dit is een test'})
         self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
@@ -391,6 +399,19 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_18m': 4,
                                           'banen_25m': 4})
         self.assert404(resp, 'Geen valide invoer')
+
+        # verwijder de binnenlocatie
+        # gebruik de alternatieve url
+        loc2.delete()
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.pk,
+                                    {'maak_buiten_locatie': 'graag'})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.pk,
+                                    {'baan_type': 'X'})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
 
         # illegale location_pk
         url = self.url_accommodatie_vereniging % 888888
@@ -446,10 +467,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # zet het aantal banen op 0,0
         self.e2e_wissel_naar_functie(self.functie_hwl)
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'baan_type': 'H',
-                                          'banen_18m': 1,
-                                          'banen_25m': 0,
-                                          'notities': 'dit is een test'})
+            self.client.post(url, {'baan_type': 'H',
+                                   'banen_18m': 1,
+                                   'banen_25m': 0,
+                                   'notities': 'dit is een test'})
         # haal op als WL, dan krijg je read-only zonder DT
         self.e2e_wissel_naar_functie(self.functie_wl)
         with self.assert_max_queries(20):
@@ -570,6 +591,11 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         url = self.url_accommodatie_vereniging % self.nhbver2.pk
 
+        # verwijder de buitenlocatie terwijl deze niet bestaat
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'verwijder_buitenbaan': 'ja'})
+        self.assert_is_redirect_not_plein(resp)
+
         # maak de buitenlocatie aan
         self.assertEqual(1, self.nhbver2.wedstrijdlocatie_set.count())
         with self.assert_max_queries(20):
@@ -597,6 +623,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_18m': 5,
                                           'banen_25m': 6,
                                           'notities': 'dit is een test',
+                                          'disc_outdoor': 'on',
+                                          'disc_clout': 'on',
                                           'buiten_banen': 50,
                                           'buiten_max_afstand': 90,
                                           'buiten_notities': 'dit is een buiten test'})
@@ -607,6 +635,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(buiten_locatie.buiten_banen, 50)
         self.assertEqual(buiten_locatie.buiten_max_afstand, 90)
         self.assertEqual(buiten_locatie.notities, 'dit is een buiten test')
+        self.assertTrue(buiten_locatie.discipline_outdoor)
+        self.assertTrue(buiten_locatie.discipline_clout)
 
         # nog een keer opslaan zodat er geen wijzigingen zijn
         with self.assert_max_queries(20):
@@ -614,6 +644,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_18m': 5,
                                           'banen_25m': 6,
                                           'notities': 'dit is een test',
+                                          'disc_outdoor': 'on',
+                                          'disc_clout': 'on',
                                           'buiten_banen': 50,
                                           'buiten_max_afstand': 90,
                                           'buiten_notities': 'dit is een buiten test'})
@@ -705,7 +737,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(len(urls), 2)      # wijzig knop is erbij gekomen
+        self.assertEqual(len(urls), 2)      # wijzig-knop is erbij gekomen
 
         # probeer een locatie toe te voegen van een andere vereniging
         with self.assert_max_queries(20):
@@ -755,6 +787,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'naam': 'test naam',
                                           'adres': 'Langeboog 5\r\nBoogstad',
+                                          'plaats': 'Boogstad',
                                           'disc_clout': 'on',
                                           'disc_veld': 'on',
                                           'disc_run': 1,
@@ -781,6 +814,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(locatie.buiten_max_afstand, 99)
         self.assertEqual(locatie.buiten_banen, 42)
         self.assertIn('Langeboog 5\nBoogstad', locatie.adres)
+        self.assertEqual(locatie.plaats, 'Boogstad')
         self.assertFalse(locatie.adres_uit_crm)
         self.assertIn('hoi\ntest\nmeer testen', locatie.notities)
 
@@ -826,6 +860,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'naam': 'test naam',
                                           'adres': 'Langeboog 5\r\nBoogstad',
                                           'disc_indoor': 'on',
+                                          'max_sporters_18m': 18,
+                                          'max_sporters_25m': 25,
                                           'banen_18m': 17,
                                           'banen_25m': 24})
         self.assert_is_redirect_not_plein(resp)
@@ -835,6 +871,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertTrue(locatie.discipline_indoor)
         self.assertEqual(locatie.banen_18m, 17)
         self.assertEqual(locatie.banen_25m, 24)
+        self.assertEqual(locatie.max_sporters_18m, 18)
+        self.assertEqual(locatie.max_sporters_25m, 25)
 
         # no change
         with self.assert_max_queries(20):
@@ -850,6 +888,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'naam': 'test naam',
                                           'adres': 'Langeboog 5\r\nBoogstad',
                                           'disc_indoor': 'on',
+                                          'max_sporters_18m': 'xxx',
+                                          'max_sporters_25m': 'xxx',
                                           'banen_18m': 'xxx',
                                           'banen_25m': 'xxx'})
         self.assert_is_redirect_not_plein(resp)

@@ -5,10 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
+from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Sporter.models import Sporter
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEANNULEERD
+from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
+                                WEDSTRIJD_STATUS_GEANNULEERD)
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -18,9 +21,10 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
     """ tests voor de Wedstrijden applicatie, module sessie wijzigen """
 
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
-    url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'  # wedstrijd_pk
+    url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                  # wedstrijd_pk
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_wedstrijden_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'  # wedstrijd_pk, sessie_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                    # sporter_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -29,13 +33,18 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
+        self.lid_nr = 123456
+        self.account = self.e2e_create_account(str(self.lid_nr), 'test@nhb.not', 'Voornaam')
+
+        self.boog_r = BoogType.objects.get(afkorting='R')
+
         sporter = Sporter(
-                    lid_nr=100000,
+                    lid_nr=self.lid_nr,
                     voornaam='Ad',
                     achternaam='de Admin',
                     geboorte_datum='1966-06-06',
                     sinds_datum='2020-02-02',
-                    account=self.account_admin)
+                    account=self.account)
         sporter.save()
 
         # maak een test vereniging
@@ -49,6 +58,30 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.functie_hwl.nhb_ver = self.nhbver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
+
+        # wordt HWL, stel sporter voorkeuren in en maak een wedstrijd aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        sporter1 = Sporter(
+                    lid_nr=self.lid_nr,
+                    geslacht='M',
+                    voornaam='Ad',
+                    achternaam='de Admin',
+                    geboorte_datum='1966-06-06',
+                    sinds_datum='2020-02-02',
+                    adres_code='1234AB56',
+                    account=self.account,
+                    bij_vereniging=self.nhbver1)
+        sporter1.save()
+        self.sporter1 = sporter1
+        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
+        self.client.get(self.url_sporter_voorkeuren % sporter1.pk)   # maakt alle SporterBoog records aan
+
+        sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_r)
+        sporterboog.voor_wedstrijd = True
+        sporterboog.save(update_fields=['voor_wedstrijd'])
+        self.sporterboog1r = sporterboog
 
         self.nhbver2 = NhbVereniging(
                             ver_nr=1001,
@@ -253,6 +286,25 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         # herstel de wedstrijd
         wedstrijd.status = old_status
         wedstrijd.save()
+
+        # koppel een inschrijving
+        inschrijving = WedstrijdInschrijving(
+                            wanneer=timezone.now(),
+                            wedstrijd=wedstrijd,
+                            sessie=sessie,
+                            sporterboog=self.sporterboog1r,
+                            wedstrijdklasse=wkl,
+                            koper=self.account,
+                            log='test')
+        inschrijving.save()
+
+        # verwijderen kan niet omdat er een inschrijving aan gekoppeld is
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'verwijder_sessie': 'graag'})
+        self.assert404(resp, 'Sessie heeft aanmeldingen')
+        self.assertEqual(1, WedstrijdSessie.objects.count())
+
+        inschrijving.delete()
 
         # verwijder de sessie
         with self.assert_max_queries(20):

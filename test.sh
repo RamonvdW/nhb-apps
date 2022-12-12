@@ -7,6 +7,8 @@
 ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
+TEST_DIR="./nhbapps/data_test"
+TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
 [ -e "$LOG" ] && rm "$LOG"
@@ -36,6 +38,11 @@ then
     pkill -f websim
 fi
 
+# create empty test data directories
+rm -rf "$TEST_DIR" &> /dev/null
+mkdir "$TEST_DIR"
+mkdir "$TEST_DIR_FOTOS_WEBWINKEL"
+
 echo
 echo "****************************** START OF TEST RUN ******************************"
 echo
@@ -64,6 +71,7 @@ then
 fi
 
 FOCUS=""
+FOCUS_SPECIFIC_TEST=0
 if [ -z "$ARGS" ]
 then
     # no args = test all = remove database
@@ -74,6 +82,7 @@ else
     FOCUS1=""
     for arg in $ARGS;
     do
+        [[ "$arg" == *".tests."* ]] && FOCUS_SPECIFIC_TEST=1
         clean_focus=$(echo "$arg" | cut -d'.' -f1)
         FOCUS1="$clean_focus $FOCUS1"
     done
@@ -87,6 +96,8 @@ else
     [ ! -z "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 fi
+
+# echo "[DEBUG] FOCUS=$FOCUS, FOCUS_SPECIFIC_TEST=$FOCUS_SPECIFIC_TEST"
 
 if [ $KEEP_DB -eq 0 ]
 then
@@ -127,13 +138,9 @@ fi
 python3 ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
 
-# start the bondspas service simulator
-python3 ./Bondspas/test-tools/websim_bondspas.py &
-PID_WEBSIM2=$!
-
 # start the payment service simulator
 python3 ./Betaal/test-tools/websim_betaal_test.py &
-PID_WEBSIM3=$!
+PID_WEBSIM2=$!
 
 # check all websim programs have started properly
 sleep 0.5               # give python some time to load everything
@@ -145,13 +152,6 @@ then
 fi
 
 kill -0 $PID_WEBSIM2    # check the simulator is running
-if [ $? -ne 0 ]
-then
-    echo "[ERROR] Bondspas service simulator failed to start"
-    exit
-fi
-
-kill -0 $PID_WEBSIM3    # check the simulator is running
 if [ $? -ne 0 ]
 then
     echo "[ERROR] Betaal service simulator failed to start"
@@ -179,7 +179,7 @@ wait $PID_TAIL 2>/dev/null
 # launch log in editor
 [ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
 
-if [ $RES -eq 0 ] && [ "$FOCUS" != "" ]
+if [ $RES -eq 0 ] && [ "$FOCUS" != "" ] && [ $FOCUS_SPECIFIC_TEST -eq 0 ]
 then
     echo "[INFO] Discovering all management commands in $FOCUS"
     for cmd in $(python3 ./manage.py --help);
@@ -213,11 +213,13 @@ kill $PID_WEBSIM1
 wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
 wait $PID_WEBSIM2 2>/dev/null
-kill $PID_WEBSIM3
-wait $PID_WEBSIM3 2>/dev/null
+
+# cleanup test data directories
+rm -rf "$TEST_DIR"
 
 ASK_LAUNCH=0
 COVERAGE_RED=0
+PRECISION=2     # 2 decimalen achter de komma
 
 if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
@@ -228,18 +230,18 @@ then
 
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
+        python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
         res=$?
 
-        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT &>>"$LOG"
+        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
 
         if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
         then
             COVERAGE_RED=1
         fi
     else
-        python3 -m coverage report --precision=1 --include=$COV_INCLUDE
-        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered --include=$COV_INCLUDE &>>"$LOG"
+        python3 -m coverage report --precision=$PRECISION --include=$COV_INCLUDE
+        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered --include=$COV_INCLUDE &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"

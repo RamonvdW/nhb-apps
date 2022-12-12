@@ -12,15 +12,16 @@ from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 
 """ Deze module houdt bij wie beheerders zijn
 
-    Functies: BKO, RKO, RCL, BKWL, RKWL, WL zijn functies
-    (IT en BB: staan in het Account als is_staff en is_BB)
+    Functies: BKO, RKO, RCL, HWL, etc. zijn functies
+    (BB: staat in het Account als is_BB)
+    (IT: staat in het Account als is_staff - alleen voor toegang Admin)
     
     Een Account is lid van een of meerdere functies
         Hiermee wordt het Account gekoppeld aan een Functie
         en krijgt de gebruiker 'rechten'
         
     Voorbeeld:
-        Account = 'ramon'
+        Account = '123456'
         Account.functies = [Functie: 'RKO Rayon 1']
 """
 
@@ -51,7 +52,7 @@ class Functie(models.Model):
 
     # een aantal velden om de juiste Functie te kunnen koppelen
 
-    # BKO, RKO, RCL, SEC, HWL, WL, MO, MWZ, SUP (zie rol.py)
+    # BKO, RKO, etc. (zie rol.py)
     rol = models.CharField(max_length=5)
 
     # email adres wat bij deze functie hoort

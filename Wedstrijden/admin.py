@@ -94,7 +94,7 @@ class WedstrijdKortingAdmin(admin.ModelAdmin):
                    ('uitgegeven_door', admin.RelatedOnlyFieldListFilter),
                   )
 
-    autocomplete_fields = ('voor_wedstrijden', 'voor_sporter', 'voor_vereniging', 'uitgegeven_door')
+    autocomplete_fields = ('voor_wedstrijden', 'voor_sporter', 'uitgegeven_door')
 
 
 class WedstrijdInschrijvingAdmin(admin.ModelAdmin):

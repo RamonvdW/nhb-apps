@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-12-09'
+SITE_VERSIE = '2022-12-12'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',
     'Functie.apps.FunctieConfig',
-    'Handleiding.apps.HandleidingConfig',
     'HistComp.apps.HistCompConfig',
     'Kalender.apps.KalenderConfig',
     'Logboek.apps.LogboekConfig',
@@ -59,6 +58,7 @@ INSTALLED_APPS = [
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',
     'Vereniging.apps.VerenigingConfig',
+    'Webwinkel.apps.WebwinkelConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
@@ -171,6 +171,7 @@ STATIC_URL = '/static/'             # url
 STATIC_ROOT = 'nhbapps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
     os.path.join(PROJ_DIR, "compiled_static"),
+    ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),
 ]
 STATICFILES_FINDER = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -279,11 +280,13 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
 )
 
 
+# vertaling van discipline en beschrijving uit CRM naar volgorde (voor tonen op de site)
+# volgorde: lager = beter
 SPEELSTERKTE_VOLGORDE = (
     # discipline, beschrijving, volgorde
-    ('NHB Graadspelden Schutter', 'Allroundschutter', 1),
-    ('NHB Graadspelden Schutter', 'Meesterschutter', 2),
-    ('NHB Graadspelden Schutter', 'Grootmeesterschutter', 3),
+    ('NHB Graadspelden Schutter', 'Grootmeesterschutter', 1),       # 1e graad (3 van de 4)
+    ('NHB Graadspelden Schutter', 'Meesterschutter', 2),            # 2e graad (3 van de 4)
+    ('NHB Graadspelden Schutter', 'Allroundschutter', 3),           # 3e graad (4 van de 4)
 
     ('NHB Graadspelden Indoor', '1e Graad Indoor', 10),
     ('NHB Graadspelden Indoor', '2e Graad Indoor', 11),
@@ -345,84 +348,90 @@ SPEELSTERKTE_VOLGORDE = (
     ('NHB Tussenspelden', '1250', 200),
     ('NHB Tussenspelden', '1150', 201),
     ('NHB Tussenspelden', '1050', 202),
-    ('NHB Tussenspelden', '950', 203),
+    ('NHB Tussenspelden', '950',  203),
 
-    ('Veld', 'Goud', 301),
-    ('Veld', 'Zilver', 302),
-    ('Veld', 'Wit', 303),
-    ('Veld', 'Zwart', 304),
-    ('Veld', 'Grijs', 305),
-    ('Veld', 'Bruin', 306),
-    ('Veld', 'Groen', 307),
+    # arrowhead
+    ('Veld', 'Goud',   300),
+    ('Veld', 'Zilver', 301),
+    ('Veld', 'Wit',    302),
+    ('Veld', 'Zwart',  303),
+    ('Veld', 'Grijs',  304),
+    ('Veld', 'Bruin',  305),
+    ('Veld', 'Groen',  306),
 
-    ('Veld', 'Rode posten', 0),
-    ('Veld', 'Blauwe posten', 0),
-    ('Veld', 'Gele posten', 0),
+    # ('Veld', 'Rode posten', 0),
+    # ('Veld', 'Blauwe posten', 0),
+    # ('Veld', 'Gele posten', 0),
 
-    ('World Archery Target Awards', 'Purper', 0),
-    ('World Archery Target Awards', 'Goud', 0),
-    ('World Archery Target Awards', 'Rood', 0),
-    ('World Archery Target Awards', 'Blauw', 0),
-    ('World Archery Target Awards', 'Zwart', 0),
-    ('World Archery Target Awards', 'Wit', 0),
+    # Compound/Recurve
+    ('World Archery Target Awards', 'Purper', 500),
+    ('World Archery Target Awards', 'Goud',   501),
+    ('World Archery Target Awards', 'Rood',   502),
+    ('World Archery Target Awards', 'Blauw',  503),
+    ('World Archery Target Awards', 'Zwart',  504),
+    ('World Archery Target Awards', 'Wit',    505),
 
-    ('Algemeen', 'Blauwe Pijl', 0),
-    ('Algemeen', 'Gouden Pijl', 0),
-    ('Algemeen', 'Gouden Veer', 0),
-    ('Algemeen', 'Rode Pijl', 0),
-    ('Algemeen', 'Rode Veer', 0),
-    ('Algemeen', 'Witte Pijl', 0),
-    ('Algemeen', 'Zwarte Pijl', 0),
+    # beginners awards
+    ('Algemeen', 'Gouden Pijl', 600),
+    ('Algemeen', 'Rode Pijl',   601),
+    ('Algemeen', 'Blauwe Pijl', 602),
+    ('Algemeen', 'Zwarte Pijl', 603),
+    ('Algemeen', 'Witte Pijl',  604),
+    ('Algemeen', 'Gouden Veer', 605),
+    ('Algemeen', 'Rode Veer',   606),
 )
 
 
-# pagina's van de handleiding
-HANDLEIDING_TOP = 'Hoofdpagina'
-HANDLEIDING_SEC = 'Handleiding_Secretaris'
-HANDLEIDING_WL = 'Handleiding_Wedstrijdleider'
-HANDLEIDING_HWL = 'Handleiding_Hoofdwedstrijdleider'
-HANDLEIDING_RCL = 'Handleiding_RCL'
-HANDLEIDING_PLANNING_REGIO = 'Planning_Regio'
-HANDLEIDING_RKO = 'Handleiding_RKO'
-HANDLEIDING_BKO = 'Handleiding_BKO'
-HANDLEIDING_BB = 'Handleiding_BB'
-HANDLEIDING_MO = 'Handleiding_MO'
-HANDLEIDING_2FA = 'Twee-factor_authenticatie'
-HANDLEIDING_ROLLEN = 'Rollen'
-HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
-HANDLEIDING_SPORTERBOOG = 'Sporter-boog'
-HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
-HANDLEIDING_CLUSTERS = 'Clusters'
-HANDLEIDING_RK_SELECTIE = 'RK_selectie'
-HANDLEIDING_RCL_INSTELLINGEN_REGIO = 'RCL_instellingen_regio'
-HANDLEIDING_POULES = 'Poules'
-HANDLEIDING_WEDSTRIJDKALENDER_HWL = 'Wedstrijdkalender_HWL'
+OPLEIDING_CODES = (
+    # code, afk-voor-pas, beschrijving, hogere-opleidingen
+    ('011', 'HBT-A', 'Handboogtrainer A', ('014', '015')),
+    ('012', 'HBT-B', 'Handboogtrainer B', ('011', '014', '015')),
 
-HANDLEIDING_PAGINAS = [
-    HANDLEIDING_TOP,
-    HANDLEIDING_SEC,
-    HANDLEIDING_WL,
-    HANDLEIDING_HWL,
-    HANDLEIDING_RCL,
-    HANDLEIDING_RKO,
-    HANDLEIDING_BKO,
-    HANDLEIDING_BB,
-    HANDLEIDING_MO,
-    HANDLEIDING_2FA,
-    HANDLEIDING_ROLLEN,
-    HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,
-    HANDLEIDING_SPORTERBOOG,
-    HANDLEIDING_PLANNING_REGIO,
-    HANDLEIDING_INSCHRIJFMETHODES,
-    HANDLEIDING_CLUSTERS,
-    HANDLEIDING_RK_SELECTIE,
-    HANDLEIDING_RCL_INSTELLINGEN_REGIO,
-    HANDLEIDING_POULES,
-    HANDLEIDING_WEDSTRIJDKALENDER_HWL,
-    # pagina's van de handleiding die intern gerefereerd worden
-    'Koppelen_beheerders'
-]
+    ('013', 'HBT2', 'Handboogtrainer 2', ('014', '015')),
+    ('014', 'HBT3', 'Handboogtrainer 3', ('015',)),
+    ('015', 'HBT4', 'Handboogtrainer 4', ()),
 
+    ('017', 'HBI2', 'Handboog instructeur 2', ('018',)),
+    ('018', 'HBI3', 'Handboog instructeur 3', ()),
+
+    ('030', 'WL', 'Wedstrijdleider 25m1pijl', ()),
+    ('031', 'WL', 'Wedstrijdleider Indoor/Outdoor', ()),
+    ('032', 'WL', 'Wedstrijdleider 25m1pijl + Indoor', ()),
+    ('033', 'WL', 'Wedstrijdleider Outdoor', ()),
+    ('034', 'WL', 'Wedstrijdleider Indoor', ()),
+    ('035', 'WL', 'Wedstrijdleider Allround (niveau 3)', ()),
+
+    ('039', '', 'Praktijkbegeleider voor instructeurs', ()),
+
+    ('040', 'SR3', 'Verenigingsscheidsrechter', ('041', '042')),
+    ('041', 'SR4', 'Bondsscheidsrechter', ('042',)),
+    ('042', 'SR5', 'Scheidsrechter internationaal', ()),
+
+    ('043', '', 'Basisblok', ()),
+
+    ('060', '', 'Autisme in de sport', ()),
+    ('061', '', 'Preventie seksuele intimidatie', ()),
+    ('062', '', 'Spec. aantekening aangepast sporten', ()),
+    ('063', '', 'Workshop doping', ()),
+    ('064', '', 'Experttraining arbitrage', ()),
+    ('065', 'TTR', 'Spec. aantekening Traditioneel (HBT2)', ()),
+    ('066', '', 'Basisschot bijscholing', ()),
+    ('066a', '', 'Bewijs deelname Basisschot (geen cert)', ()),
+    ('067', 'TTR', 'Certif. aantekening Traditioneel (HBT3)', ()),
+    ('068', '', 'Ianseo scoreverwerking', ()),
+
+    ('074', '', 'Sportief coachen', ()),
+
+    ('080', 'PB', 'Praktijkbegeleider voor trainer/coach', ()),
+    ('081', '', 'Mentor van cursisten Tr.A', ()),
+    ('082', '', 'Leercoach', ()),
+    ('083', '', 'Beoordelaar (portfolio/pvb)', ()),
+    ('084a', '', '(Bij-)scholing opl. opleiders-expert ASK', ()),
+
+    ('085', 'TCO', 'Technical Control Officer (IFAA/DFBV)', ()),
+    ('086', '', 'Certificaat WA level 1 Coach', ()),
+    ('087', '', 'Certificaat WA level 2 Coach', ()),
+)
 
 # logging to syslog
 # zie https://docs.djangoproject.com/en/3.0/topics/logging/
@@ -477,6 +486,18 @@ LOGGING = {
         }
     }
 }
+
+# CRM import flexibiliteit
+CRM_IMPORT_SKIP_MEMBERS = (101711,)            # CRM developer
+
+CRM_IMPORT_GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
+
+CRM_IMPORT_GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijden
+
+CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
+                                    1377)      # persoonlijk lid, geen wedstrijden
+
+CRM_IMPORT_BEHOUD_CLUB = (1999,)               # voor demo
 
 
 # begin waarden voor unieke ticket nummers

@@ -8,14 +8,16 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.models import BestelProduct, BestelMandje, BestelMutatie, Bestelling
-from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
+from Bestel.models import (BestelProduct, Bestelling, BestelMutatie, BestelMandje, BESTEL_MUTATIE_VERWIJDER)
 from Betaal.models import BetaalInstellingenVereniging
+from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_COMBI)
+                                WedstrijdInschrijving,
+                                WedstrijdKorting, WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_VERENIGING)
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
@@ -47,6 +49,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
                             mollie_api_key='test_1234')
         instellingen.save()
         self.instellingen_nhb = instellingen
+
+        self.assertEqual(settings.BETAAL_VIA_NHB_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
 
         ver = NhbVereniging(
                     ver_nr=1000,
@@ -129,27 +133,56 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         korting = WedstrijdKorting(
                     geldig_tot_en_met=datum,
+                    soort=WEDSTRIJD_KORTING_VERENIGING,
                     uitgegeven_door=ver,
-                    voor_vereniging=ver,
                     percentage=42)
         korting.save()
         korting.voor_wedstrijden.add(wedstrijd)
         self.korting = korting
+
+        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+
+        product = WebwinkelProduct(
+                        omslag_titel='Test titel 1',
+                        onbeperkte_voorraad=False,
+                        aantal_op_voorraad=10,
+                        bestel_begrenzing='1-5',
+                        eenheid='test,tests',
+                        bevat_aantal=6,
+                        prijs_euro="1.23")
+        product.save()
+        self.product = product
+
+        keuze = WebwinkelKeuze(
+                        wanneer=now,
+                        koper=self.account_admin,
+                        product=product,
+                        aantal=2,
+                        totaal_euro=Decimal('1.23'),
+                        log='test')
+        keuze.save()
+        self.keuze = keuze
 
     def _vul_mandje(self, account):
 
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)
 
         # geen koppeling aan een mandje
-        product = BestelProduct(
+        product1 = BestelProduct(
                     wedstrijd_inschrijving=self.inschrijving,
                     prijs_euro=Decimal(10.0))
-        product.save()
+        product1.save()
 
         # stop het product in het mandje
-        mandje.producten.add(product)
+        mandje.producten.add(product1)
 
-        return product
+        product2 = BestelProduct(
+                        webwinkel_keuze=self.keuze,
+                        prijs_euro=Decimal(1.23))
+        product2.save()
+        mandje.producten.add(product2)
+
+        return product1, product2
 
     def test_anon(self):
         self.client.logout()
@@ -176,7 +209,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
         # vul het mandje
-        inhoud = self._vul_mandje(self.account_admin)
+        product1, product2 = self._vul_mandje(self.account_admin)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -189,8 +222,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.sporter.save()
 
         # corner case: te hoge korting
-        inhoud.korting_euro = 999
-        inhoud.save()
+        product1.korting_euro = 999
+        product1.save()
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -244,36 +277,6 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
-    # def test_korting(self):
-    #     self.e2e_login_and_pass_otp(self.account_admin)
-    #     self.e2e_check_rol('sporter')
-    #
-    #     # vul het mandje
-    #     product = self._vul_mandje(self.account_admin)
-    #
-    #     # dit doet Wedstrijden.inschrijven:
-    #     bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, True)
-    #
-    #     self.verwerk_bestel_mutaties()
-    #
-    #     # controleer dat de code toegepast is
-    #     inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-    #     self.assertIsNotNone(inschrijving.korting)
-    #
-    #     product = BestelProduct.objects.get(pk=product.pk)
-    #     self.assertTrue(str(product) != '')
-    #
-    #     # mandje tonen met korting
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(self.url_mandje_toon)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
-    #
-    #     self.assertContains(resp, '10,00')    # prijs sessie
-    #     self.assertContains(resp, '4,20')     # korting
-    #     self.assertContains(resp, '5,80')     # totaal
-
     def test_verwijder(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
@@ -287,38 +290,67 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde parameter')
 
         # vul het mandje
-        product = self._vul_mandje(self.account_admin)
-        self.assertTrue(str(product) != '')
-        self.assertTrue(product.korte_beschrijving() != '')
+        product1, product2 = self._vul_mandje(self.account_admin)
+        self.assertTrue(str(product1) != '')
+        self.assertTrue(product1.korte_beschrijving() != '')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_mandje_verwijder % 999999)
         self.assert404(resp, 'Niet gevonden in jouw mandje')
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
+            resp = self.client.post(self.url_mandje_verwijder % product1.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
         # nog een keer, dan is de mutatie al aangemaakt (is_created is False)
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
+            resp = self.client.post(self.url_mandje_verwijder % product1.pk, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_mandje_toon)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_mandje_verwijder % product2.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
         self.verwerk_bestel_mutaties()
 
+        # maak een verwijder mutatie aan zonder product
+        BestelMutatie(
+            code=BESTEL_MUTATIE_VERWIJDER,
+            account=self.account_admin).save()
+
+        # maak een eigen verwijder mutatie met onbekend product
+        product = BestelProduct()
+        product.save()
+        BestelMutatie(
+            code=BESTEL_MUTATIE_VERWIJDER,
+            product=product,
+            account=self.account_admin).save()
+
+        mandje = BestelMandje.objects.get(account=self.account_admin)
+        mandje.producten.add(product)
+
+        f1, f2 = self.verwerk_bestel_mutaties(show_warnings=False, fail_on_error=False)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue(": Type niet ondersteund" in f1.getvalue())
+        self.assertTrue(" niet meer in het mandje gevonden" in f2.getvalue())
+
         # nog een keer verwijderen
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
+            resp = self.client.post(self.url_mandje_verwijder % product1.pk, {'snel': 1})
         self.assert404(resp, 'Niet gevonden in jouw mandje')
 
         # verwijderen zonder mandje
-        product = self._vul_mandje(self.account_admin)
+        product1, product2 = self._vul_mandje(self.account_admin)
+        product2.korting_euro = 1
+        self.assertTrue(str(product2) != '')
+        self.assertTrue(product2.korte_beschrijving() != '')
+
         mandje = BestelMandje.objects.get(account=self.account_admin)
         mandje.producten.clear()
         mandje.delete()
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
+            resp = self.client.post(self.url_mandje_verwijder % product1.pk, {'snel': 1})
         self.assert404(resp, 'Niet gevonden')
 
     def test_bestellen(self):
@@ -334,6 +366,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        Bestelling.objects.all().delete()
 
         # doe de bestelling
         self.assertEqual(0, BestelMutatie.objects.count())

@@ -156,6 +156,14 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
+        wedstrijd.toon_op_kalender = False
+        wedstrijd.save(update_fields=['toon_op_kalender'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
     def test_info(self):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)

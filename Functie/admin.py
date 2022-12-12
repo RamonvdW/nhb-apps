@@ -14,7 +14,7 @@ class FunctieAdmin(admin.ModelAdmin):
 
     ordering = ('beschrijving',)
 
-    search_fields = ('beschrijving', 'nhb_ver__naam', 'nhb_ver__plaats', 'bevestigde_email', 'nieuwe_email')
+    search_fields = ('beschrijving', 'nhb_ver__naam', 'nhb_ver__plaats', 'bevestigde_email', 'nieuwe_email', 'rol')
 
     list_filter = ('rol',)
 

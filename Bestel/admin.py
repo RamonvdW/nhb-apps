@@ -23,7 +23,7 @@ class BestelMandjeAdmin(admin.ModelAdmin):
     @staticmethod
     def producten_in_mandje(obj):     # pragma: no cover
         return "\n".join(['(pk %s) %s' % (product.pk, product) for product in
-                                            obj.producten.select_related('wedstrijd_inschrijving').all()])
+                                          obj.producten.select_related('wedstrijd_inschrijving').all()])
 
 
 class BestellingAdmin(admin.ModelAdmin):
@@ -44,7 +44,16 @@ class BestellingAdmin(admin.ModelAdmin):
         ('Koper',
             {'fields': ('bestel_nr',
                         'account',
-                        'aangemaakt',
+                        'aangemaakt')
+             }),
+        ('Kosten',
+            {'fields': ('verzendkosten_euro',
+                        'btw_percentage_cat1',
+                        'btw_percentage_cat2',
+                        'btw_percentage_cat3',
+                        'btw_euro_cat1',
+                        'btw_euro_cat2',
+                        'btw_euro_cat3',
                         'totaal_euro')
              }),
         ('Verkoper',

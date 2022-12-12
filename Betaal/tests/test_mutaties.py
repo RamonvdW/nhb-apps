@@ -33,7 +33,6 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         ver = NhbVereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    # secretaris kan nog niet ingevuld worden
                     regio=self.regio_111)
         ver.save()
         self.nhbver = ver

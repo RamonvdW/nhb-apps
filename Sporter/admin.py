@@ -5,7 +5,41 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Secretaris, Speelsterkte
+from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Speelsterkte
+
+
+class HeeftWaIdListFilter(admin.SimpleListFilter):
+
+    title = 'Heeft WA Id'
+
+    parameter_name = 'heeft_wa_id'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ja', 'Heeft een WA id'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ja':        # pragma: no cover
+            queryset = queryset.exclude(wa_id='')
+        return queryset
+
+
+class HeeftAccountFilter(admin.SimpleListFilter):
+
+    title = 'Heeft account'
+
+    parameter_name = 'heeft_account'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ja', 'Heeft account aangemaakt'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ja':        # pragma: no cover
+            queryset = queryset.exclude(account=None)
+        return queryset
 
 
 class SporterAdmin(admin.ModelAdmin):
@@ -16,7 +50,7 @@ class SporterAdmin(admin.ModelAdmin):
     search_fields = ('unaccented_naam', 'lid_nr')
 
     # filter mogelijkheid
-    list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid')
+    list_filter = ('geslacht', 'is_actief_lid', 'is_erelid', HeeftWaIdListFilter, HeeftAccountFilter, 'para_classificatie')
 
     list_select_related = True
 
@@ -57,49 +91,21 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
             {'fields': ('wedstrijd_geslacht_gekozen',
                         'wedstrijd_geslacht'),
              }),
+        ('Para',
+            {'fields': ('para_met_rolstoel',
+                        'opmerking_para_sporter',)
+             }),
         ('Overig',
             {'fields': ('voorkeur_eigen_blazoen',
-                        'voorkeur_meedoen_competitie',
-                        'opmerking_para_sporter')
+                        'voorkeur_meedoen_competitie')
              }),
     )
-
-
-class SecretarisAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor Secretaris klasse """
-
-    search_fields = ('vereniging__ver_nr',
-                     'vereniging__naam',)
-
-    list_filter = ('vereniging',)
-
-    list_select_related = ('vereniging', 'sporter')
-
-    auto_complete = ('vereniging', 'sporter')
-
-    def __init__(self, model, admin_site):
-        super().__init__(model, admin_site)
-        self.obj = None
-
-    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
-        if obj:
-            self.obj = obj
-        return super().get_form(request, obj, **kwargs)
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'sporter' and self.obj:
-            kwargs['queryset'] = (Sporter
-                                  .objects
-                                  .filter(bij_vereniging=self.obj.vereniging)
-                                  .order_by('unaccented_naam'))
-
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class SpeelsterkteAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Speelsterkte klasse """
 
-    search_fields = ('beschrijving', 'category', 'discipline', 'sporter__unaccented_naam')
+    search_fields = ('beschrijving', 'category', 'discipline', 'sporter__unaccented_naam', 'sporter__lid_nr')
 
     list_filter = ('discipline', 'beschrijving', 'category')
 
@@ -111,7 +117,6 @@ class SpeelsterkteAdmin(admin.ModelAdmin):
 admin.site.register(Sporter, SporterAdmin)
 admin.site.register(SporterBoog, SporterBoogAdmin)
 admin.site.register(SporterVoorkeuren, SporterVoorkeurenAdmin)
-admin.site.register(Secretaris, SecretarisAdmin)
 admin.site.register(Speelsterkte, SpeelsterkteAdmin)
 
 # end of file

@@ -12,44 +12,46 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.utils.timezone import get_default_timezone
-from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db.models import Count
 from django.db import transaction
-from BasisTypen.models import ORGANISATIE_IFAA
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Bestel.models import (BestelProduct, BestelMandje,
                            Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
+                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
+                           BESTELLING_STATUS2STR,
                            BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
-                           BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
-                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
-                           BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
+                           BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
+                           BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER,
+                           BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
+                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
+                           BESTEL_MUTATIE_ANNULEER)
+from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
+from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering,
+                                      webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten_mandje,
+                                      webwinkel_plugin_bepaal_verzendkosten_bestelling)
+from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Wedstrijden.models import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                 WEDSTRIJD_KORTING_COMBI)
 from mollie.api.client import Client, RequestSetupError
+from types import SimpleNamespace
 from decimal import Decimal
 import traceback
 import datetime
 import sys
 
+EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN = 'email_bestel/backoffice-versturen.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BESTELLING = 'email_bestel/bevestig-bestelling.dtl'
 EMAIL_TEMPLATE_BEVESTIG_BETALING = 'email_bestel/bevestig-betaling.dtl'
 
 
-def stuur_email_naar_koper_bestelling_details(bestelling):
-    """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
-
-    account = bestelling.account
-    email = account.accountemail_set.all()[0]
-
+def _beschrijf_bestelling(bestelling):
     producten = (bestelling
                  .producten
                  .select_related('wedstrijd_inschrijving',
@@ -58,58 +60,99 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
                                  'wedstrijd_inschrijving__sporterboog',
                                  'wedstrijd_inschrijving__sporterboog__boogtype',
                                  'wedstrijd_inschrijving__sporterboog__sporter',
-                                 'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
+                                 'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+                                 'wedstrijd_inschrijving__korting',
+                                 'webwinkel_keuze',
+                                 'webwinkel_keuze__product')
+                 # .prefetch_related('wedstrijd_inschrijving__korting__voor_wedstrijden')
                  .order_by('pk'))       # vaste volgorde (primitief, maar functioneel)
 
     regel_nr = 0
     for product in producten:
 
+        # nieuwe regel op de bestelling
+        regel_nr += 1
+        product.regel_nr = regel_nr
+        product.beschrijving = beschrijf_product(product)
+
         if product.wedstrijd_inschrijving:
-            inschrijving = product.wedstrijd_inschrijving
-            wedstrijd = inschrijving.wedstrijd
-
-            # lege regel gevolgd door een regel nummer
-            regel_nr += 1
-            product.regel_nr = regel_nr
-
-            product.reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
-            product.wedstrijd_titel = wedstrijd.titel
-            product.wedstrijd_bij_vereniging = wedstrijd.organiserende_vereniging.ver_nr_en_naam()
-            product.wedstrijd_adres = wedstrijd.locatie.adres.replace('\n', ', ')
-            product.sessie_datum = inschrijving.sessie.datum
-            product.sessie_tijd = inschrijving.sessie.tijd_begin
-            product.sporter_lid_nr_naam = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
-            product.org_email = wedstrijd.contact_email
-            product.org_telefoon = wedstrijd.contact_telefoon
-
-            sporter_ver = inschrijving.sporterboog.sporter.bij_vereniging
-            if sporter_ver:
-                product.ver_nr_naam = sporter_ver.ver_nr_en_naam()
-            else:
-                product.ver_nr_naam = 'Onbekend'
-
-            if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                product.schietstijl = inschrijving.sporterboog.boogtype.beschrijving
-                product.klasse = '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
-                                              inschrijving.wedstrijdklasse.afkorting)
-            else:
-                product.boog = inschrijving.sporterboog.boogtype.beschrijving
-                product.klasse = inschrijving.wedstrijdklasse.beschrijving
-
-            if inschrijving.korting:
-                korting = inschrijving.korting
-                product.korting = "Korting: %d%%" % korting.percentage
-
+            korting = product.wedstrijd_inschrijving.korting
+            if korting:
+                product.gebruikte_korting_str, combi_redenen = beschrijf_korting(product)
                 if korting.soort == WEDSTRIJD_KORTING_COMBI:
-                    combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                     product.combi_reden = " en ".join(combi_redenen)
     # for
+
+    producten = list(producten)
+
+    # voeg de eventuele verzendkosten toe als aparte regel op de bestelling
+    if bestelling.verzendkosten_euro > 0.001:
+
+        # nieuwe regel op de bestelling
+        regel_nr += 1
+
+        verzendkosten_euro_str = "%.2f" % bestelling.verzendkosten_euro
+        verzendkosten_euro_str = verzendkosten_euro_str.replace('.', ',')       # nederlandse komma
+
+        product = SimpleNamespace(
+                        regel_nr=regel_nr,
+                        is_verzendkosten=True,                      # TODO: wordt niet gebruikt
+                        beschrijving=[("Verzendkosten", "")],       # TODO: specialiseren in pakket/briefpost
+                        prijs_euro=verzendkosten_euro_str)
+        producten.append(product)
+
+    # voeg de eventuele BTW toe
+    for btw_euro, btw_tekst in [(bestelling.btw_euro_cat1, bestelling.btw_percentage_cat1),
+                                (bestelling.btw_euro_cat2, bestelling.btw_percentage_cat2),
+                                (bestelling.btw_euro_cat3, bestelling.btw_percentage_cat3)]:
+
+        if btw_euro > 0.001:
+            product = SimpleNamespace(
+                            regel_nr=0,     # geen nummer tonen
+                            beschrijving=[(btw_tekst, "")],
+                            prijs_euro=btw_euro)
+            producten.append(product)
+    # for
+
+    return producten
+
+
+def _beschrijf_transacties(bestelling):
+    transacties = (bestelling
+                   .transacties
+                   .all()
+                   .order_by('when'))  # chronologisch
+
+    for transactie in transacties:
+        transactie.when_str = timezone.localtime(transactie.when).strftime('%Y-%m-%d om %H:%M')
+    # for
+
+    return transacties
+
+
+def stuur_email_naar_koper_bestelling_details(bestelling):
+    """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
+
+    account = bestelling.account
+    email = account.accountemail_set.all()[0]
+
+    producten = _beschrijf_bestelling(bestelling)
+
+    status = bestelling.status
+    if status == BESTELLING_STATUS_NIEUW:
+        status = BESTELLING_STATUS_WACHT_OP_BETALING
+
+    totaal_euro_str = "%.2f" % bestelling.totaal_euro
+    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
 
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
+        'totaal_euro_str': totaal_euro_str,
         'producten': producten,
+        'bestel_status': BESTELLING_STATUS2STR[status],
+        'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD)
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
@@ -125,63 +168,18 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
     account = bestelling.account
     email = account.accountemail_set.all()[0]
 
-    producten = (bestelling
-                 .producten
-                 .select_related('wedstrijd_inschrijving',
-                                 'wedstrijd_inschrijving__wedstrijd',
-                                 'wedstrijd_inschrijving__sessie',
-                                 'wedstrijd_inschrijving__sporterboog',
-                                 'wedstrijd_inschrijving__sporterboog__boogtype',
-                                 'wedstrijd_inschrijving__sporterboog__sporter',
-                                 'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
-                 .order_by('pk'))       # vaste volgorde (primitief, maar functioneel)
+    producten = _beschrijf_bestelling(bestelling)
 
-    regel_nr = 0
-    for product in producten:
+    transacties = _beschrijf_transacties(bestelling)
 
-        if product.wedstrijd_inschrijving:
-            inschrijving = product.wedstrijd_inschrijving
-
-            # lege regel gevolgd door een regel nummer
-            regel_nr += 1
-            product.regel_nr = regel_nr
-
-            product.reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
-            product.wedstrijd_titel = inschrijving.wedstrijd.titel
-            product.sessie_datum = inschrijving.sessie.datum
-            product.sessie_tijd = inschrijving.sessie.tijd_begin
-            product.sporter_lid_nr_naam = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
-
-            sporter_ver = inschrijving.sporterboog.sporter.bij_vereniging
-            if sporter_ver:
-                product.ver_nr_naam = sporter_ver.ver_nr_en_naam()
-            else:
-                product.ver_nr_naam = 'Onbekend'
-
-            product.boog = inschrijving.sporterboog.boogtype.beschrijving
-
-            if inschrijving.korting:
-                korting = inschrijving.korting
-                product.korting = "Korting: %d%%" % korting.percentage
-
-                if korting.soort == WEDSTRIJD_KORTING_COMBI:
-                    combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-                    product.combi_reden = " en ".join(combi_redenen)
-    # for
-
-    transacties = (bestelling
-                   .transacties
-                   .all()
-                   .order_by('when'))  # chronologisch
-
-    for transactie in transacties:
-        transactie.when_str = timezone.localtime(transactie.when).strftime('%Y-%m-%d om %H:%M')
-    # for
+    totaal_euro_str = "%.2f" % bestelling.totaal_euro
+    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
 
     context = {
         'voornaam': account.get_first_name(),
         'naam_site': settings.NAAM_SITE,
         'bestelling': bestelling,
+        'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'transacties': transacties,
     }
@@ -190,6 +188,34 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
 
     mailer_queue_email(email.bevestigde_email,
                        'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
+                       mail_body)
+
+
+def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
+    """ Stuur een e-mail om de betaalde bestelling te bevestigen """
+
+    account = bestelling.account
+    sporter = account.sporter_set.all()[0]
+
+    producten = _beschrijf_bestelling(bestelling)
+    transacties = _beschrijf_transacties(bestelling)
+
+    totaal_euro_str = "%.2f" % bestelling.totaal_euro
+    totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
+
+    context = {
+        'koper_sporter': sporter,       # bevat postadres
+        'naam_site': settings.NAAM_SITE,
+        'bestelling': bestelling,
+        'totaal_euro_str': totaal_euro_str,
+        'producten': producten,
+        'transacties': transacties,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BACKOFFICE_VERSTUREN)
+
+    mailer_queue_email(email_backoffice,
+                       'Verstuur webwinkel producten (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 
 
@@ -207,8 +233,11 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = None
 
-        self._instellingen_nhb = None
+        self._instellingen_via_nhb = None
+        self._instellingen_verkoper_webwinkel = None
         self._instellingen_cache = dict()     # [ver_nr] = BetaalInstellingenVereniging
+
+        self._emailadres_backoffice = Functie.objects.get(rol='MWW').bevestigde_email
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -235,25 +264,72 @@ class Command(BaseCommand):
         verval_datum = timezone.now() - datetime.timedelta(days=settings.MANDJE_VERVAL_NA_DAGEN)
 
         # doorloop alle producten die nog in een mandje liggen en waarvan de datum verlopen is
+
+        mandje_pks = list()
+
+        # wedstrijden
         for product in (BestelProduct
                         .objects
                         .annotate(mandje_count=Count('bestelmandje'))
+                        .exclude(wedstrijd_inschrijving=None)
                         .select_related('wedstrijd_inschrijving',
                                         'wedstrijd_inschrijving__koper',
                                         'wedstrijd_inschrijving__sessie')
-                        .filter(mandje_count=1,
+                        .filter(mandje_count=1,         # product ligt nog in een mandje
                                 wedstrijd_inschrijving__wanneer__lt=verval_datum)):
 
             inschrijving = product.wedstrijd_inschrijving
 
-            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s (%s) in mandje van %s' % (
+            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s inschrijving (%s) in mandje van %s' % (
                                 product.pk, inschrijving, inschrijving.koper))
 
-            wedstrijden_plugin_verwijder_reservering(self.stdout, product.wedstrijd_inschrijving)
+            wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
+
+            mandje = product.bestelmandje_set.all()[0]
+            if mandje.pk not in mandje_pks:
+                mandje_pks.append(mandje.pk)
 
             # verwijder het product, dan verdwijnt deze ook uit het mandje
             self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
             product.delete()
+        # for
+
+        # webwinkel
+        for product in (BestelProduct
+                        .objects
+                        .annotate(mandje_count=Count('bestelmandje'))
+                        .exclude(webwinkel_keuze=None)
+                        .select_related('webwinkel_keuze')
+                        .filter(mandje_count=1,         # product ligt nog in een mandje
+                                webwinkel_keuze__wanneer__lt=verval_datum)):
+
+            keuze = product.webwinkel_keuze
+
+            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s webwinkel (%s) in mandje van %s' % (
+                                product.pk, keuze.product, keuze.koper))
+
+            # geef de reservering op de producten weer vrij
+            webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
+
+            mandje = product.bestelmandje_set.all()[0]
+            if mandje.pk not in mandje_pks:
+                mandje_pks.append(mandje.pk)
+
+            # verwijder de webwinkel keuze
+            self.stdout.write('[INFO] WebwinkelKeuze met pk=%s wordt verwijderd' % keuze.pk)
+            keuze.product = None
+            keuze.delete()
+
+            # verwijder het bestel product
+            self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
+            product.delete()
+        # for
+
+        # mandjes bijwerken
+        for mandje in BestelMandje.objects.filter(pk__in=mandje_pks):
+            wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
+            webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
+            webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
         # for
 
         self.stdout.write('[INFO] Opschonen mandjes klaar')
@@ -263,12 +339,18 @@ class Command(BaseCommand):
 
         ver_nhb = NhbVereniging.objects.get(ver_nr=settings.BETAAL_VIA_NHB_VER_NR)
 
-        self._instellingen_nhb, _ = (BetaalInstellingenVereniging
-                                     .objects
-                                     .select_related('vereniging')
-                                     .get_or_create(vereniging=ver_nhb))
+        self._instellingen_via_nhb, _ = (BetaalInstellingenVereniging
+                                         .objects
+                                         .select_related('vereniging')
+                                         .get_or_create(vereniging=ver_nhb))
 
-        self._instellingen_cache[settings.BETAAL_VIA_NHB_VER_NR] = self._instellingen_nhb
+        self._instellingen_cache[settings.BETAAL_VIA_NHB_VER_NR] = self._instellingen_via_nhb
+
+        # geen foutafhandeling: deze instelling moet gewoon goed staan
+        self._instellingen_verkoper_webwinkel = (BetaalInstellingenVereniging
+                                                 .objects
+                                                 .select_related('vereniging')
+                                                 .get(vereniging__ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR))
 
     def _get_instellingen(self, ver):
         try:
@@ -280,7 +362,7 @@ class Command(BaseCommand):
                                .get_or_create(vereniging=ver))
 
             if instellingen.akkoord_via_nhb:
-                instellingen = self._instellingen_nhb
+                instellingen = self._instellingen_via_nhb
 
             self._instellingen_cache[ver.ver_nr] = instellingen
 
@@ -303,6 +385,42 @@ class Command(BaseCommand):
 
         return nummer
 
+    @staticmethod
+    def _mandje_bepaal_btw(mandje):
+        """ bereken de btw voor de producten in het mandje """
+
+        # nog niet ondersteund: toon voorlopig helemaal niets
+        mandje.btw_percentage_cat1 = ""
+        mandje.btw_euro_cat1 = Decimal(0)
+
+        mandje.btw_percentage_cat2 = ""
+        mandje.btw_euro_cat2 = Decimal(0)
+
+        mandje.btw_percentage_cat3 = ""
+        mandje.btw_euro_cat3 = Decimal(0)
+
+        mandje.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1',
+                                   'btw_percentage_cat2', 'btw_euro_cat2',
+                                   'btw_percentage_cat3', 'btw_euro_cat3'])
+
+    @staticmethod
+    def _bestelling_bepaal_btw(bestelling):
+        """ bereken de btw voor de producten in een bestelling """
+
+        # nog niet ondersteund: toon voorlopig helemaal niets
+        bestelling.btw_percentage_cat1 = ""
+        bestelling.btw_euro_cat1 = Decimal(0)
+
+        bestelling.btw_percentage_cat2 = ""
+        bestelling.btw_euro_cat2 = Decimal(0)
+
+        bestelling.btw_percentage_cat3 = ""
+        bestelling.btw_euro_cat3 = Decimal(0)
+
+        bestelling.save(update_fields=['btw_percentage_cat1', 'btw_euro_cat1',
+                                       'btw_percentage_cat2', 'btw_euro_cat2',
+                                       'btw_percentage_cat3', 'btw_euro_cat3'])
+
     def _verwerk_mutatie_wedstrijd_inschrijven(self, mutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
@@ -323,7 +441,34 @@ class Command(BaseCommand):
                 wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
 
                 # bereken het totaal opnieuw
+                self._mandje_bepaal_btw(mandje)
                 mandje.bepaal_totaalprijs_opnieuw()
+        else:
+            self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
+
+    def _verwerk_mutatie_webwinkel_keuze(self, mutatie):
+        mandje = self._get_mandje(mutatie)
+        if mandje:                                  # pragma: no branch
+            webwinkel_keuze = mutatie.webwinkel_keuze
+
+            prijs_euro = webwinkel_plug_reserveren(webwinkel_keuze)
+
+            # maak een product regel aan voor de bestelling
+            product = BestelProduct(
+                            webwinkel_keuze=webwinkel_keuze,
+                            prijs_euro=prijs_euro)
+            product.save()
+
+            # leg het product in het mandje
+            mandje.producten.add(product)
+
+            webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
+
+            webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
+
+            # bereken het totaal opnieuw
+            self._mandje_bepaal_btw(mandje)
+            mandje.bepaal_totaalprijs_opnieuw()
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
@@ -359,15 +504,37 @@ class Command(BaseCommand):
                     # verwijder de hele inschrijving, want bewaren heeft geen waarde op dit punt
                     # inschrijving.delete()     # geeft db integratie error i.v.m. referenties die nog ergens bestaan
 
+                    # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
+                    wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
+
                     handled = True
+
+                elif product.webwinkel_keuze:
+                    mandje.producten.remove(product)
+
+                    webwinkel_keuze = product.webwinkel_keuze
+
+                    webwinkel_plugin_verwijder_reservering(self.stdout, webwinkel_keuze)
+
+                    mutatie.webwinkel_keuze = None
+                    mutatie.product = None
+                    mutatie.save()
+
+                    # verwijder het BestelProduct, dan verdwijnt deze ook uit het mandje
+                    product.delete()
+
+                    webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
+
+                    webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
+
+                    handled = True
+
                 else:
                     self.stderr.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
                                         product.pk, mandje.pk))
 
-            # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
-            wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
-
             # bereken het totaal opnieuw
+            self._mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
         if not handled:
@@ -391,36 +558,42 @@ class Command(BaseCommand):
                             .producten
                             .select_related('wedstrijd_inschrijving',
                                             'wedstrijd_inschrijving__wedstrijd',
-                                            'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging')
-                            .order_by('wedstrijd_inschrijving__pk')):
+                                            'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
+                                            'webwinkel_keuze')
+                            .order_by('wedstrijd_inschrijving__pk',
+                                      'webwinkel_keuze__pk')):
 
                 if product.wedstrijd_inschrijving:
                     # wedstrijd van de kalender
                     instellingen = self._get_instellingen(product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging)
-                    ontvanger_ver_nr = instellingen.vereniging.ver_nr
+                    ontvanger_ver_nr = instellingen.vereniging.ver_nr       # kan nu ook "via nhb" zijn
+                    try:
+                        ontvanger2producten[ontvanger_ver_nr].append(product)
+                    except KeyError:
+                        ontvanger2producten[ontvanger_ver_nr] = [product]
+
+                elif product.webwinkel_keuze:
+                    # keuze in de webwinkel
+                    ontvanger_ver_nr = self._instellingen_verkoper_webwinkel.vereniging.ver_nr
                     try:
                         ontvanger2producten[ontvanger_ver_nr].append(product)
                     except KeyError:
                         ontvanger2producten[ontvanger_ver_nr] = [product]
             # for
 
-            to_tz = get_default_timezone()
-
             nieuwe_bestellingen = list()
             for ver_nr, producten in ontvanger2producten.items():
 
                 instellingen = self._instellingen_cache[ver_nr]
+                ver = instellingen.vereniging
 
                 # neem een bestelnummer uit
                 bestel_nr = self._bestel_get_volgende_bestel_nr()
 
                 totaal_euro = Decimal('0')
-                ver = None
                 for product in producten:
                     totaal_euro += product.prijs_euro
                     totaal_euro -= product.korting_euro
-                    if ver is None:
-                        ver = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging
                 # for
 
                 bestelling = Bestelling(
@@ -449,13 +622,25 @@ class Command(BaseCommand):
                 bestelling.save()
                 bestelling.producten.set(producten)
 
-                totaal_euro_str = "€ %s" % totaal_euro
+                webwinkel_plugin_bepaal_verzendkosten_bestelling(self.stdout, bestelling)
+
+                self._bestelling_bepaal_btw(bestelling)
+
+                totaal_euro += bestelling.verzendkosten_euro
+                totaal_euro += bestelling.btw_euro_cat1
+                totaal_euro += bestelling.btw_euro_cat2
+                totaal_euro += bestelling.btw_euro_cat3
+
+                bestelling.totaal_euro = totaal_euro
+                bestelling.save(update_fields=['totaal_euro'])
+
+                totaal_euro_str = "€ %.2f" % totaal_euro
                 totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
 
+                when_str = timezone.localtime(bestelling.aangemaakt).strftime('%Y-%m-%d om %H:%M')
+
                 msg = "[%s] Bestelling aangemaakt met %s producten voor totaal %s" % (
-                                                date_format(bestelling.aangemaakt.astimezone(to_tz), 'j F Y H:i'),
-                                                len(producten),
-                                                totaal_euro_str)
+                                                when_str, len(producten), totaal_euro_str)
                 bestelling.log = msg
                 bestelling.save(update_fields=['log'])
 
@@ -481,6 +666,7 @@ class Command(BaseCommand):
             for bestelling in nieuwe_bestellingen:
                 if bestelling.totaal_euro < Decimal('0.001'):
                     self.stdout.write('[INFO] Bestelling pk=%s wordt meteen afgerond' % bestelling.pk)
+                    # TODO: ondersteuning voor gratis producten in de webwinkel
                     for product in bestelling.producten.all():
                         if product.wedstrijd_inschrijving:
                             wedstrijden_plugin_inschrijving_is_betaald(product)
@@ -498,6 +684,8 @@ class Command(BaseCommand):
             # for
 
             # zorg dat het totaal van het mandje ook weer klopt
+            webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
+            self._mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
 
     def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie):
@@ -524,6 +712,9 @@ class Command(BaseCommand):
             # FUTURE: automatisch een restitutie beginnen
 
     def _verwerk_mutatie_betaling_afgerond(self, mutatie):
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
         bestelling = mutatie.bestelling
         is_gelukt = mutatie.betaling_is_gelukt
 
@@ -558,11 +749,17 @@ class Command(BaseCommand):
                     ontvangen_euro += transactie.bedrag_euro_klant
             # for
 
-            self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s euro ontvangen' % (
-                                bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
+            ontvangen_euro_str = "€ %.2f" % ontvangen_euro
+            ontvangen_euro_str = ontvangen_euro_str.replace('.', ',')  # nederlandse komma
+
+            totaal_euro_str = "€ %.2f" % bestelling.totaal_euro
+            totaal_euro_str = totaal_euro_str.replace('.', ',')  # nederlandse komma
+
+            self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s ontvangen' % (
+                                bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro_str, totaal_euro_str))
 
             msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
-                        mutatie.when, ontvangen_euro, bestelling.totaal_euro)
+                        when_str, ontvangen_euro_str, totaal_euro_str)
             bestelling.log += msg
             bestelling.save(update_fields=['log'])
 
@@ -571,24 +768,31 @@ class Command(BaseCommand):
                                     bestelling.mh_bestel_nr(), bestelling.pk))
                 bestelling.status = BESTELLING_STATUS_AFGEROND
 
-                msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % mutatie.when
+                msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % when_str
                 bestelling.log += msg
                 bestelling.save(update_fields=['log'])
 
+                bevat_webwinkel = False
                 for product in bestelling.producten.all():
                     if product.wedstrijd_inschrijving:
                         wedstrijden_plugin_inschrijving_is_betaald(product)
+                    elif product.webwinkel_keuze:
+                        bevat_webwinkel = True
                 # for
 
                 # stuur een e-mail aan de koper
                 stuur_email_naar_koper_betaalbevestiging(bestelling)
+
+                # stuur een e-mail naar het backoffice
+                if bevat_webwinkel:
+                    stuur_email_webwinkel_backoffice(bestelling, self._emailadres_backoffice)
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.mh_bestel_nr(), bestelling.pk))
 
             bestelling.status = BESTELLING_STATUS_MISLUKT
 
-            msg = "\n[%s] Betaling is niet gelukt" % mutatie.when
+            msg = "\n[%s] Betaling is niet gelukt" % when_str
             bestelling.log += msg
             bestelling.save(update_fields=['log'])
 
@@ -596,6 +800,9 @@ class Command(BaseCommand):
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
     def _verwerk_mutatie_overboeking_ontvangen(self, mutatie):
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
         bestelling = mutatie.bestelling
         bedrag_euro = mutatie.bedrag_euro
 
@@ -613,11 +820,11 @@ class Command(BaseCommand):
                             bestelling.mh_bestel_nr(), bestelling.pk))
 
         # koppel een transactie aan de bestelling
-        bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
+        # bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
         transactie = BetaalTransactie(
                             when=timezone.now(),
                             is_handmatig=True,
-                            beschrijving='Overschrijving ontvangen',
+                            beschrijving='Overboeking ontvangen',
                             is_restitutie=False,
                             bedrag_euro_klant=bedrag_euro,
                             bedrag_euro_boeking=bedrag_euro,
@@ -628,7 +835,7 @@ class Command(BaseCommand):
         bestelling.transacties.add(transactie)
 
         msg = "\n[%s] Bestelling heeft een overboeking van %s euro ontvangen" % (
-                    mutatie.when, bedrag_euro)
+                    when_str, bedrag_euro)
         bestelling.log += msg
 
         # controleer of we voldoende ontvangen hebben
@@ -644,7 +851,7 @@ class Command(BaseCommand):
                             bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
 
         msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
-                    mutatie.when, ontvangen_euro, bestelling.totaal_euro)
+                    when_str, ontvangen_euro, bestelling.totaal_euro)
         bestelling.log += msg
 
         bestelling.save(update_fields=['log'])
@@ -654,18 +861,82 @@ class Command(BaseCommand):
                                 bestelling.mh_bestel_nr(), bestelling.pk))
             bestelling.status = BESTELLING_STATUS_AFGEROND
 
-            msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % mutatie.when
+            msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % when_str
             bestelling.log += msg
 
             bestelling.save(update_fields=['status', 'log'])
 
+            bevat_webwinkel = False
             for product in bestelling.producten.all():
                 if product.wedstrijd_inschrijving:
                     wedstrijden_plugin_inschrijving_is_betaald(product)
+                elif product.webwinkel_keuze:
+                    bevat_webwinkel = True
             # for
+
+            # stuur een e-mail naar het backoffice
+            if bevat_webwinkel:
+                stuur_email_webwinkel_backoffice(bestelling, self._emailadres_backoffice)
 
             # stuur een e-mail aan de koper
             stuur_email_naar_koper_betaalbevestiging(bestelling)
+
+    def _verwerk_mutatie_annuleer_bestelling(self, mutatie):
+        """ Annulering van een bestelling + verwijderen van de reserveringen + bevestig via e-mail """
+
+        bestelling = mutatie.bestelling
+
+        status = bestelling.status
+        if status not in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+            self.stdout.write('[WARNING] Kan bestelling %s (pk=%s) niet annuleren, want status = %s' % (
+                                bestelling.mh_bestel_nr(), bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
+            return
+
+        self.stdout.write('[INFO] Bestelling %s (pk=%s) wordt nu geannuleerd' % (bestelling.bestel_nr, bestelling.pk))
+
+        now = timezone.now()
+        when_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
+        bestelling.status = BESTELLING_STATUS_GEANNULEERD
+        bestelling.log += '\n[%s] Bestelling is geannuleerd' % when_str
+        bestelling.save(update_fields=['status', 'log'])
+
+        # stuur een e-mail om de annulering te bevestigen
+        stuur_email_naar_koper_bestelling_details(bestelling)
+
+        # verwijder de reserveringen
+
+        # wedstrijden
+        for product in (bestelling
+                        .producten
+                        .exclude(wedstrijd_inschrijving=None)
+                        .select_related('wedstrijd_inschrijving',
+                                        'wedstrijd_inschrijving__koper',
+                                        'wedstrijd_inschrijving__sessie')
+                        .all()):
+
+            inschrijving = product.wedstrijd_inschrijving
+
+            self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s inschrijving (%s) in mandje van %s' % (
+                                product.pk, inschrijving, inschrijving.koper))
+
+            wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
+        # for
+
+        # webwinkel
+        for product in (bestelling
+                        .producten
+                        .exclude(webwinkel_keuze=None)
+                        .select_related('webwinkel_keuze')
+                        .all()):
+
+            keuze = product.webwinkel_keuze
+
+            self.stdout.write('[INFO] Annuleer: BestelProduct pk=%s webwinkel (%s) in mandje van %s' % (
+                                product.pk, keuze.product, keuze.koper))
+
+            webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
+        # for
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
@@ -673,6 +944,10 @@ class Command(BaseCommand):
         if code == BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: inschrijven op wedstrijd' % mutatie.pk)
             self._verwerk_mutatie_wedstrijd_inschrijven(mutatie)
+
+        elif code == BESTEL_MUTATIE_WEBWINKEL_KEUZE:
+            self.stdout.write('[INFO] Verwerk mutatie %s: webwinkel keuze' % mutatie.pk)
+            self._verwerk_mutatie_webwinkel_keuze(mutatie)
 
         elif code == BESTEL_MUTATIE_VERWIJDER:
             self.stdout.write('[INFO] Verwerk mutatie %s: verwijder product uit mandje' % mutatie.pk)
@@ -698,6 +973,10 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)
             self._verwerk_mutatie_restitutie_uitbetaald(mutatie)
 
+        elif code == BESTEL_MUTATIE_ANNULEER:
+            self.stdout.write('[INFO] Verwerk mutatie %s: annuleer bestelling' % mutatie.pk)
+            self._verwerk_mutatie_annuleer_bestelling(mutatie)
+
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
 
@@ -721,7 +1000,8 @@ class Command(BaseCommand):
                     .objects
                     .exclude(is_verwerkt=True))             # deferred
 
-        mutatie_pks = qset.values_list('pk', flat=True)     # deferred
+        # sorteren zodat ze in de juiste volgorde afgehandeld worden
+        mutatie_pks = qset.order_by('pk').values_list('pk', flat=True)     # deferred
 
         self._hoogste_mutatie_pk = mutatie_latest.pk
 

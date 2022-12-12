@@ -21,7 +21,7 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_TEAM, AG_DOEL_INDIV
-from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog, Speelsterkte, get_sporter_voorkeuren
 import logging
 import copy
 
@@ -55,7 +55,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         objs = list()
         for obj in (HistCompetitieIndividueel
                     .objects
-                    .filter(schutter_nr=sporter.lid_nr)
+                    .filter(sporter_lid_nr=sporter.lid_nr)
                     .exclude(totaal=0)
                     .select_related('histcompetitie')
                     .order_by('histcompetitie__comp_type',      # 18/25
@@ -344,7 +344,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 if functie.rol == 'SEC':
                     # nog geen account aangemaakt, dus haal de naam op van de secretaris volgens CRM
                     if len(namen) == 0 and sporter.bij_vereniging.secretaris_set.count() > 0:
-                        namen = [sec.sporter.volledige_naam() for sec in sporter.bij_vereniging.secretaris_set.all() if sec.sporter]
+                        sec = sporter.bij_vereniging.secretaris_set.all()[0]
+                        namen = [sporter.volledige_naam() for sporter in sec.sporters.all()]
                     context['sec_namen'] = namen
                     context['sec_email'] = functie.bevestigde_email
                 elif functie.rol == 'HWL':
@@ -370,6 +371,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if sterktes.count() == 0:           # pragma: no branch
             sterktes = None
         return sterktes
+
+    @staticmethod
+    def _find_diplomas(sporter):
+        diplomas = list(sporter.opleidingdiploma_set.order_by('-datum_begin'))
+        if len(diplomas) == 0:           # pragma: no branch
+            diplomas = None
+        return diplomas
 
     @staticmethod
     def _find_scores(sporter):
@@ -442,6 +450,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     context['toon_bondscompetities'] = False
 
             context['speelsterktes'] = self._find_speelsterktes(sporter)
+            context['diplomas'] = self._find_diplomas(sporter)
 
         if Bestelling.objects.filter(account=account).count() > 0:
             context['toon_bestellingen'] = True

@@ -45,7 +45,33 @@
         </div>
     </div>
 
-    {% if not mandje_is_leeg %}
+
+    {% if mandje_is_leeg %}
+
+        <!-- toon een paar keuzes om verder te gaan -->
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                {% url 'Plein:plein' as card_url %}
+                {% include 'plein/card.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
+
+                <!-- wedstrijdkalender -->
+                {% url 'Kalender:landing-page' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+
+                <!-- TODO: toon opleidingen -->
+
+                <!-- webwinkel -->
+                {% url 'Webwinkel:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+
+            </div>
+        </div>
+
+
+    {% else %}
 
         <!-- blauwe balk met dialoog venster -->
         <div class="row-nhb-blauw">
@@ -82,6 +108,32 @@
                                 {% endif %}
                             {% endfor %}
 
+                            <!-- verzendkosten -->
+                            {% if mandje.verzendkosten_euro > 0 %}
+                                <tr>
+                                    <td colspan="2">Verzendkosten</td>
+                                    <td class="right-align">&euro;&nbsp;{{ mandje.verzendkosten_euro }}</td>
+                                    <td><!-- knoppen --></td>
+                                </tr>
+                            {% endif %}
+
+                            <!-- btw -->
+                            {% if mandje.btw_percentage_cat1 or mandje.btw_percentage_cat2 or mandje.btw_percentage_cat3 %}
+                                <tr>
+                                    <td colspan="2">
+                                        {% if mandje.btw_percentage_cat1 %}<span>BTW {{ mandje.btw_percentage_cat1 }}</span><br>{% endif %}
+                                        {% if mandje.btw_percentage_cat2 %}<span>BTW {{ mandje.btw_percentage_cat2 }}</span><br>{% endif %}
+                                        {% if mandje.btw_percentage_cat3 %}<span>BTW {{ mandje.btw_percentage_cat3 }}</span><br>{% endif %}
+                                    </td>
+                                    <td class="right-align">
+                                        {% if mandje.btw_percentage_cat1 %}<span>&euro;&nbsp;{{ mandje.btw_euro_cat1 }}</span><br>{% endif %}
+                                        {% if mandje.btw_percentage_cat2 %}<span>&euro;&nbsp;{{ mandje.btw_euro_cat2 }}</span><br>{% endif %}
+                                        {% if mandje.btw_percentage_cat3 %}<span>&euro;&nbsp;{{ mandje.btw_euro_cat3 }}</span><br>{% endif %}
+                                    </td>
+                                    <td><!-- knoppen --></td>
+                                </tr>
+                            {% endif %}
+
                             <!-- totaal -->
                             <tr>
                                 <td class="hide-on-small-only"></td>
@@ -108,7 +160,7 @@
                                 <form action="{{ url_bestellen }}" method="post">
                                     {% csrf_token %}
                                     <button id="id_bestellen" class="btn-nhb-rood">
-                                        <i class="material-icons-round right">shopping_cart_checkout</i>Bestelling afronden</button>
+                                        <i class="material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
                                 </form>
                             </div>
                         {% endif %}
@@ -120,18 +172,42 @@
         </div>
 
 
+        {% if toon_postadres %}
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Afleveradres</h4>
+                </div>
+            </div>
+
+            <!-- blauw balk met wit informatie veld -->
+            <div class="row-nhb-blauw">
+                <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                    <div class="white" style="padding:10px">
+                        <p>De producten worden verstuurd naar jouw postadres:</p>
+                        <p>{{ koper_sporter.postadres_1 }}<br>{{ koper_sporter.postadres_2 }}{% if koper_sporter.postadres_3 %}<br>{{ koper_sporter.postadres_3 }}{% endif %}</p>
+                        <p>Als dit adres niet klopt (of onvolledig is) vraag dan de secretaris van jouw vereniging om dit aan te passen.</p>
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+
+
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
                 <h4>Voorwaarden</h4>
-                <p>Onderstaand document beschrijft de verkoopvoorwaarden voor bestellingen via deze site.</p>
+                <p>Onderstaande documenten beschrijven de verkoopvoorwaarden voor bestellingen via deze site.</p>
             </div>
         </div>
 
         <!-- blauwe balk met kaartjes -->
         <div class="row-nhb-blauw">
             <div class="col s12">
-                {% include 'plein/card.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
+                {% include 'plein/card.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
+
+                {% include 'plein/card.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
             </div>
         </div>
 

@@ -1,0 +1,35 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Handleidingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Handleidingen</h3>
+            <p>Deze handleidingen zijn bedoeld om je op gang te helpen.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            {% include 'plein/card.dtl' with title="Voor leden" text="Introductie voor NHB leden: account aanmaken, voorkeuren, inschrijven." icon="article" extern_open=True url=url_handleiding_leden %}
+
+            {% include 'plein/card.dtl' with title="Voor beheerders" text="Instructies voor beheerders: uitleg over de tweede factor en wissel-van-rol." icon="article" extern_open=True url=url_handleiding_beheerders %}
+
+            {% include 'plein/card.dtl' with title="Voor verenigingen" text="Instructies voor verenigingen: instellingen, bondscompetities en wedstrijden organiseren." icon="article" extern_open=True url=url_handleiding_vereniging %}
+
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="plein-handleidingen" %}
+
+{% endblock %}

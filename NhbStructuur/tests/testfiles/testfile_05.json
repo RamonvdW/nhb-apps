@@ -1,0 +1,58 @@
+{"rayons": [
+  {"rayon_number":4,
+   "name1":"Rayon 99"}
+ ],
+  "regions": [
+    {"region_number":111,
+     "name2": "Regio 111",
+     "rayon_number": 3
+    }
+  ],
+  "clubs": [
+    {"club_number": 1000,
+     "region_number": 111,
+     "name3": "Grote Club",
+     "prefix": null,
+     "secretaris": [],
+     "email": "test@groteclub.archery",
+     "website": "www.groteclub.archery",
+     "has_disabled_facilities": true,
+     "location_name": null,
+     "postal_code": null,
+     "address": null,
+     "phone_business": null,
+     "phone_private": null,
+     "phone_mobile": null,
+     "iso_abbr": null,
+     "latitude": null,
+     "longitude": null
+    }
+  ],
+  "members": [
+    {"member_number": 100001,
+      "club_number": 1000,
+      "name4": "Achternaam",
+      "prefix": "van der",
+      "first_name": "Voornaam",
+      "initials": "V.",
+      "gender": "F",
+      "email": "",
+      "birthday": "2000-02-01",
+      "birthplace": null,
+      "member_from": "2000-01-01",
+      "para_code": null,
+      "address": null,
+      "postal_code": null,
+      "location_name": null,
+      "phone_business": null,
+      "phone_private": null,
+      "phone_mobile": null,
+      "iso_abbr": null,
+      "latitude": null,
+      "longitude": null,
+      "blocked": false,
+      "wa_id": null
+    }
+  ],
+  "extra": [1,2,3]
+}

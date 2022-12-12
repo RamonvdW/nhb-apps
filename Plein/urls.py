@@ -14,6 +14,10 @@ urlpatterns = [
          views.PleinView.as_view(),
          name='plein'),
 
+    path('handleidingen/',
+         views.HandleidingenView.as_view(),
+         name='handleidingen'),
+
     path('privacy/',
          views.PrivacyView.as_view(),
          name='privacy'),

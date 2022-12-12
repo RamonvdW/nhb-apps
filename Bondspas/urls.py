@@ -5,19 +5,23 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Bondspas import views
+from Bondspas import view_online
 
 
 app_name = 'Bondspas'
 
 urlpatterns = [
     path('toon/',
-         views.ToonBondspasView.as_view(),
+         view_online.ToonBondspasView.as_view(),
          name='toon-bondspas'),
 
-    path('check-status/',
-         views.DynamicBondspasCheckStatus.as_view(),
-         name='dynamic-check-status'),
+    path('dynamic/ophalen/',
+         view_online.DynamicBondspasOphalenView.as_view(),
+         name='dynamic-ophalen'),
+
+    path('toon/van-lid/<lid_nr>/',
+         view_online.ToonBondspasBeheerderView.as_view(),
+         name='toon-bondspas-van')
 ]
 
 # end of file

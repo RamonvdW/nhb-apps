@@ -120,8 +120,10 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                 obj.status_str = "Actief"
                 if obj.regio_organiseert_teamcompetitie:
                     # check hoever deze regio is met de teamcompetitie rondes
-                    if obj.huidige_team_ronde < 8:
+                    if obj.huidige_team_ronde <= 7:
                         obj.status_str += ' (team ronde %s)' % obj.huidige_team_ronde
+                    elif obj.huidige_team_ronde == 99:
+                        obj.status_str += ' / Teams klaar'
         # for
 
         return regio_deelcomps

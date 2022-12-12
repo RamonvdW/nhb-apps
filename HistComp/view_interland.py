@@ -93,7 +93,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
                         # zoek de sporter erbij
                         try:
-                            sporter = lid_nr2sporter[indiv.schutter_nr]
+                            sporter = lid_nr2sporter[indiv.sporter_lid_nr]
                         except KeyError:
                             sporter = None
 

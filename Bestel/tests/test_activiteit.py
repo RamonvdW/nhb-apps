@@ -8,17 +8,15 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.models import (Bestelling, BestelProduct,
-                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
-                           BESTELLING_STATUS_MISLUKT)
+from Bestel.models import Bestelling, BestelProduct, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING
 from Betaal.models import BetaalInstellingenVereniging
+from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD, WedstrijdLocatie,
-                                WedstrijdInschrijving, WedstrijdKorting,
-                                INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
+                                WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_VERENIGING)
+from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
 
@@ -51,6 +49,8 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen_nhb = instellingen
 
+        self.assertEqual(settings.BETAAL_VIA_NHB_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
+
         ver = NhbVereniging(
                     ver_nr=1000,
                     naam="Grote Club",
@@ -60,7 +60,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
                     kvk_nummer='KvK1234',
                     website='www.bb.not',
                     contact_email='info@bb.not',
-                    telefoonnummer = '12345678')
+                    telefoonnummer='12345678')
         ver.save()
 
         instellingen = BetaalInstellingenVereniging(
@@ -140,17 +140,62 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
         korting = WedstrijdKorting(
                     geldig_tot_en_met=datum,
+                    soort=WEDSTRIJD_KORTING_VERENIGING,
                     uitgegeven_door=ver,
-                    voor_vereniging=ver,
                     percentage=42)
         korting.save()
         korting.voor_wedstrijden.add(wedstrijd)
         self.korting = korting
 
+        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+
+        product = WebwinkelProduct(
+                        omslag_titel='Test titel 1',
+                        onbeperkte_voorraad=True,
+                        bestel_begrenzing='',
+                        prijs_euro="1.23")
+        product.save()
+        self.product = product
+
+        keuze = WebwinkelKeuze(
+                        wanneer=now,
+                        koper=self.account_admin,
+                        product=product,
+                        aantal=1,
+                        totaal_euro=Decimal('1.23'),
+                        log='test')
+        keuze.save()
+
+        product2 = BestelProduct(
+                        webwinkel_keuze=keuze,
+                        prijs_euro=Decimal(1.23))
+        product2.save()
+        self.product2 = product2
+
+        bestelling2 = Bestelling(
+                        bestel_nr=1235,
+                        account=self.account_admin,
+                        ontvanger=self.instellingen_nhb,
+                        verkoper_naam='Ver naam',
+                        verkoper_adres1='Ver adres 1',
+                        verkoper_adres2='Ver adres 2',
+                        verkoper_kvk='Ver Kvk',
+                        verkoper_email='contact@ver.not',
+                        verkoper_telefoon='0123456799',
+                        verkoper_iban='NL2BANK0123456799',
+                        verkoper_bic='VER2BIC',
+                        verkoper_heeft_mollie=False,
+                        totaal_euro='1.23',
+                        status=BESTELLING_STATUS_WACHT_OP_BETALING,
+                        log='Een beginnetje\n')
+        bestelling2.save()
+        bestelling2.producten.add(product2)
+        self.bestelling2 = bestelling2
+
     def _maak_bestellingen(self):
         bestel = Bestelling(
                     bestel_nr=1234567,
-                    #account=       # van wie is deze bestelling
+                    # account=       # van wie is deze bestelling
                     ontvanger=self.instellingen,
                     verkoper_naam='Test',
                     verkoper_adres1='Adres1',
@@ -227,7 +272,22 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
         self._maak_bestellingen()
 
+        # zoekterm bestelnummer
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit + '?zoekterm=MH-1234')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/activiteit.dtl', 'plein/site_layout.dtl'))
+
         # toon de nieuwste bestellingen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_wissel_naar_functie(self.functie_mww)
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

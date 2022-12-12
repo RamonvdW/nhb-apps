@@ -100,9 +100,8 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                     .filter(histcompetitie=histcomp)):
 
             # gebruik scores van IB voor gemiddelde van TR (overgang 2021/2022 --> 2022/2023)
-            # FUTURE: verwijder
-            if obj.boogtype == 'IB':        # pragma: no cover
-                obj.boogtype = 'TR'
+            # if obj.boogtype == 'IB':
+            #     obj.boogtype = 'TR'
 
             if (obj.gemiddelde > AG_NUL
                     and obj.boogtype in boogtype_dict
@@ -110,7 +109,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
 
                 # haal het sporterboog record op, of maak een nieuwe aan
                 try:
-                    tup = (obj.schutter_nr, obj.boogtype)
+                    tup = (obj.sporter_lid_nr, obj.boogtype)
                     sporterboog = sporterboog_cache[tup]
                 except KeyError:
                     # nieuw record nodig
@@ -119,7 +118,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                     sporterboog.voor_wedstrijd = True
 
                     try:
-                        sporterboog.sporter = sporter_dict[obj.schutter_nr]
+                        sporterboog.sporter = sporter_dict[obj.sporter_lid_nr]
                     except KeyError:
                         # geen lid meer - skip
                         sporterboog = None

@@ -51,7 +51,6 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 
@@ -169,7 +168,6 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         ver2.naam = "Andere Club"
         ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
-        # secretaris kan nog niet ingevuld worden
         ver2.save()
         self.nhbver2 = ver2
 

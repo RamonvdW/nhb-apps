@@ -49,7 +49,7 @@ def get_sporter_regio_nr(request):
     elif rol_nu == Rollen.ROL_SPORTER:
         # sporter
         account = request.user
-        if account.sporter_set.count() > 0:
+        if account.sporter_set.count() > 0:         # pragma: no branch
             sporter = account.sporter_set.select_related('bij_vereniging__regio').all()[0]
             if sporter.is_actief_lid and sporter.bij_vereniging:
                 nhb_ver = sporter.bij_vereniging
@@ -408,12 +408,18 @@ class UitslagenRegioTeamsView(TemplateView):
                   .prefetch_related('teams')
                   .filter(deelcompetitie=deelcomp))
 
-        team_pk2poule = dict()
+        team_pk2poule = dict()                      # [team.pk] = poule
+        poule_pk2laagste_klasse_volgorde = dict()   # [team.pk] = team_klasse.volgorde
         for poule in poules:
             heeft_poules = True
             heeft_teams = False
+            poule_pk2laagste_klasse_volgorde[poule.pk] = 9999
 
-            for team in poule.teams.select_related('team_type').order_by('pk'):
+            for team in poule.teams.select_related('team_type', 'team_klasse'):
+                if team.team_klasse:
+                    poule_pk2laagste_klasse_volgorde[poule.pk] = min(poule_pk2laagste_klasse_volgorde[poule.pk],
+                                                                     team.team_klasse.volgorde)
+
                 if team.team_type == context['teamtype']:
                     team_pk2poule[team.pk] = poule
                     heeft_teams = True
@@ -476,7 +482,7 @@ class UitslagenRegioTeamsView(TemplateView):
                 # laat deze voorlopig uit de uitslag
                 pass
             else:
-                tup = (poule.pk, team.team_klasse.volgorde,
+                tup = (poule_pk2laagste_klasse_volgorde[poule.pk], team.team_klasse.volgorde,
                        0-team.totaal_punten,        # hoogste WP bovenaan
                        0-team.totaal_score,         # hoogste score bovenaan
                        team.pk, poule, team)

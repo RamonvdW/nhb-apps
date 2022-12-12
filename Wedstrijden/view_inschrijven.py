@@ -15,8 +15,8 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_IFAA, KalenderWedstrijdklasse
-from Bestel.mandje import mandje_tel_inhoud
-from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
+from Bestel.operations.mandje import mandje_tel_inhoud
+from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Plein.menu import menu_dynamics
@@ -102,16 +102,17 @@ class WedstrijdDetailsView(TemplateView):
                     klasse.beschrijving += ' [%s]' % klasse.afkorting
                 # for
         # for
+        context['toon_sessies'] = heeft_sessies
 
         # om aan te melden is een account nodig
         # extern beheerder wedstrijden kan je niet voor aanmelden
         # een wedstrijd zonder sessie is een placeholder op de agenda
-        context['kan_aanmelden'] = self.request.user.is_authenticated and not wedstrijd.extern_beheerd and heeft_sessies
+        context['kan_aanmelden'] = self.request.user.is_authenticated and not wedstrijd.extern_beheerd
 
         # inschrijven moet voor de sluitingsdatum
         context['kan_inschrijven'] = now_date < wedstrijd.inschrijven_voor
 
-        context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven']) or wedstrijd.extern_beheerd
+        context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or wedstrijd.extern_beheerd
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True

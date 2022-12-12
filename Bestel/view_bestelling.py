@@ -10,13 +10,14 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_IFAA
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
+                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
+                           BESTELLING_STATUS_GEANNULEERD)
+from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
+from Bestel.operations.mutaties import bestel_mutatieverzoek_annuleer
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.rol import Functie, Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
 from decimal import Decimal
 
 
@@ -65,6 +66,8 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
 
                 if product.wedstrijd_inschrijving:
                     beschrijving.append(product.wedstrijd_inschrijving.korte_beschrijving())
+                elif product.webwinkel_keuze:
+                    beschrijving.append(product.webwinkel_keuze.product.omslag_titel)
                 else:
                     beschrijving.append("??")
             # for
@@ -74,6 +77,7 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                 # nieuw is een interne state. Na een verlopen/mislukte betalen wordt deze status ook gezet.
                 # toon daarom als "te betalen"
                 status = BESTELLING_STATUS_WACHT_OP_BETALING
+
             bestelling.status_str = BESTELLING_STATUS2STR[status]
             bestelling.status_aandacht = (status == BESTELLING_STATUS_WACHT_OP_BETALING)
 
@@ -86,6 +90,11 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
         account = self.request.user
 
         self._get_bestellingen(account, context)
+
+        # contactgegevens voor hulpvragen
+        functie = Functie.objects.filter(rol='MWW')[0]
+        context['email_webshop'] = functie.bevestigde_email
+        context['email_support'] = settings.EMAIL_SUPPORT
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
@@ -130,84 +139,41 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                                      'wedstrijd_inschrijving__sporterboog',
                                      'wedstrijd_inschrijving__sporterboog__boogtype',
                                      'wedstrijd_inschrijving__sporterboog__sporter',
-                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
+                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging',
+                                     'webwinkel_keuze',
+                                     'webwinkel_keuze__product')
                      .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
 
         for product in producten:
             # maak een beschrijving van deze regel
-            product.beschrijving = beschrijving = list()
+            product.beschrijving = beschrijf_product(product)
+
+            product.gebruikte_korting_str, product.combi_reden = beschrijf_korting(product)
+            product.is_combi_korting = len(product.combi_reden) > 0
 
             if product.wedstrijd_inschrijving:
-                inschrijving = product.wedstrijd_inschrijving
+                pass
 
-                tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
-                beschrijving.append(tup)
+            elif product.webwinkel_keuze:
+                pass
 
-                tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
-                beschrijving.append(tup)
-
-                tup = ('Bij vereniging', inschrijving.wedstrijd.organiserende_vereniging)
-                beschrijving.append(tup)
-
-                sessie = inschrijving.sessie
-                tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
-                beschrijving.append(tup)
-
-                sporterboog = inschrijving.sporterboog
-                tup = ('Sporter', '%s' % sporterboog.sporter.lid_nr_en_volledige_naam())
-                beschrijving.append(tup)
-
-                sporter_ver = sporterboog.sporter.bij_vereniging
-                if sporter_ver:
-                    ver_naam = sporter_ver.ver_nr_en_naam()
-                else:
-                    ver_naam = 'Onbekend'
-                tup = ('Van vereniging', ver_naam)
-                beschrijving.append(tup)
-
-                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                    tup = ('Schietstijl', '%s' % sporterboog.boogtype.beschrijving)
-                else:
-                    tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
-                beschrijving.append(tup)
-
-                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
-                    tup = ('Wedstrijdklasse', '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
-                                                           inschrijving.wedstrijdklasse.afkorting))
-                else:
-                    tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
-                beschrijving.append(tup)
-
-                tup = ('Locatie', inschrijving.wedstrijd.locatie.adres.replace('\n', ', '))
-                beschrijving.append(tup)
-
-                tup = ('E-mail organisatie', inschrijving.wedstrijd.contact_email)
-                beschrijving.append(tup)
-
-                tup = ('Telefoon organisatie', inschrijving.wedstrijd.contact_telefoon)
-                beschrijving.append(tup)
-
-                if inschrijving.korting:
-                    korting = inschrijving.korting
-                    product.gebruikte_korting_str = "Korting: %d%%" % korting.percentage
-                    if korting.soort == WEDSTRIJD_KORTING_COMBI:
-                        product.is_combi_korting = True
-                        product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
-                elif product.korting_euro:
-                    product.gebruikte_korting_str = "Onbekende korting"
-                    bevat_fout = True
-
-                controleer_euro += product.prijs_euro
-                controleer_euro -= product.korting_euro
             else:
                 tup = ('Fout', 'Onbekend product')
-                beschrijving.append(tup)
+                product.beschrijving.append(tup)
                 bevat_fout = True
+
+            controleer_euro += product.prijs_euro
+            controleer_euro -= product.korting_euro
         # for
 
         # nooit een negatief totaalbedrag tonen want we geven geen geld weg
-        if controleer_euro < 0.0:
-            controleer_euro = 0.0
+        if controleer_euro < 0:
+            controleer_euro = Decimal(0)
+
+        controleer_euro += bestelling.verzendkosten_euro
+        controleer_euro += bestelling.btw_euro_cat1
+        controleer_euro += bestelling.btw_euro_cat2
+        controleer_euro += bestelling.btw_euro_cat3
 
         if controleer_euro != bestelling.totaal_euro:
             bevat_fout = True
@@ -257,22 +223,30 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         context['transacties'], transacties_euro = self._beschrijf_transacties(bestelling)
 
-        rest_euro = bestelling.totaal_euro - transacties_euro
-        if rest_euro > 0:
-            context['rest_euro'] = rest_euro
+        if bestelling.status == BESTELLING_STATUS_GEANNULEERD:
+            context['is_geannuleerd'] = True
+        else:
+            rest_euro = bestelling.totaal_euro - transacties_euro
+            if rest_euro > 0:
+                context['rest_euro'] = rest_euro
 
-        if rest_euro >= Decimal('0.01'):
-            # betaling is vereist
+            if rest_euro >= Decimal('0.01'):
+                # betaling is vereist
 
-            if bestelling.ontvanger.moet_handmatig():
-                # betaling moet handmatig
-                context['moet_handmatig'] = True
-            else:
-                # betaling gaat via Mollie
-                context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                if bestelling.ontvanger.moet_handmatig():
+                    # betaling moet handmatig
+                    context['moet_handmatig'] = True
+                else:
+                    # betaling gaat via Mollie
+                    context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                                                       kwargs={'bestel_nr': bestelling.bestel_nr})
+
+            if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+                context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
                                                    kwargs={'bestel_nr': bestelling.bestel_nr})
 
-        context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
+        context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
+        context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 
         context['producten'], context['bevat_fout'] = self._beschrijf_inhoud_bestelling(bestelling)
 
@@ -299,12 +273,12 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu = None      # wordt gezet door dispatch()
         self.bestelling = None  # wordt gezet door dispatch()
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.rol_nu != Rollen.ROL_NONE
+        return self.rol_nu not in (Rollen.ROL_NONE, None)
 
     def dispatch(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen voor get_queryset/get_context_data
@@ -350,28 +324,17 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als de gebruiker op de knop BETALEN drukt in de bestelling
             de enige taak van deze functie is een bestelling met status MISLUKT terug zetten naar NIEUW.
         """
-
-        account = request.user
-
-        try:
-            bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
-            bestel_nr = int(bestel_nr)
-            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
-        except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
-            raise Http404('Niet gevonden')
-
-        if bestelling.status == BESTELLING_STATUS_MISLUKT:
-            bestelling.status = BESTELLING_STATUS_NIEUW
-            bestelling.save(update_fields=['status'])
+        if self.bestelling.status == BESTELLING_STATUS_MISLUKT:
+            self.bestelling.status = BESTELLING_STATUS_NIEUW
+            self.bestelling.save(update_fields=['status'])
 
         # doorsturen naar de GET
         url = reverse('Bestel:bestelling-afrekenen',
-                      kwargs={'bestel_nr': bestelling.bestel_nr})
+                      kwargs={'bestel_nr': self.bestelling.bestel_nr})
         return HttpResponseRedirect(url)
 
 
@@ -409,7 +372,9 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             out['status'] = 'nieuw'
 
             # start een nieuwe transactie op
-            beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.mh_bestel_nr())
+            # LET OP: deze tekst moeten we kort houden, want Mollie + iDEAL kapt af op 36 tekens
+            #         dus MijnHandboogsport bestelling MH-1234567 verliest de laatste 4 cijfers
+            beschrijving = "%s %s" % (bestelling.mh_bestel_nr(), settings.AFSCHRIFT_SITE_NAAM)
 
             # TODO: is het realistisch dat status NIEUW al transacties heeft?
             rest_euro = bestelling.totaal_euro
@@ -449,6 +414,9 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
         elif bestelling.status == BESTELLING_STATUS_MISLUKT:
             out['status'] = 'mislukt'
+
+        else:       # pragma: no cover
+            raise Http404('Onbekende status')
 
         # niet gebruiken: raise Http404('Onbekende status')
         # want een 404 leidt tot een foutmelding pagina met status 200 ("OK")
@@ -523,6 +491,44 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
+
+
+class AnnuleerBestellingView(UserPassesTestMixin, View):
+
+    """ Deze functie wordt gebruikt om een bestelling te annuleren. """
+
+    # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu != Rollen.ROL_NONE            # inlog vereist
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als de gebruiker op de knop ANNULEREN drukt in de bestelling
+            de enige taak van deze functie is een bestelling aan te passen naar BESTEL_STATUS_.
+        """
+
+        account = request.user
+        snel = str(request.POST.get('snel', ''))[:1]
+
+        try:
+            bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
+            bestel_nr = int(bestel_nr)
+            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
+        except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
+            raise Http404('Niet gevonden')
+
+        if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+            # verzoek de achtergrondtaak om de annulering te verwerken
+            bestel_mutatieverzoek_annuleer(bestelling, snel == '1')
+
+        # redirect naar het bestellingen overzicht
+        url = reverse('Bestel:toon-bestellingen')
+        return HttpResponseRedirect(url)
 
 
 # end of file

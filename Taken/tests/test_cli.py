@@ -69,4 +69,11 @@ class TestTakenCLI(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Account matching query does not exist' in f1.getvalue())
 
+        # er zijn meerdere RCL's, dus dit is niet duidelijk genoeg
+        with self.assert_max_queries(20):
+            f1, f2 = self.run_management_command('maak_taak', 'RCL', 'BlaBla', '2020-02-03', 'Hallo')
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Meerdere functies gevonden die voldoen aan 'RCL'" in f1.getvalue())
+
 # end of file

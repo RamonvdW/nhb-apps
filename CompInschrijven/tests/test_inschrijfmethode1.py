@@ -69,7 +69,6 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver = ver
 
@@ -116,7 +115,6 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         ver.naam = "Kleine Club"
         ver.ver_nr = "1100"
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver2 = ver
 

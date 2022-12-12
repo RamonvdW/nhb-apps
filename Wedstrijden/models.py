@@ -352,6 +352,11 @@ class Wedstrijd(models.Model):
     # status van deze wedstrijd: ontwerp --> goedgekeurd --> geannuleerd
     status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS, default='O')
 
+    # mogelijkheid om een wedstrijd niet op de kalender te tonen
+    # use case: 2-daagse wedstrijd wordt geannuleerd en vervangen door twee 1-daagse wedstrijden
+    #           als er inschrijvingen aan hangen dan wil je de wedstrijd niet verwijderen
+    toon_op_kalender = models.BooleanField(default=True)
+
     # wanneer is de wedstrijd (kan meerdere dagen beslaan)
     datum_begin = models.DateField()
     datum_einde = models.DateField()
@@ -468,9 +473,6 @@ class WedstrijdKorting(models.Model):
     # voor welke individuele sporter is deze korting?
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # voor leden van welke vereniging is deze korting?
-    voor_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.SET_NULL, null=True, blank=True)
-
     def __str__(self):
         return "[%s] %s %d%%" % (self.uitgegeven_door.pk, WEDSTRIJD_KORTING_SOORT_TO_STR[self.soort], self.percentage)
 
@@ -520,7 +522,8 @@ class WedstrijdInschrijving(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        return "Inschrijving voor %s" % self.sporterboog.sporter.lid_nr_en_volledige_naam()
+        return "Inschrijving voor %s: [%s]" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                                               INSCHRIJVING_STATUS_TO_STR[self.status])
 
     def korte_beschrijving(self):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """

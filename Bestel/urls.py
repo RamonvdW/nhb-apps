@@ -32,6 +32,10 @@ urlpatterns = [
          view_bestelling.BestellingAfrekenenView.as_view(),
          name='bestelling-afrekenen'),
 
+    path('annuleer/<bestel_nr>/',
+         view_bestelling.AnnuleerBestellingView.as_view(),
+         name='annuleer-bestelling'),
+
     path('check-status/<bestel_nr>/',
          view_bestelling.DynamicBestellingCheckStatus.as_view(),
          name='dynamic-check-status'),

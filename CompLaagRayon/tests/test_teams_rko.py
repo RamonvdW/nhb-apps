@@ -25,7 +25,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
 
     regio_nr = 101
-    ver_nr = 1012  # rayon 1, regio 101, vereniging 2
+    ver_nr = 0      # wordt in setupTestData ingevuld
 
     testdata = None
 
@@ -36,6 +36,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
+        cls.ver_nr = cls.testdata.regio_ver_nrs[101][2]
         cls.testdata.maak_bondscompetities()
         s2 = timezone.now()
         d = s2 - s1
@@ -144,8 +145,8 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
         # verpruts de klasse van 1 team
         team = KampioenschapTeam.objects.get(pk=self.testdata.comp25_kampioenschapteams[0].pk)
-        for klasse in self.testdata.comp25_klassen_team['R2']:
-            if not klasse.is_voor_teams_rk_bk:
+        for klasse in self.testdata.comp25_klassen_team['R2']:          # pragma: no branch
+            if not klasse.is_voor_teams_rk_bk:                          # pragma: no branch
                 team.team_klasse = klasse
                 team.save(update_fields=['team_klasse'])
                 break   # from the for

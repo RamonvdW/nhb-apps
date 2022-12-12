@@ -1,0 +1,89 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bondspas{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Jouw digital bondspas</h3>
+        </div>
+    </div>
+
+    <!-- blauw balk  -->
+    <div class="row-nhb-blauw">
+
+        <!-- tijdelijk wit informatieveld, totdat de volledige bondspas opgehaald is -->
+        <div class="col s12 m10 offset-m1 l6 offset-l3 xl6 offset-xl3">
+            <div id="id_even_wachten" class="white" style="padding:10px">
+                <p>Je bondspas wordt opgehaald</p>
+            </div>
+        </div>
+
+        <!-- de bondspas (wordt pas getoond na ophalen bondspas plaatje) -->
+        <div class="col s12">
+            <img id="id_image" alt="Bondspas" src="#" style="max-width:800px; width:100%; height:auto; display:none"/>
+        </div>
+    </div>
+
+    <script type="application/javascript">
+        function ophalen_klaar(xhr, el_img)
+        {
+            // console.log('ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status);
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200)
+            {
+                // verzoek is klaar en we hebben een antwoord
+                // responseText is leeg bij connection failure
+                if (xhr.responseText !== "")
+                {
+                    const rsp = JSON.parse(xhr.responseText);
+                    const bondspas_data = rsp['bondspas_base64'];
+
+                    el_img.src = "data:image/jpeg;base64," + bondspas_data;
+                    el_img.style.display = "inline-block";
+
+                    // "Je bondspas wordt opgehaald" bericht weghalen
+                    const el = document.getElementById('id_even_wachten');
+                    el.style.display = "none";
+                }
+            }
+        }
+
+        function ophalen_timeout(xhr)
+        {
+            // voorkom reactie bij ontvangst laat antwoord
+            xhr.abort();
+
+            // note: ophalen_klaar wordt zo aangeroepen met readyState=0
+            // deze kan een melding doen naar de gebruiker
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const el_img = document.getElementById('id_image');
+
+            let xhr = new XMLHttpRequest();
+            el_img.dataset.xhr = xhr;       // ter voorkoming parallelle verzoeken
+
+            // POST voorkomt caching
+            xhr.open("POST", "{{ url_dynamic }}", true);         // true = async
+            xhr.timeout = 60000;                                 // 60 sec voor trage verbinding
+            xhr.onloadend = function(){
+                                ophalen_klaar(xhr, el_img)
+                                delete el_img.dataset.xhr       // clean-up
+                            };
+            xhr.ontimeout = function(){ ophalen_timeout(xhr) };
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhr.send();
+        });
+    </script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="bondspas-toon-bondspas-sporter" %}
+
+{% endblock %}

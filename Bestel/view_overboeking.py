@@ -5,14 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.models import Bestelling, BESTELLING_STATUS_AFGEROND
-from Bestel.mutaties import bestel_overboeking_ontvangen
-from Betaal.models import BetaalTransactie
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Bestel.operations.mutaties import bestel_overboeking_ontvangen
+from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from decimal import Decimal, InvalidOperation
 
@@ -35,7 +33,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_MWW)
 
     def _zoek_overboekingen(self):
 
@@ -54,7 +52,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                 overboekingen.append(transactie)
             # for
 
-            if len(overboekingen) >= 100:
+            if len(overboekingen) >= 100:       # pragma: no cover
                 break
         # for
 
@@ -70,11 +68,17 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         context['overboekingen'] = self._zoek_overboekingen()
 
-        context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
-            (None, 'Overboekingen'),
-        )
+        if self.rol_nu == Rollen.ROL_MWW:
+            context['kruimels'] = (
+                (reverse('Webwinkel:manager'), 'Webwinkel'),
+                (None, 'Overboekingen'),
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+                (None, 'Overboekingen'),
+            )
 
         menu_dynamics(self.request, context)
         return context
@@ -142,11 +146,17 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         context['overboekingen'] = self._zoek_overboekingen()
 
-        context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
-            (None, 'Overboekingen'),
-        )
+        if self.rol_nu == Rollen.ROL_MWW:
+            context['kruimels'] = (
+                (reverse('Webwinkel:manager'), 'Webwinkel'),
+                (None, 'Overboekingen'),
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+                (None, 'Overboekingen'),
+            )
 
         menu_dynamics(self.request, context)
         return render(request, TEMPLATE_OVERBOEKING_ONTVANGEN, context)

@@ -42,7 +42,6 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         ver.naam = "Eerste Club"
         ver.ver_nr = "1001"
         ver.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 
@@ -50,7 +49,6 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         ver.naam = "Tweede Club"
         ver.ver_nr = "1002"
         ver.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver2 = ver
 
@@ -58,7 +56,6 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         ver.naam = "Derde Club"
         ver.ver_nr = "1003"
         ver.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver3 = ver
 

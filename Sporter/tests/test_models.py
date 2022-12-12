@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from Account.models import Account
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging, NhbRegio
-from Sporter.models import Sporter, SporterBoog, Speelsterkte, Secretaris
+from Sporter.models import Sporter, SporterBoog, Speelsterkte
 import datetime
 
 
@@ -103,11 +103,6 @@ class TestSporterModels(TestCase):
                     category='test',
                     volgorde=1,
                     datum='2001-02-03',
-                    sporter=self.sporter1)
-        self.assertTrue(str(obj) != '')
-
-        obj = Secretaris(
-                    vereniging=self.nhbver1,
                     sporter=self.sporter1)
         self.assertTrue(str(obj) != '')
 

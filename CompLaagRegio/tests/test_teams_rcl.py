@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                LAAG_BK, LAAG_RK, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog,
+                               RegioCompetitieSchutterBoog, CompetitieMutatie,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES)
 from Competitie.operations import competities_aanmaken
@@ -78,7 +78,6 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         ver.naam = "Zuidelijke Club"
         ver.ver_nr = 1111
         ver.regio = self.regio_112
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver_112 = ver
 
@@ -87,7 +86,6 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = 1000
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver_101 = ver
 
@@ -718,6 +716,72 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
+
+    def test_laatste_ronde(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 0)
+
+        self.deelcomp_regio112_18.regio_team_punten_model = TEAM_PUNTEN_MODEL_SOM_SCORES
+        self.deelcomp_regio112_18.save(update_fields=['regio_team_punten_model'])
+
+        # maak een paar teams aan
+        self._maak_teams(self.deelcomp_regio112_18)
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+
+        # start de eerste ronde op
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+
+        self.verwerk_regiocomp_mutaties()
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        # forceer ronde 7
+        self.deelcomp_regio112_18.huidige_team_ronde = 7
+        self.deelcomp_regio112_18.save(update_fields=['huidige_team_ronde'])
+
+        # voor een paar scores in
+        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+            ronde_team.team_score = 100 + ronde_team.pk
+            ronde_team.ronde_nr = 7
+            ronde_team.save(update_fields=['team_score', 'ronde_nr'])
+        # for
+
+        CompetitieMutatie.objects.all().delete()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.verwerk_regiocomp_mutaties()
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
+
+        # nog een keer doorzetten doet niets
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+
+        # laat de laatste mutatie (doorzetten ronde 7) nog een keer verwerken
+        self.assertEqual(1, CompetitieMutatie.objects.count())
+        mutatie = CompetitieMutatie.objects.all()[0]
+        mutatie.is_verwerkt = False
+        mutatie.save(update_fields=['is_verwerkt'])
+        # laat deze herstelde mutatie verwerken
+        self.run_management_command('regiocomp_mutaties', '1', '--quick', '--all')
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
 
 
 # end of file

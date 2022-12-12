@@ -1,6 +1,6 @@
 /*!
  * Materialize v1.1.0-alpha (https://materializecss.github.io/materialize)
- * Copyright 2014-2021 Materialize
+ * Copyright 2014-2022 Materialize
  * MIT License (https://raw.githubusercontent.com/materializecss/materialize/master/LICENSE)
  */
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -2365,7 +2365,6 @@ $jscomp.polyfill = function (e, r, p, m) {
       value: function _setupTemporaryEventHandlers() {
         // Use capture phase event handler to prevent click
         document.body.addEventListener('click', this._handleDocumentClickBound, true);
-        document.body.addEventListener('touchend', this._handleDocumentClickBound);
         document.body.addEventListener('touchmove', this._handleDocumentTouchmoveBound);
         this.dropdownEl.addEventListener('keydown', this._handleDropdownKeydownBound);
       }
@@ -2374,7 +2373,6 @@ $jscomp.polyfill = function (e, r, p, m) {
       value: function _removeTemporaryEventHandlers() {
         // Use capture phase event handler to prevent click
         document.body.removeEventListener('click', this._handleDocumentClickBound, true);
-        document.body.removeEventListener('touchend', this._handleDocumentClickBound);
         document.body.removeEventListener('touchmove', this._handleDocumentTouchmoveBound);
         this.dropdownEl.removeEventListener('keydown', this._handleDropdownKeydownBound);
       }
@@ -2491,6 +2489,8 @@ $jscomp.polyfill = function (e, r, p, m) {
           } while (newFocusedIndex < this.dropdownEl.children.length && newFocusedIndex >= 0);
 
           if (foundNewIndex) {
+            // Remove active class from old element
+            if (this.focusedIndex >= 0) this.dropdownEl.children[this.focusedIndex].classList.remove('active');
             this.focusedIndex = newFocusedIndex;
             this._focusFocusedItem();
           }
@@ -2566,7 +2566,9 @@ $jscomp.polyfill = function (e, r, p, m) {
         if (!!this.options.container) {
           $(this.options.container).append(this.dropdownEl);
         } else if (containerEl) {
-          $(containerEl).append(this.dropdownEl);
+          if (!containerEl.contains(this.dropdownEl)) {
+            $(containerEl).append(this.dropdownEl);
+          }
         } else {
           this.$el.after(this.dropdownEl);
         }
@@ -2588,7 +2590,14 @@ $jscomp.polyfill = function (e, r, p, m) {
       key: "_focusFocusedItem",
       value: function _focusFocusedItem() {
         if (this.focusedIndex >= 0 && this.focusedIndex < this.dropdownEl.children.length && this.options.autoFocus) {
-          this.dropdownEl.children[this.focusedIndex].focus();
+          this.dropdownEl.children[this.focusedIndex].focus({
+            preventScroll: true
+          });
+          this.dropdownEl.children[this.focusedIndex].scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest'
+          });
         }
       }
     }, {
@@ -2622,6 +2631,10 @@ $jscomp.polyfill = function (e, r, p, m) {
         if (!alignments.top) {
           if (alignments.bottom) {
             verticalAlignment = 'bottom';
+
+            if (!this.options.coverTrigger) {
+              idealYPos -= triggerBRect.height;
+            }
           } else {
             this.isScrollable = true;
 
@@ -2819,6 +2832,7 @@ $jscomp.polyfill = function (e, r, p, m) {
         if (!this.isOpen) {
           return;
         }
+
         this.isOpen = false;
         this.focusedIndex = -1;
 
@@ -11201,7 +11215,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       }
 
       /**
-       * Handle Carousel CLick
+       * Handle Carousel Click
        * @param {Event} e
        */
 
@@ -12044,67 +12058,32 @@ $jscomp.polyfill = function (e, r, p, m) {
     dropdownOptions: {}
   };
 
-  /**
-   * @class
-   *
-   */
-
   var FormSelect = function (_Component20) {
     _inherits(FormSelect, _Component20);
 
-    /**
-     * Construct FormSelect instance
-     * @constructor
-     * @param {Element} el
-     * @param {Object} options
-     */
     function FormSelect(el, options) {
       _classCallCheck(this, FormSelect);
 
-      // Don't init if browser default version
       var _this68 = _possibleConstructorReturn(this, (FormSelect.__proto__ || Object.getPrototypeOf(FormSelect)).call(this, FormSelect, el, options));
 
-      if (_this68.$el.hasClass('browser-default')) {
-        return _possibleConstructorReturn(_this68);
-      }
-
+      if (_this68.$el.hasClass('browser-default')) return _possibleConstructorReturn(_this68);
       _this68.el.M_FormSelect = _this68;
-
-      /**
-       * Options for the select
-       * @member FormSelect#options
-       */
       _this68.options = $.extend({}, FormSelect.defaults, options);
-
       _this68.isMultiple = _this68.$el.prop('multiple');
-
-      // Setup
       _this68.el.tabIndex = -1;
-      _this68._keysSelected = {};
-      _this68._valueDict = {}; // Maps key to original and generated option element.
+      _this68._values = [];
       _this68._setupDropdown();
-
       _this68._setupEventHandlers();
       return _this68;
     }
 
     _createClass(FormSelect, [{
       key: "destroy",
-
-
-      /**
-       * Teardown component
-       */
       value: function destroy() {
         this._removeEventHandlers();
         this._removeDropdown();
         this.el.M_FormSelect = undefined;
       }
-
-      /**
-       * Setup Event Handlers
-       */
-
     }, {
       key: "_setupEventHandlers",
       value: function _setupEventHandlers() {
@@ -12113,18 +12092,12 @@ $jscomp.polyfill = function (e, r, p, m) {
         this._handleSelectChangeBound = this._handleSelectChange.bind(this);
         this._handleOptionClickBound = this._handleOptionClick.bind(this);
         this._handleInputClickBound = this._handleInputClick.bind(this);
-
         $(this.dropdownOptions).find('li:not(.optgroup)').each(function (el) {
           el.addEventListener('click', _this69._handleOptionClickBound);
         });
         this.el.addEventListener('change', this._handleSelectChangeBound);
         this.input.addEventListener('click', this._handleInputClickBound);
       }
-
-      /**
-       * Remove Event Handlers
-       */
-
     }, {
       key: "_removeEventHandlers",
       value: function _removeEventHandlers() {
@@ -12136,72 +12109,54 @@ $jscomp.polyfill = function (e, r, p, m) {
         this.el.removeEventListener('change', this._handleSelectChangeBound);
         this.input.removeEventListener('click', this._handleInputClickBound);
       }
-
-      /**
-       * Handle Select Change
-       * @param {Event} e
-       */
-
     }, {
       key: "_handleSelectChange",
       value: function _handleSelectChange(e) {
         this._setValueToInput();
       }
-
-      /**
-       * Handle Option Click
-       * @param {Event} e
-       */
-
     }, {
       key: "_handleOptionClick",
       value: function _handleOptionClick(e) {
         e.preventDefault();
-        var optionEl = $(e.target).closest('li')[0];
-        this._selectOption(optionEl);
+        var virtualOption = $(e.target).closest('li')[0];
+        this._selectOptionElement(virtualOption);
         e.stopPropagation();
       }
     }, {
-      key: "_selectOption",
-      value: function _selectOption(optionEl) {
-        var key = optionEl.id;
-        if (!$(optionEl).hasClass('disabled') && !$(optionEl).hasClass('optgroup') && key.length) {
-          var selected = true;
-
-          if (this.isMultiple) {
-            // Deselect placeholder option if still selected.
-            var placeholderOption = $(this.dropdownOptions).find('li.disabled.selected');
-            if (placeholderOption.length) {
-              placeholderOption.removeClass('selected');
-              placeholderOption.find('input[type="checkbox"]').prop('checked', false);
-              this._toggleEntryFromArray(placeholderOption[0].id);
-            }
-            selected = this._toggleEntryFromArray(key);
-          } else {
-            $(this.dropdownOptions).find('li').removeClass('selected');
-            $(optionEl).toggleClass('selected', selected);
-            this._keysSelected = {};
-            this._keysSelected[optionEl.id] = true;
-          }
-
-          // Set selected on original select option
-          // Only trigger if selected state changed
-          var prevSelected = $(this._valueDict[key].el).prop('selected');
-          if (prevSelected !== selected) {
-            $(this._valueDict[key].el).prop('selected', selected);
-            this.$el.trigger('change');
-          }
-        }
-
-        if (!this.isMultiple) {
-          this.dropdown.close();
-        }
+      key: "_arraysEqual",
+      value: function _arraysEqual(a, b) {
+        if (a === b) return true;
+        if (a == null || b == null) return false;
+        if (a.length !== b.length) return false;
+        for (var i = 0; i < a.length; ++i) {
+          if (a[i] !== b[i]) return false;
+        }return true;
       }
-
-      /**
-       * Handle Input Click
-       */
-
+    }, {
+      key: "_selectOptionElement",
+      value: function _selectOptionElement(virtualOption) {
+        if (!$(virtualOption).hasClass('disabled') && !$(virtualOption).hasClass('optgroup')) {
+          var value = this._values.filter(function (value) {
+            return value.optionEl === virtualOption;
+          })[0];
+          var previousSelectedValues = this.getSelectedValues();
+          if (this.isMultiple) {
+            // Multi-Select
+            this._toggleEntryFromArray(value);
+          } else {
+            // Single-Select
+            this._deselectAll();
+            this._selectValue(value);
+          }
+          // Refresh Input-Text
+          this._setValueToInput();
+          // Trigger Change-Event only when data is different
+          var actualSelectedValues = this.getSelectedValues();
+          var selectionHasChanged = !this._arraysEqual(previousSelectedValues, actualSelectedValues);
+          if (selectionHasChanged) this.$el.trigger('change');
+        }
+        if (!this.isMultiple) this.dropdown.close();
+      }
     }, {
       key: "_handleInputClick",
       value: function _handleInputClick() {
@@ -12210,11 +12165,6 @@ $jscomp.polyfill = function (e, r, p, m) {
           this._setSelectedStates();
         }
       }
-
-      /**
-       * Setup dropdown
-       */
-
     }, {
       key: "_setupDropdown",
       value: function _setupDropdown() {
@@ -12223,14 +12173,13 @@ $jscomp.polyfill = function (e, r, p, m) {
         this.wrapper = document.createElement('div');
         $(this.wrapper).addClass('select-wrapper ' + this.options.classes);
         this.$el.before($(this.wrapper));
+
         // Move actual select element into overflow hidden wrapper
         var $hideSelect = $('<div class="hide-select"></div>');
         $(this.wrapper).append($hideSelect);
         $hideSelect[0].appendChild(this.el);
 
-        if (this.el.disabled) {
-          this.wrapper.classList.add('disabled');
-        }
+        if (this.el.disabled) this.wrapper.classList.add('disabled');
 
         // Create dropdown
         this.$selectOptions = this.$el.children('option, optgroup');
@@ -12238,32 +12187,24 @@ $jscomp.polyfill = function (e, r, p, m) {
         this.dropdownOptions.id = "select-options-" + M.guid();
         $(this.dropdownOptions).addClass('dropdown-content select-dropdown ' + (this.isMultiple ? 'multiple-select-dropdown' : ''));
 
-        // Create dropdown structure.
+        // Create dropdown structure
         if (this.$selectOptions.length) {
-          this.$selectOptions.each(function (el) {
-            if ($(el).is('option')) {
-              // Direct descendant option.
-              var optionEl = void 0;
-              if (_this71.isMultiple) {
-                optionEl = _this71._appendOptionWithIcon(_this71.$el, el, 'multiple');
-              } else {
-                optionEl = _this71._appendOptionWithIcon(_this71.$el, el);
-              }
-
-              _this71._addOptionToValueDict(el, optionEl);
-            } else if ($(el).is('optgroup')) {
-              // Optgroup.
-              var selectOptions = $(el).children('option');
-              $(_this71.dropdownOptions).append($('<li class="optgroup"><span>' + el.getAttribute('label') + '</span></li>')[0]);
-
-              selectOptions.each(function (el) {
-                var optionEl = _this71._appendOptionWithIcon(_this71.$el, el, 'optgroup-option');
-                _this71._addOptionToValueDict(el, optionEl);
+          this.$selectOptions.each(function (realOption) {
+            if ($(realOption).is('option')) {
+              // Option
+              var virtualOption = _this71._createAndAppendOptionWithIcon(realOption, _this71.isMultiple ? 'multiple' : undefined);
+              _this71._addOptionToValues(realOption, virtualOption);
+            } else if ($(realOption).is('optgroup')) {
+              // Optgroup
+              var selectOptions = $(realOption).children('option');
+              $(_this71.dropdownOptions).append($('<li class="optgroup"><span>' + realOption.getAttribute('label') + '</span></li>')[0]);
+              selectOptions.each(function (realOption) {
+                var virtualOption = _this71._createAndAppendOptionWithIcon(realOption, 'optgroup-option');
+                _this71._addOptionToValues(realOption, virtualOption);
               });
             }
           });
         }
-
         $(this.wrapper).append(this.dropdownOptions);
 
         // Add input dropdown
@@ -12272,9 +12213,7 @@ $jscomp.polyfill = function (e, r, p, m) {
         this.input.setAttribute('type', 'text');
         this.input.setAttribute('readonly', 'true');
         this.input.setAttribute('data-target', this.dropdownOptions.id);
-        if (this.el.disabled) {
-          $(this.input).prop('disabled', 'true');
-        }
+        if (this.el.disabled) $(this.input).prop('disabled', 'true');
 
         $(this.wrapper).prepend(this.input);
         this._setValueToInput();
@@ -12282,23 +12221,20 @@ $jscomp.polyfill = function (e, r, p, m) {
         // Add caret
         var dropdownIcon = $('<svg class="caret" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
         $(this.wrapper).prepend(dropdownIcon[0]);
-
         // Initialize dropdown
         if (!this.el.disabled) {
           var dropdownOptions = $.extend({}, this.options.dropdownOptions);
+          dropdownOptions.coverTrigger = false;
           var userOnOpenEnd = dropdownOptions.onOpenEnd;
-
           // Add callback for centering selected option when dropdown content is scrollable
           dropdownOptions.onOpenEnd = function (el) {
             var selectedOption = $(_this71.dropdownOptions).find('.selected').first();
-
             if (selectedOption.length) {
               // Focus selected option in dropdown
               M.keyDown = true;
               _this71.dropdown.focusedIndex = selectedOption.index();
               _this71.dropdown._focusFocusedItem();
               M.keyDown = false;
-
               // Handle scrolling to selected option
               if (_this71.dropdown.isScrollable) {
                 var scrollOffset = selectedOption[0].getBoundingClientRect().top - _this71.dropdownOptions.getBoundingClientRect().top; // scroll to selected option
@@ -12306,46 +12242,21 @@ $jscomp.polyfill = function (e, r, p, m) {
                 _this71.dropdownOptions.scrollTop = scrollOffset;
               }
             }
-
             // Handle user declared onOpenEnd if needed
-            if (userOnOpenEnd && typeof userOnOpenEnd === 'function') {
-              userOnOpenEnd.call(_this71.dropdown, _this71.el);
-            }
+            if (userOnOpenEnd && typeof userOnOpenEnd === 'function') userOnOpenEnd.call(_this71.dropdown, _this71.el);
           };
-
           // Prevent dropdown from closing too early
           dropdownOptions.closeOnClick = false;
-
           this.dropdown = M.Dropdown.init(this.input, dropdownOptions);
         }
-
         // Add initial selections
         this._setSelectedStates();
       }
-
-      /**
-       * Add option to value dict
-       * @param {Element} el  original option element
-       * @param {Element} optionEl  generated option element
-       */
-
     }, {
-      key: "_addOptionToValueDict",
-      value: function _addOptionToValueDict(el, optionEl) {
-        var index = Object.keys(this._valueDict).length;
-        var key = this.dropdownOptions.id + index;
-        var obj = {};
-        optionEl.id = key;
-
-        obj.el = el;
-        obj.optionEl = optionEl;
-        this._valueDict[key] = obj;
+      key: "_addOptionToValues",
+      value: function _addOptionToValues(realOption, virtualOption) {
+        this._values.push({ el: realOption, optionEl: virtualOption });
       }
-
-      /**
-       * Remove dropdown
-       */
-
     }, {
       key: "_removeDropdown",
       value: function _removeDropdown() {
@@ -12355,160 +12266,125 @@ $jscomp.polyfill = function (e, r, p, m) {
         $(this.wrapper).before(this.$el);
         $(this.wrapper).remove();
       }
-
-      /**
-       * Setup dropdown
-       * @param {Element} select  select element
-       * @param {Element} option  option element from select
-       * @param {String} type
-       * @return {Element}  option element added
-       */
-
     }, {
-      key: "_appendOptionWithIcon",
-      value: function _appendOptionWithIcon(select, option, type) {
-        // Add disabled attr if disabled
-        var disabledClass = option.disabled ? 'disabled ' : '';
-        var optgroupClass = type === 'optgroup-option' ? 'optgroup-option ' : '';
-        var multipleCheckbox = this.isMultiple ? "<label><input type=\"checkbox\"" + disabledClass + "\"/><span>" + option.innerHTML + "</span></label>" : option.innerHTML;
-        var liEl = $('<li></li>');
-        var spanEl = $('<span></span>');
-        spanEl.html(multipleCheckbox);
-        liEl.addClass(disabledClass + " " + optgroupClass);
-        liEl.append(spanEl);
-
-        // add icons
-        var iconUrl = option.getAttribute('data-icon');
-        if (!!iconUrl) {
-          var imgEl = $("<img alt=\"\" src=\"" + iconUrl + "\">");
-          liEl.prepend(imgEl);
+      key: "_createAndAppendOptionWithIcon",
+      value: function _createAndAppendOptionWithIcon(realOption, type) {
+        var li = document.createElement('li');
+        if (realOption.disabled) li.classList.add('disabled');
+        if (type === 'optgroup-option') li.classList.add(type);
+        // Text / Checkbox
+        var span = document.createElement('span');
+        if (this.isMultiple) span.innerHTML = "<label><input type=\"checkbox\"" + (realOption.disabled ? ' disabled="disabled"' : '') + "><span>" + realOption.innerHTML + "</span></label>";else span.innerHTML = realOption.innerHTML;
+        li.appendChild(span);
+        // add Icon
+        var iconUrl = realOption.getAttribute('data-icon');
+        var classes = realOption.getAttribute('class');
+        if (iconUrl) {
+          var img = $("<img alt=\"\" class=\"" + classes + "\" src=\"" + iconUrl + "\">");
+          li.prepend(img[0]);
         }
-
-        // Check for multiple type.
-        $(this.dropdownOptions).append(liEl[0]);
-        return liEl[0];
+        // Check for multiple type
+        $(this.dropdownOptions).append(li);
+        return li;
       }
+    }, {
+      key: "_selectValue",
+      value: function _selectValue(value) {
+        value.el.selected = true;
+        value.optionEl.classList.add('selected');
+        var checkbox = value.optionEl.querySelector('input[type="checkbox"]');
+        if (checkbox) checkbox.checked = true;
+      }
+    }, {
+      key: "_deselectValue",
+      value: function _deselectValue(value) {
+        value.el.selected = false;
+        value.optionEl.classList.remove('selected');
+        var checkbox = value.optionEl.querySelector('input[type="checkbox"]');
+        if (checkbox) checkbox.checked = false;
+      }
+    }, {
+      key: "_deselectAll",
+      value: function _deselectAll() {
+        var _this72 = this;
 
-      /**
-       * Toggle entry from option
-       * @param {String} key  Option key
-       * @return {Boolean}  if entry was added or removed
-       */
-
+        this._values.forEach(function (value) {
+          _this72._deselectValue(value);
+        });
+      }
+    }, {
+      key: "_isValueSelected",
+      value: function _isValueSelected(value) {
+        var realValues = this.getSelectedValues();
+        return realValues.some(function (realValue) {
+          return realValue === value.el.value;
+        });
+      }
     }, {
       key: "_toggleEntryFromArray",
-      value: function _toggleEntryFromArray(key) {
-        var notAdded = !this._keysSelected.hasOwnProperty(key);
-        var $optionLi = $(this._valueDict[key].optionEl);
-
-        if (notAdded) {
-          this._keysSelected[key] = true;
-        } else {
-          delete this._keysSelected[key];
-        }
-
-        $optionLi.toggleClass('selected', notAdded);
-
-        // Set checkbox checked value
-        $optionLi.find('input[type="checkbox"]').prop('checked', notAdded);
-
-        // use notAdded instead of true (to detect if the option is selected or not)
-        $optionLi.prop('selected', notAdded);
-
-        return notAdded;
+      value: function _toggleEntryFromArray(value) {
+        var isSelected = this._isValueSelected(value);
+        if (isSelected) this._deselectValue(value);else this._selectValue(value);
       }
-
-      /**
-       * Set text value to input
-       */
-
+    }, {
+      key: "_getSelectedOptions",
+      value: function _getSelectedOptions() {
+        return Array.prototype.filter.call(this.el.selectedOptions, function (realOption) {
+          return realOption;
+        });
+      }
     }, {
       key: "_setValueToInput",
       value: function _setValueToInput() {
-        var values = [];
-        var options = this.$el.find('option');
-
-        options.each(function (el) {
-          if ($(el).prop('selected')) {
-            var text = $(el).text();
-            values.push(text);
-          }
+        var realOptions = this._getSelectedOptions();
+        var values = this._values.filter(function (value) {
+          return realOptions.indexOf(value.el) >= 0;
         });
-
-        if (!values.length) {
-          var firstDisabled = this.$el.find('option:disabled').eq(0);
-          if (firstDisabled.length && firstDisabled[0].value === '') {
-            values.push(firstDisabled.text());
+        var texts = values.map(function (value) {
+          return value.optionEl.querySelector('span').innerText.trim();
+        });
+        // Set input-text to first Option with empty value which indicates a description like "choose your option"
+        if (texts.length === 0) {
+          var firstDisabledOption = this.$el.find('option:disabled').eq(0);
+          if (firstDisabledOption.length > 0 && firstDisabledOption[0].value === '') {
+            this.input.value = firstDisabledOption.text();
+            return;
           }
         }
-
-        this.input.value = values.join(', ');
+        this.input.value = texts.join(', ');
       }
-
-      /**
-       * Set selected state of dropdown to match actual select element
-       */
-
     }, {
       key: "_setSelectedStates",
       value: function _setSelectedStates() {
-        this._keysSelected = {};
+        var _this73 = this;
 
-        for (var key in this._valueDict) {
-          var option = this._valueDict[key];
-          var optionIsSelected = $(option.el).prop('selected');
-          $(option.optionEl).find('input[type="checkbox"]').prop('checked', optionIsSelected);
+        this._values.forEach(function (value) {
+          var optionIsSelected = $(value.el).prop('selected');
+          $(value.optionEl).find('input[type="checkbox"]').prop('checked', optionIsSelected);
           if (optionIsSelected) {
-            this._activateOption($(this.dropdownOptions), $(option.optionEl));
-            this._keysSelected[key] = true;
-          } else {
-            $(option.optionEl).removeClass('selected');
-          }
-        }
+            _this73._activateOption($(_this73.dropdownOptions), $(value.optionEl));
+          } else $(value.optionEl).removeClass('selected');
+        });
       }
-
-      /**
-       * Make option as selected and scroll to selected position
-       * @param {jQuery} collection  Select options jQuery element
-       * @param {Element} newOption  element of the new option
-       */
-
     }, {
       key: "_activateOption",
-      value: function _activateOption(collection, newOption) {
-        if (newOption) {
-          if (!this.isMultiple) {
-            collection.find('li.selected').removeClass('selected');
-          }
-          var option = $(newOption);
-          option.addClass('selected');
-        }
+      value: function _activateOption(ul, li) {
+        if (!li) return;
+        if (!this.isMultiple) ul.find('li.selected').removeClass('selected');
+        $(li).addClass('selected');
       }
-
-      /**
-       * Get Selected Values
-       * @return {Array}  Array of selected values
-       */
-
     }, {
       key: "getSelectedValues",
       value: function getSelectedValues() {
-        var selectedValues = [];
-        for (var key in this._keysSelected) {
-          selectedValues.push(this._valueDict[key].el.value);
-        }
-        return selectedValues;
+        return this._getSelectedOptions().map(function (realOption) {
+          return realOption.value;
+        });
       }
     }], [{
       key: "init",
       value: function init(els, options) {
         return _get(FormSelect.__proto__ || Object.getPrototypeOf(FormSelect), "init", this).call(this, this, els, options);
       }
-
-      /**
-       * Get Instance
-       */
-
     }, {
       key: "getInstance",
       value: function getInstance(el) {
@@ -12527,9 +12403,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
   M.FormSelect = FormSelect;
 
-  if (M.jQueryLoaded) {
-    M.initializeJqueryWrapper(FormSelect, 'formSelect', 'M_FormSelect');
-  }
+  if (M.jQueryLoaded) M.initializeJqueryWrapper(FormSelect, 'formSelect', 'M_FormSelect');
 })(cash);
 ;(function ($, anim) {
   'use strict';
@@ -12553,23 +12427,23 @@ $jscomp.polyfill = function (e, r, p, m) {
     function Range(el, options) {
       _classCallCheck(this, Range);
 
-      var _this72 = _possibleConstructorReturn(this, (Range.__proto__ || Object.getPrototypeOf(Range)).call(this, Range, el, options));
+      var _this74 = _possibleConstructorReturn(this, (Range.__proto__ || Object.getPrototypeOf(Range)).call(this, Range, el, options));
 
-      _this72.el.M_Range = _this72;
+      _this74.el.M_Range = _this74;
 
       /**
        * Options for the range
        * @member Range#options
        */
-      _this72.options = $.extend({}, Range.defaults, options);
+      _this74.options = $.extend({}, Range.defaults, options);
 
-      _this72._mousedown = false;
+      _this74._mousedown = false;
 
       // Setup
-      _this72._setupThumb();
+      _this74._setupThumb();
 
-      _this72._setupEventHandlers();
-      return _this72;
+      _this74._setupEventHandlers();
+      return _this74;
     }
 
     _createClass(Range, [{

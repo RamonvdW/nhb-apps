@@ -62,10 +62,6 @@
         <!-- blauwe balk -->
         <div class="row-nhb-blauw">
             <div class="col s12">
-                {% if show_beheerder_intro %}
-                    {% include 'plein/card.dtl' with title="Introductie" text="Lees de introductie voor nieuwe beheerders." icon="help_outline" url=wiki_intro_nieuwe_beheerders extern_open=True %}
-                {% endif %}
-
                 {% if show_otp_koppelen %}
                     {% url 'Functie:otp-koppelen-stap1' as card_url %}
                     {% include 'plein/card.dtl' with title="Koppel 2e factor" text="Verplicht voor gebruikers met toegang tot persoonsgegevens." icon="lock" url=card_url %}
@@ -229,11 +225,6 @@
                 {% if url_login_as %}
                     <div class="col s12 l6 xl6">
                         {% include 'plein/card.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
-                        {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
-                    </div>
-                {% else %}
-                    <div class="col s12 l4 offset-l1">
-                        {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
                     </div>
                 {% endif %}
             </div>

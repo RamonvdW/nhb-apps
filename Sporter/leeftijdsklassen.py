@@ -13,7 +13,7 @@ from BasisTypen.models import (LeeftijdsKlasse, TemplateCompetitieIndivKlasse,
                                BOOGTYPE_AFKORTING_RECURVE)
 
 
-def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
+def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit.
         wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
@@ -25,16 +25,16 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
                 Voorbeeld:
                     huidige jaar = 2019
                     leeftijd = 17
-                    lkl_lst=(('Onder 18 Uniseks of Onder 18 Heren'),     # -1 = 16
-                             ('Onder 18 Uniseks of Onder 18 Heren'),     #  0 = 17
-                             ('Onder 21 Uniseks of Onder 21 Heren'),     # +1 = 18
-                             ('Onder 21 Uniseks of Onder 21 Heren'),     # +2 = 19
-                             ('Onder 21 Uniseks of Onder 21 Heren'))     # +3 = 20
+                    lkl_lst=(('Onder 18 Gemengd of Onder 18 Heren'),     # -1 = 16
+                             ('Onder 18 Gemengd of Onder 18 Heren'),     #  0 = 17
+                             ('Onder 21 Gemengd of Onder 21 Heren'),     # +1 = 18
+                             ('Onder 21 Gemengd of Onder 21 Heren'),     # +2 = 19
+                             ('Onder 21 Gemengd of Onder 21 Heren'))     # +3 = 20
     """
 
     leeftijd2tekst = dict()     # [leeftijd] = beschrijving
 
-    # begin met de Uniseks klassen
+    # begin met de Gemengd klassen
     if True:
         alle_lkl = list()
         prev_lkl = None
@@ -63,7 +63,7 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
         # maak de look-up tabel
         for lkl in alle_lkl:
             for leeftijd in range(lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd+1):
-                leeftijd2tekst[leeftijd] = lkl.beschrijving     # 21+ Uniseks
+                leeftijd2tekst[leeftijd] = lkl.beschrijving     # 21+ Gemengd
             # for
         # for
 
@@ -93,18 +93,13 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
         prev_lkl.max_wedstrijdleeftijd = 150
 
         # de look-up tabel uitbreiden met een tweede beschrijving
-        # 21+ Uniseks --> 21+ Uniseks of 21+ Heren
+        # 21+ Gemengd --> 21+ Gemengd of 21+ Heren
         for lkl in alle_lkl:
             for leeftijd in range(lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd+1):
                 leeftijd2tekst[leeftijd] += ' of ' + lkl.beschrijving
             # for
         # for
 
-    # pak het huidige jaar na conversie naar lokale tijdzone
-    # zodat dit ook goed gaat in de laatste paar uren van het jaar
-    now = timezone.now()  # is in UTC
-    now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
-    huidige_jaar = now.year
     wedstrijdleeftijd = huidige_jaar - geboorte_jaar
 
     # bereken de wedstrijdklassen en competitieklassen
@@ -120,22 +115,21 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
     return huidige_jaar, wedstrijdleeftijd, lkl_dit_jaar, lkl_lst
 
 
-def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nhb):
+def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar, huidige_maand):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit
         voor de bondscompetities van de NHB.
         wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
         Retourneert:
-                huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst
-                lkl_lst is een lijst van wedstrijdklassen voor de jaren -1, 0, +1, +2, +3 ten opzicht van leeftijd
+                wedstrijdleeftijd, lkl_lst
+                lkl_lst is een lijst van wedstrijdklassen voor de seizoenen -1, 0, +1, +2, +3 ten opzicht van huidige seizoen
                 Voorbeeld:
-                    huidige jaar = 2019
                     leeftijd = 14
-                    lkl_lst=(('Onder 14 Jongens'),      # -1 = 13
-                             ('Onder 14 Jongens'),      #  0 = 14
-                             ('Onder 18'),              # +1 = 15
-                             ('Onder 18'),              # +2 = 16
-                             ('Onder 18'))              # +3 = 27
+                    lkl_lst=({seizoen:'2018/2019', tekst:'Onder 14 Jongens'},      # 0 = 13
+                             {seizoen:'2019/2020', tekst:'Onder 14 Jongens'),      # 1 = 14  huidige seizoen
+                             {seizoen:'2020/2021', tekst:'Onder 18'),              # 2 = 15
+                             {seizoen:'2021/2022', tekst:'Onder 18'),              # 3 = 16
+                             {seizoen:'2022/2023', tekst:'Onder 18'))              # 4 = 27
     """
 
     # bondscompetitie heeft gender-neutrale klassen, behalve voor Onder 12 en Onder 14
@@ -185,37 +179,41 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
             target = leeftijd2tekst_w
 
         for leeftijd in range(lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd + 1):
-            target[leeftijd] = lkl.beschrijving.replace(' Uniseks', '')
+            target[leeftijd] = lkl.beschrijving.replace(' Gemengd', '')
         # for
     # for
 
-    # pak het huidige jaar na conversie naar lokale tijdzone
-    # zodat dit ook goed gaat in de laatste paar uren van het jaar
-    now = timezone.now()  # is in UTC
-    now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
-    huidige_jaar = now.year
-    wedstrijdleeftijd = huidige_jaar - geboorte_jaar
+    eerste_jaar = huidige_jaar
+    if huidige_maand <= 6:
+        # toon voor seizoen vorig-jaar/dit-jaar
+        eerste_jaar -= 1
+    else:
+        # toon voor seizoen dit-jaar/volgend-jaar
+        pass
+
+    wedstrijdleeftijd = eerste_jaar - geboorte_jaar
 
     # bereken de wedstrijdklassen en competitieklassen
     lkl_lst = list()
     lkl_volgende_competitie = '?'
     for n in (-1, 0, 1, 2, 3):
+        seizoen = '%s/%s' % (eerste_jaar+n, eerste_jaar+n+1)
+
         try:
             tekst = leeftijd2tekst_w[wedstrijdleeftijd + n]
         except KeyError:
             tekst = leeftijd2tekst_g[wedstrijdleeftijd + n]
 
-        lkl_lst.append(tekst)
-        if n == 1:
-            lkl_volgende_competitie = tekst
+        lkl = {'seizoen': seizoen, 'tekst': tekst}
+        lkl_lst.append(lkl)
     # for
 
     # print(lkl_lst)
 
-    return huidige_jaar, wedstrijdleeftijd, lkl_volgende_competitie, lkl_lst
+    return wedstrijdleeftijd, lkl_lst
 
 
-def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht):
+def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit.
         wedstrijdgeslacht moet zijn GESLACHT_MAN of GESLACHT_VROUW
 
@@ -229,11 +227,6 @@ def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht):
                     lkl_lst=('Onder 21 Mannen', '21+ Mannen', '21+ Mannen', '21+ Mannen', '21+ Mannen')
     """
 
-    # pak het huidige jaar na conversie naar lokale tijdzone
-    # zodat dit ook goed gaat in de laatste paar uren van het jaar
-    now = timezone.now()  # is in UTC
-    now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
-    huidige_jaar = now.year
     sporter_leeftijd = huidige_jaar - geboorte_jaar
 
     # haal alle leeftijdsklassen op en vul de min/max leeftijden aan
@@ -285,7 +278,7 @@ def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht):
     return huidige_jaar, sporter_leeftijd, lkl_dit_jaar, lkl_list
 
 
-def bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht):
+def bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar):
     """
         wedstrijdgeslacht moet zijn GESLACHT_MAN of GESLACHT_VROUW
 
@@ -323,11 +316,6 @@ def bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht):
         # for
     # for
 
-    # pak het huidige jaar na conversie naar lokale tijdzone
-    # zodat dit ook goed gaat in de laatste paar uren van het jaar
-    now = timezone.now()  # is in UTC
-    now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
-    huidige_jaar = now.year
     leeftijd = huidige_jaar - geboorte_jaar
 
     lst = list()

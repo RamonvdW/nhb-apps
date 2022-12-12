@@ -11,7 +11,7 @@ from Mailer.models import MailQueue
 class MailQueueAdmin(admin.ModelAdmin):
     search_fields = ('mail_to',)
 
-    list_filter = ('is_verstuurd', )
+    list_filter = ('is_verstuurd', 'is_blocked')
 
 
 admin.site.register(MailQueue, MailQueueAdmin)

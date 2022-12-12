@@ -18,7 +18,8 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, Secretaris
+from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
+from Vereniging.models import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -84,7 +85,10 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_sec.save()
         self.functie_sec = functie_sec
 
-        Secretaris(vereniging=ver, sporter=sporter).save()
+        sec = Secretaris(vereniging=ver)
+        sec.save()
+        sec.sporters.add(sporter)
+        self.sec = sec
 
         # geef dit account een record
         rec = IndivRecord()
@@ -137,14 +141,14 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = "2009/2010"
         histcomp.comp_type = "18"
-        histcomp.klasse = "don't care"
+        histcomp.boog_str = "don't care"
         histcomp.save()
 
         indiv = HistCompetitieIndividueel()
         indiv.histcompetitie = histcomp
         indiv.rank = 1
-        indiv.schutter_nr = 100001
-        indiv.schutter_naam = "Ramon de Tester"
+        indiv.sporter_lid_nr = 100001
+        indiv.sporter_naam = "Ramon de Tester"
         indiv.boogtype = "R"
         indiv.vereniging_nr = 1000
         indiv.vereniging_naam = "don't care"
@@ -219,7 +223,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._prep_voorkeuren()
 
         # controleer dat inschrijven mogelijk is
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')
@@ -245,7 +249,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         zet_competitie_fase(comp_25, 'C')
 
         # controleer dat inschrijven nog mogelijk is voor 25m en uitschrijven voor 18m
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')     # 18m
@@ -260,7 +264,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog_bb = SporterBoog.objects.get(boogtype__afkorting='R')
         sporterboog_bb.voor_wedstrijd = False
         sporterboog_bb.save()
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             resp = self.client.get(self.url_profiel)
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
@@ -291,7 +295,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         zet_competitie_fase(comp_18, 'F')
 
         # haal de profiel pagina op
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -305,7 +309,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
         score_indiv_ag_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
 
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -316,7 +320,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # variant met Score zonder ScoreHist
         ScoreHist.objects.all().delete()
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -327,7 +331,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # zet de 25m door naar BK fase
         zet_competitie_fase(comp_18, 'K')
         zet_competitie_fase(comp_25, 'P')
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'Rayonkampioenschappen')      # 18m
         self.assertContains(resp, 'Bondskampioenschappen')      # 25m
@@ -340,7 +344,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # als er geen SEC gekoppeld is, dan wordt de secretaris van de vereniging gebruikt
         self.functie_sec.accounts.remove(self.account_normaal)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -369,7 +373,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen sporterboog
 
         # haal de profiel pagina op
-        with self.assert_max_queries(39):
+        with self.assert_max_queries(40):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -404,7 +408,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase(self.comp_18, 'A2')
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -413,7 +417,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # met standaard voorkeuren worden de regiocompetities getoond
         voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=self.sporter1)
         self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -441,7 +445,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
 
         # voorkeur net uitgezet, maar nog wel ingeschreven
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -488,7 +492,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -518,7 +522,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             account=self.account_normaal,
             log='testje').save()
 
-        with self.assert_max_queries(39):
+        with self.assert_max_queries(40):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

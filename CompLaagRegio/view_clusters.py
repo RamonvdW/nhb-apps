@@ -102,7 +102,6 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
-        context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
         context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
 
         context['kruimels'] = (

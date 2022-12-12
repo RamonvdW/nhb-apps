@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
-from Bestel.mandje import eval_mandje_inhoud
+from Bestel.operations.mandje import eval_mandje_inhoud
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import Wedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
 from datetime import date, timedelta
@@ -58,6 +58,7 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
     # we willen in de eerstvolgende maand komen met een wedstrijd
     wedstrijden = (Wedstrijd
                    .objects
+                   .exclude(toon_op_kalender=False)
                    .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                            datum_begin__gte=now)
                    .order_by('datum_begin'))
@@ -155,6 +156,7 @@ class KalenderMaandView(TemplateView):
         context['wedstrijden'] = wedstrijden = (Wedstrijd
                                                 .objects
                                                 .select_related('locatie')
+                                                .exclude(toon_op_kalender=False)
                                                 .filter(datum_begin__gte=datum_vanaf,
                                                         datum_begin__lt=datum_voor,
                                                         status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD,

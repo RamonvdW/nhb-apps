@@ -220,10 +220,9 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         korting = WedstrijdKorting(
                         geldig_tot_en_met='2099-12-31',
-                        uitgegeven_door=self.nhbver1,
-                        percentage=42,
                         soort=WEDSTRIJD_KORTING_VERENIGING,
-                        voor_vereniging=self.nhbver1)
+                        uitgegeven_door=self.nhbver1,
+                        percentage=42)
         korting.save()
 
         self.inschrijving1r.korting = korting

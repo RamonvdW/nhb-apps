@@ -129,7 +129,7 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_initieel_klasse_indiv(self, deelcomp, indiv_klasse):
         # Bepaal de top-X deelnemers voor een klasse van een kampioenschap
-        # De kampioenen aangevuld met de schutters met hoogste gemiddelde
+        # De kampioenen aangevuld met de sporters met hoogste gemiddelde
         # gesorteerde op gemiddelde
 
         self.stdout.write('[INFO] Bepaal deelnemers in indiv_klasse %s van %s' % (indiv_klasse, deelcomp))
@@ -152,7 +152,7 @@ class Command(BaseCommand):
             lijst.append(tup)
         # for
 
-        # aanvullen met schutters tot aan de cut
+        # aanvullen met sporters tot aan de cut
         objs = (KampioenschapSchutterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
@@ -593,11 +593,18 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_team_ronde(self, deelcomp):
 
-        ronde_nr = deelcomp.huidige_team_ronde + 1
-
-        if ronde_nr > 7:
+        # bepaal de volgende ronde
+        if deelcomp.huidige_team_ronde > 7:
             # alle rondes al gehad - silently ignore
             return
+
+        if deelcomp.huidige_team_ronde == 7:
+            # afsluiten van de laatste ronde
+            deelcomp.huidige_team_ronde = 99
+            deelcomp.save(update_fields=['huidige_team_ronde'])
+            return
+
+        ronde_nr = deelcomp.huidige_team_ronde + 1
 
         if ronde_nr == 1:
             teams = (RegiocompetitieTeam
@@ -740,7 +747,7 @@ class Command(BaseCommand):
         for boogtype in comp.boogtypen.all():
             histcomp = HistCompetitie(seizoen=seizoen,
                                       comp_type=comp.afstand,
-                                      klasse=boogtype.beschrijving,     # 'Recurve'
+                                      boog_str=boogtype.beschrijving,   # 'Recurve'
                                       is_team=False,
                                       is_openbaar=False)                # nog niet laten zien
             histcomp.save()
@@ -769,8 +776,8 @@ class Command(BaseCommand):
                     hist = HistCompetitieIndividueel(
                                 histcompetitie=histcomp,
                                 rank=rank,
-                                schutter_nr=sporter.lid_nr,
-                                schutter_naam=sporter.volledige_naam(),
+                                sporter_lid_nr=sporter.lid_nr,
+                                sporter_naam=sporter.volledige_naam(),
                                 boogtype=boogtype.afkorting,
                                 vereniging_nr=ver.ver_nr,
                                 vereniging_naam=ver.naam,
@@ -802,7 +809,7 @@ class Command(BaseCommand):
             en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
         """
 
-        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        # sporter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
         pks = list()
         for deelcomp in (DeelCompetitie
                          .objects
@@ -884,7 +891,7 @@ class Command(BaseCommand):
         return deelnemers
 
     def _maak_deelnemerslijst_rks(self, comp):
-        """ stel de kampioenschap deelnemers lijst aan de hand van gerechtigde deelnemers uit de regiocompetitie.
+        """ stel de deelnemerslijsten voor de kampioenschappen op aan de hand van gerechtigde deelnemers uit de regiocompetitie.
             ook wordt hier de vereniging van de sporter bevroren.
         """
 
@@ -917,7 +924,7 @@ class Command(BaseCommand):
                     # schrijf de sporter in het juiste rayon in
                     sporter_deelcomp_rk = rayon_nr2deelcomp_rk[ver.regio.rayon.rayon_nr]
 
-                    deelnemer = KampioenschapSchutterBoog(
+                    kampioen = KampioenschapSchutterBoog(
                                     deelcompetitie=sporter_deelcomp_rk,
                                     sporterboog=deelnemer.sporterboog,
                                     indiv_klasse=deelnemer.indiv_klasse,
@@ -926,7 +933,11 @@ class Command(BaseCommand):
                                     kampioen_label=deelnemer.kampioen_label,
                                     regio_scores=deelnemer.regio_scores)
 
-                    bulk_lijst.append(deelnemer)
+                    if not deelnemer.inschrijf_voorkeur_rk_bk:
+                        # bij inschrijven al afgemeld voor RK/BK
+                        kampioen.deelname = DEELNAME_NEE
+
+                    bulk_lijst.append(kampioen)
                     if len(bulk_lijst) > 150:       # pragma: no cover
                         KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
                         bulk_lijst = list()

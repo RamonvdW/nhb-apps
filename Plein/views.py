@@ -8,9 +8,9 @@ from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
-from Bestel.mandje import eval_mandje_inhoud
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
-from Handleiding.views import reverse_handleiding
+from django.contrib.auth.mixins import UserPassesTestMixin
+from Bestel.operations.mandje import eval_mandje_inhoud
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 
@@ -18,19 +18,9 @@ from Taken.operations import eval_open_taken
 TEMPLATE_PLEIN_SPORTER = 'plein/plein-sporter.dtl'       # sporter (ROL_SPORTER)
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'     # niet ingelogd
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'   # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
+TEMPLATE_PLEIN_HANDLEIDINGEN = 'plein/handleidingen.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
-
-ROL2HANDLEIDING_PAGINA = {
-    Rollen.ROL_BB: settings.HANDLEIDING_BB,
-    Rollen.ROL_MO: settings.HANDLEIDING_MO,
-    Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
-    Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
-    Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
-    Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
-    Rollen.ROL_WL:  settings.HANDLEIDING_WL,
-    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
-}
 
 
 def is_browser_supported(request):
@@ -115,6 +105,8 @@ class PleinView(View):
                     context['rol_is_mo'] = True
                 elif rol_nu == Rollen.ROL_MWZ:
                     context['rol_is_mwz'] = True
+                elif rol_nu == Rollen.ROL_MWW:
+                    context['rol_is_mww'] = True
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
@@ -135,6 +127,9 @@ class PleinView(View):
 
                 if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
                     context['toon_manager_sectie'] = True
+
+                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL):
+                    context['toon_bondscompetities'] = True
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
 
@@ -168,6 +163,37 @@ class PrivacyView(TemplateView):
 
         context['kruimels'] = (
             (None, 'Privacy'),
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+
+class HandleidingenView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view voor toegang tot de Handleidingen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_PLEIN_HANDLEIDINGEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        account = self.request.user
+        if account.is_authenticated:
+            return rol_mag_wisselen(self.request)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['url_handleiding_leden'] = settings.URL_PDF_HANDLEIDING_LEDEN
+        context['url_handleiding_beheerders'] = settings.URL_PDF_HANDLEIDING_BEHEERDERS
+        context['url_handleiding_vereniging'] = settings.URL_PDF_HANDLEIDING_VERENIGINGEN
+
+        context['kruimels'] = (
+            (None, 'Handleidingen'),
         )
 
         menu_dynamics(self.request, context)

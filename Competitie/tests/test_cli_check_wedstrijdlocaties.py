@@ -154,7 +154,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Geen rk_bk_matches voor deelcompetitie comp1 - Rayon 2" in f2.getvalue())
@@ -176,7 +176,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         self.loc2.save(update_fields=['zichtbaar'])
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         self.assertTrue('met zichtbaar=False' in f2.getvalue())
 

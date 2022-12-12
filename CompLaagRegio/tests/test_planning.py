@@ -81,7 +81,6 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         ver.naam = "Zuidelijke Club"
         ver.ver_nr = 1111
         ver.regio = self.regio_112
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver_112 = ver
 
@@ -90,7 +89,6 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = 1000
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver_101 = ver
 
@@ -133,7 +131,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        # een parallel competitie is noodzakelijk om corner-cases te raken
+        # een parallelle competitie is noodzakelijk om corner-cases te raken
         competities_aanmaken(jaar=2020)
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen

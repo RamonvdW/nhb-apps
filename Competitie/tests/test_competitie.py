@@ -80,7 +80,6 @@ class TestCompetitie(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = 1000
         ver.regio = regio
-        # secretaris kan nog niet ingevuld worden
         ver.save()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)
@@ -151,7 +150,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.klasse = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
+        histcomp.boog_str = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
         histcomp.is_team = False
         histcomp.save()
         self.histcomp = histcomp
@@ -160,7 +159,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         histcomp2 = HistCompetitie()
         histcomp2.seizoen = '2017/2018'
         histcomp2.comp_type = '18'
-        histcomp2.klasse = 'Testcurve2'
+        histcomp2.boog_str = 'Testcurve2'
         histcomp2.is_team = False
         histcomp2.save()
 
@@ -168,8 +167,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.sporter_100001.lid_nr
-        rec.schutter_naam = self.sporter_100001.volledige_naam()
+        rec.sporter_lid_nr = self.sporter_100001.lid_nr
+        rec.sporter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
@@ -188,8 +187,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp2
         rec.rank = 1
-        rec.schutter_nr = self.sporter_100001.lid_nr
-        rec.schutter_naam = self.sporter_100001.volledige_naam()
+        rec.sporter_lid_nr = self.sporter_100001.lid_nr
+        rec.sporter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
@@ -208,8 +207,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 100
-        rec.schutter_nr = self.sporter_100001.lid_nr
-        rec.schutter_naam = self.sporter_100001.volledige_naam()
+        rec.sporter_lid_nr = self.sporter_100001.lid_nr
+        rec.sporter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'TR'
@@ -228,8 +227,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.sporter_100002.lid_nr
-        rec.schutter_naam = self.sporter_100002.volledige_naam()
+        rec.sporter_lid_nr = self.sporter_100002.lid_nr
+        rec.sporter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'C'
@@ -248,8 +247,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.sporter_100002.lid_nr
-        rec.schutter_naam = self.sporter_100002.volledige_naam()
+        rec.sporter_lid_nr = self.sporter_100002.lid_nr
+        rec.sporter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'BB'
@@ -268,8 +267,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = 991111
-        rec.schutter_naam = "Die is weg"
+        rec.sporter_lid_nr = 991111
+        rec.sporter_naam = "Die is weg"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'BB'
@@ -306,7 +305,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             rec = HistCompetitieIndividueel(histcompetitie=self.histcomp,
                                             boogtype='R',
                                             rank=lp,
-                                            schutter_nr=sporter.lid_nr,
+                                            sporter_lid_nr=sporter.lid_nr,
                                             vereniging_nr=1000,
                                             score1=1,
                                             score2=2,

@@ -47,6 +47,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # for
 
         cls.testdata.maak_label_regiokampioenen(18, cls.regio_nr_begin, cls.regio_nr_einde)
+        cls.testdata.maak_label_regiokampioenen(25, cls.regio_nr_begin, cls.regio_nr_einde)
 
         # zet de competitie in fase J
         zet_competitie_fase(cls.testdata.comp18, 'J')
@@ -97,9 +98,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                     .filter(indiv_klasse=klasse)
                     .select_related('sporterboog__sporter')
                     .order_by('volgorde')):
-            print('  rank=%s, volgorde=%s, sporterboog_pk=%s, lid_nr=%s, gem=%s, deelname=%s, label=%s' % (
-                    obj.rank, obj.volgorde, obj.sporterboog.pk, obj.sporterboog.sporter.lid_nr, obj.gemiddelde,
-                    obj.deelname, obj.kampioen_label))
+            print('  rank=%s, volgorde=%s, sporterboog_pk=%s, boog=%s, lid_nr=%s, gem=%s, deelname=%s, kampioen_label=%s' % (
+                    obj.rank, obj.volgorde, obj.sporterboog.pk, obj.sporterboog.boogtype.afkorting,
+                    obj.sporterboog.sporter.lid_nr, obj.gemiddelde, obj.deelname, obj.kampioen_label))
         print('====================================================================')
 
     def _dump_deelnemers(self, alle_klassen=False):                 # pragma: no cover

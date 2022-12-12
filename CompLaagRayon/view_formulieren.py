@@ -15,9 +15,11 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, LAAG
                                CompetitieMatch)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
 from copy import copy
 import openpyxl
+import textwrap
 import zipfile
 import shutil
 import os
@@ -110,6 +112,11 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 beschr.append('Teams')
         # for
 
+        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        # for
+
         vastgesteld = timezone.localtime(timezone.now())
         context['vastgesteld'] = vastgesteld
 
@@ -147,6 +154,21 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 deelnemer.volledige_naam = deelnemer.sporterboog.sporter.volledige_naam()
                 deelnemer.gemiddelde_str = "%.3f" % deelnemer.gemiddelde
                 deelnemer.gemiddelde_str = deelnemer.gemiddelde_str.replace('.', ',')
+
+                try:
+                    voorkeuren = lid2voorkeuren[deelnemer.lid_nr]
+                except KeyError:        # pragma: no cover
+                    pass
+                else:
+                    if voorkeuren.para_met_rolstoel:
+                        if deelnemer.kampioen_label != '':
+                            deelnemer.kampioen_label += ';\n'
+                        deelnemer.kampioen_label += 'Sporter laat voorwerpen\nop de schietlijn staan'
+
+                    if voorkeuren.opmerking_para_sporter:
+                        if deelnemer.kampioen_label != '':
+                            deelnemer.kampioen_label += ';\n'
+                        deelnemer.kampioen_label += textwrap.fill(voorkeuren.opmerking_para_sporter, 30)
             # for
 
         if heeft_teams:
@@ -183,10 +205,22 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 team.sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
                 team.sterkte_str = team.sterkte_str.replace('.', ',')
 
+                team.gekoppelde_schutters_lijst = list()
                 for lid in team.gekoppelde_schutters.select_related('sporterboog__sporter').all():
                     sporter = lid.sporterboog.sporter
                     lid.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     lid.gem_str = lid.gemiddelde
+
+                    try:
+                        voorkeuren = lid2voorkeuren[sporter.lid_nr]
+                    except KeyError:        # pragma: no cover
+                        pass
+                    else:
+                        if voorkeuren.para_met_rolstoel or len(voorkeuren.opmerking_para_sporter) > 1:
+                            lid.is_para = True
+                            context['toon_para_uitleg'] = True
+
+                    team.gekoppelde_schutters_lijst.append(lid)
                 # for
             # for
 
@@ -247,7 +281,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen RK wedstrijd')
 
         comp = deelcomp_rk.competitie
-        # TODO: check fase
+        # TODO: check competitie fase
 
         vastgesteld = timezone.localtime(timezone.now())
 
@@ -268,6 +302,11 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             limiet = 24
         else:
             limiet = lim.limiet
+
+        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        # for
 
         if comp.afstand == '18':
             excel_name = 'template-excel-rk-indoor-indiv.xlsm'
@@ -333,6 +372,21 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         row1_nr = 6
         row2_nr = 35
         for deelnemer in deelnemers:
+
+            para_notities = ''
+            try:
+                voorkeuren = lid2voorkeuren[deelnemer.sporterboog.sporter.lid_nr]
+            except KeyError:        # pragma: no cover
+                pass
+            else:
+                if voorkeuren.para_met_rolstoel:
+                    para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
+
+                if voorkeuren.opmerking_para_sporter:
+                    if para_notities != '':
+                        para_notities += '\n'
+                    para_notities += voorkeuren.opmerking_para_sporter
+
             is_deelnemer = False
             reserve_str = ''
             if deelnemer.deelname != DEELNAME_NEE:
@@ -380,6 +434,9 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
             # gemiddelde
             ws['I' + row] = deelnemer.gemiddelde
+
+            if para_notities:
+                ws['R' + row] = para_notities
         # for
 
         # geef het aangepaste RK programma aan de client
@@ -444,6 +501,11 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
+
+        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        # for
 
         vastgesteld = timezone.localtime(timezone.now())
 
@@ -534,11 +596,23 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
                 sporter = deelnemer.sporterboog.sporter
 
+                para_mark = False
+                try:
+                    voorkeuren = lid2voorkeuren[sporter.lid_nr]
+                except KeyError:        # pragma: no cover
+                    pass
+                else:
+                    if voorkeuren.para_met_rolstoel or voorkeuren.opmerking_para_sporter:
+                        para_mark = True
+
                 # bondsnummer
                 ws['E' + row] = sporter.lid_nr
 
                 # volledige naam
-                ws['F' + row] = sporter.volledige_naam()
+                naam_str = sporter.volledige_naam()
+                if para_mark:
+                    naam_str += ' **'
+                ws['F' + row] = naam_str
 
                 # regio gemiddelde
                 ws['G' + row] = deelnemer.gemiddelde
@@ -645,17 +719,40 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
             # sporter
             sporter = deelnemer.sporterboog.sporter
+
+            para_notities = ''
+            try:
+                voorkeuren = lid2voorkeuren[sporter.lid_nr]
+            except KeyError:        # pragma: no cover
+                pass
+            else:
+                if voorkeuren.para_met_rolstoel:
+                    para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
+
+                if voorkeuren.opmerking_para_sporter:
+                    if para_notities != '':
+                        para_notities += '\n'
+                    para_notities += voorkeuren.opmerking_para_sporter
+
             ws['E' + row] = sporter.lid_nr
-            ws['F' + row] = sporter.volledige_naam()
+
+            naam_str = sporter.volledige_naam()
+            if para_notities:
+                naam_str += ' **'
+            ws['F' + row] = naam_str
 
             ws['G' + row] = deelnemer.gemiddelde
             ws['H' + row] = deelnemer.sporterboog.boogtype.beschrijving
+
+            if para_notities:
+                ws['I' + row] = para_notities
 
             if row_nr != 18:
                 ws['E' + row].font = copy(efgh_font)
                 ws['F' + row].font = copy(efgh_font)
                 ws['G' + row].font = copy(efgh_font)
                 ws['H' + row].font = copy(efgh_font)
+                ws['I' + row].font = copy(efgh_font)
 
                 ws['E' + row].alignment = copy(e_align)
                 ws['G' + row].alignment = copy(g_align)

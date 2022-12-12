@@ -99,7 +99,7 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        # als er geen wijzig knop in beeld hoeft te komen, dan kan de tabel wat smaller
+        # als er geen knop in beeld hoeft te komen, dan kan de tabel wat smaller
         context['show_wijzig_kolom'] = False
         for obj in context['object_list']:
             if obj.wijzig_url:
@@ -139,19 +139,19 @@ class OverzichtView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_SUP,
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_MWW, Rollen.ROL_SUP,
                                Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                                Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     @staticmethod
     def _sorteer_functies(objs):
         """ Sorteer de functies zodat:
-            MWZ < MO < SUP < rest
+            MWZ < MO < MWW < SUP < rest
             18 < 25
             BKO < RKO < RCL
             op volgorde van rayon- of regionummer (oplopend)
         """
-        sort_level = {'MWZ': 1, 'MO': 2, 'SUP': 3, 'BKO': 4,  'RKO': 5, 'RCL': 6}
+        sort_level = {'MWZ': 1, 'MO': 2, 'MWW': 3, 'SUP': 4, 'BKO': 5,  'RKO': 6, 'RCL': 7}
         tup2obj = dict()
         sort_me = list()
         for obj in objs:
@@ -252,7 +252,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
                     .prefetch_related('accounts'))
         else:
             objs = (Functie.objects
-                    .filter(Q(rol='BKO') | Q(rol='RKO') | Q(rol='RCL') | Q(rol='MWZ') | Q(rol='SUP') | Q(rol='MO'))
+                    .filter(rol__in=('BKO', 'RKO', 'RCL', 'MWZ', 'MWW', 'SUP', 'MO'))
                     .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
                     .prefetch_related('accounts'))
 
@@ -272,7 +272,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
         if self.rol_nu == Rollen.ROL_HWL:
             context['rol_is_hwl'] = True
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_SUP):
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_SUP):
             context['accounts_it'] = (Account
                                       .objects
                                       .filter(is_staff=True)

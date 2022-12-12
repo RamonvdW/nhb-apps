@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Overig.templatetags.overig_filters import filter_highlight, filter_wbr_email, filter_wbr_dagdeel
+from Overig.templatetags.overig_filters import filter_highlight, filter_wbr_email, filter_wbr_dagdeel, filter_wbr_www
 
 
 class TestOverigTemplatetags(TestCase):
@@ -26,8 +26,42 @@ class TestOverigTemplatetags(TestCase):
         self.assertEqual(filter_highlight("ramon", "on"), "ram<b>on</b>")
 
     def test_filter_wbr_email(self):
-        self.assertEqual(filter_wbr_email("ramon@gmail.not"), "ramon<wbr>@gmail<wbr>.not")
-        self.assertEqual(filter_wbr_email("ramon.tester@gmail.not"), "ramon<wbr>.tester<wbr>@gmail<wbr>.not")
+        self.assertEqual(filter_wbr_email("ramon@gmail.not"),
+                         "ramon<wbr>@gmail<wbr>.not")
+
+        self.assertEqual(filter_wbr_email("ramon.tester@gmail.not"),
+                         "ramon<wbr>.tester<wbr>@gmail<wbr>.not")
+
+        self.assertEqual(filter_wbr_email("ramon.tester@gmail.not"),
+                         "ramon<wbr>.tester<wbr>@gmail<wbr>.not")
+
+        self.assertEqual(filter_wbr_email("ramon@handboogsport.not"),
+                         "ramon<wbr>@handboog<wbr>sport<wbr>.not")
+
+        self.assertEqual(filter_wbr_email("handboogsport@ramon.not"),
+                         "handboog<wbr>sport<wbr>@ramon<wbr>.not")
+
+    def test_filter_wbr_www(self):
+        self.assertEqual(filter_wbr_www('www.test.nl'),
+                         'www.<wbr>test.<wbr>nl')
+
+        self.assertEqual(filter_wbr_www('http://www.not'),
+                         'http://<wbr>www.<wbr>not')
+
+        # / aan het einde
+        self.assertEqual(filter_wbr_www('https://www.not/test/'),
+                         'https://<wbr>www.<wbr>not/<wbr>test/')
+
+        # . na /
+        self.assertEqual(filter_wbr_www('https://test/x.y'),
+                         'https://<wbr>test/<wbr>x.<wbr>y')
+
+        # lange woorden
+        self.assertEqual(filter_wbr_www('handboogsport.nl/grensoverschreidend-gedrag'),
+                         'handboog<wbr>sport.<wbr>nl/<wbr>grens<wbr>over<wbr>schreidend-gedrag')
+
+        self.assertEqual(filter_wbr_www('grensoverschreiden.nl/handboogsport'),
+                         'grens<wbr>over<wbr>schreiden.<wbr>nl/<wbr>handboog<wbr>sport')
 
     def test_filter_wbr_dagdeel(self):
         self.assertEqual(filter_wbr_dagdeel("WO"),

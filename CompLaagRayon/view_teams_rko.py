@@ -19,7 +19,7 @@ from Plein.menu import menu_dynamics
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'complaagrayon/rko-teams.dtl'
 
 
-class RayonTeamsView(TemplateView):
+class RayonTeamsTemplateView(TemplateView):
 
     """ Met deze view kan een lijst van teams getoond worden, zowel landelijk, rayon als regio """
 
@@ -31,6 +31,7 @@ class RayonTeamsView(TemplateView):
         self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
+        # template - zie override classes verderop
         raise NotImplementedError("test_func is mandatory")     # pragma: no cover
 
     def get_context_data(self, **kwargs):
@@ -245,7 +246,7 @@ class RayonTeamsView(TemplateView):
         return context
 
 
-class RayonTeamsRKOView(UserPassesTestMixin, RayonTeamsView):
+class RayonTeamsRKOView(UserPassesTestMixin, RayonTeamsTemplateView):
 
     """ Met deze view kan de RKO de aangemaakte teams inzien """
 
@@ -260,7 +261,7 @@ class RayonTeamsRKOView(UserPassesTestMixin, RayonTeamsView):
         return self.rol_nu == Rollen.ROL_RKO
 
 
-class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsView):
+class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsTemplateView):
 
     """ Met deze view kunnen de BB en BKO de aangemaakte teams inzien, met mogelijkheid tot filteren op een rayon """
 

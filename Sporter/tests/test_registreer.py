@@ -11,7 +11,8 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Overig.models import SiteTijdelijkeUrl
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-from Sporter.models import Sporter, Secretaris
+from Sporter.models import Sporter
+from Vereniging.models import Secretaris
 import datetime
 
 
@@ -128,7 +129,9 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
 
     def test_geen_email(self):
         # vul de sec in
-        Secretaris(vereniging=self.nhbver, sporter=self.sporter_100001).save()
+        sec = Secretaris(vereniging=self.nhbver)
+        sec.save()
+        sec.sporters.add(self.sporter_100001)
 
         with self.assert_max_queries(20):
             resp = self.client.post('/sporter/registreer/',
@@ -179,9 +182,9 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
     def test_registreer(self):
 
         # maak een andere sporter secretaris van de vereniging
-        Secretaris(
-            sporter=self.sporter_100002,
-            vereniging=self.nhbver).save()
+        sec = Secretaris(vereniging=self.nhbver)
+        sec.save()
+        sec.sporters.add(self.sporter_100002)
 
         # doorloop de registratie
         with self.assert_max_queries(20):
@@ -416,9 +419,9 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         # lid dat zich registreert, is secretaris van een vereniging
         # en wordt meteen gekoppeld aan de SEC rol
 
-        Secretaris(
-            sporter=self.sporter_100001,
-            vereniging=self.nhbver).save()
+        sec = Secretaris(vereniging=self.nhbver)
+        sec.save()
+        sec.sporters.add(self.sporter_100001)
 
         functie = Functie.objects.get(rol='SEC', nhb_ver=self.nhbver)
         self.assertEqual(functie.accounts.count(), 0)
@@ -433,9 +436,15 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(functie.accounts.count(), 1)
-        self.sporter_100001 = Sporter.objects.get(lid_nr=self.sporter_100001.lid_nr)   # refresh
-        self.assertEqual(functie.accounts.all()[0], self.sporter_100001.account)
+        self.sporter_100001 = Sporter.objects.get(pk=self.sporter_100001.pk)   # refresh
+
+        # sporter is nog niet gekoppeld aan de functie
+        # dat wordt gedaan door de CRM import
+        self.assertEqual(functie.accounts.count(), 0)
+
+        # sporter is wel gekoppeld aan Secretaris
+        self.assertEqual(sec.sporters.count(), 1)
+        self.assertEqual(sec.sporters.all()[0], self.sporter_100001)
 
     def test_geen_ver(self):
         self.sporter_100001.bij_vereniging = None

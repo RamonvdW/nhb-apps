@@ -62,7 +62,6 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
 
@@ -111,7 +110,6 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         ver2.naam = "Extra Club"
         ver2.ver_nr = "1900"
         ver2.regio = self.regio_112
-        # secretaris kan nog niet ingevuld worden
         ver2.save()
         self.nhbver2 = ver2
 
@@ -302,6 +300,11 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.post('/functie/activeer-functie/%s/' % self.functie_bko.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
+
+        # variant: nog geen bevestigde email
+        email = self.account_beh2.accountemail_set.all()[0]
+        email.email_is_bevestigd = False
+        email.save(update_fields=['email_is_bevestigd'])
 
         LogboekRegel.objects.all().delete()
 

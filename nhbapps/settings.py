@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,6 +16,6 @@
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
-from nhbapps.settings_base import *
+from nhbapps.settings_base import *         # noqa
 
 # end of file

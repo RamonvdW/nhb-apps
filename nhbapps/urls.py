@@ -35,7 +35,6 @@ urlpatterns = [
     path('bondscompetities/',               include('Competitie.urls')),
     path('functie/',                        include('Functie.urls')),
     path('feedback/',                       include('Feedback.urls')),
-    path('handleiding/',                    include('Handleiding.urls')),
     path('kalender/',                       include('Kalender.urls')),
     path('logboek/',                        include('Logboek.urls')),
     path('opleidingen/',                    include('Opleidingen.urls')),
@@ -47,6 +46,7 @@ urlpatterns = [
     path('score/',                          include('Score.urls')),
     path('taken/',                          include('Taken.urls')),
     path('vereniging/',                     include('Vereniging.urls')),
+    path('webwinkel/',                      include('Webwinkel.urls')),
     path('wedstrijden/',                    include('Wedstrijden.urls')),
 
     # direct van oude urls naar nieuwe urls

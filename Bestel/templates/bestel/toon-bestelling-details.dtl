@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestelling</h3>
-            <p>Bestelnummer: {{ bestelling.mh_bestel_nr }}</p>
+            <p>Bestelnummer {{ bestelling.mh_bestel_nr }}</p>
         </div>
     </div>
 
@@ -30,7 +30,7 @@
 
                 {% for product in producten %}
                     <tr>
-                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}{{ hdr }}:<br>{% endfor %}</th>
+                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</th>
                         <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
                         <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ product.prijs_euro }}</td>
                     </tr>
@@ -44,10 +44,37 @@
                     {% endif %}
                 {% endfor %}
 
+                <!-- verzendkosten -->
+                {% if bestelling.verzendkosten_euro > 0 %}
+                    <tr>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
+                        <td>Verzendkosten</td>
+                        <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ bestelling.verzendkosten_euro }}</td>
+                    </tr>
+                {% endif %}
+
+                <!-- btw -->
+                {% if bestelling.btw_percentage_cat1 or bestelling.btw_percentage_cat2 or bestelling.btw_percentage_cat3 %}
+                    <tr>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
+                        <td>
+                            {% if bestelling.btw_percentage_cat1 %}<span>BTW {{ bestelling.btw_percentage_cat1 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat2 %}<span>BTW {{ bestelling.btw_percentage_cat2 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat3 %}<span>BTW {{ bestelling.btw_percentage_cat3 }}</span><br>{% endif %}
+                        </td>
+                        <td class="right-align" style="padding-right:20px">
+                            {% if bestelling.btw_percentage_cat1 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat1 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat2 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat2 }}</span><br>{% endif %}
+                            {% if bestelling.btw_percentage_cat3 %}<span>&euro;&nbsp;{{ bestelling.btw_euro_cat3 }}</span><br>{% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+
                 <!-- totaal -->
                 <tr>
                     <td class="hide-on-small-only"></td>
-                    <td class="right-align"><b>Totale kosten:</b></td>
+                    <td class="right-align"><b>Totale kosten</b></td>
                     <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
                 </tr>
 
@@ -61,52 +88,74 @@
                     </tr>
                 {% endfor %}
 
-                {% if rest_euro %}
+                {% if is_geannuleerd %}
                     <tr>
-                        <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td class="right-align"><b>Nog te voldoen:</b></td>
-                        <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                        <td class="hide-on-small-only"></td>
+                        <td class="right-align">GEANNULEERD</td>
                     </tr>
                 {% else %}
-                    <tr>
-                        <td class="hide-on-small-only" style="padding-left:20px"></td>
-                        <td class="right-align"><b>Openstaand:</b></td>
-                        <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;0,00</b></td>
-                    </tr>
-                {% endif %}
-
-                <!-- afrekenen -->
-                {% if bevat_fout %}
-                    <tr>
-                        <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
-                    </tr>
-                {% else %}
-                    {% if url_afrekenen %}
+                    {% if rest_euro %}
                         <tr>
-                            <td class="hide-on-small-only"></td>
-                            <td class="right-align">
-                                <form action="{{ url_afrekenen }}" method="post">
-                                    {% csrf_token %}
-                                    <button class="btn-nhb-rood">
-                                        <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
-                                </form>
-                            </td>
-                            <td><!-- bedragen --></td>
+                            <td class="hide-on-small-only" style="padding-left:20px"></td>
+                            <td class="right-align"><b>Nog te voldoen</b></td>
+                            <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td class="hide-on-small-only" style="padding-left:20px"></td>
+                            <td class="right-align"><b>Openstaand</b></td>
+                            <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;0,00</b></td>
                         </tr>
                     {% endif %}
 
-                    <tr>
-                        <td colspan="3">
-                            <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
-                        </td>
-                    </tr>
+                    <!-- afrekenen -->
+                    {% if bevat_fout %}
+                        <tr>
+                            <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                        </tr>
+                    {% else %}
+                        {% if url_afrekenen %}
+                            <tr>
+                                <td class="hide-on-small-only"></td>
+                                <td class="right-align">
+                                    <form action="{{ url_afrekenen }}" method="post">
+                                        {% csrf_token %}
+                                        <button class="btn-nhb-rood">
+                                            <i class="material-icons-round left">shopping_cart_checkout</i>Betalen</button>
+                                    </form>
+                                </td>
+                                <td><!-- bedragen --></td>
+                            </tr>
+                        {% endif %}
+
+                        <tr>
+                            <td colspan="3">
+                                <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
+                            </td>
+                        </tr>
+
+                    {% endif %}
+
+
+                    {% if url_annuleren %}
+
+                        <tr>
+                            <td class="hide-on-small-only"></td>
+                            <td class="right-align">
+                                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_annuleer">
+                                    <i class="material-icons-round left">delete</i>Annuleer</a>
+                            </td>
+                        </tr>
+
+                    {% endif %}
+
+
                 {% endif %}
+
             </table>
         </div>
 
-        <p>&nbsp;</p>
-
-        <div class="col s12 l8 offset-l2">
+        <div class="col s12 l8 offset-l2" style="margin-top:30px">
             <table class="white">
                 <tr>
                     <td colspan="4" class="center">
@@ -122,7 +171,36 @@
                 </tr>
             </table>
         </div>
+
     </div>
+
+
+    {% if url_annuleren %}
+
+        <div class="modal" id="bevestig_annuleer">
+            <div class="modal-content center black-text">
+                <h5>Bestelling annuleren?</h5>
+                <p>Weet je zeker dat je deze bestelling niet door wil laten gaan?</p>
+                <p>Gemaakte reserveringen voor wedstrijden / evenementen / producten vervallen.</p>
+                <p>Doet dit alleen als je nog geen betaling gedaan hebt.</p>
+
+                <form method="post" action="{{ url_annuleren }}">
+                    {% csrf_token %}
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    {% endif %}
+
 
 
     <!-- witruimte -->
@@ -136,7 +214,9 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
+                {% include 'plein/card.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
+
+                {% include 'plein/card.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
         </div>
     </div>
 

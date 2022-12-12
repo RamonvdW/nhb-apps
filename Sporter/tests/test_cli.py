@@ -5,13 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
 from Sporter.models import Sporter
 from NhbStructuur.models import NhbVereniging, NhbRegio
-from Sporter.models import SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-import io
 
 
 class TestSporterCli(E2EHelpers, TestCase):
@@ -33,26 +30,20 @@ class TestSporterCli(E2EHelpers, TestCase):
         lid_nr = 123456
 
         # niet bestaand account
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('dev_koppel_sporter', 'niet_bestaand_account', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('dev_koppel_sporter', 'niet_bestaand_account')
         self.assertTrue("Geen account met username 'niet_bestaand_account' gevonden" in f1.getvalue())
 
         # username is geen nummer (lid_nr is een nummer)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('dev_koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('dev_koppel_sporter', self.testdata.account_admin.username)
         self.assertTrue("Geen sporter met lid_nr 'admin' gevonden" in f1.getvalue())
 
         # corrigeer de username
         self.testdata.account_admin.username = str(lid_nr)
         self.testdata.account_admin.save(update_fields=['username'])
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('dev_koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('dev_koppel_sporter', self.testdata.account_admin.username)
         self.assertTrue("Geen sporter met lid_nr '123456' gevonden" in f1.getvalue())
 
         # maak de sporter aan
@@ -75,10 +66,8 @@ class TestSporterCli(E2EHelpers, TestCase):
 
         self.testdata.account_admin.username = '123456'
         self.testdata.account_admin.save(update_fields=['username'])
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('dev_koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('dev_koppel_sporter', self.testdata.account_admin.username)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("Account '123456' gekoppeld aan bijbehorende sporter" in f2.getvalue())
@@ -88,10 +77,8 @@ class TestSporterCli(E2EHelpers, TestCase):
 
     def test_dev_koppel_ver(self):
         # niet bestaande vereniging
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('dev_koppel_ver', '999999', '999999', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('dev_koppel_ver', '999999', '999999')
         self.assertTrue("Vereniging '999999' niet gevonden" in f1.getvalue())
 
         # maak een test vereniging
@@ -104,10 +91,8 @@ class TestSporterCli(E2EHelpers, TestCase):
         ver.save()
 
         # niet bestaande sporter
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('dev_koppel_ver', '999999', ver_nr, stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('dev_koppel_ver', '999999', ver_nr)
         self.assertTrue("Sporter met lid_nr '999999' niet gevonden" in f1.getvalue())
 
         # maak de sporter aan
@@ -127,10 +112,8 @@ class TestSporterCli(E2EHelpers, TestCase):
             account=None).save()
 
         # koppel de twee
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('dev_koppel_ver', lid_nr, ver_nr, stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('dev_koppel_ver', lid_nr, ver_nr)
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue("Sporter 345678 gekoppeld aan vereniging 1000" in f2.getvalue())
 

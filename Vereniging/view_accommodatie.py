@@ -13,7 +13,7 @@ from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
-from Sporter.models import Secretaris
+from Vereniging.models import Secretaris
 from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Logboek.models import schrijf_in_logboek
 from Vereniging.forms import AccommodatieDetailsForm
@@ -57,7 +57,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         binnen_locatie = None
         buiten_locatie = None
         externe_locaties = list()
-        for loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
+        for loc in nhbver.wedstrijdlocatie_set.all():
             if loc.baan_type == BAAN_TYPE_EXTERN:
                 externe_locaties.append(loc)
             elif loc.baan_type == BAAN_TYPE_BUITEN:
@@ -122,12 +122,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if len(context['sec_names']) == 0:
             context['geen_sec'] = True
             try:
-                sec = Secretaris.objects.select_related('sporter').get(vereniging=functie_sec.nhb_ver)
+                sec = Secretaris.objects.prefetch_related('sporters').get(vereniging=functie_sec.nhb_ver)
             except Secretaris.DoesNotExist:
                 pass
             else:
-                if sec.sporter:
-                    context['sec_names'] = [sec.sporter.volledige_naam()]
+                if sec.sporters.count() > 0:            # pragma: no branch
+                    context['sec_names'] = [sporter.volledige_naam() for sporter in sec.sporters.all()]
                     context['geen_sec'] = False
 
         context['hwl_names'] = self.get_all_names(functie_hwl)

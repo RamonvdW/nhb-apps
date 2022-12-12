@@ -32,22 +32,22 @@
                 </tr>
                 <tr>
                     <th>Huidige ronde</th>
-                    <td>{{ deelcomp.huidige_team_ronde }}</td>
+                    <td>{% if deelcomp.huidige_team_ronde <= 7 %}{{ deelcomp.huidige_team_ronde }}{% else %}-{% endif %}</td>
                 </tr>
             </table>
         </div>
     </div>
 
-    <div class="center">
-        {% if aantal_keuzes_nodig > 0 %}
-            <p class="red-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
-            {% if anchor %}<p><a class="btn-nhb-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
-        {% else %}
-            <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te slaan!</p>
-        {% endif %}
-    </div>
-
     {% if deelcomp.huidige_team_ronde >= 1 and deelcomp.huidige_team_ronde <= 7 %}
+
+        <div class="center">
+            {% if aantal_keuzes_nodig > 0 %}
+                <p class="red-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
+                {% if anchor %}<p><a class="btn-nhb-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
+            {% else %}
+                <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te slaan!</p>
+            {% endif %}
+        </div>
 
         <!-- blauwe balk met dialoog venster -->
         <div class="row-nhb-blauw">
@@ -153,8 +153,13 @@
 
             </div>
         </div>
+
     {% else %}
-        <p>Deze pagina is niet beschikbaar voor de huidige team ronde</p>
+
+        <div class="center">
+            <p>Deze pagina is niet beschikbaar voor de huidige team ronde</p>
+        </div>
+
     {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compscores-rcl-scores-regio-teams" %}

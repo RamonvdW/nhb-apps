@@ -46,7 +46,8 @@ class Rollen(enum.IntEnum):
     ROL_SPORTER = 20    # Individuele sporter en NHB lid
     ROL_MWZ = 30        # Manager Wedstrijdzaken
     ROL_MO = 40         # Manager Opleidingen
-    ROL_SUP = 50        # Support
+    ROL_MWW = 50        # Manager Webwinkel
+    ROL_SUP = 90        # Support
     ROL_NONE = 99       # geen rol
 
     """ LET OP!
@@ -67,6 +68,7 @@ url2rol = {
     'SEC': Rollen.ROL_SEC,
     'MO': Rollen.ROL_MO,
     'MWZ': Rollen.ROL_MWZ,
+    'MWW': Rollen.ROL_MWW,
     'support': Rollen.ROL_SUP,
     'sporter': Rollen.ROL_SPORTER,
     'geen': Rollen.ROL_NONE
@@ -200,6 +202,8 @@ def rol_zet_sessionvars(account, request):
                     rol = Rollen.ROL_MO
                 elif functie.rol == "MWZ":
                     rol = Rollen.ROL_MWZ
+                elif functie.rol == "MWW":
+                    rol = Rollen.ROL_MWW
                 elif functie.rol == "SUP":
                     rol = Rollen.ROL_SUP
 
@@ -366,7 +370,8 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
         beschr = 'Manager Competitiezaken'
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                  Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC,
-                 Rollen.ROL_MO, Rollen.ROL_SUP, Rollen.ROL_MWZ):
+                 Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_MWW,
+                 Rollen.ROL_SUP):
         beschr = functie_naam
     elif rol == Rollen.ROL_SPORTER:
         beschr = 'Sporter'
@@ -486,7 +491,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
         Deze functie yield (rol, functie_pk)
     """
     if rol_in == Rollen.ROL_BB:
-        # deze rol mag de functie BKO aannemen
+        # deze rol mag de functie BKO (en nog een paar) aannemen
         for pk, obj in functie_cache.items():
             if obj.rol == 'BKO':
                 yield Rollen.ROL_BKO, obj.pk
@@ -494,6 +499,8 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                 yield Rollen.ROL_MO, obj.pk
             elif obj.rol == 'MWZ':
                 yield Rollen.ROL_MWZ, obj.pk
+            elif obj.rol == 'MWW':
+                yield Rollen.ROL_MWW, obj.pk
             elif obj.rol == 'SUP':
                 yield Rollen.ROL_SUP, obj.pk
         # for

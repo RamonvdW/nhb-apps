@@ -1,0 +1,105 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Webwinkel{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Webwinkel</h3>
+        </div>
+    </div>
+
+    {% for product in producten %}
+
+        {% if product.sectie_afsluiten %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if product.nieuwe_sectie %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>{{ product.sectie }}</h4>
+                </div>
+            </div>
+
+            <!-- blauwe balk met kaartjes -->
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+        {% endif %}
+
+        {% if product.is_uitverkocht %}
+
+            <!-- licht niet op bij mouse-over -->
+            <div class="nhb-card-disabled">
+
+        {% else %}
+
+            <!-- zet breedte, hoogte en side-by-side layout -->
+            <!-- bij mouse-over licht de rand op -->
+            <div class="nhb-card">
+
+        {% endif %}
+
+            {% if not product.is_uitverkocht %}
+
+                <!-- de hele kaart is klikbaar -->
+                <a href="{{ product.url_details }}">
+
+            {% endif %}
+
+                    <div class="nhb-card-content" style="padding:0">
+
+                        <div class="card-image" style="top:0px; left:0px; width:244px; height:244px; overflow:hidden">
+                            <!-- achtergrondplaatje -->
+                            <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} style="opacity:0.5"{% endif %}>
+
+                            <!-- titel
+                            <div class="card-title" style="bottom:revert; top:0; color:black; padding:0; width:100%">{{ title }}</div>
+                            -->
+                        </div>
+
+                        {% if product.is_uitverkocht %}
+
+                            <div class="nhb-card-schuine-banner">Tijdelijk uitverkocht</div>
+
+                        {% else %}
+
+                            <div class="nhb-card-webwinkel-titel">{{ product.omslag_titel }}</div>
+
+                        {% endif %}
+
+                        <div style="position:absolute; bottom:10px; right:10px; color: white; background-color:rgba(0,0,0,.5); padding:3px">&euro;&nbsp;{{ product.prijs_euro }}</div>
+
+                    </div>
+
+            {% if not product.is_uitverkocht %}
+
+                </a>
+
+            {% endif %}
+
+            </div>
+
+        {% if forloop.last %}
+            <!-- blauwe balk afsluiten -->
+                </div>
+            </div>
+        {% endif %}
+
+    {% endfor %}
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="webwinkel-overzicht" %}
+
+{% endblock %}

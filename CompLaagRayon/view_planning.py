@@ -18,7 +18,6 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1
                                KampioenschapSchutterBoog, KampioenschapTeam, CompetitieMutatie,
                                MUTATIE_CUT, DEELNAME_NEE)
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
@@ -32,7 +31,7 @@ import time
 TEMPLATE_COMPRAYON_PLANNING = 'complaagrayon/planning-rayon.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD = 'complaagrayon/wijzig-wedstrijd-rk.dtl'
 TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/rko-rk-selectie.dtl'
-TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_SCHUTTER = 'complaagrayon/wijzig-status-rk-deelnemer.dtl'
+TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_DEELNEMER = 'complaagrayon/wijzig-status-rk-deelnemer.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK = 'complaagrayon/wijzig-limieten-rk.dtl'
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
@@ -689,8 +688,6 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['url_opslaan'] = reverse('CompLaagRayon:rayon-limieten',
                                          kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
-
-        context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
 
         comp = deelcomp_rk.competitie
         context['kruimels'] = (
