@@ -1246,7 +1246,8 @@ class Command(BaseCommand):
                     if obj.postadres_1 != lid_postadres[0] or obj.postadres_2 != lid_postadres[1] or obj.postadres_3 != lid_postadres[2]:
                         self.stdout.write('[INFO] Lid %s: postadres_1 %s --> %s' % (lid_nr, repr(obj.postadres_1), repr(lid_postadres[0])))
                         self.stdout.write('[INFO] Lid %s: postadres_2 %s --> %s' % (lid_nr, repr(obj.postadres_2), repr(lid_postadres[1])))
-                        self.stdout.write('[INFO] Lid %s: postadres_3 %s --> %s' % (lid_nr, repr(obj.postadres_3), repr(lid_postadres[2])))
+                        if obj.postadres_3 != lid_postadres[2]:     # voorkomt vele '' --> ''
+                            self.stdout.write('[INFO] Lid %s: postadres_3 %s --> %s' % (lid_nr, repr(obj.postadres_3), repr(lid_postadres[2])))
                         obj.postadres_1 = lid_postadres[0]
                         obj.postadres_2 = lid_postadres[1]
                         obj.postadres_3 = lid_postadres[2]
