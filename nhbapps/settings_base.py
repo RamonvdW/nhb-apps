@@ -152,9 +152,6 @@ LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
 
-# format localization
-USE_L10N = True
-
 # sla alle datums in de database op als UTC
 # dit doet PostgreSQL sowieso, onafhankelijk van deze instelling
 # alleen vertalen bij presentatie naar de gebruiker toe
