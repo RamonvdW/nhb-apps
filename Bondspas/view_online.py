@@ -184,7 +184,7 @@ def teken_barcode(lid_nr, draw, begin_x, end_y, font):
     # for
     code39 += sym_start_stop
 
-    digit_width, digit_height = draw.textsize("8", font=font)
+    _, _, digit_width, digit_height = draw.textbbox((0, 0), "8", font=font)
 
     # teken de lijntjes van de barcode
     pixels = 3
@@ -247,7 +247,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     wa_id = regels[1][1]
     regels = regels[2:]
 
-    text_width, text_height = draw.textsize(lid_nr, font=font_bold)
+    _, _, text_width, text_height = draw.textbbox((0, 0), lid_nr, font=font_bold)
     text_height += 20       # extra spacing
     barcode_margin_x = 20
 
@@ -272,7 +272,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     # switch naar een kleiner font
     font = ImageFont.truetype(settings.BONDSPAS_FONT, size=40)
     font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=40)
-    _, text_height = draw.textsize(lid_nr, font=font)
+    _, _, _, text_height = draw.textbbox((0, 0), lid_nr, font=font)
 
     text_spacing = text_height + 15
     wkl_indent = 30     # pixels

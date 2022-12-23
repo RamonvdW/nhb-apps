@@ -7,7 +7,7 @@
 """ ondersteuning QR codes voor OTP controle """
 
 from django.conf import settings
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.safestring import mark_safe
 from qrcode.image.svg import SvgPathImage
 import xml.etree.ElementTree as Tree
@@ -56,7 +56,7 @@ def make_qr_code_image(text):
                 version=QRCODE_VERSION,
                 image_factory=SvgEmbeddedInHtmlImage,
                 box_size=12, border=1)      # controls SVG image size
-    qr.add_data(force_text(text))
+    qr.add_data(force_str(text))
     return qr.make_image()
 
 

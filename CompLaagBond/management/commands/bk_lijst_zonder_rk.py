@@ -313,7 +313,7 @@ class Command(BaseCommand):
         if options['indiv']:
             self._write_indiv(wb)
 
-        wb.remove_sheet(default_sheet)
+        wb.remove(default_sheet)
 
         fname = 'bk_lijst.xlsx'
         self.stdout.write('[INFO] Schrijf bestand: %s' % fname)
