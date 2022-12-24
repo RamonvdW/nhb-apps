@@ -149,7 +149,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
         # juiste otp code
         code = get_otp_code(self.testdata.account_admin)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))
@@ -266,14 +266,14 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
         # juiste otp code
         code = get_otp_code(self.testdata.account_admin)
-        with self.assert_max_queries(25):       # iets hoger ivm follow=True
+        with self.assert_max_queries(44):       # iets hoger ivm follow=True
             resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
         # juiste otp code + next url
         code = get_otp_code(self.testdata.account_admin)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/iets/'})
         self.assertEqual(resp.status_code, 302)
         self.assert_is_redirect(resp, '/records/iets/')

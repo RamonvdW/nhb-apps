@@ -347,16 +347,16 @@ def rol_mag_wisselen(request):
     return check
 
 
-def rol_activeer_rol(request, rolurl):
+def rol_activeer_rol(request, rol_url):
     """ Activeer een andere rol, als dit toegestaan is
         geen foutmelding of exceptions als het niet mag.
     """
     try:
-        nwe_rol = url2rol[rolurl]
+        nwe_rol = url2rol[rol_url]
     except KeyError:
         # onbekende rol
         from_ip = get_safe_from_ip(request)
-        my_logger.error('%s ROL verzoek activeer onbekende rol %s' % (from_ip, repr(rolurl)))
+        my_logger.error('%s ROL verzoek activeer onbekende rol %s' % (from_ip, repr(rol_url)))
     else:
         try:
             rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
@@ -370,7 +370,7 @@ def rol_activeer_rol(request, rolurl):
                 request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
             else:
                 from_ip = get_safe_from_ip(request)
-                my_logger.error('%s ROL verzoek activeer niet toegekende rol %s' % (from_ip, repr(rolurl)))
+                my_logger.error('%s ROL verzoek activeer niet toegekende rol %s' % (from_ip, repr(rol_url)))
 
     # not recognized --> no change
 
@@ -470,12 +470,52 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     yield Rollen.ROL_RKO, obj.pk
             # for
 
+            # expandeer naar de HWL van verenigingen gekozen voor de BK's
+            qset = (DeelCompetitie
+                    .objects
+                    .filter(competitie__afstand=functie_in.comp_type,
+                            laag=LAAG_BK)
+                    .prefetch_related('rk_bk_matches'))
+            ver_nrs = list()
+            for deelcomp in qset:
+                ver_nrs.extend(list(deelcomp
+                                    .rk_bk_matches
+                                    .select_related('vereniging')
+                                    .values_list('vereniging__ver_nr', flat=True)))
+            # for
+
+            # zoek de HWL functies op
+            for pk, obj in functie_cache.items():
+                if obj.rol == 'HWL' and obj.ver_nr in ver_nrs:
+                    yield Rollen.ROL_HWL, obj.pk
+            # for
+
         if functie_in.rol == "RKO":
             # expandeer naar de RCL rollen binnen het rayon
             for pk, obj in functie_cache.items():
                 if obj.rol == 'RCL' and obj.comp_type == functie_in.comp_type:
                     if obj.regio_rayon_nr == functie_in.nhb_rayon.rayon_nr:
                         yield Rollen.ROL_RCL, obj.pk
+            # for
+
+            # expandeer naar de HWL van verenigingen gekozen voor de RKs
+            qset = (DeelCompetitie
+                    .objects
+                    .filter(competitie__afstand=functie_in.comp_type,
+                            laag=LAAG_RK, nhb_rayon=functie_in.nhb_rayon)
+                    .prefetch_related('rk_bk_matches'))
+            ver_nrs = list()
+            for deelcomp in qset:
+                ver_nrs.extend(list(deelcomp
+                                    .rk_bk_matches
+                                    .select_related('vereniging')
+                                    .values_list('vereniging__ver_nr', flat=True)))
+            # for
+
+            # zoek de HWL functies op
+            for pk, obj in functie_cache.items():
+                if obj.rol == 'HWL' and obj.ver_nr in ver_nrs:
+                    yield Rollen.ROL_HWL, obj.pk
             # for
 
         if functie_in.rol == "RCL":

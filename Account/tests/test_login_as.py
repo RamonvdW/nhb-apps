@@ -144,7 +144,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(34):
             resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -153,7 +153,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # controleer dat OTP controle niet nodig is
         # FUTURE: ongewenste dependency op Functie --> verplaats deze check naar Functie
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
