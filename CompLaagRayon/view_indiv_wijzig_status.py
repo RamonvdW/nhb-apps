@@ -12,7 +12,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (KampioenschapSchutterBoog, CompetitieMutatie,
                                MUTATIE_AFMELDEN, MUTATIE_AANMELDEN)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 import time

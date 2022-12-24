@@ -10,7 +10,8 @@ from django.http import Http404
 from django.views.generic import View
 from django.utils.formats import localize
 from Competitie.models import get_competitie_boog_typen, LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from Sporter.models import SporterBoog

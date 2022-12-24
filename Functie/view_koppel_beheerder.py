@@ -13,9 +13,9 @@ from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Functie.models import Functie
+from Functie.models import Functie, Rollen
 from Functie.operations import functie_vraag_email_bevestiging, functie_wijziging_stuur_email_notificatie
-from Functie.rol import (Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
+from Functie.rol import (rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_wissel_van_rol_menu_voor_account)
 from Functie.forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 from Logboek.models import schrijf_in_logboek

@@ -11,8 +11,9 @@ from NhbStructuur.models import NhbRayon
 from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                Competitie, DeelCompetitie, DeelcompetitieIndivKlasseLimiet, CompetitieMatch,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige_functie
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'

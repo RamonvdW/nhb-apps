@@ -9,7 +9,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter

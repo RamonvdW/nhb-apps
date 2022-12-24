@@ -9,7 +9,7 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                LAAG_REGIO, LAAG_RK, LAAG_BK)
-from Functie.rol import Rollen
+from Functie.models import Rollen
 import datetime
 
 

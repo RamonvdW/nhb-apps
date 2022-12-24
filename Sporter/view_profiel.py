@@ -15,8 +15,8 @@ from Bestel.models import Bestelling
 from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
-from Functie.rol import Rollen, rol_get_huidige
-from Functie.models import Functie
+from Functie.models import Functie, Rollen
+from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE

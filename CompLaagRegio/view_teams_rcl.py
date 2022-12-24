@@ -17,7 +17,8 @@ from Competitie.models import (LAAG_REGIO, AG_NUL,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync

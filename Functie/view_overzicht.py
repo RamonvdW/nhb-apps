@@ -9,8 +9,8 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from Functie.models import Functie
+from Functie.models import Functie, Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 
 

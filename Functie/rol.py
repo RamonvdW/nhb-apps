@@ -9,14 +9,14 @@
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
 from Account.models import AccountSessions
+from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
-from Functie.models import Functie
+from Functie.models import Functie, Rollen, rol2url, url2rol
 from Functie.operations import account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
 from typing import Tuple
 import logging
-import enum
 
 my_logger = logging.getLogger('NHBApps.Functie')
 
@@ -26,55 +26,6 @@ SESSIONVAR_ROL_MAG_WISSELEN = 'gebruiker_rol_mag_wisselen'
 SESSIONVAR_ROL_HUIDIGE = 'gebruiker_rol_huidige'
 SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
-
-
-# FUTURE: overweeg verwijderen ROL_NONE (nodig voor accounts die geen NHB lid zijn?)
-
-class Rollen(enum.IntEnum):
-    """ definitie van de rollen met codes
-        vertaling naar beschrijvingen in Plein.views
-    """
-
-    # rollen staan in prio volgorde
-    ROL_BB = 2          # Manager Competitiezaken
-    ROL_BKO = 3         # BK organisator, specifieke competitie
-    ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
-    ROL_RCL = 5         # Regiocompetitieleider, specifieke competitie en regio
-    ROL_HWL = 6         # Hoofdwedstrijdleider van een vereniging, alle competities
-    ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
-    ROL_SEC = 10        # Secretaris van een vereniging
-    ROL_SPORTER = 20    # Individuele sporter en NHB lid
-    ROL_MWZ = 30        # Manager Wedstrijdzaken
-    ROL_MO = 40         # Manager Opleidingen
-    ROL_MWW = 50        # Manager Webwinkel
-    ROL_SUP = 90        # Support
-    ROL_NONE = 99       # geen rol
-
-    """ LET OP!
-        rol nummers worden opgeslagen in de sessie
-            verwijderen = probleem voor terugkerende gebruiker
-            hergebruiken = gevaarlijk: gebruiker 'springt' naar nieuwe rol! 
-        indien nodig alle sessies verwijderen
-    """
-
-
-url2rol = {
-    'BB': Rollen.ROL_BB,
-    'BKO': Rollen.ROL_BKO,
-    'RKO': Rollen.ROL_RKO,
-    'RCL': Rollen.ROL_RCL,
-    'HWL': Rollen.ROL_HWL,
-    'WL': Rollen.ROL_WL,
-    'SEC': Rollen.ROL_SEC,
-    'MO': Rollen.ROL_MO,
-    'MWZ': Rollen.ROL_MWZ,
-    'MWW': Rollen.ROL_MWW,
-    'support': Rollen.ROL_SUP,
-    'sporter': Rollen.ROL_SPORTER,
-    'geen': Rollen.ROL_NONE
-}
-
-rol2url = {value: key for key, value in url2rol.items()}
 
 
 # plugin administratie

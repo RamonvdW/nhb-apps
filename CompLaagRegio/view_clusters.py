@@ -9,7 +9,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek

@@ -9,15 +9,14 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_IFAA
-from Bestel.operations.mandje import mandje_tel_inhoud, eval_mandje_inhoud
 from Bestel.models import BestelMandje
+from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.rol import Rollen, rol_get_huidige
-from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 

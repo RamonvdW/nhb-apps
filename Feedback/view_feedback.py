@@ -9,7 +9,8 @@ from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Feedback.forms import FeedbackForm
 from Feedback.models import Feedback

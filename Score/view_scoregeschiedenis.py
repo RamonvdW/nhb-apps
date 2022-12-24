@@ -8,7 +8,8 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Sporter.models import SporterBoog
 from Score.forms import ScoreGeschiedenisForm
 from Score.models import AanvangsgemiddeldeHist, ScoreHist, SCORE_WAARDE_VERWIJDERD

@@ -10,7 +10,8 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 
 

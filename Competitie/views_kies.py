@@ -10,7 +10,8 @@ from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, RegiocompetitieTeam
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 

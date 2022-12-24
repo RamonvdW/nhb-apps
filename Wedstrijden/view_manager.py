@@ -10,7 +10,8 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIES2SHORT_STR
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import (Wedstrijd,
                                 ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS,

@@ -16,7 +16,8 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, LA
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync

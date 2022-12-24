@@ -11,7 +11,8 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import LAAG_RK, AG_NUL, Competitie, CompetitieTeamKlasse, DeelCompetitie, KampioenschapTeam
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
 

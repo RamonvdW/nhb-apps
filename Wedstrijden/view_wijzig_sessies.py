@@ -12,7 +12,8 @@ from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIE_IFAA
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie,
                                 WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN,

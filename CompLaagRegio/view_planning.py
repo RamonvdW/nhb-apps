@@ -17,7 +17,8 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_deelcompetitie_ronde, competitie_week_nr_to_date
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics

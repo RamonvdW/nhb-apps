@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Sporter.models import Sporter
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import (Wedstrijd, WedstrijdKorting,

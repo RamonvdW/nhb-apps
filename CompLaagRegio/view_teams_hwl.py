@@ -15,7 +15,8 @@ from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM
 from Score.operations import score_teams_ag_opslaan

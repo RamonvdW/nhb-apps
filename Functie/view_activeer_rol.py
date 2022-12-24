@@ -8,7 +8,8 @@ from django.shortcuts import redirect
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.menu import get_url_voor_competitie
-from Functie.rol import (Rollen, rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
+from Functie.models import Rollen
+from Functie.rol import (rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
 from Overig.helpers import get_safe_from_ip
 from Taken.operations import eval_open_taken

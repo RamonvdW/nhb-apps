@@ -10,8 +10,7 @@ from Account.models import Account
 from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                BLAZOEN_CHOICES, BLAZOEN_40CM)
-from Functie.models import Functie
-from Functie.rol import Rollen
+from Functie.models import Functie, Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog

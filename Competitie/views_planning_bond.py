@@ -9,7 +9,8 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie,
                                LAAG_REGIO, LAAG_RK, LAAG_BK, MUTATIE_AFSLUITEN_REGIOCOMP)

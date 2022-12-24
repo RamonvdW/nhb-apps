@@ -9,7 +9,8 @@ from django.http import Http404
 from django.shortcuts import render, reverse
 from BasisTypen.models import BLAZOEN2STR
 from Competitie.models import AG_NUL, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Functie.rol import rol_get_huidige, Rollen
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 
 

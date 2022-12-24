@@ -16,7 +16,8 @@ from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_
                                CompetitieMatch, get_competitie_indiv_leeftijdsklassen)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter_voorkeuren

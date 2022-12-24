@@ -15,7 +15,8 @@ from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4S
 from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                RegioCompetitieSchutterBoog, DAGDEEL2LABEL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL)
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren

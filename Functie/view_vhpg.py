@@ -11,9 +11,9 @@ from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.rechten import account_rechten_eval_now
-from Functie.models import VerklaringHanterenPersoonsgegevens
+from Functie.models import Rollen, VerklaringHanterenPersoonsgegevens
 from Functie.operations import account_needs_vhpg
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.rol import rol_get_huidige
 from Functie.forms import AccepteerVHPGForm
 from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics

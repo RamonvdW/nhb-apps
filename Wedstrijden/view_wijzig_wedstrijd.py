@@ -16,8 +16,8 @@ from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
                                ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.models import Functie
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Functie, Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Wedstrijden.models import (Wedstrijd, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie,

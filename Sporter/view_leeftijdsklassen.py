@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import GESLACHT_MAN, GESLACHT_ANDERS
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_nhb,

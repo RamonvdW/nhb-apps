@@ -4,18 +4,16 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
-from Functie.models import Functie
+from Functie.models import Functie, Rollen, rol2url
 from Functie.operations import account_needs_vhpg
-from Functie.rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
-                         rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
-                         rol_evalueer_opnieuw)
+from Functie.rol import (rol_mag_wisselen, rol_enum_pallet, rol_get_huidige, rol_get_huidige_functie,
+                         rol_get_beschrijving, rol_evalueer_opnieuw)
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
