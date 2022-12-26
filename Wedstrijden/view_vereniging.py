@@ -159,7 +159,6 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                             datum_einde=begin,
                             organiserende_vereniging=self.functie_nu.nhb_ver,
                             organisatie=keuze2organisatie[keuze],
-                            voorwaarden_a_status_when=now,
                             locatie=locaties[0],
                             contact_naam=account.volledige_naam(),
                             contact_email=self.functie_nu.bevestigde_email,
