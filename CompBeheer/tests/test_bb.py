@@ -34,6 +34,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
     url_ag_vaststellen_afstand = '/bondscompetities/beheer/ag-vaststellen/%s/'                  # afstand
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
     url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen/tonen/'                     # comp_pk
+    url_seizoen_afsluiten = '/bondscompetities/beheer/seizoen-afsluiten/'
 
     testdata = None
 
@@ -326,6 +327,9 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
             resp = self.client.get(self.url_klassengrenzen_vaststellen % 999999)
         self.assert403(resp)
 
+        resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assert403(resp)
+
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
@@ -452,6 +456,13 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
+
+        # trigger de onbekende afstand fout
+        resp = self.client.get(self.url_ag_vaststellen_afstand % '42')
+        self.assert404(resp, 'Onbekende afstand')
+
+        resp = self.client.post(self.url_ag_vaststellen_afstand % '42')
+        self.assert404(resp, 'Onbekende afstand')
 
         # trigger de permissie check (want: geen competitie aangemaakt)
         with self.assert_max_queries(20):
@@ -751,6 +762,60 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
+    def test_seizoen_afsluiten(self):
+        # moet BB zijn
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wisselnaarrol_bb()
+
+        # maak een competitie van het volgende seizoen aan
+        competities_aanmaken(jaar=2019)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Alle competities nog niet in fase S')
+
+        # maak een HistComp aan die straks doorgezet gaat worden
+        hist = HistCompetitie(
+                        seizoen='2019/2020',
+                        is_openbaar=False,
+                        boog_str='Test',
+                        comp_type='18')
+        hist.save()
+
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
+
+        # fase S: alle BK's afgesloten
+        zet_competitie_fase(self.comp_18, 'S')
+        zet_competitie_fase(self.comp_25, 'S')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert_is_redirect(resp, '/bondscompetities/')
+
+        hist = HistCompetitie.objects.get(pk=hist.pk)
+        self.assertTrue(hist.is_openbaar)
+
+        # corner case: verwijder alle competitie
+        Competitie.objects.all().delete()
+
+        resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Geen competitie gevonden')
+
+        resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Geen competitie gevonden')
 
 # TODO: gebruik assert_other_http_commands_not_supported
 

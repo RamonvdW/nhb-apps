@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import views_bb
+from CompBeheer import views_bb, views_bko
 
 app_name = 'CompBeheer'
 
@@ -38,16 +38,18 @@ urlpatterns = [
          views_bb.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
 
+
+    # BKO schermen
     path('<comp_pk>/doorzetten-rk/',
-         views_bb.DoorzettenNaarRKView.as_view(),
+         views_bko.DoorzettenNaarRKView.as_view(),
          name='bko-doorzetten-naar-rk'),
 
     path('<comp_pk>/doorzetten-bk/',
-         views_bb.DoorzettenNaarBKView.as_view(),
+         views_bko.DoorzettenNaarBKView.as_view(),
          name='bko-doorzetten-naar-bk'),
 
     path('<comp_pk>/doorzetten-voorbij-bk/',
-         views_bb.DoorzettenVoorbijBKView.as_view(),
+         views_bko.DoorzettenVoorbijBKView.as_view(),
          name='bko-doorzetten-voorbij-bk'),
 ]
 
