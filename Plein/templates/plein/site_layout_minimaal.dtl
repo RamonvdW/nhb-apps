@@ -23,6 +23,7 @@
 
 <html lang="nl">
     <head>
+        {% block extra_header %}{% endblock %}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">

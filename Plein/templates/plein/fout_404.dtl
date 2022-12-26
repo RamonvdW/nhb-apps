@@ -9,6 +9,12 @@
 
 {% block title %}Niet gevonden{% endblock %}
 
+{% block extra_header %}
+    {% if meta_path %}
+        <meta path="{{ meta_path }}" />
+    {% endif %}
+{% endblock %}
+
 {% block pagina_minimaal %}
 
     <!-- template bevat 'Oeps!' header -->

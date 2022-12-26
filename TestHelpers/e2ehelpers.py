@@ -201,7 +201,7 @@ class E2EHelpers(TestCase):
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
     def e2e_dump_resp(self, resp):                        # pragma: no cover
-        print("status code:", resp.status_code)
+        print("\nstatus code:", resp.status_code)
         print(repr(resp))
         is_attachment = False
         if resp.status_code == 302:
@@ -228,8 +228,19 @@ class E2EHelpers(TestCase):
             if len(content) < 50:
                 print("very short content:", content)
             else:
-                soup = BeautifulSoup(content, features="html.parser")
-                print(soup.prettify())
+                is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
+                if is_404:
+                    pos = content.find('<meta path="')
+                    if pos < 0:
+                        # geen page-not-found maar fout-in-pagina
+                        is_404 = False
+                if is_404:
+                    sub = content[pos+12:pos+300]
+                    pos = sub.find('"')
+                    print('404 pagina niet gevonden: %s' % sub[:pos])
+                else:
+                    soup = BeautifulSoup(content, features="html.parser")
+                    print(soup.prettify())
 
     def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)

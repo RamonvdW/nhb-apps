@@ -84,6 +84,7 @@ def site_handler404_page_not_found(request, exception=None):
         except (KeyError, IndexError, TypeError):
             # typical for an internally raised Resolver404()
             rauw = False
+            path = ''
 
         if rauw:
             # geef een 'rauwe' 404 terug
@@ -94,6 +95,8 @@ def site_handler404_page_not_found(request, exception=None):
 
         # voorkom dat we een hele urlconf dumpen naar de gebruiker
         info = "Pagina bestaat niet"
+        if path:
+            context['meta_path'] = path
     else:
         info = str(exception)
     if len(info):
