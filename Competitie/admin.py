@@ -344,6 +344,30 @@ class GebruikteKlassenFilter(admin.SimpleListFilter):
         return queryset
 
 
+class IncompleetTeamFilter(admin.SimpleListFilter):
+
+    title = "Incompleet Team"
+
+    parameter_name = 'incompleet'
+
+    default_value = None
+
+    def lookups(self, request, model_admin):                    # pragma: no cover
+        """ Return list of tuples for the sidebar """
+        return [
+            ('incompleet', 'Incomplete teams'),
+            ('compleet', 'Volledige teams')
+        ]
+
+    def queryset(self, request, queryset):      # pragma: no cover
+        selection = self.value()
+        if selection == 'incompleet':
+            queryset = queryset.filter(aanvangsgemiddelde__lte=0.0001)
+        elif selection == 'compleet':
+            queryset = queryset.filter(aanvangsgemiddelde__gt=0)
+        return queryset
+
+
 class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('tijdelijke_schutters',
@@ -352,7 +376,8 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     list_filter = ('deelcompetitie__competitie',
                    'vereniging__regio__rayon',
-                   GebruikteKlassenFilter)
+                   GebruikteKlassenFilter,
+                   IncompleetTeamFilter)
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_rayon',

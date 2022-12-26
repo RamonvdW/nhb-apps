@@ -50,7 +50,7 @@ class SporterAdmin(admin.ModelAdmin):
     search_fields = ('unaccented_naam', 'lid_nr')
 
     # filter mogelijkheid
-    list_filter = ('geslacht', 'is_actief_lid', 'is_erelid', HeeftWaIdListFilter, HeeftAccountFilter, 'para_classificatie')
+    list_filter = ('geslacht', 'is_actief_lid', 'is_erelid', HeeftWaIdListFilter, HeeftAccountFilter, 'para_classificatie', 'bij_vereniging')
 
     list_select_related = True
 
