@@ -36,6 +36,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-bko-doorzetten-voorbij-bk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-voorbij-bk" %}
 
 {% endblock %}

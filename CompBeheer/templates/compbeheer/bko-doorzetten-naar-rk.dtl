@@ -86,6 +86,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-bko-doorzetten-naar-rk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-naar-rk" %}
 
 {% endblock %}

@@ -76,6 +76,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-bko-afsluiten-competitie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-afsluiten-competitie" %}
 
 {% endblock %}
