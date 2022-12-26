@@ -58,7 +58,7 @@ class TestMailerGoodBase(TestCase):
         # controleer dat de whitelist zijn werk doet
         self.assertEqual(0, MailQueue.objects.count())
 
-        with self.settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
+        with override_settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
             mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
             mail = MailQueue.objects.all()[0]

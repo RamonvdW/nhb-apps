@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from Feedback.models import Feedback, feedback_opschonen
 from Feedback.operations import store_feedback
 from Taken.models import Taak
@@ -234,7 +234,7 @@ class TestFeedback(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
-        with self.settings(TAAK_OVER_FEEDBACK_ACCOUNTS=[self.account_admin.username]):
+        with override_settings(TAAK_OVER_FEEDBACK_ACCOUNTS=[self.account_admin.username]):
 
             self.assertEqual(Taak.objects.count(), 0)
 

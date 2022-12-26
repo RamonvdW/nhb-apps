@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from Competitie.models import CompetitieMatch, KampioenschapSchutterBoog, DeelcompetitieIndivKlasseLimiet, DEELNAME_NEE
 from Competitie.tests.test_fase import zet_competitie_fase
@@ -228,13 +228,13 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert200_file(resp)
 
         # niet bestaand RK programma
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
         self._make_bad_xlsm_file(self.xlsm_fpath_18_indiv)
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
 
@@ -311,13 +311,13 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert200_file(resp)
 
         # niet bestaand RK programma
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
         self._make_bad_xlsm_file(self.xlsm_fpath_18_teams)
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
 

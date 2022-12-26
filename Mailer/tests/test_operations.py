@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide, render_email_template
 
@@ -61,7 +61,7 @@ class TestMailerOperations(TestCase):
         # controleer dat de whitelist zijn werk doet
         self.assertEqual(0, MailQueue.objects.count())
 
-        with self.settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
+        with override_settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
             mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
             mail = MailQueue.objects.all()[0]

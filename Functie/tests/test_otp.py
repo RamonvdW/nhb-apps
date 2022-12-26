@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from Account.models import Account
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -286,7 +286,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.testdata.account_admin.save()
         self.e2e_login(self.testdata.account_admin)
 
-        with self.settings(OTP_ISSUER_NAME='erg_lange_otp_issuer_naam_van_50_tekens__erg_lange'):
+        with override_settings(OTP_ISSUER_NAME='erg_lange_otp_issuer_naam_van_50_tekens__erg_lange'):
             # check mogelijkheid tot koppelen
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_koppel_stap2)

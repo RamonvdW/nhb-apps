@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -347,13 +347,13 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'E')
 
         # competitie in de verkeerde fase
-        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=30):
+        with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=30):
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
                 self.assert404(resp, 'Competitie is niet in de juiste fase 2')
 
         # verplaats het openingstijdstip
-        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
+        with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
@@ -441,7 +441,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_25, 'E')
 
         # verplaats het openingstijdstip
-        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
+        with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
@@ -466,7 +466,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         # zet competitie in fase E (nodig om een team aan te maken)
         zet_competitie_fase(self.comp_18, 'E')
 
-        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
+        with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             # maak een team aan
             self.assertEqual(KampioenschapTeam.objects.count(), 0)
             with self.assert_max_queries(20):
