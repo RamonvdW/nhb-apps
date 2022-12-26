@@ -24,7 +24,7 @@ urlpatterns = [
          views_info.redirect_leeftijden,        # oud; redirects naar nieuw
          name='info-leeftijden'),
 
-    path('<comp_pk>/klassengrenzen/tonen/',
+    path('<comp_pk>/klassengrenzen-tonen/',
          views_klassengrenzen.KlassengrenzenTonenView.as_view(),
          name='klassengrenzen-tonen'),
 

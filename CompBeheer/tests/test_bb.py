@@ -33,7 +33,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
     url_wijzigdatums = '/bondscompetities/beheer/%s/wijzig-datums/'                             # comp_pk
     url_ag_vaststellen_afstand = '/bondscompetities/beheer/ag-vaststellen/%s/'                  # afstand
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
-    url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen/tonen/'                     # comp_pk
+    url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen-tonen/'                     # comp_pk
     url_seizoen_afsluiten = '/bondscompetities/beheer/seizoen-afsluiten/'
 
     testdata = None
