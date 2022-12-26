@@ -453,8 +453,9 @@ class TestData(object):
         # maak voor elke vereniging een paar accounts aan
         lid_nr = MIN_LID_NR
         bulk = list()
-        for ver in self.vereniging.values():
-
+        ver_unsorted = [(ver.ver_nr, ver) for ver in self.vereniging.values()]
+        ver_unsorted.sort()     # sorteer op verenigingsnummer in de volgorde te garanderen
+        for _, ver in ver_unsorted:
             try:
                 self.regio_ver_nrs[ver.regio.regio_nr].append(ver.ver_nr)
             except KeyError:
