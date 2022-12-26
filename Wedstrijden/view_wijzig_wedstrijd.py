@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
+from django.db.models import Count
 from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -323,7 +324,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             else:
                 selected_ver_nr = -1
 
-            context['opt_uitvoerende_vers'] = NhbVereniging.objects.exclude(geen_wedstrijden=True).order_by('ver_nr')
+            context['opt_uitvoerende_vers'] = (NhbVereniging
+                                               .objects
+                                               .exclude(geen_wedstrijden=True)
+                                               .annotate(aantal=Count('wedstrijdlocatie'))
+                                               .filter(aantal__gte=1)
+                                               .order_by('ver_nr'))
             for ver in context['opt_uitvoerende_vers']:
                 ver.sel = 'ver_%s' % ver.ver_nr
                 ver.selected = (ver.ver_nr == selected_ver_nr)
@@ -521,7 +527,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
                 data = request.POST.get('uitvoerend', '')
                 if data:
-                    for ver in NhbVereniging.objects.exclude(geen_wedstrijden=True):
+                    for ver in (NhbVereniging
+                                .objects
+                                .exclude(geen_wedstrijden=True)
+                                .annotate(aantal=Count('wedstrijdlocatie'))
+                                .filter(aantal__gte=1)):
                         sel = 'ver_%s' % ver.ver_nr
                         if data == sel:
                             wedstrijd.uitvoerende_vereniging = ver
