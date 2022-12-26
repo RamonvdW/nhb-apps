@@ -511,6 +511,10 @@ BETAAL_VIA_NHB_VER_NR = 1368
 BETAAL_API = 'https://api.mollie.com'
 
 
+# welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
+WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
+
+
 # defaults for 'dev' and 'test' options
 
 # SECURITY WARNING: don't run with debug turned on in production!

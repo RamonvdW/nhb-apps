@@ -365,6 +365,9 @@ class Wedstrijd(models.Model):
     inschrijven_tot = models.PositiveSmallIntegerField(default=7)
 
     # waar wordt de wedstrijd gehouden
+    uitvoerende_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+                                               related_name='uitvoerend',
+                                               blank=True, null=True)
     locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
 
     # begrenzing
@@ -386,9 +389,15 @@ class Wedstrijd(models.Model):
     contact_website = models.CharField(max_length=100, default='', blank=True)
     contact_telefoon = models.CharField(max_length=50, default='', blank=True)
 
+    # acceptatie verkoopvoorwaarden wedstrijdkalender
+    verkoopvoorwaarden_status_acceptatie = models.BooleanField(default=False)
+    verkoopvoorwaarden_status_when = models.DateTimeField(auto_now=True)
+    verkoopvoorwaarden_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
+                                                     blank=True)     # mag leeg zijn
+
     # acceptatie voorwaarden WA A-status
     voorwaarden_a_status_acceptatie = models.BooleanField(default=False)
-    voorwaarden_a_status_when = models.DateTimeField()
+    voorwaarden_a_status_when = models.DateTimeField(auto_now=True)
     voorwaarden_a_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
                                                 blank=True)     # mag leeg zijn
 

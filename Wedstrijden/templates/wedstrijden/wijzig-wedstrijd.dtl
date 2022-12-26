@@ -236,6 +236,19 @@
                                 </tr>
                             {% endif %}     <!-- toon_wa_status -->
 
+                            {% if toon_uitvoerende %}
+                            <tr>
+                                <th>Uitvoerende vereniging</th>
+                                <td>
+                                    <select name="uitvoerend" onchange="gewijzigd()">
+                                        {% for opt in opt_uitvoerende_vers %}
+                                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endif %}
+
                             <tr>
                                 <th>Wedstrijd locatie</th>
                                 <td>

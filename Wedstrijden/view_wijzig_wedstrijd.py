@@ -18,6 +18,7 @@ from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_kla
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie, Rollen
 from Functie.rol import rol_get_huidige_functie
+from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Wedstrijden.models import (Wedstrijd, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie,
@@ -59,6 +60,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
+                                         'uitvoerende_vereniging',
                                          'locatie')
                          .prefetch_related('sessies',
                                            'sessies__wedstrijdklassen',
@@ -154,8 +156,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             opt_begrenzing.append(opt)
         # for
 
-        locaties = (wedstrijd
-                    .organiserende_vereniging
+        if wedstrijd.uitvoerende_vereniging:
+            ver = wedstrijd.uitvoerende_vereniging
+        else:
+            ver = wedstrijd.organiserende_vereniging
+        locaties = (ver
                     .wedstrijdlocatie_set
                     .exclude(zichtbaar=False)
                     .order_by('pk'))
@@ -309,6 +314,21 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         # aantal banen waar uit gekozen kan worden
         max_banen = min(80, max_banen)
         context['opt_banen'] = [nr for nr in range(2, max_banen + 1)]  # 1 baan = handmatig in .dtl
+
+        if wedstrijd.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING:
+            # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
+            context['toon_uitvoerende'] = True
+            if wedstrijd.uitvoerende_vereniging:
+                selected_ver_nr = wedstrijd.uitvoerende_vereniging.ver_nr
+            else:
+                selected_ver_nr = -1
+
+            context['opt_uitvoerende_vers'] = NhbVereniging.objects.exclude(geen_wedstrijden=True).order_by('ver_nr')
+            for ver in context['opt_uitvoerende_vers']:
+                ver.sel = 'ver_%s' % ver.ver_nr
+                ver.selected = (ver.ver_nr == selected_ver_nr)
+                ver.keuze_str = ver.ver_nr_en_naam()
+            # for
 
         context['url_opslaan'] = reverse('Wedstrijden:wijzig-wedstrijd',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -496,10 +516,24 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
             wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
 
+            wedstrijd.uitvoerende_vereniging = None
+            if wedstrijd.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING:
+                # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
+                data = request.POST.get('uitvoerend', '')
+                if data:
+                    for ver in NhbVereniging.objects.exclude(geen_wedstrijden=True):
+                        sel = 'ver_%s' % ver.ver_nr
+                        if data == sel:
+                            wedstrijd.uitvoerende_vereniging = ver
+                    # for
+
             data = request.POST.get('locatie', '')
             if data:
-                for locatie in (wedstrijd
-                                .organiserende_vereniging
+                if wedstrijd.uitvoerende_vereniging:
+                    ver = wedstrijd.uitvoerende_vereniging
+                else:
+                    ver = wedstrijd.organiserende_vereniging
+                for locatie in (ver
                                 .wedstrijdlocatie_set
                                 .exclude(zichtbaar=False)):
                     sel = 'loc_%s' % locatie.pk
