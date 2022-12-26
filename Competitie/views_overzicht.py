@@ -74,7 +74,7 @@ class CompetitieOverzichtView(View):
                 if datum:
                     context['datum_ag_vastgesteld'] = localize(datum.date())
                 context['comp_afstand'] = comp.afstand
-                comp.url_ag_vaststellen = reverse('Competitie:ag-vaststellen-afstand',
+                comp.url_ag_vaststellen = reverse('CompBeheer:ag-vaststellen-afstand',
                                                   kwargs={'afstand': comp.afstand})
 
             context['planning_deelcomp'] = (DeelCompetitie
@@ -88,7 +88,7 @@ class CompetitieOverzichtView(View):
 
                 obj.titel = 'Planning'
                 obj.tekst = 'Landelijke planning voor deze competitie.'
-                obj.url = reverse('Competitie:bond-planning',
+                obj.url = reverse('CompLaagBond:bond-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
             # for
 
@@ -240,24 +240,24 @@ class CompetitieOverzichtView(View):
 
                 obj.titel = 'Planning'
                 obj.tekst = 'Landelijke planning voor deze competitie.'
-                obj.url = reverse('Competitie:bond-planning',
+                obj.url = reverse('CompLaagBond:bond-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
 
                 # geef de BKO de mogelijkheid om
                 # - de regiocompetitie door te zetten naar de rayonkampioenschappen
                 # - de RK door te zetten naar de BK
                 if 'E' <= comp.fase <= 'G':
-                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-rk',
+                    comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-naar-rk',
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (Regio naar RK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
                 elif 'M' <= comp.fase < 'P':
-                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-bk',
+                    comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-naar-bk',
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
                 elif comp.fase == 'R':
-                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-voorbij-bk',
+                    comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-voorbij-bk',
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten voorbij het BK' % comp.beschrijving
                     context['bko_doorzetten'] = comp

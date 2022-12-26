@@ -87,7 +87,7 @@
     </div>
 
     <p class="center">
-        <a class="btn-nhb-rood" href="{% url 'Competitie:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
+        <a class="btn-nhb-rood" href="{% url 'CompBeheer:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
     </p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="competitie-instellingen-nieuwe-competitie" %}

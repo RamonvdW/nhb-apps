@@ -267,11 +267,11 @@ class CompetitieKiesView(TemplateView):
             # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
             if begin_jaar is not None:
                 context['nieuwe_seizoen'] = "%s/%s" % (begin_jaar, begin_jaar+1)
-                context['url_seizoen_opstarten'] = reverse('Competitie:instellingen-volgende-competitie')
+                context['url_seizoen_opstarten'] = reverse('CompBeheer:instellingen-volgende-competitie')
                 context['toon_management_competitie'] = True
 
             if seizoen_afsluiten > 0:
-                context['url_seizoen_afsluiten'] = reverse('Competitie:bb-seizoen-afsluiten')
+                context['url_seizoen_afsluiten'] = reverse('CompBeheer:bb-seizoen-afsluiten')
                 context['toon_management_competitie'] = True
 
             self._tel_aantallen(context)

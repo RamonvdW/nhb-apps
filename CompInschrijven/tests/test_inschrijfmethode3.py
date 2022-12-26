@@ -27,6 +27,9 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
     url_behoefte3 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
     url_behoefte3_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
+    url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'     # comp_pk
+    url_voorkeuren = '/sporter/voorkeuren/%s/'  # lid_nr
 
     testdata = None
     begin_jaar = 2019
@@ -117,18 +120,15 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
     def _doe_inschrijven(self, comp):
 
-        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/' % comp.pk
-
         # meld een bak leden aan voor de competitie
         self.e2e_wisselnaarrol_bb()
 
         # klassengrenzen vaststellen
-        url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
@@ -178,7 +178,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                     self.assertTrue(sporter.bereken_wedstrijdleeftijd_wa(self.begin_jaar + 1) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
-                url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
+                url_voorkeuren = self.url_voorkeuren % lid_nr
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)
                 self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -216,7 +216,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
             with self.assert_max_queries(29):
-                resp = self.client.post(url_inschrijven, post_params)
+                resp = self.client.post(self.url_inschrijven % comp.pk, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
 

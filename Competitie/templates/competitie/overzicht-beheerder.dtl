@@ -66,13 +66,13 @@
 
                 <!-- competities aanmaken -->
                 {% if bb_kan_competitie_aanmaken %}
-                    {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
+                    {% url 'CompBeheer:instellingen-volgende-competitie' as card_url %}
                     {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en competities aanmaken." icon="playlist_add" url=card_url %}
                 {% endif %}
 
                 <!-- datums wijzigen (hoge prio) -->
                 {% if comp.fase < 'B' %}
-                    {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
+                    {% url 'CompBeheer:wijzig-datums' comp_pk=comp.pk as card_url %}
                     {% include 'plein/card.dtl' with title="Zet datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
                 {% endif %}
 
@@ -86,7 +86,7 @@
                     {% endif %}
 
                     <!-- klassengrenzen vaststellen -->
-                    {% url 'Competitie:klassengrenzen-vaststellen' comp_pk=comp.pk as card_url %}
+                    {% url 'CompBeheer:klassengrenzen-vaststellen' comp_pk=comp.pk as card_url %}
                     {% include 'plein/card.dtl' with title="Zet klassengrenzen" text="Klassengrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
                 {% endif %}
 
@@ -200,7 +200,7 @@
             {% if rol_is_bb %}
                 <!-- datums wijzigen (lage prio) -->
                 {% if comp.fase >= 'B' %}
-                    {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
+                    {% url 'CompBeheer:wijzig-datums' comp_pk=comp.pk as card_url %}
                     {% include 'plein/card.dtl' with title="Fase datums" text="Datums aanpassen voor de fases van de competitie." icon="build" url=card_url %}
                 {% endif %}
             {% endif %}     <!-- rol_is_bb -->

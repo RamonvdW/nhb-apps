@@ -37,6 +37,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     url_regio_teams = '/bondscompetities/scores/teams/%s/'                          # deelcomp_pk
 
+    url_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'     # comp_pk
+
     ver_nr = 0      # wordt in setupTestData ingevuld
 
     testdata = None
@@ -69,12 +71,11 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         """
 
         # klassengrenzen vaststellen
-        url_vaststellen = '/bondscompetities/%s/klassengrenzen/vaststellen/'  # comp_pk
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
-        resp = self.client.post(url_vaststellen % self.testdata.comp18.pk)
+        resp = self.client.post(self.url_vaststellen % self.testdata.comp18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
-        resp = self.client.post(url_vaststellen % self.testdata.comp25.pk)
+        resp = self.client.post(self.url_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])

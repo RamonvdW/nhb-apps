@@ -36,6 +36,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
     url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'                 # comp_pk, subset=auto/alle/rayon_nr
     url_regio_teams_bestand = '/bondscompetities/regio/%s/teams/als-bestand/'     # deelcomp_pk
     url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'                     # deelcomp_pk
+    url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
 
     testdata = None
 
@@ -134,8 +135,8 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
-        self.url_klassengrenzen_vaststellen_18 = '/bondscompetities/%s/klassengrenzen/vaststellen/' % self.comp_18.pk
-        resp = self.client.post(self.url_klassengrenzen_vaststellen_18)
+        url_klassengrenzen_vaststellen_18 = self.url_klassengrenzen_vaststellen % self.comp_18.pk
+        resp = self.client.post(url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,

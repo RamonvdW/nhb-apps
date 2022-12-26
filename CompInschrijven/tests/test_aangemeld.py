@@ -23,11 +23,11 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
-    url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'                                # comp_pk
+    url_wijzigdatums = '/bondscompetities/beheer/%s/wijzig-datums/'                                # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'     # comp_pk
     url_aangemeld_rayon = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/rayon-%s/'  # comp_pk, rayon_pk
     url_aangemeld_regio = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/'  # comp_pk, regio_pk
-    url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'                 # comp_pk
+    url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'                 # comp_pk
     url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'                     # comp.pk
 
     @classmethod

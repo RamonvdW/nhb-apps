@@ -150,7 +150,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             deelcomp_bk = DeelCompetitie.objects.get(laag=LAAG_BK,
                                                      competitie=deelcomp_rk.competitie)
-            context['url_bond'] = reverse('Competitie:bond-planning',
+            context['url_bond'] = reverse('CompLaagBond:bond-planning',
                                           kwargs={'deelcomp_pk': deelcomp_bk.pk})
 
         deelcomps = (DeelCompetitie

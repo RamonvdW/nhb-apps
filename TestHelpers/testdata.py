@@ -454,7 +454,7 @@ class TestData(object):
         lid_nr = MIN_LID_NR
         bulk = list()
         ver_unsorted = [(ver.ver_nr, ver) for ver in self.vereniging.values()]
-        ver_unsorted.sort()     # sorteer op verenigingsnummer in de volgorde te garanderen
+        ver_unsorted.sort()     # sorteer op verenigingsnummer om de volgorde te garanderen
         for _, ver in ver_unsorted:
             try:
                 self.regio_ver_nrs[ver.regio.regio_nr].append(ver.ver_nr)
@@ -520,7 +520,7 @@ class TestData(object):
 
         lid_nr = MIN_LID_NR
         bulk = list()
-        for ver in self.vereniging.values():
+        for _, ver in ver_unsorted:
 
             self.ver_sporters[ver.ver_nr] = list()
             self.ver_sporters_met_account[ver.ver_nr] = list()
@@ -573,7 +573,7 @@ class TestData(object):
                         .objects
                         .select_related('account',
                                         'bij_vereniging')
-                        .all()):
+                        .order_by('lid_nr')):
 
             ver_nr = sporter.bij_vereniging.ver_nr
 

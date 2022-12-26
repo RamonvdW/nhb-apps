@@ -38,7 +38,7 @@
                     <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
                     <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
                     <p>
-                        <a class="btn-nhb-rood" href="{% url 'Competitie:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a>
+                        <a class="btn-nhb-rood" href="{% url 'CompBeheer:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a>
                     </p>
                 </div>
             </div>
@@ -110,7 +110,7 @@
         </div>
 
         <div class="center">
-            <form method="post" action="{% url 'Competitie:klassengrenzen-vaststellen' comp_pk=comp.pk %}">
+            <form method="post" action="{% url 'CompBeheer:klassengrenzen-vaststellen' comp_pk=comp.pk %}">
                 {% csrf_token %}
                 <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Deze klassengrenzen vaststellen">
             </form>

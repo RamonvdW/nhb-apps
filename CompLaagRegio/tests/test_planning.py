@@ -29,7 +29,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders', 'Competitie.tests.test_competitie')
 
-    url_planning_bond = '/bondscompetities/planning/bk/%s/'                                 # deelcomp_pk
+    url_planning_bond = '/bondscompetities/bk/planning/%s/'                                 # deelcomp_pk
     url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                             # deelcomp_pk
     url_planning_regio_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'          # deelcomp_pk, cluster_pk
@@ -39,6 +39,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
     url_verwijder_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/verwijder/%s/'    # match_pk
     url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                    # match_pk
     url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'                  # deelcomp_pk
+    url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
 
     testdata = None
     
@@ -137,8 +138,8 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
-        self.url_klassengrenzen_vaststellen_18 = '/bondscompetities/%s/klassengrenzen/vaststellen/' % self.comp_18.pk
-        resp = self.client.post(self.url_klassengrenzen_vaststellen_18)
+        url_klassengrenzen_vaststellen_18 = self.url_klassengrenzen_vaststellen % self.comp_18.pk
+        resp = self.client.post(url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
@@ -238,7 +239,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
@@ -267,7 +268,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)

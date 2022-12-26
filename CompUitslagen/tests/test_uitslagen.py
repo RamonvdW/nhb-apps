@@ -34,7 +34,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
     url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
     url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'                                  # comp_pk, comp_boog
 
-    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                                       # comp_pk
+    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                       # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
 
     ver_nr = 0      # wordt in setupTestData ingevuld

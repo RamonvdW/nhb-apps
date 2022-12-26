@@ -25,7 +25,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     url_kies = '/bondscompetities/'
     url_overzicht = '/bondscompetities/%s/'  # comp_pk
-    url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'  # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
 
     @classmethod
@@ -116,7 +115,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # klassengrenzen vaststellen
-        url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
+        url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'
         with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
@@ -341,77 +340,5 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         deelcomp.save()
         obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_BK).all()[0]
         self.assertTrue(str(obj) != '')
-
-    def test_wijzig_datums_not_bb(self):
-        comp = Competitie.objects.all()[0]
-        url = self.url_wijzigdatums % comp.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-    def test_wijzig_datums_bb(self):
-        comp = Competitie.objects.all()[0]
-        url = self.url_wijzigdatums % comp.pk
-
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.begin_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.einde_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.eerste_wedstrijd)
-
-        # wordt BB
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        # get
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/bb-wijzig-datums.dtl', 'plein/site_layout.dtl'))
-
-        # post
-        with self.assert_max_queries(21):
-            resp = self.client.post(url, {'datum1': '2019-08-09',
-                                          'datum2': '2019-09-10',
-                                          'datum3': '2019-10-11',
-                                          'datum4': '2019-11-12',
-                                          'datum5': '2019-11-12',
-                                          'datum6': '2020-02-01',
-                                          'datum7': '2019-02-12',
-                                          'datum8': '2020-05-01',
-                                          'datum9': '2020-05-12',
-                                          'datum10': '2020-06-12',
-                                          })
-        self.assert_is_redirect(resp, self.url_overzicht % comp.pk)
-
-        # controleer dat de nieuwe datums opgeslagen zijn
-        comp = Competitie.objects.get(pk=comp.pk)
-        self.assertEqual(datetime.date(year=2019, month=8, day=9), comp.begin_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=9, day=10), comp.einde_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=10, day=11), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=2019, month=11, day=12), comp.eerste_wedstrijd)
-
-        # check corner cases
-
-        # alle datums verplicht
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assert404(resp, 'Verplichte parameter ontbreekt')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': 'null',
-                                          'datum2': 'hallo',
-                                          'datum3': '0',
-                                          'datum4': '2019-13-42'})
-        self.assert404(resp, 'Geen valide datum')
-
-        # foute comp_pk bij get
-        url = self.url_wijzigdatums % 999999
-        resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
-
-        # foute comp_pk bij post
-        resp = self.client.post(url)
-        self.assert404(resp, 'Competitie niet gevonden')
 
 # end of file

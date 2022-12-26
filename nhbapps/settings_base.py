@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'CompLaagBond.apps.CompLaagBondConfig',
     'CompLaagRegio.apps.CompLaagRegioConfig',
     'CompLaagRayon.apps.CompLaagRayonConfig',
+    'CompBeheer.apps.CompBeheerConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',

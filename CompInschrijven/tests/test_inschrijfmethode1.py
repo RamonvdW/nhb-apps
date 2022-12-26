@@ -29,6 +29,10 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                      # match_pk
     url_behoefte1 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'    # comp_pk, regio_pk
     url_behoefte1_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
+    url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'         # comp.pk
+    url_voorkeuren = '/sporter/voorkeuren/%s/'  # lid_nr
+    url_success = '/vereniging/leden-voorkeuren/'
 
     testdata = None
 
@@ -131,12 +135,11 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # klassengrenzen vaststellen
-        url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
@@ -195,7 +198,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     def _doe_inschrijven(self, comp):
         # maak leden aan voor de tests
-        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/' % comp.pk
+        url_inschrijven = self.url_inschrijven % comp.pk
 
         # wissel naar HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -231,8 +234,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                 sporter.save()
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
-                url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
-                url_success = '/vereniging/leden-voorkeuren/'
+                url_voorkeuren = self.url_voorkeuren % lid_nr
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)
                 self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -264,7 +266,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
 
-                self.assert_is_redirect(resp, url_success)  # redirect = succes
+                self.assert_is_redirect(resp, self.url_success)  # redirect = succes
 
             # for
 

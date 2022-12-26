@@ -21,7 +21,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # rk_deelcomp_pk
     url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset
-    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                                       # comp_pk
+    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                       # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
 
     regio_nr = 101
