@@ -95,7 +95,7 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
         ongebruikte_foto = WebwinkelFoto(volgorde=66)
         ongebruikte_foto.save()
 
-    def __del__(self):
+    def tearDown(self):
         self.tmp_dir.cleanup()
 
     def test_check_fotos(self):
