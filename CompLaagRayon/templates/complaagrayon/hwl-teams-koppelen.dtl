@@ -158,7 +158,7 @@
         <div class="col s12">
             <div class="white" style="padding:10px">
                 {% if alleen_bekijken %}
-                    <p>Er kunnen geen wijzigingen meer gedaan worden. {% if rk_team.team_klasse %}Dit team is geplaatst voor het RK teams!{% else %}Teamleden die niet gerechtigd waren om deel te nemen aan de Rayonkampioenschappen zijn verwijderd.</p><p class="red-text">Dit team is niet compleet en daarom niet geplaatst.{% endif %}</p>
+                    <p>Er kunnen geen wijzigingen meer gedaan worden. {% if rk_team.team_klasse %}Dit team is geplaatst voor het RK teams!<br>Invallers kunnen doorgegevens worden op de wedstrijddag.{% else %}Teamleden die niet gerechtigd waren om deel te nemen aan de Rayonkampioenschappen zijn verwijderd.</p><p class="red-text">Dit team is niet compleet en daarom niet geplaatst.{% endif %}</p>
                 {% else %}
                     {% if onder_voorbehoud %}
                         <p>LET OP: Teamleden moeten gerechtigd zijn deel te nemen aan de Rayonkampioenschappen. Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte en team wedstrijdklasse voor het RK zijn daarom <b>onder voorbehoud</b>.</p>
