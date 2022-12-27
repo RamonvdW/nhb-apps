@@ -36,15 +36,15 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         lid_nr = self._next_lid_nr
         self._next_lid_nr += 1
 
-        sporter = Sporter()
-        sporter.lid_nr = lid_nr
-        sporter.geslacht = "M"
-        sporter.voornaam = voornaam
-        sporter.achternaam = "Tester"
-        sporter.email = voornaam.lower() + "@nhb.test"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = self._ver
+        sporter = Sporter(
+                    lid_nr=lid_nr,
+                    geslacht="M",
+                    voornaam=voornaam,
+                    achternaam="Tester",
+                    email=voornaam.lower() + "@nhb.test",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self._ver)
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -60,10 +60,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_101
+        ver = NhbVereniging(
+                    ver_nr="1000",
+                    naam="Grote Club",
+                    regio=self.regio_101)
         ver.save()
         self._ver = ver
 
