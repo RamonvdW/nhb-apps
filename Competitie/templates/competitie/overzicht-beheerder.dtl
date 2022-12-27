@@ -64,11 +64,12 @@
 
             {% if rol_is_bb %}
 
-                <!-- competities aanmaken -->
+                <!-- competities aanmaken --
                 {% if bb_kan_competitie_aanmaken %}
                     {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
                     {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en competities aanmaken." icon="playlist_add" url=card_url %}
                 {% endif %}
+                -->
 
                 <!-- datums wijzigen (hoge prio) -->
                 {% if comp.fase < 'B' %}
