@@ -77,7 +77,7 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
                 # hoe moeilijk is knippen & plakken? Niet veel moeite in stoppen
                 raise Http404('Niet geaccepteerd')
 
-            # TODO: doe een echte transactie om te controleren dat de API key echt werkt
+            # FUTURE: doe een interactie met Mollie om te controleren dat de API key echt werkt
 
             instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
             instellingen.mollie_api_key = apikey
