@@ -113,8 +113,7 @@ class Command(BaseCommand):
                 wedstrijd_fouten.append('geen locatie')
 
             if ver:
-                # kijk hoeveel wedstrijdlocaties deze vereniging heeft
-                if len(locs) > 1:
+                if loc:
                     # als de gekozen locatie discipline_indoor is en banen_18m/banen_25m ingesteld heeft, dan is het goed
                     if (not loc.discipline_indoor) or (loc.banen_18m == 0 and loc.banen_25m == 0):
                         toon_loc = True
