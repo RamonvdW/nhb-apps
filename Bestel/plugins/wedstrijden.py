@@ -286,7 +286,7 @@ class BepaalAutomatischeKorting(object):
         combi_pks = list(combi_korting_euro.keys())
         # self._stdout.write('combi_pks: %s' % repr(combi_pks))
         for inschrijving in alle_inschrijvingen:
-            if inschrijving.korting.pk in combi_pks:
+            if inschrijving.korting and inschrijving.korting.pk in combi_pks:
                 korting_euro = combi_korting_euro[inschrijving.korting.pk]
                 product = self._inschrijving_pk2product[inschrijving.pk]
                 if korting_euro:
