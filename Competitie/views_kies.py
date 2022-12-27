@@ -251,7 +251,7 @@ class CompetitieKiesView(TemplateView):
                 if comp.fase == 'B' and rol_nu == Rollen.ROL_SPORTER:
                     context['toon_inschrijven'] = True
 
-                if 'B' <= comp.fase <= 'G':
+                if comp.fase >= 'B':
                     self.actuele_regio_comps.append(comp)
 
             try:
