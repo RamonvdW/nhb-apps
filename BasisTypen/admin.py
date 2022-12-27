@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-# all klassen zijn hard-coded
+# alle klassen zijn hard-coded
 from BasisTypen.models import (BoogType, TeamType, LeeftijdsKlasse,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                KalenderWedstrijdklasse)
@@ -47,7 +47,7 @@ class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgorde
     """ filter voor TemplateCompetitieIndivKlasse """
 
     # lijstweergave
-    list_filter = ('buiten_gebruik', 'boogtype', 'is_aspirant_klasse')
+    list_filter = ('gebruik_18m', 'gebruik_25m', 'boogtype', 'is_aspirant_klasse')
 
     list_select_related = ('boogtype',)
 
@@ -55,7 +55,7 @@ class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgorde
 
     # record weergave
     fieldsets = (
-        (None, {'fields': ('volgorde', 'beschrijving', 'boogtype', 'buiten_gebruik')}),
+        (None, {'fields': ('volgorde', 'beschrijving', 'boogtype', 'gebruik_18m', 'gebruik_25m')}),
         ('Details', {'fields': ('leeftijdsklassen', 'is_aspirant_klasse', 'is_onbekend', 'niet_voor_rk_bk', )}),
         ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen_18m_rk_bk')}),
         ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
@@ -76,7 +76,7 @@ class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeA
     """ filter voor TemplateCompetitieTeamKlasse """
 
     # lijstweergave
-    list_filter = ('buiten_gebruik',)
+    list_filter = ('gebruik_18m', 'gebruik_25m')
 
     list_select_related = ('team_type',)
 
@@ -84,8 +84,8 @@ class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeA
 
     # record weergave
     fieldsets = (
-        (None, {'fields': ('volgorde', 'beschrijving', 'team_type', 'buiten_gebruik')}),
-        ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen1_18m_rk_bk', 'blazoen2_18m_rk_bk')}),
+        (None, {'fields': ('volgorde', 'beschrijving', 'team_type', 'gebruik_18m', 'gebruik_25m')}),
+        ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen_18m_rk_bk')}),
         ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
     )
 

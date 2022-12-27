@@ -33,6 +33,8 @@
                 <thead>
                     <tr>
                         <th>Beschrijving</th>
+                        <th class="center">Indoor</th>
+                        <th class="center">25m 1pijl</th>
                         <th>Boogtype</th>
                         <th>Leeftijdsklassen</th>
                     </tr>
@@ -41,6 +43,8 @@
                 {% for obj in indivklassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
+                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
                         <td>{{ obj.boogtype.beschrijving }}</td>
                         <td>
                             {% for lkl in obj.lkl_list %}
@@ -68,6 +72,8 @@
                 <thead>
                     <tr>
                         <th>Beschrijving</th>
+                        <th class="center">Indoor</th>
+                        <th class="center">25m 1pijl</th>
                         <th>Boogtypen</th>
                     </tr>
                 </thead>
@@ -75,6 +81,8 @@
                 {% for obj in teamklassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
+                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
                         <td>
                             {% for boogtype in obj.boogtypen_list %}
                                 <span>{{ boogtype }}</span><br>

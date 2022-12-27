@@ -55,7 +55,6 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
     def _get_queryset_indivklassen():
         objs = (TemplateCompetitieIndivKlasse
                 .objects
-                .filter(buiten_gebruik=False)
                 .select_related('boogtype')
                 .prefetch_related('leeftijdsklassen')
                 .order_by('volgorde'))
@@ -72,7 +71,6 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
     def _get_queryset_teamklassen():
         objs = (TemplateCompetitieTeamKlasse
                 .objects
-                .filter(buiten_gebruik=False)
                 .select_related('team_type')
                 .prefetch_related('team_type__boog_typen')
                 .order_by('volgorde'))
@@ -102,7 +100,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
 class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
-    """ deze view laat de BKO een nieuwe competitie opstarten """
+    """ deze view laat de BB een nieuwe competitie opstarten """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_AANMAKEN

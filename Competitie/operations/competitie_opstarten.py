@@ -181,8 +181,14 @@ def _maak_competitieklassen(comp):
 
         for indiv in (TemplateCompetitieIndivKlasse
                       .objects
-                      .prefetch_related('leeftijdsklassen')
-                      .exclude(buiten_gebruik=True)):
+                      .prefetch_related('leeftijdsklassen')):
+
+            if is_18m:
+                if not indiv.gebruik_18m:
+                    continue
+            else:
+                if not indiv.gebruik_25m:
+                    continue
 
             klasse = CompetitieIndivKlasse(
                             competitie=comp,
@@ -222,9 +228,15 @@ def _maak_competitieklassen(comp):
         bulk = list()
         for team in (TemplateCompetitieTeamKlasse
                      .objects
-                     .exclude(buiten_gebruik=True)
                      .select_related('team_type')
                      .prefetch_related('team_type__boog_typen')):
+
+            if is_18m:
+                if not team.gebruik_18m:
+                    continue
+            else:
+                if not team.gebruik_25m:
+                    continue
 
             boog_pks = list(team.team_type.boog_typen.all().values_list('pk', flat=True))
             teamtype_pk2boog_pks[team.team_type.pk] = boog_pks
@@ -242,7 +254,7 @@ def _maak_competitieklassen(comp):
             if is_18m:
                 klasse.blazoen1_regio = team.blazoen1_18m_regio
                 klasse.blazoen2_regio = team.blazoen2_18m_regio
-                klasse.blazoen_rk_bk = team.blazoen1_18m_rk_bk
+                klasse.blazoen_rk_bk = team.blazoen_18m_rk_bk
             else:
                 klasse.blazoen1_regio = team.blazoen1_25m_regio
                 klasse.blazoen2_regio = team.blazoen2_25m_regio
@@ -263,7 +275,7 @@ def _maak_competitieklassen(comp):
             if is_18m:
                 klasse.blazoen1_regio = team.blazoen1_18m_regio
                 klasse.blazoen2_regio = team.blazoen2_18m_regio
-                klasse.blazoen_rk_bk = team.blazoen1_18m_rk_bk
+                klasse.blazoen_rk_bk = team.blazoen_18m_rk_bk
             else:
                 klasse.blazoen1_regio = team.blazoen1_25m_regio
                 klasse.blazoen2_regio = team.blazoen2_25m_regio
@@ -343,16 +355,12 @@ def competities_aanmaken(jaar=None):
 
         comp.save()
 
-        pks = list(TemplateCompetitieIndivKlasse
-                   .objects
-                   .exclude(buiten_gebruik=True)
-                   .values_list('boogtype__pk', flat=True))
+        indiv_klassen = TemplateCompetitieIndivKlasse.objects.all()
+        pks = list(indiv_klassen.values_list('boogtype__pk', flat=True))
         comp.boogtypen.set(pks)
 
-        pks = list(TemplateCompetitieTeamKlasse
-                   .objects
-                   .exclude(buiten_gebruik=True)
-                   .values_list('team_type__pk', flat=True))
+        teams_klassen = TemplateCompetitieTeamKlasse.objects.all()
+        pks = list(teams_klassen.values_list('team_type__pk', flat=True))
         comp.teamtypen.set(pks)
 
         _maak_deelcompetities(comp, rayons, regios, functies)

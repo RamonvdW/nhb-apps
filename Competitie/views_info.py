@@ -48,7 +48,6 @@ class InfoCompetitieView(TemplateView):
         context['klassen_count'] = (TemplateCompetitieIndivKlasse
                                     .objects
                                     .exclude(is_onbekend=True)
-                                    .exclude(buiten_gebruik=True)
                                     .count())
 
         context['kruimels'] = (
