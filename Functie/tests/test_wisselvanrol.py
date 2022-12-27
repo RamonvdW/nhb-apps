@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Competitie.models import Competitie, DeelCompetitie, LAAG_BK, LAAG_RK, CompetitieMatch
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -41,11 +42,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_rcl.save()
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = regio_111
+        ver = NhbVereniging(
+                    ver_nr="1000",
+                    naam="Grote Club",
+                    regio=regio_111)
         ver.save()
+        self.ver1000 = ver
 
         self.functie_sec = maak_functie("SEC test", "SEC")
         self.functie_sec.nhb_ver = ver
@@ -702,6 +704,86 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+
+    def test_bko_to_hwl(self):
+        self.functie_bko.comp_type = '18'
+        self.functie_bko.save(update_fields=['comp_type'])
+
+        comp = Competitie(
+                    beschrijving='test',
+                    afstand='18',
+                    begin_jaar='2000',
+                    uiterste_datum_lid='2000-01-01',
+                    begin_aanmeldingen='2000-10-10',
+                    einde_aanmeldingen='2000-10-10',
+                    einde_teamvorming='2000-10-10',
+                    eerste_wedstrijd='2000-10-10',
+                    laatst_mogelijke_wedstrijd='2000-10-10',
+                    datum_klassengrenzen_rk_bk_teams='2000-10-10',
+                    rk_eerste_wedstrijd='2000-10-10',
+                    rk_laatste_wedstrijd='2000-10-10',
+                    bk_eerste_wedstrijd='2000-10-10',
+                    bk_laatste_wedstrijd='2000-10-10')
+        comp.save()
+
+        match = CompetitieMatch(
+                    competitie=comp,
+                    beschrijving='Test match',
+                    vereniging=self.ver1000,
+                    datum_wanneer='2000-12-31',
+                    tijd_begin_wedstrijd='10:00')
+        match.save()
+
+        deelcomp = DeelCompetitie(
+                        competitie=comp,
+                        laag=LAAG_BK,
+                        functie=self.functie_bko)
+        deelcomp.save()
+        deelcomp.rk_bk_matches.add(match)
+
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_check_rol('BKO')
+
+    def test_rko_to_hwl(self):
+        comp = Competitie(
+                    beschrijving='test',
+                    afstand='18',
+                    begin_jaar='2000',
+                    uiterste_datum_lid='2000-01-01',
+                    begin_aanmeldingen='2000-10-10',
+                    einde_aanmeldingen='2000-10-10',
+                    einde_teamvorming='2000-10-10',
+                    eerste_wedstrijd='2000-10-10',
+                    laatst_mogelijke_wedstrijd='2000-10-10',
+                    datum_klassengrenzen_rk_bk_teams='2000-10-10',
+                    rk_eerste_wedstrijd='2000-10-10',
+                    rk_laatste_wedstrijd='2000-10-10',
+                    bk_eerste_wedstrijd='2000-10-10',
+                    bk_laatste_wedstrijd='2000-10-10')
+        comp.save()
+
+        match = CompetitieMatch(
+                    competitie=comp,
+                    beschrijving='Test match',
+                    vereniging=self.ver1000,
+                    datum_wanneer='2000-12-31',
+                    tijd_begin_wedstrijd='10:00')
+        match.save()
+
+        deelcomp = DeelCompetitie(
+                        competitie=comp,
+                        laag=LAAG_RK,
+                        nhb_rayon=self.functie_rko.nhb_rayon,
+                        functie=self.functie_rko)
+        deelcomp.save()
+        deelcomp.rk_bk_matches.add(match)
+
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_check_rol('RKO')
 
     # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 
