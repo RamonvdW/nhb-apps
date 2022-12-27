@@ -65,7 +65,6 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
                         notitie="Invoer uitslag wedstrijd\nDoor HWL ver 1000")
             bulk.append(hist)
         # for
-        print(len(bulk))
         ScoreHist.objects.bulk_create(bulk)
 
         # alleen rapporteren
