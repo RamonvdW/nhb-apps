@@ -160,7 +160,7 @@
                                         <button form="form_next" class="btn-nhb-rood vertrek_knop">{{ url_next_tekst }}</button>
                                     {% endif %}
                                     {% if not wed.verkoopvoorwaarden_status_acceptatie %}
-                                        <span>Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
+                                        <br><span>Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
                                     {% endif %}
                                 </td>
                             </tr>
