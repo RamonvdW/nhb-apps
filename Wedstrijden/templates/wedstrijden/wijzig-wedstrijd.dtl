@@ -312,25 +312,6 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <td colspan="2" class="center nhb-blauw-text"><h6>Inschrijfgeld</h6></td>
-                            </tr>
-
-                            <tr>
-                                <th>Standaard</th>
-                                <td>
-                                    <span style="font-size:16px">&euro;&nbsp;</span>
-                                    <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Tot 18 jaar</th>
-                                <td>
-                                    <span style="font-size:16px">&euro;&nbsp;</span>
-                                    <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
-                                </td>
-                            </tr>
 
                             <tr>
                                 <td colspan="2" class="center nhb-blauw-text"><h6>Contactgegevens organisatie</h6></td>
@@ -391,6 +372,27 @@
                                             <span>Inschrijven via bovenstaande website en/of e-mailadres</span>
                                         </label>
                                     {% endif %}
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td colspan="2" class="center nhb-blauw-text"><h6>Inschrijfgeld</h6></td>
+                            </tr>
+
+                            <tr>
+                                <th>Standaard</th>
+                                <td>
+                                    <span style="font-size:16px">&euro;&nbsp;</span>
+                                    <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Tot 18 jaar</th>
+                                <td>
+                                    <span style="font-size:16px">&euro;&nbsp;</span>
+                                    <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
                                 </td>
                             </tr>
 
