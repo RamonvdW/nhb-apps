@@ -92,7 +92,7 @@
 
                 {% for aanmelding in aanmeldingen %}
                     {% if not aanmelding.is_afgemeld  %}
-                        <tr>
+                        <tr{% if not aanmelding.is_definitief %} class="nhb-blauw-text"{% endif %}>
                             <td>{{ aanmelding.volg_nr }}</td>
                             <td class="hide-on-small-only">{{ aanmelding.reserveringsnummer }}</td>
                             <td class="hide-on-small-only">{{ aanmelding.wanneer }}</td>

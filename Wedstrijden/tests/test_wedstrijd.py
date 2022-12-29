@@ -130,6 +130,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # buiten locatie met binnen locatie
         self._maak_accommodatie_binnen(self.nhbver1)
@@ -137,6 +138,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # wijzig velden via de 'post' interface
         loc_sel = 'loc_%s' % locatie_buiten.pk
@@ -193,13 +195,28 @@ class TestWedstrijd(E2EHelpers, TestCase):
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.wa_status, 'A')
 
-        # zet de wedstrijd door 'Wacht op goedkeuring' en haal de pagina opnieuw op
+        # akkoord verkoopvoorwaarden
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'akkoord_verkoop': 'ja'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertTrue(wedstrijd.verkoopvoorwaarden_status_acceptatie)
+
+        # een GET met akkoord verkoopvoorwaarden geeft de know om goedkeuring aan te vragen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+        # zet de wedstrijd hard door 'Wacht op goedkeuring' en haal de pagina opnieuw op
         wedstrijd.status = 'W'
         wedstrijd.save()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # probeer wijzigingen te doen aan een wedstrijd die voorbij Ontwerp fase is
         datum = '%s-3-3' % wedstrijd.datum_begin.year
@@ -243,6 +260,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # zet de wedstrijd door 'Geannuleerd' en haal de pagina opnieuw op
         wedstrijd.status = WEDSTRIJD_STATUS_GEANNULEERD
@@ -251,6 +269,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # probeer wijzigingen te doen aan een geannuleerde wedstrijd
         datum = '%s-2-2' % wedstrijd.datum_begin.year
@@ -428,6 +447,15 @@ class TestWedstrijd(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+
+        # doorzetten naar 'Wacht op goedkeuring'
+        # mag alleen als de verkoopvoorwaarden geaccepteerd zijn
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'verder': 'ja'})
+        self.assert404(resp, 'Verkoopvoorwaarden')
+
+        wedstrijd.verkoopvoorwaarden_status_acceptatie = True
+        wedstrijd.save(update_fields=['verkoopvoorwaarden_status_acceptatie'])
 
         # doorzetten naar 'Wacht op goedkeuring'
         with self.assert_max_queries(20):

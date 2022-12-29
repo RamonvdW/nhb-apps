@@ -335,7 +335,7 @@ class WedstrijdSessie(models.Model):
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
-        return "%s %s (%s)" % (self.datum, self.tijd_begin, self.max_sporters)
+        return "(pk=%s) %s %s (%s plekken)" % (self.pk, self.datum, self.tijd_begin, self.max_sporters)
 
     class Meta:
         verbose_name = "Wedstrijd sessie"

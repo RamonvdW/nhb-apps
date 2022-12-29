@@ -514,6 +514,7 @@ class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
 
     list_filter = ('deelcompetitie__competitie',
                    'deelcompetitie__nhb_rayon',
+                   'deelname',
                    'sporterboog__boogtype',
                    ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
                    'sporterboog__sporter__bij_vereniging')

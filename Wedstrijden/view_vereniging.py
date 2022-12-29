@@ -17,8 +17,7 @@ from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_kla
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import (Wedstrijd,
-                                WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
+from Wedstrijden.models import Wedstrijd, WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS
 from datetime import date
 
 TEMPLATE_WEDSTRIJDEN_KIES_TYPE = 'wedstrijden/nieuwe-wedstrijd-kies-type.dtl'
