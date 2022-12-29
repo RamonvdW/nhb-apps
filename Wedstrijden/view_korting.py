@@ -193,7 +193,8 @@ class WijzigKortingView(UserPassesTestMixin, View):
 
         if korting.soort == WEDSTRIJD_KORTING_SPORTER:
             template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_SPORTER
-            context['voor_sporter_str'] = korting.voor_sporter.lid_nr_en_volledige_naam()
+            if korting.voor_sporter:
+                context['voor_sporter_str'] = korting.voor_sporter.lid_nr_en_volledige_naam()
 
         elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
             template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_VERENIGING

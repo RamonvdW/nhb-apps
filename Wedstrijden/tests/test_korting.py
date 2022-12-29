@@ -162,19 +162,39 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/kortingen-overzicht.dtl', 'plein/site_layout.dtl'))
 
-        # vul wat meer details in
         korting_sporter = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_SPORTER)
+        korting_ver = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_VERENIGING)
+        korting_combi = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_COMBI)
+
+        # haal de edit schermen op met onvolledige kortingen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_korting_wijzig % korting_sporter.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-sporter.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_korting_wijzig % korting_ver.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-vereniging.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_korting_wijzig % korting_combi.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-korting-combi.dtl', 'plein/site_layout.dtl'))
+
+        # vul wat meer details in
         self.assertEqual(korting_sporter.uitgegeven_door, self.nhbver1)
         korting_sporter.voor_sporter = self.sporter
         korting_sporter.save(update_fields=['voor_sporter'])
         korting_sporter.voor_wedstrijden.add(self.wedstrijd2)
         self.assertTrue(str(korting_sporter) != '')
 
-        korting_ver = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_VERENIGING)
         self.assertEqual(korting_ver.uitgegeven_door, self.nhbver1)
         korting_ver.voor_wedstrijden.add(self.wedstrijd2)
 
-        korting_combi = WedstrijdKorting.objects.get(soort=WEDSTRIJD_KORTING_COMBI)
         self.assertEqual(korting_combi.uitgegeven_door, self.nhbver1)
         korting_combi.voor_wedstrijden.add(self.wedstrijd1)
         korting_combi.voor_wedstrijden.add(self.wedstrijd3)
