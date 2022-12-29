@@ -17,7 +17,8 @@ from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterVoorkeuren, get_sporter_voorkeuren
 from Wedstrijden.models import (Wedstrijd, WedstrijdInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
-                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
+                                INSCHRIJVING_STATUS_DEFINITIEF)
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
@@ -86,7 +87,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
                                         'sporterboog__boogtype',
                                         'korting')
                         .order_by('sessie',
-                                  'status'))
+                                  'pk'))        # = reserveringsnummer
         context['aanmeldingen'] = aanmeldingen
 
         totaal_ontvangen_euro = Decimal('000.00')
@@ -102,8 +103,8 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             if aanmelding.status != INSCHRIJVING_STATUS_AFGEMELD:
                 aantal_aanmeldingen += 1
                 aanmelding.volg_nr = aantal_aanmeldingen
-
                 aanmelding.reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
+                aanmelding.is_definitief = (aanmelding.status == INSCHRIJVING_STATUS_DEFINITIEF)
             else:
                 aantal_afmeldingen += 1
                 aanmelding.is_afgemeld = True
