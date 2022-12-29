@@ -91,9 +91,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         if self.rol_nu == Rollen.ROL_HWL:
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
-                context['url_next_tekst'] = 'Vraag om goedkeuring'
-                context['url_next_status'] = reverse('Wedstrijden:zet-status',
-                                                     kwargs={'wedstrijd_pk': wedstrijd.pk})
+                if wedstrijd.verkoopvoorwaarden_status_acceptatie:
+                    context['url_next_tekst'] = 'Vraag om goedkeuring'
+                    context['url_next_status'] = reverse('Wedstrijden:zet-status',
+                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 context['limit_edits'] = True
 
@@ -310,7 +311,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         context['prijs_euro_normaal_str'] = str(wedstrijd.prijs_euro_normaal).replace('.', ',')
         context['prijs_euro_onder18_str'] = str(wedstrijd.prijs_euro_onder18).replace('.', ',')
 
-        context['url_voorwaarden'] = settings.VOORWAARDEN_A_STATUS_URL
+        context['url_voorwaarden_a_status'] = settings.VOORWAARDEN_A_STATUS_URL
+        context['url_voorwaarden_verkoop'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
 
         # aantal banen waar uit gekozen kan worden
         max_banen = min(80, max_banen)
@@ -423,6 +425,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
 
             if not limit_edits:
+                akkoord = request.POST.get('akkoord_verkoop', '')
+                if akkoord:
+                    account = request.user
+                    sporter = account.sporter_set.all()[0]
+                    wedstrijd.verkoopvoorwaarden_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+                    wedstrijd.verkoopvoorwaarden_status_when = timezone.now()
+                    wedstrijd.verkoopvoorwaarden_status_acceptatie = True
+
                 datum_ymd = request.POST.get('datum_begin', '')[:10]    # afkappen voor de veiligheid
                 if datum_ymd:
                     try:
@@ -703,6 +713,9 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
 
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and verder:
                 self._garandeer_instellingen_bestaat(wedstrijd.organiserende_vereniging)
+
+                if not wedstrijd.verkoopvoorwaarden_status_acceptatie:
+                    raise Http404('Verkoopvoorwaarden')
 
                 # verzoek tot goedkeuring
                 wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
