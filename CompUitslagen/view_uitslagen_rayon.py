@@ -181,7 +181,7 @@ class UitslagenRayonIndivView(TemplateView):
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
                           .filter(deelcompetitie=deelcomp_rk,
                                   indiv_klasse__boogtype=boogtype,
-                                  volgorde__lte=48)                  # toon tot 48 sporters per klasse
+                                  rank__lte=48)                      # toon tot 48 sporters per klasse
                           .select_related('indiv_klasse',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging',
