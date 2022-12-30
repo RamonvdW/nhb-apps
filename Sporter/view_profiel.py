@@ -13,8 +13,8 @@ from django.db.models import Q
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.models import (Competitie, DeelCompetitie,
-                               RegioCompetitieSchutterBoog,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1)
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                               LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE)
 from Functie.rol import Rollen, rol_get_huidige
 from Functie.models import Functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -163,12 +163,21 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # zoek alle inschrijvingen van deze sporter erbij
         inschrijvingen = list(RegioCompetitieSchutterBoog
                               .objects
-                              .select_related('deelcompetitie', 'sporterboog')
+                              .select_related('deelcompetitie',
+                                              'sporterboog')
                               .filter(sporterboog__sporter=sporter))
 
         if not voorkeuren.voorkeur_meedoen_competitie:
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
                 return None, moet_bogen_kiezen, gebruik_knoppen
+
+        kampioenen = list(KampioenschapSchutterBoog
+                          .objects
+                          .select_related('deelcompetitie',
+                                          'deelcompetitie__competitie',
+                                          'deelcompetitie__nhb_rayon',
+                                          'sporterboog')
+                          .filter(sporterboog__sporter=sporter))
 
         objs = list()
 
@@ -205,6 +214,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     for inschrijving in inschrijvingen:
                         if inschrijving.sporterboog == sporterboog and inschrijving.deelcompetitie == obj:
                             obj.is_ingeschreven = True
+                            obj.afgemeld_voorkeur_rk = not inschrijving.inschrijf_voorkeur_rk_bk
                             inschrijvingen.remove(inschrijving)
                             if comp.fase <= 'B':
                                 obj.url_afmelden = reverse('CompInschrijven:afmelden',
@@ -218,13 +228,34 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                             break
                     # for
 
-                    if not obj.is_ingeschreven:
-                        # niet ingeschreven
-                        if 'B' <= comp.fase < 'F':
+                    if 'B' <= comp.fase < 'F':
+                        # niet ingeschreven?
+                        if not obj.is_ingeschreven:
                             obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
                                                         kwargs={'sporterboog_pk': sporterboog.pk,
                                                                 'deelcomp_pk': obj.pk})
                             gebruik_knoppen = True
+
+                    elif 'J' <= comp.fase <= 'N':
+                        # zoek de inschrijving voor het RK erbij
+                        for kampioen in kampioenen:
+                            if (kampioen.deelcompetitie.competitie == deelcompetitie.competitie and
+                                    kampioen.deelcompetitie.laag == LAAG_RK and
+                                    kampioen.sporterboog == sporterboog):
+
+                                # RK inschrijving van deze sporterboog gevonden
+                                obj.rk_inschrijving = kampioen
+
+                                if kampioen.deelname != DEELNAME_NEE:
+                                    obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+                                                                    kwargs={'comp_pk': kampioen.deelcompetitie.competitie.pk,
+                                                                            'comp_boog': afk.lower(),
+                                                                            'rayon_nr': kampioen.deelcompetitie.nhb_rayon.rayon_nr})
+                        # for
+
+                    elif 'P' <= comp.fase < 'R':
+                        # FUTURE: zelfde logica voor het BK
+                        pass
             # for
         # for
 
