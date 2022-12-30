@@ -22,7 +22,7 @@ from reportlab.lib import pagesizes, colors
 import datetime
 
 
-class Command(BaseCommand):
+class Command(BaseCommand):     # pragma: no cover
 
     help = "Betaal mutaties verwerken"
 
