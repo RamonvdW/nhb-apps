@@ -139,7 +139,23 @@
                                         {% endif %}
                                     {% else %}
                                         {% if deelcomp.is_ingeschreven %}
-                                            <span>Je bent ingeschreven</span>
+                                            {% if deelcomp.rk_inschrijving %}
+                                                <!-- is al doorgestroomd naar het RK -->
+                                                <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelcomp.rk_inschrijving.deelcompetitie.nhb_rayon.rayon_nr }}</span>
+                                                {% if deelcomp.rk_inschrijving.rank > 0 %}
+                                                    <br><span>Op de RK lijst sta je op plaats {{ deelcomp.rk_inschrijving.rank }}</span>
+                                                {% endif %}
+                                                {% if deelcomp.rk_inschrijving.deelname == 'N' %}
+                                                    <br><span>Je bent afgemeld</span>
+                                                {% elif deelcomp.rk_inschrijving.deelname == '?' %}
+                                                    <br><span class="nhb-rood-text">Laat de wedstrijdleider van jouw vereniging weten of je mee kan doen</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span>Je bent ingeschreven</span>
+                                                {% if deelcomp.afgemeld_voorkeur_rk %}
+                                                    <br><span>Je bent alvast afgemeld voor de Rayonkampioenschappen</span>
+                                                {% endif %}
+                                            {% endif %}
                                         {% else %}
                                             <span>Je bent niet ingeschreven</span>
                                         {% endif %}
@@ -176,6 +192,9 @@
                                         {% elif deelcomp.competitie.fase < 'B' %}
                                             <span>Inschrijven kan nog niet</span>
                                         {% endif %}
+                                    {% endif %}
+                                    {% if deelcomp.url_rk_deelnemers %}
+                                        <a class="btn-nhb-rood" href="{{ deelcomp.url_rk_deelnemers }}">RK lijsten</a>
                                     {% endif %}
                                 </td>
                             </tr>

@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.models import Competitie, DeelCompetitie, INSCHRIJF_METHODE_1
+from Competitie.models import (Competitie, DeelCompetitie, INSCHRIJF_METHODE_1, RegioCompetitieSchutterBoog,
+                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND)
 from Competitie.tests.test_fase import zet_competitie_fase
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
 from Functie.operations import maak_functie
@@ -55,7 +56,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
-        self.nhbver = ver
+        self.ver = ver
 
         # maak een test lid aan
         sporter = Sporter()
@@ -205,9 +206,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_compleet(self):
-        url_kies = '/bondscompetities/'
-
-        # log in as schutter
+        # log in as sporter
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren()
 
@@ -218,12 +217,12 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # competitie aanmaken
         comp_18, comp_25 = maak_competities_en_zet_fase_b()
 
-        # log in as schutter
+        # log in as sporter
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren()
 
         # controleer dat inschrijven mogelijk is
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')
@@ -233,23 +232,23 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls), 2)
 
-        # schrijf de schutter in voor de 18m Recurve
+        # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.ver.regio)
 
         # zet de 25m door naar fase C
         zet_competitie_fase(comp_25, 'C')
 
         # controleer dat inschrijven nog mogelijk is voor 25m en uitschrijven voor 18m
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')     # 18m
@@ -264,7 +263,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog_bb = SporterBoog.objects.get(boogtype__afkorting='R')
         sporterboog_bb.voor_wedstrijd = False
         sporterboog_bb.save()
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
@@ -295,7 +294,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         zet_competitie_fase(comp_18, 'F')
 
         # haal de profiel pagina op
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -309,7 +308,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
         score_indiv_ag_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -320,7 +319,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # variant met Score zonder ScoreHist
         ScoreHist.objects.all().delete()
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -331,7 +330,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # zet de 25m door naar BK fase
         zet_competitie_fase(comp_18, 'K')
         zet_competitie_fase(comp_25, 'P')
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'Rayonkampioenschappen')      # 18m
         self.assertContains(resp, 'Bondskampioenschappen')      # 25m
@@ -344,15 +343,15 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # als er geen SEC gekoppeld is, dan wordt de secretaris van de vereniging gebruikt
         self.functie_sec.accounts.remove(self.account_normaal)
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
         # maak dit een vereniging zonder secretaris
-        Secretaris.objects.filter(vereniging=self.nhbver).delete()
+        Secretaris.objects.filter(vereniging=self.ver).delete()
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -368,12 +367,12 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     def test_geen_wedstrijdbogen(self):
         # geen regiocompetities op profiel indien geen wedstrijdbogen
 
-        # log in as schutter
+        # log in as sporter
         self.e2e_login(self.account_normaal)
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen sporterboog
 
         # haal de profiel pagina op
-        with self.assert_max_queries(40):
+        with self.assert_max_queries(41):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -389,7 +388,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Regiocompetities')
 
     def test_geen_voorkeur_competities(self):
-        # toon geen regiocompetities als de schutter geen interesse heeft
+        # toon geen regiocompetities als de sporter geen interesse heeft
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
@@ -402,13 +401,13 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assert403(resp)
 
-        # log in as schutter
+        # log in as sporter
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren()
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase(self.comp_18, 'A2')
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -417,7 +416,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # met standaard voorkeuren worden de regiocompetities getoond
         voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=self.sporter1)
         self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -427,16 +426,16 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # uitgezet worden de regiocompetities niet getoond
         voorkeuren.voorkeur_meedoen_competitie = False
         voorkeuren.save()
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
-        # schrijf de schutter in voor de 18m Recurve
+        # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -445,7 +444,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
 
         # voorkeur net uitgezet, maar nog wel ingeschreven
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -454,10 +453,10 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     def test_geen_wedstrijden(self):
         # doe een test met een persoonlijk lid - mag geen wedstrijden doen
 
-        self.nhbver.geen_wedstrijden = True
-        self.nhbver.save()
+        self.ver.geen_wedstrijden = True
+        self.ver.save()
 
-        # log in as schutter
+        # log in as sporter
         # account_normaal is lid bij nhbver
         self.e2e_login(self.account_normaal)
 
@@ -475,24 +474,24 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._competitie_aanmaken()
 
         # zet de deelcompetitie op inschrijfmethode 1
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
-        # log in as schutter en prep voor inschrijving
+        # log in as sporter en prep voor inschrijving
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren()
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
-        # schrijf de schutter in voor de 18m Recurve
+        # schrijf de sporter in voor de 18m Recurve
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
 
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -502,7 +501,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # competitie aanmaken
         competities_aanmaken(jaar=2019)
 
-        # log in as schutter
+        # log in as sporter
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren()
 
@@ -514,7 +513,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
     def test_bestelling(self):
-        # log in as schutter
+        # log in as sporter
         self.e2e_login(self.account_normaal)
 
         Bestelling(
@@ -522,7 +521,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             account=self.account_normaal,
             log='testje').save()
 
-        with self.assert_max_queries(40):
+        with self.assert_max_queries(41):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -530,5 +529,134 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, 'Bestellingen')                           # titel kaartje
         self.assertContains(resp, 'Alle details van je bestellingen.')      # tekst op kaartje
         self.assertContains(resp, '/bestel/overzicht/')                     # href van het kaartje
+
+    def test_rk(self):
+        # controleer het melden van de RK deelname status
+
+        comp_18, comp_25 = maak_competities_en_zet_fase_b()
+
+        # log in as sporter
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+
+        # schrijf de sporter in voor de 18m Recurve
+        sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
+        self.assertTrue(res)
+        url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
+        with self.assert_max_queries(21):
+            resp = self.client.post(url, {'opmerking': 'test van de 18m'})
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        self.assertEqual(1, RegioCompetitieSchutterBoog.objects.count())
+        deelnemer = RegioCompetitieSchutterBoog.objects.all()[0]
+
+        # ingeschreven en geen knop meer voor aanmelden
+        with self.assert_max_queries(27):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+        # laat de sporter doorstromen naar het RK
+        deelcomp_rk25 = DeelCompetitie.objects.get(competitie__afstand='25', nhb_rayon=self.ver.regio.rayon)
+        kamp = KampioenschapSchutterBoog(
+                    deelcompetitie=deelcomp_rk25,
+                    sporterboog=sporterboog,
+                    indiv_klasse=deelnemer.indiv_klasse,  # don't care maar moet gezet zijn
+                    bij_vereniging=self.ver,
+                    volgorde=51,
+                    rank=24,
+                    gemiddelde=9)
+        kamp.save()
+
+        deelcomp_rk18 = DeelCompetitie.objects.get(competitie__afstand='18', nhb_rayon=self.ver.regio.rayon)
+        kamp = KampioenschapSchutterBoog(
+                        deelcompetitie=deelcomp_rk18,
+                        sporterboog=sporterboog,
+                        indiv_klasse=deelnemer.indiv_klasse,        # don't care maar moet gezet zijn
+                        bij_vereniging=self.ver,
+                        volgorde=50,
+                        rank=42,
+                        gemiddelde=9)
+        kamp.save()
+
+        # regiocompetitie fase
+        zet_competitie_fase(comp_18, 'E')
+
+        # controleer pre-afmelden
+        with self.assert_max_queries(27):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je bent ingeschreven')
+        self.assertNotContains(resp, 'Je bent alvast afgemeld voor de Rayonkampioenschappen')
+
+        deelnemer.inschrijf_voorkeur_rk_bk = False
+        deelnemer.save(update_fields=['inschrijf_voorkeur_rk_bk'])
+
+        with self.assert_max_queries(27):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je bent ingeschreven')
+        self.assertContains(resp, 'Je bent alvast afgemeld voor de Rayonkampioenschappen')
+
+        # RK fase
+        zet_competitie_fase(comp_18, 'J')
+
+        # kampioenschap deelname: onbekend
+        with self.assert_max_queries(27):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon')
+        self.assertContains(resp, 'Op de RK lijst sta je op plaats 42')
+        self.assertContains(resp, 'Laat de wedstrijdleider van jouw vereniging weten of je mee kan doen')
+
+        # kampioenschap deelname: bevestigd
+        kamp.deelname = DEELNAME_JA
+        kamp.save(update_fields=['deelname'])
+
+        with self.assert_max_queries(27):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon')
+        self.assertContains(resp, 'Op de RK lijst sta je op plaats 42')
+
+        # kampioenschap deelname: afgemeld
+        kamp.deelname = DEELNAME_NEE
+        kamp.rank = 0
+        kamp.save(update_fields=['deelname', 'rank'])
+
+        with self.assert_max_queries(27):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Je hebt je gekwalificeerd voor het RK in Rayon')
+        self.assertContains(resp, 'Je bent afgemeld')
+
+        # BK fase
+        zet_competitie_fase(comp_18, 'P')
+        with self.assert_max_queries(25):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+        # afsluitende fase
+        zet_competitie_fase(comp_18, 'S')
+        with self.assert_max_queries(25):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
 # end of file
