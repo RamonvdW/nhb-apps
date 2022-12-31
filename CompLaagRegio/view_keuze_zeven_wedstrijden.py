@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Competitie.models import DeelcompetitieRonde, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1, CompetitieMatch
+from Competitie.models import DeelcompetitieRonde, RegioCompetitieSporterBoog, INSCHRIJF_METHODE_1, CompetitieMatch
 from Plein.menu import menu_dynamics
 
 
@@ -37,13 +37,13 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(self.kwargs['deelnemer_pk'][:6])       # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
+            deelnemer = (RegioCompetitieSporterBoog
                          .objects
                          .select_related('deelcompetitie',
                                          'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk,
                               deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
+        except (ValueError, TypeError, RegioCompetitieSporterBoog.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         context['deelnemer'] = deelnemer
@@ -150,13 +150,13 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])       # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
+            deelnemer = (RegioCompetitieSporterBoog
                          .objects
                          .select_related('deelcompetitie',
                                          'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk,
                               deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
+        except (ValueError, TypeError, RegioCompetitieSporterBoog.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)

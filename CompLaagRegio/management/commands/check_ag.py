@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, LAAG_REGIO, RegioCompetitieSchutterBoog
+from Competitie.models import DeelCompetitie, LAAG_REGIO, RegioCompetitieSporterBoog
 
 
 class Command(BaseCommand):
@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.stdout.write('RegioCompetitieSchutterBoog met voorkeur voor teams maar zonder Team-AG:')
+        self.stdout.write('RegioCompetitieSporterBoog met voorkeur voor teams maar zonder Team-AG:')
 
         for afstand in ('18', '25'):
             deelcomp_pks = (DeelCompetitie
@@ -30,7 +30,7 @@ class Command(BaseCommand):
                             .order_by('nhb_regio__regio_nr')
                             .values_list('pk', flat=True))
 
-            for deelnemer in (RegioCompetitieSchutterBoog
+            for deelnemer in (RegioCompetitieSporterBoog
                               .objects
                               .filter(deelcompetitie__pk__in=deelcomp_pks,
                                       inschrijf_voorkeur_team=True,

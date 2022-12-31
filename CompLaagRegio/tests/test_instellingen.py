@@ -8,7 +8,8 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               LAAG_BK, LAAG_RK, LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
+                               LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -151,9 +152,9 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
         self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_25, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_112)[0]

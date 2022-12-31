@@ -9,8 +9,9 @@ from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, LAAG_RK, DeelCompetitie, DeelcompetitieIndivKlasseLimiet,
-                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE)
+from Competitie.models import (LAAG_REGIO, DeelCompetitie, KampioenschapIndivKlasseLimiet,
+                               DeelKampioenschap, DEEL_RK,
+                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -76,55 +77,57 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie', 'nhb_rayon')
-                           .get(pk=rk_deelcomp_pk, laag=LAAG_RK))
-        except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp = (DeelKampioenschap
+                        .objects
+                        .select_related('competitie',
+                                        'nhb_rayon')
+                        .get(pk=deelkamp_pk,
+                             deel=DEEL_RK))
+        except (ValueError, DeelKampioenschap.DoesNotExist):
+            raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste RKO aan de knoppen zit
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelcomp_rk.functie:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelkamp.functie:
             raise PermissionDenied()     # niet de juiste RKO
 
-        alles_afgesloten, regio_status = self._get_regio_status(deelcomp_rk.competitie)
+        alles_afgesloten, regio_status = self._get_regio_status(deelkamp.competitie)
         context['regio_status'] = regio_status
 
-        context['deelcomp_rk'] = deelcomp_rk
+        context['deelkamp'] = deelkamp
 
-        comp = deelcomp_rk.competitie
+        comp = deelkamp.competitie
         # TODO: check competitie fase
 
-        if not deelcomp_rk.heeft_deelnemerslijst:
+        if not deelkamp.heeft_deelnemerslijst:
             # situatie 1)
             context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
-                                               kwargs={'comp_pk': deelcomp_rk.competitie.pk,
+                                               kwargs={'comp_pk': deelkamp.competitie.pk,
                                                        'comp_boog': 'r',
-                                                       'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
+                                                       'rayon_nr': deelkamp.nhb_rayon.rayon_nr})
             deelnemers = list()
         else:
             # situatie 2)
-            deelnemers = (KampioenschapSchutterBoog
+            deelnemers = (KampioenschapSporterBoog
                           .objects
-                          .select_related('deelcompetitie',
+                          .select_related('kampioenschap',
                                           'indiv_klasse',
                                           'sporterboog__sporter',
                                           'bij_vereniging')
-                          .filter(deelcompetitie=deelcomp_rk,
+                          .filter(kampioenschap=deelkamp,
                                   volgorde__lte=48)             # max 48 schutters per klasse tonen
                           .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                     'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                     '-gemiddelde'))             # aflopend op gemiddelde
 
             context['url_download'] = reverse('CompLaagRayon:lijst-rk-als-bestand',
-                                              kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                                              kwargs={'deelkamp_pk': deelkamp.pk})
 
         wkl2limiet = dict()    # [pk] = aantal
-        for limiet in (DeelcompetitieIndivKlasseLimiet
+        for limiet in (KampioenschapIndivKlasseLimiet
                        .objects
                        .select_related('indiv_klasse')
-                       .filter(deelcompetitie=deelcomp_rk)):
+                       .filter(kampioenschap=deelkamp)):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
@@ -172,7 +175,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         context['deelnemers'] = deelnemers
         context['aantal_klassen'] = aantal_klassen
 
-        if deelcomp_rk.heeft_deelnemerslijst:
+        if deelkamp.heeft_deelnemerslijst:
             context['aantal_afgemeld'] = aantal_afgemeld
             context['aantal_onbekend'] = aantal_onbekend
             context['aantal_bevestigd'] = aantal_bevestigd
@@ -197,44 +200,46 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
     def get(self, request, *args, **kwargs):
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie', 'nhb_rayon')
-                           .get(pk=rk_deelcomp_pk, laag=LAAG_RK))
-        except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp = (DeelKampioenschap
+                        .objects
+                        .select_related('competitie',
+                                        'nhb_rayon')
+                        .get(pk=deelkamp_pk,
+                             deel=DEEL_RK))
+        except (ValueError, DeelKampioenschap.DoesNotExist):
+            raise Http404('Kampioenschap niet gevonden')
 
-        if not deelcomp_rk.heeft_deelnemerslijst:
+        if not deelkamp.heeft_deelnemerslijst:
             raise Http404('Geen deelnemerslijst')
 
         # laat alleen de juiste RKO de lijst ophalen
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelcomp_rk.functie:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelkamp.functie:
             raise PermissionDenied()     # niet de juiste RKO
 
-        deelnemers = (KampioenschapSchutterBoog
+        deelnemers = (KampioenschapSporterBoog
                       .objects
-                      .select_related('deelcompetitie',
+                      .select_related('kampioenschap',
                                       'indiv_klasse',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
                       .exclude(deelname=DEELNAME_NEE)
-                      .filter(deelcompetitie=deelcomp_rk,
+                      .filter(kampioenschap=deelkamp,
                               rank__lte=48)                 # max 48 schutters
                       .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                 '-gemiddelde'))             # aflopend op gemiddelde
 
         wkl2limiet = dict()    # [pk] = aantal
-        for limiet in (DeelcompetitieIndivKlasseLimiet
+        for limiet in (KampioenschapIndivKlasseLimiet
                        .objects
                        .select_related('indiv_klasse')
-                       .filter(deelcompetitie=deelcomp_rk)):
+                       .filter(kampioenschap=deelkamp)):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelcomp_rk.nhb_rayon.rayon_nr
+        response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelkamp.nhb_rayon.rayon_nr
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings

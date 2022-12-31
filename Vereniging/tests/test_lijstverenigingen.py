@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
+from Competitie.models import DeelCompetitie, LAAG_REGIO, DeelKampioenschap, DEEL_RK, DEEL_BK
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
@@ -78,8 +78,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competities_aanmaken(jaar=2019)
 
-        self.functie_bko = DeelCompetitie.objects.filter(laag=LAAG_BK)[0].functie
-        self.functie_rko = DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2)[0].functie
+        self.functie_bko = DeelKampioenschap.objects.filter(deel=DEEL_BK)[0].functie
+        self.functie_rko = DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2)[0].functie
         self.functie_rcl = DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101)[0].functie
 
         self.functie_bko.accounts.add(self.account_bko)

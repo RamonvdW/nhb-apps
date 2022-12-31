@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
+from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
                                CompetitieMatch, update_uitslag_teamcompetitie)
 from Functie.models import Rollen
@@ -213,7 +213,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         sporterboog_pks = scores.values_list('sporterboog__pk', flat=True)
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
                               sporterboog__pk__in=sporterboog_pks))
@@ -464,7 +464,7 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
         out = dict()
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__boogtype',
@@ -728,7 +728,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
 
         # maak een opzoektabel voor de huidige vereniging van elke sporterboog
         sporterboog_pks = [score.sporterboog.pk for score in scores]
-        regioschutters = (RegioCompetitieSchutterBoog
+        regioschutters = (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
                                           'bij_vereniging')
@@ -800,7 +800,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         deelnemer2sporter_cache = dict()        # [deelnemer_pk] = (sporterboog_pk, naam_str)
         sporterboog_cache = dict()              # [sporterboog_pk] = SporterBoog
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
                                           'sporterboog__sporter')

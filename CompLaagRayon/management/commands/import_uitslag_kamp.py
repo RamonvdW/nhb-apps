@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import KampioenschapSchutterBoog, DEELNAME_NEE
+from Competitie.models import KampioenschapSporterBoog, DEELNAME_NEE
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.deelnemers = dict()        # [lid_nr] = [KampioenschapSchutterBoog, ...]
+        self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
@@ -30,11 +30,11 @@ class Command(BaseCommand):
                             help='Kolom letters: bondsnummer, score1, score2, #10, #9, #8')
 
     def deelnemers_ophalen(self, afstand):
-        for deelnemer in (KampioenschapSchutterBoog
+        for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(deelcompetitie__competitie__afstand=afstand)
-                          .select_related('deelcompetitie',
-                                          'deelcompetitie__nhb_rayon',
+                          .filter(kampioenschap__competitie__afstand=afstand)
+                          .select_related('kampioenschap',
+                                          'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -92,7 +92,7 @@ class Command(BaseCommand):
         self.deelnemers_ophalen(afstand)
 
         klasse_pks = list()
-        deelcomp_pks = list()
+        deelkamp_pks = list()
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
         row_nr = 0
@@ -148,9 +148,9 @@ class Command(BaseCommand):
                             prev_totaal = 999
                             if klasse_pk not in klasse_pks:                             # pragma: no branch
                                 klasse_pks.append(klasse_pk)
-                                deelcomp_pk = deelnemer.deelcompetitie.pk
-                                if deelcomp_pk not in deelcomp_pks:                     # pragma: no branch
-                                    deelcomp_pks.append(deelnemer.deelcompetitie.pk)
+                                deelcomp_pk = deelnemer.kampioenschap.pk
+                                if deelcomp_pk not in deelkamp_pks:                     # pragma: no branch
+                                    deelkamp_pks.append(deelnemer.kampioenschap.pk)
 
                         score1 = ws[col_score1 + row].value
                         score2 = ws[col_score2 + row].value
@@ -227,7 +227,7 @@ class Command(BaseCommand):
         # zet deelnemers die niet meegedaan hebben op een hoog rank nummer
         for deelnemers in self.deelnemers.values():
             for deelnemer in deelnemers:
-                if deelnemer.deelcompetitie.pk in deelcomp_pks:
+                if deelnemer.kampioenschap.pk in deelkamp_pks:
                     if deelnemer.indiv_klasse.pk in klasse_pks:
                         if deelnemer.result_rank in (0, 32000, 32001):
                             if deelnemer.deelname != DEELNAME_NEE:

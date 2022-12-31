@@ -24,7 +24,7 @@
             <table class="white">
                 <tr>
                     <th>Competitie</th>
-                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                    <td>{{ deelkamp.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Wedstrijd</th>
@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ deelcomp.nhb_rayon }}</td>
+                    <td>{{ deelkamp.nhb_rayon }}</td>
                 </tr>
                 <tr>
                     <th>Wedstrijdklassen</th>
@@ -178,7 +178,7 @@
                             <td class="center">{{ team.sterkte_str }}</td>
                         </tr>
 
-                        {% for deelnemer in team.gekoppelde_schutters_lijst %}
+                        {% for deelnemer in team.gekoppelde_leden_lijst %}
                             <tr>
                                 <td colspan="2"></td>
                                 <td style="padding-left: 30px">{{ deelnemer.naam_str }}{% if deelnemer.is_para %} **{% endif %}</td>

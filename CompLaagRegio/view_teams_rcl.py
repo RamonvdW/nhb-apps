@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, AG_NUL,
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
-                               Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+                               Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from Competitie.operations.poules import maak_poule_schema
@@ -360,7 +360,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
                                               'deelcompetitie')
                               .filter(deelcompetitie=deelcomp,
                                       team_klasse=None)
-                              .prefetch_related('gekoppelde_schutters')
+                              .prefetch_related('leden')
                               .order_by('team_type__volgorde',
                                         '-aanvangsgemiddelde',
                                         'vereniging__ver_nr'))
@@ -373,8 +373,8 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             ag_str = ag_str.replace('.', ',')
 
             ver = team.vereniging
-            aantal_sporters = team.gekoppelde_schutters.count()
-            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter').all()])
+            aantal_sporters = team.leden.count()
+            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.leden.select_related('sporterboog__sporter').all()])
 
             tup = (ver.ver_nr, ver.naam,
                    team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
@@ -401,9 +401,9 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             ag_str = ag_str.replace('.', ',')
 
             ver = team.vereniging
-            aantal_sporters = team.gekoppelde_schutters.count()
+            aantal_sporters = team.leden.count()
             klasse_str = team.team_klasse.beschrijving
-            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter').all()])
+            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.leden.select_related('sporterboog__sporter').all()])
 
             tup = (ver.ver_nr, ver.naam,
                    team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
@@ -463,7 +463,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         context['geen_ag'] = geen_ag_lijst = list()
 
         # zoek de schuttersboog met handmatig_ag voor de teamcompetitie
-        for obj in (RegioCompetitieSchutterBoog
+        for obj in (RegioCompetitieSporterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
                             inschrijf_voorkeur_team=True,
@@ -717,13 +717,13 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                                           'vereniging__regio',
                                           'team_type')
                           .filter(deelcompetitie=deelcomp)
-                          .prefetch_related('gekoppelde_schutters')
+                          .prefetch_related('leden')
                           .order_by('team_type__volgorde',
                                     '-aanvangsgemiddelde',
                                     'vereniging__ver_nr'))
 
             for team in regioteams:
-                team.aantal_sporters = team.gekoppelde_schutters.count()
+                team.aantal_sporters = team.leden.count()
 
                 if not team.team_klasse:
                     probleem_met_teams = True

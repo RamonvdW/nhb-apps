@@ -53,12 +53,6 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         # self.e2e_dump_resp(resp)
         self.assert_is_redirect_not_plein(resp)
 
-        # for team in KampioenschapTeam.objects.prefetch_related('gekoppelde_schutters').all():
-        #     print(team, '-->', team.team_klasse)
-        #     print('  gekoppelde_schutters: %s' % repr([deelnemer.sporterboog.sporter.lid_nr for deelnemer in
-        #                                                team.gekoppelde_schutters.select_related(
-        #                                                    'sporterboog__sporter').all()]))
-
         # zet de competities in fase L
         zet_competitie_fase(self.testdata.comp18, 'L')
         zet_competitie_fase(self.testdata.comp25, 'L')

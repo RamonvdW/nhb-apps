@@ -278,7 +278,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         url = self.url_uitslagen_rayon_n % (self.testdata.comp18.pk, 'R', '0')
         resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -440,7 +440,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         comp.save(update_fields=['is_afgesloten'])
         url = self.url_uitslagen_bond % (comp.pk, 'R')
         resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
     def test_ver_indiv(self):
         url = self.url_uitslagen_ver % (self.testdata.comp18.pk, 'R')

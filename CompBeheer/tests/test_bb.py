@@ -10,9 +10,9 @@ from Functie.operations import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               CompetitieMutatie, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
-                               DAGDEEL_AFKORTINGEN)
+from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.tests.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -383,7 +383,8 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_kies)
 
         self.assertEqual(Competitie.objects.count(), 2)
-        self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
+        self.assertEqual(DeelCompetitie.objects.count(), 2*16)
+        self.assertEqual(DeelKampioenschap.objects.count(), 2*5)
 
     def test_regio_settings_overnemen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)

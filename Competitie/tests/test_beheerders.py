@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -85,12 +86,12 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
-            deelcomp.functie.accounts.add(self.account_bko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+            deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2).all():
-            deelcomp.functie.accounts.add(self.account_rko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+            deelkamp.functie.accounts.add(self.account_rko)
         # for
 
         for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
@@ -271,7 +272,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
         # BKO 18m
-        functie_bko = DeelCompetitie.objects.get(competitie=comp18, laag=LAAG_BK).functie
+        deelkamp = DeelKampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)
+        functie_bko = deelkamp.functie
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(functie_bko)
 
@@ -282,8 +284,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # RKO 25m Rayon 2
-        functie_rko = DeelCompetitie.objects.get(competitie=comp25, laag=LAAG_RK, nhb_rayon=self.rayon_2).functie
-
+        deelkamp = DeelKampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, nhb_rayon=self.rayon_2)
+        functie_rko = deelkamp.functie
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(functie_rko)
@@ -295,7 +297,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # RCL
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp18, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
+        deelcomp = DeelCompetitie.objects.get(competitie=comp18, laag=LAAG_REGIO, nhb_regio=self.regio_101)
+        functie_rcl = deelcomp.functie
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
 
@@ -323,22 +326,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # TODO: add WL
 
         # coverage voor models __str__
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_RK
-        deelcomp.nhb_regio = None
-        deelcomp.nhb_rayon = self.rayon_1
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_RK).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_BK
-        deelcomp.nhb_rayon = None
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_BK).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
         self.assertTrue(str(obj) != '')
 
 # end of file

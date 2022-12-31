@@ -9,8 +9,9 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.models import (Competitie, DeelCompetitie, INSCHRIJF_METHODE_1, RegioCompetitieSchutterBoog,
-                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND)
+from Competitie.models import (Competitie, DeelCompetitie, INSCHRIJF_METHODE_1, RegioCompetitieSporterBoog,
+                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
+                               DeelKampioenschap)
 from Competitie.tests.test_fase import zet_competitie_fase
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
 from Functie.operations import maak_functie
@@ -549,8 +550,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        self.assertEqual(1, RegioCompetitieSchutterBoog.objects.count())
-        deelnemer = RegioCompetitieSchutterBoog.objects.all()[0]
+        self.assertEqual(1, RegioCompetitieSporterBoog.objects.count())
+        deelnemer = RegioCompetitieSporterBoog.objects.all()[0]
 
         # ingeschreven en geen knop meer voor aanmelden
         with self.assert_max_queries(27):
@@ -560,9 +561,9 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
         # laat de sporter doorstromen naar het RK
-        deelcomp_rk25 = DeelCompetitie.objects.get(competitie__afstand='25', nhb_rayon=self.ver.regio.rayon)
-        kamp = KampioenschapSchutterBoog(
-                    deelcompetitie=deelcomp_rk25,
+        deelkamp_25 = DeelKampioenschap.objects.get(competitie__afstand='25', nhb_rayon=self.ver.regio.rayon)
+        kamp = KampioenschapSporterBoog(
+                    kampioenschap=deelkamp_25,
                     sporterboog=sporterboog,
                     indiv_klasse=deelnemer.indiv_klasse,  # don't care maar moet gezet zijn
                     bij_vereniging=self.ver,
@@ -571,9 +572,9 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                     gemiddelde=9)
         kamp.save()
 
-        deelcomp_rk18 = DeelCompetitie.objects.get(competitie__afstand='18', nhb_rayon=self.ver.regio.rayon)
-        kamp = KampioenschapSchutterBoog(
-                        deelcompetitie=deelcomp_rk18,
+        deelkamp_18 = DeelKampioenschap.objects.get(competitie__afstand='18', nhb_rayon=self.ver.regio.rayon)
+        kamp = KampioenschapSporterBoog(
+                        kampioenschap=deelkamp_18,
                         sporterboog=sporterboog,
                         indiv_klasse=deelnemer.indiv_klasse,        # don't care maar moet gezet zijn
                         bij_vereniging=self.ver,

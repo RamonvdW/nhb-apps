@@ -8,8 +8,9 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               LAAG_REGIO, LAAG_RK, LAAG_BK)
-from Functie.models import Rollen
+                               LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+from Functie.models import Rollen, Functie
 import datetime
 
 
@@ -185,15 +186,19 @@ class TestCompetitieFase(TestCase):
                                         laag=LAAG_REGIO)
         deelcomp_regio.save()
 
-        deelcomp_rk = DeelCompetitie(competitie=comp,
-                                     is_afgesloten=False,
-                                     laag=LAAG_RK)
-        deelcomp_rk.save()
+        functie = Functie.objects.get(rol='MWZ')
 
-        deelcomp_bk = DeelCompetitie(competitie=comp,
-                                     is_afgesloten=False,
-                                     laag=LAAG_BK)
-        deelcomp_bk.save()
+        deelkamp_rk = DeelKampioenschap(competitie=comp,
+                                        is_afgesloten=False,
+                                        deel=DEEL_RK,
+                                        functie=functie)
+        deelkamp_rk.save()
+
+        deelkamp_bk = DeelKampioenschap(competitie=comp,
+                                        is_afgesloten=False,
+                                        deel=DEEL_BK,
+                                        functie=functie)
+        deelkamp_bk.save()
 
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
@@ -261,8 +266,8 @@ class TestCompetitieFase(TestCase):
         self.assertEqual(comp.fase, 'M')
 
         # na afsluiten RK = N
-        deelcomp_rk.is_afgesloten = True
-        deelcomp_rk.save()
+        deelkamp_rk.is_afgesloten = True
+        deelkamp_rk.save()
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'N')
 
@@ -279,8 +284,8 @@ class TestCompetitieFase(TestCase):
         self.assertEqual(comp.fase, 'R')
 
         # na afsluiten BK = S
-        deelcomp_bk.is_afgesloten = True
-        deelcomp_bk.save()
+        deelkamp_bk.is_afgesloten = True
+        deelkamp_bk.save()
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'S')
 

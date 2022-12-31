@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
+from Competitie.models import Competitie, RegioCompetitieSporterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import (Aanvangsgemiddelde, AG_DOEL_INDIV,
@@ -94,7 +94,7 @@ class Command(BaseCommand):
         del sporterboog
 
         # controleer dat de sporter niet al geschreven
-        count = (RegioCompetitieSchutterBoog
+        count = (RegioCompetitieSporterBoog
                  .objects
                  .filter(deelcompetitie__competitie=comp,
                          sporterboog=juiste_sporterboog)
@@ -107,13 +107,13 @@ class Command(BaseCommand):
         # juiste sporterboog is nog niet ingeschreven voor de competitie
 
         try:
-            deelnemer = (RegioCompetitieSchutterBoog
+            deelnemer = (RegioCompetitieSporterBoog
                          .objects
                          .select_related('sporterboog',
                                          'sporterboog__boogtype')
                          .get(deelcompetitie__competitie=comp,
                               sporterboog__sporter__lid_nr=lid_nr))
-        except RegioCompetitieSchutterBoog.MultipleObjectsReturned:
+        except RegioCompetitieSporterBoog.MultipleObjectsReturned:
             self.stderr.write('[ERROR] Sporter met meerdere inschrijvingen wordt niet ondersteund')
             return
 

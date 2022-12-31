@@ -7,7 +7,8 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelcompetitieRonde, DeelCompetitie, CompetitieMatch, LAAG_REGIO, LAAG_RK, LAAG_BK
+from Competitie.models import (DeelcompetitieRonde, CompetitieMatch, LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -49,11 +50,10 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                             deelcompetitie__laag=LAAG_REGIO)
                     .values_list('matches', flat=True))
 
-        pks2 = list(DeelCompetitie
+        pks2 = list(DeelKampioenschap
                     .objects
                     .filter(is_afgesloten=False,
-                            rk_bk_matches__vereniging=self.functie_nu.nhb_ver,
-                            laag__in=(LAAG_RK, LAAG_BK))
+                            rk_bk_matches__vereniging=self.functie_nu.nhb_ver)
                     .exclude(rk_bk_matches=None)                # excludes when ManyToMany is empty
                     .values_list('rk_bk_matches', flat=True))
 
@@ -72,20 +72,18 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             # als de instellingen van de ronde opgeslagen worden
             # dit is slechts fall-back
             if match.beschrijving == "":
-                # als deze wedstrijd bij een competitieronde hoort,
-                # maak een passende beschrijving voor
-
+                # maak een passende beschrijving voor deze wedstrijd
                 rondes = match.deelcompetitieronde_set.all()
                 if len(rondes) > 0:
                     ronde = rondes[0]
                     match.beschrijving1 = ronde.deelcompetitie.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
-                    deelcomps = match.deelcompetitie_set.all()
-                    if len(deelcomps) > 0:
-                        deelcomp = deelcomps[0]
-                        match.beschrijving1 = deelcomp.competitie.beschrijving
-                        if deelcomp.laag == LAAG_RK:
+                    deelkamps = match.deelkampioenschappen_set.all()
+                    if len(deelkamps) > 0:
+                        deelkamp = deelkamps[0]
+                        match.beschrijving1 = deelkamp.competitie.beschrijving
+                        if deelkamp.deel == DEEL_RK:
                             match.beschrijving2 = "Rayonkampioenschappen"
                         else:
                             match.beschrijving2 = "Bondskampioenschappen"

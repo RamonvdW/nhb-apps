@@ -8,8 +8,8 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, LAAG_REGIO, LAAG_RK,
-                               RegioCompetitieSchutterBoog, KampioenschapTeam)
+from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, LAAG_REGIO,
+                               RegioCompetitieSporterBoog, KampioenschapTeam, DeelKampioenschap, DEEL_RK)
 from Competitie.tests.test_fase import zet_competitie_fase
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -302,9 +302,9 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                                           'wil_in_team': 'ja!'})
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        # print('aantal ingeschreven deelnemers:', RegioCompetitieSchutterBoog.objects.count())
+        # print('aantal ingeschreven deelnemers:', RegioCompetitieSporterBoog.objects.count())
 
-        for obj in (RegioCompetitieSchutterBoog
+        for obj in (RegioCompetitieSporterBoog
                     .objects
                     .select_related('sporterboog__sporter')
                     .filter(deelcompetitie__competitie=self.comp_18)
@@ -332,15 +332,15 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        deelcomp_rk3 = (DeelCompetitie
+        deelkamp_rk3 = (DeelKampioenschap
                         .objects
                         .get(competitie=self.comp_18,
-                             laag=LAAG_RK,
+                             deel=DEEL_RK,
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # competitie in de verkeerde fase
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+            resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
             self.assert404(resp, 'Competitie is niet in de juiste fase 1')
 
         # zet competitie in fase E
@@ -349,37 +349,37 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         # competitie in de verkeerde fase
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=30):
             with self.assert_max_queries(20):
-                resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+                resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
                 self.assert404(resp, 'Competitie is niet in de juiste fase 2')
 
         # verplaats het openingstijdstip
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             with self.assert_max_queries(20):
-                resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+                resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('complaagrayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
             # team aanmaken pagina
             with self.assert_max_queries(20):
-                resp = self.client.get(self.url_rk_teams_nieuw % deelcomp_rk3.pk)
+                resp = self.client.get(self.url_rk_teams_nieuw % deelkamp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
 
             # maak een team aan zonder team nummer
             with self.assert_max_queries(20):
-                resp = self.client.post(self.url_rk_teams_nieuw % deelcomp_rk3.pk)
+                resp = self.client.post(self.url_rk_teams_nieuw % deelkamp_rk3.pk)
                 self.assert404(resp, 'Slechte parameter')
 
             # bad deelcomp_pk
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (999999, 0)
                 resp = self.client.get(url)
-                self.assert404(resp, 'Competitie niet gevonden')
+                self.assert404(resp, 'Kampioenschap niet gevonden')
 
             # maak een team aan, zonder team type
-            url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
+            url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
             with self.assert_max_queries(20):
                 resp = self.client.post(url)
                 self.assert404(resp, 'Onbekend team type')
@@ -387,7 +387,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             # maak een team aan
             self.assertEqual(KampioenschapTeam.objects.count(), 0)
             with self.assert_max_queries(20):
-                url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
+                url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
                 resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
@@ -398,7 +398,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assertTrue(str(team) != "")
 
             # wijzig een team
-            url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, team.pk)
+            url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, team.pk)
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
@@ -406,10 +406,10 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
 
             # team does not exist
-            resp = self.client.get(self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 999999))
+            resp = self.client.get(self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 999999))
             self.assert404(resp, 'Team niet gevonden of niet van jouw vereniging')
 
-            resp = self.client.post(self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 999999), {})
+            resp = self.client.post(self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 999999), {})
             self.assert404(resp, 'Team bestaat niet')
 
             # wijzig team type
@@ -418,7 +418,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
 
             # verwijder een team
-            url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, team.pk)
+            url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, team.pk)
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'verwijderen': 1})
             self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
@@ -428,13 +428,13 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         # niet bestaande deelcomp_rk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_rk_teams % self.deelcomp18_regio111.pk)
-            self.assert404(resp, 'Competitie niet gevonden')
+            self.assert404(resp, 'Kampioenschap niet gevonden')
 
         # repeat voor de 25m
-        deelcomp_rk3 = (DeelCompetitie
+        deelkamp_rk3 = (DeelKampioenschap
                         .objects
                         .get(competitie=self.comp_25,
-                             laag=LAAG_RK,
+                             deel=DEEL_RK,
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase E
@@ -443,7 +443,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         # verplaats het openingstijdstip
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             with self.assert_max_queries(20):
-                resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+                resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('complaagrayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
@@ -457,10 +457,10 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         self._create_deelnemers()
 
-        deelcomp_rk3 = (DeelCompetitie
+        deelkamp_rk3 = (DeelKampioenschap
                         .objects
                         .get(competitie=self.comp_18,
-                             laag=LAAG_RK,
+                             deel=DEEL_RK,
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase E (nodig om een team aan te maken)
@@ -470,7 +470,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             # maak een team aan
             self.assertEqual(KampioenschapTeam.objects.count(), 0)
             with self.assert_max_queries(20):
-                url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
+                url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
                 resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
@@ -496,10 +496,10 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Team niet gevonden')
 
             # herhaal voor 25m1p
-            deelcomp_rk3 = (DeelCompetitie
+            deelkamp_rk3 = (DeelKampioenschap
                             .objects
                             .get(competitie=self.comp_25,
-                                 laag=LAAG_RK,
+                                 deel=DEEL_RK,
                                  nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
             # zet competitie in fase E (nodig om een team aan te maken)
@@ -509,7 +509,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             team.delete()
             self.assertEqual(KampioenschapTeam.objects.count(), 0)
             with self.assert_max_queries(20):
-                url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
+                url = self.url_rk_teams_wijzig % (deelkamp_rk3.pk, 0)  # 0 = nieuw team
                 resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)

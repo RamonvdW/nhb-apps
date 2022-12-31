@@ -9,8 +9,9 @@ from BasisTypen.models import BoogType, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSchutterBoog,
-                               INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK, LAAG_BK)
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
+                               INSCHRIJF_METHODE_3, LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -93,12 +94,12 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
-            deelcomp.functie.accounts.add(self.account_bko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+            deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2).all():
-            deelcomp.functie.accounts.add(self.account_rko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+            deelkamp.functie.accounts.add(self.account_rko)
         # for
 
         for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
@@ -259,7 +260,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = NhbRegio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 
@@ -296,7 +297,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = NhbRegio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 

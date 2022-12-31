@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from BasisTypen.models import GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
-from Competitie.models import CompetitieIndivKlasse, RegioCompetitieSchutterBoog
+from Competitie.models import CompetitieIndivKlasse, RegioCompetitieSporterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import SporterVoorkeuren
 
@@ -83,7 +83,7 @@ class Command(BaseCommand):
         # for
 
         prev_comp_pk = jaartal = -1
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('indiv_klasse',
                                           'sporterboog',

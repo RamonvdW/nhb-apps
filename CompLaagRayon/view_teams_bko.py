@@ -73,9 +73,9 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         for rk_team in (KampioenschapTeam
                         .objects
-                        .filter(deelcompetitie__competitie=comp)
+                        .filter(kampioenschap__competitie=comp)
                         .select_related('team_type')
-                        .annotate(sporter_count=Count('tijdelijke_schutters'))
+                        .annotate(sporter_count=Count('tijdelijke_leden'))
                         .order_by('team_type__volgorde',
                                   '-aanvangsgemiddelde')):
 
@@ -244,8 +244,8 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         # plaats elk RK team in een wedstrijdklasse
         for team in (KampioenschapTeam
                      .objects
-                     .filter(deelcompetitie__competitie=comp)
-                     .annotate(sporter_count=Count('gekoppelde_schutters'))):
+                     .filter(kampioenschap__competitie=comp)
+                     .annotate(sporter_count=Count('gekoppelde_leden'))):
 
             team.team_klasse = None
             if 3 <= team.sporter_count <= 4:

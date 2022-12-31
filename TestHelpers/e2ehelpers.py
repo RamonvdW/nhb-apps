@@ -166,22 +166,33 @@ class E2EHelpers(TestCase):
     def e2e_wisselnaarrol_gebruiker(self):
         self._wissel_naar_rol('geen', '/functie/wissel-van-rol/')
 
+    WISSEL_VAN_ROL_EXPECTED_URL = {
+        'SEC': '/vereniging/',
+        'HWL': '/vereniging/',
+        'WL' : '/vereniging/',
+        'BKO': '/bondscompetities/##',
+        'RKO': '/bondscompetities/##',
+        'RCL': '/bondscompetities/##',
+        'MO' : '/opleidingen/manager/',
+        'SUP': '/feedback/inzicht/',
+        'MWW': '/webwinkel/manager/',
+        'MWZ': '/functie/wissel-van-rol/',      # '/kalender/'
+    }
+
     def e2e_wissel_naar_functie(self, functie):
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
 
-        if functie.rol in ('SEC', 'HWL', 'WL'):
-            self.assert_is_redirect(resp, '/vereniging/')
-        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):    # pragma: no branch
-            # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
-            self.assert_is_redirect(resp, '/bondscompetities/##')
-        elif functie.rol == "MO":
-            self.assert_is_redirect(resp, '/opleidingen/manager/')
-        elif functie.rol == "SUP":
-            self.assert_is_redirect(resp, '/feedback/inzicht/')
-        elif functie.rol == "MWW":
-            self.assert_is_redirect(resp, '/webwinkel/manager/')
-        else:
-            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')                               # pragma: no cover
+        try:
+            expected_url = self.WISSEL_VAN_ROL_EXPECTED_URL[functie.rol]
+        except KeyError:
+            expected_url = 'functie ontbreekt'
+
+        # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
+        if functie.rol in ('BKO', 'RKO', 'RCL'):
+            if resp.status_code == 302 and not resp.url.startswith('/bondscompetities/'):
+                expected_url = '/functie/wissel-van-rol/'
+
+        self.assert_is_redirect(resp, expected_url)
 
     def e2e_check_rol(self, rol_verwacht):
         resp = self.client.get('/functie/wissel-van-rol/')

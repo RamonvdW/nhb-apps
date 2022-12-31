@@ -9,7 +9,8 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import View
 from django.utils.formats import localize
-from Competitie.models import get_competitie_boog_typen, LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
+from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, DeelKampioenschap, DEEL_BK,
+                               get_competitie_boog_typen)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -77,19 +78,19 @@ class CompetitieOverzichtView(View):
                 comp.url_ag_vaststellen = reverse('CompBeheer:ag-vaststellen-afstand',
                                                   kwargs={'afstand': comp.afstand})
 
-            context['planning_deelcomp'] = (DeelCompetitie
-                                            .objects
-                                            .filter(competitie=comp,
-                                                    laag=LAAG_BK)
-                                            .select_related('competitie')
-                                            .order_by('competitie__afstand'))
-            for obj in context['planning_deelcomp']:
+            context['planning_deelkamps'] = (DeelKampioenschap
+                                             .objects
+                                             .filter(competitie=comp,
+                                                     deel=DEEL_BK)
+                                             .select_related('competitie')
+                                             .order_by('competitie__afstand'))
+            for obj in context['planning_deelkamps']:
                 kan_beheren = True
 
                 obj.titel = 'Planning'
                 obj.tekst = 'Landelijke planning voor deze competitie.'
                 obj.url = reverse('CompLaagBond:bond-planning',
-                                  kwargs={'deelcomp_pk': obj.pk})
+                                  kwargs={'deelkamp_pk': obj.pk})
             # for
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
@@ -121,7 +122,8 @@ class CompetitieOverzichtView(View):
                                             .filter(competitie=comp,
                                                     functie=self.functie_nu,
                                                     is_afgesloten=False)
-                                            .select_related('nhb_regio', 'competitie'))
+                                            .select_related('nhb_regio',
+                                                            'competitie'))
             for obj in context['planning_deelcomp']:
                 kan_beheren = True
 
@@ -194,34 +196,35 @@ class CompetitieOverzichtView(View):
                                                    kwargs={'regio': self.functie_nu.nhb_regio.regio_nr})
 
         elif self.rol_nu == Rollen.ROL_RKO:
-            deelcomp_rks = (DeelCompetitie
-                            .objects
-                            .select_related('nhb_rayon', 'competitie')
-                            .filter(competitie=comp,
-                                    functie=self.functie_nu,
-                                    is_afgesloten=False))
-            if len(deelcomp_rks):
+            deelkamps = (DeelKampioenschap
+                         .objects
+                         .select_related('nhb_rayon',
+                                         'competitie')
+                         .filter(competitie=comp,
+                                 functie=self.functie_nu,
+                                 is_afgesloten=False))
+            if len(deelkamps):
                 kan_beheren = True
 
-                deelcomp_rk = deelcomp_rks[0]
+                deelkamp = deelkamps[0]
 
-                deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
-                deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
-                deelcomp_rk.url = reverse('CompLaagRayon:rayon-planning',
-                                          kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                deelkamp.titel = 'Planning %s' % deelkamp.nhb_rayon.naam
+                deelkamp.tekst = 'Planning voor %s voor deze competitie.' % deelkamp.nhb_rayon.naam
+                deelkamp.url = reverse('CompLaagRayon:rayon-planning',
+                                       kwargs={'deelkamp_pk': deelkamp.pk})
 
-                deelcomp_rk.tekst_rayon_teams = "Aangemelde teams voor de Rayonkampioenschappen in Rayon %s." % deelcomp_rk.nhb_rayon.rayon_nr
-                deelcomp_rk.url_rayon_teams = reverse('CompLaagRayon:rayon-teams',
-                                                      kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                deelkamp.tekst_rayon_teams = "Aangemelde teams voor de Rayonkampioenschappen in Rayon %s." % deelkamp.nhb_rayon.rayon_nr
+                deelkamp.url_rayon_teams = reverse('CompLaagRayon:rayon-teams',
+                                                   kwargs={'deelkamp_pk': deelkamp.pk})
 
-                context['planning_deelcomp'] = [deelcomp_rk, ]
+                context['planning_deelkamps'] = [deelkamp, ]
 
                 # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
                 context['url_lijst_rk'] = reverse('CompLaagRayon:lijst-rk',
-                                                  kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                                                  kwargs={'deelkamp_pk': deelkamp.pk})
 
                 context['url_limieten_rk'] = reverse('CompLaagRayon:rayon-limieten',
-                                                     kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                                                     kwargs={'deelkamp_pk': deelkamp.pk})
 
             if 'B' <= comp.fase <= 'E':
                 comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-rayon',
@@ -229,19 +232,19 @@ class CompetitieOverzichtView(View):
                                                           'rayon_pk': self.functie_nu.nhb_rayon.pk})
 
         elif self.rol_nu == Rollen.ROL_BKO:
-            context['planning_deelcomp'] = (DeelCompetitie
-                                            .objects
-                                            .filter(competitie=comp,
-                                                    functie=self.functie_nu,
-                                                    is_afgesloten=False)
-                                            .select_related('competitie'))
-            for obj in context['planning_deelcomp']:
+            context['planning_deelkamps'] = (DeelKampioenschap
+                                             .objects
+                                             .filter(competitie=comp,
+                                                     functie=self.functie_nu,
+                                                     is_afgesloten=False)
+                                             .select_related('competitie'))
+            for obj in context['planning_deelkamps']:
                 kan_beheren = True
 
                 obj.titel = 'Planning'
                 obj.tekst = 'Landelijke planning voor deze competitie.'
                 obj.url = reverse('CompLaagBond:bond-planning',
-                                  kwargs={'deelcomp_pk': obj.pk})
+                                  kwargs={'deelkamp_pk': obj.pk})
 
                 # geef de BKO de mogelijkheid om
                 # - de regiocompetitie door te zetten naar de rayonkampioenschappen

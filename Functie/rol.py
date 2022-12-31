@@ -9,7 +9,7 @@
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
 from Account.models import AccountSessions
-from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK
+from Competitie.models import DeelKampioenschap, DEEL_RK, DEEL_BK
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
 from Functie.models import Functie, Rollen, rol2url, url2rol
@@ -471,14 +471,14 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de BK's
-            qset = (DeelCompetitie
+            qset = (DeelKampioenschap
                     .objects
                     .filter(competitie__afstand=functie_in.comp_type,
-                            laag=LAAG_BK)
+                            deel=DEEL_BK)
                     .prefetch_related('rk_bk_matches'))
             ver_nrs = list()
-            for deelcomp in qset:
-                ver_nrs.extend(list(deelcomp
+            for deelkamp in qset:
+                ver_nrs.extend(list(deelkamp
                                     .rk_bk_matches
                                     .select_related('vereniging')
                                     .values_list('vereniging__ver_nr', flat=True)))
@@ -499,14 +499,15 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de RKs
-            qset = (DeelCompetitie
+            qset = (DeelKampioenschap
                     .objects
                     .filter(competitie__afstand=functie_in.comp_type,
-                            laag=LAAG_RK, nhb_rayon=functie_in.nhb_rayon)
+                            deel=DEEL_RK,
+                            nhb_rayon=functie_in.nhb_rayon)
                     .prefetch_related('rk_bk_matches'))
             ver_nrs = list()
-            for deelcomp in qset:
-                ver_nrs.extend(list(deelcomp
+            for deelkamp in qset:
+                ver_nrs.extend(list(deelkamp
                                     .rk_bk_matches
                                     .select_related('vereniging')
                                     .values_list('vereniging__ver_nr', flat=True)))

@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO
+from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO
 from Functie.models import Functie
 from Taken.operations import check_taak_bestaat, maak_taak
 from datetime import timedelta
@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 # competitie is niet meer in de juiste fase
                 pass
             else:
-                qset = (RegioCompetitieSchutterBoog
+                qset = (RegioCompetitieSporterBoog
                         .objects
                         .filter(deelcompetitie=deelcomp,
                                 wanneer_aangemeld=gisteren_date)

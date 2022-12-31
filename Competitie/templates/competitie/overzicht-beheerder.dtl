@@ -105,11 +105,6 @@
                 <!-- planning deelcomp -->
                 {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 
-                <!-- rayon teams -->
-                {% if deelcomp.url_rayon_teams %}
-                    {% include 'plein/card.dtl' with title="RK Teams" text=deelcomp.tekst_rayon_teams icon="api" url=deelcomp.url_rayon_teams %}
-                {% endif %}
-
                 <!-- regio ingeschreven teams -->
                 {% if deelcomp.url_regio_teams %}
                     {% include 'plein/card.dtl' with title="Ingeschreven Teams" text=deelcomp.tekst_regio_teams icon="gamepad" url=deelcomp.url_regio_teams %}
@@ -123,6 +118,18 @@
                 <!-- scores -->
                 {% if deelcomp.url_scores %}
                     {% include 'plein/card.dtl' with title="Scores" text=deelcomp.tekst_scores icon="edit" url=deelcomp.url_scores %}
+                {% endif %}
+
+            {% endfor %}
+
+            {% for deelkamp in planning_deelkamps %}
+
+                <!-- planning -->
+                {% include 'plein/card.dtl' with title=deelkamp.titel text=deelkamp.tekst icon="pending_actions" url=deelkamp.url %}
+
+                <!-- rayon teams -->
+                {% if deelkamp.url_rayon_teams %}
+                    {% include 'plein/card.dtl' with title="RK Teams" text=deelkamp.tekst_rayon_teams icon="api" url=deelkamp.url_rayon_teams %}
                 {% endif %}
 
             {% endfor %}

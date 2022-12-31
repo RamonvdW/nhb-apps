@@ -8,8 +8,9 @@ from django.conf import settings
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelcompetitieRonde, CompetitieMatch, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
+                               DeelcompetitieRonde, CompetitieMatch, LAAG_REGIO,
+                               RegioCompetitieSporterBoog, INSCHRIJF_METHODE_1,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
@@ -163,9 +164,9 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
         self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_25, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_112)[0]
@@ -197,10 +198,10 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         ver.clusters.add(self.cluster_101e_25)
 
     def _maak_inschrijving(self, deelcomp):
-        RegioCompetitieSchutterBoog(sporterboog=self.sporterboog,
-                                    bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                    deelcompetitie=deelcomp,
-                                    indiv_klasse=self.klasse_recurve_onbekend).save()
+        RegioCompetitieSporterBoog(sporterboog=self.sporterboog,
+                                   bij_vereniging=self.sporterboog.sporter.bij_vereniging,
+                                   deelcompetitie=deelcomp,
+                                   indiv_klasse=self.klasse_recurve_onbekend).save()
 
     def test_overzicht_anon(self):
         with self.assert_max_queries(20):
@@ -430,10 +431,10 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         # niet bestaande pk's
         resp = self.client.get(self.url_planning_bond % 999999)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_rayon % 999999)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_regio % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
@@ -452,10 +453,10 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         # verkeerde laag
         resp = self.client.get(self.url_planning_bond % self.deelcomp_rayon2_18.pk)
-        self.assert404(resp, 'Verkeerde competitie (1)')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_rayon % self.deelcomp_bond_18.pk)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_regio % self.deelcomp_bond_18.pk)
         self.assert404(resp, 'Competitie niet gevonden')
@@ -1425,7 +1426,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        inschrijving = RegioCompetitieSchutterBoog(
+        inschrijving = RegioCompetitieSporterBoog(
                             sporterboog=sporterboog,
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
                             deelcompetitie=self.deelcomp_regio101_18,

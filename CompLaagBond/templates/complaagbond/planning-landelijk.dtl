@@ -67,20 +67,20 @@
                     </tr>
                 </thead>
 
-                {% for deelcomp in rayon_deelcomps %}
+                {% for deelkamp in rayon_deelkamps %}
                     <tr>
                         <td class="center">
-                            {% if deelcomp.is_afgesloten %}
+                            {% if deelkamp.is_afgesloten %}
                                 <span>Afgesloten</span>
                             {% else %}
                                 <span>Actief</span>
                             {% endif %}
                         </td>
 
-                        <td class="center">{{ deelcomp.nhb_rayon }}</td>
+                        <td class="center">{{ deelkamp.nhb_rayon }}</td>
 
                         <td class="center">
-                            <a class="btn-nhb-rood" href="{% url 'CompLaagRayon:rayon-planning' deelcomp.pk %}">
+                            <a class="btn-nhb-rood" href="{% url 'CompLaagRayon:rayon-planning' deelkamp.pk %}">
                                 <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
                             </a>
                         </td>

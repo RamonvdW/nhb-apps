@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, LAAG_RK, KampioenschapTeam, KampioenschapSchutterBoog
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               DeelKampioenschap, DEEL_RK, KampioenschapTeam, KampioenschapSporterBoog)
 from Competitie.operations import competities_aanmaken
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -32,9 +33,9 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         regio_109 = NhbRegio.objects.get(regio_nr=109)
         boog_r = BoogType.objects.get(afkorting='R')
         comp_25 = Competitie.objects.get(afstand=25)
-        deelcomp = DeelCompetitie.objects.get(competitie=comp_25,
-                                              laag=LAAG_RK,
-                                              nhb_rayon__rayon_nr=3)
+        deelkamp = DeelKampioenschap.objects.get(competitie=comp_25,
+                                                 deel=DEEL_RK,
+                                                 nhb_rayon__rayon_nr=3)
 
         team_klasse = CompetitieTeamKlasse.objects.filter(competitie=comp_25,
                                                           is_voor_teams_rk_bk=True).all()[0]
@@ -66,21 +67,21 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         sporterboog.save()
 
         team = KampioenschapTeam(
-                    deelcompetitie=deelcomp,
+                    kampioenschap=deelkamp,
                     team_klasse=team_klasse,
                     vereniging=ver)
         team.save()
 
-        deelnemer = KampioenschapSchutterBoog(
-                        deelcompetitie=deelcomp,
+        deelnemer = KampioenschapSporterBoog(
+                        kampioenschap=deelkamp,
                         sporterboog=sporterboog,
                         indiv_klasse=indiv_klasse,
                         bij_vereniging=ver)
         deelnemer.save()
-        team.gekoppelde_schutters.add(deelnemer)
+        team.gekoppelde_leden.add(deelnemer)
 
-        deelnemer = KampioenschapSchutterBoog(
-                        deelcompetitie=deelcomp,
+        deelnemer = KampioenschapSporterBoog(
+                        kampioenschap=deelkamp,
                         sporterboog=sporterboog,
                         indiv_klasse=indiv_klasse,
                         bij_vereniging=ver,

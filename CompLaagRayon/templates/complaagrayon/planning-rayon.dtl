@@ -23,7 +23,7 @@
             <table class="white">
                 <tr>
                     <th>Competitie</th>
-                    <td>{{ deelcomp_rk.competitie.beschrijving }}</td>
+                    <td>{{ deelkamp.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Rayon</th>

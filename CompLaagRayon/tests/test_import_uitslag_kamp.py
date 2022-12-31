@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import KampioenschapSchutterBoog, DEELNAME_NEE
+from Competitie.models import KampioenschapSporterBoog, DEELNAME_NEE
 from Competitie.tests.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -34,7 +34,7 @@ class TestCompLaagRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
         cls.testdata.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
 
         # meld een paar deelnemers af
-        for deelnemer in KampioenschapSchutterBoog.objects.filter(sporterboog__sporter__lid_nr__in=(301946, 301976)):
+        for deelnemer in KampioenschapSporterBoog.objects.filter(sporterboog__sporter__lid_nr__in=(301946, 301976)):
             deelnemer.deelname = DEELNAME_NEE
             deelnemer.save(update_fields=['deelname'])
 
@@ -80,8 +80,8 @@ class TestCompLaagRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
         self.run_management_command('import_uitslag_kamp', '25', self.real_file, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O')
 
         # geef de dupe-check iets om op te reageren
-        deelnemer = KampioenschapSchutterBoog.objects.get(deelcompetitie__competitie__afstand=25,
-                                                          sporterboog__sporter__lid_nr=301966)
+        deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand=25,
+                                                         sporterboog__sporter__lid_nr=301966)
         deelnemer.result_counts = 'test'
         deelnemer.save(update_fields=['result_counts'])
 

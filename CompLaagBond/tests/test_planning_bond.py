@@ -6,9 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieIndivKlasse,
-                               DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               RegioCompetitieSchutterBoog)
+from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -127,11 +126,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(url_klassengrenzen_vaststellen)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                              laag=LAAG_BK)[0]
-        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                                laag=LAAG_RK,
-                                                                nhb_rayon=self.rayon_1)[0]
+        self.deelkamp_bk_18 = DeelKampioenschap.objects.filter(competitie=self.comp_18,
+                                                               deel=DEEL_BK)[0]
+        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(competitie=self.comp_18,
+                                                                   deel=DEEL_RK,
+                                                                   nhb_rayon=self.rayon_1)[0]
         self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.comp_18,
                                                                 laag=LAAG_REGIO,
                                                                 nhb_regio=self.regio_101)[0]
@@ -139,12 +138,12 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                                                 laag=LAAG_REGIO,
                                                                 nhb_regio=self.regio_105)[0]
 
-        self.functie_bko_18 = self.deelcomp_bond_18.functie
+        self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
 
-        self.deelcomp_bond_25 = DeelCompetitie.objects.filter(competitie=self.comp_25,
-                                                              laag=LAAG_BK)[0]
-        self.functie_bko_25 = self.deelcomp_bond_25.functie
+        self.deelkamp_bk_25 = DeelKampioenschap.objects.filter(competitie=self.comp_25,
+                                                               deel=DEEL_BK)[0]
+        self.functie_bko_25 = self.deelkamp_bk_25.functie
         self.functie_bko_25.accounts.add(self.account_bko_25)
 
         self.functie_rko1_18 = self.deelcomp_rayon1_18.functie
@@ -162,11 +161,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         # verkeerde BKO
-        url = self.url_planning_bk % self.deelcomp_bond_25.pk
+        url = self.url_planning_bk % self.deelkamp_bk_25.pk
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie (2)')
 
-        url = self.url_planning_bk % self.deelcomp_bond_18.pk
+        url = self.url_planning_bk % self.deelkamp_bk_18.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -181,10 +180,10 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # verkeerde deelcomp
         resp = self.client.get(self.url_planning_bk % self.deelcomp_rayon1_18.pk)
-        self.assert404(resp, 'Verkeerde competitie (1)')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_bk % 999999)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
 
 # end of file

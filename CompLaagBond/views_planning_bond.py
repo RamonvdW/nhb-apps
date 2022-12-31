@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelCompetitie, LAAG_RK, LAAG_BK
+from Competitie.models import DeelKampioenschap, DEEL_RK, DEEL_BK
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -40,30 +40,29 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp_bk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie')
-                           .get(pk=deelcomp_pk))
-        except (KeyError, DeelCompetitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        if deelcomp_bk.laag != LAAG_BK:
-            raise Http404('Verkeerde competitie (1)')
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp = (DeelKampioenschap
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelkamp_pk,
+                             deel=DEEL_BK))
+        except (KeyError, DeelKampioenschap.DoesNotExist):
+            raise Http404('Kampioenschap niet gevonden')
 
         if self.rol_nu == Rollen.ROL_BKO:
-            if deelcomp_bk.competitie.afstand != self.functie_nu.comp_type:
+            if deelkamp.competitie.afstand != self.functie_nu.comp_type:
                 raise Http404('Verkeerde competitie (2)')
 
-        context['deelcomp_bk'] = deelcomp_bk
+        context['deelcomp_bk'] = deelkamp
 
-        context['rayon_deelcomps'] = (DeelCompetitie
+        context['rayon_deelkamps'] = (DeelKampioenschap
                                       .objects
-                                      .filter(laag=LAAG_RK,
-                                              competitie=deelcomp_bk.competitie)
-                                      .order_by('nhb_rayon__rayon_nr'))
+                                      .filter(deel=DEEL_RK,
+                                              competitie=deelkamp.competitie)
+                                      .order_by('nhb_rayon__rayon_nr',
+                                                'deel'))
 
-        comp = deelcomp_bk.competitie
+        comp = deelkamp.competitie
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

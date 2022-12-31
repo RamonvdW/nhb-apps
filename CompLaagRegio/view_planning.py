@@ -12,10 +12,11 @@ from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
+from Competitie.models import (LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
+                               DeelKampioenschap, DEEL_RK,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam)
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_deelcompetitie_ronde, competitie_week_nr_to_date
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
@@ -231,11 +232,11 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                 context['inschrijfmethode'] = '3 (sporter voorkeur dagdeel)'
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
-            rayon = DeelCompetitie.objects.get(laag=LAAG_RK,
-                                               competitie=deelcomp.competitie,
-                                               nhb_rayon=deelcomp.nhb_regio.rayon)
+            rayon = DeelKampioenschap.objects.get(competitie=deelcomp.competitie,
+                                                  deel=DEEL_RK,
+                                                  nhb_rayon=deelcomp.nhb_regio.rayon)
             context['url_rayon'] = reverse('CompLaagRayon:rayon-planning',
-                                           kwargs={'rk_deelcomp_pk': rayon.pk})
+                                           kwargs={'deelkamp_pk': rayon.pk})
 
         comp = deelcomp.competitie
 
@@ -499,7 +500,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         if heeft_wkl:
             teams_tonen = ronde.deelcompetitie.regio_organiseert_teamcompetitie
 
-            for obj in (RegioCompetitieSchutterBoog
+            for obj in (RegioCompetitieSporterBoog
                         .objects
                         .filter(deelcompetitie=ronde.deelcompetitie)
                         .select_related('indiv_klasse')):
@@ -750,7 +751,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # er zijn minder wedstrijden dan deelnemers
         for wedstrijd in wedstrijden:
-            wedstrijd.aantal_aanmeldingen = wedstrijd.regiocompetitieschutterboog_set.count()
+            wedstrijd.aantal_aanmeldingen = wedstrijd.regiocompetitiesporterboog_set.count()
         # for
 
         rol_nu = rol_get_huidige(self.request)
@@ -850,7 +851,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # wedstrijdklassen individueel
         klasse2aantal_sporters = dict()
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .filter(deelcompetitie=deelcomp)
                           .select_related('indiv_klasse')):
@@ -1404,10 +1405,10 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             taak_log = "[%s] Taak aangemaakt" % now
 
             # maak een taak aan voor de RKO
-            deelcomp_rk = DeelCompetitie.objects.get(competitie=deelcomp.competitie,
-                                                     laag=LAAG_RK,
+            deelkamp = DeelKampioenschap.objects.get(competitie=deelcomp.competitie,
+                                                     deel=DEEL_RK,
                                                      nhb_rayon=deelcomp.nhb_regio.rayon)
-            functie_rko = deelcomp_rk.functie
+            functie_rko = deelkamp.functie
             maak_taak(toegekend_aan_functie=functie_rko,
                       deadline=taak_deadline,
                       aangemaakt_door=account,

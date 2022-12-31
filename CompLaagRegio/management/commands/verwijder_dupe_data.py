@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # verwijder de probleem data: dubbele sporterboog en te veel scores
 
 from django.core.management.base import BaseCommand
-from Competitie.models import RegioCompetitieSchutterBoog
+from Competitie.models import RegioCompetitieSporterBoog
 from Score.models import Score, SCORE_TYPE_SCORE
 
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         gevonden = list()
         dupes = dict()
 
-        for obj in (RegioCompetitieSchutterBoog
+        for obj in (RegioCompetitieSporterBoog
                     .objects
                     .select_related('deelcompetitie__competitie',
                                     'sporterboog')
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                 uitleggen = True
 
             # verwijder alle dubbele deelnemers
-            deelnemers = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__competitie=obj.deelcompetitie.competitie, sporterboog=obj.sporterboog)
+            deelnemers = RegioCompetitieSporterBoog.objects.filter(deelcompetitie__competitie=obj.deelcompetitie.competitie, sporterboog=obj.sporterboog)
             self.stdout.write('   %s deelnemers' % deelnemers.count())
             if do_commit:
                 deelnemers.delete()

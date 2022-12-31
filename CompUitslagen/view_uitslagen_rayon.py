@@ -8,9 +8,10 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRayon
-from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
-                               Competitie, DeelCompetitie, DeelcompetitieIndivKlasseLimiet, CompetitieMatch,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
+from Competitie.models import (LAAG_REGIO, DEELNAME_NEE,
+                               Competitie, DeelCompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
+                               RegioCompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
+                               DeelKampioenschap, DEEL_RK)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -140,23 +141,23 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         try:
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie',
-                                           'nhb_rayon')
-                           .prefetch_related('rk_bk_matches')
-                           .get(laag=LAAG_RK,
-                                competitie__is_afgesloten=False,
-                                competitie=comp,
-                                nhb_rayon__rayon_nr=rayon_nr))
-        except DeelCompetitie.DoesNotExist:
-            raise Http404('Competitie niet gevonden')
+            deelkamp = (DeelKampioenschap
+                        .objects
+                        .select_related('competitie',
+                                        'nhb_rayon')
+                        .prefetch_related('rk_bk_matches')
+                        .get(competitie__is_afgesloten=False,
+                             competitie=comp,
+                             deel=DEEL_RK,
+                             nhb_rayon__rayon_nr=rayon_nr))
+        except DeelKampioenschap.DoesNotExist:
+            raise Http404('Kampioenschap niet gevonden')
 
-        context['deelcomp'] = deelcomp_rk
+        context['deelcomp'] = deelkamp
 
         # haal de planning erbij: competitie klasse --> competitie match
         indiv2match = dict()    # [indiv_pk] = CompetitieMatch
-        match_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
+        match_pks = list(deelkamp.rk_bk_matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
                       .objects
                       .prefetch_related('indiv_klassen')
@@ -174,13 +175,13 @@ class UitslagenRayonIndivView(TemplateView):
         wkl2limiet = dict()    # [pk] = aantal
         is_lijst_rk = False
 
-        if deelcomp_rk.heeft_deelnemerslijst:
+        if deelkamp.heeft_deelnemerslijst:
             # deelnemers/reserveschutters van het RK tonen
-            deelnemers = (KampioenschapSchutterBoog
+            deelnemers = (KampioenschapSporterBoog
                           .objects
                           .exclude(bij_vereniging__isnull=True)      # attentie gevallen
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
-                          .filter(deelcompetitie=deelcomp_rk,
+                          .filter(kampioenschap=deelkamp,
                                   indiv_klasse__boogtype=boogtype,
                                   rank__lte=48)                      # toon tot 48 sporters per klasse
                           .select_related('indiv_klasse',
@@ -191,10 +192,10 @@ class UitslagenRayonIndivView(TemplateView):
                                     'result_rank',                   # is 0 zolang er geen resultaat is
                                     'volgorde'))
 
-            for limiet in (DeelcompetitieIndivKlasseLimiet
+            for limiet in (KampioenschapIndivKlasseLimiet
                            .objects
                            .select_related('indiv_klasse')
-                           .filter(deelcompetitie=deelcomp_rk)):
+                           .filter(kampioenschap=deelkamp)):
                 wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
             # for
 
@@ -212,7 +213,7 @@ class UitslagenRayonIndivView(TemplateView):
                                     nhb_regio__rayon__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
-            deelnemers = (RegioCompetitieSchutterBoog
+            deelnemers = (RegioCompetitieSporterBoog
                           .objects
                           .filter(deelcompetitie__pk__in=deelcomp_pks,
                                   indiv_klasse__boogtype=boogtype,
@@ -239,7 +240,7 @@ class UitslagenRayonIndivView(TemplateView):
         curr_teller = None
         for deelnemer in deelnemers:
             # deelnemer kan zijn:
-            #   is_lijst_rk == False --> RegioCompetitieSchutterBoog
+            #   is_lijst_rk == False --> RegioCompetitieSporterBoog
             #   is_lijst_rk == True  --> KampioenschapSchutterBoog
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
@@ -280,7 +281,7 @@ class UitslagenRayonIndivView(TemplateView):
                     # deelnemer.deelname = DEELNAME_NEE       # wordt niet gebruikt?!
                     deelnemer.geen_deelname = True
 
-            if deelcomp_rk.heeft_deelnemerslijst:
+            if deelkamp.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True
 
@@ -399,20 +400,20 @@ class UitslagenRayonTeamsView(TemplateView):
             raise Http404('Team type niet bekend')
 
         try:
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie',
-                                           'nhb_rayon')
-                           .prefetch_related('rk_bk_matches')
-                           .get(laag=LAAG_RK,
-                                competitie=comp,
-                                competitie__is_afgesloten=False,
-                                nhb_rayon__rayon_nr=rayon_nr))
-        except DeelCompetitie.DoesNotExist:
+            deelkamp = (DeelKampioenschap
+                        .objects
+                        .select_related('competitie',
+                                        'nhb_rayon')
+                        .prefetch_related('rk_bk_matches')
+                        .get(competitie=comp,
+                             competitie__is_afgesloten=False,
+                             deel=DEEL_RK,
+                             nhb_rayon__rayon_nr=rayon_nr))
+        except DeelKampioenschap.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
-        context['deelcomp_rk'] = deelcomp_rk
-        comp = deelcomp_rk.competitie
+        context['deelkamp'] = deelkamp
+        comp = deelkamp.competitie
         comp.bepaal_fase()
 
         # als de gebruiker ingelogd is, laat dan de voor de teams van zijn vereniging zien wie er in de teams zitten
@@ -432,7 +433,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
-        match_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
+        match_pks = list(deelkamp.rk_bk_matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
                       .objects
                       .prefetch_related('team_klassen')
@@ -453,12 +454,12 @@ class UitslagenRayonTeamsView(TemplateView):
 
         rk_teams = (KampioenschapTeam
                     .objects
-                    .filter(deelcompetitie=deelcomp_rk,
+                    .filter(kampioenschap=deelkamp,
                             team_type=teamtype)
                     .select_related('team_klasse',
                                     'vereniging')
-                    .prefetch_related('gekoppelde_schutters',
-                                      'feitelijke_schutters')
+                    .prefetch_related('gekoppelde_leden',
+                                      'feitelijke_leden')
                     .order_by('team_klasse__volgorde',
                               'result_rank',
                               '-aanvangsgemiddelde'))       # sterkste team eerst
@@ -482,7 +483,7 @@ class UitslagenRayonTeamsView(TemplateView):
                     teller = klasse_teams_done[0]
                 elif len(klasse_teams_plan) > 0:
                     # er is geen uitslag, maar misschien hebben teams vrijstelling
-                    if deelcomp_rk.is_afgesloten:
+                    if deelkamp.is_afgesloten:
                         for plan_team in klasse_teams_plan:
                             plan_team.rank = ''
                             plan_team.niet_deelgenomen = True
@@ -524,7 +525,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 team.toon_team_leden = True
                 team.team_leden = list()
                 for deelnemer in (team
-                                  .gekoppelde_schutters
+                                  .gekoppelde_leden
                                   .select_related('sporterboog__sporter')
                                   .order_by('-gemiddelde')):                      # hoogste eerst
                     team.team_leden.append(deelnemer)
@@ -539,10 +540,10 @@ class UitslagenRayonTeamsView(TemplateView):
                 team.rk_score_str = str(team.result_teamscore)
                 team.heeft_uitslag = True
 
-                originele_lid_nrs = list(team.gekoppelde_schutters.all().values_list('sporterboog__sporter__lid_nr', flat=True))
+                originele_lid_nrs = list(team.leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
                 deelnemers = list()
                 lid_nrs = list()
-                for deelnemer in team.feitelijke_schutters.select_related('sporterboog__sporter'):
+                for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
                     deelnemer.result_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
                     deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                     lid_nr = deelnemer.sporterboog.sporter.lid_nr
@@ -553,7 +554,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
                     lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
                 # for
-                for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter'):
+                for deelnemer in team.leden.select_related('sporterboog__sporter'):
                     if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
                         deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                         deelnemer.is_uitvaller = True
@@ -583,7 +584,7 @@ class UitslagenRayonTeamsView(TemplateView):
             teller = klasse_teams_done[0]
         elif len(klasse_teams_plan) > 0:
             # er is geen uitslag, maar misschien hebben teams vrijstelling
-            if deelcomp_rk.is_afgesloten:
+            if deelkamp.is_afgesloten:
                 for plan_team in klasse_teams_plan:
                     plan_team.rank = ''
                     plan_team.niet_deelgenomen = True

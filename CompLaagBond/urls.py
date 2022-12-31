@@ -13,7 +13,7 @@ urlpatterns = [
 
     # base url: bondscompetities/bk/
 
-    path('planning/<deelcomp_pk>/',
+    path('planning/<deelkamp_pk>/',
          views_planning_bond.BondPlanningView.as_view(),
          name='bond-planning'),
 ]

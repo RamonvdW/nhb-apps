@@ -169,15 +169,14 @@
                             <thead>
                                 <tr>        <!-- filter veld -->
                                     <td></td>
-                                    <td colspan="2" class="table-filter">
+                                    <td class="table-filter">
                                         <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
                                     </td>
                                     <td colspan="4"></td>
                                 </tr>
                                 <tr>
                                     <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                                    <th data-filter="on">Bonds<wbr>nummer</th>
-                                    <th data-filter="on">Naam</th>
+                                    <th data-filter="on">Lid</th>
                                     <th>Leeftijd {{ tweede_jaar }}</th>
                                     <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
                                     <th>Wedstrijd<wbr>boog</th>
@@ -190,8 +189,7 @@
                                     {% if not obj.wil_competitie %}
                                         <!-- sporter wil niet meedoen -->
                                         <td><!-- geen checkbox --></td>
-                                        <td class="grey-text">{{ obj.lid_nr }}</td>
-                                        <td class="grey-text">{{ obj.volledige_naam }}</td>
+                                        <td class="grey-text">{{ obj.lid_nr_en_volledige_naam }}</td>
                                         <td class="grey-text">{{ obj.leeftijd }}</td>
                                         <td class="grey-text hide-on-small-only">{{ obj.leeftijdsklasse.beschrijving }}</td>
                                         <td class="grey-text">{{ obj.boogtype }}</td>
@@ -209,8 +207,7 @@
                                                 {% endif %}
                                             {% endif %}
                                         </td>
-                                        <td>{{ obj.lid_nr }}</td>
-                                        <td>{{ obj.volledige_naam }}</td>
+                                        <td>{{ obj.lid_nr_en_volledige_naam }}</td>
                                         <td>{{ obj.leeftijd }}</td>
                                         <td class="hide-on-small-only">{{ obj.leeftijdsklasse.beschrijving }}</td>
                                         <td>{{ obj.boogtype }}</td>
@@ -229,15 +226,14 @@
                         <thead>
                             <tr>        <!-- filter veld -->
                                 <td></td>
-                                <td colspan="2" class="table-filter">
+                                <td class="table-filter">
                                     <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
                                 </td>
                                 <td colspan="2"></td>
                             </tr>
                             <tr>
                                 <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                                <th data-filter="on">Bonds<wbr>nummer</th>
-                                <th data-filter="on">Naam</th>
+                                <th data-filter="on">Lid</th>
                                 <th>Wedstrijd<wbr>boog</th>
                                 <th class="center"><span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
                             </tr>
@@ -248,8 +244,7 @@
                                 {% if not obj.wil_competitie %}
                                     <!-- wil niet meedoen, dus kan niet aanmelden -->
                                     <td><!-- geen checkbox --></td>
-                                    <td class="grey-text">{{ obj.lid_nr }}</td>
-                                    <td class="grey-text">{{ obj.volledige_naam }}</td>
+                                    <td class="grey-text">{{ obj.lid_nr_en_volledige_naam }}</td>
                                     <td class="grey-text">{{ obj.boogtype }}</td>
                                     <td><!-- geen aanvangsgemiddelde --></td>
                                 {% else %}
@@ -265,8 +260,7 @@
                                             {% endif %}
                                         {% endif %}
                                     </td>
-                                    <td>{{ obj.lid_nr }}</td>
-                                    <td>{{ obj.volledige_naam }}</td>
+                                    <td>{{ obj.lid_nr_en_volledige_naam }}</td>
                                     <td>{{ obj.boogtype }}</td>
                                     <td class="center">{{ obj.ag|floatformat:3 }}</td>
                                 {% endif %}

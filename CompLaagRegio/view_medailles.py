@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO
+from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -84,7 +84,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
 
         uitslag = list()
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
                               aantal_scores__gte=min_aantal_scores)

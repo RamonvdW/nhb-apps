@@ -15,10 +15,11 @@ from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from BasisTypen.models import ORGANISATIE_NHB
 from BasisTypen.operations import get_organisatie_teamtypen
-from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, LAAG_REGIO, LAAG_RK,
-                               DeelCompetitie, DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
+from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, LAAG_REGIO,
+                               DeelCompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
+                               DeelKampioenschap, DEEL_RK,
+                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
                                KampioenschapTeam,
                                CompetitieTaken,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
@@ -51,7 +52,7 @@ class Command(BaseCommand):
 
         self.taken = CompetitieTaken.objects.all()[0]
 
-        self.pk2scores = dict()         # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
+        self.pk2scores = dict()         # [RegioCompetitieSporterBoog.pk] = [tup, ..] with tup = (afstand, score)
         self.pk2scores_alt = dict()
 
         self._sync = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
@@ -66,10 +67,10 @@ class Command(BaseCommand):
 
     def _bepaal_boog2team(self):
         """ bepaalde boog typen mogen meedoen in bepaalde team types
-            straks als we de team schutters gaan verdelen over de teams moeten dat in een slimme volgorde
+            straks als we de team leden gaan verdelen over de teams moeten dat in een slimme volgorde
             zodat de sporters in toegestane teams en alle team typen gevuld worden.
             Voorbeeld: LB mag meedoen in LB, TR, BB en R teams terwijl C alleen in C team mag.
-                       we moeten dus niet beginnen met de LB schutter in een R team te stoppen en daarna
+                       we moeten dus niet beginnen met de LB sporter in een R team te stoppen en daarna
                        geen sporters meer over hebben voor het LB team.
         """
 
@@ -90,25 +91,25 @@ class Command(BaseCommand):
         self._team_volgorde = [team_type_pk for _, team_type_pk in team_aantal]
 
     @staticmethod
-    def _get_limiet_indiv(deelcomp, indiv_klasse):
+    def _get_limiet_indiv(deelkamp, indiv_klasse):
         # bepaal de limiet
         try:
-            limiet = (DeelcompetitieIndivKlasseLimiet
+            limiet = (KampioenschapIndivKlasseLimiet
                       .objects
-                      .get(deelcompetitie=deelcomp,
+                      .get(kampioenschap=deelkamp,
                            indiv_klasse=indiv_klasse)
                       ).limiet
-        except DeelcompetitieIndivKlasseLimiet.DoesNotExist:
+        except KampioenschapIndivKlasseLimiet.DoesNotExist:
             limiet = 24
 
         return limiet
 
     @staticmethod
-    def _update_rank_nummers(deelcomp, klasse):
+    def _update_rank_nummers(deelkamp, klasse):
         rank = 0
-        for obj in (KampioenschapSchutterBoog
+        for obj in (KampioenschapSporterBoog
                     .objects
-                    .filter(deelcompetitie=deelcomp,
+                    .filter(kampioenschap=deelkamp,
                             indiv_klasse=klasse)
                     .order_by('volgorde')):
             if obj.deelname == DEELNAME_NEE:
@@ -127,20 +128,20 @@ class Command(BaseCommand):
             herinnering bevestigen / afmelden deelname
         """
 
-    def _verwerk_mutatie_initieel_klasse_indiv(self, deelcomp, indiv_klasse):
+    def _verwerk_mutatie_initieel_klasse_indiv(self, deelkamp, indiv_klasse):
         # Bepaal de top-X deelnemers voor een klasse van een kampioenschap
         # De kampioenen aangevuld met de sporters met hoogste gemiddelde
         # gesorteerde op gemiddelde
 
-        self.stdout.write('[INFO] Bepaal deelnemers in indiv_klasse %s van %s' % (indiv_klasse, deelcomp))
+        self.stdout.write('[INFO] Bepaal deelnemers in indiv_klasse %s van %s' % (indiv_klasse, deelkamp))
 
-        limiet = self._get_limiet_indiv(deelcomp, indiv_klasse)
+        limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
         # kampioenen hebben deelnamegarantie
-        kampioenen = (KampioenschapSchutterBoog
+        kampioenen = (KampioenschapSporterBoog
                       .objects
                       .exclude(kampioen_label='')
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(kampioenschap=deelkamp,
                               indiv_klasse=indiv_klasse))
 
         lijst = list()
@@ -153,9 +154,9 @@ class Command(BaseCommand):
         # for
 
         # aanvullen met sporters tot aan de cut
-        objs = (KampioenschapSchutterBoog
+        objs = (KampioenschapSporterBoog
                 .objects
-                .filter(deelcompetitie=deelcomp,
+                .filter(kampioenschap=deelkamp,
                         indiv_klasse=indiv_klasse,
                         kampioen_label='')      # kampioenen hebben we al gedaan
                 .order_by('-gemiddelde',        # hoogste boven
@@ -191,7 +192,7 @@ class Command(BaseCommand):
             pks.append(obj.pk)
         # for
 
-        # geef nu alle andere schutters en nieuw volgnummer
+        # geef nu alle andere sporters en nieuw volgnummer
         # dit voorkomt dubbele volgnummers als de cut omlaag gezet is
         for obj in objs:
             if obj.pk not in pks:
@@ -206,63 +207,63 @@ class Command(BaseCommand):
                 obj.save(update_fields=['rank', 'volgorde'])
         # for
 
-    def _verwerk_mutatie_initieel_deelcomp(self, deelcomp):
-        # bepaal alle wedstrijdklassen aan de hand van de ingeschreven schutters
-        for deelnemer in (KampioenschapSchutterBoog
+    def _verwerk_mutatie_initieel_deelkamp(self, deelkamp):
+        # bepaal alle wedstrijdklassen aan de hand van de ingeschreven sporters
+        for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(deelcompetitie=deelcomp)
+                          .filter(kampioenschap=deelkamp)
                           .distinct('indiv_klasse')):
 
             # sorteer de lijst op gemiddelde en bepaalde volgorde
-            self._verwerk_mutatie_initieel_klasse_indiv(deelcomp, deelnemer.indiv_klasse)
+            self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse)
         # for
 
-    def _verwerk_mutatie_initieel(self, competitie, laag):
+    def _verwerk_mutatie_initieel(self, competitie, deel):
         # bepaal de volgorde en rank van de deelnemers
         # in alle klassen van de RK of BK deelcompetities
 
         # via deelnemer kunnen we bepalen over welke kampioenschappen dit gaat
-        for deelcomp in (DeelCompetitie
+        for deelkamp in (DeelKampioenschap
                          .objects
                          .filter(competitie=competitie,
-                                 laag=laag)):
-            self._verwerk_mutatie_initieel_deelcomp(deelcomp)
+                                 deel=deel)):
+            self._verwerk_mutatie_initieel_deelkamp(deelkamp)
         # for
 
     def _verwerk_mutatie_afmelden_indiv(self, deelnemer):
-        # pas alleen de ranking aan voor alle schutters in deze klasse
+        # pas alleen de ranking aan voor alle sporters in deze klasse
         # de deelnemer is al afgemeld en behoudt zijn volgorde zodat de RKO/BKO
         # 'm in grijs kan zien in de tabel
 
-        # bij een mutatie "boven de cut" wordt de schutter bovenaan de lijst van reserve schutters
+        # bij een mutatie "boven de cut" wordt de sporter bovenaan de lijst van reserve sporters
         # tot deelnemer gepromoveerd. Zijn gemiddelde bepaalt de volgorde
 
         deelnemer.deelname = DEELNAME_NEE
         deelnemer.save(update_fields=['deelname'])
 
-        deelcomp = deelnemer.deelcompetitie
+        deelkamp = deelnemer.kampioenschap
         indiv_klasse = deelnemer.indiv_klasse
 
-        limiet = self._get_limiet_indiv(deelcomp, indiv_klasse)
+        limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
-        # haal de reserve schutter op
+        # haal de reserve sporters op
         try:
-            reserve = (KampioenschapSchutterBoog
+            reserve = (KampioenschapSporterBoog
                        .objects
-                       .get(deelcompetitie=deelcomp,
+                       .get(kampioenschap=deelkamp,
                             indiv_klasse=indiv_klasse,
                             rank=limiet+1))
-        except KampioenschapSchutterBoog.DoesNotExist:
-            # zoveel schutter zijn er niet (meer)
+        except KampioenschapSporterBoog.DoesNotExist:
+            # zoveel sporters zijn er niet (meer)
             pass
         else:
             if reserve.volgorde > deelnemer.volgorde:
                 # de afgemelde deelnemer zit boven de cut
 
-                # bepaal het nieuwe plekje van de reserve-schutter
-                slechter = (KampioenschapSchutterBoog
+                # bepaal het nieuwe plekje van de reserve-sporters
+                slechter = (KampioenschapSporterBoog
                             .objects
-                            .filter(deelcompetitie=deelcomp,
+                            .filter(kampioenschap=deelkamp,
                                     indiv_klasse=indiv_klasse,
                                     gemiddelde__lt=reserve.gemiddelde,
                                     rank__lte=limiet)
@@ -273,16 +274,16 @@ class Command(BaseCommand):
                     reserve.volgorde = slechter[0].volgorde
                     reserve.save(update_fields=['volgorde'])
 
-                    # schuif de andere schutters omlaag
+                    # schuif de andere sporters omlaag
                     slechter.update(volgorde=F('volgorde') + 1)
-                # else: geen schutters om op te schuiven
+                # else: geen sporters om op te schuiven
 
-        self._update_rank_nummers(deelcomp, indiv_klasse)
+        self._update_rank_nummers(deelkamp, indiv_klasse)
 
     def _opnieuw_aanmelden_indiv(self, deelnemer):
         # meld de deelnemer opnieuw aan door hem bij de reserves te zetten
 
-        deelcomp = deelnemer.deelcompetitie
+        deelkamp = deelnemer.kampioenschap
         indiv_klasse = deelnemer.indiv_klasse
         oude_volgorde = deelnemer.volgorde
 
@@ -291,24 +292,24 @@ class Command(BaseCommand):
         deelnemer.volgorde = VOLGORDE_PARKEER
         deelnemer.save(update_fields=['volgorde'])
 
-        qset = (KampioenschapSchutterBoog
+        qset = (KampioenschapSporterBoog
                 .objects
-                .filter(deelcompetitie=deelcomp,
+                .filter(kampioenschap=deelkamp,
                         indiv_klasse=indiv_klasse,
                         volgorde__gt=oude_volgorde,
                         volgorde__lt=VOLGORDE_PARKEER))
         qset.update(volgorde=F('volgorde') - 1)
 
-        limiet = self._get_limiet_indiv(deelcomp, indiv_klasse)
+        limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
         # als er minder dan limiet deelnemers zijn, dan invoegen op gemiddelde
         # als er een reserve lijst is, dan invoegen in de reserve-lijst op gemiddelde
-        # altijd invoegen NA schutters met gelijkwaarde gemiddelde
+        # altijd invoegen NA sporters met gelijkwaarde gemiddelde
 
-        deelnemers_count = (KampioenschapSchutterBoog
+        deelnemers_count = (KampioenschapSporterBoog
                             .objects
                             .exclude(deelname=DEELNAME_NEE)
-                            .filter(deelcompetitie=deelcomp,
+                            .filter(kampioenschap=deelkamp,
                                     indiv_klasse=indiv_klasse,
                                     rank__lte=limiet,
                                     volgorde__lt=VOLGORDE_PARKEER).count())
@@ -317,9 +318,9 @@ class Command(BaseCommand):
             # er zijn genoeg schutters, dus deze her-aanmelding moet op de reserve-lijst
 
             # zoek een plekje in de reserve-lijst
-            objs = (KampioenschapSchutterBoog
+            objs = (KampioenschapSporterBoog
                     .objects
-                    .filter(deelcompetitie=deelcomp,
+                    .filter(kampioenschap=deelkamp,
                             indiv_klasse=indiv_klasse,
                             rank__gt=limiet,
                             gemiddelde__gte=deelnemer.gemiddelde)
@@ -330,14 +331,14 @@ class Command(BaseCommand):
                 # invoegen na de reserve-schutter met gelijk of hoger gemiddelde
                 nieuwe_rank = objs[0].rank + 1
             else:
-                # er zijn geen reserve-schutters met gelijk of hoger gemiddelde
+                # er zijn geen reserve-sporters met gelijk of hoger gemiddelde
                 # dus deze schutter mag boven aan de reserve-lijst
                 nieuwe_rank = limiet + 1
 
-            # maak een plekje in de lijst door andere schutters op te schuiven
-            objs = (KampioenschapSchutterBoog
+            # maak een plekje in de lijst door andere sporters op te schuiven
+            objs = (KampioenschapSporterBoog
                     .objects
-                    .filter(deelcompetitie=deelcomp,
+                    .filter(kampioenschap=deelkamp,
                             indiv_klasse=indiv_klasse,
                             rank__gte=nieuwe_rank))
 
@@ -346,18 +347,18 @@ class Command(BaseCommand):
                 nieuwe_volgorde = obj.volgorde
             else:
                 # niemand om op te schuiven - zet aan het einde
-                nieuwe_volgorde = (KampioenschapSchutterBoog
+                nieuwe_volgorde = (KampioenschapSporterBoog
                                    .objects
                                    .exclude(volgorde=VOLGORDE_PARKEER)
-                                   .filter(deelcompetitie=deelcomp,
+                                   .filter(kampioenschap=deelkamp,
                                            indiv_klasse=indiv_klasse)
                                    .count()) + 1
         else:
             # er is geen reserve-lijst in deze klasse
             # de schutter gaat dus meteen de deelnemers lijst in
-            objs = (KampioenschapSchutterBoog
+            objs = (KampioenschapSporterBoog
                     .objects
-                    .filter(deelcompetitie=deelcomp,
+                    .filter(kampioenschap=deelkamp,
                             indiv_klasse=indiv_klasse,
                             gemiddelde__gte=deelnemer.gemiddelde,
                             volgorde__lt=VOLGORDE_PARKEER)
@@ -372,9 +373,9 @@ class Command(BaseCommand):
                 # zet deze deelnemer boven aan de lijst
                 nieuwe_volgorde = 1
 
-        objs = (KampioenschapSchutterBoog
+        objs = (KampioenschapSporterBoog
                 .objects
-                .filter(deelcompetitie=deelcomp,
+                .filter(kampioenschap=deelkamp,
                         indiv_klasse=indiv_klasse,
                         volgorde__gte=nieuwe_volgorde))
         objs.update(volgorde=F('volgorde') + 1)
@@ -384,7 +385,7 @@ class Command(BaseCommand):
         deelnemer.save(update_fields=['volgorde', 'deelname'])
 
         # deel de rank nummers opnieuw uit
-        self._update_rank_nummers(deelcomp, indiv_klasse)
+        self._update_rank_nummers(deelkamp, indiv_klasse)
 
     def _verwerk_mutatie_aanmelden(self, deelnemer):
         if deelnemer.deelname != DEELNAME_JA:
@@ -396,14 +397,14 @@ class Command(BaseCommand):
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
     @staticmethod
-    def _verwerk_mutatie_verhoog_cut(deelcomp, klasse, cut_nieuw):
+    def _verwerk_mutatie_verhoog_cut(deelkamp, klasse, cut_nieuw):
         # de deelnemerslijst opnieuw sorteren op gemiddelde
         # dit is nodig omdat kampioenen naar boven geplaatst kunnen zijn bij het verlagen van de cut
         # nu plaatsen we ze weer terug op hun originele plek
         lijst = list()
-        for obj in (KampioenschapSchutterBoog
+        for obj in (KampioenschapSporterBoog
                     .objects
-                    .filter(deelcompetitie=deelcomp,
+                    .filter(kampioenschap=deelkamp,
                             indiv_klasse=klasse,
                             rank__lte=cut_nieuw)):
             tup = (obj.gemiddelde, len(lijst), obj)
@@ -431,12 +432,12 @@ class Command(BaseCommand):
         # for
 
     @staticmethod
-    def _verwerk_mutatie_verlaag_cut(deelcomp, indiv_klasse, cut_oud, cut_nieuw):
+    def _verwerk_mutatie_verlaag_cut(deelkamp, indiv_klasse, cut_oud, cut_nieuw):
         # zoek de kampioenen die al deel mochten nemen (dus niet op reserve lijst)
-        kampioenen = (KampioenschapSchutterBoog
+        kampioenen = (KampioenschapSporterBoog
                       .objects
                       .exclude(kampioen_label='')
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(kampioenschap=deelkamp,
                               indiv_klasse=indiv_klasse,
                               rank__lte=cut_oud))  # begrens tot deelnemerslijst
 
@@ -451,10 +452,10 @@ class Command(BaseCommand):
                 aantal += 1
         # for
 
-        # aanvullen met schutters tot aan de cut
-        objs = (KampioenschapSchutterBoog
+        # aanvullen met sporters tot aan de cut
+        objs = (KampioenschapSporterBoog
                 .objects
-                .filter(deelcompetitie=deelcomp,
+                .filter(kampioenschap=deelkamp,
                         indiv_klasse=indiv_klasse,
                         kampioen_label='',  # kampioenen hebben we al gedaan
                         rank__lte=cut_oud)
@@ -491,7 +492,7 @@ class Command(BaseCommand):
             obj.save(update_fields=['rank', 'volgorde'])
         # for
 
-        # geef nu alle andere schutters (tot de oude cut) opnieuw een volgnummer
+        # geef nu alle andere sporters (tot de oude cut) opnieuw een volgnummer
         # dit is nodig omdat de kampioenen er tussenuit gehaald (kunnen) zijn
         # en we willen geen dubbele volgnummers
         for obj in objs:
@@ -507,18 +508,18 @@ class Command(BaseCommand):
                 obj.save(update_fields=['rank', 'volgorde'])
         # for
 
-    def _verwerk_mutatie_cut_indiv(self, deelcomp, indiv_klasse, cut_oud, cut_nieuw):
+    def _verwerk_mutatie_cut_indiv(self, deelkamp, indiv_klasse, cut_oud, cut_nieuw):
         try:
             is_nieuw = False
-            limiet = (DeelcompetitieIndivKlasseLimiet
+            limiet = (KampioenschapIndivKlasseLimiet
                       .objects
-                      .get(deelcompetitie=deelcomp,
+                      .get(kampioenschap=deelkamp,
                            indiv_klasse=indiv_klasse))
-        except DeelcompetitieIndivKlasseLimiet.DoesNotExist:
+        except KampioenschapIndivKlasseLimiet.DoesNotExist:
             # maak een nieuwe aan
             is_nieuw = True
-            limiet = DeelcompetitieIndivKlasseLimiet(deelcompetitie=deelcomp,
-                                                     indiv_klasse=indiv_klasse)
+            limiet = KampioenschapIndivKlasseLimiet(kampioenschap=deelkamp,
+                                                    indiv_klasse=indiv_klasse)
 
         if cut_nieuw > cut_oud:
             # limiet verhogen is simpel, want deelnemers blijven deelnemers
@@ -531,7 +532,7 @@ class Command(BaseCommand):
                 limiet.save()
 
             # de deelnemerslijst opnieuw sorteren op gemiddelde
-            self._verwerk_mutatie_verhoog_cut(deelcomp, indiv_klasse, cut_nieuw)
+            self._verwerk_mutatie_verhoog_cut(deelkamp, indiv_klasse, cut_nieuw)
 
         elif cut_nieuw < cut_oud:
             # limiet is omlaag gezet
@@ -539,24 +540,24 @@ class Command(BaseCommand):
             limiet.limiet = cut_nieuw
             limiet.save()
 
-            self._verwerk_mutatie_verlaag_cut(deelcomp, indiv_klasse, cut_oud, cut_nieuw)
+            self._verwerk_mutatie_verlaag_cut(deelkamp, indiv_klasse, cut_oud, cut_nieuw)
 
         # else: cut_oud == cut_nieuw --> doe niets
         #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
 
     @staticmethod
-    def _verwerk_mutatie_cut_team(deelcomp, team_klasse, cut_oud, cut_nieuw):
+    def _verwerk_mutatie_cut_team(deelkamp, team_klasse, cut_oud, cut_nieuw):
         try:
             is_nieuw = False
-            limiet = (DeelcompetitieTeamKlasseLimiet
+            limiet = (KampioenschapTeamKlasseLimiet
                       .objects
-                      .get(deelcompetitie=deelcomp,
+                      .get(kampioenschap=deelkamp,
                            team_klasse=team_klasse))
-        except DeelcompetitieTeamKlasseLimiet.DoesNotExist:
+        except KampioenschapTeamKlasseLimiet.DoesNotExist:
             # maak een nieuwe aan
             is_nieuw = True
-            limiet = DeelcompetitieTeamKlasseLimiet(deelcompetitie=deelcomp,
-                                                    team_klasse=team_klasse)
+            limiet = KampioenschapTeamKlasseLimiet(kampioenschap=deelkamp,
+                                                   team_klasse=team_klasse)
 
         if cut_nieuw > cut_oud:
             # limiet verhogen is simpel, want deelnemers blijven deelnemers
@@ -592,7 +593,6 @@ class Command(BaseCommand):
             competities_aanmaken(jaar)
 
     def _verwerk_mutatie_team_ronde(self, deelcomp):
-
         # bepaal de volgende ronde
         if deelcomp.huidige_team_ronde > 7:
             # alle rondes al gehad - silently ignore
@@ -635,7 +635,7 @@ class Command(BaseCommand):
         ver_dict = dict()       # [ver_nr] = list(vsg, deelnemer_pk, boog_type_pk)
 
         # voor elke deelnemer het gemiddelde_begin_team_ronde invullen
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('bij_vereniging',
                                           'sporterboog',
@@ -660,8 +660,8 @@ class Command(BaseCommand):
                 ver_dict[ver_nr] = [tup]
         # for
 
-        for team_schutters in ver_dict.values():
-            team_schutters.sort()
+        for team_lid in ver_dict.values():
+            team_lid.sort()
         # for
 
         # maak voor elk team een 'ronde instantie' aan waarin de invallers en score bijgehouden worden
@@ -673,7 +673,7 @@ class Command(BaseCommand):
             for team in (RegiocompetitieTeam
                          .objects
                          .select_related('vereniging')
-                         .prefetch_related('gekoppelde_schutters')
+                         .prefetch_related('leden')
                          .filter(deelcompetitie=deelcomp,
                                  team_type__pk=team_type_pk)
                          .order_by('-aanvangsgemiddelde')):     # hoogste eerst
@@ -684,17 +684,17 @@ class Command(BaseCommand):
                                 logboek="[%s] Aangemaakt bij opstarten ronde %s\n" % (now_str, ronde_nr))
                 ronde_team.save()
 
-                # koppel de schutters
+                # koppel de leden
                 if deelcomp.regio_heeft_vaste_teams:
-                    # vaste team begint elke keer met de vaste schutters
-                    schutter_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+                    # vaste team begint elke keer met de vaste leden
+                    schutter_pks = team.leden.values_list('pk', flat=True)
                 else:
                     # voortschrijdend gemiddelde: pak de volgende 4 beste sporters van de vereniging
                     schutter_pks = list()
                     ver_nr = team.vereniging.ver_nr
-                    ver_schutters = ver_dict[ver_nr]
+                    ver_leden = ver_dict[ver_nr]
                     gebruikt = list()
-                    for tup in ver_schutters:
+                    for tup in ver_leden:
                         _, deelnemer_pk, boogtype_pk = tup
                         if boogtype_pk in team_boogtypen:
                             schutter_pks.append(deelnemer_pk)
@@ -705,15 +705,15 @@ class Command(BaseCommand):
                     # for
 
                     for tup in gebruikt:
-                        ver_schutters.remove(tup)
+                        ver_leden.remove(tup)
                     # for
 
                 ronde_team.deelnemers_geselecteerd.set(schutter_pks)
                 ronde_team.deelnemers_feitelijk.set(schutter_pks)
 
                 # schrijf de namen van de leden in het logboek
-                ronde_team.logboek += '[%s] Geselecteerde schutters:\n' % now_str
-                for deelnemer in (RegioCompetitieSchutterBoog
+                ronde_team.logboek += '[%s] Geselecteerde leden:\n' % now_str
+                for deelnemer in (RegioCompetitieSporterBoog
                                   .objects
                                   .select_related('sporterboog__sporter')
                                   .filter(pk__in=schutter_pks)):
@@ -758,7 +758,7 @@ class Command(BaseCommand):
                                    boogtype=boogtype)
                            .values_list('pk', flat=True))
 
-            deelnemers = (RegioCompetitieSchutterBoog
+            deelnemers = (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter',
                                           'bij_vereniging')
@@ -820,7 +820,7 @@ class Command(BaseCommand):
         # for
 
         # TODO: sorteren en kampioenen eerst zetten kan allemaal weg
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .select_related('indiv_klasse',
                                       'bij_vereniging__regio',
@@ -876,7 +876,7 @@ class Command(BaseCommand):
                 kampioenen.append(tup)
                 deelnemers.pop(nr)
             else:
-                # alle schutters overnemen als potentiële reserveschutter
+                # alle sporters overnemen als potentiële reserve-sporter
                 deelnemer.kampioen_label = ""
                 nr += 1
         # while
@@ -896,24 +896,24 @@ class Command(BaseCommand):
         """
 
         # sporters moeten in het rayon van hun huidige vereniging geplaatst worden
-        rayon_nr2deelcomp_rk = dict()
-        for deelcomp_rk in (DeelCompetitie
-                            .objects
-                            .select_related('nhb_rayon')
-                            .filter(competitie=comp,
-                                    laag=LAAG_RK)):
-            rayon_nr2deelcomp_rk[deelcomp_rk.nhb_rayon.rayon_nr] = deelcomp_rk
+        rayon_nr2deelkamp = dict()
+        for deelkamp in (DeelKampioenschap
+                         .objects
+                         .select_related('nhb_rayon')
+                         .filter(competitie=comp,
+                                 deel=DEEL_RK)):
+            rayon_nr2deelkamp[deelkamp.nhb_rayon.rayon_nr] = deelkamp
         # for
 
-        for deelcomp_rk in (DeelCompetitie
-                            .objects
-                            .select_related('nhb_rayon')
-                            .filter(competitie=comp,
-                                    laag=LAAG_RK)):
+        for deelkamp in (DeelKampioenschap
+                         .objects
+                         .select_related('nhb_rayon')
+                         .filter(competitie=comp,
+                                 deel=DEEL_RK)):
 
-            deelnemers = self._get_regio_sporters_rayon(comp, deelcomp_rk.nhb_rayon.rayon_nr)
+            deelnemers = self._get_regio_sporters_rayon(comp, deelkamp.nhb_rayon.rayon_nr)
 
-            # schrijf all deze schutters in voor het RK
+            # schrijf all deze sporters in voor het RK
             # kampioenen als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
             bulk_lijst = list()
             for deelnemer in deelnemers:
@@ -922,10 +922,10 @@ class Command(BaseCommand):
                 ver = deelnemer.sporterboog.sporter.bij_vereniging
                 if ver:
                     # schrijf de sporter in het juiste rayon in
-                    sporter_deelcomp_rk = rayon_nr2deelcomp_rk[ver.regio.rayon.rayon_nr]
+                    deelkamp = rayon_nr2deelkamp[ver.regio.rayon.rayon_nr]
 
-                    kampioen = KampioenschapSchutterBoog(
-                                    deelcompetitie=sporter_deelcomp_rk,
+                    kampioen = KampioenschapSporterBoog(
+                                    kampioenschap=deelkamp,
                                     sporterboog=deelnemer.sporterboog,
                                     indiv_klasse=deelnemer.indiv_klasse,
                                     bij_vereniging=ver,             # bevries vereniging
@@ -939,33 +939,33 @@ class Command(BaseCommand):
 
                     bulk_lijst.append(kampioen)
                     if len(bulk_lijst) > 150:       # pragma: no cover
-                        KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
+                        KampioenschapSporterBoog.objects.bulk_create(bulk_lijst)
                         bulk_lijst = list()
                 else:
                     self.stdout.write('[WARNING] Sporter %s is geen RK deelnemer want heeft geen vereniging' % deelnemer.sporterboog)
             # for
 
             if len(bulk_lijst) > 0:
-                KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
+                KampioenschapSporterBoog.objects.bulk_create(bulk_lijst)
             del bulk_lijst
         # for
 
-        for deelcomp_rk in (DeelCompetitie
-                            .objects
-                            .select_related('nhb_rayon')
-                            .filter(competitie=comp,
-                                    laag=LAAG_RK)
-                            .order_by('nhb_rayon__rayon_nr')):
+        for deelkamp in (DeelKampioenschap
+                         .objects
+                         .select_related('nhb_rayon')
+                         .filter(competitie=comp,
+                                 deel=DEEL_RK)
+                         .order_by('nhb_rayon__rayon_nr')):
 
-            deelcomp_rk.heeft_deelnemerslijst = True
-            deelcomp_rk.save(update_fields=['heeft_deelnemerslijst'])
+            deelkamp.heeft_deelnemerslijst = True
+            deelkamp.save(update_fields=['heeft_deelnemerslijst'])
 
             # laat de lijsten sorteren en de volgorde bepalen
-            self._verwerk_mutatie_initieel_deelcomp(deelcomp_rk)
+            self._verwerk_mutatie_initieel_deelkamp(deelkamp)
 
             # stuur de RKO een taak ('ter info')
             rko_namen = list()
-            functie_rko = deelcomp_rk.functie
+            functie_rko = deelkamp.functie
             now = timezone.now()
             taak_deadline = now
             taak_tekst = "Ter info: De deelnemerslijst voor jouw Rayonkampioenschappen zijn zojuist vastgesteld door de BKO"
@@ -979,7 +979,7 @@ class Command(BaseCommand):
                       log=taak_log)
 
             # schrijf in het logboek
-            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelcomp_rk.nhb_rayon)
+            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelkamp.nhb_rayon)
             msg += '\nDe %s is geïnformeerd via een taak' % functie_rko
             schrijf_in_logboek(None, "Competitie", msg)
         # for
@@ -995,9 +995,9 @@ class Command(BaseCommand):
             het vaststellen van de wedstrijdklasse voor de RK teams volgt later
         """
 
-        # maak een look-up tabel van RegioCompetitieSchutterBoog naar KampioenschapSchutterBoog
+        # maak een look-up tabel van RegioCompetitieSporterBoog naar KampioenschapSchutterBoog
         sporterboog_pk2regiocompetitieschutterboog = dict()
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('bij_vereniging')
                           .filter(deelcompetitie__competitie=comp)):
@@ -1005,10 +1005,10 @@ class Command(BaseCommand):
         # for
 
         regiocompetitieschutterboog_pk2kampioenschapschutterboog = dict()
-        for deelnemer in (KampioenschapSchutterBoog
+        for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .select_related('bij_vereniging')
-                          .filter(deelcompetitie__competitie=comp)):
+                          .filter(kampioenschap__competitie=comp)):
             try:
                 regio_deelnemer = sporterboog_pk2regiocompetitieschutterboog[deelnemer.sporterboog.pk]
             except KeyError:
@@ -1025,15 +1025,15 @@ class Command(BaseCommand):
         for team in (KampioenschapTeam
                      .objects
                      .select_related('vereniging')
-                     .prefetch_related('tijdelijke_schutters')
-                     .filter(deelcompetitie__competitie=comp)):
+                     .prefetch_related('tijdelijke_leden')
+                     .filter(kampioenschap__competitie=comp)):
 
             team_ver_nr = team.vereniging.ver_nr
             deelnemer_pks = list()
 
             ags = list()
 
-            for pk in team.tijdelijke_schutters.values_list('pk', flat=True):
+            for pk in team.tijdelijke_leden.values_list('pk', flat=True):
                 try:
                     deelnemer = regiocompetitieschutterboog_pk2kampioenschapschutterboog[pk]
                 except KeyError:
@@ -1050,7 +1050,7 @@ class Command(BaseCommand):
                             ags.append(deelnemer.gemiddelde)
             # for
 
-            team.gekoppelde_schutters.set(deelnemer_pks)
+            team.gekoppelde_leden.set(deelnemer_pks)
 
             # bepaal de team sterkte
             ags.sort(reverse=True)
@@ -1078,10 +1078,10 @@ class Command(BaseCommand):
 
             # verwijder alle eerder aangemaakte KampioenschapSchutterBoog
             # verwijder eerst alle eerder gekoppelde team leden
-            for team in KampioenschapTeam.objects.filter(deelcompetitie__competitie=comp):
-                team.gekoppelde_schutters.clear()
+            for team in KampioenschapTeam.objects.filter(kampioenschap__competitie=comp):
+                team.gekoppelde_leden.clear()
             # for
-            KampioenschapSchutterBoog.objects.filter(deelcompetitie__competitie=comp).all().delete()
+            KampioenschapSporterBoog.objects.filter(kampioenschap__competitie=comp).all().delete()
 
             # gerechtigde RK deelnemers aanmaken
             self._maak_deelnemerslijst_rks(comp)
@@ -1112,16 +1112,17 @@ class Command(BaseCommand):
             aanvangsgemiddelden_vaststellen_voor_afstand(25)
 
         elif code == MUTATIE_INITIEEL:
+            # let op: wordt alleen gebruik vanuit test code
             self.stdout.write('[INFO] Verwerk mutatie %s: initieel' % mutatie.pk)
-            self._verwerk_mutatie_initieel(mutatie.deelcompetitie.competitie, mutatie.deelcompetitie.laag)
+            self._verwerk_mutatie_initieel(mutatie.kampioenschap.competitie, mutatie.kampioenschap.deel)
 
         elif code == MUTATIE_CUT:
             self.stdout.write('[INFO] Verwerk mutatie %s: aangepaste limiet (cut)' % mutatie.pk)
             if mutatie.indiv_klasse:
-                self._verwerk_mutatie_cut_indiv(mutatie.deelcompetitie, mutatie.indiv_klasse,
+                self._verwerk_mutatie_cut_indiv(mutatie.kampioenschap, mutatie.indiv_klasse,
                                                 mutatie.cut_oud, mutatie.cut_nieuw)
             else:
-                self._verwerk_mutatie_cut_team(mutatie.deelcompetitie, mutatie.team_klasse,
+                self._verwerk_mutatie_cut_team(mutatie.kampioenschap, mutatie.team_klasse,
                                                mutatie.cut_oud, mutatie.cut_nieuw)
 
         elif code == MUTATIE_AANMELDEN:
@@ -1174,10 +1175,11 @@ class Command(BaseCommand):
                        .objects
                        .select_related('competitie',
                                        'deelcompetitie',
+                                       'kampioenschap',
                                        'indiv_klasse',
                                        'team_klasse',
                                        'deelnemer',
-                                       'deelnemer__deelcompetitie',
+                                       'deelnemer__kampioenschap',
                                        'deelnemer__sporterboog__sporter',
                                        'deelnemer__indiv_klasse')
                        .get(pk=pk))

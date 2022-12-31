@@ -12,7 +12,7 @@ from Competitie.models import (LAAG_REGIO,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSchutterBoog)
+                               RegioCompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -209,7 +209,7 @@ class UitslagenRegioIndivView(TemplateView):
         if not boogtype:
             raise Http404('Boogtype niet bekend')
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp)
                       .select_related('sporterboog__sporter',
@@ -449,7 +449,7 @@ class UitslagenRegioTeamsView(TemplateView):
             team.naam_str = "[%s] %s" % (team.vereniging.ver_nr, team.team_naam)
             team.totaal_score = 0
             team.totaal_punten = 0
-            team.leden = dict()     # [deelnemer.pk] = [ronde status, ..]
+            # team.leden_lijst = dict()     # [deelnemer.pk] = [ronde status, ..]
         # for
 
         ronde_teams = (RegiocompetitieRondeTeam

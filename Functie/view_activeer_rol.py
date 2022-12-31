@@ -81,6 +81,8 @@ class ActiveerRolView(UserPassesTestMixin, View):
         if rol_nu == Rollen.ROL_MWW:
             return redirect('Webwinkel:manager')
 
+        # TODO: add MWZ
+
         return redirect('Functie:wissel-van-rol')
 
 

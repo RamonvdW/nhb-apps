@@ -84,11 +84,11 @@
             <table class="white">
                 <tr>
                     <th>Competitie</th>
-                    <td>{{ deelcomp_rk.competitie.beschrijving }}</td>
+                    <td>{{ deelkamp.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ deelcomp_rk.nhb_rayon }}</td>
+                    <td>{{ deelkamp.nhb_rayon }}</td>
                 </tr>
             </table>
         </div>

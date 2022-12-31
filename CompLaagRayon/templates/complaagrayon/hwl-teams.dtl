@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Teams RK</h3>
-            <p>De HWL kan de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b><br>van de <b>{{ deelcomp_rk }}</b></p>
+            <p>De HWL kan de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b><br>van de <b>{{ deelkamp }}</b></p>
         </div>
     </div>
 
@@ -25,9 +25,9 @@
                 {% if rk_bk_klassen_vastgesteld %}
                     <p>De inschrijving voor het RK teams is gesloten.</p>
                 {% else %}
-                    <p>Het RK teams kent een open inschrijving. De leden van het team komen uit de regiocompetitie en moeten {{ deelcomp_rk.competitie.aantal_scores_voor_rk_deelname }} scores hebben.<br>Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte is daarom <b>onder voorbehoud</b>.</p>
+                    <p>Het RK teams kent een open inschrijving. De leden van het team komen uit de regiocompetitie en moeten {{ deelkamp.competitie.aantal_scores_voor_rk_deelname }} scores hebben.<br>Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte is daarom <b>onder voorbehoud</b>.</p>
 
-                    <p>Aanmelden en aanpassen van de RK teams is mogelijk tot <b>{{ deelcomp_rk.datum_einde_knutselen_teams_rk_bk }}</b>.</p>
+                    <p>Aanmelden en aanpassen van de RK teams is mogelijk tot <b>{{ deelkamp.datum_einde_knutselen_teams_rk_bk }}</b>.</p>
                 {% endif %}
             </div>
         </div>

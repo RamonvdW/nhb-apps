@@ -7,9 +7,8 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from Competitie.models import Competitie, DeelCompetitie, LAAG_BK
+from Competitie.models import Competitie, DeelKampioenschap, DEEL_BK
 from Plein.menu import menu_dynamics
-
 
 TEMPLATE_COMPUITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
 
@@ -39,14 +38,14 @@ class UitslagenBondView(TemplateView):
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 
         try:
-            deelcomp = (DeelCompetitie
+            deelkamp = (DeelKampioenschap
                         .objects
                         .select_related('competitie')
-                        .get(laag=LAAG_BK,
+                        .get(deel=DEEL_BK,
                              competitie__is_afgesloten=False,
                              competitie__pk=comp_pk))
-        except DeelCompetitie.DoesNotExist:
-            raise Http404('Competitie niet gevonden')
+        except DeelKampioenschap.DoesNotExist:
+            raise Http404('Kampioenschap niet gevonden')
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

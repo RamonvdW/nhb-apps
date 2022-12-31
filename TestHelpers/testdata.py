@@ -14,10 +14,11 @@ from Account.operations import account_create
 from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie, LAAG_BK, LAAG_RK,
-                               RegioCompetitieSchutterBoog,
+                               DeelCompetitie, LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK,
+                               RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
-                               KampioenschapSchutterBoog, KampioenschapTeam)
+                               KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_competitie import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
@@ -145,13 +146,15 @@ class TestData(object):
 
         # competities
         self.comp18 = None                      # Competitie
-        self.deelcomp18_bk = None               # DeelCompetitie
-        self.deelcomp18_rk = dict()             # [rayon_nr] DeelCompetitie
-        self.deelcomp18_regio = dict()          # [regio_nr] DeelCompetitie
-
         self.comp25 = None                      # Competitie
-        self.deelcomp25_bk = None               # DeelCompetitie
-        self.deelcomp25_rk = dict()             # [rayon_nr] DeelCompetitie
+
+        self.deelkamp18_bk = None               # DeelKampioenschap
+        self.deelkamp25_bk = None               # DeelKampioenschap
+
+        self.deelkamp18_rk = dict()             # [rayon_nr] DeelKampioenschap
+        self.deelkamp25_rk = dict()             # [rayon_nr] DeelKampioenschap
+
+        self.deelcomp18_regio = dict()          # [regio_nr] DeelCompetitie
         self.deelcomp25_regio = dict()          # [regio_nr] DeelCompetitie
 
         # competitie accounts
@@ -800,29 +803,37 @@ class TestData(object):
                          .select_related('competitie',
                                          'nhb_rayon',
                                          'nhb_regio')
-                         .all()):
+                         .filter(laag=LAAG_REGIO)):
             is_18 = deelcomp.competitie.afstand == '18'
-
-            if deelcomp.laag == LAAG_BK:
-                if is_18:
-                    self.deelcomp18_bk = deelcomp
-                else:
-                    self.deelcomp25_bk = deelcomp
-
-            elif deelcomp.laag == LAAG_RK:
-                rayon_nr = deelcomp.nhb_rayon.rayon_nr
-                if is_18:
-                    self.deelcomp18_rk[rayon_nr] = deelcomp
-                else:
-                    self.deelcomp25_rk[rayon_nr] = deelcomp
-
-            else:   # if deelcomp.laag == LAAG_REGIO:
-                regio_nr = deelcomp.nhb_regio.regio_nr
-                if is_18:
-                    self.deelcomp18_regio[regio_nr] = deelcomp
-                else:
-                    self.deelcomp25_regio[regio_nr] = deelcomp
+            regio_nr = deelcomp.nhb_regio.regio_nr
+            if is_18:
+                self.deelcomp18_regio[regio_nr] = deelcomp
+            else:
+                self.deelcomp25_regio[regio_nr] = deelcomp
         # for
+        del deelcomp
+
+        for deelkamp in (DeelKampioenschap
+                         .objects
+                         .select_related('competitie',
+                                         'nhb_rayon')
+                         .all()):
+            is_18 = deelkamp.competitie.afstand == '18'
+
+            if deelkamp.deel == DEEL_BK:
+                if is_18:
+                    self.deelkamp18_bk = deelkamp
+                else:
+                    self.deelkamp25_bk = deelkamp
+
+            elif deelkamp.deel == DEEL_RK:
+                rayon_nr = deelkamp.nhb_rayon.rayon_nr
+                if is_18:
+                    self.deelkamp18_rk[rayon_nr] = deelkamp
+                else:
+                    self.deelkamp25_rk[rayon_nr] = deelkamp
+        # for
+        del deelkamp
 
         # zorg dat er accounts gekoppeld zijn aan de functies BKO, RKO, RCL
         accounts = self._accounts_beheerders[:]
@@ -952,7 +963,7 @@ class TestData(object):
             self._dump_resp(resp)
             raise ValueError('Inschrijven van sporters failed')
 
-        new_deelnemers = (RegioCompetitieSchutterBoog
+        new_deelnemers = (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter',
                                           'sporterboog__boogtype',
@@ -1071,7 +1082,7 @@ class TestData(object):
             team.aanvangsgemiddelde = sum([deelnemer.ag_voor_team for deelnemer in deelnemers])     # TODO: top 3
             team.save(update_fields=['aanvangsgemiddelde'])
 
-            team.gekoppelde_schutters.set(deelnemers)
+            team.leden.set(deelnemers)
 
             regioteams.append(team)
         # for
@@ -1133,11 +1144,11 @@ class TestData(object):
         ver = self.vereniging[ver_nr]
 
         if afstand == 18:
-            deelcomp_rk = self.deelcomp18_rk[ver.regio.rayon.rayon_nr]
+            deelkamp = self.deelkamp18_rk[ver.regio.rayon.rayon_nr]
             klassen = self.comp18_klassen_indiv
             rk_deelnemers = self.comp18_rk_deelnemers
         else:
-            deelcomp_rk = self.deelcomp25_rk[ver.regio.rayon.rayon_nr]
+            deelkamp = self.deelkamp25_rk[ver.regio.rayon.rayon_nr]
             klassen = self.comp25_klassen_indiv
             rk_deelnemers = self.comp25_rk_deelnemers
 
@@ -1148,7 +1159,7 @@ class TestData(object):
         if (regio_nr % 4) == 0:
             max_ag = 9500           # zorg dat de regiokampioenen niet allemaal bovenaan staan
 
-        wedstrijd_jaar = deelcomp_rk.competitie.begin_jaar      # niet +1 doen, want dan komen er aspiranten doorheen!
+        wedstrijd_jaar = deelkamp.competitie.begin_jaar      # niet +1 doen, want dan komen er aspiranten doorheen!
 
         pks = list()
         bulk = list()
@@ -1179,8 +1190,8 @@ class TestData(object):
 
                     # print(sporterboog.sporter.bij_vereniging.ver_nr, sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting, "%.3f" % (ag/1000), deelnemer_klasse)
                     if deelnemer_klasse:                                            # pragma: no branch
-                        deelnemer = KampioenschapSchutterBoog(
-                                            deelcompetitie=deelcomp_rk,
+                        deelnemer = KampioenschapSporterBoog(
+                                            kampioenschap=deelkamp,
                                             sporterboog=sporterboog,
                                             indiv_klasse=deelnemer_klasse,
                                             bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -1195,15 +1206,15 @@ class TestData(object):
                         # print(deelnemer, ' --> ', deelnemer.indiv_klasse)
         # for
 
-        KampioenschapSchutterBoog.objects.bulk_create(bulk)
+        KampioenschapSporterBoog.objects.bulk_create(bulk)
         del bulk
 
-        nieuwe_deelnemers = (KampioenschapSchutterBoog
+        nieuwe_deelnemers = (KampioenschapSporterBoog
                              .objects
                              .select_related('indiv_klasse',
                                              'bij_vereniging',
-                                             'deelcompetitie',
-                                             'deelcompetitie__competitie',
+                                             'kampioenschap',
+                                             'kampioenschap__competitie',
                                              'sporterboog',
                                              'sporterboog__sporter',
                                              'sporterboog__boogtype')
@@ -1222,9 +1233,9 @@ class TestData(object):
         volgorde_per_klasse = dict()    # [klasse.pk] = teller
         klasse_regio_done = list()      # [(klasse.pk, regio_nr), ...]
 
-        for kampioen in (KampioenschapSchutterBoog
+        for kampioen in (KampioenschapSporterBoog
                          .objects
-                         .filter(deelcompetitie__competitie__afstand=afstand,
+                         .filter(kampioenschap__competitie__afstand=afstand,
                                  bij_vereniging__regio__regio_nr__in=regio_nrs)
                          .select_related('indiv_klasse',
                                          'bij_vereniging__regio')
@@ -1260,11 +1271,11 @@ class TestData(object):
         rayon_nr = ver.regio.rayon.rayon_nr
 
         if afstand == 18:                                                           # pragma: no cover
-            deelcomp_rk = self.deelcomp18_rk[rayon_nr]
+            deelkamp = self.deelkamp18_rk[rayon_nr]
             deelnemers = self.comp18_deelnemers
             rk_teams = self.comp18_kampioenschapteams
         else:
-            deelcomp_rk = self.deelcomp25_rk[rayon_nr]
+            deelkamp = self.deelkamp25_rk[rayon_nr]
             deelnemers = self.comp25_deelnemers
             rk_teams = self.comp25_kampioenschapteams
 
@@ -1319,7 +1330,7 @@ class TestData(object):
                         ag_step = 0.57
 
                     team = KampioenschapTeam(
-                                deelcompetitie=deelcomp_rk,
+                                kampioenschap=deelkamp,
                                 vereniging=ver,
                                 volg_nr=next_nr,
                                 team_type=self.afkorting2teamtype_nhb[afkorting],
@@ -1337,10 +1348,7 @@ class TestData(object):
         KampioenschapTeam.objects.bulk_create(bulk)
 
         for team, koppel in nieuwe_teams:
-            # tijdelijke_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-            # gekoppelde_schutters = models.ManyToManyField(KampioenschapSchutterBoog,
-
-            team.tijdelijke_schutters.set(koppel)
+            team.tijdelijke_leden.set(koppel)
             rk_teams.append(team)
         # for
 
@@ -1355,7 +1363,7 @@ class TestData(object):
 
         for team in rk_teams:
             if team.vereniging.ver_nr == ver_nr:            # pragma: no branch
-                for deelnemer in team.tijdelijke_schutters.all():
+                for deelnemer in team.tijdelijke_leden.all():
                     deelnemer.aantal_scores = 6
                     deelnemer.gemiddelde = gem
                     deelnemer.save(update_fields=['aantal_scores', 'gemiddelde'])
@@ -1404,11 +1412,11 @@ class TestData(object):
         rayon_nr = ver.regio.rayon.rayon_nr
 
         if afstand == 18:
-            deelcomp_rk = self.deelcomp18_rk[rayon_nr]
+            deelkamp = self.deelkamp18_rk[rayon_nr]
             rk_deelnemers = self.comp18_rk_deelnemers
             rk_teams = self.comp18_kampioenschapteams
         else:
-            deelcomp_rk = self.deelcomp25_rk[rayon_nr]
+            deelkamp = self.deelkamp25_rk[rayon_nr]
             rk_deelnemers = self.comp25_rk_deelnemers
             rk_teams = self.comp25_kampioenschapteams
 
@@ -1463,7 +1471,7 @@ class TestData(object):
                     team_ag = sum(gemiddelden[:3])
 
                     team = KampioenschapTeam(
-                                deelcompetitie=deelcomp_rk,
+                                kampioenschap=deelkamp,
                                 vereniging=ver,
                                 volg_nr=next_nr,
                                 team_type=teamtype,
@@ -1480,7 +1488,7 @@ class TestData(object):
         KampioenschapTeam.objects.bulk_create(bulk)
 
         for team, koppel in nieuwe_teams:
-            team.gekoppelde_schutters.set(koppel)
+            team.gekoppelde_leden.set(koppel)
             rk_teams.append(team)
         # for
 

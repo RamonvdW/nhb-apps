@@ -8,7 +8,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               KampioenschapSchutterBoog, KampioenschapTeam)
+                               KampioenschapSporterBoog, KampioenschapTeam)
 import openpyxl
 from openpyxl.styles import Alignment, Font, DEFAULT_FONT
 
@@ -93,9 +93,10 @@ class Command(BaseCommand):
             team_nr = 0
             for team in (KampioenschapTeam
                          .objects
-                         .filter(deelcompetitie__competitie=self.comp,
+                         .filter(kampioenschap__competitie=self.comp,
                                  team_klasse=klasse)
                          .select_related('vereniging')
+                         .prefetch_related('gekoppelde_leden')
                          .order_by('-aanvangsgemiddelde')):
 
                 row_str = str(row_nr)
@@ -119,7 +120,8 @@ class Command(BaseCommand):
                 row_nr += 1
 
                 # schrijf de sporters op
-                for deelnemer in (team.gekoppelde_schutters
+                for deelnemer in (team
+                                  .gekoppelde_leden
                                   .select_related('sporterboog__sporter')
                                   .order_by('-gemiddelde')):        # hoogste eerst
 
@@ -182,9 +184,9 @@ class Command(BaseCommand):
                 row_nr += 1
 
                 # sporter details
-                for deelnemer in (KampioenschapSchutterBoog
+                for deelnemer in (KampioenschapSporterBoog
                                   .objects
-                                  .filter(deelcompetitie__competitie=self.comp,
+                                  .filter(kampioenschap__competitie=self.comp,
                                           bij_vereniging=ver)
                                   .select_related('sporterboog__sporter',
                                                   'sporterboog__boogtype')
@@ -250,9 +252,9 @@ class Command(BaseCommand):
 
             row_nr = 4
             nr = 0
-            for deelnemer in (KampioenschapSchutterBoog
+            for deelnemer in (KampioenschapSporterBoog
                               .objects
-                              .filter(deelcompetitie__competitie=self.comp,
+                              .filter(kampioenschap__competitie=self.comp,
                                       indiv_klasse=klasse)
                               .select_related('sporterboog__sporter',
                                               'bij_vereniging')

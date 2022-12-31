@@ -9,8 +9,8 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie,
-                               LAAG_REGIO, LAAG_RK, MUTATIE_AFSLUITEN_REGIOCOMP)
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, DeelKampioenschap, DEEL_RK,
+                               LAAG_REGIO, MUTATIE_AFSLUITEN_REGIOCOMP)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -177,14 +177,18 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
                                                 kwargs={'comp_pk': comp.pk})
         else:
             # bepaal de status van elk rayon
-            context['rk_status'] = deelcomps = DeelCompetitie.objects.select_related('nhb_rayon').filter(competitie=comp, laag=LAAG_RK)
-            for deelcomp in deelcomps:
-                deelcomp.rayon_str = 'Rayon %s' % deelcomp.nhb_rayon.rayon_nr
-                if deelcomp.is_afgesloten:
-                    deelcomp.status_str = "Afgesloten"
-                    deelcomp.status_groen = True
+            context['rk_status'] = deelkamps = (DeelKampioenschap
+                                                .objects
+                                                .select_related('nhb_rayon')
+                                                .filter(competitie=comp,
+                                                        deel=DEEL_RK))
+            for deelkamp in deelkamps:
+                deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
+                if deelkamp.is_afgesloten:
+                    deelkamp.status_str = "Afgesloten"
+                    deelkamp.status_groen = True
                 else:
-                    deelcomp.status_str = "Actief"
+                    deelkamp.status_str = "Actief"
 
         context['comp'] = comp
 

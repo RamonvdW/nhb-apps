@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import Competitie, DeelCompetitie, LAAG_BK, LAAG_RK, CompetitieMatch
+from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap, DEEL_RK, DEEL_BK
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -734,12 +734,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelcomp = DeelCompetitie(
+        deelkamp = DeelKampioenschap(
                         competitie=comp,
-                        laag=LAAG_BK,
+                        deel=DEEL_BK,
                         functie=self.functie_bko)
-        deelcomp.save()
-        deelcomp.rk_bk_matches.add(match)
+        deelkamp.save()
+        deelkamp.rk_bk_matches.add(match)
 
         self.e2e_account_accepteert_vhpg(self.account_admin)
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -772,13 +772,13 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelcomp = DeelCompetitie(
+        deelkamp = DeelKampioenschap(
                         competitie=comp,
-                        laag=LAAG_RK,
+                        deel=DEEL_RK,
                         nhb_rayon=self.functie_rko.nhb_rayon,
                         functie=self.functie_rko)
-        deelcomp.save()
-        deelcomp.rk_bk_matches.add(match)
+        deelkamp.save()
+        deelkamp.rk_bk_matches.add(match)
 
         self.e2e_account_accepteert_vhpg(self.account_admin)
         self.e2e_login_and_pass_otp(self.account_admin)

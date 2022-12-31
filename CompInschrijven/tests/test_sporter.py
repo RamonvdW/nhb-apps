@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSporterBoog,
                                DeelcompetitieRonde, CompetitieMatch, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.tests.test_fase import zet_competitie_fase
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
@@ -133,7 +133,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self._prep_voorkeuren(100001)
 
         # schrijf in voor de 18m Recurve, met AG
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
@@ -151,9 +151,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog.pk))
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertEqual(str(inschrijving.ag_voor_indiv), "8.180")
         self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
         self.assertFalse(inschrijving.ag_voor_team_mag_aangepast_worden)
@@ -163,7 +163,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
         self.assertEqual(inschrijving.inschrijf_notitie, '')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'GN')
-        self.assertTrue(str(RegioCompetitieSchutterBoog) != '')                  # coverage only
+        self.assertTrue(str(RegioCompetitieSporterBoog) != '')                  # coverage only
         self.assertEqual(inschrijving.indiv_klasse.competitie.afstand, '18')     # juiste competitie?
         self.assertEqual(inschrijving.indiv_klasse.boogtype.afkorting, 'R')      # klasse compatibel met boogtype?
 
@@ -172,7 +172,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Sporter is al aangemeld')
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
         # 18m TR voor extra coverage
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='TR')
@@ -211,13 +211,13 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'eigen blazoen')
 
         # schrijf in voor de 25m BB, zonder AG
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog.pk))
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 2)
 
-        inschrijving_25 = RegioCompetitieSchutterBoog.objects.exclude(pk=inschrijving.pk)[0]
+        inschrijving_25 = RegioCompetitieSporterBoog.objects.exclude(pk=inschrijving.pk)[0]
         self.assertEqual(inschrijving_25.indiv_klasse.competitie.afstand, '25')     # juiste competitie?
         self.assertEqual(inschrijving_25.indiv_klasse.boogtype.afkorting, 'BB')     # klasse compatibel met boogtype?
 
@@ -225,7 +225,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog.pk))
         self.assert404(resp, 'Sporter is al aangemeld')
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 2)
 
         # competitie in verkeerde fase
         comp = deelcomp.competitie    # Competitie.objects.get(pk=deelcomp.competitie.pk)
@@ -324,7 +324,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self._prep_voorkeuren(100001)
 
         # aanmelden voor de 18m Recurve, met AG
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         sporterboog_18 = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = score_indiv_ag_opslaan(sporterboog_18, 18, 8.18, None, 'Test')
@@ -332,7 +332,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog_18.pk))
         self.assert_is_redirect(resp, self.url_profiel)
-        inschrijving_18 = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving_18 = RegioCompetitieSporterBoog.objects.all()[0]
 
         # aanmelden voor de 25m BB, zonder AG
         sporterboog_25 = SporterBoog.objects.get(boogtype__afkorting='BB')
@@ -342,11 +342,11 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
 
         # afmelden van de 18m
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 2)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % inschrijving_18.pk)
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
         # illegaal inschrijving nummer
         resp = self.client.post(self.url_afmelden % 999999)
@@ -357,7 +357,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert404(resp, 'Inschrijving niet gevonden')
 
         # sporterboog hoort niet bij gebruiker
-        inschrijving_25 = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving_25 = RegioCompetitieSporterBoog.objects.all()[0]
         self.client.logout()
         self.e2e_login(self.account_twee)
         with self.assert_max_queries(20):
@@ -376,7 +376,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self._prep_voorkeuren(100001)
 
         # aanmelden voor de 18m Recurve, met AG
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         sporterboog_18 = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = score_indiv_ag_opslaan(sporterboog_18, 18, 8.18, None, 'Test')
@@ -384,18 +384,18 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog_18.pk))
         self.assert_is_redirect(resp, self.url_profiel)
-        inschrijving_18 = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving_18 = RegioCompetitieSporterBoog.objects.all()[0]
 
         # voorkeur boogtype uitzetten
         sporterboog_18.voor_wedstrijd = False
         sporterboog_18.save()
 
         # afmelden van de 18m
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % inschrijving_18.pk)
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
 
     def test_inschrijven_team(self):
         # log in as BB en maak de competitie aan
@@ -410,7 +410,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # schrijf in voor de 18m Recurve, met AG
         # geef ook team schieten en opmerking door
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
@@ -420,9 +420,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wil_in_team': 'yes', 'opmerking': 'Hallo daar!'})
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertEqual(str(inschrijving.ag_voor_indiv), "8.180")
         self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
         self.assertFalse(inschrijving.ag_voor_team_mag_aangepast_worden)
@@ -436,16 +436,16 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         # schrijf in voor de 25m BB, zonder AG, als aspirant
         self.sporter1.geboorte_datum = datetime.date(year=timezone.now().year - 12, month=1, day=1)
         self.sporter1.save()
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='BB')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog.pk),
                                     {'wil_in_team': 'ja', 'opmerking': 'ben ik oud genoeg?'})
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 2)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.filter(sporterboog=sporterboog).all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.filter(sporterboog=sporterboog).all()[0]
         self.assertEqual(inschrijving.inschrijf_notitie, 'ben ik oud genoeg?')
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
 
@@ -469,7 +469,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # schrijf in voor de 18m Recurve, met AG
         # geef ook team schieten en opmerking door
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
@@ -479,9 +479,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wil_in_team': 'yes'})
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertEqual(inschrijving.deelcompetitie, deelcomp)
         self.assertEqual(inschrijving.sporterboog, sporterboog)
         self.assertEqual(inschrijving.bij_vereniging, sporterboog.sporter.bij_vereniging)
@@ -524,7 +524,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertNotContains(resp, 's Avonds')
         self.assertNotContains(resp, 'Weekend')
 
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
@@ -532,7 +532,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
         resp = self.client.post(url, {'dagdeel': 'AV'})
         self.assert404(resp, 'Verzoek is niet compleet')
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
 
         # schrijf in met dagdeel, team schieten en opmerking door
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -541,9 +541,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
                                           'dagdeel': 'ZAT',
                                           'opmerking': 'Hallo nogmaals!\n' * 50})
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertTrue(inschrijving.inschrijf_voorkeur_team)
         self.assertTrue(len(inschrijving.inschrijf_notitie) > 480)
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'ZAT')
@@ -554,7 +554,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
         resp = self.client.post(url, {'dagdeel': 'XX'})
         self.assert404(resp, 'Verzoek is niet compleet')
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
     def test_inschrijven_methode3_alle_dagdelen(self):
         regio_105 = NhbRegio.objects.get(pk=105)
@@ -594,7 +594,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertContains(resp, 'Weekend')
 
         # geef dagdeel door
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
@@ -602,9 +602,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'dagdeel': 'AV'})
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
         self.assertEqual(inschrijving.inschrijf_notitie, '')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'AV')
@@ -648,13 +648,13 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # probeer in te schrijven en controleer daarna de wedstrijdklasse waarin de schutter geplaatst is
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertEqual(inschrijving.deelcompetitie, deelcomp)
         self.assertEqual(inschrijving.sporterboog, sporterboog)
 
@@ -755,7 +755,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
                                           'wedstrijd_99999': 'on'})     # is ignored
         self.assert_is_redirect(resp, self.url_profiel)
 
-        aanmelding = RegioCompetitieSchutterBoog.objects.get(sporterboog=sporterboog)
+        aanmelding = RegioCompetitieSporterBoog.objects.get(sporterboog=sporterboog)
         self.assertEqual(aanmelding.ag_voor_indiv, 0.0)
         self.assertEqual(aanmelding.ag_voor_team, 0.0)
         self.assertTrue(aanmelding.ag_voor_team_mag_aangepast_worden)
@@ -772,7 +772,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        aanmelding2 = RegioCompetitieSchutterBoog.objects.get(sporterboog=sporterboog2)
+        aanmelding2 = RegioCompetitieSporterBoog.objects.get(sporterboog=sporterboog2)
 
         # terug naar de eerste sporter
         self.e2e_login(self.account_normaal)
@@ -843,7 +843,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self._prep_voorkeuren(100001)
 
         # voorkeuren en AG zetten
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
@@ -890,7 +890,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # schrijf in voor de 18m Recurve, met AG
         # geef ook team schieten en opmerking door
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = score_teams_ag_opslaan(sporterboog, 18, 8.25, self.account_twee, 'Test')
@@ -903,9 +903,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wil_in_team': 'yes', 'opmerking': 'Hallo daar!'})
         self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertEqual(str(inschrijving.ag_voor_indiv), "0.000")
         self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
         self.assertTrue(inschrijving.ag_voor_team_mag_aangepast_worden)

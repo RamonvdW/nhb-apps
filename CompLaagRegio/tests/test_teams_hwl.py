@@ -9,7 +9,7 @@ from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, AG_NUL, LAAG_REGIO,
-                               RegiocompetitieTeam, RegioCompetitieSchutterBoog, RegiocompetitieRondeTeam)
+                               RegiocompetitieTeam, RegioCompetitieSporterBoog, RegiocompetitieRondeTeam)
 from Competitie.tests.test_fase import zet_competitie_fase
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -307,9 +307,9 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                                               'wil_in_team': 'ja!'})
             self.assert_is_redirect_not_plein(resp)     # check success
 
-            # print('aantal ingeschreven deelnemers:', RegioCompetitieSchutterBoog.objects.count())
+            # print('aantal ingeschreven deelnemers:', RegioCompetitieSporterBoog.objects.count())
 
-            for obj in (RegioCompetitieSchutterBoog
+            for obj in (RegioCompetitieSporterBoog
                         .objects
                         .select_related('sporterboog__sporter')
                         .filter(deelcompetitie__competitie=self.comp_18)
@@ -335,7 +335,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                                        'lid_100012_boogtype_1': 'on',    # 1=R
                                        'wil_in_team': 'ja!'})
 
-            for obj in (RegioCompetitieSchutterBoog
+            for obj in (RegioCompetitieSporterBoog
                         .objects
                         .select_related('sporterboog__sporter')
                         .filter(deelcompetitie__competitie=self.comp_25)
@@ -455,7 +455,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         team.team_klasse = klasse
         team.aanvangsgemiddelde = 8.8
         team.save()
-        team.gekoppelde_schutters.add(self.deelnemer_100004_18)
+        team.leden.add(self.deelnemer_100004_18)
 
         # wijzig het team type
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
@@ -471,7 +471,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         team = RegiocompetitieTeam.objects.get(pk=team.pk)
         self.assertTrue(team.aanvangsgemiddelde < 0.0005)
         self.assertIsNone(team.team_klasse)
-        self.assertEqual(0, team.gekoppelde_schutters.count())
+        self.assertEqual(0, team.leden.count())
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk))
@@ -650,12 +650,12 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
         team_18 = RegiocompetitieTeam.objects.get(pk=team_18.pk)
-        self.assertEqual(2, team_18.gekoppelde_schutters.count())
+        self.assertEqual(2, team_18.leden.count())
         self.assertEqual(team_18.aanvangsgemiddelde, AG_NUL)
         self.assertEqual(None, team_18.team_klasse)
 
         # koppel nog meer leden
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(pk=self.deelnemer_100012_18.pk)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(pk=self.deelnemer_100012_18.pk)
         deelnemer.ag_voor_team = 6.500
         deelnemer.save()
 
@@ -679,7 +679,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         team_18 = RegiocompetitieTeam.objects.get(pk=team_18.pk)
-        self.assertEqual(3, team_18.gekoppelde_schutters.count())
+        self.assertEqual(3, team_18.leden.count())
         self.assertEqual(str(team_18.aanvangsgemiddelde), '21.340')        # 7.42 + 7.42 + 6.5
         self.assertEqual(team_18.team_klasse, obj)
 

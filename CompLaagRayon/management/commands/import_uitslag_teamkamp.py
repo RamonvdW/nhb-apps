@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import KampioenschapSchutterBoog, KampioenschapTeam, LAAG_RK  # , LAAG_BK
+from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam, DEEL_RK
 from openpyxl.utils.exceptions import InvalidFileException
 from decimal import Decimal
 import openpyxl
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         self.team_lid_nrs = dict()      # [team.pk] = [lid_nr, ...]
         self.ver_lid_nrs = dict()       # [ver_nr] = [lid_nr, ...]
         self.kamp_lid_nrs = list()      # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
-        self.laag = ""
+        self.deel = "?"
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
@@ -37,15 +37,15 @@ class Command(BaseCommand):
 
     def _bepaal_laag(self, afstand):
         # TODO: aan de hand van de competitie fase bepalen of dit een RK of BK uitslag moet zijn
-        self.laag = LAAG_RK
+        self.deel = DEEL_RK
 
     def _deelnemers_ophalen(self, afstand):
-        for deelnemer in (KampioenschapSchutterBoog
+        for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(deelcompetitie__competitie__afstand=afstand,
-                                  deelcompetitie__laag=self.laag)
-                          .select_related('deelcompetitie',
-                                          'deelcompetitie__nhb_rayon',
+                          .filter(kampioenschap__competitie__afstand=afstand,
+                                  kampioenschap__deel=self.deel)
+                          .select_related('kampioenschap',
+                                          'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -69,18 +69,18 @@ class Command(BaseCommand):
     def _teams_ophalen(self, afstand):
         for team in (KampioenschapTeam
                      .objects
-                     .filter(deelcompetitie__competitie__afstand=afstand,
-                             deelcompetitie__laag=self.laag)
-                     .select_related('deelcompetitie',
-                                     'deelcompetitie__nhb_rayon',
+                     .filter(kampioenschap__competitie__afstand=afstand,
+                             kampioenschap__deel=self.deel)
+                     .select_related('kampioenschap',
+                                     'kampioenschap__nhb_rayon',
                                      'vereniging',
                                      'team_type',
                                      'team_klasse')
-                     .prefetch_related('gekoppelde_schutters',
-                                       'feitelijke_schutters')):
+                     .prefetch_related('gekoppelde_leden',
+                                       'feitelijke_leden')):
 
             self.teams_cache.append(team)
-            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr for deelnemer in team.gekoppelde_schutters.all()]
+            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr for deelnemer in team.gekoppelde_leden.all()]
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
@@ -314,7 +314,7 @@ class Command(BaseCommand):
                 # for
                 deelnemer_totalen.sort(reverse=True)                        # hoogste eerst
                 kamp_team.result_teamscore = sum(deelnemer_totalen[:3])     # de 3 hoogste gebruiken
-                kamp_team.feitelijke_schutters.set(feitelijke_deelnemers)
+                kamp_team.feitelijke_leden.set(feitelijke_deelnemers)
 
                 deelnemer_totalen.insert(0, kamp_team.result_teamscore)     # resultaat vooraan
                 deelnemer_totalen.append(kamp_team)                         # team record laatst

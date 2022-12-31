@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -19,7 +20,7 @@ import datetime
 
 class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
-    """ tests voor de CompInfra applicatie, Aangemeld functie """
+    """ tests voor de CompInschrijven applicatie, Aangemeld functie """
 
     test_after = ('Functie',)
 
@@ -88,12 +89,12 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
-            deelcomp.functie.accounts.add(self.account_bko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+            deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2).all():
-            deelcomp.functie.accounts.add(self.account_rko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+            deelkamp.functie.accounts.add(self.account_rko)
         # for
 
         for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
@@ -276,27 +277,12 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         # coverage voor models __str__
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_RK
-        deelcomp.nhb_regio = None
-        deelcomp.nhb_rayon = self.rayon_1
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_RK).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_BK
-        deelcomp.nhb_rayon = None
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_BK).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
         self.assertTrue(str(obj) != '')
 
     def test_overzicht_bko(self):
         comp = Competitie.objects.get(afstand='18')
-        functie_bko = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_BK).functie
+        functie_bko = DeelKampioenschap.objects.get(competitie=comp, deel=DEEL_BK).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -329,7 +315,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_overzicht_rko(self):
         comp = Competitie.objects.get(afstand='25')
-        functie_rko = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_RK, nhb_rayon=self.rayon_2).functie
+        functie_rko = DeelKampioenschap.objects.get(competitie=comp, deel=DEEL_RK, nhb_rayon=self.rayon_2).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -461,7 +447,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
                                                  nhb_regio=self.regio_101).functie
         self.e2e_wissel_naar_functie(functie_rcl)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
         naam_str = "[" + str(inschrijving.sporterboog.sporter.lid_nr) + "] " + inschrijving.sporterboog.sporter.volledige_naam()
         ver_str = str(self._ver)            # [ver_nr] Vereniging
 

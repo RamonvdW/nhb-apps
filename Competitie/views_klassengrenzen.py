@@ -33,7 +33,7 @@ class KlassengrenzenTonenView(View):
                    .objects
                    .select_related('competitie')
                    .filter(competitie=comp)
-                   .prefetch_related('regiocompetitieschutterboog_set')
+                   .prefetch_related('regiocompetitiesporterboog_set')
                    .order_by('volgorde'))
 
         for obj in klassen:
@@ -42,7 +42,7 @@ class KlassengrenzenTonenView(View):
                 obj.min_ag_str = ag_str.replace('.', ',')       # nederlands: komma ipv punt
 
             if toon_aantal:
-                obj.aantal = obj.regiocompetitieschutterboog_set.count()
+                obj.aantal = obj.regiocompetitiesporterboog_set.count()
 
             obj.blazoen_regio_str = BLAZOEN2STR[obj.blazoen1_regio]
             if obj.blazoen1_regio != obj.blazoen2_regio:

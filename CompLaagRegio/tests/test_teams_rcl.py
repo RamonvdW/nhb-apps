@@ -6,11 +6,11 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               LAAG_BK, LAAG_RK, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog, CompetitieMutatie,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, LAAG_REGIO,
+                               RegioCompetitieSporterBoog, CompetitieMutatie,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                               TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES)
+                               TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -159,9 +159,9 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
         self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_25, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_112)[0]
@@ -230,10 +230,6 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                     aanvangsgemiddelde=18.042,
                     team_klasse=klasse_r_ere)
         team3.save()
-
-        # initiële schutters in het team
-        # gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-        #                                              blank=True)  # mag leeg zijn
 
         poule = RegiocompetitieTeamPoule(
                     deelcompetitie=deelcomp,
@@ -468,7 +464,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/rcl-ag-controle.dtl', 'plein/site_layout.dtl'))
 
         # maak een inschrijving met handmatig AG
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 sporterboog=self.sporterboog,
                 bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                 deelcompetitie=self.deelcomp_regio112_18,

@@ -10,7 +10,7 @@ from django.views.generic import View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog, CompetitieMatch,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog, CompetitieMatch,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
@@ -79,7 +79,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegioCompetitieSchutterBoog
+        if (RegioCompetitieSporterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
                         sporterboog=sporterboog)
@@ -110,7 +110,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
 
-        aanmelding = RegioCompetitieSchutterBoog(
+        aanmelding = RegioCompetitieSporterBoog(
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog,
                             ag_voor_indiv=ag)
@@ -278,7 +278,7 @@ class RegiocompetitieAanmeldenView(View):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegioCompetitieSchutterBoog
+        if (RegioCompetitieSporterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
                         sporterboog=sporterboog)
@@ -300,7 +300,7 @@ class RegiocompetitieAanmeldenView(View):
         # bepaal in welke wedstrijdklasse de sporter komt
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
-        aanmelding = RegioCompetitieSchutterBoog(
+        aanmelding = RegioCompetitieSporterBoog(
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog,
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -418,12 +418,12 @@ class RegiocompetitieAfmeldenView(View):
         # converteer en doe eerste controle op de parameters
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
+            deelnemer = (RegioCompetitieSporterBoog
                          .objects
                          .select_related('deelcompetitie__competitie',
                                          'sporterboog__sporter')
                          .get(pk=deelnemer_pk))
-        except (ValueError, KeyError, RegioCompetitieSchutterBoog.DoesNotExist):
+        except (ValueError, KeyError, RegioCompetitieSporterBoog.DoesNotExist):
             # niet bestaand record
             raise Http404('Inschrijving niet gevonden')
 

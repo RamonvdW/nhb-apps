@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.db.models import F
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Competitie.models import Competitie, RegioCompetitieSchutterBoog, RegiocompetitieTeam
+from Competitie.models import Competitie, RegioCompetitieSporterBoog, RegiocompetitieTeam
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
@@ -49,7 +49,7 @@ class CompetitieKiesView(TemplateView):
         pks = list()
         for comp in self.actuele_regio_comps:
             pks.append(comp.pk)
-            aantal_indiv = (RegioCompetitieSchutterBoog
+            aantal_indiv = (RegioCompetitieSporterBoog
                             .objects
                             .filter(deelcompetitie__competitie=comp)
                             .count())
@@ -109,7 +109,7 @@ class CompetitieKiesView(TemplateView):
             aantal_leden_regio[regio_nr] = 0
         # for
 
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .filter(deelcompetitie__competitie__pk__in=pks)
                           .select_related('sporterboog__sporter__bij_vereniging__regio__rayon',
@@ -155,7 +155,7 @@ class CompetitieKiesView(TemplateView):
             context['aantal_25m_regio'].append(aantal_25m_regio[regio_nr])
         # for
 
-        qset = (RegioCompetitieSchutterBoog
+        qset = (RegioCompetitieSporterBoog
                 .objects
                 .filter(deelcompetitie__competitie__pk__in=pks)
                 .select_related('sporterboog',

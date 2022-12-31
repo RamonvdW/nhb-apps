@@ -6,9 +6,9 @@
 
 from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, AFSTANDEN,
+from Competitie.models import (AG_NUL, LAAG_REGIO, AFSTANDEN, DEEL_RK, DEEL_BK,
                                Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie, DeelcompetitieRonde)
+                               DeelCompetitie, DeelKampioenschap, DeelcompetitieRonde)
 from Functie.models import Functie
 from NhbStructuur.models import NhbRayon, NhbRegio
 from datetime import date
@@ -105,11 +105,11 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
     return ronde
 
 
-def _maak_deelcompetities(comp, rayons, regios, functies):
+def _maak_deelcompetities(comp, regios, functies):
 
-    """ Maak de deelcompetities van een competitie aan """
+    """ Maak de DeelCompetities voor een competitie aan """
 
-    # zoek de voorgaande deelcompetities erbij om settings over te kunnen nemen
+    # zoek de voorgaande deelcompetities erbij om instellingen over te kunnen nemen
     vorige_deelcomps = dict()   # [regio_nr] = DeelCompetitie()
     for deelcomp in (DeelCompetitie
                      .objects
@@ -121,51 +121,58 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
 
-    # maak de Deelcompetities aan voor Regio, RK, BK
+    # maak de deelcompetities aan voor regiocompetities
     bulk = list()
-    for laag, _ in DeelCompetitie.LAAG:
-        if laag == LAAG_REGIO:
-            # Regio
-            for obj in regios:
-                functie = functies[("RCL", comp.afstand, obj.regio_nr)]
-                deel = DeelCompetitie(competitie=comp,
-                                      laag=laag,
-                                      nhb_regio=obj,
-                                      functie=functie,
-                                      einde_teams_aanmaken=comp.einde_teamvorming)
-                try:
-                    vorige = vorige_deelcomps[obj.regio_nr]
-                except KeyError:
-                    pass
-                else:
-                    deel.inschrijf_methode = vorige.inschrijf_methode
-                    deel.toegestane_dagdelen = vorige.toegestane_dagdelen
-                    deel.regio_organiseert_teamcompetitie = vorige.regio_organiseert_teamcompetitie
-                    deel.regio_heeft_vaste_teams = vorige.regio_heeft_vaste_teams
-                    deel.regio_team_punten_model = vorige.regio_team_punten_model
-
-                bulk.append(deel)
-            # for
-        elif laag == LAAG_RK:
-            # RK
-            for obj in rayons:
-                functie = functies[("RKO", comp.afstand, obj.rayon_nr)]
-                deel = DeelCompetitie(competitie=comp,
-                                      laag=laag,
-                                      nhb_rayon=obj,
-                                      functie=functie)
-                bulk.append(deel)
-            # for
+    for obj in regios:
+        functie = functies[("RCL", comp.afstand, obj.regio_nr)]
+        deel = DeelCompetitie(competitie=comp,
+                              laag=LAAG_REGIO,
+                              nhb_regio=obj,
+                              functie=functie,
+                              einde_teams_aanmaken=comp.einde_teamvorming)
+        try:
+            vorige = vorige_deelcomps[obj.regio_nr]
+        except KeyError:
+            pass
         else:
-            # BK
-            functie = functies[("BKO", comp.afstand, 0)]
-            deel = DeelCompetitie(competitie=comp,
-                                  laag=laag,
-                                  functie=functie)
-            bulk.append(deel)
+            deel.inschrijf_methode = vorige.inschrijf_methode
+            deel.toegestane_dagdelen = vorige.toegestane_dagdelen
+            deel.regio_organiseert_teamcompetitie = vorige.regio_organiseert_teamcompetitie
+            deel.regio_heeft_vaste_teams = vorige.regio_heeft_vaste_teams
+            deel.regio_team_punten_model = vorige.regio_team_punten_model
+
+        bulk.append(deel)
     # for
 
     DeelCompetitie.objects.bulk_create(bulk)
+
+
+def _maak_deelkampioenschappen(comp, rayons, functies):
+
+    """ Maak de DeelKampioenschappen voor een competitie aan """
+
+    bulk = list()
+
+    # RK individueel en teams
+    for rayon in rayons:
+        functie = functies[("RKO", comp.afstand, rayon.rayon_nr)]
+        deelkamp = DeelKampioenschap(
+                            deel=DEEL_RK,
+                            competitie=comp,
+                            nhb_rayon=rayon,
+                            functie=functie)
+        bulk.append(deelkamp)
+    # for
+
+    # BK individueel en teams
+    functie = functies[("BKO", comp.afstand, 0)]
+    deelkamp = DeelKampioenschap(
+                    deel=DEEL_BK,
+                    competitie=comp,
+                    functie=functie)
+    bulk.append(deelkamp)
+
+    DeelKampioenschap.objects.bulk_create(bulk)
 
 
 def _maak_competitieklassen(comp):
@@ -363,7 +370,8 @@ def competities_aanmaken(jaar=None):
         pks = list(teams_klassen.values_list('team_type__pk', flat=True))
         comp.teamtypen.set(pks)
 
-        _maak_deelcompetities(comp, rayons, regios, functies)
+        _maak_deelcompetities(comp, regios, functies)
+        _maak_deelkampioenschappen(comp, rayons, functies)
 
         _maak_competitieklassen(comp)
     # for

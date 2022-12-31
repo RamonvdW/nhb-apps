@@ -7,7 +7,8 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
-                               INSCHRIJF_METHODE_1, LAAG_REGIO, LAAG_RK, LAAG_BK)
+                               INSCHRIJF_METHODE_1, LAAG_REGIO,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -94,12 +95,12 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
-            deelcomp.functie.accounts.add(self.account_bko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+            deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2).all():
-            deelcomp.functie.accounts.add(self.account_rko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+            deelkamp.functie.accounts.add(self.account_rko)
         # for
 
         for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():

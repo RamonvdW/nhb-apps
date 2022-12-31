@@ -10,12 +10,11 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import LAAG_RK, AG_NUL, Competitie, CompetitieTeamKlasse, DeelCompetitie, KampioenschapTeam
+from Competitie.models import AG_NUL, Competitie, CompetitieTeamKlasse, KampioenschapTeam, DeelKampioenschap, DEEL_RK
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
-
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'complaagrayon/rko-teams.dtl'
 
@@ -62,11 +61,11 @@ class RayonTeamsTemplateView(TemplateView):
             if subset == 'alle':
                 # alle rayons
                 context['rayon'] = 'Alle'
-                rk_deelcomp_pks = (DeelCompetitie
-                                   .objects
-                                   .filter(competitie=comp,
-                                           laag=LAAG_RK)
-                                   .values_list('pk', flat=True))
+                deelkamp_pks = (DeelKampioenschap
+                                .objects
+                                .filter(competitie=comp,
+                                        deel=DEEL_RK)
+                                .values_list('pk', flat=True))
             else:
                 # alleen het gekozen rayon
                 try:
@@ -75,11 +74,11 @@ class RayonTeamsTemplateView(TemplateView):
                 except (ValueError, NhbRayon.DoesNotExist):
                     raise Http404('Selectie wordt niet ondersteund')
 
-                rk_deelcomp_pks = (DeelCompetitie
-                                   .objects
-                                   .filter(competitie=comp,
-                                           nhb_rayon=context['rayon'])
-                                   .values_list('pk', flat=True))
+                deelkamp_pks = (DeelKampioenschap
+                                .objects
+                                .filter(competitie=comp,
+                                        nhb_rayon=context['rayon'])
+                                .values_list('pk', flat=True))
 
             context['filters'] = filters = list()
             alle_filter = dict(beschrijving='Alles',
@@ -102,27 +101,26 @@ class RayonTeamsTemplateView(TemplateView):
         else:
             # RKO mode
             try:
-                rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])    # afkappen voor de veiligheid
-                deelcomp_rk = (DeelCompetitie
-                               .objects
-                               .select_related('competitie')
-                               .get(pk=rk_deelcomp_pk,
-                                    laag=LAAG_RK))
-            except (ValueError, DeelCompetitie.DoesNotExist):
-                raise Http404('Competitie niet gevonden')
+                deelkamp_pk = int(kwargs['deelkamp_pk'][:6])    # afkappen voor de veiligheid
+                deelkamp = (DeelKampioenschap
+                            .objects
+                            .select_related('competitie')
+                            .get(pk=deelkamp_pk,
+                                 deel=DEEL_RK))
+            except (ValueError, DeelKampioenschap.DoesNotExist):
+                raise Http404('Kampioenschap niet gevonden')
 
-            if deelcomp_rk.functie != self.functie_nu:
+            if deelkamp.functie != self.functie_nu:
                 # niet de beheerder
                 raise PermissionDenied()
 
-            rk_deelcomp_pks = [deelcomp_rk.pk]
+            deelkamp_pks = [deelkamp.pk]
 
-            context['comp'] = comp = deelcomp_rk.competitie
+            context['comp'] = comp = deelkamp.competitie
             comp.bepaal_fase()
 
             open_inschrijving = comp.fase <= 'G'
 
-            context['deelcomp'] = deelcomp_rk
             context['rayon'] = self.functie_nu.nhb_rayon
 
         if comp.afstand == '18':
@@ -163,18 +161,19 @@ class RayonTeamsTemplateView(TemplateView):
         # for
 
         if open_inschrijving:
-            tel_dit = 'tijdelijke_schutters'
+            tel_dit = 'tijdelijke_leden'
         else:
-            tel_dit = 'gekoppelde_schutters'
+            tel_dit = 'gekoppelde_leden'
 
         rk_teams = (KampioenschapTeam
                     .objects
                     .select_related('vereniging',
                                     'vereniging__regio',
                                     'team_type',
-                                    'team_klasse')
+                                    'team_klasse',
+                                    'kampioenschap')
                     .exclude(team_klasse=None)
-                    .filter(deelcompetitie__in=rk_deelcomp_pks)
+                    .filter(kampioenschap__in=deelkamp_pks)
                     .annotate(sporter_count=Count(tel_dit))
                     .order_by('team_klasse__volgorde',
                               '-aanvangsgemiddelde',
@@ -209,8 +208,8 @@ class RayonTeamsTemplateView(TemplateView):
                     .select_related('vereniging',
                                     'vereniging__regio',
                                     'team_type',
-                                    'deelcompetitie')
-                    .filter(deelcompetitie__in=rk_deelcomp_pks,
+                                    'kampioenschap')
+                    .filter(kampioenschap__in=deelkamp_pks,
                             team_klasse=None)
                     .annotate(sporter_count=Count(tel_dit))
                     .order_by('team_type__volgorde',

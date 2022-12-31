@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import Competitie, DeelCompetitie, LAAG_RK, KampioenschapTeam
+from Competitie.models import Competitie, KampioenschapTeam, DeelKampioenschap, DEEL_RK
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -19,7 +19,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders', 'Competitie.tests.test_competitie')
 
-    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # rk_deelcomp_pk
+    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # deelkamp_pk
     url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset
     url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                       # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
@@ -48,7 +48,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         """
         competities_aanmaken(jaar=2019)
 
-        self.rk_deelcomp_1 = DeelCompetitie.objects.get(laag=LAAG_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
+        self.deelkamp_rk1 = DeelKampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
 
     def test_rk_teams_alle(self):
         # BB en BKO mogen deze pagina ophalen
@@ -116,7 +116,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr)
         self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr)
 
-        url = self.url_rko_teams % self.testdata.deelcomp25_rk[1].pk        # rayon 1
+        url = self.url_rko_teams % self.testdata.deelkamp25_rk[1].pk        # rayon 1
 
         # anon
         resp = self.client.get(url)
@@ -166,13 +166,13 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
         # bad urls
         resp = self.client.get(self.url_rko_teams % 999999)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_rko_teams % 'xyz')
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         # verkeerde rayon
-        url = self.url_rko_teams % self.testdata.deelcomp25_rk[2].pk
+        url = self.url_rko_teams % self.testdata.deelkamp25_rk[2].pk
         resp = self.client.get(url)
         self.assert403(resp)
 
