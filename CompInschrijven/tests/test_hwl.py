@@ -376,7 +376,9 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
 
-        self.assertContains(resp, '>Cadet de Jeugd</')
+        self.e2e_dump_resp(resp)
+
+        self.assertContains(resp, '>[100004] Cadet de Jeugd</')
         self.assertContains(resp, '>14</')                  # leeftijd 2021
         self.assertContains(resp, '>Onder 18</')            # leeftijdsklasse competitie
 

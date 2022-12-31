@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -690,16 +691,26 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'De klassengrenzen voor de ')
 
     def test_wijzig_datums(self):
+
+        expected_month, expected_day = 12, 31
+        expected_year = 2019
+
         # creëer een competitie met deelcompetities
-        competities_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=expected_year)
         # nu in fase A
 
         comp = Competitie.objects.all()[0]
 
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.begin_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.einde_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.eerste_wedstrijd)
+        now = timezone.now()
+        if now.month == expected_month and now.day == expected_day:     # pragma: no cover
+            # avoid testcase from failing one day per year
+            expected_month, expected_day = 1, 1
+            expected_year += 1
+
+        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_aanmeldingen)
+        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.einde_aanmeldingen)
+        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.einde_teamvorming)
+        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.eerste_wedstrijd)
 
         # niet BB
         url = self.url_wijzigdatums % comp.pk
