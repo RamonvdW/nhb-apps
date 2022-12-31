@@ -106,7 +106,7 @@ class Command(BaseCommand):
     def _verwijder_orphan_matches(self):
         orphan_pks = list()
         for match in CompetitieMatch.objects.all():
-            in_plans1 = match.deelcompetitie_set.all()
+            in_plans1 = match.deelkampioenschap_set.all()
             in_plans2 = match.deelcompetitieronde_set.all()
             count = in_plans1.count() + in_plans2.count()
             if count == 0:

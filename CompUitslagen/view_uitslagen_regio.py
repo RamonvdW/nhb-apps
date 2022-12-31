@@ -8,8 +8,7 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (LAAG_REGIO,
-                               TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
+from Competitie.models import (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegioCompetitieSporterBoog)
@@ -194,8 +193,7 @@ class UitslagenRegioIndivView(TemplateView):
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
-                        .get(laag=LAAG_REGIO,
-                             competitie=comp,
+                        .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:
@@ -381,8 +379,7 @@ class UitslagenRegioTeamsView(TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
-                        .get(laag=LAAG_REGIO,
-                             competitie=comp,
+                        .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:

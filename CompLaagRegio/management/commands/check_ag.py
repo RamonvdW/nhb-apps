@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, LAAG_REGIO, RegioCompetitieSporterBoog
+from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog
 
 
 class Command(BaseCommand):
@@ -25,7 +25,6 @@ class Command(BaseCommand):
             deelcomp_pks = (DeelCompetitie
                             .objects
                             .filter(competitie__afstand=afstand,
-                                    laag=LAAG_REGIO,
                                     regio_organiseert_teamcompetitie=True)
                             .order_by('nhb_regio__regio_nr')
                             .values_list('pk', flat=True))

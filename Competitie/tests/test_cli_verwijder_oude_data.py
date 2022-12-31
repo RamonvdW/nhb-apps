@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, CompetitieMatch, DeelCompetitie
+from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.models import Score, SCORE_TYPE_GEEN, ScoreHist
@@ -49,8 +49,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='00:00')
         match.save()
-        deelcomp = DeelCompetitie.objects.all()[0]
-        deelcomp.rk_bk_matches.add(match)
+        deelkamp = DeelKampioenschap.objects.all()[0]
+        deelkamp.rk_bk_matches.add(match)
 
         Score(waarde=0, afstand_meter=18, type=SCORE_TYPE_GEEN).save()
         Score(waarde=123, afstand_meter=18).save()                      # geen sporterboog

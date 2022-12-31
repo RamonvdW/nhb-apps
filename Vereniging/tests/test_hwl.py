@@ -9,7 +9,7 @@ from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieMatch, DeelcompetitieRonde,
-                               DeelKampioenschap, DEEL_RK, LAAG_REGIO, INSCHRIJF_METHODE_1)
+                               DeelKampioenschap, DEEL_RK, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -257,8 +257,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                         nhb_regio=self.regio_111,
+        self.deelcomp_regio = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
         self.deelcomp_regio.save()
@@ -315,7 +314,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         zet_competitie_fase(self.comp_25, 'E')
         deelcomp = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                              laag=LAAG_REGIO,
                                               nhb_regio=self.regio_111)
         deelcomp.regio_organiseert_teamcompetitie = False
         deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])

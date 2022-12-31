@@ -11,8 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, AG_NUL,
-                               TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
+from Competitie.models import (AG_NUL, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
                                Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
@@ -123,8 +122,7 @@ class RegioTeamsTemplateView(TemplateView):
                 deelcomp = (DeelCompetitie
                             .objects
                             .select_related('competitie')
-                            .get(pk=deelcomp_pk,
-                                 laag=LAAG_REGIO))
+                            .get(pk=deelcomp_pk))
             except (ValueError, DeelCompetitie.DoesNotExist):
                 raise Http404('Competitie niet gevonden')
 
@@ -321,8 +319,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -444,7 +441,6 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp_pk,
-                             laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')

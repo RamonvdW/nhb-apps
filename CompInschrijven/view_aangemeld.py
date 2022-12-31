@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
                                BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
                                BLAZOEN2STR, BLAZOEN2STR_COMPACT)
-from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                RegioCompetitieSporterBoog, DAGDEEL2LABEL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL)
 from Functie.models import Rollen
@@ -152,8 +152,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
-                .filter(deelcompetitie__competitie=comp,
-                        deelcompetitie__laag=LAAG_REGIO)
+                .filter(deelcompetitie__competitie=comp)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -220,7 +219,6 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                                 'sporterboog__sporter',
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
-                        deelcompetitie__laag=LAAG_REGIO,
                         deelcompetitie__nhb_regio__rayon=rayon)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
@@ -283,8 +281,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context['inhoud'] = 'in ' + str(regio)
 
         try:
-            deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                  competitie=comp,
+            deelcomp = DeelCompetitie.objects.get(competitie=comp,
                                                   nhb_regio=regio)
         except DeelCompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
@@ -602,7 +599,6 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
-                             laag=LAAG_REGIO,
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
@@ -679,7 +675,6 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
-                             laag=LAAG_REGIO,
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
@@ -782,7 +777,6 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
-                             laag=LAAG_REGIO,
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
@@ -911,7 +905,6 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
-                             laag=LAAG_REGIO,
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
-                               INSCHRIJF_METHODE_1, LAAG_REGIO,
+                               INSCHRIJF_METHODE_1,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
@@ -103,16 +103,14 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
+        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
         self.deelcomp = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                      laag=LAAG_REGIO,
                                                       nhb_regio=self.regio_101)[0]
 
         self.functie_rcl101_18 = DeelCompetitie.objects.get(competitie=self.comp_18,
-                                                            laag=LAAG_REGIO,
                                                             nhb_regio=self.regio_101).functie
 
         # maak nog een test vereniging, zonder HWL functie
@@ -376,7 +374,6 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)

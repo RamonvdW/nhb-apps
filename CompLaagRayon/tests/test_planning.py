@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO,
+from Competitie.models import (Competitie, DeelCompetitie,
                                DeelKampioenschap, DEEL_BK, DEEL_RK,
                                KampioenschapSporterBoog, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, RegioCompetitieSporterBoog,
@@ -152,9 +152,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
         self.deelkamp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
         self.deelkamp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_25, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_112)[0]
+        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
         self.cluster_101a = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
 
@@ -205,7 +205,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         comp.bepaal_fase()
         # print('comp: %s --> fase=%s' % (comp, comp.fase))
         self.assertTrue('B' < comp.fase < 'G')
-        for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
+        for deelcomp in DeelCompetitie.objects.filter(competitie=comp):
             if not deelcomp.is_afgesloten:          # pragma: no branch
                 deelcomp.is_afgesloten = True
                 deelcomp.save()
@@ -291,7 +291,6 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         # maak een regiowedstrijd aan, zodat deze geteld kan worden
         deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18,
-                                              laag=LAAG_REGIO,
                                               nhb_regio=self.regio_101)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()

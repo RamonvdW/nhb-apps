@@ -7,8 +7,7 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (DeelcompetitieRonde, CompetitieMatch, LAAG_REGIO,
-                               DeelKampioenschap, DEEL_RK)
+from Competitie.models import DeelcompetitieRonde, CompetitieMatch, DeelKampioenschap, DEEL_RK
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -46,8 +45,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         pks1 = list(DeelcompetitieRonde
                     .objects
                     .filter(deelcompetitie__is_afgesloten=False,
-                            matches__vereniging=self.functie_nu.nhb_ver,
-                            deelcompetitie__laag=LAAG_REGIO)
+                            matches__vereniging=self.functie_nu.nhb_ver)
                     .values_list('matches', flat=True))
 
         pks2 = list(DeelKampioenschap

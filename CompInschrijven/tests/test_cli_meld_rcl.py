@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, ORGANISATIE_WA
-from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, RegioCompetitieSporterBoog, CompetitieIndivKlasse
+from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_competitie import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -34,7 +34,6 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
         self.deelcomp103_18m = (DeelCompetitie
                                 .objects
                                 .get(competitie=self.comp_18m,
-                                     laag=LAAG_REGIO,
                                      nhb_regio__regio_nr=103))
 
         self.indiv_klasse_bb = (CompetitieIndivKlasse

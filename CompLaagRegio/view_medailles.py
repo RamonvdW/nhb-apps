@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO
+from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -160,7 +160,6 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                          .objects
                          .select_related('competitie')
                          .filter(competitie__afstand=self.functie_nu.comp_type,
-                                 laag=LAAG_REGIO,
                                  nhb_regio__regio_nr=regio_nr)
                          .order_by('competitie__begin_jaar'))
             if deelcomps.count() < 1:

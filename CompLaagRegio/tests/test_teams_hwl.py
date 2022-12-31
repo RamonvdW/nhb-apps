@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, AG_NUL, LAAG_REGIO,
+from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, AG_NUL,
                                RegiocompetitieTeam, RegioCompetitieSporterBoog, RegiocompetitieRondeTeam)
 from Competitie.tests.test_fase import zet_competitie_fase
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
@@ -230,14 +230,12 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp18_regio111 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                              nhb_regio=self.regio_111,
+        self.deelcomp18_regio111 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                               competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
         self.deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                                              laag=LAAG_REGIO,
                                                               nhb_regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):
@@ -439,7 +437,6 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
         self.nhbver1 = NhbVereniging.objects.get(pk=self.nhbver1.pk)
 
-        team = RegiocompetitieTeam.objects.all()[0]
         self.assertEqual(team.deelcompetitie.pk, self.deelcomp18_regio111.pk)
         self.assertEqual(team.vereniging, self.nhbver1)
         self.assertEqual(team.volg_nr, 1)
@@ -750,7 +747,6 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
-        team_18 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp18_regio111)[0]
 
         # haal de wijzig-ag pagina op
         url = self.url_wijzig_ag % self.deelnemer_100002_18.pk

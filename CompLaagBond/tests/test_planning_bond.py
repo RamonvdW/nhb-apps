@@ -6,8 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+from Competitie.models import Competitie, DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -132,10 +131,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                                                    deel=DEEL_RK,
                                                                    nhb_rayon=self.rayon_1)[0]
         self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                                laag=LAAG_REGIO,
                                                                 nhb_regio=self.regio_101)[0]
         self.deelcomp_regio_105 = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                                laag=LAAG_REGIO,
                                                                 nhb_regio=self.regio_105)[0]
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie

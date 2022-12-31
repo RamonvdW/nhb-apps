@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import View
 from django.utils.formats import localize
-from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, DeelKampioenschap, DEEL_BK,
+from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap, DEEL_BK,
                                get_competitie_boog_typen)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -281,7 +281,6 @@ class CompetitieOverzichtView(View):
         context['planning_deelcomp'] = (DeelCompetitie
                                         .objects
                                         .filter(competitie=comp,
-                                                laag=LAAG_REGIO,
                                                 is_afgesloten=False,
                                                 nhb_regio=self.functie_nu.nhb_ver.regio))
 

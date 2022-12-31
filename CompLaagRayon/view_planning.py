@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, INSCHRIJF_METHODE_1, DeelCompetitie,
+from Competitie.models import (INSCHRIJF_METHODE_1, DeelCompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                DeelcompetitieRonde, CompetitieMatch,
@@ -157,8 +157,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         deelcomps = (DeelCompetitie
                      .objects
                      .select_related('nhb_regio')
-                     .filter(laag=LAAG_REGIO,
-                             competitie=deelkamp.competitie,
+                     .filter(competitie=deelkamp.competitie,
                              nhb_regio__rayon=deelkamp.nhb_rayon)
                      .order_by('nhb_regio__regio_nr'))
         context['regio_deelcomps'] = deelcomps

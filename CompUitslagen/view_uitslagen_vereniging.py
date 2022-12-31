@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbVereniging
-from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
+from Competitie.models import (TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSporterBoog)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -88,9 +88,8 @@ class UitslagenVerenigingIndivView(TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
-                        .get(laag=LAAG_REGIO,
-                             competitie=comp,
-                             competitie__is_afgesloten=False,       # FUTURE: op meer plekken dit filter toepassen
+                        .get(competitie=comp,
+                             competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:     # pragma: no cover
             raise Http404('Competitie niet gevonden')

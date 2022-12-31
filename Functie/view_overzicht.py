@@ -328,6 +328,13 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
                       .filter(rol__in=('HWL', 'SEC'))
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
+            alle = (Functie
+                    .objects
+                    .filter(rol__in=('HWL', 'SEC'))
+                    .exclude(bevestigde_email='')
+                    .select_related('nhb_ver')
+                    .order_by('nhb_ver__ver_nr',
+                              'rol'))
 
         elif self.rol_nu == Rollen.ROL_RKO:
             rayon_nr = self.functie_nu.nhb_rayon.rayon_nr
@@ -338,6 +345,14 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
                               nhb_ver__regio__rayon__rayon_nr=rayon_nr)
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
+            alle = (Functie
+                    .objects
+                    .filter(rol__in=('HWL', 'SEC'),
+                            nhb_ver__regio__rayon__rayon_nr=rayon_nr)
+                    .exclude(bevestigde_email='')
+                    .select_related('nhb_ver')
+                    .order_by('nhb_ver__ver_nr',
+                              'rol'))
 
         else:  # elif self.rol_nu == Rollen.ROL_RCL:
             regio_nr = self.functie_nu.nhb_regio.regio_nr
@@ -348,9 +363,18 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
                               nhb_ver__regio__regio_nr=regio_nr)
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
+            alle = (Functie
+                    .objects
+                    .filter(rol__in=('HWL', 'SEC'),
+                            nhb_ver__regio__regio_nr=regio_nr)
+                    .exclude(bevestigde_email='')
+                    .select_related('nhb_ver')
+                    .order_by('nhb_ver__ver_nr',
+                              'rol'))
 
         context['aantal'] = len(emails)
         context['emails'] = "; ".join(emails)
+        context['alle'] = alle
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

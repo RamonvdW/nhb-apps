@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRayon
-from Competitie.models import (LAAG_REGIO, DEELNAME_NEE,
+from Competitie.models import (DEELNAME_NEE,
                                Competitie, DeelCompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegioCompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                DeelKampioenschap, DEEL_RK)
@@ -204,11 +204,10 @@ class UitslagenRayonIndivView(TemplateView):
             # competitie is nog in de regiocompetitie fase
             context['regiocomp_nog_actief'] = True
 
-            # sporters moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+            # sporters komen uit de 4 regio's van het rayon
             deelcomp_pks = (DeelCompetitie
                             .objects
-                            .filter(laag=LAAG_REGIO,
-                                    competitie__is_afgesloten=False,
+                            .filter(competitie__is_afgesloten=False,
                                     competitie=comp,
                                     nhb_regio__rayon__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))

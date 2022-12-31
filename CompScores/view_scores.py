@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
                                CompetitieMatch, update_uitslag_teamcompetitie)
 from Functie.models import Rollen
@@ -54,8 +54,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -389,8 +388,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(laag=LAAG_REGIO,
-                             pk=deelcomp_pk))
+                        .get(pk=deelcomp_pk))
         except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -1057,8 +1055,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -1092,8 +1089,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
-                                                  laag=LAAG_REGIO)
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 

@@ -14,7 +14,7 @@ from Account.operations import account_create
 from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie, LAAG_REGIO,
+                               DeelCompetitie,
                                DeelKampioenschap, DEEL_RK, DEEL_BK,
                                RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
@@ -801,9 +801,8 @@ class TestData(object):
         for deelcomp in (DeelCompetitie
                          .objects
                          .select_related('competitie',
-                                         'nhb_rayon',
                                          'nhb_regio')
-                         .filter(laag=LAAG_REGIO)):
+                         .all()):
             is_18 = deelcomp.competitie.afstand == '18'
             regio_nr = deelcomp.nhb_regio.regio_nr
             if is_18:

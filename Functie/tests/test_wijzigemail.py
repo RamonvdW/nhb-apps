@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import DeelCompetitie, DeelKampioenschap, LAAG_REGIO, DEEL_RK, DEEL_BK
+from Competitie.models import DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie, Functie
 from Mailer.models import MailQueue
@@ -37,8 +37,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.functie_bko1 = deel1.functie
         self.functie_bko2 = DeelKampioenschap.objects.filter(deel=DEEL_BK).exclude(pk=deel1.pk)[0].functie
         self.functie_rko1 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=deel1.competitie, nhb_rayon=rayon_1)[0].functie
-        self.functie_rcl101 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=deel1.competitie, nhb_regio=regio_101)[0].functie
-        self.functie_rcl105 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=deel1.competitie, nhb_regio=regio_105)[0].functie
+        self.functie_rcl101 = DeelCompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_101)[0].functie
+        self.functie_rcl105 = DeelCompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_105)[0].functie
 
         # maak een test vereniging
         ver = NhbVereniging()

@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.models import (AG_NUL, LAAG_REGIO, AFSTANDEN, DEEL_RK, DEEL_BK,
+from Competitie.models import (AG_NUL, AFSTANDEN, DEEL_RK, DEEL_BK,
                                Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, DeelKampioenschap, DeelcompetitieRonde)
 from Functie.models import Functie
@@ -115,8 +115,7 @@ def _maak_deelcompetities(comp, regios, functies):
                      .objects
                      .select_related('competitie',
                                      'nhb_regio')
-                     .filter(laag=LAAG_REGIO,
-                             competitie__begin_jaar=comp.begin_jaar - 1,
+                     .filter(competitie__begin_jaar=comp.begin_jaar - 1,
                              competitie__afstand=comp.afstand)):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
@@ -126,7 +125,6 @@ def _maak_deelcompetities(comp, regios, functies):
     for obj in regios:
         functie = functies[("RCL", comp.afstand, obj.regio_nr)]
         deel = DeelCompetitie(competitie=comp,
-                              laag=LAAG_REGIO,
                               nhb_regio=obj,
                               functie=functie,
                               einde_teams_aanmaken=comp.einde_teamvorming)
@@ -315,7 +313,13 @@ def competities_aanmaken(jaar=None):
     if not jaar:
         jaar = bepaal_startjaar_nieuwe_competitie()
 
-    yearend = date(year=jaar, month=12, day=31)     # 31 december
+    now = timezone.now()
+    if now.month == 12 and now.day == 31:
+        # avoid test cases breaking on this date
+        yearend = date(year=jaar+1, month=1, day=1)     # 31 december + 1 day
+    else:
+        yearend = date(year=jaar, month=12, day=31)     # 31 december
+
     udvl = date(year=jaar, month=8, day=1)          # 1 augustus
     begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
     begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei

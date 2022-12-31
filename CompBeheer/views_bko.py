@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, DeelKampioenschap, DEEL_RK,
-                               LAAG_REGIO, MUTATIE_AFSLUITEN_REGIOCOMP)
+                               MUTATIE_AFSLUITEN_REGIOCOMP)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -41,11 +41,10 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_regio_status(competitie):
-        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        # sporters komen uit de 4 regio's van het rayon
         regio_deelcomps = (DeelCompetitie
                            .objects
-                           .filter(laag=LAAG_REGIO,
-                                   competitie=competitie)
+                           .filter(competitie=competitie)
                            .select_related('nhb_regio',
                                            'nhb_regio__rayon')
                            .order_by('nhb_regio__regio_nr'))

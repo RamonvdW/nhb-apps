@@ -10,7 +10,7 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
+from Competitie.models import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
                                Competitie, DeelCompetitie)
 from Functie.models import Rollen
@@ -54,7 +54,6 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(competitie=comp_pk,
-                             laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -134,7 +133,6 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp_pk,
-                             laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -226,8 +224,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                      .select_related('competitie',
                                      'nhb_regio',
                                      'nhb_regio__rayon')
-                     .filter(competitie=comp_pk,
-                             laag=LAAG_REGIO)
+                     .filter(competitie=comp_pk)
                      .order_by('nhb_regio__regio_nr'))
 
         context['comp'] = comp

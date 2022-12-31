@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO
+from Competitie.models import Competitie, DeelCompetitie
 
 
 class Command(BaseCommand):
@@ -16,8 +16,7 @@ class Command(BaseCommand):
                          .objects
                          .select_related('nhb_regio')
                          .filter(competitie=comp,
-                                 is_afgesloten=False,
-                                 laag=LAAG_REGIO)
+                                 is_afgesloten=False)
                          .order_by('nhb_regio__regio_nr')):
 
             regio_nr = deelcomp.nhb_regio.regio_nr

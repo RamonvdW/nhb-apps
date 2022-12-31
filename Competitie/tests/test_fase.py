@@ -8,9 +8,9 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               LAAG_REGIO,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Functie.models import Rollen, Functie
+from NhbStructuur.models import NhbRegio
 import datetime
 
 
@@ -138,7 +138,7 @@ def zet_competitie_fase(comp, fase):
 
     if fase == 'G':
         # alle regios afsluiten
-        for deelcomp in comp.deelcompetitie_set.filter(is_afgesloten=False, laag=LAAG_REGIO):
+        for deelcomp in comp.deelcompetitie_set.filter(is_afgesloten=False):
             deelcomp.is_afgesloten = True
             deelcomp.save(update_fields=['is_afgesloten'])
         comp.save()
@@ -181,23 +181,25 @@ class TestCompetitieFase(TestCase):
         comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
         comp.save()
 
+        dummy_functie = Functie.objects.get(rol='MWZ')
+        regio_116 = NhbRegio.objects.get(regio_nr=116)
+
         deelcomp_regio = DeelCompetitie(competitie=comp,
                                         is_afgesloten=False,
-                                        laag=LAAG_REGIO)
+                                        nhb_regio=regio_116,
+                                        functie=dummy_functie)
         deelcomp_regio.save()
-
-        functie = Functie.objects.get(rol='MWZ')
 
         deelkamp_rk = DeelKampioenschap(competitie=comp,
                                         is_afgesloten=False,
                                         deel=DEEL_RK,
-                                        functie=functie)
+                                        functie=dummy_functie)
         deelkamp_rk.save()
 
         deelkamp_bk = DeelKampioenschap(competitie=comp,
                                         is_afgesloten=False,
                                         deel=DEEL_BK,
-                                        functie=functie)
+                                        functie=dummy_functie)
         deelkamp_bk.save()
 
         comp.bepaal_fase()

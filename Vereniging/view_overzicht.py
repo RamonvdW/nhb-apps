@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, DeelKampioenschap,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1, DEEL_RK)
+                               INSCHRIJF_METHODE_1, DEEL_RK)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -101,8 +101,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
                 deelcomps = (DeelCompetitie
                              .objects
-                             .filter(laag=LAAG_REGIO,
-                                     competitie__is_afgesloten=False,
+                             .filter(competitie__is_afgesloten=False,
                                      nhb_regio=ver.regio)
                              .select_related('competitie'))
 

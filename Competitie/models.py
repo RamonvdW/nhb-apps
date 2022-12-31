@@ -24,8 +24,6 @@ my_logger = logging.getLogger('NHBApps.Competitie')
 AG_NUL = Decimal('0.000')
 AG_LAAGSTE_NIET_NUL = Decimal('0.001')
 
-LAAG_REGIO = 'Regio'    # TODO: weghalen nadat DeelCompetitie.laag verwijderd is
-
 AFSTANDEN = [('18', 'Indoor'),
              ('25', '25m 1pijl')]
 
@@ -340,8 +338,7 @@ class Competitie(models.Model):
             return
 
         # fase F: vaststellen uitslag in elke regio (RCL)
-        if self.deelcompetitie_set.filter(is_afgesloten=False,
-                                          laag=LAAG_REGIO).count() > 0:
+        if self.deelcompetitie_set.filter(is_afgesloten=False).count() > 0:
             self.fase = 'F'
             return
 
@@ -581,11 +578,6 @@ class DeelCompetitie(models.Model):
     """ Deze database tabel bevat informatie over een deel van een competitie:
         regiocompetitie (16x), rayoncompetitie (4x) of bondscompetitie (1x)
     """
-    LAAG = [(LAAG_REGIO, 'Regiocompetitie'),            # TODO: verwijderen
-            ('RK', 'Rayoncompetitie'),
-            ('BK', 'Bondscompetitie')]
-
-    laag = models.CharField(max_length=5, choices=LAAG)     # TODO: verwijderen (altijd LAAG_REGIO)
 
     # hoort bij welke competitie?
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
@@ -595,22 +587,13 @@ class DeelCompetitie(models.Model):
     # geen van beiden is gezet voor de BK
 
     # regio, voor regiocompetitie
-    nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT,
-                                  null=True, blank=True)    # optioneel want alleen voor laag Regio     # TODO: niet meer optioneel maken
-
-    # rayon, voor RK
-    nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,       # TODO: verwijderen
-                                  null=True, blank=True)    # optioneel want alleen voor laag Rayon
+    nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
 
     # welke beheerder hoort hier bij?
-    functie = models.ForeignKey(Functie, on_delete=models.PROTECT,
-                                null=True, blank=True)      # optioneel (om migratie toe te staan)
+    functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
 
     # is de beheerder klaar?
     is_afgesloten = models.BooleanField(default=False)
-
-    # wedstrijden - alleen voor de RK en BK
-    rk_bk_matches = models.ManyToManyField(CompetitieMatch, blank=True)     # TODO: verwijderen
 
     # specifieke instellingen voor deze regio
     inschrijf_methode = models.CharField(max_length=1,
@@ -654,13 +637,7 @@ class DeelCompetitie(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        if self.nhb_regio:
-            substr = str(self.nhb_regio)
-        elif self.nhb_rayon:
-            substr = str(self.nhb_rayon)
-        else:
-            substr = "BK"
-        return "%s - %s" % (self.competitie, substr)
+        return "%s - %s" % (self.competitie, self.nhb_regio)
 
     objects = models.Manager()      # for the editor only
 

@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
+from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie,
                                RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
 from Functie.models import Rollen
@@ -96,7 +96,6 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
-                             laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -310,7 +309,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
-                             laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
@@ -884,7 +882,6 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
-                             laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):

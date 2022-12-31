@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.db.models import F
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from BasisTypen.models import TeamType
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO,
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMatch, RegioCompetitieSporterBoog, KampioenschapSporterBoog,
@@ -37,9 +37,7 @@ class DeelCompetitieAdmin(CreateOnlyAdmin):
 
     list_filter = ('competitie', 'nhb_regio')
 
-    list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
-
-    filter_horizontal = ('rk_bk_matches',)
+    list_select_related = ('competitie', 'nhb_regio')
 
 
 class DeelKampioenschapAdmin(CreateOnlyAdmin):
@@ -228,7 +226,6 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
                                   .objects
                                   .select_related('competitie',
                                                   'nhb_regio')
-                                  .filter(laag=LAAG_REGIO)
                                   .order_by('competitie__afstand',
                                             'nhb_regio__regio_nr'))
 
@@ -282,7 +279,6 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_regio',
-                           'deelcompetitie__nhb_rayon',
                            'deelcompetitie__competitie',
                            'vereniging',
                            'team_klasse')
@@ -306,11 +302,8 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         elif db_field.name == 'deelcompetitie':
             kwargs['queryset'] = (DeelCompetitie
                                   .objects
-                                  .select_related('nhb_rayon',
-                                                  'nhb_regio')
+                                  .select_related('nhb_regio')
                                   .order_by('competitie__afstand',
-                                            'laag',
-                                            'nhb_rayon__rayon_nr',
                                             'nhb_regio__regio_nr'))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

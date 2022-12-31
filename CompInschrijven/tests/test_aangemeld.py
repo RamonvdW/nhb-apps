@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO,
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
@@ -97,7 +97,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
+        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -277,7 +277,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         # coverage voor models __str__
-        obj = RegioCompetitieSporterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
     def test_overzicht_bko(self):
@@ -348,7 +348,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_overzicht_rcl(self):
         comp = Competitie.objects.get(afstand='18')
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
+        functie_rcl = DeelCompetitie.objects.get(competitie=comp, nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -382,7 +382,6 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
@@ -443,7 +442,6 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         # wissel naar RCL rol
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
         self.e2e_wissel_naar_functie(functie_rcl)
 

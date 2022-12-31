@@ -14,7 +14,7 @@ from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSporterBoog, KampioenschapSporterBoog,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1, DEELNAME_NEE, DEEL_RK)
+                               INSCHRIJF_METHODE_1, DEELNAME_NEE, DEEL_RK)
 from Functie.models import Functie, Rollen
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -190,7 +190,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                .select_related('competitie')
                                .exclude(competitie__is_afgesloten=True)
                                .filter(competitie__pk__in=comp_pks,
-                                       laag=LAAG_REGIO,
                                        nhb_regio=regio)
                                .order_by('competitie__afstand')):
             comp = deelcompetitie.competitie

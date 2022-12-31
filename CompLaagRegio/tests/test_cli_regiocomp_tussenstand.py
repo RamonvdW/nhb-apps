@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, LAAG_REGIO,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie,
                                DeelcompetitieRonde, RegioCompetitieSporterBoog, CompetitieMatch,
                                DeelKampioenschap, DEEL_BK)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
@@ -38,8 +38,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         competitie_klassengrenzen_vaststellen(comp_18)
         competitie_klassengrenzen_vaststellen(comp_25)
 
-        self.deelcomp_r101 = DeelCompetitie.objects.filter(laag=LAAG_REGIO,
-                                                           competitie=self.comp,
+        self.deelcomp_r101 = DeelCompetitie.objects.filter(competitie=self.comp,
                                                            nhb_regio=self.regio_101)[0]
 
         # login als BB

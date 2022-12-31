@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, LAAG_REGIO,
+from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse,
                                RegioCompetitieSporterBoog, KampioenschapTeam, DeelKampioenschap, DEEL_RK)
 from Competitie.tests.test_fase import zet_competitie_fase
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
@@ -226,14 +226,12 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp18_regio111 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                              nhb_regio=self.regio_111,
+        self.deelcomp18_regio111 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                               competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
         self.deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                                              laag=LAAG_REGIO,
                                                               nhb_regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):

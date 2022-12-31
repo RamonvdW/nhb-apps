@@ -8,10 +8,8 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
-from Competitie.models import (DeelCompetitie, CompetitieMatch,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegioCompetitieSporterBoog, RegiocompetitieTeam,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1)
+from Competitie.models import (DeelCompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam, INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -187,12 +185,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_18 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand='18')
 
-        self.deelcomp_regio_25 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_25 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand='25')
 
     def _maak_wedstrijden(self):
@@ -599,8 +595,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         # 25m1pijl wedstrijd
         self.ronde.matches.clear()
-        self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_18 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand=25)
         ronde = maak_deelcompetitie_ronde(self.deelcomp_regio_18)
         ronde.matches.add(self.wedstrijden[0])

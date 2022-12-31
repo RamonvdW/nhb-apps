@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieMatch,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1)
+                               INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog
@@ -206,8 +206,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                         nhb_regio=self.regio_111,
+        self.deelcomp_regio = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
 
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1

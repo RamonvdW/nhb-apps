@@ -172,6 +172,7 @@ class TestBeheer(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         for url in BEHEER_PAGINAS:
+            # print(url)
             with self.assert_max_queries(20):
                 self.client.get(url)
 

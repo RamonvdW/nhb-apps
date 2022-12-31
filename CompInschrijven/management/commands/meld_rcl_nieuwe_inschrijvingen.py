@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO
+from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog
 from Functie.models import Functie
 from Taken.operations import check_taak_bestaat, maak_taak
 from datetime import timedelta
@@ -34,7 +34,6 @@ class Command(BaseCommand):
         afstand_regio2deelcomp = dict()     # [(afstand_str, regio_nr)] = DeelCompetitie
         for deelcomp in (DeelCompetitie
                          .objects
-                         .filter(laag=LAAG_REGIO)
                          .select_related('competitie',
                                          'nhb_regio')):
 

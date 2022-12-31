@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import F, Q
 from django.db.utils import DataError, OperationalError, IntegrityError
 from Competitie.models import (CompetitieTaken,
-                               LAAG_REGIO, Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
+                               Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 import traceback
@@ -174,8 +174,7 @@ class Command(BaseCommand):
         for ronde in (DeelcompetitieRonde
                       .objects
                       .select_related('deelcompetitie')
-                      .filter(deelcompetitie__is_afgesloten=False,
-                              deelcompetitie__laag=LAAG_REGIO)
+                      .filter(deelcompetitie__is_afgesloten=False)
                       .all()):
 
             week_nr = ronde.week_nr
@@ -358,7 +357,7 @@ class Command(BaseCommand):
     def _update_team_scores():
         """ Update alle team scores aan de hand van wie er in de teams zitten en de door de RCL geselecteerde scores
         """
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, is_afgesloten=False):
+        for deelcomp in DeelCompetitie.objects.filter(is_afgesloten=False):
             ronde_nr = deelcomp.huidige_team_ronde
             if 1 <= ronde_nr <= 7:
                 # pak alle teams in deze deelcompetitie erbij

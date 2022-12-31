@@ -9,7 +9,7 @@ from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, DeelCompetitie, KampioenschapIndivKlasseLimiet,
+from Competitie.models import (DeelCompetitie, KampioenschapIndivKlasseLimiet,
                                DeelKampioenschap, DEEL_RK,
                                KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE)
 from Functie.models import Rollen
@@ -44,11 +44,10 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_regio_status(competitie):
-        # deelnemers moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        # deelnemers komen uit de 4 regio's van het rayon
         regio_deelcomps = (DeelCompetitie
                            .objects
-                           .filter(laag=LAAG_REGIO,
-                                   competitie=competitie)
+                           .filter(competitie=competitie)
                            .select_related('nhb_regio',
                                            'nhb_regio__rayon')
                            .order_by('nhb_regio__regio_nr'))

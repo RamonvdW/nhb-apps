@@ -10,7 +10,7 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
-                               INSCHRIJF_METHODE_3, LAAG_REGIO,
+                               INSCHRIJF_METHODE_3,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
@@ -102,7 +102,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
+        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -136,7 +136,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         # zet de inschrijfmethode van regio 101 op 'methode 3' (=voorkeur dagdelen)
         dagdelen = ['GN', 'ZAT', 'ZON']   # uit: DAGDEEL_AFKORTINGEN
 
-        deelcomp = DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101, competitie=comp)[0]
+        deelcomp = DeelCompetitie.objects.filter(nhb_regio=self.regio_101, competitie=comp)[0]
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = ",".join(dagdelen)
         deelcomp.save(update_fields=['inschrijf_methode', 'toegestane_dagdelen'])
@@ -235,7 +235,6 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     def test_behoefte3_18(self):
         comp = Competitie.objects.get(afstand='18')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
@@ -272,7 +271,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
     def test_behoefte3_25(self):
         comp = Competitie.objects.filter(afstand='25').all()[0]
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
+        functie_rcl = DeelCompetitie.objects.get(competitie=comp, nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
@@ -338,7 +337,6 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)

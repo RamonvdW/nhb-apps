@@ -12,7 +12,7 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie,
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
@@ -439,8 +439,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         # pas ook de deelcompetities aan
         for deelcomp in (DeelCompetitie
                          .objects
-                         .filter(competitie=comp,
-                                 laag=LAAG_REGIO)):
+                         .filter(competitie=comp)):
 
             # volg mee met wijzigingen in de competitie datums
             # neem ook meteen template datums mee (2001-01-01)

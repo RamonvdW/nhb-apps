@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog, LAAG_REGIO,
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_fase import zet_competitie_fase
@@ -94,7 +94,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
+        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -297,7 +297,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # RCL
-        deelcomp = DeelCompetitie.objects.get(competitie=comp18, laag=LAAG_REGIO, nhb_regio=self.regio_101)
+        deelcomp = DeelCompetitie.objects.get(competitie=comp18, nhb_regio=self.regio_101)
         functie_rcl = deelcomp.functie
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
@@ -326,7 +326,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # TODO: add WL
 
         # coverage voor models __str__
-        obj = RegioCompetitieSporterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
 # end of file

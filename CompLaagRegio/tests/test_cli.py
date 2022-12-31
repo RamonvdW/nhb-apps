@@ -6,10 +6,10 @@
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie, LAAG_REGIO,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, DeelCompetitie,
                                RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.tests.test_fase import zet_competitie_fase
+from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, ScoreHist, Score, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -51,10 +51,11 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         comp.save()
         self.comp = comp
 
+        dummy_functie = Functie.objects.filter(rol='RCL', nhb_regio__regio_nr=111)[0]
         deelcomp = DeelCompetitie(
                             competitie=comp,
-                            laag=LAAG_REGIO,
-                            nhb_regio=regio_111)
+                            nhb_regio=regio_111,
+                            functie=dummy_functie)
         deelcomp.save()
 
         indiv_r1 = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_r)[1]

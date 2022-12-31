@@ -15,7 +15,7 @@ from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from BasisTypen.models import ORGANISATIE_NHB
 from BasisTypen.operations import get_organisatie_teamtypen
-from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, LAAG_REGIO,
+from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse,
                                DeelCompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                DeelKampioenschap, DEEL_RK,
@@ -809,12 +809,11 @@ class Command(BaseCommand):
             en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
         """
 
-        # sporter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        # sporter komen uit de 4 regio's van het rayon
         pks = list()
         for deelcomp in (DeelCompetitie
                          .objects
-                         .filter(laag=LAAG_REGIO,
-                                 competitie=competitie,
+                         .filter(competitie=competitie,
                                  nhb_regio__rayon__rayon_nr=rayon_nr)):
             pks.append(deelcomp.pk)
         # for

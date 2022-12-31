@@ -10,7 +10,7 @@ from BasisTypen.models import BOOGTYPE_AFKORTING_RECURVE
 from Functie.operations import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, RegioCompetitieSporterBoog,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, LAAG_REGIO,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                DeelKampioenschap, DEEL_RK,
                                DeelcompetitieRonde, CompetitieMatch)
 from Competitie.operations import competities_aanmaken
@@ -237,8 +237,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                         nhb_regio=self.regio_111,
+        self.deelcomp_regio = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
 
     def _zet_sporter_voorkeuren(self, lid_nr):

@@ -11,9 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog, CompetitieMatch,
-                               LAAG_REGIO, AG_NUL,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               DAGDELEN, DAGDEEL_AFKORTINGEN)
+                               AG_NUL, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige
@@ -73,9 +71,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # controleer dat deelcompetitie bij de juist regio hoort
         account = self.request.user
         sporter = account.sporter_set.all()[0]      # ROL_SPORTER geeft bescherming tegen geen nhblid
-        if (sporterboog.sporter != sporter
-                or deelcomp.laag != LAAG_REGIO
-                or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
+        if (sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
@@ -272,9 +268,7 @@ class RegiocompetitieAanmeldenView(View):
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat deelcompetitie bij de juist regio hoort
-        if (sporterboog.sporter != sporter
-                or deelcomp.laag != LAAG_REGIO
-                or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
+        if (sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
