@@ -77,8 +77,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     match.beschrijving1 = ronde.deelcompetitie.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
-                    deelkamps = match.deelkampioenschappen_set.all()
-                    if len(deelkamps) > 0:
+                    deelkamps = match.deelkampioenschap_set.all()
+                    if len(deelkamps) > 0:      # pragma: no branch
                         deelkamp = deelkamps[0]
                         match.beschrijving1 = deelkamp.competitie.beschrijving
                         if deelkamp.deel == DEEL_RK:
