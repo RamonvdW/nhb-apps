@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -696,17 +696,21 @@ class Command(BaseCommand):
             if ver_nr in settings.CRM_IMPORT_BEHOUD_CLUB:
                 continue
             obj = self._vind_vereniging(ver_nr)
-            self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
-            if not self.dryrun:
-                # kan alleen als er geen leden meer aan hangen --> de modellen beschermen dit automatisch
-                # vang de gerelateerde exceptie af
-                try:
-                    del self._cache_ver[obj.pk]
-                    obj.delete()
-                    self._count_verwijderingen += 1
-                except ProtectedError as exc:       # pragma: no cover
-                    self._count_errors += 1
-                    self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
+            leden_count = obj.sporter_set.count()
+            if leden_count > 0:
+                self.stderr.write('[ERROR] Kan vereniging %s met %s leden niet verwijderen' % (str(obj), leden_count))
+            else:
+                self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
+                if not self.dryrun:
+                    # kan alleen als er geen leden meer aan hangen --> de modellen beschermen dit automatisch
+                    # vang de gerelateerde exceptie af
+                    try:
+                        del self._cache_ver[obj.pk]
+                        obj.delete()
+                        self._count_verwijderingen += 1
+                    except ProtectedError as exc:       # pragma: no cover
+                        self._count_errors += 1
+                        self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
         # while
 
     def _import_clubs_secretaris(self, data):
