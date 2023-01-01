@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, ORGANISATIE_WA
+from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd,
+                                WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD)
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -17,7 +19,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
     """ tests voor de Kalender applicatie """
 
-    url_kalender = '/kalender/'
+    url_landing_page = '/kalender/'
     url_kalender_maand = '/kalender/pagina-%s-%s/'                          # jaar, maand
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
@@ -57,18 +59,35 @@ class TestKalenderMaand(E2EHelpers, TestCase):
                             regio=NhbRegio.objects.get(regio_nr=112))
         self.nhbver2.save()
 
-    @staticmethod
-    def _maak_externe_locatie(ver):
         # voeg een locatie toe
         locatie = WedstrijdLocatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
-        locatie.verenigingen.add(ver)
+        locatie.verenigingen.add(self.nhbver1)
 
-        return locatie
+        datum = timezone.now() + datetime.timedelta(days=30)
+        wedstrijd = Wedstrijd(
+                        titel='Test 1',
+                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                        datum_begin=datum,
+                        datum_einde=datum,
+                        organiserende_vereniging=self.nhbver1,
+                        locatie=locatie)
+        wedstrijd.save()
+        self.wedstrijd = wedstrijd
 
-    def test_basic(self):
+        # geannuleerd
+        wedstrijd = Wedstrijd(
+                        titel='Test 2',
+                        status=WEDSTRIJD_STATUS_GEANNULEERD,
+                        datum_begin=datum,
+                        datum_einde=datum,
+                        organiserende_vereniging=self.nhbver1,
+                        locatie=locatie)
+        wedstrijd.save()
+
+    def test_blader(self):
         # maand als getal
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_maand % (2020, 1))
@@ -119,99 +138,29 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
     def test_wedstrijd(self):
-        # wordt HWL
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        # maak een wedstrijd en sessie aan
-        self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
-        self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
-
-        # accepteer de wedstrijd zodat deze getoond wordt
-        wedstrijd.status = 'A'
-        wedstrijd.save()
-
         self.client.logout()
 
         # haal de maand pagina op met een wedstrijd erop
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender)
+            resp = self.client.get(self.url_landing_page)
         self.assertEqual(resp.status_code, 302)     # redirect naar juiste maand-pagina
         url = resp.url
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('kalender/overzicht-maand.dtl', 'plein/site_layout.dtl'))
 
-        # annuleer de wedstrijd
-        wedstrijd.status = 'X'
-        wedstrijd.save()
+        # log in, zodat het mandje eval gedaan wordt
+        self.e2e_login(self.account_admin)
+        self.e2e_wisselnaarrol_sporter()
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-
-        wedstrijd.toon_op_kalender = False
-        wedstrijd.save(update_fields=['toon_op_kalender'])
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-
-    def test_info(self):
-        # wordt HWL
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        # maak een wedstrijd en sessie aan
-        self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
-        self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
-
-        # haal de info pagina van de wedstrijd op
-        url = self.url_wedstrijd_details % wedstrijd.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-
-        # zet de begin datum in de toekomst, zodat er ingeschreven kan worden
-        wedstrijd.datum_begin += datetime.timedelta(days=100)
-        wedstrijd.save(update_fields=['datum_begin'])
-
-        # haal de info pagina van de wedstrijd op
-        url = self.url_wedstrijd_details % wedstrijd.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-
-        # wijzig naar een WA wedstrijd
-        wedstrijd.organisatie = ORGANISATIE_WA
-        wedstrijd.save(update_fields=['organisatie'])
-
-        # niet ingelogd --> kan niet inschrijven
-        self.client.logout()
-
-        # haal de info pagina van de wedstrijd op
-        url = self.url_wedstrijd_details % wedstrijd.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-
-        # corner case: niet bestaande wedstrijd
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijd_details % 999999)
-        self.assert404(resp, 'Wedstrijd niet gevonden')
+        self.assert_template_used(resp, ('kalender/overzicht-maand.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 

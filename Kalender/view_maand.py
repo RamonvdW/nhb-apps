@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,7 +63,7 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
                            datum_begin__gte=now)
                    .order_by('datum_begin'))
 
-    for wedstrijd in wedstrijden:
+    for wedstrijd in wedstrijden:       # pragma: no branch
         deadline = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
         if now.date() <= deadline:
             # hier kan nog op ingeschreven worden

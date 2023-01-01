@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -274,9 +274,10 @@ class E2EHelpers(TestCase):
         if skip_broodkruimels:                                                  # pragma: no branch
             pos = content.find('class="broodkruimels-')
             if pos >= 0:
-                content = content[pos:]
-                pos = content.find('</div>')
-                content = content[pos:]
+                remainder = content[pos:]
+                content = content[:pos]             # behoud de navbar
+                pos = remainder.find('</div>')
+                content += remainder[pos+6:]
 
         urls = list()
         while len(content):

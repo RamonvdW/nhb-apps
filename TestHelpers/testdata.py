@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -825,7 +825,7 @@ class TestData(object):
                 else:
                     self.deelkamp25_bk = deelkamp
 
-            elif deelkamp.deel == DEEL_RK:
+            else:  # if deelkamp.deel == DEEL_RK:
                 rayon_nr = deelkamp.nhb_rayon.rayon_nr
                 if is_18:
                     self.deelkamp18_rk[rayon_nr] = deelkamp
