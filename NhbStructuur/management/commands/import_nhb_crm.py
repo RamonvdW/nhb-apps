@@ -178,6 +178,7 @@ class Command(BaseCommand):
             rayon_nr = int(rayon_nr)
         except ValueError:
             self.stderr.write('[ERROR] Foutief rayon nummer: %s (geen getal)' % repr(rayon_nr))
+            self._count_errors += 1
         else:
             try:
                 return self._cache_rayon[rayon_nr]
@@ -190,6 +191,7 @@ class Command(BaseCommand):
             regio_nr = int(regio_nr)
         except ValueError:
             self.stderr.write('[ERROR] Foutief regio nummer: %s (geen getal)' % repr(regio_nr))
+            self._count_errors += 1
         else:
             try:
                 return self._cache_regio[regio_nr]
@@ -202,6 +204,7 @@ class Command(BaseCommand):
             ver_nr = int(ver_nr)
         except ValueError:
             self.stderr.write('[ERROR] Foutief verenigingsnummer: %s (geen getal)' % repr(ver_nr))
+            self._count_errors += 1
         else:
             try:
                 return self._cache_ver[ver_nr]
@@ -214,6 +217,7 @@ class Command(BaseCommand):
             ver_nr = int(ver_nr)
         except ValueError:          # pragma: no cover
             self.stderr.write('[ERROR] Foutief verenigingsnummer: %s (geen getal)' % repr(ver_nr))
+            self._count_errors += 1
         else:
             try:
                 return self._cache_sec[ver_nr]
@@ -226,7 +230,7 @@ class Command(BaseCommand):
             lid_nr = int(lid_nr)
         except ValueError:
             self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % lid_nr)
-            pass
+            self._count_errors += 1
         else:
             try:
                 return self._cache_sporter[lid_nr]
@@ -486,6 +490,7 @@ class Command(BaseCommand):
                 adres_spl = adres.strip().split('\n')
                 if len(adres_spl) != 2:
                     self.stderr.write('[ERROR] Vereniging %s adres bestaat niet uit 2 regels: %s' % (ver_nr, repr(club['address'])))
+                    self._count_errors += 1
                 if len(adres_spl) >= 2:
                     ver_adres1 = adres_spl[0]
                     ver_adres2 = adres_spl[1]
@@ -499,11 +504,13 @@ class Command(BaseCommand):
                 if len(ver_bic) not in (8, 11):
                     self.stderr.write('[ERROR] Vereniging %s heeft BIC %s met foute length %s (verwacht: 8 of 11) horende bij IBAN %s' % (
                                         ver_nr, repr(ver_bic), len(ver_bic), repr(ver_iban)))
+                    self._count_errors += 1
                     ver_bic = None
 
                 if len(ver_iban) != 18:
                     self.stderr.write('[ERROR] Vereniging %s heeft IBAN %s met foute length %s (verwacht: 18)' % (
                                         ver_nr, repr(ver_iban), len(ver_iban)))
+                    self._count_errors += 1
                     ver_bic = None
             else:
                 # een van de twee is afwezig
@@ -527,6 +534,7 @@ class Command(BaseCommand):
                 # controleer de IBAN
                 if not self._check_iban(ver_iban):
                     self.stderr.write('[ERROR] Vereniging %s heeft een foutieve IBAN: %s' % (ver_nr, repr(ver_iban)))
+                    self._count_errors += 1
                     ver_bic = None
 
             # zet None om naar lege string
@@ -645,6 +653,7 @@ class Command(BaseCommand):
                 if not regio_obj:
                     self._count_errors += 1
                     self.stderr.write('[ERROR] Vereniging %s hoort bij onbekende regio %s' % (ver_nr, ver_regio))
+                    self._count_errors += 1
                 else:
                     self.stdout.write('[INFO] Vereniging %s aangemaakt: %s' % (ver_nr, repr(ver.naam)))
                     self._count_toevoegingen += 1
@@ -699,6 +708,7 @@ class Command(BaseCommand):
             leden_count = obj.sporter_set.count()
             if leden_count > 0:
                 self.stderr.write('[ERROR] Kan vereniging %s met %s leden niet verwijderen' % (str(obj), leden_count))
+                self._count_errors += 1
             else:
                 self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
                 if not self.dryrun:
@@ -709,8 +719,8 @@ class Command(BaseCommand):
                         obj.delete()
                         self._count_verwijderingen += 1
                     except ProtectedError as exc:       # pragma: no cover
-                        self._count_errors += 1
                         self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
+                        self._count_errors += 1
         # while
 
     def _import_clubs_secretaris(self, data):
@@ -882,6 +892,7 @@ class Command(BaseCommand):
                 lid_nr = int(lid_nr)
             except ValueError:
                 self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % lid_nr)
+                self._count_errors += 1
                 continue
 
             lid_voornaam = member['first_name']
@@ -1013,6 +1024,7 @@ class Command(BaseCommand):
                 pos = postadres.find(postcode)
                 if pos < 0:
                     self.stderr.write('[ERROR] Postcode %s niet gevonden in adres %s' % (repr(postcode), repr(postadres)))
+                    self._count_errors += 1
                 else:
                     # typisch: "Straatnaam 123\n1234 ZZ  Plaats\n"
                     sub_postadres = postadres[:pos]             # postcode en verder eraf kappen
@@ -1495,8 +1507,8 @@ class Command(BaseCommand):
                         obj.delete()
                         self._count_verwijderingen += 1
                     except ProtectedError as exc:
-                        self._count_errors += 1
                         self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
+                        self._count_errors += 1
         # while
 
         for code, aantal in self._opleiding_onbekend.items():
@@ -1564,6 +1576,7 @@ class Command(BaseCommand):
             except WedstrijdLocatie.MultipleObjectsReturned:            # pragma: no cover
                 # er is een ongelukje gebeurt
                 self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
+                self._count_errors += 1
                 continue
             except WedstrijdLocatie.DoesNotExist:
                 # nieuw aanmaken
