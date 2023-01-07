@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Teams functie """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders', 'Competitie.tests.test_competitie')
+    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
 
     url_regio_instellingen = '/bondscompetities/regio/instellingen/%s/regio-%s/'  # comp_pk, regio-nr
     url_regio_globaal = '/bondscompetities/regio/instellingen/%s/globaal/'        # comp_pk

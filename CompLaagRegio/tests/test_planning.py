@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Planning functie """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders', 'Competitie.tests.test_competitie')
+    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
 
     url_planning_bond = '/bondscompetities/bk/planning/%s/'                                 # deelcomp_pk
     url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk

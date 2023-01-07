@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     """ tests voor de CompBeheer applicatie, module BKO """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders', 'Competitie.tests.test_competitie')
+    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
 
     url_competitie_overzicht = '/bondscompetities/%s/'                                          # comp_pk
     url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                            # comp_pk

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
     """ tests voor de CompUitslagen applicatie, module Uitslagen """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders', 'Competitie.tests.test_competitie')
+    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
 
     url_overzicht = '/bondscompetities/%s/'
     url_uitslagen_regio = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/'                 # comp_pk, comp_boog
