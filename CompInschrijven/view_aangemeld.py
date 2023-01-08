@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -98,7 +98,7 @@ def formatteer_objs(objs):
         else:
             obj.voorkeuren = voorkeuren
 
-            if voorkeuren.para_met_rolstoel:
+            if voorkeuren.para_voorwerpen:
                 obj.notities += '\nSporter laat voorwerpen op de schietlijn staan\n'
 
             if voorkeuren.opmerking_para_sporter:
@@ -373,7 +373,7 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
             klasse = deelnemer.indiv_klasse
             team_str = 'Ja' if deelnemer.inschrijf_voorkeur_team else 'Nee'
             eigen_str = 'Ja' if voorkeuren.voorkeur_eigen_blazoen else 'Nee'
-            para_voorwerpen = 'Ja' if voorkeuren.para_met_rolstoel else 'Nee'
+            para_voorwerpen = 'Ja' if voorkeuren.para_voorwerpen else 'Nee'
 
             if heeft_dagdeel:
                 dagdeel_str = DAGDEEL2LABEL[deelnemer.inschrijf_voorkeur_dagdeel][1]  # lange beschrijving

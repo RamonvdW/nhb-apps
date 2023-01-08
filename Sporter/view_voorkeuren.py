@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -127,13 +127,13 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             voorkeuren.opmerking_para_sporter = para_notitie
             voorkeuren.save(update_fields=['opmerking_para_sporter'])
 
-        old_voorkeur_para_met_rolstoel = voorkeuren.para_met_rolstoel
-        voorkeuren.para_met_rolstoel = False
-        if request.POST.get('para_rolstoel', None):
-            voorkeuren.para_met_rolstoel = True
-        if old_voorkeur_para_met_rolstoel != voorkeuren.para_met_rolstoel:
+        old_voorkeur_para_voorwerpen = voorkeuren.para_voorwerpen
+        voorkeuren.para_voorwerpen = False
+        if request.POST.get('para_voorwerpen', None):
+            voorkeuren.para_voorwerpen = True
+        if old_voorkeur_para_voorwerpen != voorkeuren.para_voorwerpen:
             # wijziging opslaan
-            voorkeuren.save(update_fields=['para_met_rolstoel'])
+            voorkeuren.save(update_fields=['para_voorwerpen'])
 
         old_disc_outdoor = voorkeuren.voorkeur_discipline_outdoor
         voorkeuren.voorkeur_discipline_outdoor = False

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -412,18 +412,18 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # niet-para sporter mag ook een opmerking invoeren
-        voorkeuren = SporterVoorkeuren.objects.all()[0]
+        voorkeuren = SporterVoorkeuren.objects.filter(sporter__account=self.account_normaal)[0]
         self.assertEqual(voorkeuren.opmerking_para_sporter, '')
-        self.assertFalse(voorkeuren.para_met_rolstoel)
+        self.assertFalse(voorkeuren.para_voorwerpen)
 
         with self.assert_max_queries(26):
             resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test 1',
-                                                          'para_rolstoel': 'on'})
+                                                          'para_voorwerpen': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
         self.assertEqual(voorkeuren.opmerking_para_sporter, 'Hallo test 1')
-        self.assertTrue(voorkeuren.para_met_rolstoel)
+        self.assertTrue(voorkeuren.para_voorwerpen)
 
         # maak dit een para sporter
         self.sporter1.para_classificatie = 'VI1'
@@ -435,7 +435,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
 
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
         self.assertEqual(voorkeuren.opmerking_para_sporter, 'Hallo test 2')
-        self.assertFalse(voorkeuren.para_met_rolstoel)
+        self.assertFalse(voorkeuren.para_voorwerpen)
 
         # coverage: opslaan zonder wijziging
         with self.assert_max_queries(20):
