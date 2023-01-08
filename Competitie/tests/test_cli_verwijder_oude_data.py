@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,14 +8,12 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap
 from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
-from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.models import Score, SCORE_TYPE_GEEN, ScoreHist
-from Sporter.models import Sporter, SporterBoog
+from Sporter.models import SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
-import datetime
 
 
-class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
+class TestCompetitieCliRegiocompVerwijderOudeData(E2EHelpers, TestCase):
     """ unittests voor de Competitie applicatie, management command verwijder_oude_data """
 
     def setUp(self):
