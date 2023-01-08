@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
 
 
-def migreer_kampioenschap(apps, _):
+def migreer_kampioenschap(apps, _):     # pragma: no cover
     """ Zet de een aantal klassen om van deelcompetitie naar kampioenschap """
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie

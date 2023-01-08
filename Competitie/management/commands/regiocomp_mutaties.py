@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -29,13 +29,17 @@ from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe
                                    aanvangsgemiddelden_vaststellen_voor_afstand)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
+from Mailer.operations import mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
 from Taken.operations import maak_taak
 import traceback
 import datetime
+import logging
 import sys
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
+
+my_logger = logging.getLogger('NHBApps.RegiocompMutaties')
 
 
 class Command(BaseCommand):
@@ -127,6 +131,7 @@ class Command(BaseCommand):
             uitnodiging deelname RK + verzoek bevestigen / afmelden deelname
             herinnering bevestigen / afmelden deelname
         """
+        # TODO: implementeren
 
     def _verwerk_mutatie_initieel_klasse_indiv(self, deelkamp, indiv_klasse):
         # Bepaal de top-X deelnemers voor een klasse van een kampioenschap
@@ -1258,8 +1263,34 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
+
         except KeyboardInterrupt:                       # pragma: no cover
             pass
+
+        except Exception as exc:
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
+
+            tb_msg_start = 'Onverwachte fout tijdens regiocomp_mutaties\n'
+            tb_msg_start += '\n'
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # full traceback to syslog
+            my_logger.error(tb_msg)
+
+            self.stderr.write('[ERROR] Onverwachte fout tijdens regiocomp_mutaties: ' + str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
+
+            # stuur een mail naar de ontwikkelaars
+            # reduceer tot de nuttige regels
+            tb = [line for line in tb if '/site-packages/' not in line]
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            mailer_notify_internal_error(tb_msg)
 
         self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)
 

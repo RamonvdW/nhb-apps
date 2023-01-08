@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ LAAG_RK = 'RK'
 LAAG_BK = 'BK'
 
 
-def maak_deelkampioenschappen(apps, _):
+def maak_deelkampioenschappen(apps, _):     # pragma: no cover
     """ maak de nieuwe DeelKampioenschappen aan voor de lopende competities """
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie

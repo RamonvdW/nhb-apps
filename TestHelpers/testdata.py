@@ -1217,7 +1217,9 @@ class TestData(object):
                                              'sporterboog',
                                              'sporterboog__sporter',
                                              'sporterboog__boogtype')
-                             .filter(sporterboog__pk__in=pks))
+                             .filter(sporterboog__pk__in=pks)
+                             .order_by('sporterboog__sporter__lid_nr',
+                                       'sporterboog__boogtype__afkorting'))
         rk_deelnemers.extend(nieuwe_deelnemers)
 
     def maak_label_regiokampioenen(self, afstand, regio_nr_begin, regio_nr_einde):
