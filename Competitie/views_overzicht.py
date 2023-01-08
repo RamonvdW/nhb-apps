@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -104,7 +104,7 @@ class CompetitieOverzichtView(View):
 
         if comp.fase == 'J' and not comp.klassengrenzen_vastgesteld_rk_bk and self.rol_nu == Rollen.ROL_BKO:
             context['tekst_klassengrenzen_rk_bk_vaststellen'] = "Open inschrijving RK teams sluiten en de klassengrenzen voor het RK teams en BK teams vaststellen."
-            context['url_klassengrenzen_rk_bk_vaststellen'] = reverse('CompLaagRayon:klassengrenzen-vaststellen-rk-bk-teams',
+            context['url_klassengrenzen_rk_bk_vaststellen'] = reverse('CompBeheer:klassengrenzen-vaststellen-rk-bk-teams',
                                                                       kwargs={'comp_pk': comp.pk})
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):

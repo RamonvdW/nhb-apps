@@ -22,7 +22,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
     url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # deelkamp_pk
     url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset
     url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                       # comp_pk
-    url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
     regio_nr = 101
     ver_nr = 0      # wordt in setupTestData ingevuld
@@ -36,7 +36,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
-        cls.ver_nr = cls.testdata.regio_ver_nrs[101][2]
+        cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
         cls.testdata.maak_bondscompetities()
         s2 = timezone.now()
         d = s2 - s1
@@ -46,8 +46,6 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        competities_aanmaken(jaar=2019)
-
         self.deelkamp_rk1 = DeelKampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
 
     def test_rk_teams_alle(self):
@@ -175,54 +173,5 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         url = self.url_rko_teams % self.testdata.deelkamp25_rk[2].pk
         resp = self.client.get(url)
         self.assert403(resp)
-
-    def test_rk_bk_klassengrenzen(self):
-        # maak een paar teams aan
-        self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
-        self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.ver_nr)
-
-        # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
-        zet_competitie_fase(self.testdata.comp25, 'G')
-
-        url = self.url_teams_klassengrenzen_vaststellen % 999999
-        resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
-        resp = self.client.post(url)
-        self.assert404(resp, 'Competitie niet gevonden')
-
-        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
-        resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet in de juiste fase')
-        resp = self.client.post(url)
-        self.assert404(resp, 'Competitie niet in de juiste fase')
-
-        url = self.url_doorzetten_rk % self.testdata.comp25.pk
-        resp = self.client.post(url)
-        self.assert_is_redirect_not_plein(resp)
-        self.verwerk_regiocomp_mutaties()
-
-        comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
-
-        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('complaagrayon/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-
-        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert_is_redirect_not_plein(resp)
-
-        resp = self.client.get(url)
-        self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
-        resp = self.client.post(url)
-        self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
-
 
 # end of file

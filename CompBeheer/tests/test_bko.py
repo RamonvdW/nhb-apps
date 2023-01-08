@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from django.core import management
+from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK,
                                RegioCompetitieSporterBoog, KampioenschapSporterBoog)
@@ -32,13 +33,25 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     url_doorzetten_bk = '/bondscompetities/beheer/%s/doorzetten-bk/'                            # comp_pk
     url_doorzetten_voorbij_bk = '/bondscompetities/beheer/%s/doorzetten-voorbij-bk/'            # comp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+
+    regio_nr = 101
+    ver_nr = 0      # wordt in setupTestData ingevuld
 
     testdata = None
 
     @classmethod
     def setUpTestData(cls):
+        s1 = timezone.now()
+        print('CompBeheer.test_bko: populating testdata start')
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
+        cls.testdata.maak_clubs_en_sporters()
+        cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
+        cls.testdata.maak_bondscompetities()
+        s2 = timezone.now()
+        d = s2 - s1
+        print('CompBeheer.test_bko: populating testdata took %s seconds' % d.seconds)
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr
@@ -117,9 +130,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                        boogtype=self.boog_r,
                                        voor_wedstrijd=True)
         self.sporterboog.save()
-
-        # creëer een competitie met deelcompetities
-        competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -435,5 +445,55 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko_18)
         resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_competitie_overzicht % self.comp_18.pk)
+
+    def test_rk_bk_klassengrenzen(self):
+        # maak een paar teams aan
+        self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.nhbver_101.ver_nr, ook_incomplete_teams=False)
+        self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.nhbver_101.ver_nr)
+
+        # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+        zet_competitie_fase(self.testdata.comp25, 'G')
+
+        url = self.url_teams_klassengrenzen_vaststellen % 999999
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet in de juiste fase')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Competitie niet in de juiste fase')
+
+        url = self.url_doorzetten_rk % self.testdata.comp25.pk
+        resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+        self.verwerk_regiocomp_mutaties()
+
+        comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
+        comp.bepaal_fase()
+        self.assertEqual(comp.fase, 'J')
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp,
+                                  ('compbeheer/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        resp = self.client.get(url)
+        self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
+        resp = self.client.post(url)
+        self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
+
 
 # end of file

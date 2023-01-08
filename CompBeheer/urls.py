@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,6 +51,10 @@ urlpatterns = [
     path('<comp_pk>/doorzetten-voorbij-bk/',
          views_bko.DoorzettenVoorbijBKView.as_view(),
          name='bko-doorzetten-voorbij-bk'),
+
+    path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',
+         views_bko.KlassengrenzenTeamsVaststellenView.as_view(),
+         name='klassengrenzen-vaststellen-rk-bk-teams'),
 ]
 
 # end of file

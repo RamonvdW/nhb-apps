@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagRayon import (view_planning,
+from CompLaagRayon import (view_planning, view_formulieren,
                            view_indiv_rko, view_indiv_hwl, view_indiv_wijzig_status,
-                           view_teams_bko, view_teams_rko, view_teams_hwl,
-                           view_formulieren)
+                           view_teams_rko, view_teams_hwl)
 
 app_name = 'CompLaagRayon'
 
@@ -94,12 +93,6 @@ urlpatterns = [
     path('download-formulier-teams/<match_pk>/<klasse_pk>/',
          view_formulieren.FormulierTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
-
-
-    # BKO
-    path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',
-         view_teams_bko.KlassengrenzenTeamsVaststellenView.as_view(),
-         name='klassengrenzen-vaststellen-rk-bk-teams'),
 ]
 
 # end of file
