@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,9 @@ from Competitie.models import (DeelCompetitie, KampioenschapIndivKlasseLimiet,
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Sporter.models import SporterVoorkeuren
 from codecs import BOM_UTF8
+import textwrap
 import csv
 
 
@@ -111,6 +113,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                           .objects
                           .select_related('kampioenschap',
                                           'indiv_klasse',
+                                          'sporterboog',
                                           'sporterboog__sporter',
                                           'bij_vereniging')
                           .filter(kampioenschap=deelkamp,
@@ -121,6 +124,11 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
             context['url_download'] = reverse('CompLaagRayon:lijst-rk-als-bestand',
                                               kwargs={'deelkamp_pk': deelkamp.pk})
+
+        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        # for
 
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (KampioenschapIndivKlasseLimiet
@@ -151,6 +159,28 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
             sporter = deelnemer.sporterboog.sporter
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+
+            deelnemer.notitie_str = deelnemer.kampioen_label
+
+            if deelnemer.deelname != DEELNAME_NEE:
+                para_notities = ''
+                try:
+                    voorkeuren = lid2voorkeuren[sporter.lid_nr]
+                except KeyError:        # pragma: no cover
+                    pass
+                else:
+                    if voorkeuren.para_met_rolstoel:
+                        para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
+
+                    if voorkeuren.opmerking_para_sporter:
+                        if para_notities != '':
+                            para_notities += '\n'
+                        para_notities += textwrap.fill(voorkeuren.opmerking_para_sporter, 40)
+
+                if para_notities:
+                    if deelnemer.notitie_str:
+                        deelnemer.notitie_str += '\n'
+                    deelnemer.notitie_str += para_notities
 
             if not deelnemer.bij_vereniging:
                 aantal_attentie += 1
@@ -229,6 +259,11 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                 '-gemiddelde'))             # aflopend op gemiddelde
 
+        lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+        # for
+
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (KampioenschapIndivKlasseLimiet
                        .objects
@@ -242,7 +277,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde'])
+        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde', 'Notities'])
 
         for deelnemer in deelnemers:
 
@@ -270,13 +305,27 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                 gem_str = "%.3f" % deelnemer.gemiddelde
                 gem_str = gem_str.replace('.', ',')     # nederlands
 
+                para_notities = ''
+
+                try:
+                    voorkeuren = lid2voorkeuren[sporter.lid_nr]
+                except KeyError:  # pragma: no cover
+                    pass
+                else:
+                    if voorkeuren.para_met_rolstoel:
+                        para_notities = 'Sporter laat voorwerpen op de schietlijn staan\n'
+
+                    if voorkeuren.opmerking_para_sporter:
+                        para_notities += voorkeuren.opmerking_para_sporter
+
                 writer.writerow([deelnemer.rank,
                                  sporter.lid_nr,
                                  sporter.volledige_naam(),
                                  ver_str,                  # [nnnn] Naam
                                  label,
                                  deelnemer.indiv_klasse.beschrijving,
-                                 gem_str])
+                                 gem_str,
+                                 para_notities])
         # for
 
         return response

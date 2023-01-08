@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -158,7 +158,7 @@
                                 <th>Sporter</th>
                                 <th>Vereniging</th>
                                 <th class="hide-on-small-only center">Gemiddelde</th>
-                                <th>Notitie</th>
+                                <th>Notities</th>
                                 <th class="center">Status</th>
                                 <th><!-- knop --></th>
                             </tr>
@@ -178,7 +178,12 @@
 
                             <td class="hide-on-small-only center">{{ obj.gemiddelde }}</td>
 
-                            <td>{% if obj.is_reserve %}<i>Reserve</i>{% if obj.kampioen_label != '' %}<br>{% endif %}{% endif %}{{ obj.kampioen_label }}</td>
+                            <td>
+                                {% if obj.is_reserve %}
+                                    <i>Reserve</i><br>
+                                {% endif %}
+                                <span>{{ obj.notitie_str|linebreaksbr }}</span>
+                            </td>
 
                             {% if not obj.bij_vereniging %}
                                 <td class="center"><i class="red-text in-table-icon material-icons-round">warning</i></td>
