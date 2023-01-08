@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, import van de RK/BK teams uitslag """
 
-    url_klassengrenzen_teams_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
     real_file = 'CompLaagRayon/management/testfiles/test_rk-25mp_teams.xlsm'
 

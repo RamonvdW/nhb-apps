@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -159,7 +159,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 except KeyError:        # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_met_rolstoel:
+                    if voorkeuren.para_voorwerpen:
                         if deelnemer.kampioen_label != '':
                             deelnemer.kampioen_label += ';\n'
                         deelnemer.kampioen_label += 'Sporter laat voorwerpen\nop de schietlijn staan'
@@ -215,7 +215,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                     except KeyError:        # pragma: no cover
                         pass
                     else:
-                        if voorkeuren.para_met_rolstoel or len(voorkeuren.opmerking_para_sporter) > 1:
+                        if voorkeuren.para_voorwerpen or len(voorkeuren.opmerking_para_sporter) > 1:
                             lid.is_para = True
                             context['toon_para_uitleg'] = True
 
@@ -376,7 +376,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             except KeyError:        # pragma: no cover
                 pass
             else:
-                if voorkeuren.para_met_rolstoel:
+                if voorkeuren.para_voorwerpen:
                     para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
 
                 if voorkeuren.opmerking_para_sporter:
@@ -597,7 +597,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                 except KeyError:        # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_met_rolstoel or voorkeuren.opmerking_para_sporter:
+                    if voorkeuren.para_voorwerpen or voorkeuren.opmerking_para_sporter:
                         para_mark = True
 
                 # bondsnummer
@@ -721,7 +721,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             except KeyError:        # pragma: no cover
                 pass
             else:
-                if voorkeuren.para_met_rolstoel:
+                if voorkeuren.para_voorwerpen:
                     para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
 
                 if voorkeuren.opmerking_para_sporter:

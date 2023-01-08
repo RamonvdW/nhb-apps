@@ -63,67 +63,67 @@ class TestData(object):
     url_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'   # deelcomp_pk
 
     leden = [
-        # wedstrijdleeftijd, geslacht, voornaam, boogtype, flags: (account, voorkeur_rk/bk)
-        (10, 'M', 'Asp10',  'R',      (False, True)),
-        (10, 'V', 'Asp10',  'R',      (False, True)),
-        (11, 'M', 'Asp11',  'R',      (False, True)),
-        (12, 'V', 'Asp12',  'R',      (False, True)),
-        (13, 'M', 'Asp13',  'R',      (False, True)),
-        (14, 'M', 'Cad14',  'R',      (False, True)),
-        (14, 'M', 'Cad14b', 'C',      (False, True)),
-        (14, 'M', 'Cad15',  'c',      (False, True)),       # kleine letter: geen voorkeur voor de competitie
-        (15, 'V', 'Cad15',  'R',      (False, True)),
-        (15, 'M', 'Cad15b', 'BB',     (False, True)),
-        (15, 'V', 'Cad15b', 'C',      (False, True)),
-        (16, 'M', 'Cad16',  'R',      (False, True)),
-        (16, 'M', 'Cad16b', 'C',      (False, True)),
-        (16, 'M', 'Cad16c', 'BB',     (False, True)),
-        (17, 'V', 'Cad17',  'R',      (True,  True)),       # account
-        (17, 'V', 'Cad17b', 'C',      (False, True)),
-        (17, 'V', 'Cad17c', 'BB',     (False, True)),
-        (18, 'M', 'Jun18',  'R',      (False, True)),
-        (18, 'M', 'Jun18b', 'C',      (False, True)),
-        (18, 'M', 'Jun18c', 'BB',     (False, True)),
-        (18, 'V', 'Jun18',  'BB',     (False, True)),
-        (19, 'V', 'Jun19',  'R',      (False, True)),
-        (19, 'V', 'Jun19b', 'C',      (True,  True)),       # account
-        (20, 'M', 'Jun20',  'R',      (False, True)),
-        (20, 'M', 'Jun20b', 'LB',     (False, True)),
-        (21, 'V', 'Sen21',  'R+C',    (False, True)),       # schiet twee bogen
-        (21, 'V', 'Sen21b', 'C',      (False, True)),
-        (22, 'M', 'Sen22',  'R*1',    (False, True)),       # *1 = para
-        (22, 'M', 'Sen22b', 'C',      (False, True)),
-        (22, 'M', 'Sen23',  'r',      (False, True)),       # kleine letter: geen voorkeur voor de competitie
-        (31, 'V', 'Sen31',  'R*1',    (False, True)),       # *1 = para
-        (32, 'M', 'Sen32',  'C',      (False, True)),
-        (32, 'M', 'Sen32b', 'BB',     (True,  True)),       # account
-        (33, 'V', 'Sen33',  'R',      (False, True)),
-        (33, 'V', 'Sen33b', 'BB',     (False, True)),
-        (34, 'M', 'Sen34',  'LB',     (True,  True)),       # Sen34 = HWL
-        (35, 'V', 'Sen35',  'R+C+BB', (False, True)),       # schiet 3 bogen
-        (36, 'M', 'Sen36',  'C*1',    (False, True)),       # *1 = para
-        (36, 'M', 'Sen36b', 'BB',     (False, True)),
-        (37, 'V', 'Sen37',  'R*2',    (False, True)),       # *2 = para
-        (38, 'M', 'Sen38',  'LB',     (False, True)),
-        (39, 'V', 'Sen39',  'R',      (True,  True)),       # Sen39 = BKO/RKO/RCL
-        (40, 'M', 'Sen40',  'C+FSC',  (False, True)),
-        (41, 'V', 'Sen41',  'R',      (False, False)),      # geen voorkeur rk/bk
-        (42, 'M', 'Sen42',  'R*2',    (False, True)),       # *2 = para
-        (42, 'M', 'Sen42b', 'C',      (False, True)),
-        (49, 'V', 'Sen49',  'R',      (False, True)),
-        (49, 'V', 'Sen49b', 'BB+BBR', (False, True)),
-        (50, 'M', 'Mas50',  'R',      (True,  True)),       # Mas50 = SEC
-        (51, 'V', 'Mas51',  'R',      (True,  True)),       # account
-        (51, 'V', 'Mas51b', 'C',      (False, True)),
-        (51, 'V', 'Mas52',  'r',      (False, True)),       # kleine letter: geen voorkeur voor de competitie
-        (59, 'M', 'Mas59',  'R',      (False, True)),
-        (59, 'M', 'Mas59b', 'LB',     (False, True)),
-        (60, 'V', 'Vet60',  'R',      (False, True)),
-        (60, 'V', 'Vet60b', 'C',      (False, True)),
-        (60, 'V', 'Vet60c', 'LB',     (True,  True)),       # account
-        (61, 'M', 'Vet61',  'C',      (False, True)),
-        (61, 'M', 'Vet61b', 'C',      (False, True)),
-        (80, 'V', 'Vet80',  'R',      (False, True)),
+        # wedstrijdleeftijd, geslacht, voornaam, boogtype, flags: (account, voorkeur_rk/bk, para_code, voorwerpen, notitie)
+        (10, 'M', 'Asp10',  'R',      (False, True,  '',    False, 0)),
+        (10, 'V', 'Asp10',  'R',      (False, True,  '',    False, 0)),
+        (11, 'M', 'Asp11',  'R',      (False, True,  '',    False, 0)),
+        (12, 'V', 'Asp12',  'R',      (False, True,  '',    False, 0)),
+        (13, 'M', 'Asp13',  'R',      (False, True,  '',    False, 0)),
+        (14, 'M', 'Cad14',  'R',      (False, True,  '',    False, 0)),
+        (14, 'M', 'Cad14b', 'C',      (False, True,  '',    False, 0)),
+        (14, 'M', 'Cad15',  'c',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur voor de competitie
+        (15, 'V', 'Cad15',  'R',      (False, True,  '',    False, 0)),
+        (15, 'M', 'Cad15b', 'BB',     (False, True,  '',    False, 0)),
+        (15, 'V', 'Cad15b', 'C',      (False, True,  '',    False, 0)),
+        (16, 'M', 'Cad16',  'R',      (False, True,  '',    False, 0)),
+        (16, 'M', 'Cad16b', 'C',      (False, True,  '',    False, 0)),
+        (16, 'M', 'Cad16c', 'BB',     (False, True,  '',    False, 0)),
+        (17, 'V', 'Cad17',  'R',      (True,  True,  '',    False, 1)),       # account
+        (17, 'V', 'Cad17b', 'C',      (False, True,  '',    False, 0)),
+        (17, 'V', 'Cad17c', 'BB',     (False, True,  '',    False, 0)),
+        (18, 'M', 'Jun18',  'R',      (False, True,  '',    False, 0)),
+        (18, 'M', 'Jun18b', 'C',      (False, True,  '',    False, 0)),
+        (18, 'M', 'Jun18c', 'BB',     (False, True,  '',    False, 0)),
+        (18, 'V', 'Jun18',  'BB',     (False, True,  '',    False, 0)),
+        (19, 'V', 'Jun19',  'R',      (False, True,  '',    False, 0)),
+        (19, 'V', 'Jun19b', 'C',      (True,  True,  '',    False, 0)),       # account
+        (20, 'M', 'Jun20',  'R',      (False, True,  '',    False, 0)),
+        (20, 'M', 'Jun20b', 'LB',     (False, True,  '',    False, 0)),
+        (21, 'V', 'Sen21',  'R+C',    (False, True,  '',    False, 0)),       # schiet twee bogen
+        (21, 'V', 'Sen21b', 'C',      (False, True,  'DIS', False, 0)),
+        (22, 'M', 'Sen22',  'R',      (False, True,  'DIS', False, 1)),
+        (22, 'M', 'Sen22b', 'C',      (False, True,  '',    False, 1)),
+        (22, 'M', 'Sen23',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur voor de competitie
+        (31, 'V', 'Sen31',  'R',      (False, True,  '',    True,  1)),
+        (32, 'M', 'Sen32',  'C',      (False, True,  '',    False, 0)),
+        (32, 'M', 'Sen32b', 'BB',     (True,  True,  '',    False, 0)),       # account
+        (33, 'V', 'Sen33',  'R',      (False, True,  '',    False, 0)),
+        (33, 'V', 'Sen33b', 'BB',     (False, True,  '',    False, 0)),
+        (34, 'M', 'Sen34',  'LB',     (True,  True,  '',    False, 0)),       # Sen34 = HWL
+        (35, 'V', 'Sen35',  'R+C+BB', (False, True,  '',    False, 0)),       # schiet 3 bogen
+        (36, 'M', 'Sen36',  'C',      (False, True,  'W2',  True,  0)),
+        (36, 'M', 'Sen36b', 'BB',     (False, True,  '',    False, 0)),
+        (37, 'V', 'Sen37',  'R',      (False, True,  'VI1', True,  0)),
+        (38, 'M', 'Sen38',  'LB',     (False, True,  '',    False, 0)),
+        (39, 'V', 'Sen39',  'R',      (True,  True,  '',    False, 0)),       # Sen39 = BKO/RKO/RCL
+        (40, 'M', 'Sen40',  'C+FSC',  (False, True,  '',    False, 0)),
+        (41, 'V', 'Sen41',  'R',      (False, False, '',    False, 0)),       # geen voorkeur rk/bk
+        (42, 'M', 'Sen42',  'R',      (False, True,  'DIS', True,  1)),
+        (42, 'M', 'Sen42b', 'C',      (False, True,  '',    False, 0)),
+        (49, 'V', 'Sen49',  'R',      (False, True,  '',    False, 0)),
+        (49, 'V', 'Sen49b', 'BB+BBR', (False, True,  '',    False, 0)),
+        (50, 'M', 'Mas50',  'R',      (True,  True,  '',    False, 0)),       # Mas50 = SEC
+        (51, 'V', 'Mas51',  'R',      (True,  True,  '',    False, 0)),       # account
+        (51, 'V', 'Mas51b', 'C',      (False, True,  '',    False, 0)),
+        (51, 'V', 'Mas52',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur voor de competitie
+        (59, 'M', 'Mas59',  'R',      (False, True,  '',    False, 0)),
+        (59, 'M', 'Mas59b', 'LB',     (False, True,  '',    False, 0)),
+        (60, 'V', 'Vet60',  'R',      (False, True,  '',    False, 0)),
+        (60, 'V', 'Vet60b', 'C',      (False, True,  '',    False, 0)),
+        (60, 'V', 'Vet60c', 'LB',     (True,  True,  '',    False, 0)),       # account
+        (61, 'M', 'Vet61',  'C',      (False, True,  '',    False, 0)),
+        (61, 'M', 'Vet61b', 'C',      (False, True,  '',    False, 0)),
+        (80, 'V', 'Vet80',  'R',      (False, True,  '',    False, 0)),
     ]
 
     def __init__(self):
@@ -444,7 +444,7 @@ class TestData(object):
         lid_sinds_datum = datetime.date(year=huidige_jaar - 1, month=11, day=12)
 
         geslacht_voornaam2boogtypen = dict()        # [geslacht + voornaam] = [boogtype1, boogtype2, ...]
-        for _, geslacht, voornaam, boogtype, _ in self.leden:
+        for _, geslacht, voornaam, boogtype, flags in self.leden:
             try:
                 _ = geslacht_voornaam2boogtypen[geslacht + voornaam]
             except KeyError:
@@ -465,7 +465,7 @@ class TestData(object):
                 self.regio_ver_nrs[ver.regio.regio_nr] = [ver.ver_nr]
 
             for _, _, voornaam, _, flags in self.leden:
-                maak_account, voorkeur_rk_bk = flags
+                maak_account, _, _, _, _ = flags
                 lid_nr += 1
 
                 if maak_account:
@@ -523,12 +523,16 @@ class TestData(object):
 
         lid_nr = MIN_LID_NR
         bulk = list()
+        geslacht_voornaam2para = dict()  # [geslacht + voornaam] = (voorwerpen, opmerking)
         for _, ver in ver_unsorted:
 
             self.ver_sporters[ver.ver_nr] = list()
             self.ver_sporters_met_account[ver.ver_nr] = list()
 
-            for wleeftijd, geslacht, voornaam, _, _ in self.leden:
+            for wleeftijd, geslacht, voornaam, _, flags in self.leden:
+                _, _, para_code, para_voorwerpen, para_opmerking = flags
+                geslacht_voornaam2para[geslacht + voornaam] = (para_voorwerpen, para_opmerking)
+
                 lid_nr += 1
                 achternaam = "Lid%s van Club%s" % (ver.ver_nr, lid_nr)
                 geboortedatum = datetime.date(year=huidige_jaar - wleeftijd, month=3, day=24)
@@ -585,20 +589,16 @@ class TestData(object):
                 self.ver_sporters_met_account[ver_nr].append(sporter)
 
             gewenste_boogtypen = geslacht_voornaam2boogtypen[sporter.geslacht + sporter.voornaam]
+            para_voorwerpen, para_opmerking = geslacht_voornaam2para[sporter.geslacht + sporter.voornaam]
 
             # voorkeuren
             voorkeuren = SporterVoorkeuren(
-                                sporter=sporter)
+                                sporter=sporter,
+                                para_voorwerpen=para_voorwerpen)
 
             for gewenst_boogtype in gewenste_boogtypen:
-                if gewenst_boogtype[-2:] in ('*1', '*2'):
+                if para_opmerking > 0:
                     voorkeuren.opmerking_para_sporter = 'Para opmerking van redelijke lengte om mee te testen'
-
-                    if gewenst_boogtype[-2:] == '*1':
-                        voorkeuren.para_met_rolstoel = True
-
-                    # hak de laatste twee tekens eraf
-                    gewenst_boogtype = gewenst_boogtype[:-2]
 
                 if gewenst_boogtype.islower():
                     voorkeuren.voorkeur_meedoen_competitie = False

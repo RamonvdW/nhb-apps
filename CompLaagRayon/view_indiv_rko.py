@@ -169,7 +169,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                 except KeyError:        # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_met_rolstoel:
+                    if voorkeuren.para_voorwerpen:
                         para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
 
                     if voorkeuren.opmerking_para_sporter:
@@ -312,7 +312,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                 except KeyError:  # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_met_rolstoel:
+                    if voorkeuren.para_voorwerpen:
                         para_notities = 'Sporter laat voorwerpen op de schietlijn staan\n'
 
                     if voorkeuren.opmerking_para_sporter:

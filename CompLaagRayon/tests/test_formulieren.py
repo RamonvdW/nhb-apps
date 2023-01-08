@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Formulieren functie """
 
-    test_after = ('Competitie.tests.test_fase', 'CompLaagRayon.tests.test_teams_rko', 'CompLaagRayon.tests.test_teams_rko')
+    test_after = ('Competitie.tests.test_fase', 'CompBeheer.tests.test_bko', 'CompLaagRayon.tests.test_teams_rko', 'CompLaagRayon.tests.test_teams_rko')
 
     url_forms = '/bondscompetities/rk/download-formulier/%s/'                             # match_pk
     url_forms_download_indiv = '/bondscompetities/rk/download-formulier-indiv/%s/%s/'     # match_pk, klasse_pk
@@ -30,7 +30,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
     rayon_nr = 4
     ver_nr = 0
 
-    url_klassengrenzen_teams_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
     @classmethod
     def setUpTestData(cls):
