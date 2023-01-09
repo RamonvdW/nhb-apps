@@ -6,7 +6,7 @@
 #
 asgiref==3.6.0
     # via django
-cachetools==5.2.0
+cachetools==5.2.1
     # via google-auth
 certifi==2022.12.7
     # via requests
@@ -18,7 +18,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.11.0
     # via google-api-python-client
-google-api-python-client==2.70.0
+google-api-python-client==2.71.0
     # via -r requirements.in
 google-auth==2.15.0
     # via
@@ -28,7 +28,7 @@ google-auth==2.15.0
     #   google-auth-httplib2
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-googleapis-common-protos==1.57.0
+googleapis-common-protos==1.57.1
     # via google-api-core
 httplib2==0.21.0
     # via
@@ -42,7 +42,7 @@ oauthlib==3.2.2
     # via requests-oauthlib
 openpyxl==3.0.10
     # via -r requirements.in
-pillow==9.3.0
+pillow==9.4.0
     # via -r requirements.in
 protobuf==4.21.12
     # via
