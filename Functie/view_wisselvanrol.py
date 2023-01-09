@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -335,6 +335,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         context['show_eigen_rollen'] = True
         context['show_hwl_rollen'] = len(context['hwl_rollen']) > 0
         context['show_help_rollen'] = len(context['help_rollen']) > 0
+        context['url_hwl_naar_keuze'] = reverse('Functie:activeer-functie-hwl')
 
         # snel wissel kaartje voor BB
         if self.account.is_BB or self.account.is_staff:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -375,50 +375,39 @@ def rol_activeer_rol(request, rol_url):
     # not recognized --> no change
 
 
-def rol_activeer_functie(request, functie_pk):
+def rol_activeer_functie(request, functie):
     """ Activeer een andere rol gebaseerd op een Functie
         geen foutmelding of exceptions als het niet mag.
     """
 
-    # conversie string (uit url) naar nummer
     try:
-        functie_pk = int(functie_pk)
-    except ValueError:
+        rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
+    except KeyError:
         pass
     else:
-        try:
-            rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
-        except KeyError:
-            pass
-        else:
-            # controleer dat de gebruiker deze functie mag aannemen
-            # (is al eerder vastgesteld en opgeslagen in de sessie)
-            for child_tup, parent_tup in rollen_functies:
-                mag_rol, mag_functie_pk = child_tup
-                if mag_functie_pk == functie_pk:
-                    # volledig correcte wissel - sla alles nu op
-                    request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
-                    request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
-                    request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
-                    return
-            # for
+        # controleer dat de gebruiker deze functie mag aannemen
+        # (is al eerder vastgesteld en opgeslagen in de sessie)
+        for child_tup, parent_tup in rollen_functies:
+            mag_rol, mag_functie_pk = child_tup
+            if mag_functie_pk == functie.pk:
+                # volledig correcte wissel - sla alles nu op
+                request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
+                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
+                request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
+                return
+        # for
 
-            # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
-            account = request.user
-            if account.is_authenticated:                            # pragma: no branch
-                if account_rechten_is_otp_verified(request):        # pragma: no branch
-                    if account.is_staff or account.is_BB:
-                        try:
-                            functie = Functie.objects.get(pk=functie_pk)
-                        except Functie.DoesNotExist:
-                            pass
-                        else:
-                            # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
-                            if functie.rol == 'SEC':        # pragma: no branch
-                                request.session[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_SEC
-                                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = functie_pk
-                                request.session[SESSIONVAR_ROL_BESCHRIJVING] = functie.beschrijving
-                                return
+        # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
+        account = request.user
+        if account.is_authenticated:                            # pragma: no branch
+            if account_rechten_is_otp_verified(request):        # pragma: no branch
+                if account.is_staff or account.is_BB:
+                    # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
+                    if functie.rol == 'SEC':                    # pragma: no branch
+                        request.session[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_SEC
+                        request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = functie.pk
+                        request.session[SESSIONVAR_ROL_BESCHRIJVING] = functie.beschrijving
+                        return
 
     # not recognized --> no change
 
@@ -431,7 +420,7 @@ def rol_evalueer_opnieuw(request):
     rol, functie = rol_get_huidige_functie(request)
     rol_zet_sessionvars(request.user, request)
     if functie:
-        rol_activeer_functie(request, functie.pk)
+        rol_activeer_functie(request, functie)
     else:
         rol_activeer_rol(request, rol2url[rol])
 
