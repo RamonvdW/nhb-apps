@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -191,7 +191,6 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_regio',
-                           'deelcompetitie__nhb_rayon',
                            'deelcompetitie__competitie',
                            'sporterboog',
                            'sporterboog__sporter',
