@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,6 +13,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                                KampioenschapSporterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.tests.test_fase import zet_competitie_fase
+from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import io
@@ -101,6 +102,8 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             print('  rank=%s, volgorde=%s, sporterboog_pk=%s, boog=%s, lid_nr=%s, gem=%s, deelname=%s, kampioen_label=%s' % (
                     obj.rank, obj.volgorde, obj.sporterboog.pk, obj.sporterboog.boogtype.afkorting,
                     obj.sporterboog.sporter.lid_nr, obj.gemiddelde, obj.deelname, obj.kampioen_label))
+            v = SporterVoorkeuren.objects.get(sporter=obj.sporterboog.sporter)
+            print('  voorwerpen=%s, opmerking=%s' % (v.para_voorwerpen, v.opmerking_para_sporter))
         print('====================================================================')
 
     def _dump_deelnemers(self, alle_klassen=False):                 # pragma: no cover

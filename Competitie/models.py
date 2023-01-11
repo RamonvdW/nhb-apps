@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -408,7 +408,7 @@ class CompetitieIndivKlasse(models.Model):
 
     # wedstrijdklasse wel/niet meenemen naar de RK/BK
     # staat op False voor aspiranten klassen en klassen 'onbekend'
-    is_voor_rk_bk = models.BooleanField(default=False)
+    is_voor_rk_bk = models.BooleanField(default=False)      # TODO: is_ook_voor_rk_bk
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
@@ -421,7 +421,7 @@ class CompetitieIndivKlasse(models.Model):
     def __str__(self):
         msg = self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
         if self.is_voor_rk_bk:
-            msg += ' RK'
+            msg += ' regio+RK'
         else:
             msg += ' regio'
         return msg

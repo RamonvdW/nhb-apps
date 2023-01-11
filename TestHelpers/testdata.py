@@ -15,7 +15,7 @@ from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK,
+                               DeelKampioenschap, DEEL_BK,
                                RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
                                KampioenschapSporterBoog, KampioenschapTeam)
@@ -401,10 +401,6 @@ class TestData(object):
 
             for nr in range(aantal):
                 ver_nr = MIN_VER_NR + regio.regio_nr * 10 + nr + 1
-
-                # vereniging 0, 1, 2 gaan in een cluster, 3 niet
-                if nr >= 3:
-                    cluster = None
 
                 ver = NhbVereniging(
                             ver_nr=ver_nr,
@@ -976,7 +972,7 @@ class TestData(object):
         # zet voor een paar deelnemers de inschrijfvoorkeur voor RK/BK uit
         voornamen = list()
         for _, _, voornaam, boogtype, flags in self.leden:
-            _, inschrijf_voorkeur_rk_bk = flags
+            _, inschrijf_voorkeur_rk_bk, _, _, _ = flags
             if not inschrijf_voorkeur_rk_bk:
                 voornamen.append(voornaam)
         # for

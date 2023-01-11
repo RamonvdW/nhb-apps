@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2022 Ramon van der Winkel.
+                Copyright (c) 2019-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -141,7 +141,7 @@
                                         {% if deelcomp.is_ingeschreven %}
                                             {% if deelcomp.rk_inschrijving %}
                                                 <!-- is al doorgestroomd naar het RK -->
-                                                <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelcomp.rk_inschrijving.deelcompetitie.nhb_rayon.rayon_nr }}</span>
+                                                <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelcomp.rk_inschrijving.kampioenschap.nhb_rayon.rayon_nr }}</span>
                                                 {% if deelcomp.rk_inschrijving.rank > 0 %}
                                                     <br><span>Op de RK lijst sta je op plaats {{ deelcomp.rk_inschrijving.rank }}</span>
                                                 {% endif %}
@@ -594,20 +594,30 @@
                 </tr>
                 <tr>
                     <th>Lid bij vereniging</th>
-                    <td>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</td>
+                    <td>
+                        {% if sporter.bij_vereniging %}
+                            <span>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</span>
+                        {% else %}
+                            <i>Geen</i>
+                        {% endif %}
+                    </td>
                 </tr>
-                <tr>
-                    <th>In plaats</th>
-                    <td>{{ sporter.bij_vereniging.plaats }}</td>
-                </tr>
-                <tr>
-                    <th>In NHB regio</th>
-                    <td>{{ sporter.bij_vereniging.regio }}</td>
-                </tr>
-                <tr>
-                    <th>In NHB rayon</th>
-                    <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
-                </tr>
+
+                {% if sporter.bij_vereniging %}
+                    <tr>
+                        <th>In plaats</th>
+                        <td>
+                            {{ sporter.bij_vereniging.plaats }}</td>
+                    </tr>
+                    <tr>
+                        <th>In NHB regio</th>
+                        <td>{{ sporter.bij_vereniging.regio }}</td>
+                    </tr>
+                    <tr>
+                        <th>In NHB rayon</th>
+                        <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
+                    </tr>
+                {% endif %}
                 {% if sporter.para_classificatie %}
                     <tr>
                         <th>Para classificatie</th>

@@ -566,6 +566,14 @@ class E2EHelpers(TestCase):
         self.assertNotIn('<td/>', html, msg='Illegal <td/> must be replaced with <td></td> in %s' % dtl)
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
 
+    def _assert_template_bug(self, html, dtl):
+        pos = html.find('##BUG')
+        if pos >= 0:
+            msg = html[pos:]
+            pos = msg.find('##', 3)
+            msg = msg[:pos+2]
+            self.fail(msg='Bug in template %s: %s' % (repr(dtl), msg))
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
         html = response.content.decode('utf-8')
@@ -577,6 +585,7 @@ class E2EHelpers(TestCase):
             validated_templates.append(dtl)
 
         self._assert_html_basics(html, dtl)
+        self._assert_template_bug(html, dtl)
 
         self.assertNotIn('<script>', html, msg='Missing type="application/javascript" in <script> in %s' % dtl)
 
