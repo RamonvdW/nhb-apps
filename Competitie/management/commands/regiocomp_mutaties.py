@@ -116,12 +116,17 @@ class Command(BaseCommand):
                     .filter(kampioenschap=deelkamp,
                             indiv_klasse=klasse)
                     .order_by('volgorde')):
+
+            old_rank = obj.rank
+
             if obj.deelname == DEELNAME_NEE:
                 obj.rank = 0
             else:
                 rank += 1
                 obj.rank = rank
-            obj.save(update_fields=['rank', 'volgorde'])
+
+            if obj.rank != old_rank:
+                obj.save(update_fields=['rank'])
         # for
 
     def _verstuur_uitnodigingen(self):
@@ -197,7 +202,7 @@ class Command(BaseCommand):
             pks.append(obj.pk)
         # for
 
-        # geef nu alle andere sporters en nieuw volgnummer
+        # geef nu alle andere sporters een nieuw volgnummer
         # dit voorkomt dubbele volgnummers als de cut omlaag gezet is
         for obj in objs:
             if obj.pk not in pks:
@@ -245,42 +250,52 @@ class Command(BaseCommand):
 
         deelnemer.deelname = DEELNAME_NEE
         deelnemer.save(update_fields=['deelname'])
+        self.stdout.write('[INFO] Afmelding voor RK: %s' % deelnemer.sporterboog)
 
         deelkamp = deelnemer.kampioenschap
         indiv_klasse = deelnemer.indiv_klasse
 
         limiet = self._get_limiet_indiv(deelkamp, indiv_klasse)
 
-        # haal de reserve sporters op
+        # haal de 1e reserve op
         try:
             reserve = (KampioenschapSporterBoog
                        .objects
                        .get(kampioenschap=deelkamp,
                             indiv_klasse=indiv_klasse,
-                            rank=limiet+1))
+                            rank=limiet+1))                 # TODO: dit faalde een keer met 2 resultaten!
         except KampioenschapSporterBoog.DoesNotExist:
             # zoveel sporters zijn er niet (meer)
             pass
         else:
-            if reserve.volgorde > deelnemer.volgorde:
-                # de afgemelde deelnemer zit boven de cut
+            self.stdout.write('[INFO] Reserve (rank=%s, volgorde=%s) wordt deelnemer: %s' % (
+                                reserve.rank, reserve.volgorde, reserve.sporterboog))
 
-                # bepaal het nieuwe plekje van de reserve-sporters
+            if reserve.volgorde > deelnemer.volgorde:
+                # de afgemelde deelnemer zat binnen de cut
+                # haal een reserve binnen
+
+                # bepaal het nieuwe plekje van de reserve-sporter
                 slechter = (KampioenschapSporterBoog
                             .objects
                             .filter(kampioenschap=deelkamp,
                                     indiv_klasse=indiv_klasse,
                                     gemiddelde__lt=reserve.gemiddelde,
                                     rank__lte=limiet)
-                            .order_by('volgorde'))
+                            .order_by('volgorde'))      # 10, 11, 12, etc.
 
                 if len(slechter) > 0:
                     # zet het nieuwe plekje
                     reserve.volgorde = slechter[0].volgorde
                     reserve.save(update_fields=['volgorde'])
 
+                    self.stdout.write('[INFO] Reserve krijgt nieuwe volgorde=%s' % reserve.volgorde)
+
+                    self.stdout.write('[INFO] %s deelnemers krijgen volgorde+1' % len(slechter))
+
                     # schuif de andere sporters omlaag
                     slechter.update(volgorde=F('volgorde') + 1)
+
                 # else: geen sporters om op te schuiven
 
         self._update_rank_nummers(deelkamp, indiv_klasse)
