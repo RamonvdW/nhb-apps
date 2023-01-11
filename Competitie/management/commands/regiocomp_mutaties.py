@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,13 +28,17 @@ from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe
                                    aanvangsgemiddelden_vaststellen_voor_afstand)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
+from Mailer.operations import mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
 from Taken.operations import maak_taak
 import traceback
 import datetime
+import logging
 import sys
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
+
+my_logger = logging.getLogger('NHBApps.RegiocompMutaties')
 
 
 class Command(BaseCommand):
@@ -66,10 +70,10 @@ class Command(BaseCommand):
 
     def _bepaal_boog2team(self):
         """ bepaalde boog typen mogen meedoen in bepaalde team types
-            straks als we de team schutters gaan verdelen over de teams moeten dat in een slimme volgorde
+            straks als we de team leden gaan verdelen over de teams moeten dat in een slimme volgorde
             zodat de sporters in toegestane teams en alle team typen gevuld worden.
             Voorbeeld: LB mag meedoen in LB, TR, BB en R teams terwijl C alleen in C team mag.
-                       we moeten dus niet beginnen met de LB schutter in een R team te stoppen en daarna
+                       we moeten dus niet beginnen met de LB sporter in een R team te stoppen en daarna
                        geen sporters meer over hebben voor het LB team.
         """
 
@@ -191,7 +195,7 @@ class Command(BaseCommand):
             pks.append(obj.pk)
         # for
 
-        # geef nu alle andere schutters en nieuw volgnummer
+        # geef nu alle andere sporters een nieuw volgnummer
         # dit voorkomt dubbele volgnummers als de cut omlaag gezet is
         for obj in objs:
             if obj.pk not in pks:
@@ -230,22 +234,23 @@ class Command(BaseCommand):
         # for
 
     def _verwerk_mutatie_afmelden_indiv(self, deelnemer):
-        # pas alleen de ranking aan voor alle schutters in deze klasse
+        # pas alleen de ranking aan voor alle sporters in deze klasse
         # de deelnemer is al afgemeld en behoudt zijn volgorde zodat de RKO/BKO
         # 'm in grijs kan zien in de tabel
 
-        # bij een mutatie "boven de cut" wordt de schutter bovenaan de lijst van reserve schutters
+        # bij een mutatie "boven de cut" wordt de sporter bovenaan de lijst van reserve sporters
         # tot deelnemer gepromoveerd. Zijn gemiddelde bepaalt de volgorde
 
         deelnemer.deelname = DEELNAME_NEE
         deelnemer.save(update_fields=['deelname'])
+        self.stdout.write('[INFO] Afmelding voor RK: %s' % deelnemer.sporterboog)
 
         deelcomp = deelnemer.deelcompetitie
         indiv_klasse = deelnemer.indiv_klasse
 
         limiet = self._get_limiet_indiv(deelcomp, indiv_klasse)
 
-        # haal de reserve schutter op
+        # haal de 1e reserve op
         try:
             reserve = (KampioenschapSchutterBoog
                        .objects
@@ -253,29 +258,38 @@ class Command(BaseCommand):
                             indiv_klasse=indiv_klasse,
                             rank=limiet+1))
         except KampioenschapSchutterBoog.DoesNotExist:
-            # zoveel schutter zijn er niet (meer)
+            # zoveel sporters zijn er niet (meer)
             pass
         else:
-            if reserve.volgorde > deelnemer.volgorde:
-                # de afgemelde deelnemer zit boven de cut
+            self.stdout.write('[INFO] Reserve (rank=%s, volgorde=%s) wordt deelnemer: %s' % (
+                                reserve.rank, reserve.volgorde, reserve.sporterboog))
 
-                # bepaal het nieuwe plekje van de reserve-schutter
+            if reserve.volgorde > deelnemer.volgorde:
+                # de afgemelde deelnemer zat binnen de cut
+                # haal een reserve binnen
+
+                # bepaal het nieuwe plekje van de reserve-sporter
                 slechter = (KampioenschapSchutterBoog
                             .objects
                             .filter(deelcompetitie=deelcomp,
                                     indiv_klasse=indiv_klasse,
                                     gemiddelde__lt=reserve.gemiddelde,
                                     rank__lte=limiet)
-                            .order_by('volgorde'))
+                            .order_by('volgorde'))      # 10, 11, 12, etc.
 
                 if len(slechter) > 0:
                     # zet het nieuwe plekje
                     reserve.volgorde = slechter[0].volgorde
                     reserve.save(update_fields=['volgorde'])
 
-                    # schuif de andere schutters omlaag
+                    self.stdout.write('[INFO] Reserve krijgt nieuwe volgorde=%s' % reserve.volgorde)
+
+                    self.stdout.write('[INFO] %s deelnemers krijgen volgorde+1' % len(slechter))
+
+                    # schuif de andere sporters omlaag
                     slechter.update(volgorde=F('volgorde') + 1)
-                # else: geen schutters om op te schuiven
+
+                # else: geen sporters om op te schuiven
 
         self._update_rank_nummers(deelcomp, indiv_klasse)
 
@@ -1257,8 +1271,34 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
+
         except KeyboardInterrupt:                       # pragma: no cover
             pass
+
+        except Exception as exc:
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
+
+            tb_msg_start = 'Onverwachte fout tijdens regiocomp_mutaties\n'
+            tb_msg_start += '\n'
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # full traceback to syslog
+            my_logger.error(tb_msg)
+
+            self.stderr.write('[ERROR] Onverwachte fout tijdens regiocomp_mutaties: ' + str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
+
+            # stuur een mail naar de ontwikkelaars
+            # reduceer tot de nuttige regels
+            tb = [line for line in tb if '/site-packages/' not in line]
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            mailer_notify_internal_error(tb_msg)
 
         self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)
 
