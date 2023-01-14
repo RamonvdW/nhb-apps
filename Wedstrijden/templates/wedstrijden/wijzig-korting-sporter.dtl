@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -87,9 +87,9 @@
                                             </tr>
                                         {% endif %}
                                         <tr>
-                                            <td>Kies sporter:{% if voor_sporter_str %}{% endif %}</td>
+                                            <td>Kies sporter:</td>
                                             <td>
-                                                <input type="text" name="voor_lid_nr" placeholder="Lid nr" value="{{ korting.sporter.lid_nr }}" inputmode="numeric" minlength="6" maxlength="6" oninput="gewijzigd()">
+                                                <input type="text" name="voor_lid_nr" placeholder="Lid nr" value="{{ korting.sporter_lid_nr }}" inputmode="numeric" minlength="6" maxlength="6" oninput="gewijzigd()">
                                                 {% if voor_sporter_str %}<br>(000000 = verwijder){% endif %}
                                             </td>
                                         </tr>

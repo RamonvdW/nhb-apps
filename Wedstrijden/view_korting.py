@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -191,11 +191,13 @@ class WijzigKortingView(UserPassesTestMixin, View):
             raise Http404('Niet gevonden')
 
         context['korting'] = korting
+        korting.sporter_lid_nr = ''
 
         if korting.soort == WEDSTRIJD_KORTING_SPORTER:
             template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_SPORTER
             if korting.voor_sporter:
                 context['voor_sporter_str'] = korting.voor_sporter.lid_nr_en_volledige_naam()
+                korting.sporter_lid_nr = korting.voor_sporter.lid_nr
 
         elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
             template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTING_VERENIGING

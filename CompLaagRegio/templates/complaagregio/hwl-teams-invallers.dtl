@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -63,7 +63,7 @@
                         <tr>
                             <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
                             <td>{{ team.team_naam }}</td>
-                            <td>{{ team.team_klasse.beschrijving }}</td>
+                            <td>{% if team.team_klasse %}{{ team.team_klasse.beschrijving }}{% else %}??{% endif %}</td>
                             <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
                             <td class="center">
                                 {% if team.url_koppelen %}
