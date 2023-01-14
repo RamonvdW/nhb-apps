@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -177,34 +177,43 @@
 
                     <tr class="nhb-table-header">
                         <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+
                         {% if obj.toon_uitslag %}
+
                             <th class="center">Plaats</th>
                             <th>Sporter</th>
                             <th class="hide-on-small-only">Vereniging</th>
                             <th colspan="2"><!-- leeg --></th>
                             <th colspan="2">RK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
+
                         {% else %}
+
                             <th></th>   <!-- rank -->
                             <th>Sporter</th>
                             <th class="hide-on-small-only">Vereniging</th>
                             <th class="center">Gemiddelde</th>
                             <th></th>   <!-- label -->
                             <th colspan="2">RK scores</th>
+
                         {% endif %}
                         <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
                 <tr{% if obj.geen_deelname %} class="grey-text"{% endif %}>
+
                     {% if obj.toon_uitslag%}
+
                         <td class="center">{% if not obj.geen_deelname %}{{ obj.result_rank }}{% endif %}</td>
                         <td>{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{{ obj.ver_str }}</td>
                         <td colspan="2"></td>
                         <td>{{ obj.scores_str_1 }}</td>
                         <td>{{ obj.scores_str_2 }}</td>
+
                     {% else %}
-                        <td class="center">{% if not obj.is_reserve %}{{ obj.rank }}{% endif %}</td>
+
+                        <td class="center"></td>    <!-- rank -->
                         <td>{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen RK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
                         <td class="center">{{ obj.gemiddelde }}</td>
@@ -216,6 +225,7 @@
                             <td></td>
                         {% endif %}
                         <td><i class="grey-text">volgt later</i><!-- RK scores --></td><td>&nbsp;</td>
+
                     {% endif %}
                 </tr>
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -440,6 +440,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         beheerder_accounts = self._functie.accounts.all()
         for account in beheerder_accounts:
             account.geo_beschrijving = '-'
+            account.let_op = ''
             if account.sporter_set.count() > 0:
                 sporter = account.sporter_set.all()[0]
                 if sporter.bij_vereniging:

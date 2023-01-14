@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -83,12 +83,12 @@ class UitslagenRegioIndivView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
                 boogtype.selected = True
-            else:
-                boogtype.zoom_url = reverse(self.url_name,
-                                            kwargs={'comp_pk': comp.pk,
-                                                    'zes_scores': zes_scores,
-                                                    'comp_boog': boogtype.afkorting.lower(),
-                                                    'regio_nr': gekozen_regio_nr})
+
+            boogtype.zoom_url = reverse(self.url_name,
+                                        kwargs={'comp_pk': comp.pk,
+                                                'zes_scores': zes_scores,
+                                                'comp_boog': boogtype.afkorting.lower(),
+                                                'regio_nr': gekozen_regio_nr})
         # for
 
         # regio filters
@@ -108,16 +108,15 @@ class UitslagenRegioIndivView(TemplateView):
                 prev_rayon = regio.rayon.rayon_nr
 
                 regio.title_str = 'Regio %s' % regio.regio_nr
-                if regio.regio_nr != gekozen_regio_nr:
-                    regio.zoom_url = reverse(self.url_name,
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'zes_scores': zes_scores,
-                                                     'comp_boog': comp_boog,
-                                                     'regio_nr': regio.regio_nr})
-                else:
-                    # geen zoom_url --> knop disabled
+                if regio.regio_nr == gekozen_regio_nr:
                     context['regio'] = regio
                     regio.selected = True
+
+                regio.zoom_url = reverse(self.url_name,
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'zes_scores': zes_scores,
+                                                 'comp_boog': comp_boog,
+                                                 'regio_nr': regio.regio_nr})
             # for
 
         # vereniging filters
@@ -281,11 +280,11 @@ class UitslagenRegioTeamsView(TemplateView):
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
                 team.selected = True
-            else:
-                team.zoom_url = reverse(self.url_name,
-                                        kwargs={'comp_pk': comp.pk,
-                                                'team_type': team.afkorting.lower(),
-                                                'regio_nr': gekozen_regio_nr})
+
+            team.zoom_url = reverse(self.url_name,
+                                    kwargs={'comp_pk': comp.pk,
+                                            'team_type': team.afkorting.lower(),
+                                            'regio_nr': gekozen_regio_nr})
         # for
 
         # TODO: wanneer komt het voor dat teamtype niet bestaat? Template laat altijd regios/verenigingen zien!
@@ -308,14 +307,14 @@ class UitslagenRegioTeamsView(TemplateView):
                 regio.sel = 'regio_%s' % regio.regio_nr
 
                 regio.title_str = 'Regio %s' % regio.regio_nr
-                if regio.regio_nr != gekozen_regio_nr:
-                    regio.zoom_url = reverse(self.url_name,
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'team_type': teamtype_afkorting,
-                                                     'regio_nr': regio.regio_nr})
-                else:
+                if regio.regio_nr == gekozen_regio_nr:
                     regio.selected = True
                     context['regio'] = regio
+
+                regio.zoom_url = reverse(self.url_name,
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'team_type': teamtype_afkorting,
+                                                 'regio_nr': regio.regio_nr})
             # for
 
         # vereniging filters
