@@ -371,7 +371,7 @@ class Command(BaseCommand):
             else:
                 # er zijn geen reserve-sporters met gelijk of hoger gemiddelde
                 # dus deze sporter mag boven aan de reserve-lijst
-                self.stdout.write('[INFO] Maak 1e en enige reserve')
+                self.stdout.write('[INFO] Maak 1e reserve')
                 nieuwe_rank = limiet + 1
 
             # maak een plekje in de lijst door andere sporters op te schuiven
