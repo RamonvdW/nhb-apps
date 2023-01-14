@@ -52,7 +52,7 @@ class Command(BaseCommand):
         rayon_nr = options['rayon']
         self.verbose = options['verbose']
 
-        kampioenschap = DeelCompetitie.objects.get(competitie__afstand=afstand, nhb_rayon__rayon_nr=rayon_nr)
+        kampioenschap = DeelCompetitie.objects.get(competitie__afstand=afstand, laag=LAAG_RK, nhb_rayon__rayon_nr=rayon_nr)
 
         klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
         for limiet in DeelcompetitieIndivKlasseLimiet.objects.filter(deelcompetitie=kampioenschap):
@@ -84,13 +84,15 @@ class Command(BaseCommand):
                 prev_volgorde = 0
                 prev_gemiddelde = 0
                 prev_rank = 0
-                block.append('[INFO] ---------- Indiv klasse: %s ----------' % kampioen.indiv_klasse)
 
                 net_na_cut = False
                 try:
                     limiet = klasse_pk2limiet[kampioen.indiv_klasse.pk]
                 except KeyError:
                     limiet = 24
+
+                block.append('[INFO] ---------- Indiv klasse: %s (limiet = %s) ----------' % (kampioen.indiv_klasse,
+                                                                                              limiet))
 
             block.append('[INFO] rank %2d, volgorde %3d, gem=%.3f, deelname=%s, sporterboog %s' % (
                                 kampioen.rank, kampioen.volgorde, kampioen.gemiddelde, kampioen.deelname, kampioen.sporterboog))
@@ -128,6 +130,7 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Geen deelnemers gevonden')
 
         elif self.count_ok > 0:
-            self.stdout.write('[INFO] %s klassen hebben geen afwijkingen (gebruik --verbose om alles te zien)' % self.count_ok)
+            self.stdout.write('[INFO] %s klassen hebben geen afwijkingen (gebruik --verbose om alles te zien)' %
+                              self.count_ok)
 
 # end of file
