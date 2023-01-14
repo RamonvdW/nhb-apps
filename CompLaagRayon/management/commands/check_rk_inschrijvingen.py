@@ -72,7 +72,9 @@ class Command(BaseCommand):
                          .objects
                          .filter(kampioenschap=kampioenschap)
                          .select_related('sporterboog',
-                                         'sporterboog__sporter')
+                                         'sporterboog__sporter',
+                                         'sporterboog__boogtype',
+                                         'indiv_klasse')
                          .order_by('indiv_klasse__volgorde',
                                    'volgorde',
                                    '-gemiddelde')):
@@ -101,7 +103,7 @@ class Command(BaseCommand):
             if kampioen.sporterboog.pk not in sporterboog_pks:
                 sporterboog_pks.append(kampioen.sporterboog.pk)
             else:
-                block.append('[ERROR] Dubbele sporterboog!!')
+                block.append('[ERROR] Dubbele sporterboog: %s' % kampioen.sporterboog)
 
             if prev_volgorde:
                 if kampioen.volgorde != prev_volgorde + 1:

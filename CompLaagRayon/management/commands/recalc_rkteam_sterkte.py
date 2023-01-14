@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,7 @@ class Command(BaseCommand):
                                 .filter(kampioenschap__competitie=comp)
                                 .prefetch_related('gekoppelde_leden')):
 
-                    ags = list(rk_team.leden.values_list('gemiddelde', flat=True))
+                    ags = list(rk_team.gekoppelde_leden.values_list('gemiddelde', flat=True))
                     if len(ags) >= 3:
                         ags.sort(reverse=True)  # hoogste eerst
                         ag = sum(ags[:3])
