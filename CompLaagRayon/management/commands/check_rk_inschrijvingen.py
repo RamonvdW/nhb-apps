@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, KampioenschapSchutterBoog, LAAG_RK
+from Competitie.models import DeelCompetitie, KampioenschapSchutterBoog, LAAG_RK, DeelcompetitieIndivKlasseLimiet
 
 
 class Command(BaseCommand):
@@ -54,10 +54,18 @@ class Command(BaseCommand):
 
         kampioenschap = DeelCompetitie.objects.get(competitie__afstand=afstand, nhb_rayon__rayon_nr=rayon_nr)
 
+        klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
+        for limiet in DeelcompetitieIndivKlasseLimiet.objects.filter(deelcompetitie=kampioenschap):
+            klasse_pk2limiet[limiet.indiv_klasse.pk] = limiet.limiet
+        # for
+
         sporterboog_pks = list()
         prev_klasse = -1
         prev_volgorde = 0
+        prev_gemiddelde = 0
         prev_rank = 0
+        net_na_cut = False
+        limiet = 0
         block = list()
         for kampioen in (KampioenschapSchutterBoog
                          .objects
@@ -74,8 +82,15 @@ class Command(BaseCommand):
 
                 prev_klasse = kampioen.indiv_klasse.volgorde
                 prev_volgorde = 0
+                prev_gemiddelde = 0
                 prev_rank = 0
                 block.append('[INFO] ---------- Indiv klasse: %s ----------' % kampioen.indiv_klasse)
+
+                net_na_cut = False
+                try:
+                    limiet = klasse_pk2limiet[kampioen.indiv_klasse.pk]
+                except KeyError:
+                    limiet = 24
 
             block.append('[INFO] rank %2d, volgorde %3d, gem=%.3f, deelname=%s, sporterboog %s' % (
                                 kampioen.rank, kampioen.volgorde, kampioen.gemiddelde, kampioen.deelname, kampioen.sporterboog))
@@ -88,13 +103,23 @@ class Command(BaseCommand):
             if prev_volgorde:
                 if kampioen.volgorde != prev_volgorde + 1:
                     block.append('[ERROR] Volgorde niet consecutief (pk=%s)' % kampioen.pk)
-            prev_volgorde = kampioen.volgorde
 
+                if kampioen.gemiddelde > prev_gemiddelde:
+                    if not net_na_cut:
+                        block.append('[ERROR] Gemiddelde is niet consecutief (pk=%s)' % kampioen.pk)
+
+            prev_volgorde = kampioen.volgorde
+            prev_gemiddelde = kampioen.gemiddelde
+
+            net_na_cut = False
             if kampioen.rank != 0:
                 if prev_rank:
                     if kampioen.rank != prev_rank + 1:
                         block.append('[ERROR] Rank niet consecutief (pk=%s)' % kampioen.pk)
                 prev_rank = kampioen.rank
+
+                if kampioen.rank == limiet:
+                    net_na_cut = True
         # for
 
         self._out_block(block)
