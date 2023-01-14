@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -157,9 +157,7 @@ class TestFeedback(E2EHelpers, TestCase):
             resp = self.client.post(self.url_feedback_formulier,
                                     {'bevinding': '4',
                                      'feedback': 'Just testing'})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
+        self.assert404(resp, 'Verkeerd gebruik')
 
     def test_afgehandeld(self):
         with self.assert_max_queries(20):

@@ -126,6 +126,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Manager Competitiezaken')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Maak afspraken over het omgaan met persoonsgegevens.')
@@ -140,6 +141,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Admin site')
         self.assertContains(resp, 'Account wissel')
         self.assertContains(resp, 'Manager Competitiezaken')
@@ -172,6 +174,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, "BKO test")
         self.assertNotContains(resp, "RKO test")
         self.assertContains(resp, "RCL test")
@@ -208,6 +211,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(25):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager Competitiezaken
@@ -220,6 +225,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # response = het Plein
         with self.assert_max_queries(26):
             resp = self.client.get(self.url_wissel_van_rol)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Manager Competitiezaken")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_accountwissel, urls)
@@ -254,6 +261,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(25):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_accountwissel, urls)              # Account wissel
@@ -271,6 +280,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_bko.pk, urls)
@@ -292,6 +303,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_rko.pk, urls)
@@ -311,6 +324,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(22):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
@@ -333,6 +348,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(21):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
 
@@ -350,6 +367,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(21):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
@@ -371,6 +390,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
@@ -392,6 +413,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_mo.pk, urls)
@@ -406,6 +429,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_mww.pk, urls)
@@ -420,6 +445,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_mwz.pk, urls)
@@ -434,6 +461,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_sup.pk, urls)
@@ -449,6 +478,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
 
     def test_geen_rolwissel(self):
@@ -507,6 +538,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(28):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         urls = self._get_wissel_urls(resp)
 
         urls_no_dupes = list(set(urls))
@@ -539,6 +572,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(23):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         urls = self._get_wissel_urls(resp)
 
         urls_no_dupes = list(set(urls))
@@ -574,6 +609,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(27):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)       # checkt ook href's
 
         # wissel door naar de RCL rol
@@ -582,6 +619,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(26):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)       # checkt ook href's
 
     def test_bb_naar_sec(self):
@@ -596,6 +635,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(26):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wordt secretaris van een van de verenigingen")
         urls = self.extract_all_urls(resp)
         urls = [url for url in urls if url == '/functie/wissel-van-rol/secretaris/']
@@ -630,6 +671,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(26):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % functie_hwl.pk, urls)
 
@@ -642,6 +685,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(26):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_mo.pk, urls)
 
@@ -687,6 +732,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # gaan naar de wissel-van-rol pagina
         resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
         # herhaal met 'BB' vlag, zonder functies
@@ -702,6 +748,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # gaan naar de wissel-van-rol pagina
         resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
     def test_bko_to_hwl(self):

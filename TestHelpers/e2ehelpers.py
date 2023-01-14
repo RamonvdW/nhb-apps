@@ -553,6 +553,29 @@ class E2EHelpers(TestCase):
             pos = text.find("class=")
         # while
 
+    def _assert_inputs(self, html, dtl):
+        pos = html.find('<input ')
+        while pos > 0:
+            inp = html[pos+7:]
+            pos = html.find('<input ', pos+7)
+
+            # find the end of the tag
+            # dit is erg robust, maar werkt goed genoeg
+            endpos = inp.find('>')
+            inp = inp[:endpos].strip()
+            spl = inp.split(' ')
+            # print('inp: %s' % repr(spl))
+            for part in spl:
+                if '=' in part:
+                    part_spl = part.split('=')
+                    tag = part_spl[0]
+                    # print('part_spl: %s' % repr(part_spl))
+                    if tag not in ('value', 'autofocus') and part_spl[1] in ('""', "''"):
+                        msg = 'Found input tag %s with empty value: %s' % (repr(tag), repr(inp))
+                        self.fail(msg)
+            # for
+        # while
+
     def _assert_html_basics(self, html, dtl):
         self.assertIn("<!DOCTYPE html>", html, msg='Missing DOCTYPE at start of %s' % dtl)
         self.assertIn("<html", html, msg='Missing <html in %s' % dtl)
@@ -570,9 +593,11 @@ class E2EHelpers(TestCase):
         pos = html.find('##BUG')
         if pos >= 0:
             msg = html[pos:]
+            context = html[pos-30:]
             pos = msg.find('##', 3)
             msg = msg[:pos+2]
-            self.fail(msg='Bug in template %s: %s' % (repr(dtl), msg))
+            context = context[:pos+30]
+            self.fail(msg='Bug in template %s: %s\nContext: %s' % (repr(dtl), msg, context))
 
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
@@ -585,7 +610,6 @@ class E2EHelpers(TestCase):
             validated_templates.append(dtl)
 
         self._assert_html_basics(html, dtl)
-        self._assert_template_bug(html, dtl)
 
         self.assertNotIn('<script>', html, msg='Missing type="application/javascript" in <script> in %s' % dtl)
 
@@ -594,6 +618,9 @@ class E2EHelpers(TestCase):
         self.assert_scripts_clean(html, dtl)
         self._assert_no_div_in_p(html, dtl)
         self._assert_no_col_white(html, dtl)
+        self._assert_inputs(html, dtl)
+
+        self._assert_template_bug(html, dtl)
 
         urls = self.extract_all_urls(response)
         for url in urls:

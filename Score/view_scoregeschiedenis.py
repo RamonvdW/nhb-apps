@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -116,13 +116,17 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                         score.wedstrijd_str += " " + tijd
                                     if wedstrijd.vereniging:
                                         score.wedstrijd_waar = 'bij %s' % wedstrijd.vereniging
+                                    else:
+                                        score.wedstrijd_waar = 'bij ?'
                                     if score.waarde == SCORE_WAARDE_VERWIJDERD:
                                         score.waarde = 'verwijderd'
 
                                 except IndexError:
+                                    # skip
                                     pass
 
-                                obj.scores.append(score)
+                                else:
+                                    obj.scores.append(score)
                     # for
                 # for
 

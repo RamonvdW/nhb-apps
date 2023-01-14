@@ -89,7 +89,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.cut.save()
 
     @staticmethod
-    def _dump_klasse_deelnemers(klasse):                                            # pragma: no cover
+    def _dump_klasse_deelnemers(klasse, para_info):                                 # pragma: no cover
         print('')
         print('====================================================================')
         print('Klasse: %s' % klasse)
@@ -102,17 +102,18 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             print('  rank=%s, volgorde=%s, sporterboog_pk=%s, boog=%s, lid_nr=%s, gem=%s, deelname=%s, kampioen_label=%s' % (
                     obj.rank, obj.volgorde, obj.sporterboog.pk, obj.sporterboog.boogtype.afkorting,
                     obj.sporterboog.sporter.lid_nr, obj.gemiddelde, obj.deelname, obj.kampioen_label))
-            v = SporterVoorkeuren.objects.get(sporter=obj.sporterboog.sporter)
-            print('  voorwerpen=%s, opmerking=%s' % (v.para_voorwerpen, v.opmerking_para_sporter))
+            if para_info:
+                v = SporterVoorkeuren.objects.get(sporter=obj.sporterboog.sporter)
+                print('  voorwerpen=%s, opmerking=%s' % (v.para_voorwerpen, v.opmerking_para_sporter))
         print('====================================================================')
 
-    def _dump_deelnemers(self, alle_klassen=False):                 # pragma: no cover
+    def _dump_deelnemers(self, alle_klassen=False, para_info=False):                # pragma: no cover
         if alle_klassen:
             for temp in KampioenschapSporterBoog.objects.distinct('klasse'):
-                self._dump_klasse_deelnemers(temp.klasse)
+                self._dump_klasse_deelnemers(temp.klasse, para_info)
             # for
         else:
-            self._dump_klasse_deelnemers(self.klasse)
+            self._dump_klasse_deelnemers(self.klasse, para_info)
 
     def _get_rank_volg(self, alleen_kampioenen=False, alle=False):
         if alleen_kampioenen:
@@ -162,7 +163,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     def test_begin_rk(self):
         # competitie is doorgezet - controleer de lijst deelnemers
 
-        # 4 regio's met 6 schutters waarvan 1 met te weinig scores
+        # 4 regio's met 6 sporters waarvan 1 met te weinig scores
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
 
@@ -187,14 +188,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_opnieuw_initieel(self):
         # met de MUTATIE_INITIEEL kunnen we ook een 'reset' uitvoeren
-        # daarbij wordt rekening gehouden met schutters die afgemeld zijn
+        # daarbij wordt rekening gehouden met sporters die afgemeld zijn
 
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
         # self._dump_deelnemers()
 
-        # meld een paar schutters af: 1 kampioen + 1 schutter boven de cut
+        # meld een paar sporters af: 1 kampioen + 1 sporter boven de cut
         deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=1)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
@@ -236,7 +237,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_regiocomp_mutaties()
 
     def test_rko_bevestigen(self):
-        # bevestig deelname door een schutter en een reserve
+        # bevestig deelname door een sporter en een reserve
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
@@ -258,7 +259,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self._check_volgorde_en_rank()
 
     def test_rko_afmelden_onder_cut(self):
-        # een reserve-schutter meldt zich af
+        # een reserve-sporter meldt zich af
         # dit heeft geen invloed op de deelnemers-lijst
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
@@ -283,7 +284,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_rko_afmelden_boven_cut(self):
         # sporter boven de cut meldt zich af
-        # reserve-schutter wordt opgeroepen
+        # reserve-sporter wordt opgeroepen
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
@@ -316,8 +317,66 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self._check_volgorde_en_rank()
 
+    def test_rko_afmelden_weinig_deelnemers(self):
+        # sporter boven de cut meldt zich af en weer aan
+        # er zijn geen reserve sporters
+
+        self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
+
+        nr = 14     # cut ligt op 16
+        weghalen = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse, volgorde__gt=nr)
+        weghalen.delete()
+        # self._dump_deelnemers()
+
+        deelnemer = KampioenschapSporterBoog.objects.get(indiv_klasse=self.klasse, volgorde=4)
+        url = self.url_wijzig_status % deelnemer.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
+
+        self.verwerk_regiocomp_mutaties()
+
+        deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        self.assertEqual(deelnemer.deelname, DEELNAME_NEE)
+        self.assertEqual(deelnemer.rank, 0)
+        self.assertEqual(deelnemer.volgorde, 4)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
+
+        self.verwerk_regiocomp_mutaties()
+
+        self._check_volgorde_en_rank()
+
+        # special case: de 1e deelnemer afmelden en weer aanmelden
+        deelnemer = KampioenschapSporterBoog.objects.get(indiv_klasse=self.klasse, volgorde=1)
+        url = self.url_wijzig_status % deelnemer.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
+
+        self.verwerk_regiocomp_mutaties()
+        # self._dump_deelnemers()
+
+        deelnemer = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
+        self.assertEqual(deelnemer.deelname, DEELNAME_NEE)
+        self.assertEqual(deelnemer.rank, 0)
+        self.assertEqual(deelnemer.volgorde, 1)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
+
+        self.verwerk_regiocomp_mutaties()
+        # self._dump_deelnemers()
+
+        self._check_volgorde_en_rank()
+
     def test_rko_opnieuw_aanmelden_onder_cut(self):
-        # een reserve-schutter meldt zich af en weer aan
+        # een reserve-sporter meld zich af en weer aan
         # dit heeft geen invloed op de deelnemers-lijst
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
@@ -356,7 +415,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self._check_volgorde_en_rank()
 
     def test_rko_opnieuw_aanmelden_einde_lijst(self):
-        # opnieuw aangemelde schutter komt helemaal aan het einde van de reserve-lijst
+        # opnieuw aangemelde sporter komt helemaal aan het einde van de reserve-lijst
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
@@ -377,13 +436,25 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_rko_opnieuw_aanmelden_boven_cut(self):
         # sporter boven de cut meldt zich af
-        # reserve-schutter wordt opgeroepen
-        # sporter meldt zichzelf daarna weer aan en komt in de lijst met reserve-schutters
+        # reserve-sporter wordt opgeroepen
+        # sporter meldt zichzelf daarna weer aan en komt in de lijst met reserve-sporters
         # gesorteerd op gemiddelde
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
         # self._dump_deelnemers()
+
+        # plaats een afmelding onder de cut
+        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=20)    # cut ligt op 16
+        self.assertEqual(deelnemer.volgorde, 20)
+        url = self.url_wijzig_status % deelnemer.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
+
+        self.verwerk_regiocomp_mutaties()
+        # self._dump_deelnemers()
+        # self._check_volgorde_en_rank()
 
         deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=3)    # cut ligt op 16
         self.assertEqual(deelnemer.volgorde, 3)
@@ -394,6 +465,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties()
         # self._dump_deelnemers()
+        self._check_volgorde_en_rank()
 
         reserve = KampioenschapSporterBoog.objects.get(pk=deelnemer.pk)
         del deelnemer
@@ -401,7 +473,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertEqual(reserve.rank, 0)
         self.assertEqual(reserve.volgorde, 3)
 
-        # opnieuw aanmelden --> wordt als reserve-schutter op de lijst gezet
+        # opnieuw aanmelden --> wordt als reserve-sporter op de lijst gezet
         url = self.url_wijzig_status % reserve.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
@@ -454,8 +526,8 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertEqual(ex_reserve.volgorde, 3)
         self.assertEqual(ex_reserve.rank, 3)
 
-        # de zojuist afgemelde schutter staat nog steeds waar hij stond
-        # maar is 1 omlaag geschoven door de ingeschoven reserve schutter
+        # de zojuist afgemelde sporter staat nog steeds waar hij stond
+        # maar is 1 omlaag geschoven door de ingeschoven reserve sporter
         afmelden = KampioenschapSporterBoog.objects.get(pk=afmelden.pk)
         self.assertEqual(afmelden.rank, 0)
         self.assertEqual(afmelden.volgorde, 5)
@@ -464,7 +536,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     def test_rko_kampioen_opnieuw_aanmelden(self):
         # regiokampioen meldt zich af en daarna weer aan
-        # komt in de lijst met reserve-schutters
+        # komt in de lijst met reserve-sporters
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
@@ -540,7 +612,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.verwerk_regiocomp_mutaties()
         # self._dump_deelnemers()
 
-        # controleer dat ze in de reserve schutters lijst staan, gesorteerd op gemiddelde
+        # controleer dat ze in de reserve sporters lijst staan, gesorteerd op gemiddelde
         kampioen = KampioenschapSporterBoog.objects.get(pk=pks[0])
         self.assertEqual(kampioen.rank, 17)
         self.assertEqual(kampioen.volgorde, 17)
