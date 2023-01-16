@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -105,10 +105,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command('recalc_rkteam_sterkte')
         _ = (f1, f2)
-        print('f1:', f1.getvalue())
-        print('f2:', f2.getvalue())
-
-
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
 
 
 # end of file
