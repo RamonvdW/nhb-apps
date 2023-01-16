@@ -578,6 +578,42 @@ class CompetitieMutatieAdmin(CreateOnlyAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class RondeTeamVerFilter(admin.SimpleListFilter):
+
+    title = 'Vereniging'
+
+    parameter_name = 'RondeTeamVer'
+
+    def __init__(self, request, params, model, model_admin):
+        # print('init: q=%s' % list(request.GET.items()))
+        self.limit_comp = request.GET.get('team__deelcompetitie__competitie__id__exact')
+        self.limit_regio = request.GET.get('team__vereniging__regio__regio_nr__exact')
+        self.limit_teamtype = request.GET.get('RondeTeamType')
+        super().__init__(request, params, model, model_admin)
+
+    def lookups(self, request, model_admin):
+
+        teams = RegiocompetitieTeam.objects.all()
+        if self.limit_comp:
+            teams = teams.filter(deelcompetitie__competitie__id=self.limit_comp)
+        if self.limit_regio:
+            teams = teams.filter(vereniging__regio__regio_nr=self.limit_regio)
+        if self.limit_teamtype:
+            teams = teams.filter(team_type__afkorting=self.limit_teamtype)
+
+        tups = list()
+        for team in teams.order_by('vereniging__ver_nr', 'volg_nr'):
+            tups.append((team.pk, team.maak_team_naam()))
+        # for
+        # print('looksup: aantal=%s' % len(tups))
+        return tups
+
+    def queryset(self, request, queryset):
+        if self.value():                # pragma: no cover
+            queryset = queryset.filter(team__id=self.value())
+        return queryset
+
+
 class RondeTeamTypeFilter(admin.SimpleListFilter):
 
     title = 'Team type'
@@ -606,9 +642,12 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
     list_filter = ('team__deelcompetitie__competitie',
                    'team__vereniging__regio',
                    RondeTeamTypeFilter,
-                   'ronde_nr')
+                   'ronde_nr',
+                   RondeTeamVerFilter)
 
     list_select_related = ('team', 'team__vereniging')
+
+    ordering = ('team__vereniging__ver_nr', 'ronde_nr')
 
     fieldsets = (
         ('',
