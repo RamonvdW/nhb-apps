@@ -757,7 +757,7 @@ class E2EHelpers(TestCase):
         if pos > 0:
             self.assertTrue(resp.url.startswith(expected_url[:pos]))
         else:
-            self.assertEqual(resp.url, expected_url)
+            self.assertEqual(expected_url, resp.url)
 
     def assert_is_redirect_not_plein(self, resp):
         if resp.status_code != 302:                     # pragma: no cover
