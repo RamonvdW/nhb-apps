@@ -248,7 +248,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
@@ -459,7 +459,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
