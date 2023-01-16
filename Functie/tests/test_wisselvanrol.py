@@ -24,6 +24,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
     url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
     url_activeer_rol = '/functie/activeer-rol/%s/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_activeer_functie_hwl = '/functie/activeer-functie-hwl/'     # POST parameter: 'ver_nr'
     url_accountwissel = '/account/account-wissel/'
     url_bondscompetities = '/bondscompetities/'
     url_vhpg_acceptatie = '/functie/vhpg-acceptatie/'
@@ -287,10 +288,18 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_activeer_functie % self.functie_bko.pk, urls)
         self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
-        # probeer te wisselen naar secretaris
+        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_check_rol('BKO')
+
+        # controleer dat wisselen naar SEC niet werkt als BKO
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_naar_sec)
         self.assert403(resp)
+
+        # dit geeft extra coverage in rol.py:rol_activeer_functie
+        resp = self.client.post('/functie/activeer-functie/%s/' % self.functie_sec.pk)
+        self.assert_is_redirect(resp, '/bondscompetities/')     # omdat we nog steeds BKO zijn
+        self.e2e_check_rol('BKO')
 
         self.e2e_wisselnaarrol_sporter()
         self.e2e_check_rol('sporter')
@@ -830,6 +839,19 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.e2e_check_rol('RKO')
+
+    def test_hwl_nr_keuze(self):
+        # IT en BB mogen naar een HWL naar keuze wisselen
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        resp = self.client.post(self.url_activeer_functie_hwl, {'ver_nr': 9999})
+        self.assert404(resp, 'Foute parameter (vereniging)')
+
+        resp = self.client.post(self.url_activeer_functie_hwl, {'ver_nr': self.ver1000.ver_nr})
+        self.assert_is_redirect(resp, '/vereniging/')
 
     # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 
