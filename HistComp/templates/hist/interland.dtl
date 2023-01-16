@@ -65,7 +65,7 @@
                         <th class="center">Gem<span class="hide-on-small-only">iddelde</span></th>
                         <th class="center">Klasse</th>
                         <th class="center">Gesl<span class="hide-on-small-only">acht</span></th>
-                        <th>Lid</th>
+                        <th>Lid nr</th>
                         <th>Naam</th>
                         <th>Ver<span class="hide-on-small-only">eniging</span></th>
                     </tr>
@@ -75,7 +75,7 @@
                             <td class="center">{{ indiv.gemiddelde }}</td>
                             <td class="center">{{ indiv.leeftijd_str }}</td>
                             <td class="center">{{ indiv.sporter_geslacht }}</td>
-                            <td>[{{ indiv.sporter_lid_nr }}]</td>
+                            <td>{{ indiv.sporter_lid_nr }}</td>
                             <td>{{ indiv.sporter_naam }}</td>
                             <td>[{{ indiv.vereniging_nr }}]<span class="hide-on-small-only"> {{ indiv.vereniging_naam }}</span></td>
                         </tr>

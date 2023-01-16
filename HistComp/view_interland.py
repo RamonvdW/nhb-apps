@@ -166,7 +166,7 @@ class InterlandAlsBestandView(InterlandView):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Gemiddelde', 'Klasse', 'Geslacht', 'Lid', 'Naam', 'Vereniging'])
+        writer.writerow(['Gemiddelde', 'Klasse', 'Geslacht', 'Lid nr', 'Naam', 'Vereniging'])
 
         for indiv in indivs:
             ver_str = '[%s] %s' % (indiv.vereniging_nr, indiv.vereniging_naam)
