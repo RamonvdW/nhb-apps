@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -111,13 +111,14 @@ class CompetitieKiesView(TemplateView):
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
                           .filter(deelcompetitie__competitie__pk__in=pks)
-                          .select_related('sporterboog__sporter__bij_vereniging__regio__rayon',
+                          .select_related('sporterboog__sporter',
                                           'sporterboog__sporter__account',
+                                          'bij_vereniging__regio__rayon',
                                           'aangemeld_door',
                                           'deelcompetitie__competitie')):
 
-            rayon_nr = deelnemer.sporterboog.sporter.bij_vereniging.regio.rayon.rayon_nr
-            regio_nr = deelnemer.sporterboog.sporter.bij_vereniging.regio.regio_nr
+            rayon_nr = deelnemer.bij_vereniging.regio.rayon.rayon_nr
+            regio_nr = deelnemer.bij_vereniging.regio.regio_nr
             zelfstandig = deelnemer.aangemeld_door == deelnemer.sporterboog.sporter.account
 
             if deelnemer.deelcompetitie.competitie.afstand == '18':
