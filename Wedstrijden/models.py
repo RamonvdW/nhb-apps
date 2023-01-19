@@ -352,6 +352,9 @@ class Wedstrijd(models.Model):
     # status van deze wedstrijd: ontwerp --> goedgekeurd --> geannuleerd
     status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS, default='O')
 
+    # ter info op de kalender = niet op in te schrijven, dus geen inschrijf deadline tonen
+    is_ter_info = models.BooleanField(default=False)
+
     # mogelijkheid om een wedstrijd niet op de kalender te tonen
     # use case: 2-daagse wedstrijd wordt geannuleerd en vervangen door twee 1-daagse wedstrijden
     #           als er inschrijvingen aan hangen dan wil je de wedstrijd niet verwijderen

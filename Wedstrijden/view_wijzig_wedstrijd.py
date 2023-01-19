@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -324,7 +324,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             if wedstrijd.uitvoerende_vereniging:
                 selected_ver_nr = wedstrijd.uitvoerende_vereniging.ver_nr
             else:
-                selected_ver_nr = -1
+                selected_ver_nr = wedstrijd.organiserende_vereniging.ver_nr
 
             context['opt_uitvoerende_vers'] = (NhbVereniging
                                                .objects
@@ -337,6 +337,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 ver.selected = (ver.ver_nr == selected_ver_nr)
                 ver.keuze_str = ver.ver_nr_en_naam()
             # for
+
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+            context['toon_ter_info'] = True
 
         context['url_opslaan'] = reverse('Wedstrijden:wijzig-wedstrijd',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -546,6 +549,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                         if data == sel:
                             wedstrijd.uitvoerende_vereniging = ver
                     # for
+                    if wedstrijd.uitvoerende_vereniging == wedstrijd.organiserende_vereniging:
+                        wedstrijd.uitvoerende_vereniging = None
 
             data = request.POST.get('locatie', '')
             if data:
@@ -601,6 +606,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     raise Http404('Geen toegestane prijs')
 
                 wedstrijd.prijs_euro_onder18 = prijs
+
+            if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+                ter_info = request.POST.get('ter_info', '')
+                if ter_info:
+                    wedstrijd.is_ter_info = True
+                else:
+                    wedstrijd.is_ter_info = False
 
             wedstrijd.save()
 

@@ -531,7 +531,7 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
         if db_field.name == 'indiv_klasse' and self.obj:
             kwargs['queryset'] = (CompetitieIndivKlasse
                                   .objects
-                                  .filter(competitie=self.obj.deelcompetitie.competitie)
+                                  .filter(competitie=self.obj.kampioenschap.competitie)
                                   .order_by('volgorde'))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

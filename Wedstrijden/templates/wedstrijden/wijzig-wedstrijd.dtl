@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -164,6 +164,22 @@
                                     {% endif %}
                                 </td>
                             </tr>
+
+                            {% if toon_ter_info %}
+                                <tr>
+                                    <th>Ter info op de kalender zetten?</th>
+                                    <td>
+                                        <ul id="id_ter_info">
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" class="filled-in" name="ter_info" onchange="gewijzigd()"{% if wed.is_ter_info %} checked{% endif %}>
+                                                    <span class="black-text">&nbsp;Ja, geen inschrijvingen toestaan</span>
+                                                </label>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
 
                             <tr>
                                 <th>Bijzonder<wbr>heden</th>

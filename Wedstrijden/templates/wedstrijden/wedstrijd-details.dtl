@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,10 +15,14 @@
         <div class="col s12">
             <h3 class="page-banner">Wedstrijd details</h3>
 
-            {% if not kan_aanmelden %}
-                <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
-            {% elif not kan_inschrijven %}
-                <p>Het is niet meer mogelijk om te schrijven</p>
+            {% if wed.is_ter_info %}
+                <p>Het is niet mogelijk om in te schrijven op deze wedstrijd.</p>
+            {% else %}
+                {% if not kan_aanmelden %}
+                    <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
+                {% elif not kan_inschrijven %}
+                    <p>Het is niet meer mogelijk om te schrijven</p>
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -56,21 +60,23 @@
                     </tr>
                 {% endif %}
 
-                <tr>
-                    <th>Inschrijving moet v&oacute;&oacute;r</th>
-                    <td>
-                        <span>{{ wed.inschrijven_voor }}</span>
-                        {% if not kan_inschrijven %}
-                            <span class="red-text"> (inschrijving is gesloten)</span>
-                        {% else %}
-                            {% if wed.inschrijven_let_op %}
-                                <span class="red-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                {% if not wed.is_ter_info %}
+                    <tr>
+                        <th>Inschrijving moet v&oacute;&oacute;r</th>
+                        <td>
+                            <span>{{ wed.inschrijven_voor }}</span>
+                            {% if not kan_inschrijven %}
+                                <span class="red-text"> (inschrijving is gesloten)</span>
                             {% else %}
-                                <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
+                                {% if wed.inschrijven_let_op %}
+                                    <span class="red-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                                {% else %}
+                                    <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                {% endif %}
 
                 <tr>
                     <th>Volgens regels van</th>
@@ -86,9 +92,13 @@
 
                 <tr>
                     <th>Wedstrijd locatie</th>
-                    <td>{{ wed.locatie.adres|linebreaksbr }}<br><br>
-                        <a class="btn-nhb-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                            <i class="material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                    <td>
+                        <span>{{ wed.locatie.adres|linebreaksbr }}</span>
+                        {% if url_map %}
+                            <br><br>
+                            <a class="btn-nhb-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                                <i class="material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                        {% endif %}
                     </td>
                 </tr>
 

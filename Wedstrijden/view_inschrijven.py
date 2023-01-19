@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -78,9 +78,10 @@ class WedstrijdDetailsView(TemplateView):
             wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
         if wedstrijd.locatie:
-            zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + wedstrijd.locatie.adres
-            zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
-            context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
+            if wedstrijd.locatie.adres != '(diverse)':
+                zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + wedstrijd.locatie.adres
+                zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
+                context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
         context['sessies'] = sessies = (WedstrijdSessie

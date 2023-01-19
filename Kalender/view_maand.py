@@ -7,6 +7,7 @@
 from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.formats import localize
 from django.views.generic import TemplateView
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Plein.menu import menu_dynamics
@@ -77,6 +78,31 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
                           'maand': MAAND2URL[maand]})
 
     return url
+
+
+def maak_compacte_wanneer_str(datum_begin, datum_einde):
+
+    if datum_begin == datum_einde:
+        # 5 mei 2022
+        wanneer_str = localize(datum_begin)
+
+    elif datum_begin.month == datum_einde.month:
+
+        if datum_einde.day == datum_begin.day + 1:
+            # 5 + 6 mei 2022
+            wanneer_str = "%s + " % datum_begin.day
+        else:
+            # 5 - 8 mei 2022
+            wanneer_str = "%s - " % datum_begin.day
+
+        wanneer_str += localize(datum_einde)
+
+    else:
+        # 30 mei - 2 juni 2022
+        wanneer_str = "%s - %s" % (localize(datum_begin),
+                                       localize(datum_einde))
+
+    return wanneer_str
 
 
 class KalenderMaandView(TemplateView):
@@ -170,6 +196,7 @@ class KalenderMaandView(TemplateView):
                 wed.url_details = reverse('Wedstrijden:wedstrijd-details',
                                           kwargs={'wedstrijd_pk': wed.pk})
 
+            wed.wanneer_str = maak_compacte_wanneer_str(wed.datum_begin, wed.datum_einde)
             wed.inschrijven_voor = wed.datum_begin - timedelta(days=wed.inschrijven_tot)
             wed.inschrijven_dagen = (wed.inschrijven_voor - now_date).days
             wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)

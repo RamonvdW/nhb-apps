@@ -168,6 +168,8 @@ class TestBeheer(E2EHelpers, TestCase):
         self.assertEqual(resp.redirect_chain[-1], ('/account/nieuw-wachtwoord/', 302))
 
     def test_queries(self):
+        # TODO: zorg dat er van elk type record 1 bestaat
+
         # controleer dat alle beheer pagina's het goed doen
         settings.DEBUG = True
         self.e2e_login_and_pass_otp(self.account_admin)
