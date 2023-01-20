@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -783,9 +783,65 @@ class TestWedstrijd(E2EHelpers, TestCase):
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
+            # zet de uitvoerende vereniging op de eigen vereniging om deze te "resetten"
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'uitvoerend': 'ver_%s' % nhbver_bb.ver_nr})
+            self.assert_is_redirect_not_plein(resp)
+
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+            self.assertIsNone(wedstrijd.uitvoerende_vereniging)
+
             # corner case
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'uitvoerend': ''})
             self.assert_is_redirect_not_plein(resp)
+
+    def test_ter_info(self):
+        # alleen de BB en MWZ mogen de ter-info vlag zetten
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # wissel naar HWL en maak een wedstrijd aan
+        self._maak_externe_locatie(self.nhbver1)  # locatie is noodzakelijk
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
+        self.assertFalse(wedstrijd.is_ter_info)
+
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+
+        # probeer de 'ter info' vlag te zetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'ter_info': 1})
+            self.assert_is_redirect_not_plein(resp)
+
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertFalse(wedstrijd.is_ter_info)
+
+        # probeer het nog een keer, als BB
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # probeer de 'ter info' vlag te zetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'ter_info': 1})
+            self.assert_is_redirect_not_plein(resp)
+
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertTrue(wedstrijd.is_ter_info)
+
+        # probeer de 'ter info' vlag te resetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'ter_info': ''})
+            self.assert_is_redirect_not_plein(resp)
+
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertFalse(wedstrijd.is_ter_info)
+
 
 # end of file
