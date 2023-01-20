@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -184,7 +184,7 @@ def teken_barcode(lid_nr, draw, begin_x, end_y, font):
     # for
     code39 += sym_start_stop
 
-    digit_width, digit_height = draw.textsize("8", font=font)
+    _, _, digit_width, digit_height = draw.textbbox((0, 0), "8", font=font)
 
     # teken de lijntjes van de barcode
     pixels = 3
@@ -212,6 +212,7 @@ def teken_barcode(lid_nr, draw, begin_x, end_y, font):
 def maak_bondspas_image(lid_nr, jaar, regels):
     fpath = os.path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas.jpg')
     image = Image.open(fpath)
+    _, _, width, height = image.getbbox()
 
     # image = image.resize((960, 1353))        # standard size = 1280 x 1804
     draw = ImageDraw.Draw(image)
@@ -219,60 +220,71 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=45)
     color_black = (0, 0, 0)
     color_grijs = (221, 217, 215)       # reverse engineered
-    # color_grijs = (200, 200, 200)
 
     # het grijze kader waarin de tekst moet komen
     # coördinaten: (0,0) = top-left
-    _, _, width, height = image.getbbox()
-    kader_y1 = 440          # bovenkant
-    kader_y2 = 1115         # onderkant
-    kader_x1 = 0            # border is 2 pixels
-    kader_x2 = width
+    grijze_kader_x1 = 0            # border is 2 pixels
+    grijze_kader_x2 = width
+    grijze_kader_y1 = 833          # bovenkant
+    grijze_kader_y2 = 1507         # onderkant
 
-    # teken het grijze vlak opnieuw
-    # er zou geen kleurverschil moeten zijn
-    draw.rectangle(((kader_x1, kader_y1), (kader_x2, kader_y2)), fill=color_grijs)
+    # controleer waar het grijze vlak komt
+    # color_grijs = (200, 200, 200)
+    # draw.rectangle(((grijze_kader_x1, grijze_kader_y1), (grijze_kader_x2, grijze_kader_y2)), fill=color_grijs)
+
+    witte_kader_x1 = 0
+    witte_kader_x2 = width
+    witte_kader_y1 = grijze_kader_y2 + 1
+    witte_kader_y2 = witte_kader_y1 + 225
+
+    # controleer waar het witte vlak komt
+    # color_grijs = (200, 200, 200)
+    # draw.rectangle(((witte_kader_x1+20, witte_kader_y1), (witte_kader_x2-20, witte_kader_y2)), fill=color_grijs)
 
     # zwart kader ronde het hele plaatje
     draw.rectangle(((0, 0), (image.width - 1, image.height - 1)), width=2, fill=None, outline=color_black)
 
     # zet een marge van 10 pixels
-    kader_y1 += 30
-    kader_y2 -= 20
-    kader_x1 += 50
-    kader_x2 -= 50
+    grijze_kader_y1 += 30
+    # kader_y2 -= 20
+    grijze_kader_x1 += 50
+    grijze_kader_x2 -= 50
+
+    witte_kader_y_midden = witte_kader_y1 + int((witte_kader_y2 - witte_kader_y1) / 2)
+    witte_kader_x1 = grijze_kader_x1
 
     # bondsnummer en WA id
     lid_nr = regels[0][1]
     wa_id = regels[1][1]
     regels = regels[2:]
 
-    text_width, text_height = draw.textsize(lid_nr, font=font_bold)
-    text_height += 20       # extra spacing
-    barcode_margin_x = 20
+    _, _, text_width, text_height = draw.textbbox((0, 0), lid_nr, font=font_bold)
 
-    bondsnr_width = draw.textlength("Bondsnummer: ", font=font)
-    bondsnr_x = kader_x2 - text_width - bondsnr_width - barcode_margin_x
-    bondsnr_y = kader_y1 - text_height
+    wa_id_x = bondsnr_x = witte_kader_x1
 
     if len(wa_id):
-        # zet de teksten "World archery ID" en "Bondsnummer" onder elkaar
-        draw.text((bondsnr_x, bondsnr_y), "World Archery ID: " + wa_id, color_black, font=font, anchor="ls")
-        bondsnr_y -= text_height
+        bondsnr_y = witte_kader_y_midden - 25
+        wa_id_y = witte_kader_y_midden + 25
+    else:
+        bondsnr_y = witte_kader_y_midden
 
     # bondsnummer
     # text anchors: https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
-    draw.text((bondsnr_x, bondsnr_y), "Bondsnummer: ", color_black, font=font, anchor="ls")
-    draw.text((bondsnr_x + bondsnr_width, bondsnr_y), lid_nr, color_black, font=font_bold, anchor="ls")
-    bondsnr_y -= text_height
+    bondsnr_width = draw.textlength("Bondsnummer: ", font=font)
+    draw.text((bondsnr_x, bondsnr_y), "Bondsnummer: ", color_black, font=font, anchor="lb")
+    draw.text((bondsnr_x + bondsnr_width, bondsnr_y), lid_nr, color_black, font=font_bold, anchor="lb")
+
+    if len(wa_id):
+        draw.text((wa_id_x, wa_id_y), "World Archery ID: " + wa_id, color_black, font=font, anchor="lt")
 
     # barcode
-    teken_barcode(lid_nr, draw, bondsnr_x, bondsnr_y, font)
+    # 480 plaatst deze midden boven de logo's van WA en IFAA
+    teken_barcode(lid_nr, draw, witte_kader_x2 - 480, witte_kader_y_midden + 70, font)
 
     # switch naar een kleiner font
     font = ImageFont.truetype(settings.BONDSPAS_FONT, size=40)
     font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=40)
-    _, text_height = draw.textsize(lid_nr, font=font)
+    _, _, _, text_height = draw.textbbox((0, 0), lid_nr, font=font)
 
     text_spacing = text_height + 15
     wkl_indent = 30     # pixels
@@ -297,17 +309,17 @@ def maak_bondspas_image(lid_nr, jaar, regels):
             wkl = True
     # for
 
-    next_y = kader_y1
+    next_y = grijze_kader_y1
     wkl = False
     for header, regel in regels:
         if header:
             header += ': '
             if wkl:
-                draw.text((kader_x1 + header_width - header_width_wkl + wkl_indent, next_y), header, color_black, font=font_bold)
+                draw.text((grijze_kader_x1 + header_width - header_width_wkl + wkl_indent, next_y), header, color_black, font=font_bold)
             else:
-                draw.text((kader_x1, next_y), header, color_black, font=font)
+                draw.text((grijze_kader_x1, next_y), header, color_black, font=font)
 
-        draw.text((kader_x1 + header_width, next_y), regel, color_black, font=font)
+        draw.text((grijze_kader_x1 + header_width, next_y), regel, color_black, font=font)
         next_y += text_spacing
 
         if header == "Wedstrijdklassen: ":
