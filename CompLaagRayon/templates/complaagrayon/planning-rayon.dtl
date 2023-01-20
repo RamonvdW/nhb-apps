@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -74,7 +74,11 @@
                             {% endfor %}
                         </td>
 
-                        <td>Nodig: {{ wedstrijd.schutters_count }}<br>Maximum: ?</td>
+                        <td>
+                            <span{% if wedstrijd.is_overbelast %} class="nhb-rood-text"{% endif %}>Nodig: {{ wedstrijd.schutters_count }}</span>
+                            <br>
+                            <span>Maximum: {{ wedstrijd.capaciteit }}</span>
+                        </td>
 
                         <!-- knop om wedstrijd te wijzigen -->
                         <td>

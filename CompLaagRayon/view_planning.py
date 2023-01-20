@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -73,16 +73,62 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk
         context['rayon'] = deelcomp_rk.nhb_rayon
 
-        klasse2schutters = dict()
+        indiv_klasse2count = dict()
+        team_klasse2count = dict()
         niet_gebruikt = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp_rk)
+                    .filter(rank__lte=24)   # 24 = standaard limiet voor een individuele klasse
+                    .exclude(rank=0)        # afgemeld
                     .select_related('indiv_klasse')):
             try:
-                klasse2schutters[obj.indiv_klasse.pk] += 1
+                indiv_klasse2count[obj.indiv_klasse.pk] += 1
             except KeyError:
-                klasse2schutters[obj.indiv_klasse.pk] = 1
+                indiv_klasse2count[obj.indiv_klasse.pk] = 1
+        # for
+
+        for cut in (DeelcompetitieIndivKlasseLimiet
+                    .objects
+                    .filter(deelcompetitie=deelcomp_rk)
+                    .select_related('indiv_klasse')):
+
+            try:
+                if indiv_klasse2count[cut.indiv_klasse.pk] > cut.limiet:
+                    indiv_klasse2count[cut.indiv_klasse.pk] = cut.limiet
+
+            except KeyError:
+                pass
+        # for
+
+        for obj in (KampioenschapTeam
+                    .objects
+                    .filter(deelcompetitie=deelcomp_rk)
+                    .exclude(team_klasse=None)      # nog niet in een klasse geplaatst
+                    # .exclude(rank=0)        # afgemeld
+                    .select_related('team_klasse')):
+            try:
+                team_klasse2count[obj.team_klasse.pk] += 4
+            except KeyError:
+                team_klasse2count[obj.team_klasse.pk] = 4
+        # for
+
+        # TODO: standaard begrenzing aantal teams: ERE=12, rest=8
+
+        for cut in (DeelcompetitieTeamKlasseLimiet
+                    .objects
+                    .filter(deelcompetitie=deelcomp_rk)
+                    .select_related('team_klasse')):
+
+            # vertaal aantal teams naar aantal sporters
+            aantal_sporters = cut.limiet * 4
+
+            try:
+                if team_klasse2count[cut.team_klasse.pk] > aantal_sporters:
+                    team_klasse2count[cut.team_klasse.pk] = aantal_sporters
+
+            except KeyError:
+                pass
         # for
 
         for wkl in (CompetitieIndivKlasse
@@ -101,7 +147,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # haal de RK wedstrijden op
         context['wedstrijden_rk'] = (deelcomp_rk.rk_bk_matches
-                                     .select_related('vereniging')
+                                     .select_related('vereniging',
+                                                     'locatie')
                                      .prefetch_related('indiv_klassen',
                                                        'team_klassen')
                                      .order_by('datum_wanneer',
@@ -116,7 +163,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 niet_gebruikt[100000 + wkl.pk] = None
 
                 try:
-                    obj.schutters_count += klasse2schutters[wkl.pk]
+                    obj.schutters_count += indiv_klasse2count[wkl.pk]
                 except KeyError:
                     # geen schutters in deze klasse
                     pass
@@ -126,11 +173,23 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[200000 + wkl.pk] = None
 
-                # TODO: aantal teams vaststellen per klasse
-                aantal_teams = 0
-                obj.schutters_count += 4 * aantal_teams
+                try:
+                    obj.schutters_count += team_klasse2count[wkl.pk]
+                except KeyError:
+                    pass
             # for
 
+            obj.is_overbelast = False
+            if obj.locatie:
+                if deelcomp_rk.competitie.afstand == '18':
+                    obj.capaciteit = obj.locatie.max_sporters_18m
+                else:
+                    obj.capaciteit = obj.locatie.max_sporters_25m
+
+                if obj.capaciteit < obj.schutters_count:
+                    obj.is_overbelast = True
+            else:
+                obj.capaciteit = '?'
         # for
 
         context['wkl_niet_gebruikt'] = [beschrijving for beschrijving in niet_gebruikt.values() if beschrijving]
