@@ -31,16 +31,13 @@ class HeeftMollieKeyFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         keuze = self.value()
         if keuze is not None:
-            print('keuze: %s' % repr(keuze))
+            # print('keuze: %s' % repr(keuze))
             if keuze == '0':                                 # pragma: no cover
                 # moet een mollie key hebben
-                print('ja')
                 queryset = queryset.exclude(mollie_api_key='')
-                print('queryset: %s' % repr(queryset))
 
             else:
                 # moet juist geen mollie key hebben
-                print('nee')
                 queryset = queryset.filter(mollie_api_key='')
 
         return queryset
