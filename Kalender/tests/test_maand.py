@@ -67,6 +67,10 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         locatie.verenigingen.add(self.nhbver1)
 
         datum = timezone.now() + datetime.timedelta(days=30)
+        if datum.day >= 29:
+            # zorg dat datum+1 dag in dezelfde maand is
+            datum += datetime.timedelta(days=7)
+
         wedstrijd = Wedstrijd(
                         titel='Test 1',
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
@@ -82,7 +86,28 @@ class TestKalenderMaand(E2EHelpers, TestCase):
                         titel='Test 2',
                         status=WEDSTRIJD_STATUS_GEANNULEERD,
                         datum_begin=datum,
-                        datum_einde=datum,
+                        datum_einde=datum + datetime.timedelta(days=1),
+                        organiserende_vereniging=self.nhbver1,
+                        locatie=locatie)
+        wedstrijd.save()
+
+        # langere reeks in dezelfde maand
+        wedstrijd = Wedstrijd(
+                        titel='Test 3',
+                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                        datum_begin=datum,
+                        datum_einde=datum + datetime.timedelta(days=3),
+                        organiserende_vereniging=self.nhbver1,
+                        locatie=locatie)
+        wedstrijd.save()
+
+        # langere reeks over de maandgrens
+        datum = datetime.date(datum.year, datum.month, 28)
+        wedstrijd = Wedstrijd(
+                        titel='Test 4',
+                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                        datum_begin=datum,
+                        datum_einde=datum + datetime.timedelta(days=7),
                         organiserende_vereniging=self.nhbver1,
                         locatie=locatie)
         wedstrijd.save()
