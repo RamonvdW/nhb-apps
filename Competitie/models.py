@@ -960,7 +960,7 @@ class KampioenschapIndivKlasseLimiet(models.Model):
     limiet = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
-        return "%s : %s - %s" % (self.limiet, self.indiv_klasse.beschrijving, self.kampioenschap)
+        return "%s - %s: %s" % (self.kampioenschap, self.indiv_klasse.beschrijving, self.limiet)
 
     class Meta:
         verbose_name = "Kampioenschap IndivKlasse Limiet"
