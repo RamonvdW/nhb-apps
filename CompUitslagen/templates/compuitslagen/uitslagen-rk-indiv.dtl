@@ -182,8 +182,8 @@
 
                             <th class="center">Plaats</th>
                             <th>Sporter</th>
-                            <th class="hide-on-small-only">Vereniging</th>
-                            <th colspan="2"><!-- leeg --></th>
+                            <th colspan="2" class="hide-on-small-only">Vereniging</th>
+                            <th colspan="1"><!-- label --></th>
                             <th colspan="2">RK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
 
                         {% else %}
@@ -204,10 +204,10 @@
 
                     {% if obj.toon_uitslag%}
 
-                        <td class="center">{% if not obj.geen_deelname %}{{ obj.result_rank }}{% endif %}</td>
+                        <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}</td>
                         <td>{{ obj.naam_str }}</td>
-                        <td class="hide-on-small-only">{{ obj.ver_str }}</td>
-                        <td colspan="2"></td>
+                        <td colspan="2" class="hide-on-small-only">{{ obj.ver_str }}</td>
+                        <td colspan="1">{% if obj.result_rank == 1 %}Rayonkampioen{% endif %}</td>
                         <td>{{ obj.scores_str_1 }}</td>
                         <td>{{ obj.scores_str_2 }}</td>
 

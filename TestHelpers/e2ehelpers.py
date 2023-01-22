@@ -142,6 +142,8 @@ class E2EHelpers(TestCase):
     def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         resp = self.e2e_login_no_check(account, wachtwoord)
+        if resp.status_code != 302:
+            self.e2e_dump_resp(resp)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)

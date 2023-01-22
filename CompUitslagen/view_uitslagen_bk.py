@@ -10,7 +10,7 @@ from django.http import Http404
 from Competitie.models import Competitie, DeelKampioenschap, DEEL_BK
 from Plein.menu import menu_dynamics
 
-TEMPLATE_COMPUITSLAGEN_BOND = 'compuitslagen/uitslagen-bk.dtl'
+TEMPLATE_COMPUITSLAGEN_BK = 'compuitslagen/uitslagen-bk.dtl'
 
 
 class UitslagenBondView(TemplateView):
@@ -18,7 +18,7 @@ class UitslagenBondView(TemplateView):
     """ Django class-based view voor de de uitslagen van de bondskampioenschappen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPUITSLAGEN_BOND
+    template_name = TEMPLATE_COMPUITSLAGEN_BK
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

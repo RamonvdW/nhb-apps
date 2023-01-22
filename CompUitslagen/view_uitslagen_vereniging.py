@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -116,21 +116,6 @@ class UitslagenVerenigingIndivView(TemplateView):
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
             rank += 1
-
-            # if deelnemer.score1 == 0:
-            #     deelnemer.score1 = '-'
-            # if deelnemer.score2 == 0:
-            #     deelnemer.score2 = '-'
-            # if deelnemer.score3 == 0:
-            #     deelnemer.score3 = '-'
-            # if deelnemer.score4 == 0:
-            #     deelnemer.score4 = '-'
-            # if deelnemer.score5 == 0:
-            #     deelnemer.score5 = '-'
-            # if deelnemer.score6 == 0:
-            #     deelnemer.score6 = '-'
-            # if deelnemer.score7 == 0:
-            #     deelnemer.score7 = '-'
         # for
 
         return deelnemers
@@ -243,14 +228,9 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
-        # ver_nr is optioneel en resulteert in het nummer van de sporter
+        ver_nr = kwargs['ver_nr'][:4]  # afkappen voor de veiligheid
         try:
-            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor de veiligheid
             ver_nr = int(ver_nr)
-        except KeyError:
-            # TODO: onmogelijk om hier te komen (ivm URL design)
-            # zoek de vereniging die bij de huidige gebruiker past
-            ver_nr = get_sporter_ver_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd verenigingsnummer')
 

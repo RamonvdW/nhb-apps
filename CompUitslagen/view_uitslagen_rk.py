@@ -8,17 +8,16 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRayon
-from Competitie.models import (DEELNAME_NEE,
-                               Competitie, DeelCompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
+from Competitie.models import (Competitie, DeelCompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegioCompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
-                               DeelKampioenschap, DEEL_RK)
+                               DeelKampioenschap, DEEL_RK, DEELNAME_NEE, KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 import datetime
 
-TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rk-indiv.dtl'
-TEMPLATE_COMPUITSLAGEN_RAYON_TEAMS = 'compuitslagen/uitslagen-rk-teams.dtl'
+TEMPLATE_COMPUITSLAGEN_RK_INDIV = 'compuitslagen/uitslagen-rk-indiv.dtl'
+TEMPLATE_COMPUITSLAGEN_RK_TEAMS = 'compuitslagen/uitslagen-rk-teams.dtl'
 
 
 def get_request_rayon_nr(request):
@@ -57,7 +56,7 @@ class UitslagenRayonIndivView(TemplateView):
     """ Django class-based view voor de uitslagen van de rayonkampioenschappen individueel """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPUITSLAGEN_RAYON_INDIV
+    template_name = TEMPLATE_COMPUITSLAGEN_RK_INDIV
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
@@ -286,16 +285,19 @@ class UitslagenRayonIndivView(TemplateView):
 
             if toon_uitslag:
                 # TODO: ondersteuning Indoor
-                if 0 < deelnemer.result_rank < 1000:
+                if deelnemer.result_rank in (0, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW):
+                    deelnemer.geen_deelname = True
+                    deelnemer.geen_rank = True
+                    deelnemer.scores_str_1 = "-"
+                    deelnemer.scores_str_2 = ""
+
+                elif deelnemer.result_rank < 100:
                     # 25m1pijl
                     deelnemer.scores_str_1 = "%s (%s+%s)" % (deelnemer.result_score_1 + deelnemer.result_score_2,
                                                              deelnemer.result_score_1,
                                                              deelnemer.result_score_2)
                     deelnemer.scores_str_2 = deelnemer.result_counts
-                else:
-                    deelnemer.geen_deelname = True
-                    deelnemer.scores_str_1 = "-"
-                    deelnemer.scores_str_2 = ""
+                    deelnemer.geen_rank = (deelnemer.result_rank == KAMP_RANK_UNKNOWN)
 
             curr_teller.aantal_regels += 1
         # for
@@ -318,7 +320,7 @@ class UitslagenRayonTeamsView(TemplateView):
     """ Django class-based view voor de de uitslagen van de rayonkampioenschappen teams """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPUITSLAGEN_RAYON_TEAMS
+    template_name = TEMPLATE_COMPUITSLAGEN_RK_TEAMS
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, teamtype_afkorting):

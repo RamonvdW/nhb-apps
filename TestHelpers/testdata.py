@@ -18,13 +18,13 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                DeelKampioenschap, DEEL_BK,
                                RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
-                               KampioenschapSporterBoog, KampioenschapTeam)
+                               KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, GESLACHT_ANDERS
 from Wedstrijden.models import WedstrijdLocatie
 from bs4 import BeautifulSoup
 from decimal import Decimal
@@ -131,6 +131,10 @@ class TestData(object):
         self.account_admin = None
         self.account_bb = None
 
+        # structuur
+        self.regio = dict()                     # [regio_nr] = NhbRegio
+        self.rayon = dict()                     # [rayon_nr] = NhbRayon
+
         # verenigingen
         self.regio_ver_nrs = dict()             # [regio_nr] = list(ver_nrs)
         self.vereniging = dict()                # [ver_nr] = NhbVereniging()
@@ -234,6 +238,14 @@ class TestData(object):
             self.afkorting2boogtype_ifaa[boogtype.afkorting] = boogtype
         # for
         del boogtype
+        for regio in NhbRegio.objects.all():
+            self.regio[regio.regio_nr] = regio
+        # for
+        del regio
+        for rayon in NhbRayon.objects.all():
+            self.rayon[rayon.rayon_nr] = rayon
+        # for
+        del rayon
 
     @staticmethod
     def _dump_resp(resp):                                                       # pragma: no cover
@@ -325,16 +337,63 @@ class TestData(object):
                 self.e2e_wisselnaarrol_bb()
                 self.e2e_check_rol('BB')
         """
+
+        now = timezone.now()
+
+        # alle accounts moeten en Sporter hebben en die hebben weer een vereniging nodig
+        ver = NhbVereniging(
+                    ver_nr=8000,
+                    naam='Admin vereniging',
+                    plaats='Stadium',
+                    regio=self.regio[100],
+                    geen_wedstrijden=True)
+        ver.save()
+        self.vereniging[ver.ver_nr] = ver
+
         # admin
-        self.account_admin = self._create_account('admin', 'admin@test.com', 'Admin')
+        email = 'staff@test.com'
+        self.account_admin = self._create_account('admin', email, 'Admin')
         self.account_admin.is_staff = True
         self.account_admin.is_superuser = True
         self.account_admin.save()
 
+        Sporter(
+            lid_nr=200001,
+            voornaam='Super',
+            achternaam='Admin',
+            unaccented_naam='Super Admin',
+            geboorte_datum='1900-01-01',
+            geboorteplaats='Stadium',
+            geslacht=GESLACHT_ANDERS,
+            adres_code='8000ZZ',
+            is_actief_lid=True,
+            sinds_datum='2005-01-01',
+            bij_vereniging=ver,
+            lid_tot_einde_jaar=now.year,
+            email=email,
+            account=self.account_admin).save()
+
         # maak een BB aan, nodig voor de competitie
-        self.account_bb = self._create_account('bb', 'bb@test.com', 'Bond')
+        email = 'bb@test.com'
+        self.account_bb = self._create_account('bb', email, 'Bond')
         self.account_bb.is_BB = True
         self.account_bb.save()
+
+        Sporter(
+            lid_nr=200002,
+            voornaam='BB',
+            achternaam='de Admin',
+            unaccented_naam='BB de Admin',
+            geboorte_datum='1900-01-01',
+            geboorteplaats='Stadium',
+            geslacht=GESLACHT_ANDERS,
+            adres_code='8000ZZ',
+            is_actief_lid=True,
+            sinds_datum='2005-01-01',
+            bij_vereniging=ver,
+            lid_tot_einde_jaar=now.year,
+            email=email,
+            account=self.account_bb).save()
 
         self._accepteer_vhpg_voor_alle_accounts()
 
@@ -585,55 +644,59 @@ class TestData(object):
             if sporter.account:
                 self.ver_sporters_met_account[ver_nr].append(sporter)
 
-            gewenste_boogtypen = geslacht_voornaam2boogtypen[sporter.geslacht + sporter.voornaam]
-            para_voorwerpen, para_opmerking = geslacht_voornaam2para[sporter.geslacht + sporter.voornaam]
-
-            # voorkeuren
-            voorkeuren = SporterVoorkeuren(
-                                sporter=sporter,
-                                para_voorwerpen=para_voorwerpen)
-
-            for gewenst_boogtype in gewenste_boogtypen:
-                if para_opmerking > 0:
-                    voorkeuren.opmerking_para_sporter = 'Para opmerking van redelijke lengte om mee te testen'
-
-                if gewenst_boogtype.islower():
-                    voorkeuren.voorkeur_meedoen_competitie = False
-                    gewenst_boogtype = gewenst_boogtype.upper()
-
-                # alle junioren willen een eigen blazoen
-                if gewenst_boogtype == 'R' and sporter.voornaam.startswith('Jun'):
-                    voorkeuren.voorkeur_eigen_blazoen = True
-            # for
-
-            bulk_voorkeuren.append(voorkeuren)
-            if len(bulk_voorkeuren) > 100:
-                SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
-                bulk_voorkeuren = list()
-
-            # sporterboog
-            for boogtype in boogtypen:
-                sporterboog = SporterBoog(
+            try:
+                gewenste_boogtypen = geslacht_voornaam2boogtypen[sporter.geslacht + sporter.voornaam]
+                para_voorwerpen, para_opmerking = geslacht_voornaam2para[sporter.geslacht + sporter.voornaam]
+            except KeyError:
+                # admins
+                pass
+            else:
+                # voorkeuren
+                voorkeuren = SporterVoorkeuren(
                                     sporter=sporter,
-                                    # heeft_interesse=True
-                                    # voor_wedstrijd=False
-                                    boogtype=boogtype)
+                                    para_voorwerpen=para_voorwerpen)
 
                 for gewenst_boogtype in gewenste_boogtypen:
-                    if gewenst_boogtype[-2:] in ('*1', '*2'):
-                        # hak de laatste twee tekens eraf
-                        gewenst_boogtype = gewenst_boogtype[:-2]
+                    if para_opmerking > 0:
+                        voorkeuren.opmerking_para_sporter = 'Para opmerking van redelijke lengte om mee te testen'
 
-                    if boogtype.afkorting == gewenst_boogtype:
-                        sporterboog.voor_wedstrijd = True
+                    if gewenst_boogtype.islower():
+                        voorkeuren.voorkeur_meedoen_competitie = False
+                        gewenst_boogtype = gewenst_boogtype.upper()
+
+                    # alle junioren willen een eigen blazoen
+                    if gewenst_boogtype == 'R' and sporter.voornaam.startswith('Jun'):
+                        voorkeuren.voorkeur_eigen_blazoen = True
                 # for
 
-                bulk_sporter.append(sporterboog)
+                bulk_voorkeuren.append(voorkeuren)
+                if len(bulk_voorkeuren) > 100:
+                    SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
+                    bulk_voorkeuren = list()
 
-                if len(bulk_sporter) > 250:
-                    SporterBoog.objects.bulk_create(bulk_sporter)
-                    bulk_sporter = list()
-            # for
+                # sporterboog
+                for boogtype in boogtypen:
+                    sporterboog = SporterBoog(
+                                        sporter=sporter,
+                                        # heeft_interesse=True
+                                        # voor_wedstrijd=False
+                                        boogtype=boogtype)
+
+                    for gewenst_boogtype in gewenste_boogtypen:
+                        if gewenst_boogtype[-2:] in ('*1', '*2'):
+                            # hak de laatste twee tekens eraf
+                            gewenst_boogtype = gewenst_boogtype[:-2]
+
+                        if boogtype.afkorting == gewenst_boogtype:
+                            sporterboog.voor_wedstrijd = True
+                    # for
+
+                    bulk_sporter.append(sporterboog)
+
+                    if len(bulk_sporter) > 250:
+                        SporterBoog.objects.bulk_create(bulk_sporter)
+                        bulk_sporter = list()
+                # for
         # for
 
         if len(bulk_voorkeuren):                            # pragma: no branch
@@ -1510,5 +1573,49 @@ class TestData(object):
         locatie.verenigingen.add(self.vereniging[ver_nr])
 
         return locatie
+
+    def maak_uitslag_rk_indiv(self, afstand: int):
+        if afstand == 18:
+            deelnemers = self.comp18_rk_deelnemers
+        else:
+            deelnemers = self.comp25_rk_deelnemers
+
+        nr = 1
+        score1 = 200
+        score2 = 150
+        klasse_pk2rank = dict()     # [indiv_klasse.pk] = rank
+
+        pks = [deelnemer.pk for deelnemer in deelnemers]
+        for deelnemer in (KampioenschapSporterBoog
+                          .objects
+                          .filter(kampioenschap__competitie__afstand=afstand)):
+
+            print(deelnemer.pk, deelnemer, deelnemer.indiv_klasse)
+
+            # iedere 10e deelnemer deed niet mee
+            if nr % 10 == 0:
+                deelnemer.deelname = DEELNAME_NEE
+                deelnemer.result_rank = 0
+
+                deelnemer.save(update_fields=['deelname', 'result_rank'])
+
+            else:
+                try:
+                    rank = klasse_pk2rank[deelnemer.indiv_klasse.pk]
+                except KeyError:
+                    rank = 0
+
+                rank += 1
+                klasse_pk2rank[deelnemer.indiv_klasse.pk] = rank
+
+                deelnemer.result_rank = rank
+                deelnemer.result_score_1 = score1
+                deelnemer.result_score_2 = score2
+
+                deelnemer.save(update_fields=['deelname', 'result_rank', 'result_score_1', 'result_score_2'])
+
+            nr += 1
+        # for
+
 
 # end of file

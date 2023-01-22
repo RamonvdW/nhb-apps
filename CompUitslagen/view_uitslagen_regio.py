@@ -23,7 +23,7 @@ TEMPLATE_COMPUITSLAGEN_REGIO_INDIV = 'compuitslagen/uitslagen-regio-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
 
 
-def get_sporter_regio_nr(request):
+def get_request_regio_nr(request):
     """ Geeft het regionummer van de ingelogde sporter terug,
         of 101 als er geen regio vastgesteld kan worden
     """
@@ -179,7 +179,7 @@ class UitslagenRegioIndivView(TemplateView):
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past
-            regio_nr = get_sporter_regio_nr(self.request)
+            regio_nr = get_request_regio_nr(self.request)
         except ValueError:
             raise Http404('Verkeerde regionummer')
 
@@ -366,7 +366,7 @@ class UitslagenRegioTeamsView(TemplateView):
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past
-            regio_nr = get_sporter_regio_nr(self.request)
+            regio_nr = get_request_regio_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd regionummer')
 
