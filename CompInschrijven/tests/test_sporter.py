@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSporterBoog,
                                DeelcompetitieRonde, CompetitieMatch, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
-from Competitie.tests.test_fase import zet_competitie_fase
-from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV

@@ -9,155 +9,14 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
+from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
 from Functie.models import Rollen, Functie
 from NhbStructuur.models import NhbRegio
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
-def zet_competitie_fase(comp, fase):
-    """ deze helper weet hoe de competitie datums gemanipuleerd moeten worden
-        zodat models.Competitie.bepaal_fase() de gevraagde fase terug zal geven
-    """
-
-    if fase == 'Z':
-        comp.is_afgesloten = True
-        comp.save()
-        return
-
-    comp.is_afgesloten = False
-
-    if fase == 'S':
-        comp.alle_bks_afgesloten = True
-        comp.save()
-        return
-
-    comp.alle_bks_afgesloten = False
-
-    now = timezone.now()
-    vandaag = datetime.date(year=now.year, month=now.month, day=now.day)
-    gister = vandaag - datetime.timedelta(days=1)
-    morgen = vandaag + datetime.timedelta(days=1)
-
-    if fase >= 'P':
-        # BK fases
-        comp.alle_rks_afgesloten = True
-        if fase == 'P':
-            comp.bk_eerste_wedstrijd = morgen
-            comp.save()
-            return
-
-        comp.bk_eerste_wedstrijd = gister
-
-        if fase == 'Q':
-            comp.bk_laatste_wedstrijd = morgen  # vandaag mag ook
-            comp.save()
-            return
-
-        # fase R of S: vaststellen uitslagen + afsluiten BK
-        comp.bk_laatste_wedstrijd = gister
-        comp.save()
-        return
-
-    comp.alle_rks_afgesloten = False
-
-    if fase >= 'J':
-        # RK fases
-        comp.alle_regiocompetities_afgesloten = True
-
-        for deelkamp in (DeelKampioenschap
-                         .objects
-                         .filter(competitie=comp,
-                                 deel=DEEL_RK)):
-            deelkamp.heeft_deelnemerslijst = True
-            deelkamp.save(update_fields=['heeft_deelnemerslijst'])
-        # for
-
-        if fase == 'J':
-            comp.klassengrenzen_vastgesteld_rk_bk = False
-            comp.datum_klassengrenzen_rk_bk_teams = morgen
-            comp.save()
-            return
-
-        comp.klassengrenzen_vastgesteld_rk_bk = True
-
-        if fase == 'K':
-            comp.rk_eerste_wedstrijd = morgen + datetime.timedelta(days=14)
-            comp.save()
-            return
-
-        comp.rk_eerste_wedstrijd = gister
-
-        if fase == 'L':
-            comp.rk_laatste_wedstrijd = morgen  # vandaag mag ook
-            comp.save()
-            return
-
-        # fase M of N: vaststellen uitslag in elk rayon + afsluiten RK
-        comp.rk_laatste_wedstrijd = gister
-        comp.save()
-        return
-
-    comp.alle_regiocompetities_afgesloten = False
-
-    # fase A begon toen de competitie werd aangemaakt
-
-    if fase == 'A':
-        comp.begin_aanmeldingen = morgen
-        comp.klassengrenzen_vastgesteld = False
-        comp.save()
-        return
-
-    if comp.competitieindivklasse_set.count() == 0:      # pragma: no cover
-        raise NotImplementedError("Kan niet naar fase %s zonder competitie indiv klassen!" % fase)
-
-    if comp.competitieteamklasse_set.count() == 0:      # pragma: no cover
-        raise NotImplementedError("Kan niet naar fase %s zonder competitie team klassen!" % fase)
-
-    comp.klassengrenzen_vastgesteld = True
-    comp.begin_aanmeldingen = gister
-
-    if fase == 'B':
-        comp.einde_aanmeldingen = morgen
-        comp.save()
-        return
-
-    comp.einde_aanmeldingen = gister
-
-    if fase == 'C':
-        comp.einde_teamvorming = morgen     # vandaag mag ook
-        comp.save()
-        return
-
-    comp.einde_teamvorming = gister
-
-    if fase == 'D':
-        comp.eerste_wedstrijd = morgen
-        comp.save()
-        return
-
-    comp.eerste_wedstrijd = gister
-
-    if fase == 'E':
-        comp.laatst_mogelijke_wedstrijd = morgen
-        comp.save()
-        return
-
-    comp.laatst_mogelijke_wedstrijd = gister
-
-    if fase == 'G':
-        # alle regios afsluiten
-        for deelcomp in comp.deelcompetitie_set.filter(is_afgesloten=False):
-            deelcomp.is_afgesloten = True
-            deelcomp.save(update_fields=['is_afgesloten'])
-        comp.save()
-        return
-
-    # fase F: vaststellen uitslag in elke regio + afsluiten regiocompetitie
-    comp.save()
-    return
-
-
-class TestCompetitieFase(TestCase):
+class TestCompetitieFase(E2EHelpers, TestCase):
 
     """ tests voor de Competitie applicatie, hanteren van de competitie fases """
 
@@ -393,6 +252,74 @@ class TestCompetitieFase(TestCase):
 
         comp.bepaal_openbaar(Rollen.ROL_SPORTER)
         self.assertTrue(comp.is_openbaar)
+
+    url_overzicht = '/bondscompetities/%s/'
+    url_uitslagen_regio = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/'                 # comp_pk, comp_boog
+    url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/%s/'            # comp_pk, comp_boog, regio_nr
+    url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/%s/regio-teams/'                    # comp_pk, team_type
+    url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/%s/regio-teams/%s/'               # comp_pk, team_type, regio_nr
+    url_uitslagen_ver = '/bondscompetities/uitslagen/%s/%s/vereniging/'                             # comp_pk, comp_boog
+    url_uitslagen_indiv_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/individueel/'      # comp_bk, boog_type, ver_nr
+    url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
+
+    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'                    # comp_pk, comp_boog
+    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
+    url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rayon-teams/'                    # comp_pk, team_type
+    url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
+    url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'                                  # comp_pk, comp_boog
+
+    def test_top(self):
+        now = timezone.now()
+        now = datetime.date(year=now.year, month=now.month, day=now.day)
+        way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
+
+        comp_18, comp_25 = maak_competities_en_zet_fase_b(startjaar=2020)
+
+        comp = comp_25
+
+        # fase A
+        comp.begin_aanmeldingen = now + datetime.timedelta(days=1)      # morgen
+        comp.save()
+        comp.bepaal_fase()
+        self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht % comp.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        # zet competitie fase B zodat we in mogen schrijven
+        zet_competitie_fase(comp, 'B')
+
+        # uitslagen met competitie in prep fase (B+)
+        comp.begin_aanmeldingen = way_before   # fase B
+        comp.einde_aanmeldingen = way_before   # fase C
+        comp.save()
+        comp.bepaal_fase()
+        # self.assertTrue(comp.fase >= 'B')
+        self.assertTrue(comp.fase >= 'B', msg="comp.fase=%s (expected: not below B)" % comp.fase)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht % comp.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        # uitslagen met competitie in scorende fase (E+)
+        comp.einde_teamvorming = way_before    # fase D
+        comp.eerste_wedstrijd = way_before     # fase E
+        comp.save()
+        comp.bepaal_fase()
+        self.assertTrue(comp.fase >= 'E')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht % comp.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        self.client.logout()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht % comp_18.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

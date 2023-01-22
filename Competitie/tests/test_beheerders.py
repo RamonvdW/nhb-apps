@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter

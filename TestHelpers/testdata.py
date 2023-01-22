@@ -20,11 +20,12 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
                                KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_competitie import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Wedstrijden.models import WedstrijdLocatie
 from bs4 import BeautifulSoup
 from decimal import Decimal
 import datetime
@@ -833,42 +834,43 @@ class TestData(object):
         # zorg dat er accounts gekoppeld zijn aan de functies BKO, RKO, RCL
         accounts = self._accounts_beheerders[:]
 
-        for functie in (Functie
-                        .objects
-                        .select_related('nhb_regio', 'nhb_rayon')
-                        .filter(rol__in=('RCL', 'RKO', 'BKO'))):
+        if len(accounts) > 0:
+            for functie in (Functie
+                            .objects
+                            .select_related('nhb_regio', 'nhb_rayon')
+                            .filter(rol__in=('RCL', 'RKO', 'BKO'))):
 
-            is_18 = functie.comp_type == '18'
+                is_18 = functie.comp_type == '18'
 
-            account = accounts.pop(0)
-            functie.accounts.add(account)
+                account = accounts.pop(0)
+                functie.accounts.add(account)
 
-            if functie.rol == 'RCL':
-                regio_nr = functie.nhb_regio.regio_nr
-                if is_18:
-                    self.comp18_functie_rcl[regio_nr] = functie
-                    self.comp18_account_rcl[regio_nr] = account
-                else:
-                    self.comp25_functie_rcl[regio_nr] = functie
-                    self.comp25_account_rcl[regio_nr] = account
+                if functie.rol == 'RCL':
+                    regio_nr = functie.nhb_regio.regio_nr
+                    if is_18:
+                        self.comp18_functie_rcl[regio_nr] = functie
+                        self.comp18_account_rcl[regio_nr] = account
+                    else:
+                        self.comp25_functie_rcl[regio_nr] = functie
+                        self.comp25_account_rcl[regio_nr] = account
 
-            elif functie.rol == 'RKO':
-                rayon_nr = functie.nhb_rayon.rayon_nr
-                if is_18:
-                    self.comp18_functie_rko[rayon_nr] = functie
-                    self.comp18_account_rko[rayon_nr] = account
-                else:
-                    self.comp25_functie_rko[rayon_nr] = functie
-                    self.comp25_account_rko[rayon_nr] = account
+                elif functie.rol == 'RKO':
+                    rayon_nr = functie.nhb_rayon.rayon_nr
+                    if is_18:
+                        self.comp18_functie_rko[rayon_nr] = functie
+                        self.comp18_account_rko[rayon_nr] = account
+                    else:
+                        self.comp25_functie_rko[rayon_nr] = functie
+                        self.comp25_account_rko[rayon_nr] = account
 
-            else:  # elif functie.rol == 'BKO':
-                if is_18:
-                    self.comp18_functie_bko = functie
-                    self.comp18_account_bko = account
-                else:
-                    self.comp25_functie_bko = functie
-                    self.comp25_account_bko = account
-        # for
+                else:  # elif functie.rol == 'BKO':
+                    if is_18:
+                        self.comp18_functie_bko = functie
+                        self.comp18_account_bko = account
+                    else:
+                        self.comp25_functie_bko = functie
+                        self.comp25_account_bko = account
+            # for
 
         for klasse in (CompetitieIndivKlasse
                        .objects
@@ -1489,5 +1491,24 @@ class TestData(object):
             rk_teams.append(team)
         # for
 
+    def maak_wedstrijd_locatie(self, ver_nr):
+        locatie = WedstrijdLocatie(
+                        naam='locatie %s' % ver_nr,
+                        discipline_25m1pijl=True,
+                        discipline_outdoor=True,
+                        discipline_indoor=True,
+                        discipline_3d=True,
+                        banen_18m=12,
+                        banen_25m=12,
+                        max_sporters_18m=12*4,
+                        max_sporters_25m=12*3,
+                        buiten_banen=10,
+                        buiten_max_afstand=75,
+                        adres='Ons doel 1, 9999ZZ Doelstad',
+                        plaats='Doelstad')
+        locatie.save()
+        locatie.verenigingen.add(self.vereniging[ver_nr])
+
+        return locatie
 
 # end of file

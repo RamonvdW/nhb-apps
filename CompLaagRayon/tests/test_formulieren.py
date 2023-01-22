@@ -7,7 +7,7 @@
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet, DEELNAME_NEE
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Wedstrijden.models import WedstrijdLocatie

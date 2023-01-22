@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, DeelCompetitie,
                                RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, ScoreHist, Score, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN

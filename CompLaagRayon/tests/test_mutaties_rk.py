@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                                KampioenschapSporterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse
                                RegioCompetitieSporterBoog, INSCHRIJF_METHODE_1,
                                DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging

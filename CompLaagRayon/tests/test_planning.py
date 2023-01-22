@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, DeelCompetitie,
                                CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND,
                                INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Uitslag

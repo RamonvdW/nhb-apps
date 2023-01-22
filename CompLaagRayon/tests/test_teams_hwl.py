@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,8 +10,7 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse,
                                RegioCompetitieSporterBoog, KampioenschapTeam, DeelKampioenschap, DEEL_RK)
-from Competitie.tests.test_fase import zet_competitie_fase
-from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan

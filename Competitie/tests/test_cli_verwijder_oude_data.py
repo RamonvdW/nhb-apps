@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap
-from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
 from Score.models import Score, SCORE_TYPE_GEEN, ScoreHist
 from Sporter.models import SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
