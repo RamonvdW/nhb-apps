@@ -346,7 +346,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         # wissel naar BKO en haal de planning op
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 

@@ -140,6 +140,10 @@ MUTATIE_TO_STR = {
     MUTATIE_AFSLUITEN_REGIOCOMP: "afsluiten regiocomp",
 }
 
+KAMP_RANK_UNKNOWN = 99
+KAMP_RANK_NO_SHOW = 32000
+KAMP_RANK_RESERVE = 32001
+
 
 class Competitie(models.Model):
     """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
@@ -787,8 +791,7 @@ class RegiocompetitieTeam(models.Model):
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # bij welke vereniging hoort dit team
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
-                                   blank=True, null=True)
+    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
 
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
@@ -1047,13 +1050,20 @@ class KampioenschapSporterBoog(models.Model):
     regio_scores = models.CharField(max_length=24, default='', blank=True)
 
     # resultaat van het individuele kampioenschap
-    result_rank = models.PositiveSmallIntegerField(default=0)
-    result_score_1 = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    result_score_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
     result_score_2 = models.PositiveSmallIntegerField(default=0)
-    result_counts = models.CharField(max_length=20, default='', blank=True)     # 5x10 3x9
+    result_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
+
+    # 0 = niet meegedaan (default)
+    # 1..24 = plaats op RK deelnemer, voor zover bekend
+    # KAMP_RANK_UNKNOWN = wel meegedaan, uiteindelijke rank niet precies bekend
+    # KAMP_RANK_RESERVE = niet afgemeld, reserve, niet meegedaan
+    # KAMP_RANK_NO_SHOW = niet afgemeld, wel uitgenodigd, niet meegedaan. Waarschijnlijk een no-show.
+    result_rank = models.PositiveSmallIntegerField(default=0)
 
     # resultaat van het team kampioenschap
-    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    # TODO: kan dit weg? Uitslag hoort bij team, niet individu
+    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)            # max = 32767
     result_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):

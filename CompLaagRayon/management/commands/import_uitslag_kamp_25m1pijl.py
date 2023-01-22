@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import KampioenschapSporterBoog, DEELNAME_NEE
+from Competitie.models import KampioenschapSporterBoog, DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag kampioenschap"
+    help = "Importeer uitslag 25m1pijl kampioenschap"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -20,8 +20,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
-        parser.add_argument('afstand', type=str,
-                            help='Competitie afstand (18/25)')
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
         parser.add_argument('blad', type=str,
@@ -29,10 +27,10 @@ class Command(BaseCommand):
         parser.add_argument('kolommen', type=str, nargs='+',
                             help='Kolom letters: bondsnummer, score1, score2, #10, #9, #8')
 
-    def deelnemers_ophalen(self, afstand):
+    def deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(kampioenschap__competitie__afstand=afstand)
+                          .filter(kampioenschap__competitie__afstand='25')
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
@@ -49,11 +47,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         dryrun = options['dryrun']
-
-        afstand = options['afstand']
-        if afstand not in ('18', '25'):
-            self.stderr.write('[ERROR] Afstand moet 18 of 25 zijn')
-            return
 
         # open de kopie, zodat we die aan kunnen passen
         fname = options['bestand']
@@ -73,23 +66,18 @@ class Command(BaseCommand):
             return
 
         cols = options['kolommen']
-        if afstand == '25':
-            if len(cols) != 6:
-                self.stderr.write('[ERROR] Vereiste kolommen: lid_nr, score1, score2, tienen, negens, achten')
-                return
-
-            col_lid_nr = cols[0]
-            col_score1 = cols[1]
-            col_score2 = cols[2]
-            col_10s = cols[3]
-            col_9s = cols[4]
-            col_8s = cols[5]
-        else:
-            # indoor nog niet ondersteund
-            self.stderr.write('[ERROR] Indoor nog niet ondersteund')
+        if len(cols) != 6:
+            self.stderr.write('[ERROR] Vereiste kolommen: lid_nr, score1, score2, tienen, negens, achten')
             return
 
-        self.deelnemers_ophalen(afstand)
+        col_lid_nr = cols[0]
+        col_score1 = cols[1]
+        col_score2 = cols[2]
+        col_10s = cols[3]
+        col_9s = cols[4]
+        col_8s = cols[5]
+
+        self.deelnemers_ophalen()
 
         klasse_pks = list()
         deelkamp_pks = list()
@@ -97,7 +85,7 @@ class Command(BaseCommand):
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
         row_nr = 0
         nix_count = 0
-        klasse_pk = -1
+        klasse_pk = None
         rank = 0
         prev_totaal = 999
         prev_counts_str = ""
@@ -122,7 +110,7 @@ class Command(BaseCommand):
                             deelnemer = deelnemers[0]
                         else:
                             deelnemer = None
-                            if klasse_pk:                                               # pragma: no branch
+                            if klasse_pk:
                                 for kandidaat in deelnemers:
                                     if kandidaat.indiv_klasse.pk == klasse_pk:
                                         deelnemer = kandidaat
@@ -229,12 +217,14 @@ class Command(BaseCommand):
             for deelnemer in deelnemers:
                 if deelnemer.kampioenschap.pk in deelkamp_pks:
                     if deelnemer.indiv_klasse.pk in klasse_pks:
-                        if deelnemer.result_rank in (0, 32000, 32001):
+                        if deelnemer.result_rank in (0, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE):
                             if deelnemer.deelname != DEELNAME_NEE:
-                                self.stdout.write('[WARNING] No-show voor deelnemer %s' % deelnemer)
-                                deelnemer.result_rank = 32000
+                                # noteer: we weten niet welke reserves opgeroepen waren
+                                # noteer: nog geen oplossing voor reserves die toch niet mee kunnen doen
+                                self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
+                                deelnemer.result_rank = KAMP_RANK_NO_SHOW
                             else:
-                                deelnemer.result_rank = 32001
+                                deelnemer.result_rank = KAMP_RANK_RESERVE
                             deelnemer.save(update_fields=['result_rank'])
             # for
         # for

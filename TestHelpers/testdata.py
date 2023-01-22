@@ -530,7 +530,7 @@ class TestData(object):
                 geslacht_voornaam2para[geslacht + voornaam] = (para_voorwerpen, para_opmerking)
 
                 lid_nr += 1
-                achternaam = "Lid%s van Club%s" % (ver.ver_nr, lid_nr)
+                achternaam = "Lid%s van Club%s" % (lid_nr, ver.ver_nr)
                 geboortedatum = datetime.date(year=huidige_jaar - wleeftijd, month=3, day=24)
 
                 try:
