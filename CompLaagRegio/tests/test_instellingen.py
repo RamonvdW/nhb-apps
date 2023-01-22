@@ -25,7 +25,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Teams functie """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_regio_instellingen = '/bondscompetities/regio/instellingen/%s/regio-%s/'  # comp_pk, regio-nr
     url_regio_globaal = '/bondscompetities/regio/instellingen/%s/globaal/'        # comp_pk

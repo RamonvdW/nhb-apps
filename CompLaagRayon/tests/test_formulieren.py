@@ -19,7 +19,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Formulieren functie """
 
-    test_after = ('Competitie.tests.test_fase', 'CompBeheer.tests.test_bko', 'CompLaagRayon.tests.test_teams_rko', 'CompLaagRayon.tests.test_teams_rko')
+    test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko', 'CompLaagRayon.tests.test_teams_rko', 'CompLaagRayon.tests.test_teams_rko')
 
     url_forms = '/bondscompetities/rk/download-formulier/%s/'                             # match_pk
     url_forms_download_indiv = '/bondscompetities/rk/download-formulier-indiv/%s/%s/'     # match_pk, klasse_pk

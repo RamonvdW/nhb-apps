@@ -17,7 +17,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, RK Teams functie """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # deelkamp_pk
     url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset

@@ -27,7 +27,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Poules functie """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_regio_poules = '/bondscompetities/regio/poules/%s/'         # deelcomp_pk
     url_wijzig_poule = '/bondscompetities/regio/poules/wijzig/%s/'  # poule_pk

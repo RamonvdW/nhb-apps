@@ -18,7 +18,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                DeelKampioenschap, DEEL_BK,
                                RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
-                               KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE)
+                               KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE, KAMP_RANK_RESERVE)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
@@ -512,7 +512,7 @@ class TestData(object):
         # maak voor elke vereniging een paar accounts aan
         lid_nr = MIN_LID_NR
         bulk = list()
-        ver_unsorted = [(ver.ver_nr, ver) for ver in self.vereniging.values()]
+        ver_unsorted = [(ver.ver_nr, ver) for ver in self.vereniging.values() if not ver.geen_wedstrijden]
         ver_unsorted.sort()     # sorteer op verenigingsnummer om de volgorde te garanderen
         for _, ver in ver_unsorted:
             try:
@@ -634,6 +634,7 @@ class TestData(object):
         bulk_sporter = list()
         for sporter in (Sporter
                         .objects
+                        .exclude(bij_vereniging__geen_wedstrijden=True)
                         .select_related('account',
                                         'bij_vereniging')
                         .order_by('lid_nr')):
@@ -736,7 +737,10 @@ class TestData(object):
 
         # maak de functies aan
         bulk = list()
-        for ver in NhbVereniging.objects.filter(ver_nr__gte=MIN_VER_NR):
+        for ver in (NhbVereniging
+                    .objects
+                    .filter(ver_nr__gte=MIN_VER_NR)
+                    .exclude(geen_wedstrijden=True)):
             for rol, beschrijving in (('SEC', 'Secretaris vereniging %s'),
                                       ('HWL', 'Hoofdwedstrijdleider %s'),
                                       ('WL', 'Wedstrijdleider %s')):
@@ -1590,13 +1594,18 @@ class TestData(object):
                           .objects
                           .filter(kampioenschap__competitie__afstand=afstand)):
 
-            print(deelnemer.pk, deelnemer, deelnemer.indiv_klasse)
+            # print(deelnemer.pk, deelnemer, deelnemer.indiv_klasse)
 
-            # iedere 10e deelnemer deed niet mee
             if nr % 10 == 0:
+                # iedere 10e deelnemer deed niet mee
                 deelnemer.deelname = DEELNAME_NEE
                 deelnemer.result_rank = 0
 
+                deelnemer.save(update_fields=['deelname', 'result_rank'])
+
+            if nr % 15 == 0:
+                # elke 15 deelnemer was een reserve die niet meegedaan heeft
+                deelnemer.result_rank = KAMP_RANK_RESERVE
                 deelnemer.save(update_fields=['deelname', 'result_rank'])
 
             else:

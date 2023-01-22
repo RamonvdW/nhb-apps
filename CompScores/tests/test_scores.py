@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, module Scores """
 
-    test_after = ('Competitie.tests.test_fase', 'CompLaagRegio.tests.test_planning',)
+    test_after = ('Competitie.tests.test_overzicht', 'CompLaagRegio.tests.test_planning',)
 
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
     url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk

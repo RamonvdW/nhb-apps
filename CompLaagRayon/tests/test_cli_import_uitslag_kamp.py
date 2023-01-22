@@ -111,18 +111,18 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
 
     def test_18m(self):
         # file NOK
-        self.run_management_command('import_uitslag_kamp_indoor', 'bestand', 'blad', 'A', 'B', 'C')
+        self.run_management_command('import_uitslag_kamp_indoor', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
         # blad NOK
-        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_25m1pijl, 'blad', 'A', 'B', 'C')
-        self.assertTrue("[ERROR] Kan blad 'blad' niet vinden" in f1.getvalue())
+        #f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_25m1pijl)
+        #self.assertTrue("[ERROR] Kan blad 'blad' niet vinden" in f1.getvalue())
 
         # kolommen NOK
-        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_25m1pijl, 'Wedstrijd', 'A', 'B', 'C')
-        self.assertTrue('[ERROR] Vereiste kolommen: ' in f1.getvalue())
+        #f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_25m1pijl)
+        #self.assertTrue('[ERROR] Vereiste kolommen: ' in f1.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor, 'Voorronde', 'D', 'J', 'K', 'Q', '--dryrun')
+        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor, '--dryrun')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -133,7 +133,7 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
         self.assertTrue("1: RK rayon 3 [301954]" in f2.getvalue())
         self.assertTrue("[WARNING] Regel 24 wordt overgeslagen (geen scores)" in f2.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor, 'Voorronde', 'D', 'J', 'K', 'Q')
+        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

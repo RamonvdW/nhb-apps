@@ -17,7 +17,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
 
     """ tests voor de CompUitslagen applicatie, module Uitslagen BK """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_overzicht = '/bondscompetities/%s/'
     url_uitslagen_regio = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/'                 # comp_pk, comp_boog

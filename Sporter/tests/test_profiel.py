@@ -22,6 +22,7 @@ from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
 from Vereniging.models import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers.testdata import TestData
 import datetime
 
 
@@ -41,7 +42,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
+        cls.testdata = TestData()
         cls.testdata.maak_accounts()
 
     def setUp(self):

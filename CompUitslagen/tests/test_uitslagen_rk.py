@@ -16,13 +16,12 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
     """ tests voor de CompUitslagen applicatie, module Uitslagen RK """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'                    # comp_pk, comp_boog
     url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
     url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rayon-teams/'                    # comp_pk, team_type
     url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
-    url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'                                  # comp_pk, comp_boog
 
     url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                              # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
@@ -40,53 +39,13 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         data.maak_accounts()
         data.maak_clubs_en_sporters()
         cls.ver_nr = ver_nr = data.regio_ver_nrs[cls.regio_nr][2]
-        #data.maak_sporterboog_aanvangsgemiddelden(18, cls.ver_nr)
-        #data.maak_sporterboog_aanvangsgemiddelden(25, cls.ver_nr)
         data.maak_bondscompetities()
         data.maak_inschrijvingen_regiocompetitie(18, ver_nr=ver_nr)     # tijdelijke RK deelnemerslijst
         #data.maak_inschrijvingen_regiocompetitie(25, ver_nr=ver_nr)
-        #data.maak_poules(cls.testdata.deelcomp18_regio[cls.regio_nr])
-        #data.maak_poules(cls.testdata.deelcomp25_regio[cls.regio_nr])
-        #data.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[cls.regio_nr])
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
         s2 = timezone.now()
         d = s2 - s1
         print('CompUitslagenRK: populating testdata took %s seconds' % d.seconds)
-
-    def test_focus(self):
-        self.testdata.geef_regio_deelnemers_genoeg_scores_voor_rk(18)
-
-        # als BKO: doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
-        zet_competitie_fase(self.testdata.comp18, 'G')
-
-        url = self.url_doorzetten_rk % self.testdata.comp18.pk
-        resp = self.client.post(url)
-        self.assert_is_redirect_not_plein(resp)
-        self.verwerk_regiocomp_mutaties()
-
-        comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
-
-        # als BKO: klassegrenzen RK/BK teams vaststellen (J --> K)
-        resp = self.client.post(self.url_teams_klassengrenzen_vaststellen % self.testdata.comp18.pk)
-        self.assert_is_redirect_not_plein(resp)
-
-        comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'K')
-
-        # uitslagen toevoegen
-        self.testdata.maak_uitslag_rk_indiv(18)
-
-        url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_indiv(self):
         self.testdata.geef_regio_deelnemers_genoeg_scores_voor_rk(18)

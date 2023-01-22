@@ -31,7 +31,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Planning functie """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk
     url_wijzig_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/wijzig/%s/'          # match_pk

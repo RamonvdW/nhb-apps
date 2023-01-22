@@ -243,7 +243,8 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
-        # inschrijven als BB (niet NHB lid)
+        # corner-case: afmelden als niet-lid
+        self.testdata.account_admin.sporter_set.all().delete()
         resp = self.client.post(self.url_aanmelden % (0, 0))
         self.assert404(resp, 'Sporter niet gevonden')
 
@@ -307,7 +308,8 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
-        # afmelden als BB (niet NHB lid)
+        # corner-case: afmelden als niet-lid
+        self.testdata.account_admin.sporter_set.all().delete()
         resp = self.client.post(self.url_afmelden % 0)
         self.assert404(resp, 'Sporter niet gevonden')
 

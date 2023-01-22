@@ -15,18 +15,18 @@ import zipfile
 class Command(BaseCommand):
     help = "Importeer uitslag Indoor kampioenschap"
 
+    blad_voorronde = 'Voorronde'
+    blad_finales = 'Finale'
+
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
+        self.dryrun = True
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
-        parser.add_argument('blad', type=str,
-                            help='Naam van het blad met resultaten')
-        parser.add_argument('kolommen', type=str, nargs='+',
-                            help='Kolom letters: bondsnummer, score1, score2, resultaat')
 
     def deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
@@ -46,44 +46,17 @@ class Command(BaseCommand):
                 self.deelnemers[lid_nr] = [deelnemer]
         # for
 
-    def handle(self, *args, **options):
-
-        dryrun = options['dryrun']
-
-        # open de kopie, zodat we die aan kunnen passen
-        fname = options['bestand']
-        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
-        try:
-            prg = openpyxl.load_workbook(fname,
-                                         data_only=True)        # do not evaluate formulas; use last calculated values
-        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
-            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
-            return
-
-        blad = options['blad']
-        try:
-            ws = prg[blad]
-        except KeyError:
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
-
-        cols = options['kolommen']
-        if len(cols) != 4:
-            self.stderr.write('[ERROR] Vereiste kolommen: lid_nr, score1, score2, resultaat')
-            return
-
-        col_lid_nr = cols[0]
-        col_score1 = cols[1]
-        col_score2 = cols[2]
-        col_result = cols[3]
-
-        self.deelnemers_ophalen()
+    def _importeer_resultaten(self, ws):
+        col_lid_nr = 'D'
+        col_score1 = 'J'
+        col_score2 = 'K'
+        col_result = 'Q'
 
         klasse_pk = None
         deelkamp_pk = None
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
-        row_nr = 0
+        row_nr = 4
         nix_count = 0
         while nix_count < 10:
             row_nr += 1
@@ -118,7 +91,8 @@ class Command(BaseCommand):
                                         deelnemer = kandidaat
                                 # for
                         if deelnemer is None:
-                            self.stderr.write('[ERROR] Kan deelnemer niet bepalen voor regel %s. Keuze uit %s' % (row, repr(deelnemers)))
+                            self.stderr.write('[ERROR] Kan deelnemer niet bepalen voor regel %s. Keuze uit %s' % (
+                                                row, repr(deelnemers)))
                             continue    # met de while
 
                         dupe_check = False
@@ -127,7 +101,8 @@ class Command(BaseCommand):
 
                         if klasse_pk != deelnemer.indiv_klasse.pk:
                             if klasse_pk:
-                                self.stderr.write('[ERROR] Deelnemer %s hoort in klasse: %s' % (deelnemer, deelnemer.indiv_klasse))
+                                self.stderr.write('[ERROR] Deelnemer %s hoort in klasse: %s' % (
+                                                    deelnemer, deelnemer.indiv_klasse))
                             else:
                                 klasse_pk = deelnemer.indiv_klasse.pk
                                 deelkamp_pk = deelnemer.kampioenschap.pk
@@ -145,7 +120,8 @@ class Command(BaseCommand):
                             if score1 is None and score2 is None:
                                 self.stdout.write('[WARNING] Regel %s wordt overgeslagen (geen scores)' % row)
                             else:
-                                self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (row, repr(score1), repr(score2)))
+                                self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (
+                                                    row, repr(score1), repr(score2)))
                         else:
                             totaal = score1 + score2
                             if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
@@ -156,7 +132,8 @@ class Command(BaseCommand):
                                     # wel meegedaan, maar met het huidige RK programma weten we niet genoeg
                                     rank = KAMP_RANK_UNKNOWN
 
-                                self.stdout.write('%s: %s, scores: %s %s, result: %s' % (rank, deelnemer, score1, score2, result))
+                                self.stdout.write('%s: %s, scores: %s %s, result: %s' % (
+                                                    rank, deelnemer, score1, score2, result))
 
                                 do_report = False
                                 if dupe_check:
@@ -167,14 +144,17 @@ class Command(BaseCommand):
                                         do_report = True
 
                                 if do_report:
-                                    self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s)' % (deelnemer.pk, deelnemer))
+                                    self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s)' % (
+                                                        deelnemer.pk, deelnemer))
                                 else:
                                     deelnemer.result_rank = rank
                                     deelnemer.result_score_1 = score1
                                     deelnemer.result_score_2 = score2
 
-                        if not dryrun:
+                        if not self.dryrun:
                             deelnemer.save(update_fields=['result_rank', 'result_score_1', 'result_score_2'])
+
+                        self.deelnemers[lid_nr] = [deelnemer]
             else:
                 nix_count += 1
         # while
@@ -194,5 +174,40 @@ class Command(BaseCommand):
                         deelnemer.save(update_fields=['result_rank'])
             # for
         # for
+
+    def _importeer_finales(self, ws):
+        # geblokkeerd omdat bronzen finale er niet structureel in zit
+        pass
+
+    def handle(self, *args, **options):
+
+        self.dryrun = options['dryrun']
+
+        # open de kopie, zodat we die aan kunnen passen
+        fname = options['bestand']
+        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
+        try:
+            prg = openpyxl.load_workbook(fname,
+                                         data_only=True)  # do not evaluate formulas; use last calculated values
+        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
+            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
+            return
+
+        try:
+            ws_voorronde = prg[self.blad_voorronde]
+        except KeyError:
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_voorronde))
+            return
+
+        try:
+            ws_finale = prg[self.blad_finales]
+        except KeyError:
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_finale))
+            return
+
+        self.deelnemers_ophalen()
+        self._importeer_resultaten(ws_voorronde)
+        self._importeer_finales(ws_finale)
+
 
 # end of file
