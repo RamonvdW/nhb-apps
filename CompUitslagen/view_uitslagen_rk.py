@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,12 +17,12 @@ from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 import datetime
 
-TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
-TEMPLATE_COMPUITSLAGEN_RAYON_TEAMS = 'compuitslagen/uitslagen-rayon-teams.dtl'
+TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rk-indiv.dtl'
+TEMPLATE_COMPUITSLAGEN_RAYON_TEAMS = 'compuitslagen/uitslagen-rk-teams.dtl'
 
 
-def get_sporter_rayon_nr(request):
-    """ Geeft het rayon nummer van de ingelogde sporter terug,
+def get_request_rayon_nr(request):
+    """ Geeft het rayon nummer van de ingelogde gebruiker/beheerder terug,
         of 1 als er geen rayon vastgesteld kan worden
     """
     rayon_nr = 1
@@ -39,11 +39,11 @@ def get_sporter_rayon_nr(request):
         elif functie_nu.nhb_rayon:
             # RKO
             rayon_nr = functie_nu.nhb_rayon.rayon_nr
+
     elif rol_nu == Rollen.ROL_SPORTER:
-        # sporter?
         account = request.user
-        if account.is_authenticated:
-            if account.sporter_set.count() > 0:
+        if account.is_authenticated:                                    # pragma: no branch
+            if account.sporter_set.count() > 0:                         # pragma: no branch
                 sporter = account.sporter_set.all()[0]
                 if sporter.is_actief_lid and sporter.bij_vereniging:
                     nhb_ver = sporter.bij_vereniging
@@ -130,7 +130,7 @@ class UitslagenRayonIndivView(TemplateView):
             rayon_nr = kwargs['rayon_nr'][:2]        # afkappen voor de veiligheid
             rayon_nr = int(rayon_nr)
         except KeyError:
-            rayon_nr = get_sporter_rayon_nr(self.request)
+            rayon_nr = get_request_rayon_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd rayonnummer')
 
@@ -388,7 +388,7 @@ class UitslagenRayonTeamsView(TemplateView):
             rayon_nr = kwargs['rayon_nr'][:2]        # afkappen voor de veiligheid
             rayon_nr = int(rayon_nr)
         except KeyError:
-            rayon_nr = get_sporter_rayon_nr(self.request)
+            rayon_nr = get_request_rayon_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd rayonnummer')
 
