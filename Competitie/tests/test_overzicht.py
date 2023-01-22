@@ -16,9 +16,11 @@ from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestCompetitieFase(E2EHelpers, TestCase):
+class TestCompetitieOverzicht(E2EHelpers, TestCase):
 
-    """ tests voor de Competitie applicatie, hanteren van de competitie fases """
+    """ tests voor de Competitie applicatie, pagina Overzicht """
+
+    url_overzicht = '/bondscompetities/%s/'
 
     @staticmethod
     def _maak_twee_klassen(comp):
@@ -252,21 +254,6 @@ class TestCompetitieFase(E2EHelpers, TestCase):
 
         comp.bepaal_openbaar(Rollen.ROL_SPORTER)
         self.assertTrue(comp.is_openbaar)
-
-    url_overzicht = '/bondscompetities/%s/'
-    url_uitslagen_regio = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/'                 # comp_pk, comp_boog
-    url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/%s/'            # comp_pk, comp_boog, regio_nr
-    url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/%s/regio-teams/'                    # comp_pk, team_type
-    url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/%s/regio-teams/%s/'               # comp_pk, team_type, regio_nr
-    url_uitslagen_ver = '/bondscompetities/uitslagen/%s/%s/vereniging/'                             # comp_pk, comp_boog
-    url_uitslagen_indiv_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/individueel/'      # comp_bk, boog_type, ver_nr
-    url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
-
-    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'                    # comp_pk, comp_boog
-    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
-    url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rayon-teams/'                    # comp_pk, team_type
-    url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
-    url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'                                  # comp_pk, comp_boog
 
     def test_top(self):
         now = timezone.now()
