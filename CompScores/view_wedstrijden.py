@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,6 +22,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN
     uitslag_invoeren = False
+    toon_rk_bk = True
     raise_exception = True      # genereer PermissionDefined als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
     kruimel = 'Competitie wedstrijden'
@@ -48,13 +49,16 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                             deelcompetitie__laag=LAAG_REGIO)
                     .values_list('matches', flat=True))
 
-        pks2 = list(DeelCompetitie
-                    .objects
-                    .filter(is_afgesloten=False,
-                            rk_bk_matches__vereniging=self.functie_nu.nhb_ver,
-                            laag__in=(LAAG_RK, LAAG_BK))
-                    .exclude(rk_bk_matches=None)                # excludes when ManyToMany is empty
-                    .values_list('rk_bk_matches', flat=True))
+        if self.toon_rk_bk:
+            pks2 = list(DeelCompetitie
+                        .objects
+                        .filter(is_afgesloten=False,
+                                rk_bk_matches__vereniging=self.functie_nu.nhb_ver,
+                                laag__in=(LAAG_RK, LAAG_BK))
+                        .exclude(rk_bk_matches=None)                # excludes when ManyToMany is empty
+                        .values_list('rk_bk_matches', flat=True))
+        else:
+            pks2 = list()
 
         pks = list(pks1) + list(pks2)
 
@@ -71,9 +75,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             # als de instellingen van de ronde opgeslagen worden
             # dit is slechts fall-back
             if match.beschrijving == "":
-                # als deze wedstrijd bij een competitieronde hoort,
-                # maak een passende beschrijving voor
-
+                # maak een passende beschrijving voor deze wedstrijd
                 rondes = match.deelcompetitieronde_set.all()
                 if len(rondes) > 0:
                     ronde = rondes[0]
@@ -104,7 +106,10 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
             match.toon_geen_uitslag = True
 
-            if not (match.is_rk or match.is_bk):
+            if match.is_rk or match.is_bk:
+                match.toon_nvt = True
+            else:
+                match.toon_nvt = False
                 heeft_uitslag = (match.uitslag and match.uitslag.scores.count() > 0)
                 mag_wijzigen = self.uitslag_invoeren and not (match.uitslag and match.uitslag.is_bevroren)
                 if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
@@ -151,6 +156,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 class WedstrijdenScoresView(WedstrijdenView):
 
     uitslag_invoeren = True
+    toon_rk_bk = False
     kruimel = 'Scores invoeren'
 
 
