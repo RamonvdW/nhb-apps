@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -126,6 +126,14 @@
 
                 <!-- planning -->
                 {% include 'plein/card.dtl' with title=deelkamp.titel text=deelkamp.tekst icon="pending_actions" url=deelkamp.url %}
+
+                {% if comp.fase >= 'L' %}
+                    <!-- limieten -->
+                    {% if url_limieten_bk %}
+                        {% include 'plein/card.dtl' with title="BK limieten" text="Maximum aantal deelnemers in elke wedstrijdklasse van jouw BK instellen." icon="accessibility_new" url=url_limieten_bk %}
+                    {% endif %}
+
+                {% endif %}
 
                 <!-- rayon teams -->
                 {% if deelkamp.url_rayon_teams %}

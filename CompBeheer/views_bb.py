@@ -389,7 +389,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
-            (None, 'Zet datums'),
+            (None, 'Fase datums'),
         )
 
         menu_dynamics(self.request, context)

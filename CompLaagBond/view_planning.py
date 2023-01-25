@@ -4,17 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
-from django.db.models import Count
 from django.views.generic import TemplateView, View
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (INSCHRIJF_METHODE_1, DeelCompetitie,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               DeelcompetitieRonde, CompetitieMatch,
+                               CompetitieMatch,
                                DeelKampioenschap, DEEL_RK, DEEL_BK,
                                KampioenschapSporterBoog, KampioenschapTeam, CompetitieMutatie,
                                MUTATIE_CUT, DEELNAME_NEE)
@@ -22,29 +18,22 @@ from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
-from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
-import time
+
+TEMPLATE_COMPLAAGBOND_PLANNING_LANDELIJK = 'complaagbond/planning-landelijk.dtl'
+TEMPLATE_COMPLAAGBOND_WIJZIG_WEDSTRIJD = 'complaagbond/wijzig-wedstrijd.dtl'
+TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN = 'complaagbond/wijzig-limieten.dtl'
 
 
-TEMPLATE_COMPRAYON_PLANNING = 'complaagrayon/planning-rayon.dtl'
-TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD = 'complaagrayon/wijzig-wedstrijd-rk.dtl'
-TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/rko-rk-selectie.dtl'
-TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_DEELNEMER = 'complaagrayon/wijzig-status-rk-deelnemer.dtl'
-TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK = 'complaagrayon/wijzig-limieten-rk.dtl'
+class PlanningView(UserPassesTestMixin, TemplateView):
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
-
-
-class RayonPlanningView(UserPassesTestMixin, TemplateView):
-
-    """ Deze view geeft de planning voor een competitie in een rayon """
+    """ Deze view geeft de planning voor een competitie op het landelijke niveau """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPRAYON_PLANNING
+    template_name = TEMPLATE_COMPLAAGBOND_PLANNING_LANDELIJK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -55,7 +44,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -65,15 +54,17 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
             deelkamp = (DeelKampioenschap
                         .objects
-                        .select_related('competitie',
-                                        'nhb_rayon')
+                        .select_related('competitie')
                         .get(pk=deelkamp_pk,
-                             deel=DEEL_RK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+                             deel=DEEL_BK))
+        except (KeyError, DeelKampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        context['deelkamp'] = deelkamp
-        context['rayon'] = deelkamp.nhb_rayon
+        if self.rol_nu == Rollen.ROL_BKO:
+            if deelkamp.competitie.afstand != self.functie_nu.comp_type:
+                raise Http404('Verkeerde competitie (2)')
+
+        context['deelcomp_bk'] = deelkamp
 
         indiv_klasse2count = dict()
         team_klasse2count = dict()
@@ -146,17 +137,17 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             niet_gebruikt[200000 + wkl.pk] = wkl.beschrijving
         # for
 
-        # haal de RK wedstrijden op
-        context['wedstrijden_rk'] = (deelkamp.rk_bk_matches
-                                     .select_related('vereniging',
-                                                     'locatie')
-                                     .prefetch_related('indiv_klassen',
-                                                       'team_klassen')
-                                     .order_by('datum_wanneer',
-                                               'tijd_begin_wedstrijd'))
-        for obj in context['wedstrijden_rk']:
+        # haal de BK wedstrijden op
+        context['wedstrijden'] = (deelkamp.rk_bk_matches
+                                  .select_related('vereniging',
+                                                  'locatie')
+                                  .prefetch_related('indiv_klassen',
+                                                    'team_klassen')
+                                  .order_by('datum_wanneer',
+                                            'tijd_begin_wedstrijd'))
+        for obj in context['wedstrijden']:
 
-            obj.schutters_count = 0
+            obj.sporters_count = 0
 
             obj.wkl_namen = list()
             for wkl in obj.indiv_klassen.order_by('volgorde'):      # FUTURE: order_by zorgt voor extra database accesses
@@ -164,9 +155,9 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 niet_gebruikt[100000 + wkl.pk] = None
 
                 try:
-                    obj.schutters_count += indiv_klasse2count[wkl.pk]
+                    obj.sporters_count += indiv_klasse2count[wkl.pk]
                 except KeyError:
-                    # geen schutters in deze klasse
+                    # geen sporters in deze klasse
                     pass
             # for
 
@@ -175,7 +166,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 niet_gebruikt[200000 + wkl.pk] = None
 
                 try:
-                    obj.schutters_count += team_klasse2count[wkl.pk]
+                    obj.sporters_count += team_klasse2count[wkl.pk]
                 except KeyError:
                     pass
             # for
@@ -187,7 +178,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 else:
                     obj.capaciteit = obj.locatie.max_sporters_25m
 
-                if obj.capaciteit < obj.schutters_count:
+                if obj.capaciteit < obj.sporters_count:
                     obj.is_overbelast = True
             else:
                 obj.capaciteit = '?'
@@ -197,49 +188,28 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         if len(context['wkl_niet_gebruikt']) == 0:
             del context['wkl_niet_gebruikt']
 
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.nhb_rayon == deelkamp.nhb_rayon:
-            context['url_nieuwe_wedstrijd'] = reverse('CompLaagRayon:rayon-planning',
+        if self.rol_nu == Rollen.ROL_BKO:
+            context['url_nieuwe_wedstrijd'] = reverse('CompLaagBond:planning',
                                                       kwargs={'deelkamp_pk': deelkamp.pk})
 
-            for wedstrijd in context['wedstrijden_rk']:
-                wedstrijd.url_wijzig = reverse('CompLaagRayon:rayon-wijzig-wedstrijd',
+            for wedstrijd in context['wedstrijden']:
+                wedstrijd.url_wijzig = reverse('CompLaagBond:wijzig-wedstrijd',
                                                kwargs={'match_pk': wedstrijd.pk})
             # for
 
-        # TODO: url_bond wordt niet (meer) gebruikt?
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            deelcomp_bk = DeelKampioenschap.objects.get(deel=DEEL_BK,
-                                                        competitie=deelkamp.competitie)
-            context['url_bond'] = reverse('CompLaagBond:planning',
-                                          kwargs={'deelkamp_pk': deelcomp_bk.pk})
-
-        deelcomps = (DeelCompetitie
-                     .objects
-                     .select_related('nhb_regio')
-                     .filter(competitie=deelkamp.competitie,
-                             nhb_regio__rayon=deelkamp.nhb_rayon)
-                     .order_by('nhb_regio__regio_nr'))
-        context['regio_deelcomps'] = deelcomps
-
-        # zoek het aantal regiowedstrijden erbij
-        for deelcomp in deelcomps:
-            rondes = (DeelcompetitieRonde
-                      .objects
-                      .filter(deelcompetitie=deelcomp)
-                      .annotate(aantal_matches=Count('matches')))
-            if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
-                deelcomp.rondes_count = "-"
-            else:
-                deelcomp.rondes_count = len(rondes)
-            deelcomp.wedstrijden_count = sum(ronde.aantal_matches for ronde in rondes)
-        # for
+        context['rayon_deelkamps'] = (DeelKampioenschap
+                                      .objects
+                                      .filter(deel=DEEL_RK,
+                                              competitie=deelkamp.competitie)
+                                      .order_by('nhb_rayon__rayon_nr',
+                                                'deel'))
 
         comp = deelkamp.competitie
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Planning RK')
+            (None, 'Planning')
         )
 
         menu_dynamics(self.request, context)
@@ -247,11 +217,11 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
-            in de RK planning, om een nieuwe wedstrijd toe te voegen.
+            in de BK planning, om een nieuwe wedstrijd toe te voegen.
         """
-        # alleen de RKO mag de planning uitbreiden
-        if self.rol_nu != Rollen.ROL_RKO:
-            raise PermissionDenied()
+        # alleen de BKO mag de planning uitbreiden
+        if self.rol_nu != Rollen.ROL_BKO:
+            raise Http404('Niet de beheerder')
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
@@ -259,29 +229,28 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
-                             deel=DEEL_RK,
-                             nhb_rayon=self.functie_nu.nhb_rayon))  # moet juiste rayon zijn
+                             deel=DEEL_BK))
         except (ValueError, DeelKampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         match = CompetitieMatch(
                     competitie=deelkamp.competitie,
-                    datum_wanneer=deelkamp.competitie.rk_eerste_wedstrijd,
+                    datum_wanneer=deelkamp.competitie.bk_eerste_wedstrijd,
                     tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0))
         match.save()
 
         deelkamp.rk_bk_matches.add(match)
 
-        return HttpResponseRedirect(reverse('CompLaagRayon:rayon-wijzig-wedstrijd',
+        return HttpResponseRedirect(reverse('CompLaagBond:wijzig-wedstrijd',
                                             kwargs={'match_pk': match.pk}))
 
 
-class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
+class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de planning van een wedstrijd aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD
+    template_name = TEMPLATE_COMPLAAGBOND_WIJZIG_WEDSTRIJD
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -292,7 +261,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rollen.ROL_BKO
 
     @staticmethod
     def _get_wedstrijdklassen(deelkamp, match):
@@ -396,10 +365,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         return wkl_indiv, wkl_team
 
     @staticmethod
-    def _get_dagen(deelcomp_rk, wedstrijd):
+    def _get_dagen(deelkamp, wedstrijd):
         opt_dagen = list()
-        when = deelcomp_rk.competitie.rk_eerste_wedstrijd
-        stop = deelcomp_rk.competitie.rk_laatste_wedstrijd
+        when = deelkamp.competitie.bk_eerste_wedstrijd
+        stop = deelkamp.competitie.bk_laatste_wedstrijd
         weekdag_nr = 0
         limit = 30
         while limit > 0 and when <= stop:
@@ -435,14 +404,14 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
         deelkamps = match.deelkampioenschap_set.all()
         if len(deelkamps) == 0:
-            raise Http404('Geen RK wedstrijd')
+            raise Http404('Geen BK wedstrijd')
         deelkamp = deelkamps[0]
         comp = deelkamp.competitie
         is_25m = (comp.afstand == '25')
 
         # is dit de beheerder?
         if deelkamp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise Http404('Niet de beheerder')
 
         context['deelkamp'] = deelkamp
         context['wedstrijd'] = match
@@ -456,8 +425,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         verenigingen = (NhbVereniging
                         .objects
-                        .filter(regio__rayon=deelkamp.nhb_rayon,
-                                regio__is_administratief=False)
+                        .filter(regio__is_administratief=False)
                         .prefetch_related('wedstrijdlocatie_set')
                         .order_by('ver_nr'))
         context['verenigingen'] = verenigingen
@@ -499,16 +467,16 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(deelkamp, match)
 
-        context['url_opslaan'] = reverse('CompLaagRayon:rayon-wijzig-wedstrijd', kwargs={'match_pk': match.pk})
+        context['url_opslaan'] = reverse('CompLaagBond:wijzig-wedstrijd', kwargs={'match_pk': match.pk})
 
-        context['url_verwijderen'] = reverse('CompLaagRayon:rayon-verwijder-wedstrijd',
+        context['url_verwijderen'] = reverse('CompLaagBond:verwijder-wedstrijd',
                                              kwargs={'match_pk': match.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRayon:rayon-planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
-            (None, 'Wijzig RK wedstrijd')
+            (reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning BK'),
+            (None, 'Wijzig BK wedstrijd')
         )
 
         menu_dynamics(self.request, context)
@@ -530,12 +498,12 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         deelkamps = match.deelkampioenschap_set.all()
         if len(deelkamps) == 0:
-            raise Http404('Geen RK wedstrijd')
+            raise Http404('Geen BK wedstrijd')
         deelkamp = deelkamps[0]
 
         # is dit de beheerder?
         if deelkamp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise Http404('Niet de beheerder')
 
         comp = deelkamp.competitie
         is_25m = (comp.afstand == '25')
@@ -560,11 +528,11 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if weekdag < 0 or weekdag > 30 or aanvang < 0 or aanvang > 2359:
             raise Http404('Geen valide verzoek')
 
-        # weekdag is een offset ten opzicht van de eerste toegestane RK wedstrijddag
-        match.datum_wanneer = deelkamp.competitie.rk_eerste_wedstrijd + datetime.timedelta(days=weekdag)
+        # weekdag is een offset ten opzicht van de eerste toegestane BK wedstrijddag
+        match.datum_wanneer = deelkamp.competitie.bk_eerste_wedstrijd + datetime.timedelta(days=weekdag)
 
-        # check dat datum_wanneer nu in de ingesteld RK periode valt
-        if not (comp.rk_eerste_wedstrijd <= match.datum_wanneer <= comp.rk_laatste_wedstrijd):
+        # check dat datum_wanneer nu in de ingesteld BK periode valt
+        if not (comp.bk_eerste_wedstrijd <= match.datum_wanneer <= comp.bk_laatste_wedstrijd):
             raise Http404('Geen valide datum')
 
         # vertaal aanvang naar een tijd
@@ -580,13 +548,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             match.locatie = None
         else:
             try:
-                nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
+                nhbver = NhbVereniging.objects.get(pk=nhbver_pk, regio__is_administratief=False)
             except (NhbVereniging.DoesNotExist, ValueError):
                 raise Http404('Vereniging niet gevonden')
-
-            # check dat nhbver een van de aangeboden verenigingen is
-            if nhbver.regio.rayon != deelkamp.nhb_rayon or nhbver.regio.is_administratief:
-                raise Http404('Geen valide rayon')
 
             match.vereniging = nhbver
 
@@ -661,16 +625,16 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if len(gekozen_team_klassen):
             match.team_klassen.add(*gekozen_team_klassen)
 
-        url = reverse('CompLaagRayon:rayon-planning', kwargs={'deelkamp_pk': deelkamp.pk})
+        url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)
 
 
-class RayonLimietenView(UserPassesTestMixin, TemplateView):
+class WijzigLimietenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de RKO de status van een RK selectie aanpassen """
+    """ Deze view laat de BKO de status van een BK selectie aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK
+    template_name = TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -681,7 +645,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rollen.ROL_BKO
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -693,13 +657,13 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
-                             deel=DEEL_RK))
+                             deel=DEEL_BK))
         except (ValueError, DeelKampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        # controleer dat de juiste RKO aan de knoppen zit
+        # controleer dat de juiste BKO aan de knoppen zit
         if self.functie_nu != deelkamp.functie:
-            raise PermissionDenied()     # niet de juiste RKO
+            raise Http404('Niet de beheerder')
 
         context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
                                             .objects
@@ -750,14 +714,14 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             wkl.limiet = limiet.limiet
         # for
 
-        context['url_opslaan'] = reverse('CompLaagRayon:rayon-limieten',
+        context['url_opslaan'] = reverse('CompLaagBond:wijzig-limieten',
                                          kwargs={'deelkamp_pk': deelkamp.pk})
 
         comp = deelkamp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'RK limieten')
+            (None, 'BK limieten')
         )
 
         menu_dynamics(self.request, context)
@@ -772,13 +736,13 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
-                             deel=DEEL_RK))
+                             deel=DEEL_BK))
         except (ValueError, DeelKampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        # controleer dat de juiste RKO aan de knoppen zit
+        # controleer dat de BKO aan de knoppen zit
         if self.functie_nu != deelkamp.functie:
-            raise PermissionDenied()     # niet de juiste RKO
+            raise Http404('Niet de beheerder')
 
         comp = deelkamp.competitie
         # TODO: check competitie fase
@@ -884,7 +848,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
         account = request.user
-        door_str = "RKO %s" % account.volledige_naam()
+        door_str = "BKO %s" % account.volledige_naam()
 
         mutatie = None
         for indiv_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_indiv:
@@ -943,7 +907,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
 class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
-    """ Deze view laat een RK wedstrijd verwijderen """
+    """ Deze view laat een BK wedstrijd verwijderen """
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
@@ -955,7 +919,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RKO
+        return self.rol_nu == Rollen.ROL_BKO
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
@@ -970,15 +934,15 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_BK)
         if len(deelkamps) == 0:
-            raise Http404('Geen RK wedstrijd')
+            raise Http404('Geen BK wedstrijd')
 
         deelkamp = deelkamps[0]
 
         # correcte beheerder?
         if deelkamp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise Http404('Niet de beheerder')
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
         if match.uitslag:
@@ -988,7 +952,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         match.delete()
 
-        url = reverse('CompLaagRayon:rayon-planning', kwargs={'deelkamp_pk': deelkamp.pk})
+        url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)
 
 
