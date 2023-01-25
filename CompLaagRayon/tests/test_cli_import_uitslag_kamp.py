@@ -35,20 +35,20 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
 
         # meld een paar deelnemers af
         for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand='25',
-                                                                 sporterboog__sporter__lid_nr__in=(301946, 301976)):
+                                                                 sporterboog__sporter__lid_nr__in=(301826, 301831)):
             deelnemer.deelname = DEELNAME_NEE
             deelnemer.save(update_fields=['deelname'])
         # for
 
         deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
-                                                         sporterboog__sporter__lid_nr=301946,
+                                                         sporterboog__sporter__lid_nr=301826,
                                                          indiv_klasse__boogtype__afkorting='C')
         deelnemer.deelname = DEELNAME_NEE
         deelnemer.save(update_fields=['deelname'])
 
         # geef een sporter alvast een rank
         deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
-                                                         sporterboog__sporter__lid_nr=301951)
+                                                         sporterboog__sporter__lid_nr=301842)
         deelnemer.result_rank = 5;
         deelnemer.save(update_fields=['result_rank'])
 
@@ -98,7 +98,7 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
 
         # geef de dupe-check iets om op te reageren
         deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand=25,
-                                                         sporterboog__sporter__lid_nr=301966)
+                                                         sporterboog__sporter__lid_nr=301834)
         deelnemer.result_counts = 'test'
         deelnemer.save(update_fields=['result_counts'])
 
@@ -107,30 +107,22 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue(' heeft al andere resultaten!' in f1.getvalue())
-        self.assertTrue(' [301966] ' in f1.getvalue())
+        self.assertTrue(' [301834] ' in f1.getvalue())
 
     def test_18m(self):
         # file NOK
         self.run_management_command('import_uitslag_kamp_indoor', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
-        # blad NOK
-        #f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_25m1pijl)
-        #self.assertTrue("[ERROR] Kan blad 'blad' niet vinden" in f1.getvalue())
-
-        # kolommen NOK
-        #f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_25m1pijl)
-        #self.assertTrue('[ERROR] Vereiste kolommen: ' in f1.getvalue())
-
         f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor, '--dryrun')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-        self.assertTrue('(Recurve) hoort in klasse: Recurve Onder 21 klasse 2' in f1.getvalue())
+        self.assertTrue('(Longbow) hoort in klasse: Longbow klasse 2' in f1.getvalue())
         self.assertTrue('[ERROR] Geen RK deelnemer op regel 23: 123456' in f1.getvalue())
         self.assertTrue("[ERROR] Probleem met scores op regel 25: 'n/a' en 'n/a'" in f1.getvalue())
         self.assertTrue("[INFO] Klasse: Recurve klasse 6" in f2.getvalue())
-        self.assertTrue("1: RK rayon 3 [301954]" in f2.getvalue())
+        self.assertTrue("1: RK rayon 3 [301849]" in f2.getvalue())
         self.assertTrue("[WARNING] Regel 24 wordt overgeslagen (geen scores)" in f2.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor)
@@ -138,7 +130,7 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         kampioen = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
-                                                        sporterboog__sporter__lid_nr=301954)
+                                                        sporterboog__sporter__lid_nr=301849)
         self.assertEqual(kampioen.result_rank, 1)
         self.assertEqual(kampioen.result_score_1, 204)
         self.assertEqual(kampioen.result_score_2, 228)

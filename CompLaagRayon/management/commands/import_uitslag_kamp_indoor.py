@@ -195,14 +195,14 @@ class Command(BaseCommand):
 
         try:
             ws_voorronde = prg[self.blad_voorronde]
-        except KeyError:
+        except KeyError:        # pragma: no cover
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_voorronde))
             return
 
         try:
             ws_finale = prg[self.blad_finales]
-        except KeyError:
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_finale))
+        except KeyError:        # pragma: no cover
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_finales))
             return
 
         self.deelnemers_ophalen()

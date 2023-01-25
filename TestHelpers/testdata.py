@@ -479,6 +479,11 @@ class TestData(object):
 
         for ver in bulk:
             self.vereniging[ver.ver_nr] = ver
+
+            try:
+                self.regio_ver_nrs[ver.regio.regio_nr].append(ver.ver_nr)
+            except KeyError:
+                self.regio_ver_nrs[ver.regio.regio_nr] = [ver.ver_nr]
         # for
 
         for regio in cluster_regios:
@@ -515,11 +520,6 @@ class TestData(object):
         ver_unsorted = [(ver.ver_nr, ver) for ver in self.vereniging.values() if not ver.geen_wedstrijden]
         ver_unsorted.sort()     # sorteer op verenigingsnummer om de volgorde te garanderen
         for _, ver in ver_unsorted:
-            try:
-                self.regio_ver_nrs[ver.regio.regio_nr].append(ver.ver_nr)
-            except KeyError:
-                self.regio_ver_nrs[ver.regio.regio_nr] = [ver.ver_nr]
-
             for _, _, voornaam, _, flags in self.leden:
                 maak_account, _, _, _, _ = flags
                 lid_nr += 1
