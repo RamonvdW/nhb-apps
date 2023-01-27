@@ -78,7 +78,8 @@ class WedstrijdDetailsView(TemplateView):
             wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
         if wedstrijd.locatie:
-            if wedstrijd.locatie.adres != '(diverse)':
+            toon_kaart = wedstrijd.locatie.plaats != '(diverse)' and wedstrijd.locatie.adres != '(diverse)'
+            if toon_kaart:
                 zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + wedstrijd.locatie.adres
                 zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
                 context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
@@ -114,7 +115,10 @@ class WedstrijdDetailsView(TemplateView):
         # inschrijven moet voor de sluitingsdatum
         context['kan_inschrijven'] = now_date < wedstrijd.inschrijven_voor
 
-        context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or wedstrijd.extern_beheerd
+        if wedstrijd.is_ter_info:
+            context['toon_inschrijven'] = False
+        else:
+            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or wedstrijd.extern_beheerd
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True

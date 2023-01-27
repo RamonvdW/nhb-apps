@@ -149,15 +149,17 @@
                 </tr>
 
                 {% if wed.extern_beheerd %}
-                    <tr>
-                        <th>Website voor inschrijven</th>
-                        <td>
-                            <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
-                                <i class="material-icons-round left nhb-blauw-text">open_in_new</i>
-                                <code>{{ wed.contact_website }}</code>
-                            </a>
-                        </td>
-                    </tr>
+                    {% if wed.contact_website %}
+                        <tr>
+                            <th>Website voor inschrijven</th>
+                            <td>
+                                <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
+                                    <i class="material-icons-round left nhb-blauw-text">open_in_new</i>
+                                    <code>{{ wed.contact_website }}</code>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
                 {% endif %}
 
 
@@ -243,7 +245,7 @@
                 {% endif %}
 
 
-               {% if wed.extern_beheerd %}
+               {% if wed.extern_beheerd and wed.contact_website %}
                    {% include 'plein/card.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze website gaat via de website van de organisatie" url=wed.contact_website %}
                 {% endif %}
 
