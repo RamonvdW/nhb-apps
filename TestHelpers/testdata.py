@@ -1603,7 +1603,7 @@ class TestData(object):
 
                 deelnemer.save(update_fields=['deelname', 'result_rank'])
 
-            if nr % 15 == 0:
+            elif nr % 15 == 0:
                 # elke 15 deelnemer was een reserve die niet meegedaan heeft
                 deelnemer.result_rank = KAMP_RANK_RESERVE
                 deelnemer.save(update_fields=['deelname', 'result_rank'])
@@ -1624,6 +1624,8 @@ class TestData(object):
                 deelnemer.save(update_fields=['deelname', 'result_rank', 'result_score_1', 'result_score_2'])
 
             nr += 1
+            score1 -= 2
+            score2 -= 1
         # for
 
 

@@ -128,7 +128,7 @@
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col s4">
-                                    <input type="number" name="ver_nr" placeholder="Ver nr" maxlength="4">
+                                    <input type="text" name="ver_nr" placeholder="Ver nr" maxlength="4">
                                 </div>
                                 <div class="col s4">
                                     <button class="btn-nhb-rood">HWL</button>
