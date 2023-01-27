@@ -1060,6 +1060,7 @@ class KampioenschapSporterBoog(models.Model):
     # KAMP_RANK_RESERVE = niet afgemeld, reserve, niet meegedaan
     # KAMP_RANK_NO_SHOW = niet afgemeld, wel uitgenodigd, niet meegedaan. Waarschijnlijk een no-show.
     result_rank = models.PositiveSmallIntegerField(default=0)
+    result_volgorde = models.PositiveSmallIntegerField(default=99)   # gesorteerde uitslag, inclusief alle 5e plekken
 
     # resultaat van het team kampioenschap
     # TODO: kan dit weg? Uitslag hoort bij team, niet individu

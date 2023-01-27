@@ -122,8 +122,8 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] Geen RK deelnemer op regel 23: 123456' in f1.getvalue())
         self.assertTrue("[ERROR] Probleem met scores op regel 25: 'n/a' en 'n/a'" in f1.getvalue())
         self.assertTrue("[INFO] Klasse: Recurve klasse 6" in f2.getvalue())
-        self.assertTrue("1: RK rayon 3 [301849]" in f2.getvalue())
         self.assertTrue("[WARNING] Regel 24 wordt overgeslagen (geen scores)" in f2.getvalue())
+        self.assertTrue("Volgorde=1, Rank=1, Q-scores=204, 228, deelnemer=RK rayon 3 [301849]" in f2.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor)
         _ = (f1, f2)

@@ -188,8 +188,8 @@ class UitslagenRayonIndivView(TemplateView):
                                           'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('indiv_klasse__volgorde',
-                                    'result_rank',                   # is 0 zolang er geen resultaat is
-                                    'volgorde'))
+                                    'result_volgorde',               # is constant zolang er geen resultaat is
+                                    'volgorde'))                     # inschrijf ranking
 
             for limiet in (KampioenschapIndivKlasseLimiet
                            .objects
