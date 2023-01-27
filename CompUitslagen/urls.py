@@ -59,9 +59,14 @@ urlpatterns = [
          name='uitslagen-rayon-teams-n'),
 
     # bond
-    path('<comp_pk>/<comp_boog>/bond/',
-         view_uitslagen_bk.UitslagenBondView.as_view(),
-         name='uitslagen-bond'),
+    path('<comp_pk>/<comp_boog>/bond-individueel/',
+         view_uitslagen_bk.UitslagenBondIndivView.as_view(),
+         name='uitslagen-bond-indiv'),
+
+    path('<comp_pk>/<team_type>/bond-teams/',
+         view_uitslagen_bk.UitslagenBondTeamsView.as_view(),
+         name='uitslagen-bond-teams'),
+
 ]
 
 # end of file

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,8 +14,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen BK</h3>
-            <p>Tussenstand/eindstand van de bonds<wbr>kampioenschappen</p>
+            <h3 class="page-banner">Uitslagen BK individueel</h3>
+            <p>Tussenstand/eindstand van de individuele bonds<wbr>kampioenschappen</p>
             <br>
             <p><i>Dit deel van de site is nog niet af</i></p>
         </div>

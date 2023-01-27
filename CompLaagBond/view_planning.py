@@ -62,7 +62,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_BKO:
             if deelkamp.competitie.afstand != self.functie_nu.comp_type:
-                raise Http404('Verkeerde competitie (2)')
+                raise Http404('Niet de beheerder')
 
         context['deelcomp_bk'] = deelkamp
 

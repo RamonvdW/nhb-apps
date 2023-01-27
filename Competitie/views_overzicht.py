@@ -346,25 +346,32 @@ class CompetitieOverzichtView(View):
         context['url_regio_teams'] = reverse('CompUitslagen:uitslagen-regio-teams',
                                              kwargs={'comp_pk': comp.pk,
                                                      'team_type': team_type})
+
         context['url_rayon_indiv'] = reverse('CompUitslagen:uitslagen-rayon-indiv',
                                              kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': wed_boog})
         context['url_rayon_teams'] = reverse('CompUitslagen:uitslagen-rayon-teams',
                                              kwargs={'comp_pk': comp.pk,
                                                      'team_type': team_type})
-        context['url_bond'] = reverse('CompUitslagen:uitslagen-bond',
-                                      kwargs={'comp_pk': comp.pk,
-                                              'comp_boog': wed_boog})
+
+        context['url_bond_indiv'] = reverse('CompUitslagen:uitslagen-bond-indiv',
+                                            kwargs={'comp_pk': comp.pk,
+                                                    'comp_boog': wed_boog})
+        context['url_bond_teams'] = reverse('CompUitslagen:uitslagen-bond-teams',
+                                            kwargs={'comp_pk': comp.pk,
+                                                    'team_type': team_type})
 
         tussen_eind = "Tussen" if comp.fase < 'G' else "Eind"
         context['text_regio_indiv'] = tussen_eind + 'stand voor de regiocompetitie individueel'
         context['text_regio_teams'] = tussen_eind + 'stand voor de regiocompetitie teams'
 
+        # TODO: ook melden dat dit de tijdelijke deelnemerslijst is (tijdens regiocompetitie)
         tussen_eind = "Tussen" if comp.fase <= 'N' else "Eind"
         context['text_rayon_indiv'] = tussen_eind + 'stand voor de rayonkampioenschappen individueel'
         context['text_rayon_teams'] = tussen_eind + 'stand voor de rayonkampioenschappen teams'
 
-        context['text_bond'] = 'Tussenstand voor de landelijke bondskampioenschappen'
+        context['text_bond_indiv'] = 'Tussenstand voor de landelijke bondskampioenschappen'
+        context['text_bond_teams'] = 'Tussenstand voor de landelijke bondskampioenschappen teams'
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -19,7 +19,8 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'     # comp_pk, comp_boog
+    url_uitslagen_bond_indiv = '/bondscompetities/uitslagen/%s/%s/bond-individueel/'     # comp_pk, comp_boog
+    url_uitslagen_bond_teams = '/bondscompetities/uitslagen/%s/%s/bond-teams/'           # comp_pk, team_type
 
     regio_nr = 101
     ver_nr = 0      # wordt in setupTestData ingevuld
@@ -43,19 +44,19 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         print('CompUitslagenBK: populating testdata took %s seconds' % d.seconds)
 
     def test_bond(self):
-        url = self.url_uitslagen_bond % (self.testdata.comp18.pk, 'R')
+        url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
         # illegale parameters
-        url = self.url_uitslagen_bond % ('x', 'R')
+        url = self.url_uitslagen_bond_indiv % ('x', 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
-        url = self.url_uitslagen_bond % (99, 'R')
+        url = self.url_uitslagen_bond_indiv % (99, 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
@@ -63,7 +64,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         comp = self.testdata.comp18
         comp.is_afgesloten = True
         comp.save(update_fields=['is_afgesloten'])
-        url = self.url_uitslagen_bond % (comp.pk, 'R')
+        url = self.url_uitslagen_bond_indiv % (comp.pk, 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
@@ -71,10 +72,10 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         self.client.logout()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen_bond % (self.testdata.comp18.pk, 'R'))
+            resp = self.client.get(self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'R'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

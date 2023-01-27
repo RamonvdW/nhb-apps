@@ -30,8 +30,8 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_planning_bond = '/bondscompetities/bk/planning/%s/'                                 # deelcomp_pk
-    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk
+    url_planning_bond = '/bondscompetities/bk/%s/planning/'                                 # deelkamp_pk
+    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelkamp_pk
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                             # deelcomp_pk
     url_planning_regio_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'          # deelcomp_pk, cluster_pk
     url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'                 # ronde_pk

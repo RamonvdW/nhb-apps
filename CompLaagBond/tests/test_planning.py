@@ -6,7 +6,9 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK
+from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -24,7 +26,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_competitie_overzicht = '/bondscompetities/%s/'                                          # comp_pk
-    url_planning_bk = '/bondscompetities/bk/planning/%s/'                                       # deelcomp_pk
+    url_planning = '/bondscompetities/bk/%s/planning/'                                          # deelkamp_pk
+    url_limieten = '/bondscompetities/bk/%s/limieten/'                                          # deelkamp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp.pk
 
     testdata = None
@@ -153,16 +156,29 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
 
-    def test_planning_bk(self):
+        self.klasse_indiv_r = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18, boogtype__afkorting='R', is_voor_rk_bk=True)[0]
+        self.klasse_team_c = CompetitieTeamKlasse.objects.filter(competitie=self.comp_18, team_afkorting='C', is_voor_teams_rk_bk=True)[0]
+
+        KampioenschapIndivKlasseLimiet(
+            kampioenschap=self.deelkamp_bk_18,
+            indiv_klasse=self.klasse_indiv_r,
+            limiet=24).save()
+
+        KampioenschapTeamKlasseLimiet(
+            kampioenschap=self.deelkamp_bk_18,
+            team_klasse=self.klasse_team_c,
+            limiet=8).save()
+
+    def test_planning(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         # verkeerde BKO
-        url = self.url_planning_bk % self.deelkamp_bk_25.pk
+        url = self.url_planning % self.deelkamp_bk_25.pk
         resp = self.client.get(url)
-        self.assert404(resp, 'Verkeerde competitie (2)')
+        self.assert404(resp, 'Niet de beheerder')
 
-        url = self.url_planning_bk % self.deelkamp_bk_18.pk
+        url = self.url_planning % self.deelkamp_bk_18.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -176,10 +192,33 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
         # verkeerde deelcomp
-        resp = self.client.get(self.url_planning_bk % self.deelcomp_rayon1_18.pk)
+        resp = self.client.get(self.url_planning % self.deelcomp_rayon1_18.pk)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
-        resp = self.client.get(self.url_planning_bk % 999999)
+        resp = self.client.get(self.url_planning % 999999)
+        self.assert404(resp, 'Kampioenschap niet gevonden')
+
+    def test_wijzig_wedstrijd(self):
+        pass
+
+    def test_limieten(self):
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        # verkeerde BKO
+        url = self.url_limieten % self.deelkamp_bk_25.pk
+        resp = self.client.get(url)
+        self.assert404(resp, 'Niet de beheerder')
+
+        url = self.url_limieten % self.deelkamp_bk_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/wijzig-limieten.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde BKO
+        url = self.url_limieten % 999999
+        resp = self.client.get(url)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
 
