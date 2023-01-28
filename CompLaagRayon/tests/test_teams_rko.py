@@ -31,7 +31,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print('CompLaagRayon.test_teams_rko: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
@@ -40,7 +40,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         cls.testdata.maak_bondscompetities()
         s2 = timezone.now()
         d = s2 - s1
-        print('CompLaagRayon.test_teams_rko: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def setUp(self):
         """ eenmalige setup voor alle tests

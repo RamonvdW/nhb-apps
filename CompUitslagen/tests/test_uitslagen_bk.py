@@ -29,7 +29,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print('CompUitslagenBK: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
@@ -41,7 +41,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         #cls.testdata.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[cls.regio_nr])
         s2 = timezone.now()
         d = s2 - s1
-        print('CompUitslagenBK: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def test_bond(self):
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'R')

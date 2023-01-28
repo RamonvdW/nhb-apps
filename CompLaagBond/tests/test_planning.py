@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
+from django.utils import timezone
 from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               KampioenschapSporterBoog)
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -36,8 +37,17 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        print('%s: populating testdata start' % cls.__name__)
+        s1 = timezone.now()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts()
+        data.maak_clubs_en_sporters()
+        data.maak_bondscompetities()
+
+        #data.maak_rk_deelnemers()
+        s2 = timezone.now()
+        d = s2 - s1
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr
@@ -62,27 +72,17 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         """
         self._next_lid_nr = 100001
 
-        self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
-        self.regio_101 = NhbRegio.objects.get(regio_nr=101)
-        self.regio_105 = NhbRegio.objects.get(regio_nr=105)
-        self.regio_112 = NhbRegio.objects.get(regio_nr=112)
+        self.rayon_1 = self.testdata.rayon[1]
+        self.rayon_2 = self.testdata.rayon[2]
+        self.regio_101 = self.testdata.regio[101]
+        self.regio_105 = self.testdata.regio[105]
+        self.regio_112 = self.testdata.regio[112]
 
-        # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Zuidelijke Club"
-        ver.ver_nr = "1111"
-        ver.regio = self.regio_112
-        ver.save()
-        self.nhbver_112 = ver
+        ver_nr = self.testdata.regio_ver_nrs[112][0]
+        self.nhbver_112 = self.testdata.vereniging[ver_nr]
 
-        # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_101
-        ver.save()
-        self.nhbver_101 = ver
+        ver_nr = self.testdata.regio_ver_nrs[101][0]
+        self.nhbver_101 = ver = self.testdata.vereniging[ver_nr]
 
         loc = WedstrijdLocatie(banen_18m=1,
                                banen_25m=1,
@@ -110,40 +110,34 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.account_schutter2 = self._prep_beheerder_lid('Schutter2')
         self.lid_sporter_2 = Sporter.objects.get(lid_nr=self.account_schutter2.username)
 
-        self.boog_r = BoogType.objects.get(afkorting='R')
+        self.boog_r = self.testdata.afkorting2boogtype_nhb['R']
 
         self.sporterboog = SporterBoog(sporter=self.lid_sporter_1,
                                        boogtype=self.boog_r,
                                        voor_wedstrijd=True)
         self.sporterboog.save()
 
-        # creëer een competitie met deelcompetities
-        competities_aanmaken(jaar=2019)
-
-        self.comp_18 = Competitie.objects.get(afstand='18')
-        self.comp_25 = Competitie.objects.get(afstand='25')
-
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
-        url_klassengrenzen_vaststellen = self.url_klassengrenzen_vaststellen % self.comp_18.pk
+        url_klassengrenzen_vaststellen = self.url_klassengrenzen_vaststellen % self.testdata.comp18.pk
         resp = self.client.post(url_klassengrenzen_vaststellen)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        self.deelkamp_bk_18 = DeelKampioenschap.objects.filter(competitie=self.comp_18,
+        self.deelkamp_bk_18 = DeelKampioenschap.objects.filter(competitie=self.testdata.comp18,
                                                                deel=DEEL_BK)[0]
-        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(competitie=self.comp_18,
+        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(competitie=self.testdata.comp18,
                                                                    deel=DEEL_RK,
                                                                    nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.comp_18,
+        self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.testdata.comp18,
                                                                 nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio_105 = DeelCompetitie.objects.filter(competitie=self.comp_18,
+        self.deelcomp_regio_105 = DeelCompetitie.objects.filter(competitie=self.testdata.comp18,
                                                                 nhb_regio=self.regio_105)[0]
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
 
-        self.deelkamp_bk_25 = DeelKampioenschap.objects.filter(competitie=self.comp_25,
+        self.deelkamp_bk_25 = DeelKampioenschap.objects.filter(competitie=self.testdata.comp25,
                                                                deel=DEEL_BK)[0]
         self.functie_bko_25 = self.deelkamp_bk_25.functie
         self.functie_bko_25.accounts.add(self.account_bko_25)
@@ -158,11 +152,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
 
-        qset = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18, boogtype__afkorting='R', is_voor_rk_bk=True)
+        qset = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, boogtype__afkorting='R', is_voor_rk_bk=True)
         self.klasse_indiv_r0 = qset[0]
         self.klasse_indiv_r1 = qset[1]
 
-        qset = CompetitieTeamKlasse.objects.filter(competitie=self.comp_18, team_afkorting='C', is_voor_teams_rk_bk=True)
+        qset = CompetitieTeamKlasse.objects.filter(competitie=self.testdata.comp18, team_afkorting='C', is_voor_teams_rk_bk=True)
         self.klasse_team_c0 = qset[0]
         self.klasse_team_c1 = qset[1]
 
@@ -177,11 +171,14 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             limiet=8).save()
 
         self.match = CompetitieMatch(
-                        competitie=self.comp_18,
+                        competitie=self.testdata.comp18,
                         beschrijving='test',
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='01:01')
         self.match.save()
+
+        # for lp in range(8):
+        #     KampioenschapSporterBoog().save()
 
     def test_anon(self):
         self.client.logout()

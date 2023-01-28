@@ -29,7 +29,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print('CompUitslagenVer: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
@@ -48,7 +48,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         cls.testdata.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[cls.regio_nr])
         s2 = timezone.now()
         d = s2 - s1
-        print('CompUitslagenVer: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def test_ver_indiv(self):
         # anon

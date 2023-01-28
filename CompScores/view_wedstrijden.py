@@ -61,7 +61,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         pks = list(pks1) + list(pks2)
 
-        is_mix = (1 <= len(pks2) < len(pks1))
+        is_mix = len(pks1) > 0 and len(pks2) > 0
 
         matches = (CompetitieMatch
                    .objects

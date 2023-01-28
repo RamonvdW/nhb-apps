@@ -33,7 +33,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print('CompUitslagenRK: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = data = TestData()
         data.maak_accounts()
@@ -45,7 +45,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
         s2 = timezone.now()
         d = s2 - s1
-        print('CompUitslagenRK: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def test_indiv(self):
         self.testdata.geef_regio_deelnemers_genoeg_scores_voor_rk(18)

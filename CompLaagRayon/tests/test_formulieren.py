@@ -34,7 +34,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print('CompLaagRayon.test_formulieren: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
 
         cls.testdata = data = testdata.TestData()
@@ -54,7 +54,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         s2 = timezone.now()
         d = s2 - s1
-        print('CompLaagRayon.test_formulieren: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def setUp(self):
         """ eenmalige setup voor alle tests

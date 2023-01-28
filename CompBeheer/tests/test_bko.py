@@ -43,7 +43,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         s1 = timezone.now()
-        print('CompBeheer.test_bko: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
@@ -51,7 +51,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         cls.testdata.maak_bondscompetities()
         s2 = timezone.now()
         d = s2 - s1
-        print('CompBeheer.test_bko: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr
