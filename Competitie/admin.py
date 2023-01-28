@@ -523,6 +523,7 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                            'sporterboog__sporter')
 
     list_filter = ('kampioenschap__competitie',
+                   'kampioenschap__deel',
                    'kampioenschap__nhb_rayon',
                    'deelname',
                    'sporterboog__boogtype',
@@ -574,11 +575,9 @@ class CompetitieMutatieAdmin(CreateOnlyAdmin):
             if db_field.name == 'deelcompetitie':
                 kwargs['queryset'] = (DeelCompetitie
                                       .objects
-                                      .select_related('nhb_regio',
-                                                      'nhb_rayon')
+                                      .select_related('nhb_regio')
                                       .filter(competitie=self.obj.competitie)
-                                      .order_by('nhb_rayon__rayon_nr',
-                                                'nhb_regio__regio_nr'))
+                                      .order_by('nhb_regio__regio_nr'))
             elif db_field.name == 'kampioenschap':
                 kwargs['queryset'] = (DeelKampioenschap
                                       .objects

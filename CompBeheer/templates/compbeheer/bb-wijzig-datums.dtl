@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -280,7 +280,7 @@
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum10');
-            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum9|date:'Y-m-d' }}"),
+            M.Datepicker.init(el, { defaultDate: new Date("{{ comp.datum10|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
                                     minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})

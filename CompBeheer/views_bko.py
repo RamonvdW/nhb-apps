@@ -11,7 +11,8 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, DeelKampioenschap, DEEL_RK,
-                               CompetitieTeamKlasse, KampioenschapTeam, MUTATIE_AFSLUITEN_REGIOCOMP)
+                               CompetitieTeamKlasse, KampioenschapTeam, MUTATIE_AFSLUITEN_REGIOCOMP,
+                               MUTATIE_DOORZETTEN_NAAR_BK)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -177,18 +178,20 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
                                                 kwargs={'comp_pk': comp.pk})
         else:
             # bepaal de status van elk rayon
+
+            status2str = {True: 'Afgesloten', False: 'Actief'}
+
             context['rk_status'] = deelkamps = (DeelKampioenschap
                                                 .objects
                                                 .select_related('nhb_rayon')
                                                 .filter(competitie=comp,
-                                                        deel=DEEL_RK))
+                                                        deel=DEEL_RK)
+                                                .order_by('nhb_rayon__rayon_nr'))
             for deelkamp in deelkamps:
                 deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
-                if deelkamp.is_afgesloten:
-                    deelkamp.status_str = "Afgesloten"
-                    deelkamp.status_groen = True
-                else:
-                    deelkamp.status_str = "Actief"
+                deelkamp.status_str = status2str[deelkamp.is_afgesloten]
+                deelkamp.indiv_str = status2str[deelkamp.is_klaar_indiv]
+                deelkamp.team_str = status2str[deelkamp.is_klaar_teams]
 
         context['comp'] = comp
 
@@ -203,8 +206,8 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
-            in de RK planning, om een nieuwe wedstrijd toe te voegen.
+        """ Deze functie wordt aangeroepen als de knop 'Doorzetten naar de volgende fase' gebruikt wordt
+            door de BKO, om de competitie door te zetten van de RK naar de BK fase.
         """
 
         try:
@@ -220,7 +223,14 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         if comp.fase != 'N':
             raise Http404('Verkeerde competitie fase')
 
-        # FUTURE: implementeer doorzetten
+        # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
+        # dit voorkomt ook race conditions / dubbel uitvoeren
+        account = request.user
+        door_str = "BKO %s" % account.volledige_naam()
+
+        CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_NAAR_BK,
+                          door=door_str,
+                          competitie=comp).save()
 
         return HttpResponseRedirect(reverse('Competitie:kies'))
 

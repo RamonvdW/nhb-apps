@@ -354,10 +354,10 @@ class CompetitieOverzichtView(View):
                                              kwargs={'comp_pk': comp.pk,
                                                      'team_type': team_type})
 
-        context['url_bond_indiv'] = reverse('CompUitslagen:uitslagen-bond-indiv',
+        context['url_bond_indiv'] = reverse('CompUitslagen:uitslagen-bk-indiv',
                                             kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': wed_boog})
-        context['url_bond_teams'] = reverse('CompUitslagen:uitslagen-bond-teams',
+        context['url_bond_teams'] = reverse('CompUitslagen:uitslagen-bk-teams',
                                             kwargs={'comp_pk': comp.pk,
                                                     'team_type': team_type})
 
