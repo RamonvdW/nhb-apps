@@ -225,7 +225,6 @@ class UitslagenRayonIndivView(TemplateView):
 
         # bepaal in welke klassen we de uitslag gaan tonen
         klasse2toon_uitslag = dict()        # [klasse volgorde] = True/False
-        klasse = -1
         if is_lijst_rk:
             for deelnemer in deelnemers:
                 if deelnemer.result_rank > 0:

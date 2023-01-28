@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslagen{% endblock %}
+{% block title %}Uitslag RK{% endblock %}
 
 {% block pagina %}
 
@@ -29,8 +29,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen RK individueel</h3>
-            <p>{% if comp.fase > 'L' %}Eindstand van{% else %}Planning/tussenstand voor{% endif %} de individuele rayonkampioenschappen</p>
+            <h3 class="page-banner">Uitslag RK individueel</h3>
+            <p>{% if comp.fase > 'L' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele rayonkampioenschappen</p>
         </div>
     </div>
 
@@ -242,6 +242,6 @@
         <p class="center"><i>Geen deelnemers gevonden voor deze combinatie van filters</i></p>
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rayon-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rk-indiv" %}
 
 {% endblock %}

@@ -1,12 +1,12 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslagen{% endblock %}
+{% block title %}Uitslag RK{% endblock %}
 
 {% block pagina %}
 
@@ -28,8 +28,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen RK teams</h3>
-            <p>{% if comp.fase > 'L' %}Eindstand{% else %}Planning/tussenstand{% endif %} van de rayon<wbr>kampioenschappen voor teams</p>
+            <h3 class="page-banner">Uitslag RK teams</h3>
+            <p>{% if comp.fase > 'L' %}Eindstand{% else %}Deelnemerslijst{% endif %} van de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>
 
@@ -228,6 +228,6 @@
 
     <p class="center">Sporter met ** achter de naam is invaller</p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rayon-teams" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rk-teams" %}
 
 {% endblock %}

@@ -6,21 +6,208 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslagen{% endblock %}
+{% block title %}Uitslag BK{% endblock %}
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function keuze_gemaakt(groep) {
+
+            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
+
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
+
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen BK individueel</h3>
-            <p>Tussenstand/eindstand van de individuele bonds<wbr>kampioenschappen</p>
-            <br>
-            <p><i>Dit deel van de site is nog niet af</i></p>
+            <h3 class="page-banner">Uitslag BK individueel</h3>
+            <p>{% if comp.fase > 'R' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele bondskampioenschappen</p>
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-bond" %}
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ comp.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijdboog:</th>
+                    <td>{{ comp_boog.beschrijving }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Filters</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met filters -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een boog type:</b></p>
+                <ul id="id_boog">
+                    {% for boog in boog_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ boog.sel }}">
+                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
+                                <span>{{ boog.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    {% if rk_nog_actief %}
+
+        <div class="row">
+            <div style="padding:10px">
+                <p class="center red-text">De rayonkampioenschappen zijn nog niet afgesloten</p>
+                <p class="center">Sporters worden in de lijst opgenomen als ze aan het RK deelgenomen hebben</p>
+            </div>
+        </div>
+
+    {% endif %}
+
+
+    {% if heeft_deelnemers %}
+
+        {% if bevestig_tot_datum %}
+            <!-- rood bordje -->
+            <div class="row">
+                <div style="padding:10px">
+                    <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                        <p>Aanmelden of afmelden voor de BK wedstrijd kan bij het bondsbureau tot en met <b>{{ bevestig_tot_datum }}</b></p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- uitleg over tijdstippen -->
+        {% if comp.fase <= 'Q' %}
+            <div class="row">
+                <div style="padding:10px">
+                    <div class="col s12 center">
+                        <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <table class="white">
+            {% for obj in deelnemers %}
+
+                {% if obj.break_klasse %}
+                    {% if not obj.is_eerste_break %}
+                        <tr>
+                            <td colspan="{% if obj.toon_uitslag %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td colspan="{% if obj.toon_uitslag %}8{% else %}7{% endif %}" class="center">
+                            <h5>{{ obj.klasse_str }}</h5>
+                            {% if obj.match %}
+                                {% if comp.rk_is_afgelast %}<s>{% endif %}
+                                <span>{{ obj.match.datum_wanneer }} om {{ obj.match.tijd_begin_wedstrijd }} bij {{ obj.match.vereniging }}</span>
+                                {% if obj.match.locatie %}
+                                    <span> ({{ obj.match.adres_str }})</span>
+                                {% endif %}
+                                {% if comp.rk_is_afgelast %}</s>{% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <tr class="nhb-table-header">
+                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+
+                        {% if obj.toon_uitslag %}
+
+                            <!-- 6 cols -->
+                            <th class="center">Plaats</th>  <!-- rank -->
+                            <th>Sporter</th>
+                            <th class="hide-on-small-only">Vereniging</th>
+                            <th></th>   <!-- label: Kampioen Rayon # -->
+                            <th colspan="2">BK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
+
+                        {% else %}
+
+                            <!-- 5 cols -->
+                            <th>Sporter</th>
+                            <th class="hide-on-small-only">Vereniging</th>
+                            <th class="center">Gemiddelde</th>
+                            <th></th>   <!-- label: Kampioen Rayon # -->
+                            <th>BK scores</th>
+
+                        {% endif %}
+                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                    </tr>
+                {% endif %}
+
+                <tr{% if obj.geen_deelname %} class="grey-text"{% endif %}>
+
+                    {% if obj.toon_uitslag%}
+
+                        <!-- 6 cols -->
+                        <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}</td>
+                        <td>{{ obj.naam_str }}</td>
+                        <td class="hide-on-small-only">{{ obj.ver_str }}</td>
+                        <td>{% if obj.result_rank == 1 %}Bondskampioen{% endif %}</td>
+                        <td>{{ obj.scores_str_1 }}</td>
+                        <td>{{ obj.scores_str_2 }}</td>
+
+                    {% else %}
+
+                        <!-- 5 cols -->
+                        <td>{{ obj.naam_str }}</td>
+                        <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen BK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
+                        <td class="center">{{ obj.gemiddelde }}</td>
+                        {% if obj.is_reserve %}
+                            <td><i>Reserve</i></td>
+                        {% else %}
+                            <td>{{ obj.kampioen_label }}</td>
+                        {% endif %}
+                        <td><i class="grey-text">volgt later</i></td>       <!-- BK scores -->
+
+                    {% endif %}
+                </tr>
+
+            {% endfor %}
+
+            <tr>
+                <td colspan="{% if obj.toon_uitslag %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+            </tr>
+        </table>
+
+    {% else %}
+
+        <p class="center">De deelnemerslijst is nog niet vastgesteld</p>
+
+    {% endif %}
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-bk-indiv" %}
 
 {% endblock %}

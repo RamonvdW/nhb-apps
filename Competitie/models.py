@@ -127,6 +127,7 @@ MUTATIE_AFMELDEN = 30
 MUTATIE_AANMELDEN = 40
 MUTATIE_TEAM_RONDE = 50
 MUTATIE_AFSLUITEN_REGIOCOMP = 60
+MUTATIE_DOORZETTEN_NAAR_BK = 70
 
 MUTATIE_TO_STR = {
     MUTATIE_AG_VASTSTELLEN_18M: "AG vaststellen 18m",
@@ -138,6 +139,7 @@ MUTATIE_TO_STR = {
     MUTATIE_AANMELDEN: "aanmelden",
     MUTATIE_TEAM_RONDE: "team ronde",
     MUTATIE_AFSLUITEN_REGIOCOMP: "afsluiten regiocomp",
+    MUTATIE_DOORZETTEN_NAAR_BK: "doorzetten van RK naar BK",
 }
 
 KAMP_RANK_UNKNOWN = 99
@@ -585,10 +587,6 @@ class DeelCompetitie(models.Model):
 
     # hoort bij welke competitie?
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
-
-    # nhb_regio is gezet voor de regiocompetitie
-    # nhb_rayon is gezet voor het RK
-    # geen van beiden is gezet voor de BK
 
     # regio, voor regiocompetitie
     nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)

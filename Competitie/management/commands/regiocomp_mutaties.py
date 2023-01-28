@@ -18,13 +18,13 @@ from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse,
                                DeelCompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               DeelKampioenschap, DEEL_RK,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK,
                                KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
                                KampioenschapTeam,
                                CompetitieTaken,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
                                MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN, MUTATIE_TEAM_RONDE,
-                               MUTATIE_AFSLUITEN_REGIOCOMP)
+                               MUTATIE_AFSLUITEN_REGIOCOMP, MUTATIE_DOORZETTEN_NAAR_BK)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
                                    aanvangsgemiddelden_vaststellen_voor_afstand)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -1138,6 +1138,90 @@ class Command(BaseCommand):
 
             # versturen e-mails uitnodigingen naar de deelnemers gebeurt tijdens opstarten elk uur
 
+    def _maak_deelnemerslijst_bks(self, comp):
+        """ bepaal de individuele deelnemers van het BK
+            per klasse zijn dit de rayonkampioenen (4x) aangevuld met de sporters met de hoogste kwalificatie scores
+            iedereen die scores neergezet heeft in het RK komt in de lijst
+        """
+
+        if comp.afstand == '18':
+            aantal_pijlen = 2.0 * 30
+        else:
+            aantal_pijlen = 2.0 * 25
+        print('aantal_pijlen = %s' % aantal_pijlen)
+
+        deelkamp_bk = DeelKampioenschap.objects.get(deel=DEEL_BK, competitie=comp)
+
+        # verwijder alle deelnemers van een voorgaande run
+        KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk).delete()
+
+        bulk = list()
+        for kampioen in (KampioenschapSporterBoog
+                         .objects
+                         .filter(kampioenschap__competitie=comp,
+                                 kampioenschap__deel=DEEL_RK)
+                         .exclude(deelname=DEELNAME_NEE)
+                         .select_related('kampioenschap',
+                                         'kampioenschap__nhb_rayon',
+                                         'indiv_klasse',
+                                         'bij_vereniging',
+                                         'sporterboog')):
+
+            som_scores = kampioen.result_score_1 + kampioen.result_score_2
+            gemiddelde = som_scores / aantal_pijlen
+
+            if kampioen.result_score_1 > kampioen.result_score_2:
+                gemiddelde_scores = "%03d%03d" % (kampioen.result_score_1, kampioen.result_score_2)
+            else:
+                gemiddelde_scores = "%03d%03d" % (kampioen.result_score_2, kampioen.result_score_1)
+
+            print('kampioen:', kampioen.result_rank, som_scores, gemiddelde_scores, "%.3f" % gemiddelde, kampioen)
+
+            nieuw = KampioenschapSporterBoog(
+                        kampioenschap=deelkamp_bk,
+                        sporterboog=kampioen.sporterboog,
+                        indiv_klasse=kampioen.indiv_klasse,
+                        bij_vereniging=kampioen.bij_vereniging,
+                        gemiddelde=gemiddelde,
+                        gemiddelde_scores=gemiddelde_scores)
+
+            if kampioen.result_rank == 1:
+                nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.nhb_rayon.naam
+                nieuw.deelname = DEELNAME_JA
+
+            bulk.append(nieuw)
+
+            if len(bulk) >= 250:
+                KampioenschapSporterBoog.objects.bulk_create(bulk)
+                bulk = list()
+        # for
+
+        if len(bulk):
+            KampioenschapSporterBoog.objects.bulk_create(bulk)
+        del bulk
+
+        deelkamp_bk.heeft_deelnemerslijst = True
+        deelkamp_bk.save(update_fields=['heeft_deelnemerslijst'])
+
+        # bepaal nu voor elke klasse de volgorde van de deelnemers
+        self._verwerk_mutatie_initieel_deelkamp(deelkamp_bk)
+
+    def _verwerk_mutatie_opstarten_bk(self, comp):
+        """ de BKO heeft gevraagd alles klaar te maken voor het BK """
+
+        # controleer dat de competitie in fase N is
+        if not comp.alle_rks_afgesloten:
+
+            # individuele deelnemers vaststellen
+            self._maak_deelnemerslijst_bks(comp)
+
+            # teams vaststellen
+            krak
+
+            # ga door naar fase P
+            comp.alle_rks_afgesloten = True
+            comp.save(update_fields=['alle_rks_afgesloten'])
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
@@ -1183,6 +1267,10 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten regiocompetitie' % mutatie.pk)
             self._verwerk_mutatie_afsluiten_regiocomp(mutatie.competitie)
 
+        elif code == MUTATIE_DOORZETTEN_NAAR_BK:
+            self.stdout.write('[INFO] Verwerk mutatie %s: doorzetten van RK naar BK' % mutatie.pk)
+            self._verwerk_mutatie_opstarten_bk(mutatie.competitie)
+
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))
 
@@ -1204,6 +1292,7 @@ class Command(BaseCommand):
                     .objects
                     .all())
 
+        qset = qset.filter(is_verwerkt=False)
         mutatie_pks = qset.values_list('pk', flat=True)
 
         self.taken.hoogste_mutatie = mutatie_latest

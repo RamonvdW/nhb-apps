@@ -60,12 +60,12 @@ urlpatterns = [
 
     # bond
     path('<comp_pk>/<comp_boog>/bond-individueel/',
-         view_uitslagen_bk.UitslagenBondIndivView.as_view(),
-         name='uitslagen-bond-indiv'),
+         view_uitslagen_bk.UitslagenBKIndivView.as_view(),
+         name='uitslagen-bk-indiv'),
 
     path('<comp_pk>/<team_type>/bond-teams/',
-         view_uitslagen_bk.UitslagenBondTeamsView.as_view(),
-         name='uitslagen-bond-teams'),
+         view_uitslagen_bk.UitslagenBKTeamsView.as_view(),
+         name='uitslagen-bk-teams'),
 
 ]
 

@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslagen{% endblock %}
+{% block title %}Uitslag BK{% endblock %}
 
 {% block pagina %}
 
@@ -21,6 +21,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-bond" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-bk-teams" %}
 
 {% endblock %}
