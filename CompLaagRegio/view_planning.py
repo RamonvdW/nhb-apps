@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -254,7 +254,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         """
         # alleen de RCL mag de planning uitbreiden
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
@@ -362,7 +362,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag de planning uitbreiden
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         try:
             cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen voor de veiligheid
@@ -603,7 +603,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag een wedstrijd toevoegen
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if request.POST.get('verwijder_ronde', None):
             # de ronde moet verwijderd worden
@@ -802,7 +802,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag een wedstrijd toevoegen
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # voeg een wedstrijd toe
         comp = ronde.deelcompetitie.competitie
@@ -936,7 +936,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if ronde.deelcompetitie.functie != functie_nu:
             # mag niet wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         context['competitie'] = comp = ronde.deelcompetitie.competitie
         is_25m = (comp.afstand == '25')
@@ -1111,7 +1111,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # mag niet wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
@@ -1296,7 +1296,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         # correcte beheerder?
         if deelcomp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
         if match.uitslag:
@@ -1349,7 +1349,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if not deelcomp.is_afgesloten:
             deelcomp.competitie.bepaal_fase()
@@ -1378,7 +1378,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if not deelcomp.is_afgesloten:
 

@@ -251,7 +251,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         """
         # alleen de RKO mag de planning uitbreiden
         if self.rol_nu != Rollen.ROL_RKO:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
@@ -442,7 +442,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # is dit de beheerder?
         if deelkamp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         context['deelkamp'] = deelkamp
         context['wedstrijd'] = match
@@ -535,7 +535,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # is dit de beheerder?
         if deelkamp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         comp = deelkamp.competitie
         is_25m = (comp.afstand == '25')
@@ -699,7 +699,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         # controleer dat de juiste RKO aan de knoppen zit
         if self.functie_nu != deelkamp.functie:
-            raise PermissionDenied()     # niet de juiste RKO
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
                                             .objects
@@ -778,7 +778,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         # controleer dat de juiste RKO aan de knoppen zit
         if self.functie_nu != deelkamp.functie:
-            raise PermissionDenied()     # niet de juiste RKO
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         comp = deelkamp.competitie
         # TODO: check competitie fase
@@ -978,7 +978,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         # correcte beheerder?
         if deelkamp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
         if match.uitslag:

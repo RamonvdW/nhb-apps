@@ -47,7 +47,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO koppelen
         if functie.rol != 'BKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     if rol_nu == Rollen.ROL_SEC:
@@ -57,7 +57,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
         if functie.rol not in ('SEC', 'HWL'):
             # niet een rol die de SEC mag wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # SEC
         return
@@ -69,7 +69,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
         if functie.rol not in ('HWL', 'WL'):
             # niet een rol die de HWL mag wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # HWL
         return
@@ -90,12 +90,12 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
     if rol_nu == Rollen.ROL_BKO:
         if functie.rol != 'RKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     elif rol_nu == Rollen.ROL_RKO:
         if functie.rol != 'RCL':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # controleer of deze regio gewijzigd mag worden
         if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
@@ -103,7 +103,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
         return
 
     # niets hier te zoeken (RCL en andere rollen)
-    raise PermissionDenied()
+    raise PermissionDenied('Niet de beheerder')
 
 
 def mag_email_wijzigen_of_403(request, functie):
@@ -126,12 +126,12 @@ def mag_email_wijzigen_of_403(request, functie):
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO email aanpassen
         if functie.rol != 'BKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     # voor de rest moet de gebruiker een functie bezitten
     if not functie_nu:
-        raise PermissionDenied()     # pragma: no cover
+        raise PermissionDenied('Niet de beheerder')     # pragma: no cover
 
     # SEC, HWL en WL mogen email van HWL en WL aanpassen
     if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
@@ -142,11 +142,11 @@ def mag_email_wijzigen_of_403(request, functie):
         if functie.rol not in ('HWL', 'WL'):
             # hier verdwijnt SEC in het putje
             # secretaris email is alleen aan te passen via Onze Relaties
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if rol_nu == Rollen.ROL_WL and functie.rol != 'WL':
             # WL mag alleen zijn eigen e-mailadres aanpassen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         return
 
@@ -169,12 +169,12 @@ def mag_email_wijzigen_of_403(request, functie):
 
     if rol_nu == Rollen.ROL_BKO:
         if functie.rol != 'RKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     elif rol_nu == Rollen.ROL_RKO:
         if functie.rol != 'RCL':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # controleer of deze regio gewijzigd mag worden
         if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
@@ -182,7 +182,7 @@ def mag_email_wijzigen_of_403(request, functie):
         return
 
     # niets hier te zoeken
-    raise PermissionDenied()
+    raise PermissionDenied('Niet de beheerder')
 
 
 def receive_bevestiging_functie_email(request, functie):

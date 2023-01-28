@@ -50,6 +50,17 @@
         </div>
     </div>
 
+    {% if comp.bk_is_afgelast %}
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                    <p>{{ comp.bk_afgelast_bericht }}</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
@@ -106,7 +117,7 @@
         {% endif %}
 
         <!-- uitleg over tijdstippen -->
-        {% if comp.fase <= 'Q' %}
+        {% if not comp.bk_is_afgelast and comp.fase <= 'Q' %}
             <div class="row">
                 <div style="padding:10px">
                     <div class="col s12 center">

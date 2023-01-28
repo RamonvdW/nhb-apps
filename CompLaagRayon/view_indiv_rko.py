@@ -90,7 +90,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         # controleer dat de juiste RKO aan de knoppen zit
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelkamp.functie:
-            raise PermissionDenied()     # niet de juiste RKO
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         alles_afgesloten, regio_status = self._get_regio_status(deelkamp.competitie)
         context['regio_status'] = regio_status
@@ -244,7 +244,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
 
         # laat alleen de juiste RKO de lijst ophalen
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelkamp.functie:
-            raise PermissionDenied()     # niet de juiste RKO
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
 
         deelnemers = (KampioenschapSporterBoog
                       .objects

@@ -268,7 +268,7 @@ class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
 
         # correcte beheerder?
         if comp.afstand != self.functie_nu.comp_type:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         comp.bepaal_fase()
         if comp.fase != 'R':
@@ -300,7 +300,7 @@ class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
 
         # correcte beheerder?
         if comp.afstand != self.functie_nu.comp_type:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         comp.bepaal_fase()
         if comp.fase != 'R':
