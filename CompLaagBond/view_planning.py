@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
@@ -18,14 +19,19 @@ from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
+from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
+import time
+
 
 TEMPLATE_COMPLAAGBOND_PLANNING_LANDELIJK = 'complaagbond/planning-landelijk.dtl'
 TEMPLATE_COMPLAAGBOND_WIJZIG_WEDSTRIJD = 'complaagbond/wijzig-wedstrijd.dtl'
 TEMPLATE_COMPLAAGBOND_WIJZIG_LIMIETEN = 'complaagbond/wijzig-limieten.dtl'
+
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
 class PlanningView(UserPassesTestMixin, TemplateView):
@@ -823,7 +829,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         for pk, keuze in pk2keuze_indiv.items():
             try:
                 indiv_klasse = pk2ckl_indiv[pk]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 pass
             else:
                 # indiv klasse
@@ -836,7 +842,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         for pk, keuze in pk2keuze_team.items():
             try:
                 team_klasse = pk2ckl_team[pk]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 pass
             else:
                 # ERE klasse: 12 teams
@@ -889,7 +895,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
             # wacht op verwerking door achtergrond-taak voordat we verder gaan
             snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-            if snel != '1':
+            if snel != '1':                                     # pragma: no cover
                 # wacht 3 seconden tot de mutatie uitgevoerd is
                 interval = 0.2      # om steeds te verdubbelen
                 total = 0.0         # om een limiet te stellen

@@ -372,15 +372,22 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         # bevries de uitslag
         wedstrijd = self.deelkamp_rayon1_18.rk_bk_matches.all()[0]
+        url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
+
+        self.deelkamp_rayon1_18.rk_bk_matches.clear()
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert404(resp, 'Geen RK wedstrijd')
+        self.deelkamp_rayon1_18.rk_bk_matches.add(wedstrijd)
+
+        # wedstrijd met bevroren uitslag kan niet verwijderd worden
         uitslag = Uitslag(max_score=300,
                           afstand=18,
                           is_bevroren=True)
         uitslag.save()
         wedstrijd.uitslag = uitslag
-        wedstrijd.save()
+        wedstrijd.save(update_fields=['uitslag'])
 
-        # wedstrijd met bevroren uitslag kan niet verwijderd worden
-        url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert404(resp, 'Uitslag mag niet meer gewijzigd worden')
