@@ -105,7 +105,7 @@
 
     {% if heeft_deelnemers %}
 
-        {% if bevestig_tot_datum %}
+        {% if bevestig_tot_datum and not comp.bk_is_afgelast %}
             <!-- rood bordje -->
             <div class="row">
                 <div style="padding:10px">

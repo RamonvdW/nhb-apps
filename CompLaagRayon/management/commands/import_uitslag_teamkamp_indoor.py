@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,36 +13,34 @@ import zipfile
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag team kampioenschap"
+    help = "Importeer uitslag team kampioenschap Indoor"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.deelnemers = dict()        # [lid_nr] = [KampioenschapSchutterBoog, ...]
-        self.teams_cache = list()       # [KampioenschapTeam, ...]
-        self.team_lid_nrs = dict()      # [team.pk] = [lid_nr, ...]
-        self.ver_lid_nrs = dict()       # [ver_nr] = [lid_nr, ...]
-        self.kamp_lid_nrs = list()      # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
+        self.dryrun = True
+        self.verbose = False
         self.deel = "?"
+        self.deelnemers = dict()            # [lid_nr] = [KampioenschapSchutterBoog, ...]
+        self.teams_cache = list()           # [KampioenschapTeam, ...]
+        self.team_lid_nrs = dict()          # [team.pk] = [lid_nr, ...]
+        self.ver_lid_nrs = dict()           # [ver_nr] = [lid_nr, ...]
+        self.kamp_lid_nrs = list()          # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
+        self.deelnemende_teams = dict()     # [team naam] = KampioenschapTeam
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
-        parser.add_argument('afstand', type=str,
-                            help='Competitie afstand (18/25)')
+        parser.add_argument('--verbose', action='store_true')
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
-        parser.add_argument('blad', type=str,
-                            help='Naam van het blad met resultaten')
-        parser.add_argument('kolommen', type=str, nargs='+',
-                            help='Kolom letters: verenigingsnaam, teamnaam, bondsnummer, score1, score2')
 
-    def _bepaal_laag(self, afstand):
+    def _bepaal_laag(self):
         # TODO: aan de hand van de competitie fase bepalen of dit een RK of BK uitslag moet zijn
         self.deel = DEEL_RK
 
-    def _deelnemers_ophalen(self, afstand):
+    def _deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(kampioenschap__competitie__afstand=afstand,
+                          .filter(kampioenschap__competitie__afstand='18',
                                   kampioenschap__deel=self.deel)
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
@@ -66,10 +64,10 @@ class Command(BaseCommand):
             self.kamp_lid_nrs.append(lid_nr)
         # for
 
-    def _teams_ophalen(self, afstand):
+    def _teams_ophalen(self):
         for team in (KampioenschapTeam
                      .objects
-                     .filter(kampioenschap__competitie__afstand=afstand,
+                     .filter(kampioenschap__competitie__afstand='18',
                              kampioenschap__deel=self.deel)
                      .select_related('kampioenschap',
                                      'kampioenschap__nhb_rayon',
@@ -136,52 +134,13 @@ class Command(BaseCommand):
 
         return kamp_team
 
-    def handle(self, *args, **options):
-
-        dryrun = options['dryrun']
-
-        afstand = options['afstand']
-        if afstand not in ('18', '25'):
-            self.stderr.write('[ERROR] Afstand moet 18 of 25 zijn')
-            return
-
-        # open de kopie, zodat we die aan kunnen passen
-        fname = options['bestand']
-        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
-        try:
-            prg = openpyxl.load_workbook(fname,
-                                         data_only=True)        # do not evaluate formulas; use last calculated values
-        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
-            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
-            return
-
-        blad = options['blad']
-        try:
-            ws = prg[blad]
-        except KeyError:
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
-
-        cols = options['kolommen']
-        if afstand == '25':
-            if len(cols) != 6:
-                self.stderr.write('[ERROR] Vereiste kolommen: verenigingsnaam, teamnaam, bondsnummer, ag, score1, score2')
-                return
-
-            col_ver_naam = cols[0]
-            col_team_naam = cols[1]
-            col_lid_nr = cols[2]
-            col_lid_ag = cols[3]
-            col_score1 = cols[4]
-            col_score2 = cols[5]
-        else:
-            # indoor nog niet ondersteund
-            self.stderr.write('[ERROR] Indoor nog niet ondersteund')
-            return
-
-        self._bepaal_laag(afstand)
-        self._deelnemers_ophalen(afstand)
-        self._teams_ophalen(afstand)
+    def _importeer_voorronde(self, ws):
+        col_ver_naam = 'D'
+        col_team_naam = 'F'
+        col_lid_nr = 'E'
+        col_lid_ag = 'G'
+        col_score1 = 'H'
+        col_score2 = 'I'
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
         row_nr = 8
@@ -209,7 +168,9 @@ class Command(BaseCommand):
             except ValueError:
                 pass
 
-            self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (row, ver_nr, repr(ver_naam), repr(team_naam)))
+            if self.verbose:
+                self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (
+                                    row, ver_nr, repr(ver_naam), repr(team_naam)))
 
             if ver_nr < 0:
                 continue
@@ -223,8 +184,11 @@ class Command(BaseCommand):
                 team_klasse = kamp_team.team_klasse
             else:
                 if team_klasse != kamp_team.team_klasse:
-                    self.stderr.write('[ERROR] Inconsistente team klasse op regel %s: %s (eerdere teams: %s)' % (row_nr, kamp_team.team_klasse, team_klasse))
+                    self.stderr.write('[ERROR] Inconsistente team klasse op regel %s: %s (eerdere teams: %s)' % (
+                                        row_nr, kamp_team.team_klasse, team_klasse))
                     continue
+
+            self.deelnemende_teams[team_naam] = kamp_team
 
             ver_lid_nrs = self.ver_lid_nrs[ver_nr]
             team_lid_nrs = self.team_lid_nrs[kamp_team.pk]
@@ -306,7 +270,7 @@ class Command(BaseCommand):
                 deelnemer_totalen = list()
 
                 for deelnemer in feitelijke_deelnemers:
-                    if not dryrun:
+                    if not self.dryrun:
                         # uitgestelde save actie
                         deelnemer.save(update_fields=['result_teamscore_1', 'result_teamscore_2'])
                     deelnemer_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
@@ -316,6 +280,7 @@ class Command(BaseCommand):
                 kamp_team.result_teamscore = sum(deelnemer_totalen[:3])     # de 3 hoogste gebruiken
                 kamp_team.feitelijke_leden.set(feitelijke_deelnemers)
 
+                deelnemer_totalen.insert(0, kamp_team.pk)                   # backup voor sorteren
                 deelnemer_totalen.insert(0, kamp_team.result_teamscore)     # resultaat vooraan
                 deelnemer_totalen.append(kamp_team)                         # team record laatst
                 kamp_teams.append(deelnemer_totalen)
@@ -327,8 +292,161 @@ class Command(BaseCommand):
             rank += 1
             kamp_team = tup[-1]
             kamp_team.result_rank = rank
-            if not dryrun:
-                kamp_team.save(update_fields=['result_rank', 'result_teamscore'])
+            kamp_team.result_volgorde = rank
+            if not self.dryrun:
+                kamp_team.save(update_fields=['result_rank', 'result_volgorde', 'result_teamscore'])
         # for
+
+    def _zet_rank_en_volgorde(self, goud, zilver, brons, vierde, vijfden):
+        if self.verbose:
+            self.stdout.write('[DEBUG] goud: %s' % repr(goud))
+            self.stdout.write('[DEBUG] zilver: %s' % repr(zilver))
+            self.stdout.write('[DEBUG] brons: %s' % repr(brons))
+            self.stdout.write('[DEBUG] vierde: %s' % repr(vierde))
+            self.stdout.write('[DEBUG] vijfden: %s' % repr(vijfden))
+
+        rank = 1
+        for team_naam in (goud, zilver, brons, vierde):
+            kamp_team = self.deelnemende_teams[team_naam]
+            kamp_team.result_rank = rank
+            kamp_team.result_volgorde = rank
+            kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
+            rank += 1
+        # for
+
+        # de rest is 5e
+        # result_volgorde is al gezet, gebaseerd op aflopende scores
+        for team_naam in vijfden:
+            kamp_team = self.deelnemende_teams[team_naam]
+            kamp_team.result_rank = 5
+            kamp_team.save(update_fields=['result_rank'])
+        # for
+
+    def _importeer_finales_8(self, ws):
+        """ Lees de uitslag van het blad 'Finales 8 teams' """
+
+        final_8 = list()
+        for row_nr in (12, 14, 16, 18, 20, 22, 24, 26):
+            team_naam = ws['B' + str(row_nr)].value
+            if team_naam not in ('', 'n.v.t.'):
+                if team_naam in self.deelnemende_teams.keys():
+                    final_8.append(team_naam)
+                else:
+                    self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
+        # for
+        # self.stdout.write('final_8: %s' % repr(final_8))
+
+        # gouden finale
+        team_naam_1 = ws['Q18'].value
+        team_naam_2 = ws['Q20'].value
+        if ws['V18'].value == '2e':
+            goud = team_naam_2
+            zilver = team_naam_1
+        else:
+            goud = team_naam_1
+            zilver = team_naam_2
+
+        # bronzen finale
+        team_naam_1 = ws['Q30'].value
+        team_naam_2 = ws['Q32'].value
+        if ws['V30'].value == '3e':
+            brons = team_naam_1
+            vierde = team_naam_2
+        else:
+            brons = team_naam_2
+            vierde = team_naam_1
+
+        for team_naam in (goud, zilver, brons, vierde):
+            if team_naam in final_8:
+                final_8.remove(team_naam)
+        # for
+
+        self._zet_rank_en_volgorde(goud, zilver, brons, vierde, final_8)
+
+    def _importeer_finales_4(self, ws):
+        """ Lees de uitslag van het blad 'Finales 4 teams' """
+
+        # gouden finale
+        team_naam_1 = ws['M15'].value
+        team_naam_2 = ws['M17'].value
+        if ws['R15'].value == '2e':
+            goud = team_naam_2
+            zilver = team_naam_1
+        else:
+            goud = team_naam_1
+            zilver = team_naam_2
+
+        # bronzen finale
+        team_naam_1 = ws['M30'].value
+        team_naam_2 = ws['M32'].value
+        if ws['R30'].value == '3e':
+            brons = team_naam_1
+            vierde = team_naam_2
+        else:
+            brons = team_naam_2
+            vierde = team_naam_1
+
+        self._zet_rank_en_volgorde(goud, zilver, brons, vierde, [])
+
+    def handle(self, *args, **options):
+
+        self.dryrun = options['dryrun']
+        self.verbose = options['verbose']
+
+        # open de kopie, zodat we die aan kunnen passen
+        fname = options['bestand']
+        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
+        try:
+            prg = openpyxl.load_workbook(fname,
+                                         data_only=True)        # do not evaluate formulas; use last calculated values
+        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
+            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
+            return
+
+        blad = 'Deelnemers en Scores'
+        try:
+            ws = prg[blad]
+        except KeyError:
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+            return
+
+        self._bepaal_laag()
+        self._deelnemers_ophalen()
+        self._teams_ophalen()
+
+        self._importeer_voorronde(ws)
+
+        blad = 'Finales 8 teams'
+        try:
+            ws = prg[blad]
+        except KeyError:
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+            return
+
+        winnaar = ws['V18'].value
+        if not winnaar:
+            # None or leeg
+            # dit blad is niet gebruikt - probeer het blad met finales met 4 teams
+            blad = 'Finales 4 teams'
+            try:
+                ws = prg[blad]
+            except KeyError:
+                self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+                return
+
+            winnaar = ws['R15'].value
+            if not winnaar:
+                # None or leeg
+                self.stderr.write('[ERROR] Kan juiste finale blad niet bepalen (geen WINNAAR)')
+                return
+
+            self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
+            self._importeer_finales_4(ws)
+        else:
+            self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
+            self._importeer_finales_8(ws)
+
+        for team_naam, team in self.deelnemende_teams.items():
+            print(team.result_rank, team.result_volgorde, team_naam)
 
 # end of file

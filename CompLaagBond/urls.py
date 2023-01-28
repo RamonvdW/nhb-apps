@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagBond import view_planning
+from CompLaagBond import view_planning, view_indiv
 
 app_name = 'CompLaagBond'
 
@@ -28,6 +28,19 @@ urlpatterns = [
     path('planning/wedstrijd/verwijder/<match_pk>/',
          view_planning.VerwijderWedstrijdView.as_view(),
          name='verwijder-wedstrijd'),
+
+    # BKO: individueel
+    path('selectie/<deelkamp_pk>/',
+         view_indiv.LijstBkSelectieView.as_view(),
+         name='bk-selectie'),
+
+    path('selectie/<deelkamp_pk>/bestand/',
+         view_indiv.LijstBkSelectieAlsBestandView.as_view(),
+         name='bk-selectie-als-bestand'),
+
+    path('selectie/wijzig-status-bk-deelnemer/<deelnemer_pk>/',
+         view_indiv.WijzigStatusBkDeelnemerView.as_view(),
+         name='wijzig-status-bk-deelnemer'),
 
 ]
 

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2023 Ramon van der Winkel.
+                Copyright (c) 2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wijzig sporter status</h3>
-            <p>De status van een sporter voor deelname aan het RK aanpassen.</p>
+            <p>De status van een sporter voor deelname aan het BK aanpassen.</p>
         </div>
     </div>
 
@@ -25,10 +25,6 @@
                 <tr>
                     <th>Competitie</th>
                     <td>{{ deelnemer.kampioenschap.competitie.beschrijving }}</td>
-                </tr>
-                <tr>
-                    <th>Rayon</th>
-                    <td>{{ deelnemer.kampioenschap.nhb_rayon }}</td>
                 </tr>
                 <tr>
                     <th>Klasse</th>
@@ -71,7 +67,7 @@
                     {% if not deelnemer.bij_vereniging %}
 
                         <p>
-                            <span class="red-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.</span>
+                            <span class="red-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het BK.</span>
                             <br>
                             <br>
                             <span>Laat het bondsbureau uitzoeken of dit een niet-afgeronde overschrijving is.</span>
@@ -84,7 +80,7 @@
                         -->
 
                         {% if deelnemer.deelname != 'J' %}
-                            <p>Klik op de blauwe knop om mogelijkheid tot deelname aan het RK te bevestigen</p>
+                            <p>Klik op de blauwe knop om mogelijkheid tot deelname aan het BK te bevestigen</p>
                             <br>
                             <form method="post" action="{{ url_wijzig }}">
                                 {% csrf_token %}
@@ -95,7 +91,7 @@
                         {% endif %}
 
                         {% if deelnemer.deelname != 'N' %}
-                            <p>Klik op de rode knop om de sporter af te melden voor het RK</p>
+                            <p>Klik op de rode knop om de sporter af te melden voor het BK</p>
                             <br>
                             <form method="post" action="{{ url_wijzig }}">
                                 {% csrf_token %}
@@ -112,6 +108,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-wijzig-status-rk-deelnemer" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-wijzig-status-bk-deelnemer" %}
 
 {% endblock %}

@@ -247,9 +247,6 @@ class CompetitieOverzichtView(View):
                 deelkamp.tekst = 'Landelijke planning voor deze competitie.'
                 deelkamp.url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk})
 
-                context['url_limieten_bk'] = reverse('CompLaagBond:wijzig-limieten',
-                                                     kwargs={'deelkamp_pk': deelkamp.pk})
-
                 # geef de BKO de mogelijkheid om
                 # - de regiocompetitie door te zetten naar de rayonkampioenschappen
                 # - de RK door te zetten naar de BK
@@ -258,16 +255,27 @@ class CompetitieOverzichtView(View):
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (Regio naar RK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
+
                 elif 'M' <= comp.fase < 'P':
                     comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-naar-bk',
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
-                elif comp.fase == 'R':
-                    comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-voorbij-bk',
-                                                  kwargs={'comp_pk': comp.pk})
-                    comp.titel_doorzetten = '%s doorzetten voorbij het BK' % comp.beschrijving
-                    context['bko_doorzetten'] = comp
+
+                else:
+                    # BK fase
+                    # geeft de BKO de mogelijkheid om de deelnemerslijst voor het BK te bewerken
+                    context['url_selectie_bk'] = reverse('CompLaagBond:bk-selectie',
+                                                         kwargs={'deelkamp_pk': deelkamp.pk})
+
+                    context['url_limieten_bk'] = reverse('CompLaagBond:wijzig-limieten',
+                                                         kwargs={'deelkamp_pk': deelkamp.pk})
+
+                    if comp.fase == 'R':
+                        comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-voorbij-bk',
+                                                      kwargs={'comp_pk': comp.pk})
+                        comp.titel_doorzetten = '%s doorzetten voorbij het BK' % comp.beschrijving
+                        context['bko_doorzetten'] = comp
 
         if kan_beheren:
             template_name = TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER

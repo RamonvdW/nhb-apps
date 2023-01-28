@@ -187,7 +187,7 @@
                         {% endif %}
                     </td>
                     <td class="center hide-on-small-only">
-                        <span>{{ team.ag_str }}</span>
+                        <span><b>{{ team.ag_str }}</b></span>
                         {% if team.heeft_uitslag %}
                             <br>
                             {% for deelnemer in team.deelnemers %}

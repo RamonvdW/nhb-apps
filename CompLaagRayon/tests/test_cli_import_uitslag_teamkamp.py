@@ -17,7 +17,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
     url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
-    real_file = 'CompLaagRayon/management/testfiles/test_rk-25mp_teams.xlsm'
+    real_file = 'CompLaagRayon/management/testfiles/test_rk-25m1p_teams.xlsm'
 
     testdata = None
     rayon_nr = 3
@@ -58,26 +58,12 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         zet_competitie_fase(self.testdata.comp25, 'L')
 
     def test_25m(self):
-
-        # afstand NOK
-        with self.assert_max_queries(20):
-            self.run_management_command('import_uitslag_teamkamp', '999', 'bestand', 'blad', 'A', 'B', 'C')
-        self.assertTrue('[ERROR] Afstand moet 18 of 25 zijn')
-
         # file NOK
-        self.run_management_command('import_uitslag_teamkamp', '25', 'bestand', 'blad', 'A', 'B', 'C')
+        self.run_management_command('import_uitslag_teamkamp_25m1pijl', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
-        # blad NOK
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp', '25', self.real_file, 'blad', 'A', 'B', 'C')
-        self.assertTrue("[ERROR] Kan blad 'blad' niet vinden" in f1.getvalue())
-
-        # kolommen NOK
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp', '25', self.real_file, 'Deelnemers en Scores', 'A', 'B', 'C')
-        self.assertTrue('[ERROR] Vereiste kolommen: ' in f1.getvalue())
-
         # dry-run
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp', '25', self.real_file, 'Deelnemers en Scores', 'D', 'F', 'E', 'G', 'H', 'I', '--dryrun')
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.real_file, '--dryrun')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
 
@@ -91,7 +77,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         # self.assertTrue('[WARNING] Geen scores voor sporter 301946 op regel 13' in f2.getvalue())
 
         # echte import
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp', '25', self.real_file, 'Deelnemers en Scores', 'D', 'F', 'E', 'G', 'H', 'I')
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.real_file)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -105,10 +91,10 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         # self.assertEqual(team2.result_rank, 2)
 
     def test_18m(self):
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp', '18', self.real_file, 'Deelnemers en Scores', 'A', 'B', 'C')
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', self.real_file)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-        self.assertTrue('[ERROR] Indoor nog niet ondersteund' in f1.getvalue())
+        # self.assertTrue('[ERROR] Indoor nog niet ondersteund' in f1.getvalue())
 
 # end of file

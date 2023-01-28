@@ -139,14 +139,6 @@
                 <!-- planning -->
                 {% include 'plein/card.dtl' with title=deelkamp.titel text=deelkamp.tekst icon="pending_actions" url=deelkamp.url %}
 
-                {% if comp.fase >= 'L' %}
-                    <!-- limieten -->
-                    {% if url_limieten_bk %}
-                        {% include 'plein/card.dtl' with title="BK limieten" text="Maximum aantal deelnemers in elke wedstrijdklasse van jouw BK instellen." icon="accessibility_new" url=url_limieten_bk %}
-                    {% endif %}
-
-                {% endif %}
-
                 <!-- rayon teams -->
                 {% if deelkamp.url_rayon_teams %}
                     {% include 'plein/card.dtl' with title="RK Teams" text=deelkamp.tekst_rayon_teams icon="api" url=deelkamp.url_rayon_teams %}
@@ -207,6 +199,16 @@
 
             {% if url_klassengrenzen_rk_bk_vaststellen %}
                 {% include 'plein/card.dtl' with title="Doorzetten" text=tekst_klassengrenzen_rk_bk_vaststellen icon="mediation" url=url_klassengrenzen_rk_bk_vaststellen %}
+            {% endif %}
+
+            <!-- BK selectie -->
+            {% if url_selectie_bk %}
+                {% include 'plein/card.dtl' with title="BK selectie" text="Selectie van sporters voor de Bondskampioenschappen." icon="rule" url=url_selectie_bk %}
+            {% endif %}
+
+            <!-- limieten -->
+            {% if url_limieten_bk %}
+                {% include 'plein/card.dtl' with title="BK limieten" text="Maximum aantal deelnemers in elke wedstrijdklasse van jouw BK instellen." icon="accessibility_new" url=url_limieten_bk %}
             {% endif %}
 
             {% if bko_afsluiten %}

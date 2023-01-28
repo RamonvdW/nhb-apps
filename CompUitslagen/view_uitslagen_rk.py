@@ -539,7 +539,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 team.rk_score_str = str(team.result_teamscore)
                 team.heeft_uitslag = True
 
-                originele_lid_nrs = list(team.leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
+                originele_lid_nrs = list(team.gekoppelde_leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
                 deelnemers = list()
                 lid_nrs = list()
                 for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
@@ -553,7 +553,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
                     lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
                 # for
-                for deelnemer in team.leden.select_related('sporterboog__sporter'):
+                for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter'):
                     if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
                         deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                         deelnemer.is_uitvaller = True

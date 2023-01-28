@@ -1149,8 +1149,11 @@ class KampioenschapTeam(models.Model):
                                     blank=True, null=True)
 
     # kampioenschap uitslag: score en ranking
+    # volgorde wordt gebruikt om binnen plek 5 en 9 de volgorde vast te houden
     result_rank = models.PositiveSmallIntegerField(default=0)
-    result_teamscore = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    result_volgorde = models.PositiveSmallIntegerField(default=0)
+
+    result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
 
     def __str__(self):
         return "%s: %s" % (self.vereniging, self.team_naam)
