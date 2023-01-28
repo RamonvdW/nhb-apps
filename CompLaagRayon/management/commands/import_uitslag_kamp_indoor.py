@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import (KampioenschapSporterBoog, DEELNAME_NEE, DEELNAME_JA,
+from Competitie.models import (Competitie, DEEL_RK, DEEL_BK,
+                               KampioenschapSporterBoog, DEELNAME_NEE, DEELNAME_JA,
                                KAMP_RANK_UNKNOWN, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
@@ -20,6 +21,7 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
+        self.deel = DEEL_RK
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
         self.rk_deelnemers = list()     # [KampioenschapSporterBoog, ...]
         self.dryrun = True
@@ -31,10 +33,17 @@ class Command(BaseCommand):
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
 
-    def deelnemers_ophalen(self):
+    def _bepaal_deel(self):
+        """ bepaal of we de RK of BK gaan importeren """
+        comp = Competitie.objects.filter(afstand='18').order_by('begin_jaar')[0]    # pak de oudeste
+        if comp.alle_rks_afgesloten:
+            self.deel = DEEL_BK
+
+    def _deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(kampioenschap__competitie__afstand='18')
+                          .filter(kampioenschap__competitie__afstand='18',
+                                  kampioenschap__deel=self.deel)
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
@@ -392,6 +401,8 @@ class Command(BaseCommand):
         self.dryrun = options['dryrun']
         self.verbose = options['verbose']
 
+        self._bepaal_deel()
+
         # open de kopie, zodat we die aan kunnen passen
         fname = options['bestand']
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
@@ -414,7 +425,7 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_finales))
             return
 
-        self.deelnemers_ophalen()
+        self._deelnemers_ophalen()
         self._importeer_resultaten(ws_voorronde)
         self._importeer_finales(ws_finale)
 
