@@ -168,9 +168,9 @@ class Command(BaseCommand):
                 .objects
                 .filter(kampioenschap=deelkamp,
                         indiv_klasse=indiv_klasse,
-                        kampioen_label='')      # kampioenen hebben we al gedaan
-                .order_by('-gemiddelde',        # hoogste boven
-                          '-regio_scores'))     # hoogste boven (gelijk gemiddelde)
+                        kampioen_label='')          # kampioenen hebben we al gedaan
+                .order_by('-gemiddelde',            # hoogste boven
+                          '-gemiddelde_scores'))    # hoogste boven (gelijk gemiddelde)
 
         for obj in objs:
             tup = (obj.gemiddelde, len(lijst), obj)
@@ -362,7 +362,7 @@ class Command(BaseCommand):
                             rank__gt=limiet,
                             gemiddelde__gte=deelnemer.gemiddelde)
                     .order_by('gemiddelde',
-                              'regio_scores'))
+                              'gemiddelde_scores'))
 
             if len(objs):
                 # invoegen na de reserve-sporter met gelijk of hoger gemiddelde
@@ -404,7 +404,7 @@ class Command(BaseCommand):
                             gemiddelde__gte=deelnemer.gemiddelde,
                             volgorde__lt=VOLGORDE_PARKEER)
                     .order_by('gemiddelde',
-                              'regio_scores'))
+                              'gemiddelde_scores'))
 
             if len(objs) > 0:
                 # voeg de sporter in na de laatste deelnemer
@@ -500,10 +500,10 @@ class Command(BaseCommand):
                 .objects
                 .filter(kampioenschap=deelkamp,
                         indiv_klasse=indiv_klasse,
-                        kampioen_label='',  # kampioenen hebben we al gedaan
+                        kampioen_label='',          # kampioenen hebben we al gedaan
                         rank__lte=cut_oud)
-                .order_by('-gemiddelde',        # hoogste boven
-                          '-regio_scores'))     # hoogste boven (bij gelijk gemiddelde)
+                .order_by('-gemiddelde',            # hoogste boven
+                          '-gemiddelde_scores'))    # hoogste boven (bij gelijk gemiddelde)
 
         for obj in objs:
             if obj.pk not in lijst_pks and aantal < cut_nieuw:
@@ -971,9 +971,9 @@ class Command(BaseCommand):
                                     sporterboog=deelnemer.sporterboog,
                                     indiv_klasse=deelnemer.indiv_klasse,
                                     bij_vereniging=ver,             # bevries vereniging
-                                    gemiddelde=deelnemer.gemiddelde,
                                     kampioen_label=deelnemer.kampioen_label,
-                                    regio_scores=deelnemer.regio_scores)
+                                    gemiddelde=deelnemer.gemiddelde,
+                                    gemiddelde_scores=deelnemer.regio_scores)
 
                     if not deelnemer.inschrijf_voorkeur_rk_bk:
                         # bij inschrijven al afgemeld voor RK/BK

@@ -1045,9 +1045,10 @@ class KampioenschapSporterBoog(models.Model):
 
     # sporters met gelijk gemiddelde moeten in de juiste volgorde gehouden worden door te kijken naar
     # de regio scores: hoogste score gaat voor
+    # de RK scores: hoogste score gaat voor
     # scores zijn als string opgeslagen zodat er gesorteerd kan worden
     # "AAABBBCCCDDDEEEFFFGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
-    regio_scores = models.CharField(max_length=24, default='', blank=True)
+    gemiddelde_scores = models.CharField(max_length=24, default='', blank=True)
 
     # resultaat van het individuele kampioenschap
     result_score_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
@@ -1062,10 +1063,13 @@ class KampioenschapSporterBoog(models.Model):
     result_rank = models.PositiveSmallIntegerField(default=0)
     result_volgorde = models.PositiveSmallIntegerField(default=99)   # gesorteerde uitslag, inclusief alle 5e plekken
 
-    # resultaat van het team kampioenschap
-    # TODO: kan dit weg? Uitslag hoort bij team, niet individu
-    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)            # max = 32767
+    # resultaat van de RK teams deelname van deze sporter
+    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
     result_teamscore_2 = models.PositiveSmallIntegerField(default=0)
+
+    # resultaat van de BK teams deelname van deze sporter
+    result_bk_teamscore_1 = models.PositiveSmallIntegerField(default=0)            # max = 32767
+    result_bk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         if self.kampioenschap.deel == DEEL_BK:

@@ -487,8 +487,8 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
              }),
         ('Details',
             {'fields': ('gemiddelde',
-                        'kampioen_label',
-                        'regio_scores')
+                        'gemiddelde_scores',
+                        'kampioen_label')
              }),
         ('Status aanmelding',
             {'fields': ('deelname',
@@ -497,12 +497,15 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
              }),
         ('Resultaten',
             {'fields': ('result_rank',
+                        'result_volgorde',
                         'result_score_1',
                         'result_score_2',
                         'result_counts',
                         'result_teamscore_1',
-                        'result_teamscore_2')
-             }),
+                        'result_teamscore_2',
+                        'result_bk_teamscore_1',
+                        'result_bk_teamscore_2')
+        }),
     )
 
     readonly_fields = ('kampioenschap',
