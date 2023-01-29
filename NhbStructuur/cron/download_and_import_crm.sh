@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -37,6 +37,10 @@ then
     echo "[ERROR] Missing $SPOOLDIR"
     exit 1
 fi
+
+# alles ouder dan 60 dagen mag wag
+echo "[INFO] Removing old files"
+find "$SPOOLDIR" -type f -mtime +60 -exec rm {} + &>> "$LOG"
 
 URL=$(head -1 "$CONFIGFILE")
 SECRET=$(tail -1 "$CONFIGFILE")
