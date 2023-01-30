@@ -809,7 +809,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEquals(inschrijving.koper, self.account_admin)
+        self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('0'))
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))
@@ -851,7 +851,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEquals(inschrijving.koper, self.account_admin)
+        self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # zet het mandje om in een bestelling
@@ -915,7 +915,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEquals(inschrijving.koper, self.account_admin)
+        self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # zet het mandje om in een bestelling
@@ -980,7 +980,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertEquals(inschrijving.koper, self.account_admin)
+        self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # activeer bericht over "moet handmatig betalen"

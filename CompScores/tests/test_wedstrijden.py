@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,10 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, CompetitieMatch, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog)
+from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, CompetitieMatch, RegioCompetitieSporterBoog,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import maak_deelcompetitie_ronde
-from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -180,13 +180,14 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_18 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand='18')
 
-        self.deelcomp_regio_25 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_25 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand='25')
+
+        self.deelkamp18_rk1 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie__afstand='18').order_by('nhb_rayon__rayon_nr')[0]
+        self.deelkamp18_bk = DeelKampioenschap.objects.get(deel=DEEL_BK, competitie__afstand='18')
 
     def _maak_wedstrijden(self):
         self.wedstrijden = list()
@@ -226,13 +227,23 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
             self.wedstrijden.append(match)
         # for
 
-        # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft       TODO: no such thing
+        # maak een RK wedstrijd
         match = CompetitieMatch(
-                    competitie=self.comp_25,
+                    competitie=self.comp_18,
                     vereniging=self.nhbver1,
                     datum_wanneer=datetime.date(year=2020, month=2, day=1),
                     tijd_begin_wedstrijd=de_tijd)
         match.save()
+        self.deelkamp18_rk1.rk_bk_matches.add(match)
+
+        # maak een BK wedstrijd
+        match = CompetitieMatch(
+                    competitie=self.comp_18,
+                    vereniging=self.nhbver1,
+                    datum_wanneer=datetime.date(year=2020, month=5, day=1),
+                    tijd_begin_wedstrijd=de_tijd)
+        match.save()
+        self.deelkamp18_bk.rk_bk_matches.add(match)
 
     def _maak_inschrijvingen(self):
         # schrijf iemand in
@@ -252,7 +263,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_r,
                                 is_onbekend=True))[0]
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -264,7 +275,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_r,
                                 is_onbekend=True))[0]
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -283,10 +294,10 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
-                                                 sporterboog=sporterboog,
-                                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 indiv_klasse=indiv_klasse)
+        aanmelding = RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_18,
+                                                sporterboog=sporterboog,
+                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                                indiv_klasse=indiv_klasse)
         aanmelding.save()
 
         indiv_klasse = (CompetitieIndivKlasse
@@ -295,10 +306,10 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_c,
                                 is_onbekend=False))[0]
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_25,
-                                                 sporterboog=sporterboog,
-                                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 indiv_klasse=indiv_klasse)
+        aanmelding = RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_25,
+                                                sporterboog=sporterboog,
+                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                                indiv_klasse=indiv_klasse)
         aanmelding.save()
 
         # aspirant schutter aanmelden
@@ -317,10 +328,10 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
-                                                 sporterboog=sporterboog,
-                                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 indiv_klasse=indiv_klasse)
+        aanmelding = RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_18,
+                                                sporterboog=sporterboog,
+                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                                indiv_klasse=indiv_klasse)
         aanmelding.save()
 
         indiv_klasse = (CompetitieIndivKlasse
@@ -329,7 +340,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                 boogtype=boog_tr,
                                 beschrijving__contains="Onder 12 Jongens"))[0]
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -346,7 +357,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -399,6 +410,10 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
+
+        # trigger het "er zijn geen kampioenschappen" in de view code
+        self.deelkamp18_rk1.rk_bk_matches.clear()
+        self.deelkamp18_bk.rk_bk_matches.clear()
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
 

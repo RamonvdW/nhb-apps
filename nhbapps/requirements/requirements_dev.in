@@ -1,7 +1,7 @@
 # required pip packages
 
 # base packages
--r requirements_test.txt
+-r requirements.txt
 
 # add-ons for dev environment:
 
@@ -25,5 +25,8 @@ django-extensions
 
 # html validatie
 html5validator
+
+# voor het maken van pdf's
+reportlab
 
 # end of file

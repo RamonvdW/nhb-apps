@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
+from django.db.models import Count
 from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -16,8 +17,9 @@ from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
                                ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.models import Functie
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Functie, Rollen
+from Functie.rol import rol_get_huidige_functie
+from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Wedstrijden.models import (Wedstrijd, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie,
@@ -59,6 +61,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
+                                         'uitvoerende_vereniging',
                                          'locatie')
                          .prefetch_related('sessies',
                                            'sessies__wedstrijdklassen',
@@ -88,9 +91,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         if self.rol_nu == Rollen.ROL_HWL:
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
-                context['url_next_tekst'] = 'Vraag om goedkeuring'
-                context['url_next_status'] = reverse('Wedstrijden:zet-status',
-                                                     kwargs={'wedstrijd_pk': wedstrijd.pk})
+                if wedstrijd.verkoopvoorwaarden_status_acceptatie:
+                    context['url_next_tekst'] = 'Vraag om goedkeuring'
+                    context['url_next_status'] = reverse('Wedstrijden:zet-status',
+                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 context['limit_edits'] = True
 
@@ -154,8 +158,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             opt_begrenzing.append(opt)
         # for
 
-        locaties = (wedstrijd
-                    .organiserende_vereniging
+        if wedstrijd.uitvoerende_vereniging:
+            ver = wedstrijd.uitvoerende_vereniging
+        else:
+            ver = wedstrijd.organiserende_vereniging
+        locaties = (ver
                     .wedstrijdlocatie_set
                     .exclude(zichtbaar=False)
                     .order_by('pk'))
@@ -304,11 +311,35 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         context['prijs_euro_normaal_str'] = str(wedstrijd.prijs_euro_normaal).replace('.', ',')
         context['prijs_euro_onder18_str'] = str(wedstrijd.prijs_euro_onder18).replace('.', ',')
 
-        context['url_voorwaarden'] = settings.VOORWAARDEN_A_STATUS_URL
+        context['url_voorwaarden_a_status'] = settings.VOORWAARDEN_A_STATUS_URL
+        context['url_voorwaarden_verkoop'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
 
         # aantal banen waar uit gekozen kan worden
         max_banen = min(80, max_banen)
         context['opt_banen'] = [nr for nr in range(2, max_banen + 1)]  # 1 baan = handmatig in .dtl
+
+        if wedstrijd.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING:
+            # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
+            context['toon_uitvoerende'] = True
+            if wedstrijd.uitvoerende_vereniging:
+                selected_ver_nr = wedstrijd.uitvoerende_vereniging.ver_nr
+            else:
+                selected_ver_nr = wedstrijd.organiserende_vereniging.ver_nr
+
+            context['opt_uitvoerende_vers'] = (NhbVereniging
+                                               .objects
+                                               .exclude(geen_wedstrijden=True)
+                                               .annotate(aantal=Count('wedstrijdlocatie'))
+                                               .filter(aantal__gte=1)
+                                               .order_by('ver_nr'))
+            for ver in context['opt_uitvoerende_vers']:
+                ver.sel = 'ver_%s' % ver.ver_nr
+                ver.selected = (ver.ver_nr == selected_ver_nr)
+                ver.keuze_str = ver.ver_nr_en_naam()
+            # for
+
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+            context['toon_ter_info'] = True
 
         context['url_opslaan'] = reverse('Wedstrijden:wijzig-wedstrijd',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -397,6 +428,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
 
             if not limit_edits:
+                akkoord = request.POST.get('akkoord_verkoop', '')
+                if akkoord:
+                    account = request.user
+                    sporter = account.sporter_set.all()[0]
+                    wedstrijd.verkoopvoorwaarden_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+                    wedstrijd.verkoopvoorwaarden_status_when = timezone.now()
+                    wedstrijd.verkoopvoorwaarden_status_acceptatie = True
+
                 datum_ymd = request.POST.get('datum_begin', '')[:10]    # afkappen voor de veiligheid
                 if datum_ymd:
                     try:
@@ -496,10 +535,30 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
             wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
 
+            wedstrijd.uitvoerende_vereniging = None
+            if wedstrijd.organiserende_vereniging.ver_nr in settings.WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING:
+                # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
+                data = request.POST.get('uitvoerend', '')
+                if data:
+                    for ver in (NhbVereniging
+                                .objects
+                                .exclude(geen_wedstrijden=True)
+                                .annotate(aantal=Count('wedstrijdlocatie'))
+                                .filter(aantal__gte=1)):
+                        sel = 'ver_%s' % ver.ver_nr
+                        if data == sel:
+                            wedstrijd.uitvoerende_vereniging = ver
+                    # for
+                    if wedstrijd.uitvoerende_vereniging == wedstrijd.organiserende_vereniging:
+                        wedstrijd.uitvoerende_vereniging = None
+
             data = request.POST.get('locatie', '')
             if data:
-                for locatie in (wedstrijd
-                                .organiserende_vereniging
+                if wedstrijd.uitvoerende_vereniging:
+                    ver = wedstrijd.uitvoerende_vereniging
+                else:
+                    ver = wedstrijd.organiserende_vereniging
+                for locatie in (ver
                                 .wedstrijdlocatie_set
                                 .exclude(zichtbaar=False)):
                     sel = 'loc_%s' % locatie.pk
@@ -547,6 +606,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     raise Http404('Geen toegestane prijs')
 
                 wedstrijd.prijs_euro_onder18 = prijs
+
+            if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+                ter_info = request.POST.get('ter_info', '')
+                if ter_info:
+                    wedstrijd.is_ter_info = True
+                else:
+                    wedstrijd.is_ter_info = False
 
             wedstrijd.save()
 
@@ -659,6 +725,9 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
 
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and verder:
                 self._garandeer_instellingen_bestaat(wedstrijd.organiserende_vereniging)
+
+                if not wedstrijd.verkoopvoorwaarden_status_acceptatie:
+                    raise Http404('Verkoopvoorwaarden')
 
                 # verzoek tot goedkeuring
                 wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING

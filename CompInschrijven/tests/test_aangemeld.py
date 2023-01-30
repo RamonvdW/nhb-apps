@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -19,15 +20,15 @@ import datetime
 
 class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
-    """ tests voor de CompInfra applicatie, Aangemeld functie """
+    """ tests voor de CompInschrijven applicatie, Aangemeld functie """
 
     test_after = ('Functie',)
 
-    url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'                                # comp_pk
+    url_wijzigdatums = '/bondscompetities/beheer/%s/wijzig-datums/'                                # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'     # comp_pk
     url_aangemeld_rayon = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/rayon-%s/'  # comp_pk, rayon_pk
     url_aangemeld_regio = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/'  # comp_pk, regio_pk
-    url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'                 # comp_pk
+    url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'                 # comp_pk
     url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'                     # comp.pk
 
     @classmethod
@@ -88,15 +89,15 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
-            deelcomp.functie.accounts.add(self.account_bko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+            deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2).all():
-            deelcomp.functie.accounts.add(self.account_rko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+            deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
+        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -276,27 +277,12 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         # coverage voor models __str__
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_RK
-        deelcomp.nhb_regio = None
-        deelcomp.nhb_rayon = self.rayon_1
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_RK).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_BK
-        deelcomp.nhb_rayon = None
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_BK).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
     def test_overzicht_bko(self):
         comp = Competitie.objects.get(afstand='18')
-        functie_bko = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_BK).functie
+        functie_bko = DeelKampioenschap.objects.get(competitie=comp, deel=DEEL_BK).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -329,7 +315,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_overzicht_rko(self):
         comp = Competitie.objects.get(afstand='25')
-        functie_rko = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_RK, nhb_rayon=self.rayon_2).functie
+        functie_rko = DeelKampioenschap.objects.get(competitie=comp, deel=DEEL_RK, nhb_rayon=self.rayon_2).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -362,7 +348,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def test_overzicht_rcl(self):
         comp = Competitie.objects.get(afstand='18')
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
+        functie_rcl = DeelCompetitie.objects.get(competitie=comp, nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -396,7 +382,6 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
@@ -457,11 +442,10 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         # wissel naar RCL rol
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
         self.e2e_wissel_naar_functie(functie_rcl)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        inschrijving = RegioCompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
         naam_str = "[" + str(inschrijving.sporterboog.sporter.lid_nr) + "] " + inschrijving.sporterboog.sporter.volledige_naam()
         ver_str = str(self._ver)            # [ver_nr] Vereniging
 

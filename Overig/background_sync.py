@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,9 @@ class BackgroundSync(object):
         self._address = ('localhost', poort_nummer)
         self._conn = None
         self._listener = None
+
+    def __del__(self):
+        self._sock.close()
 
     def _setup_receiver(self):
         if not self._conn:

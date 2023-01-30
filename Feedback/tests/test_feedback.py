@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from Feedback.models import Feedback, feedback_opschonen
 from Feedback.operations import store_feedback
 from Taken.models import Taak
@@ -157,9 +157,7 @@ class TestFeedback(E2EHelpers, TestCase):
             resp = self.client.post(self.url_feedback_formulier,
                                     {'bevinding': '4',
                                      'feedback': 'Just testing'})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('feedback/formulier.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
+        self.assert404(resp, 'Verkeerd gebruik')
 
     def test_afgehandeld(self):
         with self.assert_max_queries(20):
@@ -234,28 +232,26 @@ class TestFeedback(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
-        with self.settings(TAAK_OVER_FEEDBACK_ACCOUNTS=[self.account_admin.username]):
+        self.assertEqual(Taak.objects.count(), 0)
 
-            self.assertEqual(Taak.objects.count(), 0)
+        # maak feedback aan
+        self.client.get(self.url_feedback_nul_plein)
+        resp = self.client.post(self.url_feedback_formulier,
+                                {'bevinding': '4',
+                                 'feedback': 'Just testing'})
+        self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
-            # maak feedback aan
-            self.client.get(self.url_feedback_nul_plein)
-            resp = self.client.post(self.url_feedback_formulier,
-                                    {'bevinding': '4',
-                                     'feedback': 'Just testing'})
-            self.assert_is_redirect(resp, self.url_feedback_bedankt)
+        self.assertEqual(Taak.objects.count(), 1)
 
-            self.assertEqual(Taak.objects.count(), 1)
+        # maak nog meer feedback aan
+        self.client.get(self.url_feedback_nul_plein)
+        resp = self.client.post(self.url_feedback_formulier,
+                                {'bevinding': '8',
+                                 'feedback': 'Meer getest'})
+        self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
-            # maak nog meer feedback aan
-            self.client.get(self.url_feedback_nul_plein)
-            resp = self.client.post(self.url_feedback_formulier,
-                                    {'bevinding': '8',
-                                     'feedback': 'Meer getest'})
-            self.assert_is_redirect(resp, self.url_feedback_bedankt)
-
-            # controleer dat er niet nog een taak aangemaakt i
-            self.assertEqual(Taak.objects.count(), 1)
+        # controleer dat er niet nog een taak aangemaakt i
+        self.assertEqual(Taak.objects.count(), 1)
 
     def test_opschonen(self):
         f1 = io.StringIO()

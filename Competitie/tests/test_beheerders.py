@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -25,7 +26,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     url_kies = '/bondscompetities/'
     url_overzicht = '/bondscompetities/%s/'  # comp_pk
-    url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'  # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
 
     @classmethod
@@ -37,15 +37,15 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         lid_nr = self._next_lid_nr
         self._next_lid_nr += 1
 
-        sporter = Sporter()
-        sporter.lid_nr = lid_nr
-        sporter.geslacht = "M"
-        sporter.voornaam = voornaam
-        sporter.achternaam = "Tester"
-        sporter.email = voornaam.lower() + "@nhb.test"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = self._ver
+        sporter = Sporter(
+                    lid_nr=lid_nr,
+                    geslacht="M",
+                    voornaam=voornaam,
+                    achternaam="Tester",
+                    email=voornaam.lower() + "@nhb.test",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self._ver)
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -61,10 +61,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_101
+        ver = NhbVereniging(
+                    ver_nr="1000",
+                    naam="Grote Club",
+                    regio=self.regio_101)
         ver.save()
         self._ver = ver
 
@@ -86,15 +86,15 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
-            deelcomp.functie.accounts.add(self.account_bko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+            deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2).all():
-            deelcomp.functie.accounts.add(self.account_rko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+            deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
+        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -116,7 +116,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # klassengrenzen vaststellen
-        url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
+        url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'
         with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
@@ -272,7 +272,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
         # BKO 18m
-        functie_bko = DeelCompetitie.objects.get(competitie=comp18, laag=LAAG_BK).functie
+        deelkamp = DeelKampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)
+        functie_bko = deelkamp.functie
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(functie_bko)
 
@@ -283,8 +284,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # RKO 25m Rayon 2
-        functie_rko = DeelCompetitie.objects.get(competitie=comp25, laag=LAAG_RK, nhb_rayon=self.rayon_2).functie
-
+        deelkamp = DeelKampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, nhb_rayon=self.rayon_2)
+        functie_rko = deelkamp.functie
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(functie_rko)
@@ -296,7 +297,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # RCL
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp18, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
+        deelcomp = DeelCompetitie.objects.get(competitie=comp18, nhb_regio=self.regio_101)
+        functie_rcl = deelcomp.functie
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
 
@@ -324,94 +326,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # TODO: add WL
 
         # coverage voor models __str__
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
+        obj = RegioCompetitieSporterBoog.objects.all()[0]
         self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_RK
-        deelcomp.nhb_regio = None
-        deelcomp.nhb_rayon = self.rayon_1
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_RK).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        deelcomp = obj.deelcompetitie
-        deelcomp.laag = LAAG_BK
-        deelcomp.nhb_rayon = None
-        deelcomp.save()
-        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_BK).all()[0]
-        self.assertTrue(str(obj) != '')
-
-    def test_wijzig_datums_not_bb(self):
-        comp = Competitie.objects.all()[0]
-        url = self.url_wijzigdatums % comp.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-    def test_wijzig_datums_bb(self):
-        comp = Competitie.objects.all()[0]
-        url = self.url_wijzigdatums % comp.pk
-
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.begin_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.einde_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.eerste_wedstrijd)
-
-        # wordt BB
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        # get
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/bb-wijzig-datums.dtl', 'plein/site_layout.dtl'))
-
-        # post
-        with self.assert_max_queries(21):
-            resp = self.client.post(url, {'datum1': '2019-08-09',
-                                          'datum2': '2019-09-10',
-                                          'datum3': '2019-10-11',
-                                          'datum4': '2019-11-12',
-                                          'datum5': '2019-11-12',
-                                          'datum6': '2020-02-01',
-                                          'datum7': '2019-02-12',
-                                          'datum8': '2020-05-01',
-                                          'datum9': '2020-05-12',
-                                          'datum10': '2020-06-12',
-                                          })
-        self.assert_is_redirect(resp, self.url_overzicht % comp.pk)
-
-        # controleer dat de nieuwe datums opgeslagen zijn
-        comp = Competitie.objects.get(pk=comp.pk)
-        self.assertEqual(datetime.date(year=2019, month=8, day=9), comp.begin_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=9, day=10), comp.einde_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=10, day=11), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=2019, month=11, day=12), comp.eerste_wedstrijd)
-
-        # check corner cases
-
-        # alle datums verplicht
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assert404(resp, 'Verplichte parameter ontbreekt')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': 'null',
-                                          'datum2': 'hallo',
-                                          'datum3': '0',
-                                          'datum4': '2019-13-42'})
-        self.assert404(resp, 'Geen valide datum')
-
-        # foute comp_pk bij get
-        url = self.url_wijzigdatums % 999999
-        resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
-
-        # foute comp_pk bij post
-        resp = self.client.post(url)
-        self.assert404(resp, 'Competitie niet gevonden')
 
 # end of file

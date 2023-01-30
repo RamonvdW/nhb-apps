@@ -28,7 +28,6 @@ def get_competitie_bogen(comp=None):
         teamtypen_done = list()
         for team_wkl in (TemplateCompetitieTeamKlasse
                          .objects
-                         .exclude(buiten_gebruik=True)
                          .select_related('team_type')):
             teamtype = team_wkl.team_type
             if teamtype.pk not in teamtypen_done:

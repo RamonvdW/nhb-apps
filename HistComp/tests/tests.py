@@ -258,14 +258,4 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertNotContains(resp, "Test Club")
 
-    def test_correct_histcomp_2017(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(20):
-            management.call_command('correct_histcomp_indiv2', stderr=f1, stdout=f2)
-        # print('f1: %s' % f1.getvalue())
-        # print('f2: %s' % f1.getvalue())
-        self.assertEqual("", f1.getvalue())
-        self.assertTrue("Corrigeer" in f2.getvalue())
-
 # end of file

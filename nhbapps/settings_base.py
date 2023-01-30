@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-01-24'
+SITE_VERSIE = '2023-01-30'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'CompLaagBond.apps.CompLaagBondConfig',
     'CompLaagRegio.apps.CompLaagRegioConfig',
     'CompLaagRayon.apps.CompLaagRayonConfig',
+    'CompBeheer.apps.CompBeheerConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',
@@ -151,9 +152,6 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
-
-# format localization
-USE_L10N = True
 
 # sla alle datums in de database op als UTC
 # dit doet PostgreSQL sowieso, onafhankelijk van deze instelling
@@ -512,6 +510,10 @@ BETAAL_VIA_NHB_VER_NR = 1368
 
 # implementation uses this instead of built-in default, to allow override during testing
 BETAAL_API = 'https://api.mollie.com'
+
+
+# welke vereniging(en) mogen een uitvoerende vereniging aanwijzen (en daar een locatie van kiezen)?
+WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 
 
 # defaults for 'dev' and 'test' options

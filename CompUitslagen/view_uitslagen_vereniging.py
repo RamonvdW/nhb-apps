@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,8 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbVereniging
-from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog)
+from Competitie.models import (TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSporterBoog)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
@@ -88,9 +88,8 @@ class UitslagenVerenigingIndivView(TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
-                        .get(laag=LAAG_REGIO,
-                             competitie=comp,
-                             competitie__is_afgesloten=False,       # FUTURE: op meer plekken dit filter toepassen
+                        .get(competitie=comp,
+                             competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:     # pragma: no cover
             raise Http404('Competitie niet gevonden')
@@ -99,7 +98,7 @@ class UitslagenVerenigingIndivView(TemplateView):
 
     @staticmethod
     def _get_deelnemers(deelcomp, boogtype, ver_nr):
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
@@ -117,21 +116,6 @@ class UitslagenVerenigingIndivView(TemplateView):
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
             rank += 1
-
-            # if deelnemer.score1 == 0:
-            #     deelnemer.score1 = '-'
-            # if deelnemer.score2 == 0:
-            #     deelnemer.score2 = '-'
-            # if deelnemer.score3 == 0:
-            #     deelnemer.score3 = '-'
-            # if deelnemer.score4 == 0:
-            #     deelnemer.score4 = '-'
-            # if deelnemer.score5 == 0:
-            #     deelnemer.score5 = '-'
-            # if deelnemer.score6 == 0:
-            #     deelnemer.score6 = '-'
-            # if deelnemer.score7 == 0:
-            #     deelnemer.score7 = '-'
         # for
 
         return deelnemers
@@ -244,14 +228,9 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
-        # ver_nr is optioneel en resulteert in het nummer van de sporter
+        ver_nr = kwargs['ver_nr'][:4]  # afkappen voor de veiligheid
         try:
-            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor de veiligheid
             ver_nr = int(ver_nr)
-        except KeyError:
-            # TODO: onmogelijk om hier te komen (ivm URL design)
-            # zoek de vereniging die bij de huidige gebruiker past
-            ver_nr = get_sporter_ver_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd verenigingsnummer')
 
@@ -296,7 +275,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
             team.naam_str = "[%s] %s" % (team.vereniging.ver_nr, team.team_naam)
             team.totaal_score = 0
             team.totaal_punten = 0
-            team.leden = dict()     # [deelnemer.pk] = [ronde status, ..]
+            team.leden_lijst = dict()     # [deelnemer.pk] = [ronde status, ..]
         # for
 
         ronde_teams = (RegiocompetitieRondeTeam
@@ -333,8 +312,8 @@ class UitslagenVerenigingTeamsView(TemplateView):
             for deelnemer in ronde_team.deelnemers_geselecteerd.all():
                 geselecteerd_pks.append(deelnemer.pk)
 
-                if deelnemer.pk not in team.leden:
-                    team.leden[deelnemer.pk] = voorgaand = list()
+                if deelnemer.pk not in team.leden_lijst:
+                    team.leden_lijst[deelnemer.pk] = voorgaand = list()
                     while len(voorgaand) < ronde_team.ronde_nr:
                         inzet = SimpleNamespace(tekst='-', score=-1)
                         voorgaand.append(inzet)
@@ -343,9 +322,9 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
             for deelnemer in ronde_team.deelnemers_feitelijk.all():
                 try:
-                    voorgaand = team.leden[deelnemer.pk]
+                    voorgaand = team.leden_lijst[deelnemer.pk]
                 except KeyError:
-                    team.leden[deelnemer.pk] = voorgaand = list()
+                    team.leden_lijst[deelnemer.pk] = voorgaand = list()
                     while len(voorgaand) < ronde_team.ronde_nr:
                         inzet = SimpleNamespace(tekst='-', score=-1)
                         voorgaand.append(inzet)
@@ -374,7 +353,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
             laagste_inzet = None
             laagste_score = 9999
             aantal_scores = 0
-            for deelnemer_pk, voorgaand in team.leden.items():
+            for deelnemer_pk, voorgaand in team.leden_lijst.items():
                 # iedereen die voorheen in het team zaten door laten groeien
                 if len(voorgaand) <= ronde_team.ronde_nr:
                     if deelnemer_pk in geselecteerd_pks:
@@ -401,11 +380,11 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # converteer de team leden
         pks = list()
         for team in teams:
-            pks.extend(team.leden.keys())
+            pks.extend(team.leden_lijst.keys())
         # for
 
         pk2deelnemer = dict()
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
                                           'sporterboog__sporter')
@@ -415,7 +394,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         for team in teams:
             nieuw = list()
-            for pk, voorgaand in team.leden.items():
+            for pk, voorgaand in team.leden_lijst.items():
                 deelnemer = pk2deelnemer[pk]
                 sporter = deelnemer.sporterboog.sporter
                 deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
@@ -426,7 +405,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
             # TODO: sorteren zou eerder moeten zodat de doorgestreepte nul altijd de onderste is
             nieuw.sort(reverse=True)
-            team.leden = [(deelnemer, voorgaand) for _, _, deelnemer, voorgaand in nieuw]
+            team.leden_lijst = [(deelnemer, voorgaand) for _, _, deelnemer, voorgaand in nieuw]
         # for
 
         # sorteer de teams
@@ -455,7 +434,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         context['aantal_regels'] = len(teams) * 3 + 4       # team, team score, punten
         for team in teams:
-            context['aantal_regels'] += len(team.leden)
+            context['aantal_regels'] += len(team.leden_lijst)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import RegioCompetitieSchutterBoog
+from Competitie.models import RegioCompetitieSporterBoog
 from Sporter.models import SporterBoog
 
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         self.stdout.write('Deelnemers met ingeschreven boogtype niet meer actief als wedstrijdboog')
         # zoek alle leden met een andere voorkeur dan ingeschreven
         prev_comp = None
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .exclude(sporterboog__boogtype__afkorting='C')        # kan toch niet overzetten
                           .filter(sporterboog__voor_wedstrijd=False,

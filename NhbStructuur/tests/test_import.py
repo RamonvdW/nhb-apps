@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -116,7 +116,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # self.assertEqual(f2.getvalue(), '')
 
     def test_import(self):
-        with self.assert_max_queries(126):
+        with self.assert_max_queries(128):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_03_BASE_DATA,
                                                  OPTION_SIM)
@@ -169,7 +169,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_extra_geo_structuur(self):
         # extra rayon/regio
-        with self.assert_max_queries(59):
+        with self.assert_max_queries(61):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_06_BAD_RAYON_REGIO)
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
@@ -254,7 +254,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter = Sporter.objects.get(lid_nr=100025)
         self.assertEqual(sporter.wa_id, '90025')
 
-        with self.assert_max_queries(60):
+        with self.assert_max_queries(62):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_09_LID_MUTATIES,
                                                  OPTION_SIM)
@@ -296,7 +296,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # andere leden hebben een toevoeging achter hun voornaam: "Tineke (Tini)" - niet over klagen
         # some ontbreekt er een haakje
         # import verwijderd dit
-        with self.assert_max_queries(70):
+        with self.assert_max_queries(72):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_10_TOEVOEGING_NAAM,
                                                  OPTION_SIM)
@@ -308,7 +308,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
-        with self.assert_max_queries(64):
+        with self.assert_max_queries(66):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_11_BAD_DATE,
                                                  OPTION_SIM)
@@ -328,7 +328,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # sommige leden worden niet geïmporteerd
         # geen (valide) geboortedatum
         # geen (valid) datum van lidmaatschap
-        with self.assert_max_queries(58):
+        with self.assert_max_queries(60):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_12_MEMBER_INCOMPLETE_1,
                                         OPTION_SIM)
@@ -345,7 +345,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
 
-        with self.assert_max_queries(73):
+        with self.assert_max_queries(76):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_12_MEMBER_INCOMPLETE_1,
                                                  OPTION_SIM)
@@ -369,7 +369,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter.is_actief_lid = False
         sporter.save()
 
-        with self.assert_max_queries(60):
+        with self.assert_max_queries(62):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_13_WIJZIG_GESLACHT_1,
                                                  OPTION_SIM)
@@ -384,10 +384,9 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
     def test_wijzig_geslacht(self):
         # mutatie van geslacht M naar X voor sporter 100001
 
-        with self.assert_max_queries(61):
-            f1, f2 = self.run_management_command(IMPORT_COMMAND,
-                                                 TESTFILE_13_WIJZIG_GESLACHT_1,
-                                                 OPTION_SIM)
+        f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                             TESTFILE_13_WIJZIG_GESLACHT_1,
+                                             OPTION_SIM)
 
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -424,7 +423,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_maak_secretaris(self):
         # een lid secretaris maken
-        with self.assert_max_queries(98):
+        with self.assert_max_queries(100):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -484,7 +483,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
     def test_club_1377(self):
         # een paar speciale import gevallen
 
-        with self.assert_max_queries(90):
+        with self.assert_max_queries(92):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_15_CLUB_1377,
                                         OPTION_SIM)
@@ -521,10 +520,9 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # verwijderen van de secretaris geeft een fout
 
         # maak 100024 aan
-        with self.assert_max_queries(98):
-            self.run_management_command(IMPORT_COMMAND,
-                                        TESTFILE_14_WIJZIG_GESLACHT_2,
-                                        OPTION_SIM)
+        self.run_management_command(IMPORT_COMMAND,
+                                    TESTFILE_14_WIJZIG_GESLACHT_2,
+                                    OPTION_SIM)
 
         # maak het account van 100024 aan, zodat deze secretaris kan worden
         # maak het account van 100024 aan en probeer het nog een keer
@@ -549,10 +547,9 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_verwijder_recordhouder_fail(self):
         # maak 100024 aan
-        with self.assert_max_queries(98):
-            self.run_management_command(IMPORT_COMMAND,
-                                        TESTFILE_14_WIJZIG_GESLACHT_2,
-                                        OPTION_SIM)
+        self.run_management_command(IMPORT_COMMAND,
+                                    TESTFILE_14_WIJZIG_GESLACHT_2,
+                                    OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -572,10 +569,9 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_verwijder_score_fail(self):
         # maak 100024 aan
-        with self.assert_max_queries(98):
-            self.run_management_command(IMPORT_COMMAND,
-                                        TESTFILE_14_WIJZIG_GESLACHT_2,
-                                        OPTION_SIM)
+        self.run_management_command(IMPORT_COMMAND,
+                                    TESTFILE_14_WIJZIG_GESLACHT_2,
+                                    OPTION_SIM)
 
         # maak een schutterboog aan
         boog_r = BoogType.objects.get(afkorting='R')
@@ -597,14 +593,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_import_nhb_crm_dryrun(self):
         # dryrun
-        with self.assert_max_queries(49):
+        with self.assert_max_queries(50):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM,
                                                  OPTION_DRY_RUN)
         self.assertTrue("DRY RUN" in f2.getvalue())
 
-        with self.assert_max_queries(100):
+        with self.assert_max_queries(102):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)
@@ -618,12 +614,12 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                         TESTFILE_08_VER_MUTATIES,
                                         OPTION_SIM,
                                         OPTION_DRY_RUN)
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_09_LID_MUTATIES,
                                         OPTION_SIM,
                                         OPTION_DRY_RUN)
-        with self.assert_max_queries(39):
+        with self.assert_max_queries(41):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM,
@@ -635,7 +631,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.ver_nr = "1999"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(25):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_12_MEMBER_INCOMPLETE_1,
                                         OPTION_SIM,
@@ -643,7 +639,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_incomplete_data(self):
         # test import met een incomplete entry van een nieuw lid
-        with self.assert_max_queries(75):
+        with self.assert_max_queries(77):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_17_MEMBER_INCOMPLETE_2,
                                                  OPTION_SIM)

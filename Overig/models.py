@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import AccountEmail
-from Competitie.models import KampioenschapSchutterBoog
+from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
 from Overig.tijdelijke_url import set_tijdelijke_url_saver
 import datetime
@@ -43,7 +43,7 @@ class SiteTijdelijkeUrl(models.Model):
                                 blank=True, null=True)        # optional
 
     hoortbij_kampioenschap = models.ForeignKey(
-                                KampioenschapSchutterBoog,
+                                KampioenschapSporterBoog,
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)        # optioneel
 

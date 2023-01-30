@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -335,7 +335,7 @@ class WedstrijdSessie(models.Model):
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
-        return "%s %s (%s)" % (self.datum, self.tijd_begin, self.max_sporters)
+        return "(pk=%s) %s %s (%s plekken)" % (self.pk, self.datum, self.tijd_begin, self.max_sporters)
 
     class Meta:
         verbose_name = "Wedstrijd sessie"
@@ -352,6 +352,9 @@ class Wedstrijd(models.Model):
     # status van deze wedstrijd: ontwerp --> goedgekeurd --> geannuleerd
     status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS, default='O')
 
+    # ter info op de kalender = niet op in te schrijven, dus geen inschrijf deadline tonen
+    is_ter_info = models.BooleanField(default=False)
+
     # mogelijkheid om een wedstrijd niet op de kalender te tonen
     # use case: 2-daagse wedstrijd wordt geannuleerd en vervangen door twee 1-daagse wedstrijden
     #           als er inschrijvingen aan hangen dan wil je de wedstrijd niet verwijderen
@@ -365,6 +368,12 @@ class Wedstrijd(models.Model):
     inschrijven_tot = models.PositiveSmallIntegerField(default=7)
 
     # waar wordt de wedstrijd gehouden
+    organiserende_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
+
+    # bondsbureau kan wedstrijd verleggen bij gekozen vereniging
+    uitvoerende_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+                                               related_name='uitvoerend',
+                                               blank=True, null=True)
     locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
 
     # begrenzing
@@ -380,15 +389,20 @@ class Wedstrijd(models.Model):
     wa_status = models.CharField(max_length=1, default=WEDSTRIJD_WA_STATUS_B, choices=WEDSTRIJD_WA_STATUS)
 
     # contactgegevens van de organisatie
-    organiserende_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
     contact_naam = models.CharField(max_length=50, default='', blank=True)
     contact_email = models.CharField(max_length=150, default='', blank=True)
     contact_website = models.CharField(max_length=100, default='', blank=True)
     contact_telefoon = models.CharField(max_length=50, default='', blank=True)
 
+    # acceptatie verkoopvoorwaarden wedstrijdkalender
+    verkoopvoorwaarden_status_acceptatie = models.BooleanField(default=False)
+    verkoopvoorwaarden_status_when = models.DateTimeField(auto_now=True)
+    verkoopvoorwaarden_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
+                                                     blank=True)     # mag leeg zijn
+
     # acceptatie voorwaarden WA A-status
     voorwaarden_a_status_acceptatie = models.BooleanField(default=False)
-    voorwaarden_a_status_when = models.DateTimeField()
+    voorwaarden_a_status_when = models.DateTimeField(auto_now=True)
     voorwaarden_a_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
                                                 blank=True)     # mag leeg zijn
 

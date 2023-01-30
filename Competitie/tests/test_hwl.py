@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,7 +16,7 @@ class TestCompetitieHWL(E2EHelpers, TestCase):
 
     """ tests voor de Competitie applicatie, functies voor de HWL """
 
-    test_after = ('BasisTypen', 'Functie', 'Competitie.tests.test_competitie', 'Competitie.tests.test_beheerders')
+    test_after = ('BasisTypen', 'Functie', 'Competitie.tests.test_beheerders')
 
     def setUp(self):
         """ eenmalige setup voor alle tests

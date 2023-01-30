@@ -71,7 +71,7 @@
         <div class="row center">
             <div class="col s12">
                 <h3 class="page-banner">RK selectie</h3>
-                <p>Hieronder tonen we de lijst van vastgestelde sporters voor elk van de {{ aantal_klassen }} wedstrijdklassen<br>van de Rayonkampioenschappen in <b>{{ deelcomp_rk.nhb_rayon }}</b>.</p>
+                <p>Hieronder tonen we de lijst van vastgestelde sporters voor elk van de {{ aantal_klassen }} wedstrijdklassen<br>van de Rayonkampioenschappen in <b>{{ deelkamp.nhb_rayon }}</b>.</p>
             </div>
         </div>
 

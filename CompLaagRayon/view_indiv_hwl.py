@@ -8,8 +8,10 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import LAAG_RK, DeelCompetitie, KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Competitie.models import (DeelCompetitie, DeelKampioenschap, DEEL_RK,
+                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE)
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 
 
@@ -44,20 +46,20 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         rayon = ver.regio.rayon
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie',
-                                           'nhb_rayon')
-                           .get(pk=rk_deelcomp_pk,
-                                nhb_rayon=rayon,
-                                laag=LAAG_RK))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+            deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
+            deelkamp = (DeelKampioenschap
+                        .objects
+                        .select_related('competitie',
+                                        'nhb_rayon')
+                        .get(pk=deelkamp_pk,
+                             nhb_rayon=rayon,
+                             deel=DEEL_RK))
+        except (ValueError, DeelKampioenschap.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        context['deelcomp_rk'] = deelcomp_rk
+        context['deelcomp_rk'] = deelkamp
 
-        comp = deelcomp_rk.competitie
+        comp = deelkamp.competitie
         comp.bepaal_fase()
 
         if comp.fase <= 'G':
@@ -68,13 +70,13 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         mag_wijzigen = ('J' <= comp.fase <= 'K')
 
-        deelnemers = (KampioenschapSchutterBoog
+        deelnemers = (KampioenschapSporterBoog
                       .objects
-                      .select_related('deelcompetitie',
+                      .select_related('kampioenschap',
                                       'indiv_klasse',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
-                      .filter(deelcompetitie=deelcomp_rk,
+                      .filter(kampioenschap=deelkamp,
                               bij_vereniging=ver)
                       .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde

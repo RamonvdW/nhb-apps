@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,10 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog, CompetitieMatch,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1)
+from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieMatch,
+                               INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
-from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -206,8 +206,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                         nhb_regio=self.regio_111,
+        self.deelcomp_regio = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
 
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
@@ -257,7 +256,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
     def _maak_deelnemers(self):
         url = self.url_aanmelden % self.comp_18.pk
-        self.assertEqual(0, RegioCompetitieSchutterBoog.objects.count())
+        self.assertEqual(0, RegioCompetitieSporterBoog.objects.count())
 
         self.e2e_wisselnaarrol_bb()
         self.e2e_wissel_naar_functie(self.functie_hwl2)
@@ -266,7 +265,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
                                                               self.sporterboog_120001.boogtype.pk): 'on',
                                       'wedstrijd_%s' % self.ronde_wedstrijd.pk: 'on'})
         self.assertEqual(resp.status_code, 302)     # 302 = success
-        self.assertEqual(1, RegioCompetitieSchutterBoog.objects.count())
+        self.assertEqual(1, RegioCompetitieSporterBoog.objects.count())
 
         self.e2e_wisselnaarrol_bb()
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -275,10 +274,10 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
                                                               self.sporterboog_100001.boogtype.pk): 'on',
                                       'wedstrijd_%s' % self.ronde_wedstrijd.pk: 'on'})
         self.assertEqual(resp.status_code, 302)     # 302 = success
-        self.assertEqual(2, RegioCompetitieSchutterBoog.objects.count())
+        self.assertEqual(2, RegioCompetitieSporterBoog.objects.count())
 
-        self.deelnemer_100001 = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
-        self.deelnemer_120001 = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_120001)
+        self.deelnemer_100001 = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        self.deelnemer_120001 = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_120001)
 
     def test_anon(self):
         url = self.url_wieschietwaar % self.deelcomp_regio.pk

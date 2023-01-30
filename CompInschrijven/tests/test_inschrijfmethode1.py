@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
-                               INSCHRIJF_METHODE_1, LAAG_REGIO, LAAG_RK, LAAG_BK)
+                               INSCHRIJF_METHODE_1,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -29,6 +30,10 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                      # match_pk
     url_behoefte1 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'    # comp_pk, regio_pk
     url_behoefte1_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
+    url_klassengrenzen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'         # comp.pk
+    url_voorkeuren = '/sporter/voorkeuren/%s/'  # lid_nr
+    url_success = '/vereniging/leden-voorkeuren/'
 
     testdata = None
 
@@ -90,24 +95,22 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
-            deelcomp.functie.accounts.add(self.account_bko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+            deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2).all():
-            deelcomp.functie.accounts.add(self.account_rko)
+        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+            deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101).all():
+        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
         self.deelcomp = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                      laag=LAAG_REGIO,
                                                       nhb_regio=self.regio_101)[0]
 
         self.functie_rcl101_18 = DeelCompetitie.objects.get(competitie=self.comp_18,
-                                                            laag=LAAG_REGIO,
                                                             nhb_regio=self.regio_101).functie
 
         # maak nog een test vereniging, zonder HWL functie
@@ -131,12 +134,11 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # klassengrenzen vaststellen
-        url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
@@ -195,7 +197,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     def _doe_inschrijven(self, comp):
         # maak leden aan voor de tests
-        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/' % comp.pk
+        url_inschrijven = self.url_inschrijven % comp.pk
 
         # wissel naar HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -231,8 +233,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                 sporter.save()
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
-                url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
-                url_success = '/vereniging/leden-voorkeuren/'
+                url_voorkeuren = self.url_voorkeuren % lid_nr
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)
                 self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -264,7 +265,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
 
-                self.assert_is_redirect(resp, url_success)  # redirect = succes
+                self.assert_is_redirect(resp, self.url_success)  # redirect = succes
 
             # for
 
@@ -373,7 +374,6 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
                                                  nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)

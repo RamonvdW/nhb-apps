@@ -273,9 +273,9 @@ class LeeftijdsKlasse(models.Model):
 class TemplateCompetitieIndivKlasse(models.Model):
     """ definitie van een individuele klasse voor de volgende bondscompetities """
 
-    # klassen die verouderd zijn krijgen worden op deze manier eruit gehaald
-    # zonder dat referenties die nog in gebruik zijn kapot gaan
-    buiten_gebruik = models.BooleanField(default=False)
+    # toepasselijkheid
+    gebruik_18m = models.BooleanField(default=True)
+    gebruik_25m = models.BooleanField(default=True)
 
     # beschrijving om te presenteren, bijvoorbeeld Recurve Junioren Klasse 2
     beschrijving = models.CharField(max_length=80)
@@ -336,12 +336,12 @@ class TemplateCompetitieIndivKlasse(models.Model):
 class TemplateCompetitieTeamKlasse(models.Model):
     """ definitie van een team klasse voor de volgende bondscompetities """
 
-    # niet meer gebruiken?
-    buiten_gebruik = models.BooleanField(default=False)
+    # toepasselijkheid
+    gebruik_18m = models.BooleanField(default=True)
+    gebruik_25m = models.BooleanField(default=True)
 
     # voor welk team type is deze wedstrijdklasse?
-    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT,
-                                  null=True)                # nodig voor migratie
+    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT, null=True)
 
     # sorteervolgorde
     # lager nummer = betere schutters
@@ -359,9 +359,7 @@ class TemplateCompetitieTeamKlasse(models.Model):
     blazoen2_25m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
-    blazoen1_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
-    blazoen2_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)       # TODO: kan weg
-
+    blazoen_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
     blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 
     def __str__(self):

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -332,17 +332,19 @@
                 inst._updateTimeFromInput()
                 inst.done()
 
-                const minDate = new Date("{{ datum_eerste|date:'Y-m-d' }}")
-                const maxDate = new Date("{{ datum_laatste|date:'Y-m-d' }}")
-                const competitieJaren = [{{ competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]
+                {% if not opt_weekdagen %}
+                    const minDate = new Date("{{ datum_eerste|date:'Y-m-d' }}")
+                    const maxDate = new Date("{{ datum_laatste|date:'Y-m-d' }}")
+                    const competitieJaren = [{{ competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]
 
-                let el2 = document.querySelector('#datum')
-                let options2 = { defaultDate: new Date("{{ wedstrijd.datum_wanneer|date:'Y-m-d' }}"),
-                                 setDefaultDate: true,
-                                 format: "dddd d mmmm yyyy",
-                                 minDate: minDate, maxDate: maxDate,
-                                 yearRange: competitieJaren }
-                M.Datepicker.init(el2, options2)
+                    let el2 = document.querySelector('#datum')
+                    let options2 = { defaultDate: new Date("{{ wedstrijd.datum_wanneer|date:'Y-m-d' }}"),
+                                     setDefaultDate: true,
+                                     format: "dddd d mmmm yyyy",
+                                     minDate: minDate, maxDate: maxDate,
+                                     yearRange: competitieJaren }
+                    M.Datepicker.init(el2, options2)
+                {% endif %}
 
                 locatie_keuzes_init()
 

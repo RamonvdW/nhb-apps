@@ -10,7 +10,8 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from Bestel.forms import ZoekAccountForm
 from Bestel.models import Bestelling, BESTELLING_STATUS2STR
-from Functie.rol import rol_get_huidige, Rollen
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 
 

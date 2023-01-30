@@ -16,7 +16,8 @@ from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.operations.mutaties import bestel_mutatieverzoek_annuleer
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
-from Functie.rol import Functie, Rollen, rol_get_huidige
+from Functie.models import Functie, Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 

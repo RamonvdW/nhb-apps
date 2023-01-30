@@ -9,8 +9,9 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige_functie
-from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetitieSchutterBoog, CompetitieMatch
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
+from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieMatch
 
 
 TEMPLATE_COMPREGIO_WIESCHIETWAAR = 'complaagregio/wieschietwaar-methode1.dtl'
@@ -55,7 +56,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
 
         context['nhb_ver'] = self.functie_nu.nhb_ver
 
-        objs = (RegioCompetitieSchutterBoog
+        objs = (RegioCompetitieSporterBoog
                 .objects
                 .select_related('sporterboog',
                                 'sporterboog__sporter',

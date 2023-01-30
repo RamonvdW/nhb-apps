@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,10 +14,11 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (GESLACHT_ALLE,
                                ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIES2SHORT_STR)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import (Wedstrijd,
-                                WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
+from Wedstrijden.models import (Wedstrijd, WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS,
+                                WEDSTRIJD_STATUS_TO_STR)
 from datetime import date
 
 TEMPLATE_WEDSTRIJDEN_KIES_TYPE = 'wedstrijden/nieuwe-wedstrijd-kies-type.dtl'
@@ -62,6 +63,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
             wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_aanmeldingen = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})
+            wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
         # for
 
         context['wedstrijden'] = wedstrijden
@@ -158,7 +160,6 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                             datum_einde=begin,
                             organiserende_vereniging=self.functie_nu.nhb_ver,
                             organisatie=keuze2organisatie[keuze],
-                            voorwaarden_a_status_when=now,
                             locatie=locaties[0],
                             contact_naam=account.volledige_naam(),
                             contact_email=self.functie_nu.bevestigde_email,

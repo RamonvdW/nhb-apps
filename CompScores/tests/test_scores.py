@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, module Scores """
 
-    test_after = ('Competitie.tests.test_fase', 'CompLaagRegio.tests.test_planning',)
+    test_after = ('Competitie.tests.test_overzicht', 'CompLaagRegio.tests.test_planning',)
 
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
     url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
@@ -37,13 +37,15 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     url_regio_teams = '/bondscompetities/scores/teams/%s/'                          # deelcomp_pk
 
+    url_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'     # comp_pk
+
     ver_nr = 0      # wordt in setupTestData ingevuld
 
     testdata = None
 
     @classmethod
     def setUpTestData(cls):
-        print('CompScores: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
@@ -61,7 +63,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         cls.testdata.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[101])
         s2 = timezone.now()
         d = s2 - s1
-        print('CompScores: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -69,12 +71,11 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         """
 
         # klassengrenzen vaststellen
-        url_vaststellen = '/bondscompetities/%s/klassengrenzen/vaststellen/'  # comp_pk
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
-        resp = self.client.post(url_vaststellen % self.testdata.comp18.pk)
+        resp = self.client.post(self.url_vaststellen % self.testdata.comp18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
-        resp = self.client.post(url_vaststellen % self.testdata.comp25.pk)
+        resp = self.client.post(self.url_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
-from Competitie.models import CompetitieMatch, KampioenschapSchutterBoog, DeelcompetitieIndivKlasseLimiet, DEELNAME_NEE
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet, DEELNAME_NEE
+from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Wedstrijden.models import WedstrijdLocatie
@@ -19,7 +19,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Formulieren functie """
 
-    test_after = ('Competitie.tests.test_fase', 'CompLaagRayon.tests.test_teams_rko', 'CompLaagRayon.tests.test_teams_rko')
+    test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko', 'CompLaagRayon.tests.test_teams_rko', 'CompLaagRayon.tests.test_teams_rko')
 
     url_forms = '/bondscompetities/rk/download-formulier/%s/'                             # match_pk
     url_forms_download_indiv = '/bondscompetities/rk/download-formulier-indiv/%s/%s/'     # match_pk, klasse_pk
@@ -30,11 +30,11 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
     rayon_nr = 4
     ver_nr = 0
 
-    url_klassengrenzen_teams_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
     @classmethod
     def setUpTestData(cls):
-        print('CompLaagRayon.test_formulieren: populating testdata start')
+        print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
 
         cls.testdata = data = testdata.TestData()
@@ -54,7 +54,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         s2 = timezone.now()
         d = s2 - s1
-        print('CompLaagRayon.test_formulieren: populating testdata took %s seconds' % d.seconds)
+        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -101,10 +101,10 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.match.indiv_klassen.add(*match_klassen)
         self.comp18_klassen_indiv_rk = match_klassen
 
-        self.deelcomp18_rk = self.testdata.deelcomp18_rk[self.rayon_nr]
-        self.deelcomp18_rk.rk_bk_matches.add(self.match.pk)
+        self.deelkamp_18 = self.testdata.deelkamp18_rk[self.rayon_nr]
+        self.deelkamp_18.rk_bk_matches.add(self.match.pk)
 
-        self.deelcomp25_rk = self.testdata.deelcomp25_rk[self.rayon_nr]
+        self.deelkamp_25 = self.testdata.deelkamp25_rk[self.rayon_nr]
 
         bad_path = '/tmp/CompLaagRayon/files/'
         os.makedirs(bad_path, exist_ok=True)
@@ -167,13 +167,13 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk.rk_bk_matches.remove(self.match.pk)
+        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Geen competitie')
+        self.assert404(resp, 'Geen kampioenschap')
 
         # 25m1p plan
-        self.deelcomp25_rk.rk_bk_matches.add(self.match.pk)
+        self.deelkamp_25.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -184,13 +184,13 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.deelcomp25_rk.rk_bk_matches.remove(self.match.pk)
+        self.deelkamp_25.rk_bk_matches.remove(self.match.pk)
 
         # wedstrijd van een niet-RK deelcompetitie
-        self.testdata.deelcomp18_bk.rk_bk_matches.add(self.match.pk)
+        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Geen RK wedstrijd')
+        self.assert404(resp, 'Geen kampioenschap')
 
         # niet bestaande wedstrijd
         with self.assert_max_queries(20):
@@ -202,7 +202,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.match.indiv_klassen.add(klasse)
         url = self.url_forms_download_indiv % (self.match.pk, klasse.pk)
 
-        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=klasse)[0]
+        deelnemer = KampioenschapSporterBoog.objects.filter(indiv_klasse=klasse)[0]
         deelnemer.deelname = DEELNAME_NEE
         deelnemer.save(update_fields=['deelname'])
 
@@ -228,13 +228,13 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert200_file(resp)
 
         # niet bestaand RK programma
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
         self._make_bad_xlsm_file(self.xlsm_fpath_18_indiv)
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
 
@@ -249,24 +249,24 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Klasse niet gevonden')
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk.rk_bk_matches.remove(self.match.pk)
+        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Geen competitie')
+        self.assert404(resp, 'Geen kampioenschap')
 
         # wedstrijd van een niet-RK deelcompetitie
-        self.testdata.deelcomp18_bk.rk_bk_matches.add(self.match.pk)
+        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Geen RK wedstrijd')
+        self.assert404(resp, 'Geen kampioenschap')
 
     def test_download_indiv_25m(self):
         self.e2e_login_and_pass_otp(self.testdata.account_hwl[self.ver_nr])
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
 
         # 25m1p plan
-        self.deelcomp18_rk.rk_bk_matches.clear()
-        self.deelcomp25_rk.rk_bk_matches.add(self.match.pk)
+        self.deelkamp_18.rk_bk_matches.clear()
+        self.deelkamp_25.rk_bk_matches.add(self.match.pk)
 
         klasse_indiv_rk = None
         for klasse in self.testdata.comp25_klassen_indiv['R']:      # pragma: no branch
@@ -276,8 +276,8 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         url = self.url_forms_download_indiv % (self.match.pk, klasse_indiv_rk.pk)
 
-        DeelcompetitieIndivKlasseLimiet(
-                    deelcompetitie=self.deelcomp25_rk,
+        KampioenschapIndivKlasseLimiet(
+                    kampioenschap=self.deelkamp_25,
                     indiv_klasse=klasse_indiv_rk,
                     limiet=20).save()
 
@@ -311,13 +311,13 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert200_file(resp)
 
         # niet bestaand RK programma
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
         self._make_bad_xlsm_file(self.xlsm_fpath_18_teams)
-        with self.settings(INSTALL_PATH='/tmp'):
+        with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
 
@@ -332,22 +332,22 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Klasse niet gevonden')
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk.rk_bk_matches.remove(self.match.pk)
+        self.deelkamp_18.rk_bk_matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Geen competitie')
+        self.assert404(resp, 'Geen kampioenschap')
 
         # wedstrijd van een niet-RK deelcompetitie
-        self.testdata.deelcomp18_bk.rk_bk_matches.add(self.match.pk)
+        self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Geen RK wedstrijd')
-        self.testdata.deelcomp18_bk.rk_bk_matches.clear()
+        self.assert404(resp, 'Geen kampioenschap')
+        self.testdata.deelkamp18_bk.rk_bk_matches.clear()
 
         # 25m
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr, limit_boogtypen=['R', 'BB'])
         self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, per_team=3, limit_teamtypen=['R2'])
-        self.deelcomp25_rk.rk_bk_matches.add(self.match)
+        self.deelkamp_25.rk_bk_matches.add(self.match)
         klasse = self.testdata.comp25_klassen_team['R2'][0]
         self.match.team_klassen.add(klasse)
         url = self.url_forms_download_teams % (self.match.pk, klasse.pk)

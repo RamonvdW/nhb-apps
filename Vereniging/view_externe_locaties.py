@@ -10,7 +10,8 @@ from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import WedstrijdLocatie

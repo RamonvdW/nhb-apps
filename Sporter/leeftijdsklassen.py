@@ -146,7 +146,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
     for ckl in (TemplateCompetitieIndivKlasse
                 .objects
                 .prefetch_related('leeftijdsklassen')
-                .filter(buiten_gebruik=False,
+                .filter(gebruik_18m=True,
                         boogtype__afkorting=BOOGTYPE_AFKORTING_RECURVE)):
         for lkl in ckl.leeftijdsklassen.all():
             pk = lkl.pk

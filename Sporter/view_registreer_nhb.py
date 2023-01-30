@@ -12,7 +12,6 @@ from django.views.generic import TemplateView
 from Account.operations import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
 from Functie.models import Functie
-from Functie.operations import maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import GESLACHT2STR
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje)
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterVoorkeuren, get_sporter_voorkeuren
 from Wedstrijden.models import (Wedstrijd, WedstrijdInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
@@ -356,7 +357,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             except KeyError:
                 pass
             else:
-                if voorkeuren.para_met_rolstoel:
+                if voorkeuren.para_voorwerpen:
                     para_materiaal = 'Ja'
                 para_notitie = voorkeuren.opmerking_para_sporter
 

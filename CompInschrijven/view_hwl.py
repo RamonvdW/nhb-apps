@@ -12,11 +12,12 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                                BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
+                               Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog,
                                CompetitieMatch, get_competitie_indiv_leeftijdsklassen)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter_voorkeuren
@@ -65,13 +66,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         if not ('B' <= comp.fase <= 'E'):
             raise Http404('Verkeerde competitie fase')
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
 
         # bepaal de inschrijfmethode voor deze regio
-        if functie_nu.nhb_ver.regio.is_administratief:
+        if self.functie_nu.nhb_ver.regio.is_administratief:
             # niemand van deze vereniging mag zich inschrijven
             return objs
+
+        hwl_ver = self.functie_nu.nhb_ver
 
         # bepaal de boogtypen die voorkomen in de competitie
         boogtype_dict = get_competitie_bogen(comp)
@@ -87,7 +89,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # sorteer jeugd op geboorte jaar en daarna naam
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(bij_vereniging=hwl_ver)
                     .filter(geboorte_datum__year__gte=jeugdgrens)
                     .order_by('-geboorte_datum__year',
                               'achternaam', 'voornaam')):
@@ -116,7 +118,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # sorteer volwassenen op naam
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(bij_vereniging=hwl_ver)
                     .filter(geboorte_datum__year__lt=jeugdgrens)
                     .order_by('achternaam', 'voornaam')):
             obj.leeftijdsklasse = None
@@ -152,16 +154,16 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         for voorkeuren in (SporterVoorkeuren
                            .objects
                            .select_related('sporter')
-                           .filter(sporter__bij_vereniging=functie_nu.nhb_ver)):
+                           .filter(sporter__bij_vereniging=hwl_ver)):
             wil_competitie[voorkeuren.sporter.lid_nr] = voorkeuren.voorkeur_meedoen_competitie
         # for
 
         is_aangemeld_dict = dict()   # [sporterboog.pk] = True/False
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
                                           'deelcompetitie')
-                          .filter(bij_vereniging=functie_nu.nhb_ver,
+                          .filter(bij_vereniging=hwl_ver,
                                   deelcompetitie__competitie=comp)):
             is_aangemeld_dict[deelnemer.sporterboog.pk] = True
         # for
@@ -473,7 +475,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     raise PermissionDenied('Geen lid bij jouw vereniging')
 
                 # voorkom dubbele aanmelding
-                if (RegioCompetitieSchutterBoog
+                if (RegioCompetitieSporterBoog
                         .objects
                         .filter(deelcompetitie=deelcomp,
                                 sporterboog=sporterboog)
@@ -491,7 +493,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
                 dvl = sporterboog.sporter.sinds_datum
 
-                aanmelding = RegioCompetitieSchutterBoog(
+                aanmelding = RegioCompetitieSporterBoog(
                                     deelcompetitie=deelcomp,
                                     sporterboog=sporterboog,
                                     bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -601,10 +603,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
+                                      'sporterboog__boogtype',
                                       'bij_vereniging',
                                       'indiv_klasse')
                       .filter(deelcompetitie=deelcomp,
@@ -633,9 +636,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             deelnemer.team_ja_nee = JA_NEE[deelnemer.inschrijf_voorkeur_team]
             deelnemer.dagdeel_str = dagdeel_str[deelnemer.inschrijf_voorkeur_dagdeel]
             deelnemer.check = "pk_%s" % deelnemer.pk
+
+            deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
+
             sporter = deelnemer.sporterboog.sporter
-            deelnemer.lid_nr = sporter.lid_nr
-            deelnemer.naam_str = sporter.volledige_naam()
+            deelnemer.lid_nr_en_volledige_naam = sporter.lid_nr_en_volledige_naam()
 
             if deelnemer.inschrijf_voorkeur_team:
                 if mag_toggle:
@@ -689,12 +694,12 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         if deelnemer_pk:
             try:
                 deelnemer_pk = int(deelnemer_pk[:6])        # afkappen voor de veiligheid
-                deelnemer = (RegioCompetitieSchutterBoog
+                deelnemer = (RegioCompetitieSporterBoog
                              .objects
                              .select_related('bij_vereniging',
                                              'deelcompetitie')
                              .get(pk=deelnemer_pk))
-            except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+            except (ValueError, RegioCompetitieSporterBoog.DoesNotExist):
                 raise Http404('Deelnemer niet gevonden')
 
             ver = deelnemer.bij_vereniging
@@ -713,8 +718,8 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             if key[0:0+3] == 'pk_':
                 pk = key[3:3+7]   # afkappen geeft bescherming
                 try:
-                    inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=pk)
-                except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
+                    inschrijving = RegioCompetitieSporterBoog.objects.get(pk=pk)
+                except (ValueError, TypeError, RegioCompetitieSporterBoog.DoesNotExist):
                     # niet normaal
                     raise Http404('Geen valide inschrijving')
 

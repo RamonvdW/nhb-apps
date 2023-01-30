@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -240,9 +240,9 @@ class SporterVoorkeuren(models.Model):
     # open notitie aan de wedstrijdleiding
     opmerking_para_sporter = models.CharField(max_length=256, default='', blank=True)
 
-    # notificatie aan de wedstrijdleiding: sporter gebruikt een rolstoel
+    # notificatie aan de wedstrijdleiding: sporter gebruikt voorwerpen die op de schietlijn blijven staan
     # (hierdoor kunnen er minder sporters op zijn baan)
-    para_met_rolstoel = models.BooleanField(default=False)      # TODO: para_voorwerpen (die blijven staan op de schietlijn)
+    para_voorwerpen = models.BooleanField(default=False)
 
     # (opt-out) voorkeur voor wedstrijden van specifieke disciplines
     voorkeur_discipline_25m1pijl = models.BooleanField(default=True)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -142,6 +142,8 @@ class E2EHelpers(TestCase):
     def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         resp = self.e2e_login_no_check(account, wachtwoord)
+        if resp.status_code != 302:
+            self.e2e_dump_resp(resp)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
@@ -166,22 +168,33 @@ class E2EHelpers(TestCase):
     def e2e_wisselnaarrol_gebruiker(self):
         self._wissel_naar_rol('geen', '/functie/wissel-van-rol/')
 
+    WISSEL_VAN_ROL_EXPECTED_URL = {
+        'SEC': '/vereniging/',
+        'HWL': '/vereniging/',
+        'WL' : '/vereniging/',
+        'BKO': '/bondscompetities/##',
+        'RKO': '/bondscompetities/##',
+        'RCL': '/bondscompetities/##',
+        'MO' : '/opleidingen/manager/',
+        'SUP': '/feedback/inzicht/',
+        'MWW': '/webwinkel/manager/',
+        'MWZ': '/functie/wissel-van-rol/',      # '/kalender/'
+    }
+
     def e2e_wissel_naar_functie(self, functie):
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
 
-        if functie.rol in ('SEC', 'HWL', 'WL'):
-            self.assert_is_redirect(resp, '/vereniging/')
-        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):    # pragma: no branch
-            # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
-            self.assert_is_redirect(resp, '/bondscompetities/##')
-        elif functie.rol == "MO":
-            self.assert_is_redirect(resp, '/opleidingen/manager/')
-        elif functie.rol == "SUP":
-            self.assert_is_redirect(resp, '/feedback/inzicht/')
-        elif functie.rol == "MWW":
-            self.assert_is_redirect(resp, '/webwinkel/manager/')
-        else:
-            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')                               # pragma: no cover
+        try:
+            expected_url = self.WISSEL_VAN_ROL_EXPECTED_URL[functie.rol]
+        except KeyError:
+            expected_url = 'functie ontbreekt'
+
+        # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
+        if functie.rol in ('BKO', 'RKO', 'RCL'):
+            if resp.status_code == 302 and not resp.url.startswith('/bondscompetities/'):
+                expected_url = '/functie/wissel-van-rol/'
+
+        self.assert_is_redirect(resp, expected_url)
 
     def e2e_check_rol(self, rol_verwacht):
         resp = self.client.get('/functie/wissel-van-rol/')
@@ -201,7 +214,7 @@ class E2EHelpers(TestCase):
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
     def e2e_dump_resp(self, resp):                        # pragma: no cover
-        print("status code:", resp.status_code)
+        print("\ne2e_dump_resp:\nstatus code:", resp.status_code)
         print(repr(resp))
         is_attachment = False
         if resp.status_code == 302:
@@ -228,8 +241,21 @@ class E2EHelpers(TestCase):
             if len(content) < 50:
                 print("very short content:", content)
             else:
-                soup = BeautifulSoup(content, features="html.parser")
-                print(soup.prettify())
+                is_404 = resp.status_code == 404
+                if not is_404:
+                    is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
+                    if is_404:
+                        pos = content.find('<meta path="')
+                        if pos < 0:
+                            # geen page-not-found maar fout-in-pagina
+                            is_404 = False
+                        else:
+                            sub = content[pos+12:pos+300]
+                            pos = sub.find('"')
+                            print('404 pagina niet gevonden: %s' % sub[:pos])
+                if not is_404:
+                    soup = BeautifulSoup(content, features="html.parser")
+                    print(soup.prettify())
 
     def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)
@@ -250,9 +276,10 @@ class E2EHelpers(TestCase):
         if skip_broodkruimels:                                                  # pragma: no branch
             pos = content.find('class="broodkruimels-')
             if pos >= 0:
-                content = content[pos:]
-                pos = content.find('</div>')
-                content = content[pos:]
+                remainder = content[pos:]
+                content = content[:pos]             # behoud de navbar
+                pos = remainder.find('</div>')
+                content += remainder[pos+6:]
 
         urls = list()
         while len(content):
@@ -439,44 +466,43 @@ class E2EHelpers(TestCase):
 
             # credits to html5validator
             vnu_jar_location = vnujar.__file__.replace('__init__.pyc', 'vnu.jar').replace('__init__.py', 'vnu.jar')
-            proc = subprocess.Popen(["java", "-jar", vnu_jar_location, tmp.name],
-                                    stderr=subprocess.PIPE)
-            proc.wait(timeout=5)
-            # returncode is 0 als er geen problemen gevonden zijn
-            if proc.returncode:
-                lines = html.splitlines()
+            with subprocess.Popen(["java", "-jar", vnu_jar_location, tmp.name], stderr=subprocess.PIPE) as proc:
+                proc.wait(timeout=5)
+                # returncode is 0 als er geen problemen gevonden zijn
+                if proc.returncode:
+                    lines = html.splitlines()
 
-                # feedback staat in stderr
-                msg = proc.stderr.read().decode('utf-8')
+                    # feedback staat in stderr
+                    msg = proc.stderr.read().decode('utf-8')
 
-                # remove tmp filename from error message
-                msg = msg.replace('"file:%s":' % tmp.name, '')
-                for issue in msg.splitlines():
-                    # extract location information (line.pos)
-                    spl = issue.split(': ')     # 1.2091-1.2094
-                    locs = spl[0].split('-')
-                    l1, p1 = locs[0].split('.')
-                    l2, p2 = locs[1].split('.')
-                    if l1 == l2:
-                        l1 = int(l1)
-                        p1 = int(p1)
-                        p2 = int(p2)
-                        p1 -= 20
-                        if p1 < 1:
-                            p1 = 1
-                        p2 += 20
-                        line = lines[l1-1]
-                        context = line[p1-1:p2]
-                    else:
-                        # TODO
-                        context = ''
-                        pass
-                    clean = ": ".join(spl[1:])
-                    if clean not in issues:
-                        if clean not in self._VALIDATE_IGNORE:
-                            clean += " ==> %s" % context
-                            issues.append(clean)
-                # for
+                    # remove tmp filename from error message
+                    msg = msg.replace('"file:%s":' % tmp.name, '')
+                    for issue in msg.splitlines():
+                        # extract location information (line.pos)
+                        spl = issue.split(': ')     # 1.2091-1.2094
+                        locs = spl[0].split('-')
+                        l1, p1 = locs[0].split('.')
+                        l2, p2 = locs[1].split('.')
+                        if l1 == l2:
+                            l1 = int(l1)
+                            p1 = int(p1)
+                            p2 = int(p2)
+                            p1 -= 20
+                            if p1 < 1:
+                                p1 = 1
+                            p2 += 20
+                            line = lines[l1-1]
+                            context = line[p1-1:p2]
+                        else:
+                            # TODO
+                            context = ''
+                            pass
+                        clean = ": ".join(spl[1:])
+                        if clean not in issues:
+                            if clean not in self._VALIDATE_IGNORE:
+                                clean += " ==> %s" % context
+                                issues.append(clean)
+                    # for
 
         # tmp file is deleted here
         return issues
@@ -529,6 +555,29 @@ class E2EHelpers(TestCase):
             pos = text.find("class=")
         # while
 
+    def _assert_inputs(self, html, dtl):
+        pos = html.find('<input ')
+        while pos > 0:
+            inp = html[pos+7:]
+            pos = html.find('<input ', pos+7)
+
+            # find the end of the tag
+            # dit is erg robust, maar werkt goed genoeg
+            endpos = inp.find('>')
+            inp = inp[:endpos].strip()
+            spl = inp.split(' ')
+            # print('inp: %s' % repr(spl))
+            for part in spl:
+                if '=' in part:
+                    part_spl = part.split('=')
+                    tag = part_spl[0]
+                    # print('part_spl: %s' % repr(part_spl))
+                    if tag not in ('value', 'autofocus') and part_spl[1] in ('""', "''"):
+                        msg = 'Found input tag %s with empty value: %s' % (repr(tag), repr(inp))
+                        self.fail(msg)
+            # for
+        # while
+
     def _assert_html_basics(self, html, dtl):
         self.assertIn("<!DOCTYPE html>", html, msg='Missing DOCTYPE at start of %s' % dtl)
         self.assertIn("<html", html, msg='Missing <html in %s' % dtl)
@@ -541,6 +590,16 @@ class E2EHelpers(TestCase):
         self.assertNotIn('<th/>', html, msg='Illegal <th/> must be replaced with <th></th> in %s' % dtl)
         self.assertNotIn('<td/>', html, msg='Illegal <td/> must be replaced with <td></td> in %s' % dtl)
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
+
+    def _assert_template_bug(self, html, dtl):
+        pos = html.find('##BUG')
+        if pos >= 0:
+            msg = html[pos:]
+            context = html[pos-30:]
+            pos = msg.find('##', 3)
+            msg = msg[:pos+2]
+            context = context[:pos+30]
+            self.fail(msg='Bug in template %s: %s\nContext: %s' % (repr(dtl), msg, context))
 
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
@@ -561,6 +620,9 @@ class E2EHelpers(TestCase):
         self.assert_scripts_clean(html, dtl)
         self._assert_no_div_in_p(html, dtl)
         self._assert_no_col_white(html, dtl)
+        self._assert_inputs(html, dtl)
+
+        self._assert_template_bug(html, dtl)
 
         urls = self.extract_all_urls(response)
         for url in urls:
@@ -697,7 +759,7 @@ class E2EHelpers(TestCase):
         if pos > 0:
             self.assertTrue(resp.url.startswith(expected_url[:pos]))
         else:
-            self.assertEqual(resp.url, expected_url)
+            self.assertEqual(expected_url, resp.url)
 
     def assert_is_redirect_not_plein(self, resp):
         if resp.status_code != 302:                     # pragma: no cover

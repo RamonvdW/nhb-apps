@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.menu import get_url_voor_competitie
-from Functie.rol import (Rollen, rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
+from Functie.models import Rollen, Functie
+from Functie.rol import (rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
 from Overig.helpers import get_safe_from_ip
 from Taken.operations import eval_open_taken
@@ -41,14 +43,42 @@ class ActiveerRolView(UserPassesTestMixin, View):
                                 from_ip,
                                 self.request.user.username,
                                 repr(kwargs['rol'])))
+
             rol_activeer_rol(request, kwargs['rol'])
-        else:
+
+        elif 'functie_pk' in kwargs:
             # activeer functie
-            my_logger.info('%s ROL account %s wissel naar functie %s' % (
+            functie_pk = kwargs['functie_pk'][:6]       # afkappen voor de veiligheid
+            try:
+                functie_pk = int(functie_pk)
+                functie = Functie.objects.get(pk=functie_pk)
+            except (ValueError, TypeError, Functie.DoesNotExist):
+                raise Http404('Foute parameter (functie)')
+
+            my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
                             from_ip,
                             self.request.user.username,
-                            repr(kwargs['functie_pk'])))
-            rol_activeer_functie(request, kwargs['functie_pk'])
+                            functie.pk,
+                            functie))
+
+            rol_activeer_functie(request, functie)
+
+        else:
+            ver_nr = request.POST.get('ver_nr', '')[:4]     # afkappen voor de veiligheid
+            try:
+                ver_nr = int(ver_nr)
+                functie = Functie.objects.get(rol='HWL',
+                                              nhb_ver__ver_nr=ver_nr)
+            except (ValueError, TypeError, Functie.DoesNotExist):
+                raise Http404('Foute parameter (vereniging)')
+
+            my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
+                            from_ip,
+                            self.request.user.username,
+                            functie.pk,
+                            functie))
+
+            rol_activeer_functie(request, functie)
 
         rol_beschrijving = rol_get_beschrijving(request)
         my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
@@ -79,6 +109,8 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         if rol_nu == Rollen.ROL_MWW:
             return redirect('Webwinkel:manager')
+
+        # TODO: add MWZ
 
         return redirect('Functie:wissel-van-rol')
 

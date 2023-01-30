@@ -62,7 +62,8 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
             # create a few placeholder fotos
             for fname in (foto2.locatie, foto2.locatie_thumb):
                 fpath = os.path.join(self.foto_dir, fname)
-                open(fpath, "wb").write(b'hello')
+                with open(fpath, "wb") as fhandle:
+                    fhandle.write(b'hello')
             # for
 
         product = WebwinkelProduct(
@@ -93,6 +94,9 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
 
         ongebruikte_foto = WebwinkelFoto(volgorde=66)
         ongebruikte_foto.save()
+
+    def tearDown(self):
+        self.tmp_dir.cleanup()
 
     def test_check_fotos(self):
         # 1 product heeft een omslagfoto met lege locatie en locatie_thumb

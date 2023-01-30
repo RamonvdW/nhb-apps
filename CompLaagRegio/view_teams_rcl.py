@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,13 +11,13 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, AG_NUL,
-                               TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
-                               Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (AG_NUL, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
+                               Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync
@@ -122,14 +122,13 @@ class RegioTeamsTemplateView(TemplateView):
                 deelcomp = (DeelCompetitie
                             .objects
                             .select_related('competitie')
-                            .get(pk=deelcomp_pk,
-                                 laag=LAAG_REGIO))
+                            .get(pk=deelcomp_pk))
             except (ValueError, DeelCompetitie.DoesNotExist):
                 raise Http404('Competitie niet gevonden')
 
             if deelcomp.functie != self.functie_nu:
                 # niet de beheerder
-                raise PermissionDenied()
+                raise PermissionDenied('Niet de beheerder')
 
             context['url_download'] = reverse('CompLaagRegio:regio-teams-als-bestand',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
@@ -320,8 +319,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -359,7 +357,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
                                               'deelcompetitie')
                               .filter(deelcompetitie=deelcomp,
                                       team_klasse=None)
-                              .prefetch_related('gekoppelde_schutters')
+                              .prefetch_related('leden')
                               .order_by('team_type__volgorde',
                                         '-aanvangsgemiddelde',
                                         'vereniging__ver_nr'))
@@ -372,8 +370,8 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             ag_str = ag_str.replace('.', ',')
 
             ver = team.vereniging
-            aantal_sporters = team.gekoppelde_schutters.count()
-            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter').all()])
+            aantal_sporters = team.leden.count()
+            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.leden.select_related('sporterboog__sporter').all()])
 
             tup = (ver.ver_nr, ver.naam,
                    team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
@@ -400,9 +398,9 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             ag_str = ag_str.replace('.', ',')
 
             ver = team.vereniging
-            aantal_sporters = team.gekoppelde_schutters.count()
+            aantal_sporters = team.leden.count()
             klasse_str = team.team_klasse.beschrijving
-            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter').all()])
+            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.leden.select_related('sporterboog__sporter').all()])
 
             tup = (ver.ver_nr, ver.naam,
                    team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
@@ -443,7 +441,6 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp_pk,
-                             laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -462,7 +459,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         context['geen_ag'] = geen_ag_lijst = list()
 
         # zoek de schuttersboog met handmatig_ag voor de teamcompetitie
-        for obj in (RegioCompetitieSchutterBoog
+        for obj in (RegioCompetitieSporterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
                             inschrijf_voorkeur_team=True,
@@ -716,13 +713,13 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                                           'vereniging__regio',
                                           'team_type')
                           .filter(deelcompetitie=deelcomp)
-                          .prefetch_related('gekoppelde_schutters')
+                          .prefetch_related('leden')
                           .order_by('team_type__volgorde',
                                     '-aanvangsgemiddelde',
                                     'vereniging__ver_nr'))
 
             for team in regioteams:
-                team.aantal_sporters = team.gekoppelde_schutters.count()
+                team.aantal_sporters = team.leden.count()
 
                 if not team.team_klasse:
                     probleem_met_teams = True

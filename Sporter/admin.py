@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -50,7 +50,7 @@ class SporterAdmin(admin.ModelAdmin):
     search_fields = ('unaccented_naam', 'lid_nr')
 
     # filter mogelijkheid
-    list_filter = ('geslacht', 'is_actief_lid', 'is_erelid', HeeftWaIdListFilter, HeeftAccountFilter, 'para_classificatie')
+    list_filter = ('geslacht', 'is_actief_lid', 'is_erelid', HeeftWaIdListFilter, HeeftAccountFilter, 'para_classificatie', 'bij_vereniging')
 
     list_select_related = True
 
@@ -92,7 +92,7 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
                         'wedstrijd_geslacht'),
              }),
         ('Para',
-            {'fields': ('para_met_rolstoel',
+            {'fields': ('para_voorwerpen',
                         'opmerking_para_sporter',)
              }),
         ('Overig',

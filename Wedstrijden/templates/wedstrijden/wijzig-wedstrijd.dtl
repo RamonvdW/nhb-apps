@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -159,8 +159,27 @@
                                     {% if url_next_tekst %}
                                         <button form="form_next" class="btn-nhb-rood vertrek_knop">{{ url_next_tekst }}</button>
                                     {% endif %}
+                                    {% if not wed.verkoopvoorwaarden_status_acceptatie %}
+                                        <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
+                                    {% endif %}
                                 </td>
                             </tr>
+
+                            {% if toon_ter_info %}
+                                <tr>
+                                    <th>Ter info op de kalender zetten?</th>
+                                    <td>
+                                        <ul id="id_ter_info">
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" class="filled-in" name="ter_info" onchange="gewijzigd()"{% if wed.is_ter_info %} checked{% endif %}>
+                                                    <span class="black-text">&nbsp;Ja, geen inschrijvingen toestaan</span>
+                                                </label>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
 
                             <tr>
                                 <th>Bijzonder<wbr>heden</th>
@@ -214,12 +233,12 @@
                                         {% endif %}
 
                                         {% if wed.voorwaarden_a_status_acceptatie %}
-                                            <p>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</p>
-                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
+                                            <span>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</span><br>
+                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
                                                 <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
                                         {% else %}
-                                            <p>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</p>
-                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
+                                            <span>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</span><br>
+                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
                                                 <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
                                             {% if not limit_edits %}
                                                 <ul id="id_teams">
@@ -242,6 +261,15 @@
                                     {% if block_edits %}
                                         <span>{{ wed.locatie }}</span>
                                     {% else %}
+                                        {% if toon_uitvoerende %}
+                                            <select name="uitvoerend" onchange="gewijzigd()">
+                                                {% for opt in opt_uitvoerende_vers %}
+                                                    <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <br>
+                                        {% endif %}
+
                                         <ul id="id_locatie">
                                             {% for opt in opt_locatie %}
                                                <li>
@@ -393,6 +421,30 @@
                                 <td>
                                     <span style="font-size:16px">&euro;&nbsp;</span>
                                     <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Acceptatie voorwaarden gebruik MijnHandboogsport</th>
+                                <td>
+                                    {% if wed.verkoopvoorwaarden_status_acceptatie %}
+                                        <span>Akkoord voor de Verkoopvoorwaarden Wedstrijden is gegeven<br>op {{ wed.verkoopvoorwaarden_status_when }} door {{ wed.verkoopvoorwaarden_status_who }}</span><br>
+                                        <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                            <i class="material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
+                                    {% else %}
+                                        <span>Voor verkopen via MijnHandboogsport zijn de Verkoopvoorwaarden Wedstrijden van toepassing.<br>Lees het document en geef akkoord met de knop.</span><br>
+                                        <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                            <i class="material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
+
+                                        <ul id="id_verkoop">
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" class="filled-in" name="akkoord_verkoop" onchange="gewijzigd()">
+                                                    <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
+                                                </label>
+                                            </li>
+                                        </ul>
+                                    {% endif %}
                                 </td>
                             </tr>
 

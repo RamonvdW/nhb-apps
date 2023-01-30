@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,6 +63,10 @@ urlpatterns = [
     path('activeer-functie/<str:functie_pk>/',
          view_activeer_rol.ActiveerRolView.as_view(),
          name='activeer-functie'),
+
+    path('activeer-functie-hwl/',
+         view_activeer_rol.ActiveerRolView.as_view(),
+         name='activeer-functie-hwl'),
 
     path('activeer-rol/<str:rol>/',
          view_activeer_rol.ActiveerRolView.as_view(),

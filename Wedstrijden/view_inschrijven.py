@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_IFAA, KalenderWedstrijdklasse
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
@@ -77,9 +78,11 @@ class WedstrijdDetailsView(TemplateView):
             wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
         if wedstrijd.locatie:
-            zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + wedstrijd.locatie.adres
-            zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
-            context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
+            toon_kaart = wedstrijd.locatie.plaats != '(diverse)' and wedstrijd.locatie.adres != '(diverse)'
+            if toon_kaart:
+                zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + wedstrijd.locatie.adres
+                zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
+                context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
         context['sessies'] = sessies = (WedstrijdSessie
@@ -112,7 +115,10 @@ class WedstrijdDetailsView(TemplateView):
         # inschrijven moet voor de sluitingsdatum
         context['kan_inschrijven'] = now_date < wedstrijd.inschrijven_voor
 
-        context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or wedstrijd.extern_beheerd
+        if wedstrijd.is_ter_info:
+            context['toon_inschrijven'] = False
+        else:
+            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or wedstrijd.extern_beheerd
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -332,6 +338,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
         context['sportersboog'] = list(SporterBoog
                                        .objects
                                        .filter(sporter__lid_nr=lid_nr,
+                                               sporter__is_actief_lid=True,              # moet actief lid zijn
                                                voor_wedstrijd=True,
                                                boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
                                        .select_related('sporter',
@@ -342,6 +349,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
         geselecteerd = None
         for sporterboog in context['sportersboog']:
             sporterboog.is_geselecteerd = False
+
+            sporterboog.block_ver = sporterboog.sporter.bij_vereniging.geen_wedstrijden
 
             sporterboog.url_selecteer = reverse('Wedstrijden:inschrijven-sporter-boog',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk,
@@ -363,27 +372,29 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
             geselecteerd.is_geselecteerd = True
             geselecteerd.url_selecteer = None
 
-            voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
-            tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
-            context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
-
-            ingeschreven_op_sessie = None
             kan_aanmelden = False
-            for sessie in context['sessies']:
-                if sessie.kan_aanmelden:
-                    kan_aanmelden = True
-                if sessie.al_ingeschreven:
-                    ingeschreven_op_sessie = sessie
-            # for
-            context['ingeschreven_op_sessie'] = ingeschreven_op_sessie
-            context['kan_aanmelden'] = kan_aanmelden
+            if not geselecteerd.block_ver:
+                voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
+                tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
+                context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
 
-            # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
-            # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
-            if geslacht == '?':
-                context['uitleg_geslacht'] = True
-                if kan_aanmelden:
-                    context['uitleg_geslacht'] = False
+                ingeschreven_op_sessie = None
+                for sessie in context['sessies']:
+                    if sessie.kan_aanmelden:
+                        kan_aanmelden = True
+                    if sessie.al_ingeschreven:
+                        ingeschreven_op_sessie = sessie
+                # for
+                context['ingeschreven_op_sessie'] = ingeschreven_op_sessie
+
+                # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
+                # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
+                if geslacht == '?':
+                    context['uitleg_geslacht'] = True
+                    if kan_aanmelden:
+                        context['uitleg_geslacht'] = False
+
+            context['kan_aanmelden'] = kan_aanmelden
 
             context['prijs_euro_sporter'] = wedstrijd.bepaal_prijs_voor_sporter(geselecteerd.sporter)
 
@@ -481,6 +492,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             context['sportersboog'] = list(SporterBoog
                                            .objects
                                            .filter(sporter__lid_nr=zoek_lid_nr,
+                                                   sporter__is_actief_lid=True,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
                                            .select_related('sporter',
@@ -496,6 +508,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             context['sportersboog'] = list(SporterBoog
                                            .objects
                                            .filter(sporter__lid_nr=lid_nr,
+                                                   sporter__is_actief_lid=True,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
                                            .select_related('sporter',
@@ -509,6 +522,8 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         geselecteerd = None
         for sporterboog in context['sportersboog']:
             sporterboog.is_geselecteerd = False
+
+            sporterboog.block_ver = sporterboog.sporter.bij_vereniging.geen_wedstrijden
 
             sporterboog.url_selecteer = reverse('Wedstrijden:inschrijven-groepje-lid-boog',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk,
@@ -532,47 +547,49 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             geselecteerd.is_geselecteerd = True
             geselecteerd.url_selecteer = None
 
-            voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
-            tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
-            context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
-
-            # kijk of deze sporter al ingeschreven is
-            sessie_pk2inschrijving = dict()
-            for inschrijving in (WedstrijdInschrijving
-                                 .objects
-                                 .filter(wedstrijd=wedstrijd,
-                                         sporterboog__sporter=geselecteerd.sporter)
-                                 .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
-                                 .select_related('sessie',
-                                                 'sporterboog',
-                                                 'sporterboog__sporter')):
-                sessie_pk2inschrijving[inschrijving.sessie.pk] = inschrijving
-            # for
-
             kan_aanmelden = False
-            al_ingeschreven = False
-            for sessie in context['sessies']:
-                try:
-                    inschrijving = sessie_pk2inschrijving[sessie.pk]
-                except KeyError:
-                    # sporter is nog niet ingeschreven
-                    if sessie.kan_aanmelden:
-                        kan_aanmelden = True
-                else:
-                    # sporter is ingeschreven
-                    al_ingeschreven = True
-                    context['inschrijving'] = inschrijving
-                    inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
-            # for
-            context['kan_aanmelden'] = kan_aanmelden
-            context['al_ingeschreven'] = al_ingeschreven
+            if not geselecteerd.block_ver:
+                voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
+                tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
+                context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
 
-            # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
-            # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
-            if geslacht == '?':
-                context['uitleg_geslacht'] = True
-                if kan_aanmelden:
-                    context['uitleg_geslacht'] = False
+                # kijk of deze sporter al ingeschreven is
+                sessie_pk2inschrijving = dict()
+                for inschrijving in (WedstrijdInschrijving
+                                     .objects
+                                     .filter(wedstrijd=wedstrijd,
+                                             sporterboog__sporter=geselecteerd.sporter)
+                                     .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                                     .select_related('sessie',
+                                                     'sporterboog',
+                                                     'sporterboog__sporter')):
+                    sessie_pk2inschrijving[inschrijving.sessie.pk] = inschrijving
+                # for
+
+                al_ingeschreven = False
+                for sessie in context['sessies']:
+                    try:
+                        inschrijving = sessie_pk2inschrijving[sessie.pk]
+                    except KeyError:
+                        # sporter is nog niet ingeschreven
+                        if sessie.kan_aanmelden:
+                            kan_aanmelden = True
+                    else:
+                        # sporter is ingeschreven
+                        al_ingeschreven = True
+                        context['inschrijving'] = inschrijving
+                        inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                # for
+                context['al_ingeschreven'] = al_ingeschreven
+
+                # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
+                # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
+                if geslacht == '?':
+                    context['uitleg_geslacht'] = True
+                    if kan_aanmelden:
+                        context['uitleg_geslacht'] = False
+
+            context['kan_aanmelden'] = kan_aanmelden
 
             context['prijs_euro_sporter'] = wedstrijd.bepaal_prijs_voor_sporter(geselecteerd.sporter)
 
@@ -667,6 +684,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
         context['familie'] = list(SporterBoog
                                   .objects
                                   .filter(sporter__adres_code=adres_code,
+                                          sporter__is_actief_lid=True,
                                           voor_wedstrijd=True,
                                           boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
                                   .select_related('sporter',
@@ -680,6 +698,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
         geselecteerd = None
         for sporterboog in context['familie']:
             sporterboog.is_geselecteerd = False
+
+            sporterboog.block_ver = sporterboog.sporter.bij_vereniging.geen_wedstrijden
 
             sporterboog.url_selecteer = reverse('Wedstrijden:inschrijven-familie-lid-boog',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk,
@@ -704,49 +724,52 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             geselecteerd.is_geselecteerd = True
             geselecteerd.url_selecteer = None
 
-            voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
-            tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
-            context['sessies'], _, context['leeftijdsklassen'], geslacht = tups
+            if not geselecteerd.block_ver:
+                voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
+                tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
+                context['sessies'], _, context['leeftijdsklassen'], geslacht = tups
 
-            # kijk of deze sporter al ingeschreven is, want maximaal aanmelden met 1 boog
-            sessie_pk2inschrijving = dict()
-            for inschrijving in (WedstrijdInschrijving
-                                 .objects
-                                 .filter(wedstrijd=wedstrijd,
-                                         sporterboog__sporter=geselecteerd.sporter)
-                                 .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
-                                 .select_related('sessie',
-                                                 'sporterboog',
-                                                 'sporterboog__sporter')):
-                sessie_pk2inschrijving[inschrijving.sessie.pk] = inschrijving
-            # for
+                # kijk of deze sporter al ingeschreven is, want maximaal aanmelden met 1 boog
+                sessie_pk2inschrijving = dict()
+                for inschrijving in (WedstrijdInschrijving
+                                     .objects
+                                     .filter(wedstrijd=wedstrijd,
+                                             sporterboog__sporter=geselecteerd.sporter)
+                                     .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                                     .select_related('sessie',
+                                                     'sporterboog',
+                                                     'sporterboog__sporter')):
+                    sessie_pk2inschrijving[inschrijving.sessie.pk] = inschrijving
+                # for
 
-            kan_aanmelden = False
-            al_ingeschreven = False
-            for sessie in context['sessies']:
-                try:
-                    inschrijving = sessie_pk2inschrijving[sessie.pk]
-                except KeyError:
-                    # sporter is nog niet ingeschreven
-                    if sessie.kan_aanmelden:
-                        kan_aanmelden = True
-                else:
-                    # sporter is ingeschreven
-                    al_ingeschreven = True
-                    context['inschrijving'] = inschrijving
-                    inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
-            # for
-            context['al_ingeschreven'] = al_ingeschreven
+                kan_aanmelden = False
+                al_ingeschreven = False
+                for sessie in context['sessies']:
+                    try:
+                        inschrijving = sessie_pk2inschrijving[sessie.pk]
+                    except KeyError:
+                        # sporter is nog niet ingeschreven
+                        if sessie.kan_aanmelden:
+                            kan_aanmelden = True
+                    else:
+                        # sporter is ingeschreven
+                        al_ingeschreven = True
+                        context['inschrijving'] = inschrijving
+                        inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+                # for
+                context['al_ingeschreven'] = al_ingeschreven
 
-            # toon ook de sessie als de sporter geen compatibele boog heeft
-            context['kan_aanmelden'] = not al_ingeschreven  # kan_aanmelden
+                # toon ook de sessie als de sporter geen compatibele boog heeft
+                context['kan_aanmelden'] = not al_ingeschreven  # kan_aanmelden
 
-            # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
-            # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
-            if geslacht == '?':
-                context['uitleg_geslacht'] = True
-                if kan_aanmelden:
-                    context['uitleg_geslacht'] = False
+                # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
+                # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
+                if geslacht == '?':
+                    context['uitleg_geslacht'] = True
+                    if kan_aanmelden:
+                        context['uitleg_geslacht'] = False
+            else:
+                context['kan_aanmelden'] = False
 
             context['prijs_euro_sporter'] = wedstrijd.bepaal_prijs_voor_sporter(geselecteerd.sporter)
         else:
@@ -819,16 +842,20 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         try:
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-            sessie = WedstrijdSessie.objects.get(pk=sessie_pk)              # TODO: moet uit wedstrijd komen!
-            klasse = KalenderWedstrijdklasse.objects.get(pk=klasse_pk)      # TODO: moet uit wedstrijd komen!
+            sessie = wedstrijd.sessies.get(pk=sessie_pk)
+            klasse = sessie.wedstrijdklassen.get(pk=klasse_pk)
             sporterboog = (SporterBoog
                            .objects
-                           .select_related('sporter')
+                           .select_related('sporter',
+                                           'sporter__bij_vereniging')
                            .get(pk=sporterboog_pk))
         except ObjectDoesNotExist:
             raise Http404('Onderdeel van verzoek niet gevonden')
 
         inschrijving_open_of_404(wedstrijd)
+
+        if not sporterboog.sporter.is_actief_lid or not sporterboog.sporter.bij_vereniging:
+            raise Http404('Niet actief lid')
 
         account_koper = request.user
 

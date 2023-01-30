@@ -155,7 +155,7 @@
                         <td>{{ team.klasse_str }}</td>
                     </tr>
 
-                    {% for deelnemer, voorgaand in team.leden %}
+                    {% for deelnemer, voorgaand in team.leden_lijst %}
                         <tr>
                             <td style="padding-left: 30px">{{ deelnemer.naam_str }}</td>
                             {% for inzet in voorgaand %}

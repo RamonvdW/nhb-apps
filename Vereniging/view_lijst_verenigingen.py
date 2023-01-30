@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,8 @@ from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
@@ -168,6 +169,8 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                 else:
                     nhbver.locatie = loc
             # for
+
+            nhbver.cluster_letters = ''
 
             if nhbver.clusters.count() > 0:
                 context['toon_cluster'] = True

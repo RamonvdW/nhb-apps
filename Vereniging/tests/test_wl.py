@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import Competitie, CompetitieIndivKlasse, LAAG_REGIO, DeelCompetitie
+from Competitie.models import Competitie, CompetitieIndivKlasse, DeelCompetitie
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
@@ -191,8 +191,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                         nhb_regio=self.regio_111,
+        self.deelcomp_regio = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
 
     def test_overzicht(self):

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, KampioenschapSchutterBoog, LAAG_RK, DeelcompetitieIndivKlasseLimiet
+from Competitie.models import DeelKampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
 
 
 class Command(BaseCommand):
@@ -52,10 +52,10 @@ class Command(BaseCommand):
         rayon_nr = options['rayon']
         self.verbose = options['verbose']
 
-        kampioenschap = DeelCompetitie.objects.get(competitie__afstand=afstand, laag=LAAG_RK, nhb_rayon__rayon_nr=rayon_nr)
+        kampioenschap = DeelKampioenschap.objects.get(competitie__afstand=afstand, nhb_rayon__rayon_nr=rayon_nr)
 
         klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
-        for limiet in DeelcompetitieIndivKlasseLimiet.objects.filter(deelcompetitie=kampioenschap):
+        for limiet in KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=kampioenschap):
             klasse_pk2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
@@ -67,11 +67,14 @@ class Command(BaseCommand):
         net_na_cut = False
         limiet = 0
         block = list()
-        for kampioen in (KampioenschapSchutterBoog
+
+        for kampioen in (KampioenschapSporterBoog
                          .objects
-                         .filter(deelcompetitie=kampioenschap)
+                         .filter(kampioenschap=kampioenschap)
                          .select_related('sporterboog',
-                                         'sporterboog__sporter')
+                                         'sporterboog__sporter',
+                                         'sporterboog__boogtype',
+                                         'indiv_klasse')
                          .order_by('indiv_klasse__volgorde',
                                    'volgorde',
                                    '-gemiddelde')):
@@ -100,7 +103,7 @@ class Command(BaseCommand):
             if kampioen.sporterboog.pk not in sporterboog_pks:
                 sporterboog_pks.append(kampioen.sporterboog.pk)
             else:
-                block.append('[ERROR] Dubbele sporterboog!!')
+                block.append('[ERROR] Dubbele sporterboog: %s' % kampioen.sporterboog)
 
             if prev_volgorde:
                 if kampioen.volgorde != prev_volgorde + 1:

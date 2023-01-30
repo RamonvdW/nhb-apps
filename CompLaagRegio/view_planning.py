@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,12 +12,14 @@ from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
+from Competitie.models import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
+                               DeelKampioenschap, DEEL_RK,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam)
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_deelcompetitie_ronde, competitie_week_nr_to_date
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
@@ -208,8 +210,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie',
                                         'nhb_regio',
                                         'nhb_regio__rayon')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -230,11 +231,11 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                 context['inschrijfmethode'] = '3 (sporter voorkeur dagdeel)'
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
-            rayon = DeelCompetitie.objects.get(laag=LAAG_RK,
-                                               competitie=deelcomp.competitie,
-                                               nhb_rayon=deelcomp.nhb_regio.rayon)
+            rayon = DeelKampioenschap.objects.get(competitie=deelcomp.competitie,
+                                                  deel=DEEL_RK,
+                                                  nhb_rayon=deelcomp.nhb_regio.rayon)
             context['url_rayon'] = reverse('CompLaagRayon:rayon-planning',
-                                           kwargs={'rk_deelcomp_pk': rayon.pk})
+                                           kwargs={'deelkamp_pk': rayon.pk})
 
         comp = deelcomp.competitie
 
@@ -253,7 +254,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         """
         # alleen de RCL mag de planning uitbreiden
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
@@ -262,7 +263,6 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO,
                              nhb_regio=self.functie_nu.nhb_regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -362,7 +362,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag de planning uitbreiden
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         try:
             cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen voor de veiligheid
@@ -498,7 +498,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         if heeft_wkl:
             teams_tonen = ronde.deelcompetitie.regio_organiseert_teamcompetitie
 
-            for obj in (RegioCompetitieSchutterBoog
+            for obj in (RegioCompetitieSporterBoog
                         .objects
                         .filter(deelcompetitie=ronde.deelcompetitie)
                         .select_related('indiv_klasse')):
@@ -603,7 +603,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag een wedstrijd toevoegen
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if request.POST.get('verwijder_ronde', None):
             # de ronde moet verwijderd worden
@@ -749,7 +749,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # er zijn minder wedstrijden dan deelnemers
         for wedstrijd in wedstrijden:
-            wedstrijd.aantal_aanmeldingen = wedstrijd.regiocompetitieschutterboog_set.count()
+            wedstrijd.aantal_aanmeldingen = wedstrijd.regiocompetitiesporterboog_set.count()
         # for
 
         rol_nu = rol_get_huidige(self.request)
@@ -802,7 +802,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag een wedstrijd toevoegen
         if self.rol_nu != Rollen.ROL_RCL:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # voeg een wedstrijd toe
         comp = ronde.deelcompetitie.competitie
@@ -849,7 +849,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # wedstrijdklassen individueel
         klasse2aantal_sporters = dict()
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .filter(deelcompetitie=deelcomp)
                           .select_related('indiv_klasse')):
@@ -936,7 +936,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if ronde.deelcompetitie.functie != functie_nu:
             # mag niet wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         context['competitie'] = comp = ronde.deelcompetitie.competitie
         is_25m = (comp.afstand == '25')
@@ -1111,7 +1111,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # mag niet wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
@@ -1296,7 +1296,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         # correcte beheerder?
         if deelcomp.functie != self.functie_nu:
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
         if match.uitslag:
@@ -1343,14 +1343,13 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if not deelcomp.is_afgesloten:
             deelcomp.competitie.bepaal_fase()
@@ -1373,14 +1372,13 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
-                                                  laag=LAAG_REGIO)
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if not deelcomp.is_afgesloten:
 
@@ -1403,10 +1401,10 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             taak_log = "[%s] Taak aangemaakt" % now
 
             # maak een taak aan voor de RKO
-            deelcomp_rk = DeelCompetitie.objects.get(competitie=deelcomp.competitie,
-                                                     laag=LAAG_RK,
+            deelkamp = DeelKampioenschap.objects.get(competitie=deelcomp.competitie,
+                                                     deel=DEEL_RK,
                                                      nhb_rayon=deelcomp.nhb_regio.rayon)
-            functie_rko = deelcomp_rk.functie
+            functie_rko = deelkamp.functie
             maak_taak(toegekend_aan_functie=functie_rko,
                       deadline=taak_deadline,
                       aangemaakt_door=account,

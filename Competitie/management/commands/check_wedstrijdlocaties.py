@@ -7,7 +7,7 @@
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, CompetitieMatch
+from Competitie.models import DeelKampioenschap, CompetitieMatch, DEEL_BK, DEEL_RK
 from NhbStructuur.models import NhbVereniging
 
 
@@ -20,25 +20,25 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        laag = None
+        deel = None
         if options['bk']:
-            laag = LAAG_BK
+            deel = DEEL_BK
         if options['rk']:
-            laag = LAAG_RK
+            deel = DEEL_RK
 
         match2deelcomp = dict()     # [wedstrijd.pk] = deelcomp
 
         match_pks = list()
-        if laag:
-            for deelcomp in DeelCompetitie.objects.filter(laag=laag).prefetch_related('rk_bk_matches'):
-                if deelcomp.rk_bk_matches.count() == 0:
-                    self.stdout.write('[WARNING] Geen rk_bk_matches voor deelcompetitie %s' % deelcomp)
+        if deel:
+            for deelkamp in DeelKampioenschap.objects.filter(deel=deel).prefetch_related('rk_bk_matches'):
+                if deelkamp.rk_bk_matches.count() == 0:
+                    self.stdout.write('[WARNING] Geen rk_bk_matches voor %s' % deelkamp)
 
-                pks = list(deelcomp.rk_bk_matches.values_list('pk', flat=True))
+                pks = list(deelkamp.rk_bk_matches.values_list('pk', flat=True))
                 match_pks.extend(pks)
 
                 for pk in pks:
-                    match2deelcomp[pk] = deelcomp
+                    match2deelcomp[pk] = deelkamp
                 # for
             # for
 
@@ -60,7 +60,7 @@ class Command(BaseCommand):
                    .prefetch_related('indiv_klassen',
                                      'team_klassen')
                    .all())
-        if laag:
+        if deel:
             matches = matches.filter(pk__in=match_pks)
 
         for match in matches:
@@ -113,8 +113,7 @@ class Command(BaseCommand):
                 wedstrijd_fouten.append('geen locatie')
 
             if ver:
-                # kijk hoeveel wedstrijdlocaties deze vereniging heeft
-                if len(locs) > 1:
+                if loc:
                     # als de gekozen locatie discipline_indoor is en banen_18m/banen_25m ingesteld heeft, dan is het goed
                     if (not loc.discipline_indoor) or (loc.banen_18m == 0 and loc.banen_25m == 0):
                         toon_loc = True
@@ -125,11 +124,11 @@ class Command(BaseCommand):
             if len(wedstrijd_fouten) > 0:
                 self.stdout.write('[ERROR] %s heeft %s' % (wed_str, " en ".join(wedstrijd_fouten)))
                 try:
-                    deelcomp = match2deelcomp[match.pk]
+                    deelkamp = match2deelcomp[match.pk]
                 except KeyError:
                     pass
                 else:
-                    self.stdout.write('        Deelcompetitie: %s' % deelcomp)
+                    self.stdout.write('        Deelcompetitie: %s' % deelkamp)
 
                 self.stdout.write('        Wanneer: %s om %s' % (match.datum_wanneer, match.tijd_begin_wedstrijd))
                 self.stdout.write('        Wedstrijdklassen: %s' % klassen_str)

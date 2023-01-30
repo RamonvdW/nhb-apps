@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, DeelCompetitie,
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.tests.test_helpers import zet_competitie_fase
+from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, ScoreHist, Score, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -51,10 +51,11 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         comp.save()
         self.comp = comp
 
+        dummy_functie = Functie.objects.filter(rol='RCL', nhb_regio__regio_nr=111)[0]
         deelcomp = DeelCompetitie(
                             competitie=comp,
-                            laag=LAAG_REGIO,
-                            nhb_regio=regio_111)
+                            nhb_regio=regio_111,
+                            functie=dummy_functie)
         deelcomp.save()
 
         indiv_r1 = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_r)[1]
@@ -138,7 +139,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         sporterboog_bb.save()
         self.sporterboog_bb = sporterboog_bb
 
-        deelnemer_r = RegioCompetitieSchutterBoog(
+        deelnemer_r = RegioCompetitieSporterBoog(
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog_r,
                             bij_vereniging=ver,
@@ -147,7 +148,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         deelnemer_r.save()
         self.deelnemer_r = deelnemer_r
 
-        deelnemer_tr = RegioCompetitieSchutterBoog(
+        deelnemer_tr = RegioCompetitieSporterBoog(
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog_tr,
                             bij_vereniging=ver,
@@ -173,7 +174,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                             team_klasse=team_klasse_r,
                             team_naam='Test')
         team.save()
-        team.gekoppelde_schutters.add(deelnemer_tr)
+        team.leden.add(deelnemer_tr)
         self.team1 = team
 
         team = RegiocompetitieTeam(
@@ -329,7 +330,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                         afstand_meter=42)
         ag.save()
 
-        self.team1.gekoppelde_schutters.clear()
+        self.team1.leden.clear()
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
         self.assertTrue(f1.getvalue() == '')
@@ -459,7 +460,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(f2.getvalue() == '')
 
         # maak een echte dupe aan
-        dupe = RegioCompetitieSchutterBoog(
+        dupe = RegioCompetitieSporterBoog(
                     deelcompetitie=self.deelnemer_r.deelcompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
@@ -472,7 +473,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue('Gebruik --commit om' in f1.getvalue())
 
         # maak nog een dupe aan, voor extra coverage
-        dupe = RegioCompetitieSchutterBoog(
+        dupe = RegioCompetitieSporterBoog(
                     deelcompetitie=self.deelnemer_r.deelcompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,

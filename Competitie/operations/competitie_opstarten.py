@@ -6,9 +6,9 @@
 
 from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, AFSTANDEN,
+from Competitie.models import (AG_NUL, AFSTANDEN, DEEL_RK, DEEL_BK,
                                Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie, DeelcompetitieRonde)
+                               DeelCompetitie, DeelKampioenschap, DeelcompetitieRonde)
 from Functie.models import Functie
 from NhbStructuur.models import NhbRayon, NhbRegio
 from datetime import date
@@ -105,67 +105,72 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
     return ronde
 
 
-def _maak_deelcompetities(comp, rayons, regios, functies):
+def _maak_deelcompetities(comp, regios, functies):
 
-    """ Maak de deelcompetities van een competitie aan """
+    """ Maak de DeelCompetities voor een competitie aan """
 
-    # zoek de voorgaande deelcompetities erbij om settings over te kunnen nemen
+    # zoek de voorgaande deelcompetities erbij om instellingen over te kunnen nemen
     vorige_deelcomps = dict()   # [regio_nr] = DeelCompetitie()
     for deelcomp in (DeelCompetitie
                      .objects
                      .select_related('competitie',
                                      'nhb_regio')
-                     .filter(laag=LAAG_REGIO,
-                             competitie__begin_jaar=comp.begin_jaar - 1,
+                     .filter(competitie__begin_jaar=comp.begin_jaar - 1,
                              competitie__afstand=comp.afstand)):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
 
-    # maak de Deelcompetities aan voor Regio, RK, BK
+    # maak de deelcompetities aan voor regiocompetities
     bulk = list()
-    for laag, _ in DeelCompetitie.LAAG:
-        if laag == LAAG_REGIO:
-            # Regio
-            for obj in regios:
-                functie = functies[("RCL", comp.afstand, obj.regio_nr)]
-                deel = DeelCompetitie(competitie=comp,
-                                      laag=laag,
-                                      nhb_regio=obj,
-                                      functie=functie,
-                                      einde_teams_aanmaken=comp.einde_teamvorming)
-                try:
-                    vorige = vorige_deelcomps[obj.regio_nr]
-                except KeyError:
-                    pass
-                else:
-                    deel.inschrijf_methode = vorige.inschrijf_methode
-                    deel.toegestane_dagdelen = vorige.toegestane_dagdelen
-                    deel.regio_organiseert_teamcompetitie = vorige.regio_organiseert_teamcompetitie
-                    deel.regio_heeft_vaste_teams = vorige.regio_heeft_vaste_teams
-                    deel.regio_team_punten_model = vorige.regio_team_punten_model
-
-                bulk.append(deel)
-            # for
-        elif laag == LAAG_RK:
-            # RK
-            for obj in rayons:
-                functie = functies[("RKO", comp.afstand, obj.rayon_nr)]
-                deel = DeelCompetitie(competitie=comp,
-                                      laag=laag,
-                                      nhb_rayon=obj,
-                                      functie=functie)
-                bulk.append(deel)
-            # for
+    for obj in regios:
+        functie = functies[("RCL", comp.afstand, obj.regio_nr)]
+        deel = DeelCompetitie(competitie=comp,
+                              nhb_regio=obj,
+                              functie=functie,
+                              einde_teams_aanmaken=comp.einde_teamvorming)
+        try:
+            vorige = vorige_deelcomps[obj.regio_nr]
+        except KeyError:
+            pass
         else:
-            # BK
-            functie = functies[("BKO", comp.afstand, 0)]
-            deel = DeelCompetitie(competitie=comp,
-                                  laag=laag,
-                                  functie=functie)
-            bulk.append(deel)
+            deel.inschrijf_methode = vorige.inschrijf_methode
+            deel.toegestane_dagdelen = vorige.toegestane_dagdelen
+            deel.regio_organiseert_teamcompetitie = vorige.regio_organiseert_teamcompetitie
+            deel.regio_heeft_vaste_teams = vorige.regio_heeft_vaste_teams
+            deel.regio_team_punten_model = vorige.regio_team_punten_model
+
+        bulk.append(deel)
     # for
 
     DeelCompetitie.objects.bulk_create(bulk)
+
+
+def _maak_deelkampioenschappen(comp, rayons, functies):
+
+    """ Maak de DeelKampioenschappen voor een competitie aan """
+
+    bulk = list()
+
+    # RK individueel en teams
+    for rayon in rayons:
+        functie = functies[("RKO", comp.afstand, rayon.rayon_nr)]
+        deelkamp = DeelKampioenschap(
+                            deel=DEEL_RK,
+                            competitie=comp,
+                            nhb_rayon=rayon,
+                            functie=functie)
+        bulk.append(deelkamp)
+    # for
+
+    # BK individueel en teams
+    functie = functies[("BKO", comp.afstand, 0)]
+    deelkamp = DeelKampioenschap(
+                    deel=DEEL_BK,
+                    competitie=comp,
+                    functie=functie)
+    bulk.append(deelkamp)
+
+    DeelKampioenschap.objects.bulk_create(bulk)
 
 
 def _maak_competitieklassen(comp):
@@ -181,8 +186,14 @@ def _maak_competitieklassen(comp):
 
         for indiv in (TemplateCompetitieIndivKlasse
                       .objects
-                      .prefetch_related('leeftijdsklassen')
-                      .exclude(buiten_gebruik=True)):
+                      .prefetch_related('leeftijdsklassen')):
+
+            if is_18m:
+                if not indiv.gebruik_18m:
+                    continue
+            else:
+                if not indiv.gebruik_25m:
+                    continue
 
             klasse = CompetitieIndivKlasse(
                             competitie=comp,
@@ -222,9 +233,15 @@ def _maak_competitieklassen(comp):
         bulk = list()
         for team in (TemplateCompetitieTeamKlasse
                      .objects
-                     .exclude(buiten_gebruik=True)
                      .select_related('team_type')
                      .prefetch_related('team_type__boog_typen')):
+
+            if is_18m:
+                if not team.gebruik_18m:
+                    continue
+            else:
+                if not team.gebruik_25m:
+                    continue
 
             boog_pks = list(team.team_type.boog_typen.all().values_list('pk', flat=True))
             teamtype_pk2boog_pks[team.team_type.pk] = boog_pks
@@ -242,7 +259,7 @@ def _maak_competitieklassen(comp):
             if is_18m:
                 klasse.blazoen1_regio = team.blazoen1_18m_regio
                 klasse.blazoen2_regio = team.blazoen2_18m_regio
-                klasse.blazoen_rk_bk = team.blazoen1_18m_rk_bk
+                klasse.blazoen_rk_bk = team.blazoen_18m_rk_bk
             else:
                 klasse.blazoen1_regio = team.blazoen1_25m_regio
                 klasse.blazoen2_regio = team.blazoen2_25m_regio
@@ -263,7 +280,7 @@ def _maak_competitieklassen(comp):
             if is_18m:
                 klasse.blazoen1_regio = team.blazoen1_18m_regio
                 klasse.blazoen2_regio = team.blazoen2_18m_regio
-                klasse.blazoen_rk_bk = team.blazoen1_18m_rk_bk
+                klasse.blazoen_rk_bk = team.blazoen_18m_rk_bk
             else:
                 klasse.blazoen1_regio = team.blazoen1_25m_regio
                 klasse.blazoen2_regio = team.blazoen2_25m_regio
@@ -320,6 +337,11 @@ def competities_aanmaken(jaar=None):
         functies[(functie.rol, afstand, nr)] = functie
     # for
 
+    now = timezone.now()
+    if now.month == 12 and now.day == 31:               # pragma: no cover
+        # avoid failing test cases one day per year
+        yearend = date(year=jaar+1, month=1, day=1)     # 31 december + 1 day
+
     # maak de Competitie aan voor 18m en 25m
     for afstand, beschrijving in AFSTANDEN:
         comp = Competitie(
@@ -343,19 +365,16 @@ def competities_aanmaken(jaar=None):
 
         comp.save()
 
-        pks = list(TemplateCompetitieIndivKlasse
-                   .objects
-                   .exclude(buiten_gebruik=True)
-                   .values_list('boogtype__pk', flat=True))
+        indiv_klassen = TemplateCompetitieIndivKlasse.objects.all()
+        pks = list(indiv_klassen.values_list('boogtype__pk', flat=True))
         comp.boogtypen.set(pks)
 
-        pks = list(TemplateCompetitieTeamKlasse
-                   .objects
-                   .exclude(buiten_gebruik=True)
-                   .values_list('team_type__pk', flat=True))
+        teams_klassen = TemplateCompetitieTeamKlasse.objects.all()
+        pks = list(teams_klassen.values_list('team_type__pk', flat=True))
         comp.teamtypen.set(pks)
 
-        _maak_deelcompetities(comp, rayons, regios, functies)
+        _maak_deelcompetities(comp, regios, functies)
+        _maak_deelkampioenschappen(comp, rayons, functies)
 
         _maak_competitieklassen(comp)
     # for

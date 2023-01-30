@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
@@ -47,6 +48,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
     def maak_data(context):
 
         # maak een cache aan van leden
+        # deze hebben we nodig om de wedstrijdleeftijd te berekenen
         lid_nr2sporter = dict()  # [lid_nr] = Sporter
         for sporter in (Sporter
                         .objects
@@ -60,6 +62,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         context['jeugd_max'] = MAXIMALE_LEEFTIJD_JEUGD_INTERLAND
         context['minimum_aantal_scores'] = settings.INTERLAND_25M_MINIMUM_SCORES_VOOR_DEELNAME
 
+        context['seizoen'] = context['wedstrijd_jaar'] = '?'
         context['klassen'] = list()
 
         # zoek het nieuwste seizoen beschikbaar
@@ -95,10 +98,11 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                         try:
                             sporter = lid_nr2sporter[indiv.sporter_lid_nr]
                         except KeyError:
-                            sporter = None
+                            # niet op de lijst zetten
+                            pass
+                        else:
+                            indiv.sporter_geslacht = sporter.geslacht       # TODO: wedstrijdgeslacht meenemen
 
-                        if sporter:
-                            indiv.sporter = sporter
                             indiv.wedstrijd_leeftijd = sporter.bereken_wedstrijdleeftijd_wa(wedstrijd_jaar)
                             if indiv.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
                                 if indiv.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND:
@@ -107,6 +111,13 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                                     indiv.leeftijd_str = "Senior"
 
                                 klasse.indiv.append(indiv)
+
+                            # eventuele overstap meenemen
+                            ver = sporter.bij_vereniging
+                            if ver:
+                                sporter.vereniging_nr = ver.ver_nr
+                                sporter.vereniging_naam = ver.naam
+
             # for
 
     def get_context_data(self, **kwargs):
@@ -155,15 +166,17 @@ class InterlandAlsBestandView(InterlandView):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Gemiddelde', 'Klasse', 'Geslacht', 'Lid', 'Naam', 'Vereniging'])
+        writer.writerow(['Gemiddelde', 'Klasse', 'Geslacht', 'Lid nr', 'Naam', 'Vereniging'])
 
         for indiv in indivs:
+            ver_str = '[%s] %s' % (indiv.vereniging_nr, indiv.vereniging_naam)
+
             writer.writerow([indiv.gemiddelde,
                              indiv.leeftijd_str,
-                             indiv.sporter.geslacht,
-                             indiv.sporter.lid_nr,
-                             indiv.sporter.volledige_naam(),
-                             indiv.sporter.bij_vereniging])
+                             indiv.sporter_geslacht,
+                             indiv.sporter_lid_nr,
+                             indiv.sporter_naam,
+                             ver_str])
         # for
 
         return response

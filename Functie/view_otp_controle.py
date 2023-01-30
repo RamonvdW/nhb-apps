@@ -14,7 +14,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from Account.otp import account_otp_controleer, account_otp_loskoppelen
 from Functie.forms import OTPControleForm
-from Functie.rol import rol_get_huidige, Rollen
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Mailer.operations import mailer_queue_email, render_email_template
 from Plein.menu import menu_dynamics
 

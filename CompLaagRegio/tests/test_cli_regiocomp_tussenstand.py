@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, LAAG_REGIO, LAAG_BK,
-                               DeelcompetitieRonde, RegioCompetitieSchutterBoog, CompetitieMatch)
+from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie,
+                               DeelcompetitieRonde, RegioCompetitieSporterBoog, CompetitieMatch,
+                               DeelKampioenschap, DEEL_BK)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Score.operations import score_indiv_ag_opslaan
@@ -37,8 +38,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         competitie_klassengrenzen_vaststellen(comp_18)
         competitie_klassengrenzen_vaststellen(comp_25)
 
-        self.deelcomp_r101 = DeelCompetitie.objects.filter(laag=LAAG_REGIO,
-                                                           competitie=self.comp,
+        self.deelcomp_r101 = DeelCompetitie.objects.filter(competitie=self.comp,
                                                            nhb_regio=self.regio_101)[0]
 
         # login als BB
@@ -172,8 +172,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
                                boogtype=sporterboog.boogtype)
                        .order_by('volgorde'))
 
-            aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                     sporterboog=sporterboog)
+            aanmelding = RegioCompetitieSporterBoog(deelcompetitie=deelcomp,
+                                                    sporterboog=sporterboog)
             aanmelding.bij_vereniging = aanmelding.sporterboog.sporter.bij_vereniging
 
             if len(sportersboog) < len(klassen):
@@ -224,9 +224,9 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
                          self.sporterboog_100004, self.sporterboog_100005]
         self._schrijf_in_voor_competitie(self.deelcomp_r101, schuttersboog)
 
-        self.functie_bko = DeelCompetitie.objects.get(competitie=self.comp,
-                                                      laag=LAAG_BK,
-                                                      competitie__afstand=18).functie
+        self.functie_bko = DeelKampioenschap.objects.get(competitie=self.comp,
+                                                         deel=DEEL_BK,
+                                                         competitie__afstand=18).functie
 
         self.client.logout()
 
@@ -265,7 +265,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score2, 124)
         self.assertEqual(deelnemer.score3, 0)
@@ -309,7 +309,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score7, 129)
@@ -336,7 +336,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score6, 128)
@@ -349,7 +349,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
     def test_verplaats(self):
         # check het verplaatsen van een schutter uit klasse onbekend
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
+        deelnemer = RegioCompetitieSporterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
         self.assertTrue(deelnemer.indiv_klasse.is_onbekend)
 
         # 100001: 4 scores, gebruik eerste 3
@@ -372,12 +372,12 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
                 break
         # for
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100004)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100004)
         deelnemer.indiv_klasse = klasse
         deelnemer.save()
 
         # pas het AG van 100005 aan
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100005)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100005)
         deelnemer.aanvangsgemiddelde = 9.000
         deelnemer.save()
 
@@ -406,7 +406,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
     def test_verplaats_zeven(self):
         # check het verplaatsen van een schutter uit klasse onbekend
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
+        deelnemer = RegioCompetitieSporterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
         # print('deelnemer: %s (leeftijd: %s)' % (deelnemer, deelnemer.sporterboog.sporter.geboorte_datum))
         self.assertTrue(deelnemer.indiv_klasse.is_onbekend)
         # print('huidige klasse: %s (pk=%s)' % (deelnemer.indiv_klasse, deelnemer.indiv_klasse.pk))
@@ -439,7 +439,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
         sporter = self.sporterboog_100001.sporter
 
@@ -523,7 +523,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
 
         # controleer dat de schutter op zijn oude vereniging blijft staan
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100001)
+        deelnemer = RegioCompetitieSporterBoog.objects.get(sporterboog__sporter__lid_nr=100001)
         self.assertIsNone(deelnemer.sporterboog.sporter.bij_vereniging)
         self.assertIsNotNone(deelnemer.bij_vereniging)
 

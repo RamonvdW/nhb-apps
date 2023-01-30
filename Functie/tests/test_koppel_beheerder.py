@@ -333,7 +333,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # probeer als bezoeker (corner case coverage)
         # (admin kan geen schutter worden)
         url = self.url_wijzig_ontvang % self.functie_rko3.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(29):
             resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         with self.assert_max_queries(20):

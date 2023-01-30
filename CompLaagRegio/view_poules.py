@@ -10,8 +10,9 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import LAAG_REGIO, DeelCompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Competitie.models import DeelCompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 
 
@@ -48,8 +49,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie',
                                         'nhb_regio',
                                         'nhb_regio__rayon')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -121,8 +121,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie',
                                         'nhb_regio',
                                         'nhb_regio__rayon')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 

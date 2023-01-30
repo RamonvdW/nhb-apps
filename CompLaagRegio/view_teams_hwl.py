@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,10 +12,11 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
+from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie,
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM
 from Score.operations import score_teams_ag_opslaan
@@ -34,7 +35,7 @@ def bepaal_team_sterkte_en_klasse(team):
     """ gebruik AG van gekoppelde schutters om team aanvangsgemiddelde te berekenen
         en bepaal aan de hand daarvan de team-wedstrijdklasse
     """
-    ags = team.gekoppelde_schutters.values_list('ag_voor_team', flat=True)
+    ags = team.leden.values_list('ag_voor_team', flat=True)
     ags = list(ags)
 
     team.team_klasse = None
@@ -95,7 +96,6 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
-                             laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -143,11 +143,11 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                                  'team_type')
                  .filter(deelcompetitie=deelcomp,
                          vereniging=self.functie_nu.nhb_ver)
-                 .annotate(gekoppelde_schutters_count=Count('gekoppelde_schutters'))
+                 .annotate(leden_count=Count('leden'))
                  .order_by('volg_nr'))
 
         for obj in teams:
-            obj.aantal = obj.gekoppelde_schutters_count
+            obj.aantal = obj.leden_count
             ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
             obj.ag_str = ag_str.replace('.', ',')
 
@@ -166,7 +166,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             context['url_nieuw_team'] = reverse('CompLaagRegio:teams-regio',
                                                 kwargs={'deelcomp_pk': deelcomp.pk})
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
@@ -186,7 +186,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             try:
                 team = obj.regiocompetitieteam_set.all()[0]
             except IndexError:
-                pass
+                obj.in_team_str = '??'
             else:
                 obj.in_team_str = team.maak_team_naam_kort()
 
@@ -309,7 +309,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
-                             laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
@@ -448,7 +447,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
                 # verwijder eventueel gekoppelde sporters bij wijziging team type,
                 # om verkeerde boog typen te voorkomen
-                team.gekoppelde_schutters.clear()
+                team.leden.clear()
 
         if not verwijderen:
             team_naam = request.POST.get('team_naam', '')
@@ -505,7 +504,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # haal de deelnemer op
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
+            deelnemer = (RegioCompetitieSporterBoog
                          .objects
                          .select_related('sporterboog',
                                          'sporterboog__sporter',
@@ -513,7 +512,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                                          'bij_vereniging',
                                          'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk))
-        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+        except (ValueError, RegioCompetitieSporterBoog.DoesNotExist):
             raise Http404('Sporter niet gevonden')
 
         context['deelnemer'] = deelnemer
@@ -577,14 +576,14 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # haal de deelnemer op
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
+            deelnemer = (RegioCompetitieSporterBoog
                          .objects
                          .select_related('deelcompetitie',
                                          'deelcompetitie__competitie',
                                          'sporterboog',
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk))
-        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+        except (ValueError, RegioCompetitieSporterBoog.DoesNotExist):
             raise Http404('Sporter niet gevonden')
 
         # controleer dat deze deelnemer bekeken en gewijzigd mag worden
@@ -709,9 +708,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         team.ag_str = ag_str.replace('.', ',')
 
         if mag_wijzigen:
-            pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+            pks = team.leden.values_list('pk', flat=True)
 
-            deelnemers = (RegioCompetitieSchutterBoog
+            deelnemers = (RegioCompetitieSporterBoog
                           .objects
                           .filter(deelcompetitie=deelcomp,
                                   inschrijf_voorkeur_team=True,
@@ -740,7 +739,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                                              kwargs={'team_pk': team.pk})
         else:
             context['gekoppeld'] = gekoppeld = (team
-                                                .gekoppelde_schutters
+                                                .leden
                                                 .select_related('sporterboog',
                                                                 'sporterboog__sporter',
                                                                 'sporterboog__boogtype')
@@ -810,10 +809,10 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # toegestane boogtypen en schutters
         boog_pks = team.team_type.boog_typen.values_list('pk', flat=True)
-        bezet_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+        bezet_pks = team.leden.values_list('pk', flat=True)
 
         # leden die nog niet in een team zitten
-        ok1_pks = (RegioCompetitieSchutterBoog
+        ok1_pks = (RegioCompetitieSporterBoog
                    .objects
                    .exclude(pk__in=bezet_pks)
                    .filter(deelcompetitie=team.deelcompetitie,
@@ -824,7 +823,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                    .values_list('pk', flat=True))
 
         # huidige leden mogen blijven ;-)
-        ok2_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+        ok2_pks = team.leden.values_list('pk', flat=True)
 
         ok_pks = list(ok1_pks) + list(ok2_pks)
 
@@ -841,8 +840,8 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                     # silently ignore bad pks
         # for
 
-        team.gekoppelde_schutters.clear()
-        team.gekoppelde_schutters.add(*pks)
+        team.leden.clear()
+        team.leden.add(*pks)
 
         bepaal_team_sterkte_en_klasse(team)
 
@@ -883,7 +882,6 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
-                             laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
@@ -950,7 +948,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         # for
         context['teams'] = teams
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
@@ -1070,7 +1068,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         ronde_team_nu_afkorting = ronde_team_nu.team.team_type.afkorting
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
@@ -1228,7 +1226,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         max_gem.sort(reverse=True)      # hoogste eerst
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
@@ -1279,7 +1277,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         ronde_team.logboek += '\n\n[%s] Selectie is aangepast door %s:\n' % (now_str, wie_str)
 
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter')
                           .filter(pk__in=sel_pks)):

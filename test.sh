@@ -11,6 +11,10 @@ TEST_DIR="./nhbapps/data_test"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
+
+# -Wa = enable deprecation warnings
+PY_OPTS="-Wa"
+
 [ -e "$LOG" ] && rm "$LOG"
 touch "$LOG"
 
@@ -102,7 +106,7 @@ fi
 if [ $KEEP_DB -eq 0 ]
 then
     echo "[INFO] Checking application is free of fatal errors"
-    python3 ./manage.py check --tag admin --tag models || exit $?
+    python3 $PY_OPTS ./manage.py check --tag admin --tag models || exit $?
 fi
 
 # set high performance
@@ -112,7 +116,7 @@ ABORTED=0
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
 
-python3 -m coverage erase
+python3 $PY_OPTS -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
@@ -128,18 +132,18 @@ then
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
 
     # add coverage with nodebug
-    python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
+    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
 fi
 
 # start the mail transport service simulator
-python3 ./Mailer/test_tools/websim_mailer.py &
+python3 $PY_OPTS ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
 
 # start the payment service simulator
-python3 ./Betaal/test-tools/websim_betaal_test.py &
+python3 $PY_OPTS ./Betaal/test-tools/websim_betaal_test.py &
 PID_WEBSIM2=$!
 
 # check all websim programs have started properly
@@ -162,7 +166,7 @@ fi
 # -v = verbose
 # note: double quotes not supported around $*
 echo "[INFO] Starting main test run" >>"$LOG"
-python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $ARGS &>>"$LOG"
+python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $ARGS &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
@@ -188,7 +192,7 @@ then
         then
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-            python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
+            python3 $PY_OPTS -u $PYCOV ./manage.py help $cmd &>>"$LOG"
         fi
     done
     echo
@@ -202,7 +206,7 @@ then
         cmd=$(basename $cmd_file)
         echo -n '.'
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-        python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
+        python3 $PY_OPTS -u $PYCOV ./manage.py help $cmd &>>"$LOG"
     done
     echo
 fi

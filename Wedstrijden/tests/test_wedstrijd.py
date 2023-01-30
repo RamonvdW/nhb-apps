@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -130,6 +130,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # buiten locatie met binnen locatie
         self._maak_accommodatie_binnen(self.nhbver1)
@@ -137,6 +138,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # wijzig velden via de 'post' interface
         loc_sel = 'loc_%s' % locatie_buiten.pk
@@ -193,13 +195,28 @@ class TestWedstrijd(E2EHelpers, TestCase):
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.wa_status, 'A')
 
-        # zet de wedstrijd door 'Wacht op goedkeuring' en haal de pagina opnieuw op
+        # akkoord verkoopvoorwaarden
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'akkoord_verkoop': 'ja'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertTrue(wedstrijd.verkoopvoorwaarden_status_acceptatie)
+
+        # een GET met akkoord verkoopvoorwaarden geeft de knop om goedkeuring aan te vragen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+        # zet de wedstrijd hard door 'Wacht op goedkeuring' en haal de pagina opnieuw op
         wedstrijd.status = 'W'
         wedstrijd.save()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # probeer wijzigingen te doen aan een wedstrijd die voorbij Ontwerp fase is
         datum = '%s-3-3' % wedstrijd.datum_begin.year
@@ -243,6 +260,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # zet de wedstrijd door 'Geannuleerd' en haal de pagina opnieuw op
         wedstrijd.status = WEDSTRIJD_STATUS_GEANNULEERD
@@ -251,6 +269,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # probeer wijzigingen te doen aan een geannuleerde wedstrijd
         datum = '%s-2-2' % wedstrijd.datum_begin.year
@@ -428,6 +447,15 @@ class TestWedstrijd(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+
+        # doorzetten naar 'Wacht op goedkeuring'
+        # mag alleen als de verkoopvoorwaarden geaccepteerd zijn
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'verder': 'ja'})
+        self.assert404(resp, 'Verkoopvoorwaarden')
+
+        wedstrijd.verkoopvoorwaarden_status_acceptatie = True
+        wedstrijd.save(update_fields=['verkoopvoorwaarden_status_acceptatie'])
 
         # doorzetten naar 'Wacht op goedkeuring'
         with self.assert_max_queries(20):
@@ -686,5 +714,134 @@ class TestWedstrijd(E2EHelpers, TestCase):
 
         resp = self.client.post(url, {'prijs_onder18': '1000'})
         self.assert404(resp, 'Geen toegestane prijs')
+
+    def test_uitvoerend(self):
+        # maak het bondsbureau aan als vereniging
+        nhbver_bb = NhbVereniging(
+                            ver_nr=1234,
+                            naam="Bondsbureau",
+                            regio=NhbRegio.objects.get(regio_nr=100))
+        nhbver_bb.save()
+
+        # elke vereniging heeft minimaal 1 locatie nodig om een wedstrijd aan te mogen maken
+        self._maak_externe_locatie(nhbver_bb)
+
+        functie_hwl = maak_functie('HWL Ver 1234', 'HWL')
+        functie_hwl.nhb_ver = nhbver_bb
+        functie_hwl.accounts.add(self.account_admin)
+        functie_hwl.save()
+
+        # login en wordt HWL van het bondsbureau
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(functie_hwl)
+
+        # test de keuze van een uitvoerende vereniging
+        with override_settings(WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING=(nhbver_bb.ver_nr,)):
+            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+            self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+
+            self.assertEqual(1, Wedstrijd.objects.count())
+            wedstrijd = Wedstrijd.objects.all()[0]
+            self.assertIsNone(wedstrijd.uitvoerende_vereniging)
+            url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+
+            # probeer te delegeren, maar die vereniging heeft nog geen locatie
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)  # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'uitvoerend': 'ver_%s' % self.nhbver1.ver_nr})
+            self.assert_is_redirect_not_plein(resp)
+
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+            self.assertIsNone(wedstrijd.uitvoerende_vereniging)
+
+            # geef de vereniging waaraan we willen delegeren ook 1 locatie
+            loc = self._maak_accommodatie_binnen(self.nhbver1)
+
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)  # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'uitvoerend': 'ver_%s' % self.nhbver1.ver_nr,
+                                              'locatie': 'loc_%s' % loc.pk})
+            self.assert_is_redirect_not_plein(resp)
+
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+            self.assertEqual(wedstrijd.uitvoerende_vereniging, self.nhbver1)
+
+            # haal de wijzig pagina op, nu met de optie om van een andere vereniging te kiezen
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)  # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+            # zet de uitvoerende vereniging op de eigen vereniging om deze te "resetten"
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'uitvoerend': 'ver_%s' % nhbver_bb.ver_nr})
+            self.assert_is_redirect_not_plein(resp)
+
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+            self.assertIsNone(wedstrijd.uitvoerende_vereniging)
+
+            # corner case
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'uitvoerend': ''})
+            self.assert_is_redirect_not_plein(resp)
+
+    def test_ter_info(self):
+        # alleen de BB en MWZ mogen de ter-info vlag zetten
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # wissel naar HWL en maak een wedstrijd aan
+        self._maak_externe_locatie(self.nhbver1)  # locatie is noodzakelijk
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
+        self.assertFalse(wedstrijd.is_ter_info)
+
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+
+        # probeer de 'ter info' vlag te zetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'ter_info': 1})
+            self.assert_is_redirect_not_plein(resp)
+
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertFalse(wedstrijd.is_ter_info)
+
+        # probeer het nog een keer, als BB
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # probeer de 'ter info' vlag te zetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'ter_info': 1})
+            self.assert_is_redirect_not_plein(resp)
+
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertTrue(wedstrijd.is_ter_info)
+
+        # probeer de 'ter info' vlag te resetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'ter_info': ''})
+            self.assert_is_redirect_not_plein(resp)
+
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertFalse(wedstrijd.is_ter_info)
+
 
 # end of file

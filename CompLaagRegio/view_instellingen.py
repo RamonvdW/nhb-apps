@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,10 +10,11 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
+from Competitie.models import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
                                Competitie, DeelCompetitie)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 import datetime
@@ -53,14 +54,13 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(competitie=comp_pk,
-                             laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'F':
@@ -133,14 +133,13 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp_pk,
-                             laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'D':
@@ -225,8 +224,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                      .select_related('competitie',
                                      'nhb_regio',
                                      'nhb_regio__rayon')
-                     .filter(competitie=comp_pk,
-                             laag=LAAG_REGIO)
+                     .filter(competitie=comp_pk)
                      .order_by('nhb_regio__regio_nr'))
 
         context['comp'] = comp

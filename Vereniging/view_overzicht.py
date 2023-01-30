@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,9 +10,10 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
-                               LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, DeelKampioenschap,
+                               INSCHRIJF_METHODE_1, DEEL_RK)
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 from Wedstrijden.models import BAAN_TYPE_EXTERN
@@ -79,7 +80,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         comps = list()
         deelcomps = list()
-        deelcomps_rk = list()
+        deelkamps_rk = list()
 
         if self.rol_nu == Rollen.ROL_SEC:
             # SEC
@@ -100,14 +101,13 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
                 deelcomps = (DeelCompetitie
                              .objects
-                             .filter(laag=LAAG_REGIO,
-                                     competitie__is_afgesloten=False,
+                             .filter(competitie__is_afgesloten=False,
                                      nhb_regio=ver.regio)
                              .select_related('competitie'))
 
-                deelcomps_rk = (DeelCompetitie
+                deelkamps_rk = (DeelKampioenschap
                                 .objects
-                                .filter(laag=LAAG_RK,
+                                .filter(deel=DEEL_RK,
                                         competitie__is_afgesloten=False,
                                         nhb_rayon=ver.regio.rayon)
                                 .select_related('competitie'))
@@ -193,16 +193,16 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             del deelcomp
 
             # 3 - teams RK
-            for deelcomp_rk in deelcomps_rk:
-                if deelcomp_rk.competitie == comp:
-                    if deelcomp_rk.heeft_deelnemerslijst:
-                        if 'J' <= comp.fase <= 'K':
+            for deelkamp_rk in deelkamps_rk:
+                if deelkamp_rk.competitie == comp:
+                    if deelkamp_rk.heeft_deelnemerslijst:
+                        if 'J' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
                             # RK voorbereidende fase
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Deelnemers RK"
                             kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
                             kaartje.url = reverse('CompLaagRayon:lijst-rk-ver',
-                                                  kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                                                  kwargs={'deelkamp_pk': deelkamp_rk.pk})
                             kaartje.icon = 'rule'
                             kaartjes.append(kaartje)
 
@@ -210,7 +210,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
-                        kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                        kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
                         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
@@ -218,7 +218,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje.beschikbaar_vanaf = localize(vanaf)
                         kaartjes.append(kaartje)
             # for
-            del deelcomp_rk
+            del deelkamp_rk
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:

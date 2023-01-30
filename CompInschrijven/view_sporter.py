@@ -10,12 +10,11 @@ from django.views.generic import View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Functie.rol import Rollen, rol_get_huidige
-from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog, CompetitieMatch,
-                               LAAG_REGIO, AG_NUL,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               DAGDELEN, DAGDEEL_AFKORTINGEN)
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog, CompetitieMatch,
+                               AG_NUL, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Sporter.models import SporterVoorkeuren, SporterBoog, get_sporter_voorkeuren
@@ -72,13 +71,11 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # controleer dat deelcompetitie bij de juist regio hoort
         account = self.request.user
         sporter = account.sporter_set.all()[0]      # ROL_SPORTER geeft bescherming tegen geen nhblid
-        if (sporterboog.sporter != sporter
-                or deelcomp.laag != LAAG_REGIO
-                or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
+        if (sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegioCompetitieSchutterBoog
+        if (RegioCompetitieSporterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
                         sporterboog=sporterboog)
@@ -109,7 +106,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
 
-        aanmelding = RegioCompetitieSchutterBoog(
+        aanmelding = RegioCompetitieSporterBoog(
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog,
                             ag_voor_indiv=ag)
@@ -271,13 +268,11 @@ class RegiocompetitieAanmeldenView(View):
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat deelcompetitie bij de juist regio hoort
-        if (sporterboog.sporter != sporter
-                or deelcomp.laag != LAAG_REGIO
-                or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
+        if (sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegioCompetitieSchutterBoog
+        if (RegioCompetitieSporterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
                         sporterboog=sporterboog)
@@ -299,7 +294,7 @@ class RegiocompetitieAanmeldenView(View):
         # bepaal in welke wedstrijdklasse de sporter komt
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
-        aanmelding = RegioCompetitieSchutterBoog(
+        aanmelding = RegioCompetitieSporterBoog(
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog,
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -417,12 +412,12 @@ class RegiocompetitieAfmeldenView(View):
         # converteer en doe eerste controle op de parameters
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
+            deelnemer = (RegioCompetitieSporterBoog
                          .objects
                          .select_related('deelcompetitie__competitie',
                                          'sporterboog__sporter')
                          .get(pk=deelnemer_pk))
-        except (ValueError, KeyError, RegioCompetitieSchutterBoog.DoesNotExist):
+        except (ValueError, KeyError, RegioCompetitieSporterBoog.DoesNotExist):
             # niet bestaand record
             raise Http404('Inschrijving niet gevonden')
 

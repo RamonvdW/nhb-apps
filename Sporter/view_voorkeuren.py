@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (BoogType,
                                GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS,
                                GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA)
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from types import SimpleNamespace
@@ -126,13 +127,13 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             voorkeuren.opmerking_para_sporter = para_notitie
             voorkeuren.save(update_fields=['opmerking_para_sporter'])
 
-        old_voorkeur_para_met_rolstoel = voorkeuren.para_met_rolstoel
-        voorkeuren.para_met_rolstoel = False
-        if request.POST.get('para_rolstoel', None):
-            voorkeuren.para_met_rolstoel = True
-        if old_voorkeur_para_met_rolstoel != voorkeuren.para_met_rolstoel:
+        old_voorkeur_para_voorwerpen = voorkeuren.para_voorwerpen
+        voorkeuren.para_voorwerpen = False
+        if request.POST.get('para_voorwerpen', None):
+            voorkeuren.para_voorwerpen = True
+        if old_voorkeur_para_voorwerpen != voorkeuren.para_voorwerpen:
             # wijziging opslaan
-            voorkeuren.save(update_fields=['para_met_rolstoel'])
+            voorkeuren.save(update_fields=['para_voorwerpen'])
 
         old_disc_outdoor = voorkeuren.voorkeur_discipline_outdoor
         voorkeuren.voorkeur_discipline_outdoor = False

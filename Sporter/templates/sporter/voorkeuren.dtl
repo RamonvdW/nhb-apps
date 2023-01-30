@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -241,7 +241,7 @@
                         <tr>
                             <td colspan="2">
                                 <label>
-                                    <input type="checkbox" class="filled-in" name="para_rolstoel"{% if voorkeuren.para_met_rolstoel %} checked{% endif %} onchange="gewijzigd()">
+                                    <input type="checkbox" class="filled-in" name="para_voorwerpen"{% if voorkeuren.para_voorwerpen %} checked{% endif %} onchange="gewijzigd()">
                                     <span class="black-text">Ik blijf op de schietlijn zitten of gebruik voorwerpen die op de schietlijn blijven staan</span>
                                 </label>
 

@@ -6,7 +6,9 @@
 
 from django.test import TestCase
 from django.core import management
-from Competitie.models import Competitie, DeelCompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap,
+                               CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -126,24 +128,24 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         wed4.indiv_klassen.add(indiv2)
         wed4.team_klassen.add(team2)
 
-        deelcomp_bk = DeelCompetitie.objects.get(
+        deelkamp_bk = DeelKampioenschap.objects.get(
                         competitie=comp,
-                        laag='BK')
-        deelcomp_bk.rk_bk_matches.add(wed1)
+                        deel=DEEL_BK)
+        deelkamp_bk.rk_bk_matches.add(wed1)
 
-        deelcomp_rk = DeelCompetitie.objects.get(
+        deelkamp_rk = DeelKampioenschap.objects.get(
                         competitie=comp,
                         nhb_rayon=rayon_3,
-                        laag='RK')
-        deelcomp_rk.rk_bk_matches.set([wed2, wed3, wed4])
+                        deel=DEEL_RK)
+        deelkamp_rk.rk_bk_matches.set([wed2, wed3, wed4])
 
         # deelcomp zonder wedstrijden
         # geen wijzigingen nodig
-        deelcomp_rk = DeelCompetitie.objects.get(
+        deelkamp_rk = DeelKampioenschap.objects.get(
                         competitie=comp,
                         nhb_rayon=rayon_1,
-                        laag='RK')
-        self.assertIsNotNone(deelcomp_rk)
+                        deel=DEEL_RK)
+        self.assertIsNotNone(deelkamp_rk)
 
     def test_basis(self):
         # no args
@@ -157,8 +159,8 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         with self.assert_max_queries(22):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Geen rk_bk_matches voor deelcompetitie comp1 - Rayon 2" in f2.getvalue())
-        self.assertTrue("[WARNING] Geen rk_bk_matches voor deelcompetitie comp1 - Rayon 1" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen rk_bk_matches voor RK Rayon 2" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen rk_bk_matches voor RK Rayon 1" in f2.getvalue())
         self.assertTrue("zonder banen 18m/25m opgaaf en zonder discipline_indoor en geen vereniging" in f2.getvalue())
 
         # bk (geen fouten)

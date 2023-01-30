@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,8 +10,7 @@ from Account.models import Account
 from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                BLAZOEN_CHOICES, BLAZOEN_40CM)
-from Functie.models import Functie
-from Functie.rol import Rollen
+from Functie.models import Functie, Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
@@ -24,10 +23,6 @@ my_logger = logging.getLogger('NHBApps.Competitie')
 
 AG_NUL = Decimal('0.000')
 AG_LAAGSTE_NIET_NUL = Decimal('0.001')
-
-LAAG_REGIO = 'Regio'
-LAAG_RK = 'RK'
-LAAG_BK = 'BK'
 
 AFSTANDEN = [('18', 'Indoor'),
              ('25', '25m 1pijl')]
@@ -104,6 +99,9 @@ TEAM_PUNTEN = (
     (TEAM_PUNTEN_MODEL_FORMULE1, 'Formule 1 systeem (10/8/6/5/4/3/2/1)'),         # afhankelijk van score
 )
 
+DEEL_RK = 'RK'
+DEEL_BK = 'BK'
+
 DEELNAME_ONBEKEND = '?'
 DEELNAME_JA = 'J'
 DEELNAME_NEE = 'N'
@@ -129,6 +127,7 @@ MUTATIE_AFMELDEN = 30
 MUTATIE_AANMELDEN = 40
 MUTATIE_TEAM_RONDE = 50
 MUTATIE_AFSLUITEN_REGIOCOMP = 60
+MUTATIE_DOORZETTEN_NAAR_BK = 70
 
 MUTATIE_TO_STR = {
     MUTATIE_AG_VASTSTELLEN_18M: "AG vaststellen 18m",
@@ -140,7 +139,12 @@ MUTATIE_TO_STR = {
     MUTATIE_AANMELDEN: "aanmelden",
     MUTATIE_TEAM_RONDE: "team ronde",
     MUTATIE_AFSLUITEN_REGIOCOMP: "afsluiten regiocomp",
+    MUTATIE_DOORZETTEN_NAAR_BK: "doorzetten van RK naar BK",
 }
+
+KAMP_RANK_UNKNOWN = 99
+KAMP_RANK_NO_SHOW = 32000
+KAMP_RANK_RESERVE = 32001
 
 
 class Competitie(models.Model):
@@ -156,7 +160,7 @@ class Competitie(models.Model):
     # seizoen
     begin_jaar = models.PositiveSmallIntegerField()     # 2019
 
-    # wanneer moet een schutter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
+    # wanneer moet een sporter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
     uiterste_datum_lid = models.DateField()     # TODO: niet meer gebruiken; mag weg
 
     # alle ondersteunde typen bogen en teams
@@ -171,7 +175,7 @@ class Competitie(models.Model):
     # ----
 
     begin_aanmeldingen = models.DateField()
-    # fase B: aanmelden schutters
+    # fase B: aanmelden sporters
     einde_aanmeldingen = models.DateField()
     # fase C: samenstellen vaste teams (HWL)
     einde_teamvorming = models.DateField()
@@ -275,8 +279,7 @@ class Competitie(models.Model):
                 return
 
             # fase R: vaststellen uitslagen
-            if self.deelcompetitie_set.filter(is_afgesloten=False,
-                                              laag=LAAG_BK).count() > 0:
+            if self.deelkampioenschap_set.filter(is_afgesloten=False, deel=DEEL_BK).count() > 0:
                 self.fase = 'R'
                 return
 
@@ -305,8 +308,7 @@ class Competitie(models.Model):
                 return
 
             # fase M: vaststellen uitslag in elk rayon (RKO)
-            if self.deelcompetitie_set.filter(is_afgesloten=False,
-                                              laag=LAAG_RK).count() > 0:
+            if self.deelkampioenschap_set.filter(is_afgesloten=False, deel=DEEL_RK).count() > 0:
                 self.fase = 'M'
                 return
 
@@ -342,8 +344,7 @@ class Competitie(models.Model):
             return
 
         # fase F: vaststellen uitslag in elke regio (RCL)
-        if self.deelcompetitie_set.filter(is_afgesloten=False,
-                                          laag=LAAG_REGIO).count() > 0:
+        if self.deelcompetitie_set.filter(is_afgesloten=False).count() > 0:
             self.fase = 'F'
             return
 
@@ -413,7 +414,7 @@ class CompetitieIndivKlasse(models.Model):
 
     # wedstrijdklasse wel/niet meenemen naar de RK/BK
     # staat op False voor aspiranten klassen en klassen 'onbekend'
-    is_voor_rk_bk = models.BooleanField(default=False)
+    is_voor_rk_bk = models.BooleanField(default=False)      # TODO: is_ook_voor_rk_bk
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
@@ -426,7 +427,7 @@ class CompetitieIndivKlasse(models.Model):
     def __str__(self):
         msg = self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
         if self.is_voor_rk_bk:
-            msg += ' RK'
+            msg += ' regio+RK'
         else:
             msg += ' regio'
         return msg
@@ -455,7 +456,7 @@ class CompetitieTeamKlasse(models.Model):
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
     # sorteervolgorde
-    # lager nummer = betere schutters
+    # lager nummer = betere sporter
     volgorde = models.PositiveIntegerField()
 
     # voorbeeld: Recurve klasse ERE
@@ -583,36 +584,18 @@ class DeelCompetitie(models.Model):
     """ Deze database tabel bevat informatie over een deel van een competitie:
         regiocompetitie (16x), rayoncompetitie (4x) of bondscompetitie (1x)
     """
-    LAAG = [(LAAG_REGIO, 'Regiocompetitie'),
-            (LAAG_RK, 'Rayoncompetitie'),
-            (LAAG_BK, 'Bondscompetitie')]
-
-    laag = models.CharField(max_length=5, choices=LAAG)
 
     # hoort bij welke competitie?
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
-    # nhb_regio is gezet voor de regiocompetitie
-    # nhb_rayon is gezet voor het RK
-    # geen van beiden is gezet voor de BK
-
     # regio, voor regiocompetitie
-    nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT,
-                                  null=True, blank=True)    # optioneel want alleen voor laag Regio
-
-    # rayon, voor RK
-    nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
-                                  null=True, blank=True)    # optioneel want alleen voor laag Rayon
+    nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
 
     # welke beheerder hoort hier bij?
-    functie = models.ForeignKey(Functie, on_delete=models.PROTECT,
-                                null=True, blank=True)      # optioneel (om migratie toe te staan)
+    functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
 
     # is de beheerder klaar?
     is_afgesloten = models.BooleanField(default=False)
-
-    # wedstrijden - alleen voor de RK en BK
-    rk_bk_matches = models.ManyToManyField(CompetitieMatch, blank=True)
 
     # specifieke instellingen voor deze regio
     inschrijf_methode = models.CharField(max_length=1,
@@ -656,67 +639,9 @@ class DeelCompetitie(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        if self.nhb_regio:
-            substr = str(self.nhb_regio)
-        elif self.nhb_rayon:
-            substr = str(self.nhb_rayon)
-        else:
-            substr = "BK"
-        return "%s - %s" % (self.competitie, substr)
+        return "%s - %s" % (self.competitie, self.nhb_regio)
 
     objects = models.Manager()      # for the editor only
-
-
-class DeelcompetitieIndivKlasseLimiet(models.Model):
-    """ Deze database tabel bevat de limieten voor het aantal deelnemers in een RK of BK
-        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
-    """
-
-    # voor welke deelcompetitie (i.v.m. scheiding RKs)
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
-
-    # voor welke klasse is deze limiet
-    indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
-                                     on_delete=models.CASCADE,
-                                     blank=True, null=True)
-
-    # maximum aantal deelnemers in deze klasse
-    limiet = models.PositiveSmallIntegerField(default=24)
-
-    def __str__(self):
-        return "%s : %s - %s" % (self.limiet, self.indiv_klasse.beschrijving, self.deelcompetitie)
-
-    class Meta:
-        verbose_name = "Deelcompetitie IndivKlasse Limiet"
-        verbose_name_plural = "Deelcompetitie IndivKlasse Limieten"
-
-
-class DeelcompetitieTeamKlasseLimiet(models.Model):
-    """ Deze database tabel bevat de limieten voor het aantal teams in een RK of BK
-        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
-    """
-
-    # voor welke deelcompetitie (i.v.m. scheiding RKs)
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
-
-    # voor welke klasse is deze limiet
-    team_klasse = models.ForeignKey(CompetitieTeamKlasse,
-                                    on_delete=models.CASCADE,
-                                    blank=True, null=True)
-
-    # maximum aantal deelnemers in deze klasse
-    limiet = models.PositiveSmallIntegerField(default=24)
-
-    def __str__(self):
-        msg = "%s : " % self.limiet
-        if self.team_klasse:
-            msg += "%s - " % self.team_klasse.beschrijving
-        msg += "%s" % self.deelcompetitie
-        return msg
-
-    class Meta:
-        verbose_name = "Deelcompetitie TeamKlasse Limiet"
-        verbose_name_plural = "Deelcompetitie TeamKlasse Limieten"
 
 
 class DeelcompetitieRonde(models.Model):
@@ -753,7 +678,7 @@ class DeelcompetitieRonde(models.Model):
         return msg
 
 
-class RegioCompetitieSchutterBoog(models.Model):
+class RegioCompetitieSporterBoog(models.Model):
     """ Een sporterboog aangemeld bij een regiocompetitie """
 
     # wanneer is deze aanmelding gedaan?
@@ -766,8 +691,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     # om wie gaat het?
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
 
-    # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
-    # midden in het seizoen
+    # vereniging wordt hier apart bijgehouden omdat de sporter over kan stappen midden in het seizoen
     bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
 
     # aanvangsgemiddelde voor de individuele competitie
@@ -841,8 +765,8 @@ class RegioCompetitieSchutterBoog(models.Model):
                             self.sporterboog.boogtype.beschrijving)
 
     class Meta:
-        verbose_name = "Regiocompetitie Schutterboog"
-        verbose_name_plural = "Regiocompetitie Schuttersboog"
+        verbose_name = "Regiocompetitie sporterboog"
+        verbose_name_plural = "Regiocompetitie sportersboog"
 
         indexes = [
             # help de filters op aantal_scores
@@ -865,8 +789,7 @@ class RegiocompetitieTeam(models.Model):
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # bij welke vereniging hoort dit team
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
-                                   blank=True, null=True)
+    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
 
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
@@ -877,9 +800,9 @@ class RegiocompetitieTeam(models.Model):
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
     team_naam = models.CharField(max_length=50, default='')
 
-    # initiële schutters in het team
-    gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-                                                  blank=True)    # mag leeg zijn
+    # initiële leden van het team
+    leden = models.ManyToManyField(RegioCompetitieSporterBoog,
+                                   blank=True)    # mag leeg zijn
 
     # de berekende team sterkte / team gemiddelde
     # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
@@ -940,28 +863,28 @@ class RegiocompetitieRondeTeam(models.Model):
     # welke van de 7 rondes is dit
     ronde_nr = models.PositiveSmallIntegerField(default=0)
 
-    # schutters die (automatisch) gekoppeld zijn aan het team
-    deelnemers_geselecteerd = models.ManyToManyField(RegioCompetitieSchutterBoog,
+    # leden die (automatisch) gekoppeld zijn aan het team
+    deelnemers_geselecteerd = models.ManyToManyField(RegioCompetitieSporterBoog,
                                                      related_name='teamronde_geselecteerd',
                                                      blank=True)
 
-    # feitelijke schutters, inclusief invallers
-    deelnemers_feitelijk = models.ManyToManyField(RegioCompetitieSchutterBoog,
+    # feitelijke leden, inclusief invallers
+    deelnemers_feitelijk = models.ManyToManyField(RegioCompetitieSporterBoog,
                                                   related_name='teamronde_feitelijk',
                                                   blank=True)
 
-    # gekozen scores van de feitelijke schutters
+    # gekozen scores van de feitelijke leden
     # in geval van keuze zijn deze specifiek gekozen door de RCL
     scores_feitelijk = models.ManyToManyField(Score,
                                               related_name='teamronde_feitelijk',
                                               blank=True)
 
-    # bevroren scores van de feitelijke schutters op het moment dat de teamronde afgesloten werd
+    # bevroren scores van de feitelijke leden op het moment dat de teamronde afgesloten werd
     scorehist_feitelijk = models.ManyToManyField(ScoreHist,
                                                  related_name='teamronde_feitelijk',
                                                  blank=True)
 
-    # beste 3 scores van schutters in het team
+    # beste 3 scores van leden in het team
     team_score = models.PositiveSmallIntegerField(default=0)
 
     # toegekende punten in deze ronde
@@ -974,12 +897,111 @@ class RegiocompetitieRondeTeam(models.Model):
         return "Ronde %s, team %s" % (self.ronde_nr, self.team)
 
 
-class KampioenschapSchutterBoog(models.Model):
+class DeelKampioenschap(models.Model):
+    """ Deze tabel bevat informatie over een deel van de kampioenschappen 4xRK / 1xBK en Indiv/Teams:
+    """
+    DEEL = [(DEEL_RK, 'RK'),
+            (DEEL_BK, 'BK')]
+
+    deel = models.CharField(max_length=2, choices=DEEL)
+
+    # hoort bij welke competitie?
+    competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
+
+    # nhb_rayon is gezet voor het RK
+    # geen van beiden is gezet voor de BK
+
+    # rayon, voor RK
+    nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
+                                  null=True, blank=True)    # optioneel want alleen voor RK
+
+    # welke beheerder hoort hier bij?
+    functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
+
+    # is de beheerder klaar?
+    is_klaar_indiv = models.BooleanField(default=False)
+    is_klaar_teams = models.BooleanField(default=False)
+    is_afgesloten = models.BooleanField(default=False)
+
+    # wedstrijden
+    rk_bk_matches = models.ManyToManyField(CompetitieMatch, blank=True)
+
+    # heeft deze RK/BK al een vastgestelde deelnemerslijst?
+    heeft_deelnemerslijst = models.BooleanField(default=False)
+
+    def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        deel2str = {code: beschrijving for code, beschrijving in self.DEEL}
+        msg = deel2str[self.deel]
+        if self.nhb_rayon:
+            msg += ' Rayon %s' % self.nhb_rayon.rayon_nr
+        return msg
+
+    class Meta:
+        verbose_name = "Deel kampioenschap"
+        verbose_name_plural = "Deel kampioenschappen"
+
+    objects = models.Manager()      # for the editor only
+
+
+class KampioenschapIndivKlasseLimiet(models.Model):
+    """ Deze database tabel bevat de limieten voor het aantal deelnemers in een RK of BK
+        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
+    """
+
+    # voor welk kampioenschap (i.v.m. scheiding RKs)
+    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)
+
+    # voor welke klasse is deze limiet
+    indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
+                                     on_delete=models.CASCADE,
+                                     blank=True, null=True)
+
+    # maximum aantal deelnemers in deze klasse
+    limiet = models.PositiveSmallIntegerField(default=24)
+
+    def __str__(self):
+        return "%s - %s: %s" % (self.kampioenschap, self.indiv_klasse.beschrijving, self.limiet)
+
+    class Meta:
+        verbose_name = "Kampioenschap IndivKlasse Limiet"
+        verbose_name_plural = "Kampioenschap IndivKlasse Limieten"
+
+
+class KampioenschapTeamKlasseLimiet(models.Model):
+    """ Deze database tabel bevat de limieten voor het aantal teams in een RK of BK
+        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
+    """
+
+    # voor welk kampioenschap (i.v.m. scheiding RKs)
+    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)
+
+    # voor welke klasse is deze limiet
+    team_klasse = models.ForeignKey(CompetitieTeamKlasse,
+                                    on_delete=models.CASCADE,
+                                    blank=True, null=True)
+
+    # maximum aantal deelnemers in deze klasse
+    limiet = models.PositiveSmallIntegerField(default=24)
+
+    def __str__(self):
+        msg = "%s : " % self.limiet
+        if self.team_klasse:
+            msg += "%s - " % self.team_klasse.beschrijving
+        msg += "%s" % self.kampioenschap
+        return msg
+
+    class Meta:
+        verbose_name = "Kampioenschap TeamKlasse Limiet"
+        verbose_name_plural = "Kampioenschap TeamKlasse Limieten"
+
+
+class KampioenschapSporterBoog(models.Model):
 
     """ Een sporterboog aangemeld bij een rayon- of bondskampioenschap """
 
-    # bij welke deelcompetitie hoort deze inschrijving?
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+    # bij welke kampioenschap hoort deze inschrijving?
+    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)
 
     # om wie gaat het?
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
@@ -988,7 +1010,7 @@ class KampioenschapSchutterBoog(models.Model):
     indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
                                      on_delete=models.CASCADE)
 
-    # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
+    # vereniging wordt hier apart bijgehouden omdat leden over kunnen stappen
     # tijdens het seizoen.
     # Tijdens fase G wordt de vereniging bevroren voor het RK.
     bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
@@ -1004,7 +1026,7 @@ class KampioenschapSchutterBoog(models.Model):
     volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
 
     # deelname positie van de sporter in de meest up-to-date lijst
-    # de eerste N (tot de limiet/cut, standaard 24) zijn deelnemers; daarna reserveschutters
+    # de eerste N (tot de limiet/cut, standaard 24) zijn deelnemers; daarna reserve sporters
     # afmeldingen hebben rank 0
     rank = models.PositiveSmallIntegerField(default=0)
 
@@ -1013,7 +1035,7 @@ class KampioenschapSchutterBoog(models.Model):
     # fase K: twee weken voor begin van de wedstrijden wordt een herinnering gestuurd
     bevestiging_gevraagd_op = models.DateTimeField(null=True, blank=True)
 
-    # kan deze schutter deelnemen, of niet?
+    # kan deze sporter deelnemen, of niet?
     deelname = models.CharField(max_length=1, choices=DEELNAME_CHOICES, default=DEELNAME_ONBEKEND)
 
     # gemiddelde uit de voorgaande regiocompetitie
@@ -1021,25 +1043,37 @@ class KampioenschapSchutterBoog(models.Model):
 
     # sporters met gelijk gemiddelde moeten in de juiste volgorde gehouden worden door te kijken naar
     # de regio scores: hoogste score gaat voor
+    # de RK scores: hoogste score gaat voor
     # scores zijn als string opgeslagen zodat er gesorteerd kan worden
     # "AAABBBCCCDDDEEEFFFGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
-    regio_scores = models.CharField(max_length=24, default='', blank=True)
+    gemiddelde_scores = models.CharField(max_length=24, default='', blank=True)
 
     # resultaat van het individuele kampioenschap
-    result_rank = models.PositiveSmallIntegerField(default=0)
-    result_score_1 = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    result_score_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
     result_score_2 = models.PositiveSmallIntegerField(default=0)
-    result_counts = models.CharField(max_length=20, default='', blank=True)     # 5x10 3x9
+    result_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
-    # resultaat van het team kampioenschap
-    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    # 0 = niet meegedaan (default)
+    # 1..24 = plaats op RK deelnemer, voor zover bekend
+    # KAMP_RANK_UNKNOWN = wel meegedaan, uiteindelijke rank niet precies bekend
+    # KAMP_RANK_RESERVE = niet afgemeld, reserve, niet meegedaan
+    # KAMP_RANK_NO_SHOW = niet afgemeld, wel uitgenodigd, niet meegedaan. Waarschijnlijk een no-show.
+    result_rank = models.PositiveSmallIntegerField(default=0)
+    result_volgorde = models.PositiveSmallIntegerField(default=99)   # gesorteerde uitslag, inclusief alle 5e plekken
+
+    # resultaat van de RK teams deelname van deze sporter
+    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
     result_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
+    # resultaat van de BK teams deelname van deze sporter
+    result_bk_teamscore_1 = models.PositiveSmallIntegerField(default=0)            # max = 32767
+    result_bk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
+
     def __str__(self):
-        if self.deelcompetitie.nhb_rayon:
-            substr = "RK rayon %s" % self.deelcompetitie.nhb_rayon.rayon_nr
-        else:
+        if self.kampioenschap.deel == DEEL_BK:
             substr = "BK"
+        else:
+            substr = "RK rayon %s" % self.kampioenschap.nhb_rayon.rayon_nr
 
         return "%s [%s] %s (%s)" % (
                     substr,
@@ -1048,8 +1082,8 @@ class KampioenschapSchutterBoog(models.Model):
                     self.sporterboog.boogtype.beschrijving)
 
     class Meta:
-        verbose_name = "Kampioenschap Schutterboog"
-        verbose_name_plural = "Kampioenschap Schuttersboog"
+        verbose_name = "Kampioenschap sporterboog"
+        verbose_name_plural = "Kampioenschap sportersboog"
 
         indexes = [
             # help sorteren op gemiddelde (hoogste eerst)
@@ -1071,8 +1105,8 @@ class KampioenschapSchutterBoog(models.Model):
 class KampioenschapTeam(models.Model):
     """ Een team zoals aangemaakt door de HWL van de vereniging, voor een RK en doorstroming naar BK """
 
-    # bij welke seizoen en RK hoort dit team
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+    # bij welke seizoen en RK hoort dit team?
+    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)        # nodig voor de migratie
 
     # bij welke vereniging hoort dit team
     vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
@@ -1088,19 +1122,19 @@ class KampioenschapTeam(models.Model):
     team_naam = models.CharField(max_length=50, default='')
 
     # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
-    tijdelijke_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-                                                  related_name='kampioenschapteam_tijdelijke_schutters',
-                                                  blank=True)    # mag leeg zijn
+    tijdelijke_leden = models.ManyToManyField(RegioCompetitieSporterBoog,
+                                              related_name='kampioenschapteam_tijdelijke_leden',
+                                              blank=True)    # mag leeg zijn
 
     # de voor het kampioenschap geplaatste sporters die ook lid zijn van het team
-    gekoppelde_schutters = models.ManyToManyField(KampioenschapSchutterBoog,
-                                                  related_name='kampioenschapteam_gekoppelde_schutters',
-                                                  blank=True)   # mag leeg zijn
+    gekoppelde_leden = models.ManyToManyField(KampioenschapSporterBoog,
+                                              related_name='kampioenschapteam_gekoppelde_leden',
+                                              blank=True)   # mag leeg zijn
 
     # de feitelijke sporters die tijdens de kampioenschappen in het team stonden (invallers)
-    feitelijke_schutters = models.ManyToManyField(KampioenschapSchutterBoog,
-                                                  related_name='kampioenschapteam_feitelijke_schutters',
-                                                  blank=True)   # mag leeg zijn
+    feitelijke_leden = models.ManyToManyField(KampioenschapSporterBoog,
+                                              related_name='kampioenschapteam_feitelijke_leden',
+                                              blank=True)   # mag leeg zijn
 
     # de berekende team sterkte
     # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
@@ -1115,15 +1149,18 @@ class KampioenschapTeam(models.Model):
                                     blank=True, null=True)
 
     # kampioenschap uitslag: score en ranking
+    # volgorde wordt gebruikt om binnen plek 5 en 9 de volgorde vast te houden
     result_rank = models.PositiveSmallIntegerField(default=0)
-    result_teamscore = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    result_volgorde = models.PositiveSmallIntegerField(default=0)
+
+    result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
 
     def __str__(self):
         return "%s: %s" % (self.vereniging, self.team_naam)
 
 
 class CompetitieMutatie(models.Model):
-    """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
+    """ Deze tabel houdt de mutaties bij de lijst van (reserve-)sporters van
         de RK en BK wedstrijden.
         Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
         zodat er een geschiedenis is.
@@ -1140,7 +1177,7 @@ class CompetitieMutatie(models.Model):
 
     # door wie is de mutatie geïnitieerd
     # als het een account is, dan volledige naam + rol
-    # als er geen account is (schutter zonder account) dan NHB lid details
+    # als er geen account is (sporter zonder account) dan NHB lid details
     door = models.CharField(max_length=50, default='')
 
     # op welke competitie heeft deze mutatie betrekking?
@@ -1153,6 +1190,11 @@ class CompetitieMutatie(models.Model):
                                        on_delete=models.CASCADE,
                                        null=True, blank=True)
 
+    # op welke kampioenschap heeft deze mutatie betrekking?
+    kampioenschap = models.ForeignKey(DeelKampioenschap,
+                                      on_delete=models.CASCADE,
+                                      null=True, blank=True)
+
     # op welke klasse heeft deze mutatie betrekking?
     indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
                                      on_delete=models.CASCADE,
@@ -1162,7 +1204,7 @@ class CompetitieMutatie(models.Model):
                                     null=True, blank=True)
 
     # op welke kampioenschap deelnemer heeft de mutatie betrekking (aanmelden/afmelden)
-    deelnemer = models.ForeignKey(KampioenschapSchutterBoog,
+    deelnemer = models.ForeignKey(KampioenschapSporterBoog,
                                   on_delete=models.CASCADE,
                                   null=True, blank=True)
 

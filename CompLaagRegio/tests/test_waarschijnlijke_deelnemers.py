@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,12 +8,10 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
-from Competitie.models import (DeelCompetitie, CompetitieMatch,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1)
+from Competitie.models import (DeelCompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam, INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
-from Competitie.tests.test_competitie import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -187,12 +185,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_18 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand='18')
 
-        self.deelcomp_regio_25 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_25 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand='25')
 
     def _maak_wedstrijden(self):
@@ -260,7 +256,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                           boogtype=boog_r,
                           is_onbekend=True))[0]
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -272,7 +268,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                           boogtype=boog_r,
                           is_onbekend=True))[0]
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -291,10 +287,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
-                                                 sporterboog=sporterboog,
-                                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 indiv_klasse=klasse)
+        aanmelding = RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_18,
+                                                sporterboog=sporterboog,
+                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                                indiv_klasse=klasse)
         aanmelding.save()
 
         klasse = (CompetitieIndivKlasse
@@ -303,10 +299,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                           boogtype=boog_c,
                           is_onbekend=False))[0]
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_25,
-                                                 sporterboog=sporterboog,
-                                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 indiv_klasse=klasse)
+        aanmelding = RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_25,
+                                                sporterboog=sporterboog,
+                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                                indiv_klasse=klasse)
         aanmelding.save()
 
         # aspirant schutter aanmelden
@@ -324,10 +320,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
-                                                 sporterboog=sporterboog,
-                                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 indiv_klasse=klasse)
+        aanmelding = RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_18,
+                                                sporterboog=sporterboog,
+                                                bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                                indiv_klasse=klasse)
         aanmelding.save()
 
         klasse = (CompetitieIndivKlasse
@@ -336,7 +332,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                           boogtype=boog_tr,
                           beschrijving__contains="Onder 14"))[0]
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -353,7 +349,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        RegioCompetitieSchutterBoog(
+        RegioCompetitieSporterBoog(
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
@@ -449,10 +445,6 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                 team_type=teamtype_c,
                 team_naam='Test team C 25',
                 team_klasse=klasse_c).save()
-
-        # # initiële schutters in het team
-        # gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-        #                                               blank=True)    # mag leeg zijn
 
     def test_wedstrijden_hwl(self):
         # login als HWL
@@ -603,8 +595,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         # 25m1pijl wedstrijd
         self.ronde.matches.clear()
-        self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                            nhb_regio=self.regio_111,
+        self.deelcomp_regio_18 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                             competitie__afstand=25)
         ronde = maak_deelcompetitie_ronde(self.deelcomp_regio_18)
         ronde.matches.add(self.wedstrijden[0])

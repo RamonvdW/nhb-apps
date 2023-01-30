@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
+from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd,
+                                WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD)
 from TestHelpers.e2ehelpers import E2EHelpers
+import datetime
 
 
 class TestKalender(E2EHelpers, TestCase):
@@ -37,6 +41,35 @@ class TestKalender(E2EHelpers, TestCase):
         self.functie_hwl.nhb_ver = self.nhbver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
+
+        # voeg een locatie toe
+        locatie = WedstrijdLocatie(
+                        baan_type='E',      # externe locatie
+                        naam='Test locatie')
+        locatie.save()
+        locatie.verenigingen.add(self.nhbver1)
+
+        datum = timezone.now() + datetime.timedelta(days=30)
+        wedstrijd = Wedstrijd(
+                        titel='Test 1',
+                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                        datum_begin=datum,
+                        datum_einde=datum,
+                        organiserende_vereniging=self.nhbver1,
+                        locatie=locatie)
+        wedstrijd.save()
+        self.wedstrijd = wedstrijd
+
+        # inschrijving gesloten
+        datum = timezone.now() + datetime.timedelta(days=4)
+        wedstrijd = Wedstrijd(
+                        titel='Test 2',
+                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                        datum_begin=datum,
+                        datum_einde=datum,
+                        organiserende_vereniging=self.nhbver1,
+                        locatie=locatie)
+        wedstrijd.save()
 
     def test_openbaar(self):
         self.client.logout()

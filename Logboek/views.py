@@ -9,7 +9,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
 from django.urls import reverse
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Logboek.models import LogboekRegel
 from urllib.parse import quote_plus

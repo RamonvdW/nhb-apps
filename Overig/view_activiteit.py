@@ -13,8 +13,8 @@ from django.db.models import F, Count
 from django.utils import timezone
 from django.urls import reverse
 from Account.models import Account, AccountEmail, AccountSessions
-from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url, rol_get_huidige, Rollen
+from Functie.models import Functie, Rollen, rol2url, VerklaringHanterenPersoonsgegevens
+from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol_get_huidige
 from Overig.forms import ZoekAccountForm
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter

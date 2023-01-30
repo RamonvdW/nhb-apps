@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,10 +12,11 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
                                CompetitieMatch, update_uitslag_teamcompetitie)
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Sporter.models import SporterBoog
@@ -53,15 +54,14 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         context['deelcomp'] = deelcomp
 
@@ -212,7 +212,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         sporterboog_pks = scores.values_list('sporterboog__pk', flat=True)
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
                               sporterboog__pk__in=sporterboog_pks))
@@ -266,7 +266,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         if not mag_deelcomp_wedstrijd_wijzigen(match, self.functie_nu, deelcomp):
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         context['is_controle'] = self.is_controle
         context['is_akkoord'] = match.uitslag.is_bevroren
@@ -347,7 +347,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
         match, deelcomp, _ = bepaal_match_en_deelcomp_of_404(match_pk)
 
         if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, deelcomp):
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         uitslag = match.uitslag
         if not uitslag.is_bevroren:
@@ -388,8 +388,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(laag=LAAG_REGIO,
-                             pk=deelcomp_pk))
+                        .get(pk=deelcomp_pk))
         except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -463,7 +462,7 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
         out = dict()
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__boogtype',
@@ -727,7 +726,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
 
         # maak een opzoektabel voor de huidige vereniging van elke sporterboog
         sporterboog_pks = [score.sporterboog.pk for score in scores]
-        regioschutters = (RegioCompetitieSchutterBoog
+        regioschutters = (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
                                           'bij_vereniging')
@@ -799,7 +798,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         deelnemer2sporter_cache = dict()        # [deelnemer_pk] = (sporterboog_pk, naam_str)
         sporterboog_cache = dict()              # [sporterboog_pk] = SporterBoog
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
                                           'sporterboog__sporter')
@@ -1056,15 +1055,14 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
+                        .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if not deelcomp.regio_organiseert_teamcompetitie:
             raise Http404('Geen teamcompetitie in deze regio')
@@ -1091,15 +1089,14 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
-                                                  laag=LAAG_REGIO)
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if not deelcomp.regio_organiseert_teamcompetitie:
             raise Http404('Geen teamcompetitie in deze regio')

@@ -4,19 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404
-from django.urls import reverse
-from django.utils import timezone
-from django.utils.formats import localize
-from django.shortcuts import render
-from django.templatetags.static import static
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.operations.mandje import mandje_tel_inhoud
-from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
-from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
 
 TEMPLATE_WEBWINKEL_MANAGER = 'webwinkel/manager.dtl'

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,11 @@ from django.conf import settings
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelcompetitieRonde, CompetitieMatch, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
+                               DeelcompetitieRonde, CompetitieMatch,
+                               RegioCompetitieSporterBoog, INSCHRIJF_METHODE_1,
+                               DeelKampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
@@ -27,10 +28,10 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Planning functie """
 
-    test_after = ('Competitie.tests.test_fase', 'Competitie.tests.test_beheerders', 'Competitie.tests.test_competitie')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_planning_bond = '/bondscompetities/planning/bk/%s/'                                 # deelcomp_pk
-    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk
+    url_planning_bond = '/bondscompetities/bk/%s/planning/'                                 # deelkamp_pk
+    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelkamp_pk
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                             # deelcomp_pk
     url_planning_regio_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'          # deelcomp_pk, cluster_pk
     url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'                 # ronde_pk
@@ -39,6 +40,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
     url_verwijder_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/verwijder/%s/'    # match_pk
     url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                    # match_pk
     url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'                  # deelcomp_pk
+    url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
 
     testdata = None
     
@@ -137,8 +139,8 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
-        self.url_klassengrenzen_vaststellen_18 = '/bondscompetities/%s/klassengrenzen/vaststellen/' % self.comp_18.pk
-        resp = self.client.post(self.url_klassengrenzen_vaststellen_18)
+        url_klassengrenzen_vaststellen_18 = self.url_klassengrenzen_vaststellen % self.comp_18.pk
+        resp = self.client.post(url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
@@ -162,12 +164,12 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_25, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_112)[0]
+        self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
         self.cluster_101a_18 = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = NhbCluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -196,10 +198,10 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         ver.clusters.add(self.cluster_101e_25)
 
     def _maak_inschrijving(self, deelcomp):
-        RegioCompetitieSchutterBoog(sporterboog=self.sporterboog,
-                                    bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                    deelcompetitie=deelcomp,
-                                    indiv_klasse=self.klasse_recurve_onbekend).save()
+        RegioCompetitieSporterBoog(sporterboog=self.sporterboog,
+                                   bij_vereniging=self.sporterboog.sporter.bij_vereniging,
+                                   deelcompetitie=deelcomp,
+                                   indiv_klasse=self.klasse_recurve_onbekend).save()
 
     def test_overzicht_anon(self):
         with self.assert_max_queries(20):
@@ -238,7 +240,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
@@ -267,7 +269,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
@@ -429,10 +431,10 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         # niet bestaande pk's
         resp = self.client.get(self.url_planning_bond % 999999)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_rayon % 999999)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_regio % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
@@ -451,10 +453,10 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         # verkeerde laag
         resp = self.client.get(self.url_planning_bond % self.deelcomp_rayon2_18.pk)
-        self.assert404(resp, 'Verkeerde competitie (1)')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_rayon % self.deelcomp_bond_18.pk)
-        self.assert404(resp, 'Competitie niet gevonden')
+        self.assert404(resp, 'Kampioenschap niet gevonden')
 
         resp = self.client.get(self.url_planning_regio % self.deelcomp_bond_18.pk)
         self.assert404(resp, 'Competitie niet gevonden')
@@ -1424,7 +1426,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        inschrijving = RegioCompetitieSchutterBoog(
+        inschrijving = RegioCompetitieSporterBoog(
                             sporterboog=sporterboog,
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
                             deelcompetitie=self.deelcomp_regio101_18,

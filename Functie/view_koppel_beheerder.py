@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,9 +13,9 @@ from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Functie.models import Functie
+from Functie.models import Functie, Rollen
 from Functie.operations import functie_vraag_email_bevestiging, functie_wijziging_stuur_email_notificatie
-from Functie.rol import (Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
+from Functie.rol import (rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_wissel_van_rol_menu_voor_account)
 from Functie.forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 from Logboek.models import schrijf_in_logboek
@@ -47,7 +47,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO koppelen
         if functie.rol != 'BKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     if rol_nu == Rollen.ROL_SEC:
@@ -57,7 +57,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
         if functie.rol not in ('SEC', 'HWL'):
             # niet een rol die de SEC mag wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # SEC
         return
@@ -69,7 +69,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
         if functie.rol not in ('HWL', 'WL'):
             # niet een rol die de HWL mag wijzigen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # HWL
         return
@@ -90,12 +90,12 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
     if rol_nu == Rollen.ROL_BKO:
         if functie.rol != 'RKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     elif rol_nu == Rollen.ROL_RKO:
         if functie.rol != 'RCL':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # controleer of deze regio gewijzigd mag worden
         if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
@@ -103,7 +103,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
         return
 
     # niets hier te zoeken (RCL en andere rollen)
-    raise PermissionDenied()
+    raise PermissionDenied('Niet de beheerder')
 
 
 def mag_email_wijzigen_of_403(request, functie):
@@ -126,12 +126,12 @@ def mag_email_wijzigen_of_403(request, functie):
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO email aanpassen
         if functie.rol != 'BKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     # voor de rest moet de gebruiker een functie bezitten
     if not functie_nu:
-        raise PermissionDenied()     # pragma: no cover
+        raise PermissionDenied('Niet de beheerder')     # pragma: no cover
 
     # SEC, HWL en WL mogen email van HWL en WL aanpassen
     if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
@@ -142,11 +142,11 @@ def mag_email_wijzigen_of_403(request, functie):
         if functie.rol not in ('HWL', 'WL'):
             # hier verdwijnt SEC in het putje
             # secretaris email is alleen aan te passen via Onze Relaties
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         if rol_nu == Rollen.ROL_WL and functie.rol != 'WL':
             # WL mag alleen zijn eigen e-mailadres aanpassen
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         return
 
@@ -169,12 +169,12 @@ def mag_email_wijzigen_of_403(request, functie):
 
     if rol_nu == Rollen.ROL_BKO:
         if functie.rol != 'RKO':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
         return
 
     elif rol_nu == Rollen.ROL_RKO:
         if functie.rol != 'RCL':
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         # controleer of deze regio gewijzigd mag worden
         if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
@@ -182,7 +182,7 @@ def mag_email_wijzigen_of_403(request, functie):
         return
 
     # niets hier te zoeken
-    raise PermissionDenied()
+    raise PermissionDenied('Niet de beheerder')
 
 
 def receive_bevestiging_functie_email(request, functie):
@@ -440,6 +440,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         beheerder_accounts = self._functie.accounts.all()
         for account in beheerder_accounts:
             account.geo_beschrijving = '-'
+            account.let_op = ''
             if account.sporter_set.count() > 0:
                 sporter = account.sporter_set.all()[0]
                 if sporter.bij_vereniging:

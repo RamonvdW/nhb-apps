@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,8 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige
 from Sporter.models import SporterBoog
 from Score.forms import ScoreGeschiedenisForm
 from Score.models import AanvangsgemiddeldeHist, ScoreHist, SCORE_WAARDE_VERWIJDERD
@@ -115,13 +116,17 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                         score.wedstrijd_str += " " + tijd
                                     if wedstrijd.vereniging:
                                         score.wedstrijd_waar = 'bij %s' % wedstrijd.vereniging
+                                    else:
+                                        score.wedstrijd_waar = 'bij ?'
                                     if score.waarde == SCORE_WAARDE_VERWIJDERD:
                                         score.waarde = 'verwijderd'
 
                                 except IndexError:
+                                    # skip
                                     pass
 
-                                obj.scores.append(score)
+                                else:
+                                    obj.scores.append(score)
                     # for
                 # for
 

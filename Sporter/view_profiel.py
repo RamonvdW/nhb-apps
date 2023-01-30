@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,15 +13,15 @@ from django.db.models import Q
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.models import (Competitie, DeelCompetitie,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                               LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE)
-from Functie.rol import Rollen, rol_get_huidige
-from Functie.models import Functie
+                               RegioCompetitieSporterBoog, KampioenschapSporterBoog,
+                               INSCHRIJF_METHODE_1, DEELNAME_NEE, DEEL_RK)
+from Functie.models import Functie, Rollen
+from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_TEAM, AG_DOEL_INDIV
-from Sporter.models import Sporter, SporterBoog, Speelsterkte, get_sporter_voorkeuren
+from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
 import logging
 import copy
 
@@ -161,7 +161,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         gebruik_knoppen = False
 
         # zoek alle inschrijvingen van deze sporter erbij
-        inschrijvingen = list(RegioCompetitieSchutterBoog
+        inschrijvingen = list(RegioCompetitieSporterBoog
                               .objects
                               .select_related('deelcompetitie',
                                               'sporterboog')
@@ -171,11 +171,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
                 return None, moet_bogen_kiezen, gebruik_knoppen
 
-        kampioenen = list(KampioenschapSchutterBoog
+        kampioenen = list(KampioenschapSporterBoog
                           .objects
-                          .select_related('deelcompetitie',
-                                          'deelcompetitie__competitie',
-                                          'deelcompetitie__nhb_rayon',
+                          .select_related('kampioenschap',
+                                          'kampioenschap__competitie',
+                                          'kampioenschap__nhb_rayon',
                                           'sporterboog')
                           .filter(sporterboog__sporter=sporter))
 
@@ -190,7 +190,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                .select_related('competitie')
                                .exclude(competitie__is_afgesloten=True)
                                .filter(competitie__pk__in=comp_pks,
-                                       laag=LAAG_REGIO,
                                        nhb_regio=regio)
                                .order_by('competitie__afstand')):
             comp = deelcompetitie.competitie
@@ -239,8 +238,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     elif 'J' <= comp.fase <= 'N':
                         # zoek de inschrijving voor het RK erbij
                         for kampioen in kampioenen:
-                            if (kampioen.deelcompetitie.competitie == deelcompetitie.competitie and
-                                    kampioen.deelcompetitie.laag == LAAG_RK and
+                            if (kampioen.kampioenschap.competitie == deelcompetitie.competitie and
+                                    kampioen.kampioenschap.deel == DEEL_RK and
                                     kampioen.sporterboog == sporterboog):
 
                                 # RK inschrijving van deze sporterboog gevonden
@@ -248,9 +247,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
                                 if kampioen.deelname != DEELNAME_NEE:
                                     obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
-                                                                    kwargs={'comp_pk': kampioen.deelcompetitie.competitie.pk,
+                                                                    kwargs={'comp_pk': kampioen.kampioenschap.competitie.pk,
                                                                             'comp_boog': afk.lower(),
-                                                                            'rayon_nr': kampioen.deelcompetitie.nhb_rayon.rayon_nr})
+                                                                            'rayon_nr': kampioen.kampioenschap.nhb_rayon.rayon_nr})
                         # for
 
                     elif 'P' <= comp.fase < 'R':
@@ -414,7 +413,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     def _find_scores(sporter):
         scores = list()
 
-        for deelnemer in (RegioCompetitieSchutterBoog
+        for deelnemer in (RegioCompetitieSporterBoog
                           .objects
                           .select_related('deelcompetitie',
                                           'deelcompetitie__competitie',

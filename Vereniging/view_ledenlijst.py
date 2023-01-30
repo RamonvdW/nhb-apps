@@ -9,7 +9,8 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_NHB
 from Sporter.models import Sporter, SporterBoog
 

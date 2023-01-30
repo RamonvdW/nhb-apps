@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,9 +18,36 @@ class BetaalActiefAdmin(admin.ModelAdmin):
     search_fields = ('payment_id',)
 
 
+class HeeftMollieKeyFilter(admin.SimpleListFilter):
+
+    title = 'Heeft Mollie koppeling'
+
+    parameter_name = 'Mollie'
+
+    def lookups(self, request, model_admin):
+        return (('0', 'Ja'),
+                ('1', 'Nee'))
+
+    def queryset(self, request, queryset):
+        keuze = self.value()
+        if keuze is not None:
+            # print('keuze: %s' % repr(keuze))
+            if keuze == '0':                                 # pragma: no cover
+                # moet een mollie key hebben
+                queryset = queryset.exclude(mollie_api_key='')
+
+            else:
+                # moet juist geen mollie key hebben
+                queryset = queryset.filter(mollie_api_key='')
+
+        return queryset
+
+
 class BetaalInstellingenVerenigingAdmin(admin.ModelAdmin):
 
     search_fields = ('vereniging__ver_nr', 'vereniging__naam')
+
+    list_filter = (HeeftMollieKeyFilter, 'akkoord_via_nhb')
 
 
 class BetaalMutatieAdmin(admin.ModelAdmin):

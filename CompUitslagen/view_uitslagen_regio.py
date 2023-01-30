@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,13 +8,13 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (LAAG_REGIO,
-                               TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
+from Competitie.models import (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSchutterBoog)
+                               RegioCompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
@@ -23,7 +23,7 @@ TEMPLATE_COMPUITSLAGEN_REGIO_INDIV = 'compuitslagen/uitslagen-regio-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
 
 
-def get_sporter_regio_nr(request):
+def get_request_regio_nr(request):
     """ Geeft het regionummer van de ingelogde sporter terug,
         of 101 als er geen regio vastgesteld kan worden
     """
@@ -83,12 +83,12 @@ class UitslagenRegioIndivView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
                 boogtype.selected = True
-            else:
-                boogtype.zoom_url = reverse(self.url_name,
-                                            kwargs={'comp_pk': comp.pk,
-                                                    'zes_scores': zes_scores,
-                                                    'comp_boog': boogtype.afkorting.lower(),
-                                                    'regio_nr': gekozen_regio_nr})
+
+            boogtype.zoom_url = reverse(self.url_name,
+                                        kwargs={'comp_pk': comp.pk,
+                                                'zes_scores': zes_scores,
+                                                'comp_boog': boogtype.afkorting.lower(),
+                                                'regio_nr': gekozen_regio_nr})
         # for
 
         # regio filters
@@ -108,16 +108,15 @@ class UitslagenRegioIndivView(TemplateView):
                 prev_rayon = regio.rayon.rayon_nr
 
                 regio.title_str = 'Regio %s' % regio.regio_nr
-                if regio.regio_nr != gekozen_regio_nr:
-                    regio.zoom_url = reverse(self.url_name,
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'zes_scores': zes_scores,
-                                                     'comp_boog': comp_boog,
-                                                     'regio_nr': regio.regio_nr})
-                else:
-                    # geen zoom_url --> knop disabled
+                if regio.regio_nr == gekozen_regio_nr:
                     context['regio'] = regio
                     regio.selected = True
+
+                regio.zoom_url = reverse(self.url_name,
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'zes_scores': zes_scores,
+                                                 'comp_boog': comp_boog,
+                                                 'regio_nr': regio.regio_nr})
             # for
 
         # vereniging filters
@@ -180,7 +179,7 @@ class UitslagenRegioIndivView(TemplateView):
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past
-            regio_nr = get_sporter_regio_nr(self.request)
+            regio_nr = get_request_regio_nr(self.request)
         except ValueError:
             raise Http404('Verkeerde regionummer')
 
@@ -193,8 +192,7 @@ class UitslagenRegioIndivView(TemplateView):
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
-                        .get(laag=LAAG_REGIO,
-                             competitie=comp,
+                        .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:
@@ -208,7 +206,7 @@ class UitslagenRegioIndivView(TemplateView):
         if not boogtype:
             raise Http404('Boogtype niet bekend')
 
-        deelnemers = (RegioCompetitieSchutterBoog
+        deelnemers = (RegioCompetitieSporterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp)
                       .select_related('sporterboog__sporter',
@@ -282,11 +280,11 @@ class UitslagenRegioTeamsView(TemplateView):
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
                 team.selected = True
-            else:
-                team.zoom_url = reverse(self.url_name,
-                                        kwargs={'comp_pk': comp.pk,
-                                                'team_type': team.afkorting.lower(),
-                                                'regio_nr': gekozen_regio_nr})
+
+            team.zoom_url = reverse(self.url_name,
+                                    kwargs={'comp_pk': comp.pk,
+                                            'team_type': team.afkorting.lower(),
+                                            'regio_nr': gekozen_regio_nr})
         # for
 
         # TODO: wanneer komt het voor dat teamtype niet bestaat? Template laat altijd regios/verenigingen zien!
@@ -309,14 +307,14 @@ class UitslagenRegioTeamsView(TemplateView):
                 regio.sel = 'regio_%s' % regio.regio_nr
 
                 regio.title_str = 'Regio %s' % regio.regio_nr
-                if regio.regio_nr != gekozen_regio_nr:
-                    regio.zoom_url = reverse(self.url_name,
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'team_type': teamtype_afkorting,
-                                                     'regio_nr': regio.regio_nr})
-                else:
+                if regio.regio_nr == gekozen_regio_nr:
                     regio.selected = True
                     context['regio'] = regio
+
+                regio.zoom_url = reverse(self.url_name,
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'team_type': teamtype_afkorting,
+                                                 'regio_nr': regio.regio_nr})
             # for
 
         # vereniging filters
@@ -368,7 +366,7 @@ class UitslagenRegioTeamsView(TemplateView):
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past
-            regio_nr = get_sporter_regio_nr(self.request)
+            regio_nr = get_request_regio_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd regionummer')
 
@@ -380,8 +378,7 @@ class UitslagenRegioTeamsView(TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
-                        .get(laag=LAAG_REGIO,
-                             competitie=comp,
+                        .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:
@@ -448,7 +445,7 @@ class UitslagenRegioTeamsView(TemplateView):
             team.naam_str = "[%s] %s" % (team.vereniging.ver_nr, team.team_naam)
             team.totaal_score = 0
             team.totaal_punten = 0
-            team.leden = dict()     # [deelnemer.pk] = [ronde status, ..]
+            # team.leden_lijst = dict()     # [deelnemer.pk] = [ronde status, ..]
         # for
 
         ronde_teams = (RegiocompetitieRondeTeam

@@ -196,7 +196,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog1c.pk,
-                                                                        'sessie': self.sessie_r.pk,
+                                                                        'sessie': self.sessie_c.pk,
                                                                         'klasse': wkls_c[0].pk,
                                                                         'boog': self.boog_c.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -208,7 +208,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog2c.pk,
-                                                                        'sessie': self.sessie_r.pk,
+                                                                        'sessie': self.sessie_c.pk,
                                                                         'klasse': wkls_c[1].pk,
                                                                         'boog': self.boog_c.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK

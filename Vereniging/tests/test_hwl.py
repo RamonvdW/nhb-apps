@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,9 +9,9 @@ from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieMatch, DeelcompetitieRonde,
-                               LAAG_REGIO, LAAG_RK,  INSCHRIJF_METHODE_1)
+                               DeelKampioenschap, DEEL_RK, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_fase import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -174,15 +174,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._create_competitie()
 
         # fake een deelnemerslijst voor de RK
-        deelcomp_rk = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                                 laag=LAAG_RK,
+        deelkamp = DeelKampioenschap.objects.get(competitie=self.comp_25,
+                                                 deel=DEEL_RK,
                                                  nhb_rayon=self.regio_111.rayon)
-        deelcomp_rk.heeft_deelnemerslijst = True
-        deelcomp_rk.save()
-        self.deelcomp_rk = deelcomp_rk
+        deelkamp.heeft_deelnemerslijst = True
+        deelkamp.save()
+        self.deelcomp_rk = deelkamp
 
         ronde = DeelcompetitieRonde(
-                    deelcompetitie=deelcomp_rk,
+                    deelcompetitie=self.deelcomp_regio,
                     week_nr=99,
                     beschrijving='ronde')
         ronde.save()
@@ -257,8 +257,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                         nhb_regio=self.regio_111,
+        self.deelcomp_regio = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
         self.deelcomp_regio.save()
@@ -315,7 +314,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         zet_competitie_fase(self.comp_25, 'E')
         deelcomp = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                              laag=LAAG_REGIO,
                                               nhb_regio=self.regio_111)
         deelcomp.regio_organiseert_teamcompetitie = False
         deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])

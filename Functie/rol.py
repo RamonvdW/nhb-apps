@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,14 +9,14 @@
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
 from Account.models import AccountSessions
+from Competitie.models import DeelKampioenschap, DEEL_RK, DEEL_BK
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
-from Functie.models import Functie
+from Functie.models import Functie, Rollen, rol2url, url2rol
 from Functie.operations import account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
 from typing import Tuple
 import logging
-import enum
 
 my_logger = logging.getLogger('NHBApps.Functie')
 
@@ -26,55 +26,6 @@ SESSIONVAR_ROL_MAG_WISSELEN = 'gebruiker_rol_mag_wisselen'
 SESSIONVAR_ROL_HUIDIGE = 'gebruiker_rol_huidige'
 SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
-
-
-# FUTURE: overweeg verwijderen ROL_NONE (nodig voor accounts die geen NHB lid zijn?)
-
-class Rollen(enum.IntEnum):
-    """ definitie van de rollen met codes
-        vertaling naar beschrijvingen in Plein.views
-    """
-
-    # rollen staan in prio volgorde
-    ROL_BB = 2          # Manager Competitiezaken
-    ROL_BKO = 3         # BK organisator, specifieke competitie
-    ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
-    ROL_RCL = 5         # Regiocompetitieleider, specifieke competitie en regio
-    ROL_HWL = 6         # Hoofdwedstrijdleider van een vereniging, alle competities
-    ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
-    ROL_SEC = 10        # Secretaris van een vereniging
-    ROL_SPORTER = 20    # Individuele sporter en NHB lid
-    ROL_MWZ = 30        # Manager Wedstrijdzaken
-    ROL_MO = 40         # Manager Opleidingen
-    ROL_MWW = 50        # Manager Webwinkel
-    ROL_SUP = 90        # Support
-    ROL_NONE = 99       # geen rol
-
-    """ LET OP!
-        rol nummers worden opgeslagen in de sessie
-            verwijderen = probleem voor terugkerende gebruiker
-            hergebruiken = gevaarlijk: gebruiker 'springt' naar nieuwe rol! 
-        indien nodig alle sessies verwijderen
-    """
-
-
-url2rol = {
-    'BB': Rollen.ROL_BB,
-    'BKO': Rollen.ROL_BKO,
-    'RKO': Rollen.ROL_RKO,
-    'RCL': Rollen.ROL_RCL,
-    'HWL': Rollen.ROL_HWL,
-    'WL': Rollen.ROL_WL,
-    'SEC': Rollen.ROL_SEC,
-    'MO': Rollen.ROL_MO,
-    'MWZ': Rollen.ROL_MWZ,
-    'MWW': Rollen.ROL_MWW,
-    'support': Rollen.ROL_SUP,
-    'sporter': Rollen.ROL_SPORTER,
-    'geen': Rollen.ROL_NONE
-}
-
-rol2url = {value: key for key, value in url2rol.items()}
 
 
 # plugin administratie
@@ -396,16 +347,16 @@ def rol_mag_wisselen(request):
     return check
 
 
-def rol_activeer_rol(request, rolurl):
+def rol_activeer_rol(request, rol_url):
     """ Activeer een andere rol, als dit toegestaan is
         geen foutmelding of exceptions als het niet mag.
     """
     try:
-        nwe_rol = url2rol[rolurl]
+        nwe_rol = url2rol[rol_url]
     except KeyError:
         # onbekende rol
         from_ip = get_safe_from_ip(request)
-        my_logger.error('%s ROL verzoek activeer onbekende rol %s' % (from_ip, repr(rolurl)))
+        my_logger.error('%s ROL verzoek activeer onbekende rol %s' % (from_ip, repr(rol_url)))
     else:
         try:
             rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
@@ -419,55 +370,44 @@ def rol_activeer_rol(request, rolurl):
                 request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
             else:
                 from_ip = get_safe_from_ip(request)
-                my_logger.error('%s ROL verzoek activeer niet toegekende rol %s' % (from_ip, repr(rolurl)))
+                my_logger.error('%s ROL verzoek activeer niet toegekende rol %s' % (from_ip, repr(rol_url)))
 
     # not recognized --> no change
 
 
-def rol_activeer_functie(request, functie_pk):
+def rol_activeer_functie(request, functie):
     """ Activeer een andere rol gebaseerd op een Functie
         geen foutmelding of exceptions als het niet mag.
     """
 
-    # conversie string (uit url) naar nummer
     try:
-        functie_pk = int(functie_pk)
-    except ValueError:
+        rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
+    except KeyError:
         pass
     else:
-        try:
-            rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
-        except KeyError:
-            pass
-        else:
-            # controleer dat de gebruiker deze functie mag aannemen
-            # (is al eerder vastgesteld en opgeslagen in de sessie)
-            for child_tup, parent_tup in rollen_functies:
-                mag_rol, mag_functie_pk = child_tup
-                if mag_functie_pk == functie_pk:
-                    # volledig correcte wissel - sla alles nu op
-                    request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
-                    request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
-                    request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
-                    return
-            # for
+        # controleer dat de gebruiker deze functie mag aannemen
+        # (is al eerder vastgesteld en opgeslagen in de sessie)
+        for child_tup, parent_tup in rollen_functies:
+            mag_rol, mag_functie_pk = child_tup
+            if mag_functie_pk == functie.pk:
+                # volledig correcte wissel - sla alles nu op
+                request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
+                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
+                request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
+                return
+        # for
 
-            # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
-            account = request.user
-            if account.is_authenticated:                            # pragma: no branch
-                if account_rechten_is_otp_verified(request):        # pragma: no branch
-                    if account.is_staff or account.is_BB:
-                        try:
-                            functie = Functie.objects.get(pk=functie_pk)
-                        except Functie.DoesNotExist:
-                            pass
-                        else:
-                            # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
-                            if functie.rol == 'SEC':        # pragma: no branch
-                                request.session[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_SEC
-                                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = functie_pk
-                                request.session[SESSIONVAR_ROL_BESCHRIJVING] = functie.beschrijving
-                                return
+        # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
+        account = request.user
+        if account.is_authenticated:                            # pragma: no branch
+            if account_rechten_is_otp_verified(request):        # pragma: no branch
+                if account.is_staff or account.is_BB:
+                    # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
+                    if functie.rol == 'SEC':                    # pragma: no branch
+                        request.session[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_SEC
+                        request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = functie.pk
+                        request.session[SESSIONVAR_ROL_BESCHRIJVING] = functie.beschrijving
+                        return
 
     # not recognized --> no change
 
@@ -480,7 +420,7 @@ def rol_evalueer_opnieuw(request):
     rol, functie = rol_get_huidige_functie(request)
     rol_zet_sessionvars(request.user, request)
     if functie:
-        rol_activeer_functie(request, functie.pk)
+        rol_activeer_functie(request, functie)
     else:
         rol_activeer_rol(request, rol2url[rol])
 
@@ -519,12 +459,53 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     yield Rollen.ROL_RKO, obj.pk
             # for
 
+            # expandeer naar de HWL van verenigingen gekozen voor de BK's
+            qset = (DeelKampioenschap
+                    .objects
+                    .filter(competitie__afstand=functie_in.comp_type,
+                            deel=DEEL_BK)
+                    .prefetch_related('rk_bk_matches'))
+            ver_nrs = list()
+            for deelkamp in qset:
+                ver_nrs.extend(list(deelkamp
+                                    .rk_bk_matches
+                                    .select_related('vereniging')
+                                    .values_list('vereniging__ver_nr', flat=True)))
+            # for
+
+            # zoek de HWL functies op
+            for pk, obj in functie_cache.items():
+                if obj.rol == 'HWL' and obj.ver_nr in ver_nrs:
+                    yield Rollen.ROL_HWL, obj.pk
+            # for
+
         if functie_in.rol == "RKO":
             # expandeer naar de RCL rollen binnen het rayon
             for pk, obj in functie_cache.items():
                 if obj.rol == 'RCL' and obj.comp_type == functie_in.comp_type:
                     if obj.regio_rayon_nr == functie_in.nhb_rayon.rayon_nr:
                         yield Rollen.ROL_RCL, obj.pk
+            # for
+
+            # expandeer naar de HWL van verenigingen gekozen voor de RKs
+            qset = (DeelKampioenschap
+                    .objects
+                    .filter(competitie__afstand=functie_in.comp_type,
+                            deel=DEEL_RK,
+                            nhb_rayon=functie_in.nhb_rayon)
+                    .prefetch_related('rk_bk_matches'))
+            ver_nrs = list()
+            for deelkamp in qset:
+                ver_nrs.extend(list(deelkamp
+                                    .rk_bk_matches
+                                    .select_related('vereniging')
+                                    .values_list('vereniging__ver_nr', flat=True)))
+            # for
+
+            # zoek de HWL functies op
+            for pk, obj in functie_cache.items():
+                if obj.rol == 'HWL' and obj.ver_nr in ver_nrs:
+                    yield Rollen.ROL_HWL, obj.pk
             # for
 
         if functie_in.rol == "RCL":

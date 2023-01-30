@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,10 +10,11 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, LAAG_RK, DeelcompetitieIndivKlasseLimiet,
-                               KampioenschapSchutterBoog, KampioenschapTeam, DEELNAME_NEE, DEELNAME2STR,
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, KampioenschapIndivKlasseLimiet, DEEL_RK,
+                               KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE, DEELNAME2STR,
                                CompetitieMatch)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
@@ -64,20 +65,18 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelcomps = match.deelcompetitie_set.all()
-        if len(deelcomps) == 0:
-            raise Http404('Geen competitie')
-        deelcomp_rk = deelcomps[0]
-        if deelcomp_rk.laag != LAAG_RK:
-            raise Http404('Geen RK wedstrijd')
+        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        if len(deelkamps) == 0:
+            raise Http404('Geen kampioenschap')
+        deelkamp = deelkamps[0]
 
-        context['deelcomp'] = deelcomp_rk
+        context['deelkamp'] = deelkamp
         context['wedstrijd'] = match
         context['vereniging'] = match.vereniging        # als we hier komen is dit altijd bekend
         context['locatie'] = match.locatie
         context['aantal_banen'] = '?'
 
-        comp = deelcomp_rk.competitie
+        comp = deelkamp.competitie
         # TODO: check fase
         if comp.afstand == '18':
             aantal_pijlen = 30
@@ -126,9 +125,9 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
         # zoek de deelnemers erbij
         if heeft_indiv:
-            deelnemers = (KampioenschapSchutterBoog
+            deelnemers = (KampioenschapSporterBoog
                           .objects
-                          .filter(deelcompetitie=deelcomp_rk,
+                          .filter(kampioenschap=deelkamp,
                                   indiv_klasse__pk__in=klasse_indiv_pks)
                           .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
@@ -160,7 +159,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 except KeyError:        # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_met_rolstoel:
+                    if voorkeuren.para_voorwerpen:
                         if deelnemer.kampioen_label != '':
                             deelnemer.kampioen_label += ';\n'
                         deelnemer.kampioen_label += 'Sporter laat voorwerpen\nop de schietlijn staan'
@@ -174,11 +173,11 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         if heeft_teams:
             teams = (KampioenschapTeam
                      .objects
-                     .filter(deelcompetitie=deelcomp_rk,
+                     .filter(kampioenschap=deelkamp,
                              team_klasse__pk__in=klasse_team_pks)
                      .select_related('vereniging',
                                      'team_klasse')
-                     .prefetch_related('gekoppelde_schutters')
+                     .prefetch_related('gekoppelde_leden')
                      .order_by('team_klasse',               # TODO: volgorde?
                                '-aanvangsgemiddelde'))      # sterkste team bovenaan
             context['deelnemers_teams'] = teams
@@ -205,8 +204,8 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 team.sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
                 team.sterkte_str = team.sterkte_str.replace('.', ',')
 
-                team.gekoppelde_schutters_lijst = list()
-                for lid in team.gekoppelde_schutters.select_related('sporterboog__sporter').all():
+                team.gekoppelde_leden_lijst = list()
+                for lid in team.gekoppelde_leden.select_related('sporterboog__sporter').all():
                     sporter = lid.sporterboog.sporter
                     lid.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     lid.gem_str = lid.gemiddelde
@@ -216,11 +215,11 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                     except KeyError:        # pragma: no cover
                         pass
                     else:
-                        if voorkeuren.para_met_rolstoel or len(voorkeuren.opmerking_para_sporter) > 1:
+                        if voorkeuren.para_voorwerpen or len(voorkeuren.opmerking_para_sporter) > 1:
                             lid.is_para = True
                             context['toon_para_uitleg'] = True
 
-                    team.gekoppelde_schutters_lijst.append(lid)
+                    team.gekoppelde_leden_lijst.append(lid)
                 # for
             # for
 
@@ -249,7 +248,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
@@ -272,15 +271,13 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelcomps = match.deelcompetitie_set.all()
-        if len(deelcomps) == 0:
-            raise Http404('Geen competitie')
+        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        if len(deelkamps) == 0:
+            raise Http404('Geen kampioenschap')
 
-        deelcomp_rk = deelcomps[0]
-        if deelcomp_rk.laag != LAAG_RK:
-            raise Http404('Geen RK wedstrijd')
+        deelkamp = deelkamps[0]
 
-        comp = deelcomp_rk.competitie
+        comp = deelkamp.competitie
         # TODO: check competitie fase
 
         vastgesteld = timezone.localtime(timezone.now())
@@ -296,9 +293,9 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # haal de limiet op (maximum aantal deelnemers)
         try:
-            lim = DeelcompetitieIndivKlasseLimiet.objects.get(deelcompetitie=deelcomp_rk,
-                                                              indiv_klasse=klasse)
-        except DeelcompetitieIndivKlasseLimiet.DoesNotExist:
+            lim = KampioenschapIndivKlasseLimiet.objects.get(kampioenschap=deelkamp,
+                                                             indiv_klasse=klasse)
+        except KampioenschapIndivKlasseLimiet.DoesNotExist:
             limiet = 24
         else:
             limiet = lim.limiet
@@ -316,7 +313,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             ws_name = 'Wedstrijd'
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_individueel-rayon%s_" % deelcomp_rk.nhb_rayon.rayon_nr
+        fname = "rk-programma_individueel-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsm'
 
@@ -337,7 +334,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # maak wijzigingen in het RK programma
         ws = prg[ws_name]
 
-        ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelcomp_rk.nhb_rayon.rayon_nr, klasse.beschrijving)
+        ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.nhb_rayon.rayon_nr, klasse.beschrijving)
 
         ws['D5'] = match.vereniging.naam     # organisatie
         ws['F5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
@@ -355,9 +352,9 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         d_align = ws['D7'].alignment
         g_align = ws['G7'].alignment
 
-        deelnemers = (KampioenschapSchutterBoog
+        deelnemers = (KampioenschapSporterBoog
                       .objects
-                      .filter(deelcompetitie=deelcomp_rk,
+                      .filter(kampioenschap=deelkamp,
                               indiv_klasse=klasse.pk)
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
@@ -379,7 +376,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             except KeyError:        # pragma: no cover
                 pass
             else:
-                if voorkeuren.para_met_rolstoel:
+                if voorkeuren.para_voorwerpen:
                     para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
 
                 if voorkeuren.opmerking_para_sporter:
@@ -462,7 +459,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def get(self, request, *args, **kwargs):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
@@ -486,15 +483,13 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelcomps = match.deelcompetitie_set.all()
-        if len(deelcomps) == 0:
-            raise Http404('Geen competitie')
+        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        if len(deelkamps) == 0:
+            raise Http404('Geen kampioenschap')
 
-        deelcomp_rk = deelcomps[0]
-        if deelcomp_rk.laag != LAAG_RK:
-            raise Http404('Geen RK wedstrijd')
+        deelkamp = deelkamps[0]
 
-        comp = deelcomp_rk.competitie
+        comp = deelkamp.competitie
         # TODO: check fase
 
         if comp.afstand == '18':
@@ -515,7 +510,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         boog_pks = list(boog_typen.values_list('pk', flat=True))
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_teams-rayon%s_" % deelcomp_rk.nhb_rayon.rayon_nr
+        fname = "rk-programma_teams-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsm'
 
@@ -545,7 +540,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws = prg['Deelnemers en Scores']
 
-        ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelcomp_rk.nhb_rayon.rayon_nr, comp.beschrijving)
+        ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelkamp.nhb_rayon.rayon_nr, comp.beschrijving)
         ws['B4'] = 'Klasse: ' + klasse_str
         ws['D3'] = match.datum_wanneer.strftime('%Y-%m-%d')
         ws['E3'] = match.vereniging.naam     # organisatie
@@ -556,11 +551,11 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         teams = (KampioenschapTeam
                  .objects
-                 .filter(deelcompetitie=deelcomp_rk,
+                 .filter(kampioenschap=deelkamp,
                          team_klasse=team_klasse.pk)
                  .select_related('vereniging',
                                  'vereniging__regio')
-                 .prefetch_related('gekoppelde_schutters')
+                 .prefetch_related('gekoppelde_leden')
                  .order_by('-aanvangsgemiddelde'))      # sterkste team bovenaan
 
         ver_nrs = list()
@@ -590,7 +585,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
             # vul de 4 sporters in
             aantal = 0
-            for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter').all():
+            for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter').all():
                 row_nr += 1
                 row = str(row_nr)
 
@@ -602,7 +597,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                 except KeyError:        # pragma: no cover
                     pass
                 else:
-                    if voorkeuren.para_met_rolstoel or voorkeuren.opmerking_para_sporter:
+                    if voorkeuren.para_voorwerpen or voorkeuren.opmerking_para_sporter:
                         para_mark = True
 
                 # bondsnummer
@@ -683,9 +678,9 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         row_nr = 16
         prev_ver = None
-        for deelnemer in (KampioenschapSchutterBoog
+        for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(deelcompetitie=deelcomp_rk,
+                          .filter(kampioenschap=deelkamp,
                                   bij_vereniging__ver_nr__in=ver_nrs,
                                   sporterboog__boogtype__pk__in=boog_pks)       # filter op toegestane boogtypen
                           .select_related('bij_vereniging__regio',
@@ -726,7 +721,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             except KeyError:        # pragma: no cover
                 pass
             else:
-                if voorkeuren.para_met_rolstoel:
+                if voorkeuren.para_voorwerpen:
                     para_notities = 'Sporter laat voorwerpen op de schietlijn staan'
 
                 if voorkeuren.opmerking_para_sporter:

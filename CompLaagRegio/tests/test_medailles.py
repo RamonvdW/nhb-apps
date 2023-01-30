@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import RegioCompetitieSchutterBoog
+from Competitie.models import RegioCompetitieSporterBoog
 from CompLaagRegio.view_medailles import bepaal_medailles
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -80,7 +80,7 @@ class TestCompLaagRegioMedailles(E2EHelpers, TestCase):
         prev_volgorde = None
         nr = 0
         aantal = 0
-        for deelnemer in RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__nhb_regio__regio_nr=111).select_related('indiv_klasse').order_by('indiv_klasse'):
+        for deelnemer in RegioCompetitieSporterBoog.objects.filter(deelcompetitie__nhb_regio__regio_nr=111).select_related('indiv_klasse').order_by('indiv_klasse'):
             if deelnemer.indiv_klasse.volgorde != prev_volgorde:
                 prev_volgorde = deelnemer.indiv_klasse.volgorde
                 nr += 1

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 # updaten met dit commando:
-#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/'
+#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
 BEHEER_PAGINAS = (
     '/beheer/Account/account/',
     '/beheer/Account/accountemail/',
@@ -36,13 +36,14 @@ BEHEER_PAGINAS = (
     '/beheer/Competitie/competitiemutatie/',
     '/beheer/Competitie/competitieteamklasse/',
     '/beheer/Competitie/deelcompetitie/',
-    '/beheer/Competitie/deelcompetitieindivklasselimiet/',
     '/beheer/Competitie/deelcompetitieronde/',
-    '/beheer/Competitie/deelcompetitieteamklasselimiet/',
-    '/beheer/Competitie/kampioenschapschutterboog/',
+    '/beheer/Competitie/deelkampioenschap/',
+    '/beheer/Competitie/kampioenschapindivklasselimiet/',
+    '/beheer/Competitie/kampioenschapsporterboog/',
     '/beheer/Competitie/kampioenschapteam/',
+    '/beheer/Competitie/kampioenschapteamklasselimiet/',
     '/beheer/Competitie/regiocompetitierondeteam/',
-    '/beheer/Competitie/regiocompetitieschutterboog/',
+    '/beheer/Competitie/regiocompetitiesporterboog/',
     '/beheer/Competitie/regiocompetitieteam/',
     '/beheer/Competitie/regiocompetitieteampoule/',
     '/beheer/Feedback/feedback/',
@@ -87,7 +88,7 @@ BEHEER_PAGINAS = (
     '/beheer/jsi18n/',
     '/beheer/login/',
     '/beheer/logout/',
-    '/beheer/password_change/'
+    '/beheer/password_change/',
 )
 
 
@@ -167,11 +168,14 @@ class TestBeheer(E2EHelpers, TestCase):
         self.assertEqual(resp.redirect_chain[-1], ('/account/nieuw-wachtwoord/', 302))
 
     def test_queries(self):
+        # TODO: zorg dat er van elk type record 1 bestaat
+
         # controleer dat alle beheer pagina's het goed doen
         settings.DEBUG = True
         self.e2e_login_and_pass_otp(self.account_admin)
 
         for url in BEHEER_PAGINAS:
+            # print(url)
             with self.assert_max_queries(20):
                 self.client.get(url)
 

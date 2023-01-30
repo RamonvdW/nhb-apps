@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -24,7 +25,7 @@ class BeheerAdminSite(AdminSite):
 
     """ Replace all the functions that handle the urls for login/logout/password-change """
 
-    site_header = 'Admin site'
+    site_header = settings.NAAM_SITE + ' Admin'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

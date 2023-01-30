@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -22,25 +22,37 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Uitslagen</h4>
+                <h4>Individuele competitie</h4>
+                <p>Deelnemers<wbr>lijsten en uitslagen</p>
             </div>
         </div>
 
         <!-- blauwe balk met kaartjes -->
         <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
-                <!-- regio -->
-                {% include 'plein/card.dtl' with title="Regio Individueel" text=text_regio_indiv icon="view_comfy" url=url_regio_indiv %}
-                {% include 'plein/card.dtl' with title="Regio Teams" text=text_regio_teams icon="view_comfy" url=url_regio_teams %}
+                <!-- individueel -->
+                {% include 'plein/card.dtl' with title="Regio individueel" text=text_regio_indiv icon="view_compact" url=url_regio_indiv %}
+                {% include 'plein/card.dtl' with title="RK individueel" text=text_rayon_indiv icon="view_comfy" url=url_rayon_indiv %}
+                {% include 'plein/card.dtl' with title="BK individueel" text=text_bond_indiv icon="flag" url=url_bond_indiv %}
+            </div>
+        </div>
 
-                <!-- rayon -->
-                {% include 'plein/card.dtl' with title="Rayon Individueel" text=text_rayon_indiv icon="view_compact" url=url_rayon_indiv %}
-                {% include 'plein/card.dtl' with title="Rayon Teams" text=text_rayon_teams icon="view_compact" url=url_rayon_teams %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Teamcompetitie</h4>
+                <p>Deelnemers<wbr>lijsten en uitslagen</p>
+            </div>
+        </div>
 
-                <!-- bond -->
-                {% comment %}
-                {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
-                {% endcomment %}
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+            <div class="col s12">
+                <!-- teams -->
+                {% include 'plein/card.dtl' with title="Regio teams" text=text_regio_teams icon="view_compact" url=url_regio_teams %}
+                {% include 'plein/card.dtl' with title="RK teams" text=text_rayon_teams icon="view_comfy" url=url_rayon_teams %}
+                {% include 'plein/card.dtl' with title="BK teams" text=text_bond_teams icon="flag" url=url_bond_teams %}
             </div>
         </div>
 
@@ -64,16 +76,15 @@
 
             {% if rol_is_bb %}
 
-                <!-- competities aanmaken --
+                <!-- competities aanmaken -->
                 {% if bb_kan_competitie_aanmaken %}
-                    {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
+                    {% url 'CompBeheer:instellingen-volgende-competitie' as card_url %}
                     {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en competities aanmaken." icon="playlist_add" url=card_url %}
                 {% endif %}
-                -->
 
                 <!-- datums wijzigen (hoge prio) -->
                 {% if comp.fase < 'B' %}
-                    {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
+                    {% url 'CompBeheer:wijzig-datums' comp_pk=comp.pk as card_url %}
                     {% include 'plein/card.dtl' with title="Zet datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
                 {% endif %}
 
@@ -87,7 +98,7 @@
                     {% endif %}
 
                     <!-- klassengrenzen vaststellen -->
-                    {% url 'Competitie:klassengrenzen-vaststellen' comp_pk=comp.pk as card_url %}
+                    {% url 'CompBeheer:klassengrenzen-vaststellen' comp_pk=comp.pk as card_url %}
                     {% include 'plein/card.dtl' with title="Zet klassengrenzen" text="Klassengrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
                 {% endif %}
 
@@ -106,11 +117,6 @@
                 <!-- planning deelcomp -->
                 {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 
-                <!-- rayon teams -->
-                {% if deelcomp.url_rayon_teams %}
-                    {% include 'plein/card.dtl' with title="RK Teams" text=deelcomp.tekst_rayon_teams icon="api" url=deelcomp.url_rayon_teams %}
-                {% endif %}
-
                 <!-- regio ingeschreven teams -->
                 {% if deelcomp.url_regio_teams %}
                     {% include 'plein/card.dtl' with title="Ingeschreven Teams" text=deelcomp.tekst_regio_teams icon="gamepad" url=deelcomp.url_regio_teams %}
@@ -124,6 +130,18 @@
                 <!-- scores -->
                 {% if deelcomp.url_scores %}
                     {% include 'plein/card.dtl' with title="Scores" text=deelcomp.tekst_scores icon="edit" url=deelcomp.url_scores %}
+                {% endif %}
+
+            {% endfor %}
+
+            {% for deelkamp in planning_deelkamps %}
+
+                <!-- planning -->
+                {% include 'plein/card.dtl' with title=deelkamp.titel text=deelkamp.tekst icon="pending_actions" url=deelkamp.url %}
+
+                <!-- rayon teams -->
+                {% if deelkamp.url_rayon_teams %}
+                    {% include 'plein/card.dtl' with title="RK Teams" text=deelkamp.tekst_rayon_teams icon="api" url=deelkamp.url_rayon_teams %}
                 {% endif %}
 
             {% endfor %}
@@ -183,6 +201,16 @@
                 {% include 'plein/card.dtl' with title="Doorzetten" text=tekst_klassengrenzen_rk_bk_vaststellen icon="mediation" url=url_klassengrenzen_rk_bk_vaststellen %}
             {% endif %}
 
+            <!-- BK selectie -->
+            {% if url_selectie_bk %}
+                {% include 'plein/card.dtl' with title="BK selectie" text="Selectie van sporters voor de Bondskampioenschappen." icon="rule" url=url_selectie_bk %}
+            {% endif %}
+
+            <!-- limieten -->
+            {% if url_limieten_bk %}
+                {% include 'plein/card.dtl' with title="BK limieten" text="Maximum aantal deelnemers in elke wedstrijdklasse van jouw BK instellen." icon="accessibility_new" url=url_limieten_bk %}
+            {% endif %}
+
             {% if bko_afsluiten %}
                 {% include 'plein/card.dtl' with title="Afsluiten" text=bko_afsluiten.titel_afsluiten icon="mediation" url=bko_afsluiten.url_afsluiten %}
             {% endif %}
@@ -201,7 +229,7 @@
             {% if rol_is_bb %}
                 <!-- datums wijzigen (lage prio) -->
                 {% if comp.fase >= 'B' %}
-                    {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
+                    {% url 'CompBeheer:wijzig-datums' comp_pk=comp.pk as card_url %}
                     {% include 'plein/card.dtl' with title="Fase datums" text="Datums aanpassen voor de fases van de competitie." icon="build" url=card_url %}
                 {% endif %}
             {% endif %}     <!-- rol_is_bb -->

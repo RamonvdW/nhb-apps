@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, ORGANISATIE_WA
-from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, RegioCompetitieSchutterBoog, CompetitieIndivKlasse
+from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_competitie import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
@@ -34,7 +34,6 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
         self.deelcomp103_18m = (DeelCompetitie
                                 .objects
                                 .get(competitie=self.comp_18m,
-                                     laag=LAAG_REGIO,
                                      nhb_regio__regio_nr=103))
 
         self.indiv_klasse_bb = (CompetitieIndivKlasse
@@ -97,7 +96,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             mock_timezone.return_value = dt
 
             # schrijf iemand gisteren in
-            deelnemer = RegioCompetitieSchutterBoog(
+            deelnemer = RegioCompetitieSporterBoog(
                             deelcompetitie=self.deelcomp103_18m,
                             sporterboog=self.sporterboog,
                             bij_vereniging=self.ver,

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -65,7 +65,7 @@
                         <th class="center">Gem<span class="hide-on-small-only">iddelde</span></th>
                         <th class="center">Klasse</th>
                         <th class="center">Gesl<span class="hide-on-small-only">acht</span></th>
-                        <th>Lid</th>
+                        <th>Lid nr</th>
                         <th>Naam</th>
                         <th>Ver<span class="hide-on-small-only">eniging</span></th>
                     </tr>
@@ -74,10 +74,10 @@
                         <tr>
                             <td class="center">{{ indiv.gemiddelde }}</td>
                             <td class="center">{{ indiv.leeftijd_str }}</td>
-                            <td class="center">{{ indiv.sporter.geslacht }}</td>
-                            <td>[{{ indiv.sporter.lid_nr }}]</td>
-                            <td>{{ indiv.sporter.volledige_naam }}</td>
-                            <td>[{{ indiv.sporter.bij_vereniging.ver_nr }}]<span class="hide-on-small-only"> {{ indiv.sporter.bij_vereniging.naam }}</span></td>
+                            <td class="center">{{ indiv.sporter_geslacht }}</td>
+                            <td>{{ indiv.sporter_lid_nr }}</td>
+                            <td>{{ indiv.sporter_naam }}</td>
+                            <td>[{{ indiv.vereniging_nr }}]<span class="hide-on-small-only"> {{ indiv.vereniging_naam }}</span></td>
                         </tr>
                     {% endfor %}
 

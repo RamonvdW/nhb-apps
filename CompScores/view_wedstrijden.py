@@ -7,8 +7,9 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelcompetitieRonde, DeelCompetitie, CompetitieMatch, LAAG_REGIO, LAAG_RK, LAAG_BK
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
+from Competitie.models import DeelcompetitieRonde, CompetitieMatch, DeelKampioenschap, DEEL_RK
+from Functie.models import Rollen
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 
 TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
@@ -45,16 +46,14 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         pks1 = list(DeelcompetitieRonde
                     .objects
                     .filter(deelcompetitie__is_afgesloten=False,
-                            matches__vereniging=self.functie_nu.nhb_ver,
-                            deelcompetitie__laag=LAAG_REGIO)
+                            matches__vereniging=self.functie_nu.nhb_ver)
                     .values_list('matches', flat=True))
 
         if self.toon_rk_bk:
-            pks2 = list(DeelCompetitie
+            pks2 = list(DeelKampioenschap
                         .objects
                         .filter(is_afgesloten=False,
-                                rk_bk_matches__vereniging=self.functie_nu.nhb_ver,
-                                laag__in=(LAAG_RK, LAAG_BK))
+                                rk_bk_matches__vereniging=self.functie_nu.nhb_ver)
                         .exclude(rk_bk_matches=None)                # excludes when ManyToMany is empty
                         .values_list('rk_bk_matches', flat=True))
         else:
@@ -62,7 +61,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         pks = list(pks1) + list(pks2)
 
-        is_mix = (1 <= len(pks2) < len(pks1))
+        is_mix = len(pks1) > 0 and len(pks2) > 0
 
         matches = (CompetitieMatch
                    .objects
@@ -82,11 +81,11 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                     match.beschrijving1 = ronde.deelcompetitie.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
-                    deelcomps = match.deelcompetitie_set.all()
-                    if len(deelcomps) > 0:
-                        deelcomp = deelcomps[0]
-                        match.beschrijving1 = deelcomp.competitie.beschrijving
-                        if deelcomp.laag == LAAG_RK:
+                    deelkamps = match.deelkampioenschap_set.all()
+                    if len(deelkamps) > 0:      # pragma: no branch
+                        deelkamp = deelkamps[0]
+                        match.beschrijving1 = deelkamp.competitie.beschrijving
+                        if deelkamp.deel == DEEL_RK:
                             match.beschrijving2 = "Rayonkampioenschappen"
                         else:
                             match.beschrijving2 = "Bondskampioenschappen"

@@ -159,7 +159,9 @@
 
                     <tr>
                         <th>Lid bij vereniging</th>
-                        <td>{% if geselecteerd.sporter.bij_vereniging %}{{ geselecteerd.sporter.bij_vereniging }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                        <td>{% if geselecteerd.sporter.bij_vereniging %}<span>{{ geselecteerd.sporter.bij_vereniging }}</span>{% else %}<i class="red-text">Geen</i>{% endif %}
+                            {% if geselecteerd.block_ver %}<span class="red-text"> (geen wedstrijden)</span>{% endif %}
+                        </td>
                     </tr>
 
                     <tr>

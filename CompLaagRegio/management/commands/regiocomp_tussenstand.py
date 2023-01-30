@@ -11,8 +11,8 @@ from django.core.management.base import BaseCommand
 from django.db.models import F, Q
 from django.db.utils import DataError, OperationalError, IntegrityError
 from Competitie.models import (CompetitieTaken,
-                               LAAG_REGIO, Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+                               Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
+                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 import traceback
 import datetime
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         parser.add_argument('--quick', action='store_true')     # for testing
 
     def _verwerk_overstappers_regio(self, regio_comp_pks):
-        objs = (RegioCompetitieSchutterBoog
+        objs = (RegioCompetitieSporterBoog
                 .objects
                 .select_related('bij_vereniging',
                                 'bij_vereniging__regio',
@@ -75,7 +75,7 @@ class Command(BaseCommand):
         # 1. Sporter.bij_vereniging komt overeen met informatie uit CRM
 
         # 2. Schutters in regiocompetitie kunnen elk moment overstappen
-        #    RegioCompetitieSchutterBoog.bij_vereniging
+        #    RegioCompetitieSporterBoog.bij_vereniging
         # FUTURE: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
 
         # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren (afsluiten fase G)
@@ -163,7 +163,7 @@ class Command(BaseCommand):
         self.taken.save(update_fields=['hoogste_scorehist'])
         self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
-        # een deelcompetitie heeft ingeschreven schuttersboog (RegioCompetitieSchutterBoog);
+        # een deelcompetitie heeft ingeschreven schuttersboog (RegioCompetitieSporterBoog);
         # een deelcompetitie bestaat uit rondes (RegioCompetitieRonde);
         # elke ronde bevat een plan met wedstrijden;
         # wedstrijden hebben een datum;
@@ -174,8 +174,7 @@ class Command(BaseCommand):
         for ronde in (DeelcompetitieRonde
                       .objects
                       .select_related('deelcompetitie')
-                      .filter(deelcompetitie__is_afgesloten=False,
-                              deelcompetitie__laag=LAAG_REGIO)
+                      .filter(deelcompetitie__is_afgesloten=False)
                       .all()):
 
             week_nr = ronde.week_nr
@@ -276,7 +275,7 @@ class Command(BaseCommand):
                 max_score = 250
                 comp_afstand = 25
 
-            for deelnemer in (RegioCompetitieSchutterBoog
+            for deelnemer in (RegioCompetitieSporterBoog
                               .objects
                               .filter(deelcompetitie=deelcomp)
                               .select_related('sporterboog')
@@ -358,7 +357,7 @@ class Command(BaseCommand):
     def _update_team_scores():
         """ Update alle team scores aan de hand van wie er in de teams zitten en de door de RCL geselecteerde scores
         """
-        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, is_afgesloten=False):
+        for deelcomp in DeelCompetitie.objects.filter(is_afgesloten=False):
             ronde_nr = deelcomp.huidige_team_ronde
             if 1 <= ronde_nr <= 7:
                 # pak alle teams in deze deelcompetitie erbij
@@ -416,10 +415,10 @@ class Command(BaseCommand):
     def _update_tussenstand(self):
         begin = datetime.datetime.now()
 
-        # stap 1: alle RegioCompetitieSchutterBoog.scores vaststellen
+        # stap 1: alle RegioCompetitieSporterBoog.scores vaststellen
         self._vind_scores()
 
-        # stap 2: overige velden bijwerken van aangepaste RegioCompetitieSchutterBoog
+        # stap 2: overige velden bijwerken van aangepaste RegioCompetitieSporterBoog
         self._update_regiocompetitieschuttersboog()
 
         # stap 3: teams scores bijwerken

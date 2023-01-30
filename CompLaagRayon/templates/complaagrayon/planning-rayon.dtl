@@ -23,7 +23,7 @@
             <table class="white">
                 <tr>
                     <th>Competitie</th>
-                    <td>{{ deelcomp_rk.competitie.beschrijving }}</td>
+                    <td>{{ deelkamp.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Rayon</th>
@@ -91,7 +91,7 @@
                 {% empty %}
                     {% if not url_nieuwe_wedstrijd %}
                         <tr>
-                            <td colspan="4"><i>Nog geen wedstrijden aangemaakt</i></td>
+                            <td colspan="4" class="center"><i>Nog geen wedstrijden aangemaakt</i></td>
                         </tr>
                     {% endif %}
                 {% endfor %}
