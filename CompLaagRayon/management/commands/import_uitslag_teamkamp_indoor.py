@@ -446,7 +446,8 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
             self._importeer_finales_8(ws)
 
+        self.stdout.write('Resultaat:')
         for team_naam, team in self.deelnemende_teams.items():
-            print(team.result_rank, team.result_volgorde, team_naam)
+            self.stdout.write('%s %s %s' % (team.result_rank, team.result_volgorde, team_naam))
 
 # end of file

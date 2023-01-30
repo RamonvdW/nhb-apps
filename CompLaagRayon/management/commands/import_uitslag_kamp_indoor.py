@@ -11,6 +11,7 @@ from Competitie.models import (Competitie, DEEL_RK, DEEL_BK,
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
+import sys
 
 
 class Command(BaseCommand):
@@ -74,6 +75,10 @@ class Command(BaseCommand):
             row_nr += 1
             row = str(row_nr)
 
+            stop = ws['A' + row].value
+            if stop == 'Afgemeld en reserven:':
+                break   # from the while
+
             lid_nr_str = ws[col_lid_nr + row].value
             if lid_nr_str:
                 nix_count = 0
@@ -100,12 +105,16 @@ class Command(BaseCommand):
                                 # probeer het nog een keer, maar kijk nu ook naar afgemeld status
                                 for kandidaat in deelnemers:
                                     if kandidaat.deelname != DEELNAME_NEE:
-                                        deelnemer = kandidaat
+                                        if deelnemer:
+                                            deelnemer = None
+                                            break
+                                        else:
+                                            deelnemer = kandidaat
                                 # for
                         if deelnemer is None:
                             self.stderr.write('[ERROR] Kan deelnemer niet bepalen voor regel %s. Keuze uit %s' % (
                                                 row, repr(deelnemers)))
-                            continue    # met de while
+                            sys.exit(1)
 
                         if deelnemer.deelname == DEELNAME_NEE:
                             self.stdout.write('[WARNING] Was afgemeld maar wordt deelnemer: %s' % deelnemer)
@@ -269,11 +278,14 @@ class Command(BaseCommand):
             else:
                 brons = lid_nr
 
+        if self.verbose:
+            self.stdout.write('[DEBUG] Aantal rk deelnemers: %s' % len(self.rk_deelnemers))
+
         if goud == 0:
             self.stderr.write('[ERROR] Kan winnaar van gouden finale niet vaststellen')
             return
 
-        if brons == 0:
+        if brons == 0 and len(self.rk_deelnemers) > 2:
             self.stderr.write('[ERROR] Kan winnaar van bronzen finale niet vaststellen')
             return
 
@@ -319,9 +331,11 @@ class Command(BaseCommand):
         deelnemer.result_volgorde = 1
         if not self.dryrun:
             deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
+        final_2.remove(goud)
 
         # 2
-        final_2.remove(goud)
+        if len(final_2) == 0:
+            return
         lid_nr = final_2[0]
         deelnemer = lid_nr2deelnemer[lid_nr]
         deelnemer.result_rank = 2
@@ -330,15 +344,19 @@ class Command(BaseCommand):
             deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
 
         # 3
+        if brons == 0:
+            return
         lid_nr = brons
         deelnemer = lid_nr2deelnemer[lid_nr]
         deelnemer.result_rank = 3
         deelnemer.result_volgorde = 3
         if not self.dryrun:
             deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
+        final_4.remove(brons)
 
         # 4
-        final_4.remove(brons)
+        if len(final_4) == 0:
+            return
         lid_nr = final_4[0]
         deelnemer = lid_nr2deelnemer[lid_nr]
         deelnemer.result_rank = 4
