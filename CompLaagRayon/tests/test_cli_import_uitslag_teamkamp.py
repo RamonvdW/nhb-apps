@@ -108,7 +108,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', self.test_file2_18m)
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 8 teams' gehaald" in f2.getvalue())
-        print('f1:', f1.getvalue())
-        print('f2:', f2.getvalue())
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
 
 # end of file
