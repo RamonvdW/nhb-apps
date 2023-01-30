@@ -17,7 +17,9 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
     url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
-    real_file = 'CompLaagRayon/management/testfiles/test_rk-25m1p_teams.xlsm'
+    test_file_25m = 'CompLaagRayon/management/testfiles/test_rk-25m1p_teams.xlsm'
+    test_file1_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor_teams_4.xlsm'
+    test_file2_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor_teams_8.xlsm'
 
     testdata = None
     rayon_nr = 3
@@ -30,14 +32,16 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities()
 
+        # ver_nrs: 4091, 4101, 4111, 4121
         for regio_nr in range(cls.regio_nr, cls.regio_nr+4):        # 4 regio's van dit rayon
             ver_nr = data.regio_ver_nrs[regio_nr][0]        # 1 verenigingen per regio
-            # ver_nrs: 4091, 4101, 4111, 4121
             data.maak_rk_deelnemers(25, ver_nr, regio_nr, limit_boogtypen=['R', 'BB'])
+            data.maak_rk_deelnemers(18, ver_nr, regio_nr, limit_boogtypen=['R', 'BB'])
 
             # test file is voor een recurve-klasse
             per_team = 3 if ver_nr == 4121 else 4
             data.maak_inschrijvingen_rk_teamcompetitie(25, ver_nr, per_team, limit_teamtypen=['R2'])
+            data.maak_inschrijvingen_rk_teamcompetitie(18, ver_nr, per_team, limit_teamtypen=['R2'])
         # for
 
     def setUp(self):
@@ -47,10 +51,13 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
         # zet de competitie in fase J (=vereiste vaststellen klassengrenzen)
         zet_competitie_fase(self.testdata.comp25, 'J')
+        zet_competitie_fase(self.testdata.comp18, 'J')
 
         # stel de klassegrenzen vast
         resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp25.pk)
-        # self.e2e_dump_resp(resp)
+        self.assert_is_redirect_not_plein(resp)
+
+        resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
         self.assert_is_redirect_not_plein(resp)
 
         # zet de competities in fase L
@@ -59,11 +66,11 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
     def test_25m(self):
         # file NOK
-        self.run_management_command('import_uitslag_teamkamp_25m1pijl', 'bestand')
-        self.assertTrue('[ERROR] Kan het excel bestand niet openen')
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', 'bestand')
+        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
         # dry-run
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.real_file, '--dryrun')
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.test_file_25m, '--dryrun')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
 
@@ -77,7 +84,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         # self.assertTrue('[WARNING] Geen scores voor sporter 301946 op regel 13' in f2.getvalue())
 
         # echte import
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.real_file)
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.test_file_25m)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -91,10 +98,17 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         # self.assertEqual(team2.result_rank, 2)
 
     def test_18m(self):
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', self.real_file)
-        _ = (f1, f2)
-        # print('f1:', f1.getvalue())
-        # print('f2:', f2.getvalue())
-        # self.assertTrue('[ERROR] Indoor nog niet ondersteund' in f1.getvalue())
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', 'bestand')
+        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', self.test_file1_18m, '--dryrun', '--verbose')
+        self.assertFalse('[ERROR]' in f1.getvalue())
+        self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 4 teams' gehaald" in f2.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', self.test_file2_18m)
+        self.assertFalse('[ERROR]' in f1.getvalue())
+        self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 8 teams' gehaald" in f2.getvalue())
+        print('f1:', f1.getvalue())
+        print('f2:', f2.getvalue())
 
 # end of file

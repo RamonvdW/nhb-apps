@@ -202,7 +202,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertTrue(wedstrijd.verkoopvoorwaarden_status_acceptatie)
 
-        # een GET met akkoord verkoopvoorwaarden geeft de know om goedkeuring aan te vragen
+        # een GET met akkoord verkoopvoorwaarden geeft de knop om goedkeuring aan te vragen
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

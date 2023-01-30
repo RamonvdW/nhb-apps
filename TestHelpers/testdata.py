@@ -1282,7 +1282,8 @@ class TestData(object):
                                              'sporterboog',
                                              'sporterboog__sporter',
                                              'sporterboog__boogtype')
-                             .filter(sporterboog__pk__in=pks)
+                             .filter(kampioenschap=deelkamp,
+                                     sporterboog__pk__in=pks)
                              .order_by('sporterboog__sporter__lid_nr',
                                        'sporterboog__boogtype__afkorting'))
         rk_deelnemers.extend(nieuwe_deelnemers)
