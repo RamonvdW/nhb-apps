@@ -209,6 +209,9 @@ class Command(BaseCommand):
     def _importeer_finales(self, ws):
         """ Zoek uit wie er in de finale zaten """
 
+        if len(self.rk_deelnemers) == 0:
+            return
+
         final_16 = list()
         final_8 = list()
         final_4 = list()
@@ -271,12 +274,17 @@ class Command(BaseCommand):
 
         lid_nr_str = ws['T22'].value
         if lid_nr_str:
-            try:
-                lid_nr = int(lid_nr_str)
-            except ValueError:
-                pass
+            if lid_nr_str == 'nvt':
+                # bewust niet geschoten --> 3e en 4e plek krijgen beide rank=3
+                self.stdout.write('[INFO] Geen bronzen finale geschoten')
+                brons = -1
             else:
-                brons = lid_nr
+                try:
+                    lid_nr = int(lid_nr_str)
+                except ValueError:
+                    pass
+                else:
+                    brons = lid_nr
 
         if self.verbose:
             self.stdout.write('[DEBUG] Aantal rk deelnemers: %s' % len(self.rk_deelnemers))
@@ -344,25 +352,44 @@ class Command(BaseCommand):
             deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
 
         # 3
-        if brons == 0:
-            return
-        lid_nr = brons
-        deelnemer = lid_nr2deelnemer[lid_nr]
-        deelnemer.result_rank = 3
-        deelnemer.result_volgorde = 3
-        if not self.dryrun:
-            deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
-        final_4.remove(brons)
+        if brons == -1:
+            # beide bronzen finalisten krijgen plek 3
+            # sorteer daarbinnen op kwalificatie score
+            sort_scores = list()
+            for lid_nr in final_4:
+                deelnemer = lid_nr2deelnemer[lid_nr]
+                tup = (deelnemer.result_score_1 + deelnemer.result_score_2, deelnemer.volgorde, lid_nr, deelnemer)
+                sort_scores.append(tup)
+            # for
+            sort_scores.sort(reverse=True)  # hoogste eerst
+            volgorde = 3
+            for _, _, _, deelnemer in sort_scores:
+                deelnemer.result_rank = 3
+                deelnemer.result_volgorde = volgorde
+                volgorde += 1
+                if not self.dryrun:
+                    deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
+            # for
+        else:
+            if brons == 0:
+                return
+            lid_nr = brons
+            deelnemer = lid_nr2deelnemer[lid_nr]
+            deelnemer.result_rank = 3
+            deelnemer.result_volgorde = 3
+            if not self.dryrun:
+                deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
+            final_4.remove(brons)
 
-        # 4
-        if len(final_4) == 0:
-            return
-        lid_nr = final_4[0]
-        deelnemer = lid_nr2deelnemer[lid_nr]
-        deelnemer.result_rank = 4
-        deelnemer.result_volgorde = 4
-        if not self.dryrun:
-            deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
+            # 4
+            if len(final_4) == 0:
+                return
+            lid_nr = final_4[0]
+            deelnemer = lid_nr2deelnemer[lid_nr]
+            deelnemer.result_rank = 4
+            deelnemer.result_volgorde = 4
+            if not self.dryrun:
+                deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
 
         result = 5
 
