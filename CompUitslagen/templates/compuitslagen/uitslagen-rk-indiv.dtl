@@ -30,7 +30,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslag RK individueel</h3>
-            <p>{% if comp.fase > 'L' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele rayonkampioenschappen</p>
+            <p>{% if deelkamp.is_klaar_indiv %}Eindstand van{% else %}Deelnemerslijst en tussenstand voor{% endif %} de individuele rayonkampioenschappen</p>
         </div>
     </div>
 
@@ -40,7 +40,7 @@
             <table class="white">
                 <tr>
                     <th>Competitie</th>
-                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                    <td>{{ deelkamp.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Wedstrijdboog:</th>
@@ -48,7 +48,7 @@
                 </tr>
                 <tr>
                     <th>Rayon:</th>
-                    <td>{{ deelcomp.nhb_rayon }}</td>
+                    <td>{{ deelkamp.nhb_rayon }}</td>
                 </tr>
             </table>
         </div>

@@ -152,7 +152,7 @@ class UitslagenRayonIndivView(TemplateView):
         except DeelKampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
-        context['deelcomp'] = deelkamp
+        context['deelkamp'] = deelkamp
 
         # haal de planning erbij: competitie klasse --> competitie match
         indiv2match = dict()    # [indiv_pk] = CompetitieMatch
