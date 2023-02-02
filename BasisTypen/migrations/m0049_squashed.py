@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -674,14 +674,6 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
-
-    replaces = [('BasisTypen', 'm0042_squashed'),
-                ('BasisTypen', 'm0043_jongens'),
-                ('BasisTypen', 'm0044_verwijder_ib'),
-                ('BasisTypen', 'm0045_wkl_afk_beschr'),
-                ('BasisTypen', 'm0046_wkl_refresh'),
-                ('BasisTypen', 'm0047_ifaa_open_klasse'),
-                ('BasisTypen', 'm0048_ordering')]
 
     # dit is de eerste
     initial = True

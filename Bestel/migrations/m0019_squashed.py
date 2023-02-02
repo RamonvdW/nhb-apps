@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,11 +25,10 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Bestel', 'm0010_squashed'),
-                ('Bestel', 'm0011_migratie_1'),
-                ('Bestel', 'm0012_betaal_methode'),
-                ('Bestel', 'm0013_rename'),
-                ('Bestel', 'm0014_mutatie_bedrag')]
+    replaces = [('Bestel', 'm0015_squashed'),
+                ('Bestel', 'm0016_webwinkel'),
+                ('Bestel', 'm0017_kosten'),
+                ('Bestel', 'm0018_annuleer')]
 
     # dit is de eerste
     initial = True
@@ -37,7 +36,8 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0023_squashed'),
-        ('Betaal', 'm0009_squashed'),
+        ('Betaal', 'm0011_squashed'),
+        ('Webwinkel', 'm0002_keuze'),
         ('Wedstrijden', 'm0031_squashed'),
     ]
 
@@ -57,23 +57,11 @@ class Migration(migrations.Migration):
                 ('prijs_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
                 ('korting_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
                 ('wedstrijd_inschrijving', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Wedstrijden.wedstrijdinschrijving')),
+                ('webwinkel_keuze', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Webwinkel.webwinkelkeuze')),
             ],
             options={
                 'verbose_name': 'Bestel product',
                 'verbose_name_plural': 'Bestel producten',
-            },
-        ),
-        migrations.CreateModel(
-            name='BestelMandje',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=7)),
-                ('account', models.OneToOneField(on_delete=models.deletion.CASCADE, to='Account.account')),
-                ('producten', models.ManyToManyField(to='Bestel.BestelProduct')),
-            ],
-            options={
-                'verbose_name': 'Mandje',
-                'verbose_name_plural': 'Mandjes',
             },
         ),
         migrations.CreateModel(
@@ -85,12 +73,12 @@ class Migration(migrations.Migration):
                 ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=7)),
                 ('log', models.TextField()),
                 ('account', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Account.account')),
-                ('producten', models.ManyToManyField(to='Bestel.BestelProduct')),
-                ('transacties', models.ManyToManyField(blank=True, to='Betaal.BetaalTransactie')),
+                ('producten', models.ManyToManyField(to='Bestel.bestelproduct')),
+                ('transacties', models.ManyToManyField(blank=True, to='Betaal.betaaltransactie')),
                 ('betaal_mutatie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Betaal.betaalmutatie')),
                 ('betaal_actief', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Betaal.betaalactief')),
                 ('ontvanger', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='Betaal.betaalinstellingenvereniging')),
-                ('status', models.CharField(choices=[('N', 'Nieuw'), ('B', 'Te betalen'), ('A', 'Afgerond'), ('F', 'Mislukt')], default='N', max_length=1)),
+                ('status', models.CharField(choices=[('N', 'Nieuw'), ('B', 'Te betalen'), ('A', 'Afgerond'), ('F', 'Mislukt'), ('G', 'Geannuleerd')], default='N', max_length=1)),
                 ('verkoper_adres1', models.CharField(blank=True, default='', max_length=100)),
                 ('verkoper_adres2', models.CharField(blank=True, default='', max_length=100)),
                 ('verkoper_email', models.EmailField(blank=True, default='', max_length=254)),
@@ -100,6 +88,13 @@ class Migration(migrations.Migration):
                 ('verkoper_bic', models.CharField(blank=True, default='', max_length=11)),
                 ('verkoper_heeft_mollie', models.BooleanField(default=False)),
                 ('verkoper_iban', models.CharField(blank=True, default='', max_length=18)),
+                ('btw_euro_cat1', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_euro_cat2', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_euro_cat3', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_percentage_cat1', models.CharField(blank=True, default='', max_length=5)),
+                ('btw_percentage_cat2', models.CharField(blank=True, default='', max_length=5)),
+                ('btw_percentage_cat3', models.CharField(blank=True, default='', max_length=5)),
+                ('verzendkosten_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
             ],
             options={
                 'verbose_name': 'Bestelling',
@@ -120,9 +115,30 @@ class Migration(migrations.Migration):
                 ('betaling_is_gelukt', models.BooleanField(default=False)),
                 ('wedstrijd_inschrijving', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Wedstrijden.wedstrijdinschrijving')),
                 ('bedrag_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('webwinkel_keuze', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Webwinkel.webwinkelkeuze')),
             ],
             options={
                 'verbose_name': 'Bestel mutatie',
+            },
+        ),
+        migrations.CreateModel(
+            name='BestelMandje',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=7)),
+                ('account', models.OneToOneField(on_delete=models.deletion.CASCADE, to='Account.account')),
+                ('producten', models.ManyToManyField(to='Bestel.bestelproduct')),
+                ('btw_euro_cat1', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_euro_cat2', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_euro_cat3', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_percentage_cat1', models.CharField(blank=True, default='', max_length=5)),
+                ('btw_percentage_cat2', models.CharField(blank=True, default='', max_length=5)),
+                ('btw_percentage_cat3', models.CharField(blank=True, default='', max_length=5)),
+                ('verzendkosten_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+            ],
+            options={
+                'verbose_name': 'Mandje',
+                'verbose_name_plural': 'Mandjes',
             },
         ),
         migrations.RunPython(init_hoogste_bestel_nr),

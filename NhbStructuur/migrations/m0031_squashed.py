@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,6 +12,9 @@ RAYONS = (
     (3, "Rayon 3"),     # Oost-Brabant en Noord-Limburg
     (4, "Rayon 4"),     # Zuid- en Midden-Limburg
 )
+
+ADMINISTRATIEVE_REGIO = 100
+VER_NR = 1368
 
 
 def init_rayons(apps, _):
@@ -106,12 +109,33 @@ def init_clusters(apps, _):
     cluster_klas.objects.bulk_create(bulk)
 
 
+def maak_ver_bondsbureau(apps, _):
+
+    """ Maak de vereniging Bondsbureau aan, want deze is nodig voor de functie MWW
+        Verdere details volgen uit de CRM import.
+    """
+
+    # haal de klassen op die van toepassing zijn op het moment van migratie
+    regio_klas = apps.get_model('NhbStructuur', 'NhbRegio')
+    ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
+
+    # alleen bij een lege database aanmaken
+    ver, is_created = ver_klas.objects.get_or_create(
+                                    ver_nr=VER_NR,
+                                    regio=regio_klas.objects.get(regio_nr=ADMINISTRATIEVE_REGIO))
+    if is_created:      # pragma: no branch
+        ver.naam = 'Tijdelijk'
+        ver.save()
+
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('NhbStructuur', 'm0027_squashed'),
-                ('NhbStructuur', 'm0028_iban_bic')]
+    replaces = [
+        ('NhbStructuur', 'm0029_squashed'),
+        ('NhbStructuur', 'm0030_bondsbureau'),
+    ]
 
     # dit is de eerste
     initial = True
@@ -186,6 +210,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(init_rayons),
         migrations.RunPython(init_regios),
         migrations.RunPython(init_clusters),
+        migrations.RunPython(maak_ver_bondsbureau),
     ]
 
 # end of file

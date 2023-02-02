@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,14 +12,12 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Wedstrijden', 'm0023_squashed'),
-                ('Wedstrijden', 'm0024_migratie_1'),
-                ('Wedstrijden', 'm0025_migratie_2'),
-                ('Wedstrijden', 'm0026_migratie_3'),
-                ('Wedstrijden', 'm0027_sessie_beschrijving'),
-                ('Wedstrijden', 'm0028_inschrijven_tot'),
-                ('Wedstrijden', 'm0029_klasse_log'),
-                ('Wedstrijden', 'm0030_korting')]
+    replaces = [('Wedstrijden', 'm0031_squashed'),
+                ('Wedstrijden', 'm0032_niet_tonen'),
+                ('Wedstrijden', 'm0033_cleanup'),
+                ('Wedstrijden', 'm0034_verkoopvoorwaarden'),
+                ('Wedstrijden', 'm0035_uitvoerende_ver'),
+                ('Wedstrijden', 'm0036_ter_info')]
 
     # dit is de eerste
     initial = True
@@ -27,13 +25,13 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0023_squashed'),
-        ('BasisTypen', 'm0049_squashed'),
-        ('NhbStructuur', 'm0029_squashed'),
         ('Score', 'm0019_squashed'),
+        ('NhbStructuur', 'm0030_bondsbureau'),
+        ('BasisTypen', 'm0049_squashed'),
         ('Sporter', 'm0013_squashed'),
+        ('NhbStructuur', 'm0031_squashed'),
     ]
 
-    # migratie functies
     operations = [
         migrations.CreateModel(
             name='WedstrijdLocatie',
@@ -41,7 +39,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('zichtbaar', models.BooleanField(default=True)),
                 ('baan_type', models.CharField(choices=[('X', 'Onbekend'), ('O', 'Volledig overdekte binnenbaan'), ('H', 'Binnen-buiten schieten'), ('B', 'Buitenbaan'), ('E', 'Extern')], default='X', max_length=1)),
-                ('verenigingen', models.ManyToManyField(blank=True, to='NhbStructuur.NhbVereniging')),
+                ('verenigingen', models.ManyToManyField(blank=True, to='NhbStructuur.nhbvereniging')),
                 ('banen_18m', models.PositiveSmallIntegerField(default=0)),
                 ('banen_25m', models.PositiveSmallIntegerField(default=0)),
                 ('max_dt_per_baan', models.PositiveSmallIntegerField(default=4)),
@@ -76,7 +74,7 @@ class Migration(migrations.Migration):
                 ('tijd_einde', models.TimeField()),
                 ('max_sporters', models.PositiveSmallIntegerField(default=1)),
                 ('aantal_inschrijvingen', models.PositiveSmallIntegerField(default=0)),
-                ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.KalenderWedstrijdklasse')),
+                ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.kalenderwedstrijdklasse')),
                 ('beschrijving', models.CharField(default='', max_length=50)),
             ],
             options={
@@ -101,7 +99,7 @@ class Migration(migrations.Migration):
                 ('contact_website', models.CharField(blank=True, default='', max_length=100)),
                 ('contact_telefoon', models.CharField(blank=True, default='', max_length=50)),
                 ('voorwaarden_a_status_acceptatie', models.BooleanField(default=False)),
-                ('voorwaarden_a_status_when', models.DateTimeField()),
+                ('voorwaarden_a_status_when', models.DateTimeField(auto_now=True)),
                 ('voorwaarden_a_status_who', models.CharField(blank=True, default='', max_length=100)),
                 ('extern_beheerd', models.BooleanField(default=False)),
                 ('aantal_banen', models.PositiveSmallIntegerField(default=1)),
@@ -110,12 +108,18 @@ class Migration(migrations.Migration):
                 ('bijzonderheden', models.TextField(blank=True, default='', max_length=1000)),
                 ('prijs_euro_normaal', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
                 ('prijs_euro_onder18', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
-                ('boogtypen', models.ManyToManyField(blank=True, to='BasisTypen.BoogType')),
+                ('boogtypen', models.ManyToManyField(blank=True, to='BasisTypen.boogtype')),
                 ('locatie', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Wedstrijden.wedstrijdlocatie')),
                 ('organiserende_vereniging', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
-                ('sessies', models.ManyToManyField(blank=True, to='Wedstrijden.WedstrijdSessie')),
-                ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.KalenderWedstrijdklasse')),
+                ('sessies', models.ManyToManyField(blank=True, to='Wedstrijden.wedstrijdsessie')),
+                ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.kalenderwedstrijdklasse')),
                 ('inschrijven_tot', models.PositiveSmallIntegerField(default=7)),
+                ('toon_op_kalender', models.BooleanField(default=True)),
+                ('verkoopvoorwaarden_status_acceptatie', models.BooleanField(default=False)),
+                ('verkoopvoorwaarden_status_when', models.DateTimeField(auto_now=True)),
+                ('verkoopvoorwaarden_status_who', models.CharField(blank=True, default='', max_length=100)),
+                ('uitvoerende_vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, related_name='uitvoerend', to='NhbStructuur.nhbvereniging')),
+                ('is_ter_info', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Wedstrijd',
@@ -131,12 +135,11 @@ class Migration(migrations.Migration):
                 ('soort', models.CharField(choices=[('s', 'Sporter'), ('v', 'Vereniging'), ('c', 'Combi')], default='v', max_length=1)),
                 ('uitgegeven_door', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, related_name='wedstrijd_korting_uitgever', to='NhbStructuur.nhbvereniging')),
                 ('voor_sporter', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Sporter.sporter')),
-                ('voor_vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='NhbStructuur.nhbvereniging')),
-                ('voor_wedstrijden', models.ManyToManyField(to='Wedstrijden.Wedstrijd')),
+                ('voor_wedstrijden', models.ManyToManyField(to='Wedstrijden.wedstrijd')),
             ],
             options={
                 'verbose_name': 'Wedstrijd korting',
-                'verbose_name_plural': 'Wedstrijd kortingen'
+                'verbose_name_plural': 'Wedstrijd kortingen',
             },
         ),
         migrations.CreateModel(
