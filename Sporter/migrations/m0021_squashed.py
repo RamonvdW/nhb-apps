@@ -12,6 +12,15 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Sporter', 'm0013_squashed'),
+                ('Sporter', 'm0014_sporterboog_unique'),
+                ('Sporter', 'm0015_sporter_wa_id'),
+                ('Sporter', 'm0016_verwijder_secretaris'),
+                ('Sporter', 'm0017_pascode'),
+                ('Sporter', 'm0018_postadres'),
+                ('Sporter', 'm0019_erelid'),
+                ('Sporter', 'm0020_rename_para')]
+
     # dit is de eerste
     initial = True
 
@@ -41,6 +50,13 @@ class Migration(migrations.Migration):
                 ('account', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Account.account')),
                 ('bij_vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
                 ('adres_code', models.CharField(blank=True, default='', max_length=30)),
+                ('postadres_1', models.CharField(blank=True, default='', max_length=100)),
+                ('postadres_2', models.CharField(blank=True, default='', max_length=100)),
+                ('postadres_3', models.CharField(blank=True, default='', max_length=100)),
+                ('is_erelid', models.BooleanField(default=False)),
+                ('geboorteplaats', models.CharField(blank=True, default='', max_length=100)),
+                ('telefoon', models.CharField(blank=True, default='', max_length=25)),
+                ('wa_id', models.CharField(blank=True, default='', max_length=8)),
             ],
             options={
                 'verbose_name': 'Sporter',
@@ -63,7 +79,7 @@ class Migration(migrations.Migration):
                 ('wedstrijd_geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], default='M', max_length=1)),
                 ('wedstrijd_geslacht_gekozen', models.BooleanField(default=True)),
                 ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
-                ('para_met_rolstoel', models.BooleanField(default=False)),
+                ('para_voorwerpen', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Sporter voorkeuren',
@@ -82,18 +98,8 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'SporterBoog',
                 'verbose_name_plural': 'SporterBoog',
-            },
-        ),
-        migrations.CreateModel(
-            name='Secretaris',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sporter', models.ForeignKey(null=True, on_delete=models.deletion.SET_NULL, to='Sporter.sporter')),
-                ('vereniging', models.ForeignKey(on_delete=models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
-            ],
-            options={
-                'verbose_name': 'Secretaris Vereniging',
-                'verbose_name_plural': 'Secretaris Vereniging',
+                'unique_together': {('sporter', 'boogtype')},
+                'ordering': ['sporter__lid_nr', 'boogtype__volgorde'],
             },
         ),
         migrations.CreateModel(
@@ -106,6 +112,7 @@ class Migration(migrations.Migration):
                 ('category', models.CharField(max_length=50)),
                 ('volgorde', models.PositiveSmallIntegerField()),
                 ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
+                ('pas_code', models.CharField(blank=True, default='', max_length=8)),
             ],
             options={
                 'verbose_name': 'Speelsterkte',
@@ -114,20 +121,6 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name='sporterboog',
             index=models.Index(fields=['voor_wedstrijd'], name='Sporter_spo_voor_we_c6b357_idx'),
-        ),
-        migrations.AddField(
-            model_name='sporter',
-            name='geboorteplaats',
-            field=models.CharField(blank=True, default='', max_length=100),
-        ),
-        migrations.AddField(
-            model_name='sporter',
-            name='telefoon',
-            field=models.CharField(blank=True, default='', max_length=25),
-        ),
-        migrations.AlterModelOptions(
-            name='sporterboog',
-            options={'ordering': ['sporter__lid_nr', 'boogtype__volgorde'], 'verbose_name': 'SporterBoog', 'verbose_name_plural': 'SporterBoog'},
         ),
     ]
 

@@ -17,37 +17,37 @@ LEEFTIJDSKLASSEN = (
     # 60+ (was: Veteranen)
     (61,       'VV',  GESLACHT_VROUW, 60, 0,   '60+',      '60+ Dames',               ORGANISATIE_NHB),
     (62,       'VH',  GESLACHT_MAN,   60, 0,   '60+',      '60+ Heren',               ORGANISATIE_NHB),
-    (63,       'VA',  GESLACHT_ALLE,  60, 0,   '60+',      '60+ Uniseks',             ORGANISATIE_NHB),
+    (63,       'VA',  GESLACHT_ALLE,  60, 0,   '60+',      '60+ Gemengd',             ORGANISATIE_NHB),
 
     # 50+ (was: Master)
     (51,       'MV',  GESLACHT_VROUW, 50, 0,   '50+',      '50+ Dames',               ORGANISATIE_WA),
     (52,       'MH',  GESLACHT_MAN,   50, 0,   '50+',      '50+ Heren',               ORGANISATIE_WA),
-    (53,       'MA',  GESLACHT_ALLE,  50, 0,   '50+',      '50+ Uniseks',             ORGANISATIE_NHB),
+    (53,       'MA',  GESLACHT_ALLE,  50, 0,   '50+',      '50+ Gemengd',             ORGANISATIE_NHB),
 
     # open klasse
     (41,       'SV',  GESLACHT_VROUW, 0, 0,    'Dames',    'Dames',                   ORGANISATIE_WA),   # 21+
     (42,       'SH',  GESLACHT_MAN,   0, 0,    'Heren',    'Heren',                   ORGANISATIE_WA),   # 21+
-    (43,       'SA',  GESLACHT_ALLE,  0, 0,    'Uniseks',  'Uniseks',                 ORGANISATIE_NHB),  # 21+
+    (43,       'SA',  GESLACHT_ALLE,  0, 0,    'Gemengd',  'Gemengd',                 ORGANISATIE_NHB),  # 21+
 
     # Onder 21 (was: Junioren)
     (31,       'JV',  GESLACHT_VROUW, 0, 20,   'Onder 21', 'Onder 21 Dames',          ORGANISATIE_WA),
     (32,       'JH',  GESLACHT_MAN,   0, 20,   'Onder 21', 'Onder 21 Heren',          ORGANISATIE_WA),
-    (33,       'JA',  GESLACHT_ALLE,  0, 20,   'Onder 21', 'Onder 21 Uniseks',        ORGANISATIE_NHB),
+    (33,       'JA',  GESLACHT_ALLE,  0, 20,   'Onder 21', 'Onder 21 Gemengd',        ORGANISATIE_NHB),
 
     # Onder 18 (was: Cadetten)
     (21,       'CV',  GESLACHT_VROUW, 0, 17,   'Onder 18', 'Onder 18 Dames',          ORGANISATIE_WA),
     (22,       'CH',  GESLACHT_MAN,   0, 17,   'Onder 18', 'Onder 18 Heren',          ORGANISATIE_WA),
-    (23,       'CA',  GESLACHT_ALLE,  0, 17,   'Onder 18', 'Onder 18 Uniseks',        ORGANISATIE_NHB),
+    (23,       'CA',  GESLACHT_ALLE,  0, 17,   'Onder 18', 'Onder 18 Gemengd',        ORGANISATIE_NHB),
 
     # Onder 14 (was: Aspiranten)
     (15,       'AV2', GESLACHT_VROUW, 0, 13,   'Onder 14', 'Onder 14 Meisjes',        ORGANISATIE_NHB),
     (16,       'AH2', GESLACHT_MAN,   0, 13,   'Onder 14', 'Onder 14 Jongens',        ORGANISATIE_NHB),
-    (17,       'AA2', GESLACHT_ALLE,  0, 13,   'Onder 14', 'Onder 14 Uniseks',        ORGANISATIE_NHB),
+    (17,       'AA2', GESLACHT_ALLE,  0, 13,   'Onder 14', 'Onder 14 Gemengd',        ORGANISATIE_NHB),
 
     # Onder 12 (was: Aspiranten)
     (11,       'AV1', GESLACHT_VROUW, 0, 11,   'Onder 12', 'Onder 12 Meisjes',        ORGANISATIE_NHB),
     (12,       'AH1', GESLACHT_MAN,   0, 11,   'Onder 12', 'Onder 12 Jongens',        ORGANISATIE_NHB),
-    (13,       'AA1', GESLACHT_ALLE,  0, 11,   'Onder 12', 'Onder 12 Uniseks',        ORGANISATIE_NHB),
+    (13,       'AA1', GESLACHT_ALLE,  0, 11,   'Onder 12', 'Onder 12 Gemengd',        ORGANISATIE_NHB),
 
     # IFAA
     # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
@@ -183,147 +183,147 @@ INDIV_COMP_KLASSEN = (                        # boog   lkl            regio 1   
 
 KALENDERWEDSTRIJDENKLASSEN = (
     # nr  boog  lkl    afk      beschrijving
-    (100, 'R',  'VA',  'R60U',  'Recurve 60+ Uniseks'),
+    (100, 'R',  'VA',  'R60U',  'Recurve 60+ Gemengd'),
     (101, 'R',  'VH',  'R60H',  'Recurve 60+ Heren'),
     (102, 'R',  'VV',  'R60D',  'Recurve 60+ Dames'),
 
-    (110, 'R',  'MA',  'R50U',  'Recurve 50+ Uniseks'),
+    (110, 'R',  'MA',  'R50U',  'Recurve 50+ Gemengd'),
     (111, 'R',  'MH',  'R50H',  'Recurve 50+ Heren'),
     (112, 'R',  'MV',  'R50D',  'Recurve 50+ Dames'),
 
-    (120, 'R',  'SA',  'RU',    'Recurve Uniseks'),
+    (120, 'R',  'SA',  'RU',    'Recurve Gemengd'),
     (121, 'R',  'SH',  'RH',    'Recurve Heren'),
     (122, 'R',  'SV',  'RD',    'Recurve Dames'),
 
-    (130, 'R',  'JA',  'RO21U', 'Recurve Onder 21 Uniseks'),
+    (130, 'R',  'JA',  'RO21U', 'Recurve Onder 21 Gemengd'),
     (131, 'R',  'JH',  'RO21H', 'Recurve Onder 21 Heren'),
     (132, 'R',  'JV',  'RO21D', 'Recurve Onder 21 Dames'),
 
-    (140, 'R',  'CA',  'RO18U', 'Recurve Onder 18 Uniseks'),
+    (140, 'R',  'CA',  'RO18U', 'Recurve Onder 18 Gemengd'),
     (141, 'R',  'CH',  'RO18H', 'Recurve Onder 18 Heren'),
     (142, 'R',  'CV',  'RO18D', 'Recurve Onder 18 Dames'),
 
-    (150, 'R',  'AA2', 'RO14U', 'Recurve Onder 14 Uniseks'),
+    (150, 'R',  'AA2', 'RO14U', 'Recurve Onder 14 Gemengd'),
     (151, 'R',  'AH2', 'RO14H', 'Recurve Onder 14 Jongens'),
     (152, 'R',  'AV2', 'RO14D', 'Recurve Onder 14 Meisjes'),
 
-    (160, 'R',  'AA1', 'RO12U', 'Recurve Onder 12 Uniseks'),
+    (160, 'R',  'AA1', 'RO12U', 'Recurve Onder 12 Gemengd'),
     (161, 'R',  'AH1', 'RO12H', 'Recurve Onder 12 Jongens'),
     (162, 'R',  'AV1', 'RO12D', 'Recurve Onder 12 Meisjes'),
 
 
-    (200, 'C',  'VA',  'C60U',  'Compound 60+ Uniseks'),
+    (200, 'C',  'VA',  'C60U',  'Compound 60+ Gemengd'),
     (201, 'C',  'VH',  'C60H',  'Compound 60+ Heren'),
     (202, 'C',  'VV',  'C60D',  'Compound 60+ Dames'),
 
-    (210, 'C',  'MA',  'C50U',  'Compound 50+ Uniseks'),
+    (210, 'C',  'MA',  'C50U',  'Compound 50+ Gemengd'),
     (211, 'C',  'MH',  'C50H',  'Compound 50+ Heren'),
     (212, 'C',  'MV',  'C50D',  'Compound 50+ Dames'),
 
-    (220, 'C',  'SA',  'CU',    'Compound Uniseks'),
+    (220, 'C',  'SA',  'CU',    'Compound Gemengd'),
     (221, 'C',  'SH',  'CH',    'Compound Heren'),
     (222, 'C',  'SV',  'CD',    'Compound Dames'),
 
-    (230, 'C',  'JA',  'CO21U', 'Compound Onder 21 Uniseks'),
+    (230, 'C',  'JA',  'CO21U', 'Compound Onder 21 Gemengd'),
     (231, 'C',  'JH',  'CO21H', 'Compound Onder 21 Heren'),
     (232, 'C',  'JV',  'CO21D', 'Compound Onder 21 Dames'),
 
-    (240, 'C',  'CA',  'CO18U', 'Compound Onder 18 Uniseks'),
+    (240, 'C',  'CA',  'CO18U', 'Compound Onder 18 Gemengd'),
     (241, 'C',  'CH',  'CO18H', 'Compound Onder 18 Heren'),
     (242, 'C',  'CV',  'CO18D', 'Compound Onder 18 Dames'),
 
-    (250, 'C',  'AA2', 'CO14U', 'Compound Onder 14 Uniseks'),
+    (250, 'C',  'AA2', 'CO14U', 'Compound Onder 14 Gemengd'),
     (251, 'C',  'AH2', 'CO14H', 'Compound Onder 14 Jongens'),
     (252, 'C',  'AV2', 'CO14D', 'Compound Onder 14 Meisjes'),
 
-    (260, 'C',  'AA1', 'CO12U', 'Compound Onder 12 Uniseks'),
+    (260, 'C',  'AA1', 'CO12U', 'Compound Onder 12 Gemengd'),
     (261, 'C',  'AH1', 'CO14H', 'Compound Onder 12 Jongens'),
     (262, 'C',  'AV1', 'CO14D', 'Compound Onder 12 Meisjes'),
 
 
-    (300, 'BB', 'VA',  'B60U',  'Barebow 60+ Uniseks'),
+    (300, 'BB', 'VA',  'B60U',  'Barebow 60+ Gemengd'),
     (301, 'BB', 'VH',  'B60H',  'Barebow 60+ Heren'),
     (302, 'BB', 'VV',  'B60D',  'Barebow 60+ Dames'),
 
-    (310, 'BB', 'MA',  'B50U',  'Barebow 50+ Uniseks'),
+    (310, 'BB', 'MA',  'B50U',  'Barebow 50+ Gemengd'),
     (311, 'BB', 'MH',  'B50H',  'Barebow 50+ Heren'),
     (312, 'BB', 'MV',  'B50D',  'Barebow 50+ Dames'),
 
-    (320, 'BB', 'SA',  'BU',    'Barebow Uniseks'),
+    (320, 'BB', 'SA',  'BU',    'Barebow Gemengd'),
     (321, 'BB', 'SH',  'BH',    'Barebow Heren'),
     (322, 'BB', 'SV',  'BD',    'Barebow Dames'),
 
-    (330, 'BB', 'JA',  'BO21U', 'Barebow Onder 21 Uniseks'),
+    (330, 'BB', 'JA',  'BO21U', 'Barebow Onder 21 Gemengd'),
     (331, 'BB', 'JH',  'BO21H', 'Barebow Onder 21 Heren'),
     (332, 'BB', 'JV',  'BO21D', 'Barebow Onder 21 Dames'),
 
-    (340, 'BB', 'CA',  'BO18U', 'Barebow Onder 18 Uniseks'),
+    (340, 'BB', 'CA',  'BO18U', 'Barebow Onder 18 Gemengd'),
     (341, 'BB', 'CH',  'BO18H', 'Barebow Onder 18 Heren'),
     (342, 'BB', 'CV',  'BO18D', 'Barebow Onder 18 Dames'),
 
-    (350, 'BB', 'AA2', 'BO14U', 'Barebow Onder 14 Uniseks'),
+    (350, 'BB', 'AA2', 'BO14U', 'Barebow Onder 14 Gemengd'),
     (351, 'BB', 'AH2', 'BO14H', 'Barebow Onder 14 Jongens'),
     (352, 'BB', 'AV2', 'BO14D', 'Barebow Onder 14 Meisjes'),
 
-    (360, 'BB', 'AA1', 'BO12U', 'Barebow Onder 12 Uniseks'),
+    (360, 'BB', 'AA1', 'BO12U', 'Barebow Onder 12 Gemengd'),
     (361, 'BB', 'AH1', 'BO12H', 'Barebow Onder 12 Jongens'),
     (362, 'BB', 'AV1', 'BO12D', 'Barebow Onder 12 Meisjes'),
 
 
-    (500, 'TR', 'VA',  'T60U',  'Traditional 60+ Uniseks'),
+    (500, 'TR', 'VA',  'T60U',  'Traditional 60+ Gemengd'),
     (501, 'TR', 'VH',  'T60H',  'Traditional 60+ Heren'),
     (502, 'TR', 'VV',  'T60D',  'Traditional 60+ Dames'),
 
-    (510, 'TR', 'MA',  'T50U',  'Traditional 50+ Uniseks'),
+    (510, 'TR', 'MA',  'T50U',  'Traditional 50+ Gemengd'),
     (511, 'TR', 'MH',  'T50H',  'Traditional 50+ Heren'),
     (512, 'TR', 'MV',  'T50D',  'Traditional 50+ Dames'),
 
-    (520, 'TR', 'SA',  'TU',    'Traditional Uniseks'),
+    (520, 'TR', 'SA',  'TU',    'Traditional Gemengd'),
     (521, 'TR', 'SH',  'TH',    'Traditional Heren'),
     (522, 'TR', 'SV',  'TD',    'Traditional Dames'),
 
-    (530, 'TR', 'JA',  'TO21U', 'Traditional Onder 21 Uniseks'),
+    (530, 'TR', 'JA',  'TO21U', 'Traditional Onder 21 Gemengd'),
     (531, 'TR', 'JH',  'TO21H', 'Traditional Onder 21 Heren'),
     (532, 'TR', 'JV',  'TO21D', 'Traditional Onder 21 Dames'),
 
-    (540, 'TR', 'CA',  'TO18U', 'Traditional Onder 18 Uniseks'),
+    (540, 'TR', 'CA',  'TO18U', 'Traditional Onder 18 Gemengd'),
     (541, 'TR', 'CH',  'TO18H', 'Traditional Onder 18 Heren'),
     (542, 'TR', 'CV',  'TO18D', 'Traditional Onder 18 Dames'),
 
-    (550, 'TR', 'AA2', 'TO14U', 'Traditional Onder 14 Uniseks'),
+    (550, 'TR', 'AA2', 'TO14U', 'Traditional Onder 14 Gemengd'),
     (551, 'TR', 'AH2', 'TO14H', 'Traditional Onder 14 Jongens'),
     (552, 'TR', 'AV2', 'TO14D', 'Traditional Onder 14 Meisjes'),
 
-    (560, 'TR', 'AA1', 'TO12U', 'Traditional Onder 12 Uniseks'),
+    (560, 'TR', 'AA1', 'TO12U', 'Traditional Onder 12 Gemengd'),
     (561, 'TR', 'AH1', 'TO12H', 'Traditional Onder 12 Jongens'),
     (562, 'TR', 'AV1', 'TO12D', 'Traditional Onder 12 Meisjes'),
 
 
-    (600, 'LB', 'VA',  'L60U',  'Longbow 60+ Uniseks'),
+    (600, 'LB', 'VA',  'L60U',  'Longbow 60+ Gemengd'),
     (601, 'LB', 'VH',  'L60H',  'Longbow 60+ Heren'),
     (602, 'LB', 'VV',  'L60D',  'Longbow 60+ Dames'),
 
-    (610, 'LB', 'MA',  'L50U',  'Longbow 50+ Uniseks'),
+    (610, 'LB', 'MA',  'L50U',  'Longbow 50+ Gemengd'),
     (611, 'LB', 'MH',  'L50H',  'Longbow 50+ Heren'),
     (612, 'LB', 'MV',  'L50D',  'Longbow 50+ Dames'),
 
-    (620, 'LB', 'SA',  'LU',    'Longbow Uniseks'),
+    (620, 'LB', 'SA',  'LU',    'Longbow Gemengd'),
     (621, 'LB', 'SH',  'LH',    'Longbow Heren'),
     (622, 'LB', 'SV',  'LD',    'Longbow Dames'),
 
-    (630, 'LB', 'JA',  'LO21U', 'Longbow Onder 21 Uniseks'),
+    (630, 'LB', 'JA',  'LO21U', 'Longbow Onder 21 Gemengd'),
     (631, 'LB', 'JH',  'LO21H', 'Longbow Onder 21 Heren'),
     (632, 'LB', 'JV',  'LO21D', 'Longbow Onder 21 Dames'),
 
-    (640, 'LB', 'CA',  'LO18U', 'Longbow Onder 18 Uniseks'),
+    (640, 'LB', 'CA',  'LO18U', 'Longbow Onder 18 Gemengd'),
     (641, 'LB', 'CH',  'LO18H', 'Longbow Onder 18 Heren'),
     (642, 'LB', 'CV',  'LO18D', 'Longbow Onder 18 Dames'),
 
-    (650, 'LB', 'AA2', 'LO14U', 'Longbow Onder 14 Uniseks'),
+    (650, 'LB', 'AA2', 'LO14U', 'Longbow Onder 14 Gemengd'),
     (651, 'LB', 'AH2', 'LO14H', 'Longbow Onder 14 Jongens'),
     (652, 'LB', 'AV2', 'LO14D', 'Longbow Onder 14 Meisjes'),
 
-    (660, 'LB', 'AA1', 'LO12U', 'Longbow Onder 12 Uniseks'),
+    (660, 'LB', 'AA1', 'LO12U', 'Longbow Onder 12 Gemengd'),
     (661, 'LB', 'AH1', 'LO12H', 'Longbow Onder 12 Jongens'),
     (662, 'LB', 'AV1', 'LO12D', 'Longbow Onder 12 Meisjes'),
 )
@@ -546,19 +546,22 @@ def init_wedstrijdklassen_team(apps, _):
             blazoenen_25m.append(blazoenen_25m[0])
         # while
 
-        obj = team_comp_klasse_klas(
+        wkl = team_comp_klasse_klas(
                     beschrijving=beschrijving,
                     volgorde=volgorde,
                     team_type=teamtype,
                     blazoen1_18m_regio=blazoenen_18m[0],
                     blazoen2_18m_regio=blazoenen_18m[1],
-                    blazoen1_18m_rk_bk=blazoenen_18m[2],
-                    blazoen2_18m_rk_bk=blazoenen_18m[2],
+                    blazoen_18m_rk_bk=blazoenen_18m[2],
                     blazoen1_25m_regio=blazoenen_25m[0],
                     blazoen2_25m_regio=blazoenen_25m[1],
                     blazoen_25m_rk_bk=blazoenen_25m[2])
 
-        bulk.append(obj)
+        # 21 = Compound klasse A
+        if volgorde == 21:
+            wkl.gebruik_25m = False
+
+        bulk.append(wkl)
     # for
 
     team_comp_klasse_klas.objects.bulk_create(bulk)
@@ -675,6 +678,10 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('BasisTypen', 'm0049_squashed'),
+                ('BasisTypen', 'm0050_gemengd'),
+                ('BasisTypen', 'm0051_comp_klassen')]
+
     # dit is de eerste
     initial = True
 
@@ -695,8 +702,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Boog type',
-                'verbose_name_plural': 'Boog types',
+                'verbose_name_plural': 'Boog typen',
+                'ordering': ['volgorde'],
             },
+        ),
+        migrations.AddIndex(
+            model_name='boogtype',
+            index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx'),
         ),
         migrations.CreateModel(
             name='LeeftijdsKlasse',
@@ -714,6 +726,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Leeftijdsklasse',
                 'verbose_name_plural': 'Leeftijdsklassen',
+                'ordering': ['volgorde'],
             },
         ),
         migrations.CreateModel(
@@ -723,26 +736,36 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=50)),
                 ('afkorting', models.CharField(max_length=3)),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
-                ('boog_typen', models.ManyToManyField(to='BasisTypen.BoogType')),
+                ('boog_typen', models.ManyToManyField(to='BasisTypen.boogtype')),
                 ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
                 ('buiten_gebruik', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Team type',
                 'verbose_name_plural': 'Team typen',
+                'ordering': ['volgorde'],
             },
+        ),
+        migrations.AddIndex(
+            model_name='teamtype',
+            index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='teamtype',
+            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx'),
         ),
         migrations.CreateModel(
             name='TemplateCompetitieIndivKlasse',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('buiten_gebruik', models.BooleanField(default=False)),
+                ('gebruik_18m', models.BooleanField(default=True)),
+                ('gebruik_25m', models.BooleanField(default=True)),
                 ('beschrijving', models.CharField(max_length=80)),
                 ('volgorde', models.PositiveIntegerField()),
                 ('niet_voor_rk_bk', models.BooleanField()),
                 ('is_onbekend', models.BooleanField(default=False)),
                 ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
-                ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.LeeftijdsKlasse')),
+                ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.leeftijdsklasse')),
                 ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
                 ('blazoen1_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
                 ('blazoen2_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
@@ -754,13 +777,19 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Template Competitie Indiv Klasse',
                 'verbose_name_plural': 'Template Competitie Indiv Klassen',
+                'ordering': ['volgorde'],
             },
+        ),
+        migrations.AddIndex(
+            model_name='templatecompetitieindivklasse',
+            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_48eb00_idx'),
         ),
         migrations.CreateModel(
             name='TemplateCompetitieTeamKlasse',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('buiten_gebruik', models.BooleanField(default=False)),
+                ('gebruik_18m', models.BooleanField(default=True)),
+                ('gebruik_25m', models.BooleanField(default=True)),
                 ('beschrijving', models.CharField(max_length=80)),
                 ('volgorde', models.PositiveIntegerField()),
                 ('team_type', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT, to='BasisTypen.teamtype')),
@@ -768,14 +797,18 @@ class Migration(migrations.Migration):
                 ('blazoen2_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
                 ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
                 ('blazoen2_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen1_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
-                ('blazoen2_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
+                ('blazoen_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
                 ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
             ],
             options={
                 'verbose_name': 'Template Competitie Team Klasse',
                 'verbose_name_plural': 'Template Competitie Team Klassen',
+                'ordering': ['volgorde'],
             },
+        ),
+        migrations.AddIndex(
+            model_name='templatecompetitieteamklasse',
+            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx'),
         ),
         migrations.CreateModel(
             name='KalenderWedstrijdklasse',
@@ -792,7 +825,12 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Kalender Wedstrijdklasse',
                 'verbose_name_plural': 'Kalender Wedstrijdklassen',
+                'ordering': ['volgorde'],
             },
+        ),
+        migrations.AddIndex(
+            model_name='kalenderwedstrijdklasse',
+            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx'),
         ),
         migrations.RunPython(init_boogtypen),
         migrations.RunPython(init_leeftijdsklassen),
@@ -801,54 +839,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(init_wedstrijdklassen_team),
         migrations.RunPython(init_kalenderwedstrijdklassen),
         migrations.RunPython(init_kalenderwedstrijdklassen_ifaa),
-        migrations.AddIndex(
-            model_name='boogtype',
-            index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='teamtype',
-            index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='teamtype',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='kalenderwedstrijdklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='templatecompetitieindivklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_48eb00_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='templatecompetitieteamklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx'),
-        ),
-        migrations.AlterModelOptions(
-            name='boogtype',
-            options={'ordering': ['volgorde'], 'verbose_name': 'Boog type', 'verbose_name_plural': 'Boog typen'},
-        ),
-        migrations.AlterModelOptions(
-            name='kalenderwedstrijdklasse',
-            options={'ordering': ['volgorde'], 'verbose_name': 'Kalender Wedstrijdklasse', 'verbose_name_plural': 'Kalender Wedstrijdklassen'},
-        ),
-        migrations.AlterModelOptions(
-            name='leeftijdsklasse',
-            options={'ordering': ['volgorde'], 'verbose_name': 'Leeftijdsklasse', 'verbose_name_plural': 'Leeftijdsklassen'},
-        ),
-        migrations.AlterModelOptions(
-            name='teamtype',
-            options={'ordering': ['volgorde'], 'verbose_name': 'Team type', 'verbose_name_plural': 'Team typen'},
-        ),
-        migrations.AlterModelOptions(
-            name='templatecompetitieindivklasse',
-            options={'ordering': ['volgorde'], 'verbose_name': 'Template Competitie Indiv Klasse', 'verbose_name_plural': 'Template Competitie Indiv Klassen'},
-        ),
-        migrations.AlterModelOptions(
-            name='templatecompetitieteamklasse',
-            options={'ordering': ['volgorde'], 'verbose_name': 'Template Competitie Team Klasse', 'verbose_name_plural': 'Template Competitie Team Klassen'},
-        ),
     ]
 
 # end of file

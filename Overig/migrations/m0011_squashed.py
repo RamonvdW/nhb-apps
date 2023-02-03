@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('hoortbij_accountemail', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Account.accountemail')),
                 ('dispatch_to', models.CharField(default='', max_length=20)),
                 ('hoortbij_functie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Functie.functie')),
-                ('hoortbij_kampioenschap', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.kampioenschapschutterboog')),
+                ('hoortbij_kampioenschap', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.kampioenschapsporterboog')),
             ],
         ),
     ]
