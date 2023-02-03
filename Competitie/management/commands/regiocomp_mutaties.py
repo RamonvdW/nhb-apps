@@ -1216,7 +1216,7 @@ class Command(BaseCommand):
             self._maak_deelnemerslijst_bks(comp)
 
             # teams vaststellen
-            krak
+            #krak
 
             # ga door naar fase P
             comp.alle_rks_afgesloten = True
