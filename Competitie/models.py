@@ -121,25 +121,25 @@ DEELNAME2STR = {
 MUTATIE_COMPETITIE_OPSTARTEN = 1
 MUTATIE_AG_VASTSTELLEN_18M = 2
 MUTATIE_AG_VASTSTELLEN_25M = 3
-MUTATIE_CUT = 10
 MUTATIE_INITIEEL = 20
-MUTATIE_AFMELDEN = 30
-MUTATIE_AANMELDEN = 40
-MUTATIE_TEAM_RONDE = 50
-MUTATIE_AFSLUITEN_REGIOCOMP = 60
-MUTATIE_DOORZETTEN_NAAR_BK = 70
+MUTATIE_REGIO_TEAM_RONDE = 50
+MUTATIE_DOORZETTEN_REGIO_NAAR_RK = 60
+MUTATIE_KAMP_CUT = 10
+MUTATIE_KAMP_AFMELDEN = 30
+MUTATIE_KAMP_AANMELDEN = 40
+MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK = 70
 
 MUTATIE_TO_STR = {
     MUTATIE_AG_VASTSTELLEN_18M: "AG vaststellen 18m",
     MUTATIE_AG_VASTSTELLEN_25M: "AG vaststellen 25m",
     MUTATIE_COMPETITIE_OPSTARTEN: "competitie opstarten",
     MUTATIE_INITIEEL: "initieel",
-    MUTATIE_CUT: "limiet aanpassen",
-    MUTATIE_AFMELDEN: "afmelden",
-    MUTATIE_AANMELDEN: "aanmelden",
-    MUTATIE_TEAM_RONDE: "team ronde",
-    MUTATIE_AFSLUITEN_REGIOCOMP: "afsluiten regiocomp",
-    MUTATIE_DOORZETTEN_NAAR_BK: "doorzetten van RK naar BK",
+    MUTATIE_KAMP_CUT: "RK/BK cut aanpassen",
+    MUTATIE_KAMP_AFMELDEN: "RK/BK afmelden",
+    MUTATIE_KAMP_AANMELDEN: "RK/BK aanmelden",
+    MUTATIE_REGIO_TEAM_RONDE: "regio team ronde",
+    MUTATIE_DOORZETTEN_REGIO_NAAR_RK: "doorzetten regio naar RK",
+    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK: "doorzetten indiv RK naar BK",
 }
 
 KAMP_RANK_UNKNOWN = 99
@@ -1227,10 +1227,10 @@ class CompetitieMutatie(models.Model):
         except KeyError:
             msg += " %s (???)" % self.mutatie
 
-        if self.mutatie in (MUTATIE_AANMELDEN, MUTATIE_AFMELDEN):
+        if self.mutatie in (MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN):
             msg += " - %s" % self.deelnemer
 
-        if self.mutatie == MUTATIE_CUT:
+        if self.mutatie == MUTATIE_KAMP_CUT:
             msg += " (%s --> %s)" % (self.cut_oud, self.cut_nieuw)
 
         return msg

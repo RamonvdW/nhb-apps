@@ -25,7 +25,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     test_after = ('Functie',)
 
     url_kies = '/bondscompetities/'
-    url_overzicht = '/bondscompetities/%s/'  # comp_pk
+    url_tijdlijn = '/bondscompetities/%s/tijdlijn/'             # comp_pk
+    url_overzicht = '/bondscompetities/%s/'                     # comp_pk
+    url_overzicht_beheer = '/bondscompetities/%s/beheer/'       # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
 
     @classmethod
@@ -264,6 +266,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
+        self.e2e_wisselnaarrol_bb()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+
         # BKO 18m
         deelkamp = DeelKampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)
         functie_bko = deelkamp.functie
@@ -271,7 +280,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_bko)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp18.pk)
+            resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
@@ -284,7 +293,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_rko)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp25.pk)
+            resp = self.client.get(self.url_overzicht_beheer % comp25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
@@ -296,7 +305,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_rcl)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp18.pk)
+            resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
@@ -305,16 +314,16 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp18.pk)
+            resp = self.client.get(self.url_tijdlijn % comp18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/tijdlijn.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp25.pk)
+            resp = self.client.get(self.url_tijdlijn % comp25.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/tijdlijn.dtl', 'plein/site_layout.dtl'))
 
         # TODO: add WL
 

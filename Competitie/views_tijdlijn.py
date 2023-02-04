@@ -15,7 +15,7 @@ from Plein.menu import menu_dynamics
 import datetime
 
 
-TEMPLATE_COMPETITIE_OVERZICHT_TIJDLIJN = 'competitie/overzicht-tijdlijn.dtl'
+TEMPLATE_COMPETITIE_OVERZICHT_TIJDLIJN = 'competitie/tijdlijn.dtl'
 
 
 class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):

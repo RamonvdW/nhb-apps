@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (AG_NUL, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
                                Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                               CompetitieMutatie, MUTATIE_TEAM_RONDE)
+                               CompetitieMutatie, MUTATIE_REGIO_TEAM_RONDE)
 from Competitie.operations.poules import maak_poule_schema
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -813,7 +813,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
             # voor concurrency protection, laat de achtergrondtaak de ronde doorzetten
             door_str = "RCL %s" % account.volledige_naam()
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_TEAM_RONDE,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_REGIO_TEAM_RONDE,
                                         deelcompetitie=deelcomp,
                                         door=door_str)
             mutatie.save()

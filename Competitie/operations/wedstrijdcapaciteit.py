@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,6 +22,8 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
     """ geef de lijst van deelnemers en teams terug voor deze wedstrijd,
         rekening houdend met de inschrijfmethode
     """
+
+    deelnemers_teams = list()
 
     # TODO: ondersteuning inschrijfmethode 3 toevoegen - maar hoe?
     if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
@@ -98,9 +100,9 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
                 team_pks = match.team_klassen.values_list('pk', flat=True)
                 # TODO: moet dit feitelijke sporters zijn??
                 leden_pks = (RegiocompetitieTeam
-                                 .objects
-                                 .filter(team_klasse__pk__in=team_pks)
-                                 .values_list('leden__pk', flat=True))
+                             .objects
+                             .filter(team_klasse__pk__in=team_pks)
+                             .values_list('leden__pk', flat=True))
             else:
                 leden_pks = list()
 

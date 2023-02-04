@@ -11,8 +11,8 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, DeelKampioenschap, DEEL_RK,
-                               CompetitieTeamKlasse, KampioenschapTeam, MUTATIE_AFSLUITEN_REGIOCOMP,
-                               MUTATIE_DOORZETTEN_NAAR_BK)
+                               CompetitieTeamKlasse, KampioenschapTeam, MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
+                               MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -134,7 +134,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         account = self.request.user
         door_str = "BKO %s" % account.volledige_naam()
 
-        CompetitieMutatie(mutatie=MUTATIE_AFSLUITEN_REGIOCOMP,
+        CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                           door=door_str,
                           competitie=comp).save()
 
@@ -228,7 +228,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         account = request.user
         door_str = "BKO %s" % account.volledige_naam()
 
-        CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_NAAR_BK,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK,
                           door=door_str,
                           competitie=comp).save()
 

@@ -17,7 +17,7 @@ from Competitie.models import (INSCHRIJF_METHODE_1, DeelCompetitie,
                                DeelcompetitieRonde, CompetitieMatch,
                                DeelKampioenschap, DEEL_RK, DEEL_BK,
                                KampioenschapSporterBoog, KampioenschapTeam, CompetitieMutatie,
-                               MUTATIE_CUT, DEELNAME_NEE)
+                               MUTATIE_KAMP_CUT, DEELNAME_NEE)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
@@ -894,7 +894,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         str(indiv_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
                 schrijf_in_logboek(self.request.user, "Competitie", msg)
 
-                mutatie = CompetitieMutatie(mutatie=MUTATIE_CUT,
+                mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
                                             door=door_str,
                                             kampioenschap=deelkamp,
                                             indiv_klasse=indiv_klasse,
@@ -910,7 +910,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         str(team_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
                 schrijf_in_logboek(self.request.user, "Competitie", msg)
 
-                mutatie = CompetitieMutatie(mutatie=MUTATIE_CUT,
+                mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
                                             door=door_str,
                                             kampioenschap=deelkamp,
                                             team_klasse=team_klasse,
