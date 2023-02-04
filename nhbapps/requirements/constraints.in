@@ -6,8 +6,5 @@ django>=4.0,<4.1
 # stick to v2 for now
 mollie-api-python<3.0
 
-# prevent backwards-incompatible API changes for now
-qrcode<7.4.0
-
 # end of file
 

@@ -110,9 +110,13 @@ pyparsing==3.0.9
     # via
     #   -r requirements.txt
     #   httplib2
+pypng==0.20220715.0
+    # via
+    #   -r requirements.txt
+    #   qrcode
 pyyaml==6.0
     # via html5validator
-qrcode==7.3.1
+qrcode==7.4.1
     # via -r requirements.txt
 reportlab==3.6.12
     # via -r requirements_dev.in
@@ -142,6 +146,10 @@ sqlparse==0.4.3
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
+typing-extensions==4.4.0
+    # via
+    #   -r requirements.txt
+    #   qrcode
 uritemplate==4.1.1
     # via
     #   -r requirements.txt

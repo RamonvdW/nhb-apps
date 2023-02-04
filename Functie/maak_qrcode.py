@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,7 +39,7 @@ QRCODE_VERSION = 8
 
 class SvgEmbeddedInHtmlImage(SvgPathImage):
     def _write(self, stream):
-        self._img.append(self.make_path())
+        self.process()
         Tree.ElementTree(self._img).write(stream,
                                           encoding="utf-8",
                                           xml_declaration=False,
