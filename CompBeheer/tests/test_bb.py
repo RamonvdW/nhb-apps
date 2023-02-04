@@ -522,7 +522,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # dit keer met de "voor het laatst gedaan" notitie
         comp = Competitie.objects.get(afstand=18, is_afgesloten=False)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp.pk)
+            resp = self.client.get(self.url_overzicht_beheer % comp.pk)
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_ag_vaststellen_afstand % 18 in urls)
         self.assertContains(resp, "laatst gedaan op")
