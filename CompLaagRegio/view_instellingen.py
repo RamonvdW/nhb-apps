@@ -275,8 +275,8 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.short_puntenmodel_str = '-'
                 deelcomp.puntenmodel_str = '-'
 
-            if self.rol_nu == Rollen.ROL_RKO and deelcomp.nhb_regio.rayon == self.functie_nu.nhb_rayon:
-                deelcomp.highlight = True
+            if self.rol_nu == Rollen.ROL_RKO and deelcomp.nhb_regio.rayon != self.functie_nu.nhb_rayon:
+                deelcomp.lowlight = True
         # for
 
         context['kruimels'] = (
