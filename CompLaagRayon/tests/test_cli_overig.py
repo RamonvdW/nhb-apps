@@ -102,8 +102,18 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         self.assertTrue('Geen deelnemers gevonden' in f2.getvalue())
 
     def test_recalc(self):
-
         f1, f2 = self.run_management_command('recalc_rkteam_sterkte')
+        _ = (f1, f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+    def test_check_rk_uitslagen(self):
+        f1, f2 = self.run_management_command('check_rk_uitslagen', '18')
+        _ = (f1, f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+        f1, f2 = self.run_management_command('check_rk_uitslagen', '25', '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
