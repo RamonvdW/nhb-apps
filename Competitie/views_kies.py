@@ -215,6 +215,8 @@ class CompetitieKiesView(TemplateView):
 
         rol_nu = rol_get_huidige(self.request)
 
+        link_naar_beheer = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+
         context['competities'] = comps = list()
 
         begin_jaar = bepaal_startjaar_nieuwe_competitie()
@@ -224,7 +226,8 @@ class CompetitieKiesView(TemplateView):
         for comp in (Competitie
                      .objects
                      .exclude(is_afgesloten=True)
-                     .order_by('afstand', 'begin_jaar')):
+                     .order_by('afstand',
+                               'begin_jaar')):
 
             comp.bepaal_fase()
             if comp.fase == 'S':
@@ -243,8 +246,11 @@ class CompetitieKiesView(TemplateView):
                 else:
                     comp.img_src = static('plein/badge_nhb_25m1p.png')
 
-                comp.card_url = reverse('Competitie:overzicht',
-                                        kwargs={'comp_pk': comp.pk})
+                if link_naar_beheer:
+                    comp.card_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+                else:
+                    comp.card_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+
                 if comp.fase < 'B':
                     comp.text = "Hier worden de voorbereidingen voor getroffen voor de volgende bondscompetitie."
                 else:

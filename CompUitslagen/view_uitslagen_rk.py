@@ -224,12 +224,14 @@ class UitslagenRayonIndivView(TemplateView):
                                     '-gemiddelde'))
 
         # bepaal in welke klassen we de uitslag gaan tonen
+        context['toon_uitslag'] = False
         klasse2toon_uitslag = dict()        # [klasse volgorde] = True/False
         if is_lijst_rk:
             for deelnemer in deelnemers:
                 if deelnemer.result_rank > 0:
                     klasse = deelnemer.indiv_klasse.volgorde
                     klasse2toon_uitslag[klasse] = True
+                    context['toon_uitslag'] = True
             # for
 
         klasse = -1
@@ -243,6 +245,7 @@ class UitslagenRayonIndivView(TemplateView):
             if deelnemer.break_klasse:
                 if klasse == -1:
                     deelnemer.is_eerste_break = True
+
                 indiv = deelnemer.indiv_klasse
                 deelnemer.klasse_str = indiv.beschrijving
                 try:
@@ -283,7 +286,6 @@ class UitslagenRayonIndivView(TemplateView):
                     deelnemer.is_reserve = True
 
             if toon_uitslag:
-                # TODO: ondersteuning Indoor
                 if deelnemer.result_rank in (0, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW):
                     deelnemer.geen_deelname = True
                     deelnemer.geen_rank = True

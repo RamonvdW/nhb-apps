@@ -154,6 +154,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 prev_jaar = begin_jaar
                 prev_afstand = comp.afstand
 
+            # 0 - tijdlijn
+            kaartje = SimpleNamespace()
+            kaartje.titel = "Tijdlijn"
+            kaartje.tekst = 'Toon de fases en planning van de %s.' % comp.beschrijving
+            kaartje.icon = 'schedule'
+            kaartje.url = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
+            kaartjes.append(kaartje)
+
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
             if comp.fase < 'F' and self.rol_nu != Rollen.ROL_WL:
                 kaartje = SimpleNamespace()
