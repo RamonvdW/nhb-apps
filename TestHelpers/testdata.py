@@ -14,9 +14,9 @@ from Account.operations import account_create
 from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie,
-                               DeelKampioenschap, DEEL_BK,
-                               RegioCompetitieSporterBoog,
+                               Regiocompetitie,
+                               Kampioenschap, DEEL_BK,
+                               RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
                                KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE, KAMP_RANK_RESERVE)
 from Competitie.operations import competities_aanmaken
@@ -315,7 +315,7 @@ class TestData(object):
             account = self.comp25_account_rcl[regio_nr]
             functie = self.comp25_functie_rcl[regio_nr]
 
-        # wordt RCL van de deelcompetitie
+        # wordt RCL van de regiocompetitie
         client = Client()
         self._login(client, account)
         self._wissel_naar_functie(client, functie)
@@ -862,7 +862,7 @@ class TestData(object):
                 self.comp25 = comp
         # for
 
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie',
                                          'nhb_regio')
@@ -876,7 +876,7 @@ class TestData(object):
         # for
         del deelcomp
 
-        for deelkamp in (DeelKampioenschap
+        for deelkamp in (Kampioenschap
                          .objects
                          .select_related('competitie',
                                          'nhb_rayon')
@@ -1027,13 +1027,13 @@ class TestData(object):
             self._dump_resp(resp)
             raise ValueError('Inschrijven van sporters failed')
 
-        new_deelnemers = (RegioCompetitieSporterBoog
+        new_deelnemers = (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'bij_vereniging',
                                           'indiv_klasse')
-                          .filter(deelcompetitie__competitie=comp,
+                          .filter(regiocompetitie__competitie=comp,
                                   sporterboog__pk__in=pks))
 
         deelnemers.extend(new_deelnemers)
@@ -1113,7 +1113,7 @@ class TestData(object):
                 next_nr = len(bulk) + 1
 
                 team = RegiocompetitieTeam(
-                            deelcompetitie=deelcomp,
+                            regiocompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=next_nr,
                             team_type=self.afkorting2teamtype_nhb[afkorting],
@@ -1129,7 +1129,7 @@ class TestData(object):
         for team in (RegiocompetitieTeam
                      .objects
                      .select_related('team_type')
-                     .filter(deelcompetitie=deelcomp,
+                     .filter(regiocompetitie=deelcomp,
                              vereniging=ver)):
 
             afkorting = team.team_type.afkorting
@@ -1165,11 +1165,11 @@ class TestData(object):
         done = list()
         bulk = list()
         for team in regioteams:
-            if team.deelcompetitie == deelcomp:                                     # pragma: no branch
+            if team.regiocompetitie == deelcomp:                                     # pragma: no branch
                 afkorting = team.team_type.afkorting
                 if afkorting not in done:
                     poule = RegiocompetitieTeamPoule(
-                                    deelcompetitie=deelcomp,
+                                    regiocompetitie=deelcomp,
                                     # teams,
                                     beschrijving="Poule %s team type %s" % (deelcomp, team.team_type.beschrijving))
 
@@ -1181,12 +1181,12 @@ class TestData(object):
 
         for poule in (RegiocompetitieTeamPoule
                       .objects
-                      .select_related('deelcompetitie__competitie')
-                      .filter(deelcompetitie=deelcomp)):
+                      .select_related('regiocompetitie__competitie')
+                      .filter(regiocompetitie=deelcomp)):
 
             pks = list()
             for team in regioteams:
-                if team.deelcompetitie == deelcomp:                                 # pragma: no branch
+                if team.regiocompetitie == deelcomp:                                 # pragma: no branch
                     if poule.beschrijving.endswith(team.team_type.beschrijving):
                         pks.append(team.pk)
             # for

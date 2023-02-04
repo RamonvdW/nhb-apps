@@ -11,7 +11,7 @@ from Functie.operations import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap,
+from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
@@ -361,7 +361,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # gebruik een post om de competitie aan te laten maken
         # geen parameters nodig
         self.assertEqual(Competitie.objects.count(), 0)
-        self.assertEqual(DeelCompetitie.objects.count(), 0)
+        self.assertEqual(Regiocompetitie.objects.count(), 0)
         self.assertEqual(0, CompetitieMutatie.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmaken, {'snel': 1})
@@ -389,15 +389,15 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_kies)
 
         self.assertEqual(Competitie.objects.count(), 2)
-        self.assertEqual(DeelCompetitie.objects.count(), 2*16)
-        self.assertEqual(DeelKampioenschap.objects.count(), 2*5)
+        self.assertEqual(Regiocompetitie.objects.count(), 2 * 16)
+        self.assertEqual(Kampioenschap.objects.count(), 2 * 5)
 
     def test_regio_settings_overnemen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(DeelCompetitie.objects.count(), 0)
+        self.assertEqual(Regiocompetitie.objects.count(), 0)
 
         # maak een competitie aan
         competities_aanmaken(jaar=2019)
@@ -406,20 +406,20 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         dagdelen_105_25 = "%s,%s,%s" % (DAGDEEL_AFKORTINGEN[3], DAGDEEL_AFKORTINGEN[4], DAGDEEL_AFKORTINGEN[0])
 
         # pas regio-instellingen aan
-        deelcomp = DeelCompetitie.objects.get(
+        deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=18,
                                 nhb_regio__regio_nr=101)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
-        deelcomp = DeelCompetitie.objects.get(
+        deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=18,
                                 nhb_regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = dagdelen_105_18
         deelcomp.save()
 
-        deelcomp = DeelCompetitie.objects.get(
+        deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=25,
                                 nhb_regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
@@ -431,7 +431,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         competities_aanmaken(jaar=2020)
 
         # controleer dat de settings overgenomen zijn
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie', 'nhb_regio')
                          .filter(nhb_regio__regio_nr=101)):
@@ -441,7 +441,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_2)
         # for
 
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie', 'nhb_regio')
                          .filter(nhb_regio__regio_nr=105)):
@@ -700,7 +700,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         expected_month, expected_day = 12, 31
         expected_year = 2019
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=expected_year)
         # nu in fase A
 

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelKampioenschap, DEEL_RK, KampioenschapTeam, KampioenschapSporterBoog)
+                               Kampioenschap, DEEL_RK, KampioenschapTeam, KampioenschapSporterBoog)
 from Competitie.operations import competities_aanmaken
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -33,9 +33,9 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         regio_109 = NhbRegio.objects.get(regio_nr=109)
         boog_r = BoogType.objects.get(afkorting='R')
         comp_25 = Competitie.objects.get(afstand=25)
-        deelkamp = DeelKampioenschap.objects.get(competitie=comp_25,
-                                                 deel=DEEL_RK,
-                                                 nhb_rayon__rayon_nr=3)
+        deelkamp = Kampioenschap.objects.get(competitie=comp_25,
+                                             deel=DEEL_RK,
+                                             nhb_rayon__rayon_nr=3)
 
         team_klasse = CompetitieTeamKlasse.objects.filter(competitie=comp_25,
                                                           is_voor_teams_rk_bk=True).all()[0]

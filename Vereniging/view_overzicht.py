@@ -10,7 +10,7 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, DeelKampioenschap,
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap,
                                INSCHRIJF_METHODE_1, DEEL_RK)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -99,22 +99,22 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                          .order_by('afstand',
                                    'begin_jaar'))
 
-                deelcomps = (DeelCompetitie
+                deelcomps = (Regiocompetitie
                              .objects
                              .filter(competitie__is_afgesloten=False,
                                      nhb_regio=ver.regio)
                              .select_related('competitie'))
 
-                deelkamps_rk = (DeelKampioenschap
+                deelkamps_rk = (Kampioenschap
                                 .objects
                                 .filter(deel=DEEL_RK,
                                         competitie__is_afgesloten=False,
                                         nhb_rayon=ver.regio.rayon)
                                 .select_related('competitie'))
 
-                if (DeelcompetitieRonde
+                if (RegiocompetitieRonde
                     .objects
-                    .filter(deelcompetitie__is_afgesloten=False,
+                    .filter(regiocompetitie__is_afgesloten=False,
                             matches__vereniging=ver)).count() > 0:
                     # er zijn wedstrijden voor deze vereniging
                     context['heeft_wedstrijden'] = True

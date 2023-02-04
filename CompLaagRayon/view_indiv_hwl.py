@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (DeelCompetitie, DeelKampioenschap, DEEL_RK,
+from Competitie.models import (Regiocompetitie, Kampioenschap, DEEL_RK,
                                KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -47,14 +47,14 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
                         .get(pk=deelkamp_pk,
                              nhb_rayon=rayon,
                              deel=DEEL_RK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp_rk'] = deelkamp

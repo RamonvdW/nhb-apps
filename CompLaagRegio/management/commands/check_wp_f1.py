@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,12 +41,12 @@ class Command(BaseCommand):
 
         for poule in (RegiocompetitieTeamPoule
                       .objects
-                      .filter(deelcompetitie__regio_team_punten_model=TEAM_PUNTEN_MODEL_FORMULE1)
-                      .order_by('deelcompetitie__competitie',
-                                'deelcompetitie__nhb_regio__regio_nr',
+                      .filter(regiocompetitie__regio_team_punten_model=TEAM_PUNTEN_MODEL_FORMULE1)
+                      .order_by('regiocompetitie__competitie',
+                                'regiocompetitie__nhb_regio__regio_nr',
                                 'beschrijving')):
 
-            self.deelcomp_poule_msg = "%s poule %s: %s" % (poule.deelcompetitie, poule.pk, poule)
+            self.deelcomp_poule_msg = "%s poule %s: %s" % (poule.regiocompetitie, poule.pk, poule)
 
             # poule bevat teams
             team_pks = list(poule.teams.values_list('pk', flat=True))

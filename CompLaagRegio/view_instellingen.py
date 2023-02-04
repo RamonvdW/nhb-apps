@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
-                               Competitie, DeelCompetitie)
+                               Competitie, Regiocompetitie)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -49,13 +49,13 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         try:
             regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(competitie=comp_pk,
                              nhb_regio__regio_nr=regio_nr))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+        except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -129,12 +129,12 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         try:
             regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp_pk,
                              nhb_regio__regio_nr=regio_nr))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+        except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -219,7 +219,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        deelcomps = (DeelCompetitie
+        deelcomps = (Regiocompetitie
                      .objects
                      .select_related('competitie',
                                      'nhb_regio',

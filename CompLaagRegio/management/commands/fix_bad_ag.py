@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, RegioCompetitieSporterBoog, AG_NUL
+from Competitie.models import Competitie, RegiocompetitieSporterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Sporter.models import SporterVoorkeuren
@@ -73,12 +73,12 @@ class Command(BaseCommand):
             sporter_pk2wedstrijdgeslacht[voorkeuren.sporter.pk] = wedstrijdgeslacht
         # for
 
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')
-                          .filter(deelcompetitie__competitie=comp)):
+                          .filter(regiocompetitie__competitie=comp)):
 
             try:
                 ag_indiv = sporterboog_pk2ag_indiv[deelnemer.sporterboog.pk]

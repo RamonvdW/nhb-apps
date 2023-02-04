@@ -186,7 +186,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.deelkamp_25.rk_bk_matches.remove(self.match.pk)
 
-        # wedstrijd van een niet-RK deelcompetitie
+        # wedstrijd van een niet-RK kampioenschap
         self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -254,7 +254,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen kampioenschap')
 
-        # wedstrijd van een niet-RK deelcompetitie
+        # wedstrijd van een niet-RK kampioenschap
         self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -337,7 +337,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen kampioenschap')
 
-        # wedstrijd van een niet-RK deelcompetitie
+        # wedstrijd van een niet-RK kampioenschap
         self.testdata.deelkamp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)

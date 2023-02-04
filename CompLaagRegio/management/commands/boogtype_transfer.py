@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, RegioCompetitieSporterBoog, AG_NUL
+from Competitie.models import Competitie, RegiocompetitieSporterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import (Aanvangsgemiddelde, AG_DOEL_INDIV,
@@ -94,9 +94,9 @@ class Command(BaseCommand):
         del sporterboog
 
         # controleer dat de sporter niet al geschreven
-        count = (RegioCompetitieSporterBoog
+        count = (RegiocompetitieSporterBoog
                  .objects
-                 .filter(deelcompetitie__competitie=comp,
+                 .filter(regiocompetitie__competitie=comp,
                          sporterboog=juiste_sporterboog)
                  .count())
         if count > 0:
@@ -107,13 +107,13 @@ class Command(BaseCommand):
         # juiste sporterboog is nog niet ingeschreven voor de competitie
 
         try:
-            deelnemer = (RegioCompetitieSporterBoog
+            deelnemer = (RegiocompetitieSporterBoog
                          .objects
                          .select_related('sporterboog',
                                          'sporterboog__boogtype')
-                         .get(deelcompetitie__competitie=comp,
+                         .get(regiocompetitie__competitie=comp,
                               sporterboog__sporter__lid_nr=lid_nr))
-        except RegioCompetitieSporterBoog.MultipleObjectsReturned:
+        except RegiocompetitieSporterBoog.MultipleObjectsReturned:
             self.stderr.write('[ERROR] Sporter met meerdere inschrijvingen wordt niet ondersteund')
             return
 

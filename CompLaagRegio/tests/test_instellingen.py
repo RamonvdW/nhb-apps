@@ -6,10 +6,10 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie,
+from Competitie.models import (Competitie, Regiocompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+                               Kampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -116,7 +116,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                        voor_wedstrijd=True)
         self.sporterboog.save()
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -152,12 +152,12 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
+        self.deelcomp_bond_18 = Kampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
         self.cluster_101a_18 = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = NhbCluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -264,7 +264,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
             self.assert_html_ok(resp)
             self.assert_template_used(resp, ('complaagregio/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
 
-            deelcomp_pre = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+            deelcomp_pre = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
             self.assertTrue(deelcomp_pre.regio_organiseert_teamcompetitie)
             self.assertTrue(deelcomp_pre.regio_heeft_vaste_teams)
             self.assertEqual(deelcomp_pre.regio_team_punten_model, oude_punten)
@@ -281,7 +281,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                               'einde_teams_aanmaken': post_datum_ok})
             self.assert_is_redirect_not_plein(resp)
 
-            deelcomp_post = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+            deelcomp_post = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
             self.assertTrue(deelcomp_post.regio_organiseert_teamcompetitie)
             self.assertTrue(deelcomp_post.regio_heeft_vaste_teams)
             self.assertEqual(deelcomp_post.regio_team_punten_model, nieuwe_punten)

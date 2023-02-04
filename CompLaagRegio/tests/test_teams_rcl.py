@@ -6,11 +6,11 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegioCompetitieSporterBoog, CompetitieMutatie,
+from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               RegiocompetitieSporterBoog, CompetitieMutatie,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+                               Kampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -123,7 +123,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                                        voor_wedstrijd=True)
         self.sporterboog.save()
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -159,12 +159,12 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
+        self.deelcomp_bond_18 = Kampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
         self.cluster_101a_18 = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = NhbCluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -202,7 +202,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                                     is_voor_teams_rk_bk=False)        # zie WKL_TEAM in BasisTypen migrations
 
         team1 = RegiocompetitieTeam(
-                    deelcompetitie=deelcomp,
+                    regiocompetitie=deelcomp,
                     vereniging=self.nhbver_112,
                     volg_nr=1,
                     team_type=teamtype_r,
@@ -212,7 +212,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         team1.save()
 
         team2 = RegiocompetitieTeam(
-                    deelcompetitie=deelcomp,
+                    regiocompetitie=deelcomp,
                     vereniging=self.nhbver_112,
                     volg_nr=1,
                     team_type=teamtype_r,
@@ -222,7 +222,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         team2.save()
 
         team3 = RegiocompetitieTeam(
-                    deelcompetitie=deelcomp,
+                    regiocompetitie=deelcomp,
                     vereniging=self.nhbver_112,
                     volg_nr=1,
                     team_type=teamtype_r,
@@ -232,7 +232,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         team3.save()
 
         poule = RegiocompetitieTeamPoule(
-                    deelcompetitie=deelcomp,
+                    regiocompetitie=deelcomp,
                     beschrijving='Test poule')
         poule.save()
         poule.teams.add(team1)
@@ -252,7 +252,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                                     is_voor_teams_rk_bk=False)
         # create two complete teams
         RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=1,
                 team_type=team_r,
@@ -261,7 +261,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                 team_klasse=klasse_r_ere).save()
 
         RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=2,
                 team_type=team_r,
@@ -271,7 +271,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         # create a partial team
         RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=3,
                 team_type=team_r,
@@ -279,7 +279,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                 aanvangsgemiddelde=0.0).save()
 
         temp_team = RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=3,
                 team_type=team_r,
@@ -391,7 +391,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                                     is_voor_teams_rk_bk=False)
         # create two complete teams
         RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=1,
                 team_type=team_r,
@@ -400,7 +400,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                 team_klasse=klasse_r_ere).save()
 
         RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=2,
                 team_type=team_r,
@@ -410,7 +410,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         # create a partial team
         RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=3,
                 team_type=team_r,
@@ -418,7 +418,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                 aanvangsgemiddelde=0.0).save()
 
         temp_team = RegiocompetitieTeam(
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 vereniging=self.nhbver_112,
                 volg_nr=3,
                 team_type=team_r,
@@ -464,10 +464,10 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/rcl-ag-controle.dtl', 'plein/site_layout.dtl'))
 
         # maak een inschrijving met handmatig AG
-        RegioCompetitieSporterBoog(
+        RegiocompetitieSporterBoog(
                 sporterboog=self.sporterboog,
                 bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                deelcompetitie=self.deelcomp_regio112_18,
+                regiocompetitie=self.deelcomp_regio112_18,
                 indiv_klasse=self.klasse_recurve_onbekend,
                 inschrijf_voorkeur_team=True,
                 ag_voor_team_mag_aangepast_worden=True,
@@ -537,7 +537,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties(show_warnings=False)
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # doorzetten zonder scores werkt niet
@@ -545,12 +545,12 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Te weinig scores')
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # voer een paar scores in
@@ -565,7 +565,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
 
         with self.assert_max_queries(20):
@@ -588,7 +588,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 3)
 
     def test_team_ronde_f1(self):
@@ -617,7 +617,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # doorzetten zonder scores werkt niet
@@ -625,12 +625,12 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Te weinig scores')
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # voer een paar scores in
@@ -650,7 +650,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
 
         # controleer de wp verdeling: de twee top teams hebben dezelfde score, dus dezelfde wp
@@ -683,7 +683,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # doorzetten zonder scores werkt niet
@@ -691,12 +691,12 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Te weinig scores')
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # voor een paar scores in
@@ -711,7 +711,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
 
     def test_laatste_ronde(self):
@@ -740,7 +740,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
         # forceer ronde 7
@@ -761,7 +761,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
 
         # nog een keer doorzetten doet niets
@@ -777,7 +777,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # laat deze herstelde mutatie verwerken
         self.run_management_command('regiocomp_mutaties', '1', '--quick', '--all')
 
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 99)
 
 

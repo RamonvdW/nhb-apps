@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.views.generic import View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog, CompetitieMatch,
+from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch,
                                AG_NUL, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
 from Functie.models import Rollen
@@ -51,13 +51,13 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                            .select_related('sporter')
                            .get(pk=sporterboog_pk))
 
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(pk=deelcomp_pk))
 
-        except (ValueError, KeyError, SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
             # niet bestaand record
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -68,16 +68,16 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             raise Http404('Verkeerde competitie fase')
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
-        # controleer dat deelcompetitie bij de juist regio hoort
+        # controleer dat regiocompetitie bij de juist regio hoort
         account = self.request.user
         sporter = account.sporter_set.all()[0]      # ROL_SPORTER geeft bescherming tegen geen nhblid
-        if (sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
+        if sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio:
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegioCompetitieSporterBoog
+        if (RegiocompetitieSporterBoog
                 .objects
-                .filter(deelcompetitie=deelcomp,
+                .filter(regiocompetitie=deelcomp,
                         sporterboog=sporterboog)
                 .count() > 0):
             # al aangemeld - zie niet hier moeten zijn gekomen
@@ -106,8 +106,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
 
-        aanmelding = RegioCompetitieSporterBoog(
-                            deelcompetitie=deelcomp,
+        aanmelding = RegiocompetitieSporterBoog(
+                            regiocompetitie=deelcomp,
                             sporterboog=sporterboog,
                             ag_voor_indiv=ag)
 
@@ -144,10 +144,10 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         if methode == INSCHRIJF_METHODE_1:
             # toon de sporter alle wedstrijden in de regio, dus alle clusters
             pks = list()
-            for ronde in (DeelcompetitieRonde
+            for ronde in (RegiocompetitieRonde
                           .objects
                           .prefetch_related('matches')
-                          .filter(deelcompetitie=deelcomp)):
+                          .filter(regiocompetitie=deelcomp)):
                 pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
 
@@ -252,12 +252,12 @@ class RegiocompetitieAanmeldenView(View):
                            .select_related('sporter')
                            .get(pk=sporterboog_pk))
 
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(pk=deelcomp_pk))
-        except (ValueError, KeyError, SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
             # niet bestaand record(s)
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -267,14 +267,14 @@ class RegiocompetitieAanmeldenView(View):
             raise Http404('Verkeerde competitie fase')
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
-        # controleer dat deelcompetitie bij de juist regio hoort
-        if (sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio):
+        # controleer dat regiocompetitie bij de juist regio hoort
+        if sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio:
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
-        if (RegioCompetitieSporterBoog
+        if (RegiocompetitieSporterBoog
                 .objects
-                .filter(deelcompetitie=deelcomp,
+                .filter(regiocompetitie=deelcomp,
                         sporterboog=sporterboog)
                 .count() > 0):
             # al aangemeld - zie niet hier moeten zijn gekomen
@@ -294,8 +294,8 @@ class RegiocompetitieAanmeldenView(View):
         # bepaal in welke wedstrijdklasse de sporter komt
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
-        aanmelding = RegioCompetitieSporterBoog(
-                            deelcompetitie=deelcomp,
+        aanmelding = RegiocompetitieSporterBoog(
+                            regiocompetitie=deelcomp,
                             sporterboog=sporterboog,
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
                             ag_voor_indiv=AG_NUL,
@@ -373,10 +373,10 @@ class RegiocompetitieAanmeldenView(View):
 
         if methode == INSCHRIJF_METHODE_1:
             pks = list()
-            for ronde in (DeelcompetitieRonde
+            for ronde in (RegiocompetitieRonde
                           .objects
                           .prefetch_related('matches')
-                          .filter(deelcompetitie=deelcomp)):
+                          .filter(regiocompetitie=deelcomp)):
                 # sta alle wedstrijden in de regio toe, dus alle clusters
                 pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
@@ -412,12 +412,12 @@ class RegiocompetitieAfmeldenView(View):
         # converteer en doe eerste controle op de parameters
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSporterBoog
+            deelnemer = (RegiocompetitieSporterBoog
                          .objects
-                         .select_related('deelcompetitie__competitie',
+                         .select_related('regiocompetitie__competitie',
                                          'sporterboog__sporter')
                          .get(pk=deelnemer_pk))
-        except (ValueError, KeyError, RegioCompetitieSporterBoog.DoesNotExist):
+        except (ValueError, KeyError, RegiocompetitieSporterBoog.DoesNotExist):
             # niet bestaand record
             raise Http404('Inschrijving niet gevonden')
 
@@ -426,7 +426,7 @@ class RegiocompetitieAfmeldenView(View):
             raise PermissionDenied('Je kan alleen jezelf uitschrijven')
 
         # controleer de fase van de competitie
-        comp = deelnemer.deelcompetitie.competitie
+        comp = deelnemer.regiocompetitie.competitie
         comp.bepaal_fase()
         if comp.fase != 'B':
             raise Http404('Competitie is in de verkeerde fase')

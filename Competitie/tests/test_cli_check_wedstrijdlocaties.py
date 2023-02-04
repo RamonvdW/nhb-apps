@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
-from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap,
+from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
@@ -128,12 +128,12 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         wed4.indiv_klassen.add(indiv2)
         wed4.team_klassen.add(team2)
 
-        deelkamp_bk = DeelKampioenschap.objects.get(
+        deelkamp_bk = Kampioenschap.objects.get(
                         competitie=comp,
                         deel=DEEL_BK)
         deelkamp_bk.rk_bk_matches.add(wed1)
 
-        deelkamp_rk = DeelKampioenschap.objects.get(
+        deelkamp_rk = Kampioenschap.objects.get(
                         competitie=comp,
                         nhb_rayon=rayon_3,
                         deel=DEEL_RK)
@@ -141,7 +141,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         # deelcomp zonder wedstrijden
         # geen wijzigingen nodig
-        deelkamp_rk = DeelKampioenschap.objects.get(
+        deelkamp_rk = Kampioenschap.objects.get(
                         competitie=comp,
                         nhb_rayon=rayon_1,
                         deel=DEEL_RK)

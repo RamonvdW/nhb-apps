@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, DeelKampioenschap, DEEL_RK,
+from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie, Kampioenschap, DEEL_RK,
                                CompetitieTeamKlasse, KampioenschapTeam, MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK)
 from Functie.models import Rollen
@@ -44,7 +44,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_regio_status(competitie):
         # sporters komen uit de 4 regio's van het rayon
-        regio_deelcomps = (DeelCompetitie
+        regio_deelcomps = (Regiocompetitie
                            .objects
                            .filter(competitie=competitie)
                            .select_related('nhb_regio',
@@ -181,7 +181,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
 
             status2str = {True: 'Afgesloten', False: 'Actief'}
 
-            context['rk_status'] = deelkamps = (DeelKampioenschap
+            context['rk_status'] = deelkamps = (Kampioenschap
                                                 .objects
                                                 .select_related('nhb_rayon')
                                                 .filter(competitie=comp,

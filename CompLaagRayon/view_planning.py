@@ -11,11 +11,11 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (INSCHRIJF_METHODE_1, DeelCompetitie,
+from Competitie.models import (INSCHRIJF_METHODE_1, Regiocompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               DeelcompetitieRonde, CompetitieMatch,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK,
+                               RegiocompetitieRonde, CompetitieMatch,
+                               Kampioenschap, DEEL_RK, DEEL_BK,
                                KampioenschapSporterBoog, KampioenschapTeam, CompetitieMutatie,
                                MUTATIE_KAMP_CUT, DEELNAME_NEE)
 from Functie.models import Rollen
@@ -63,13 +63,13 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         context['deelkamp'] = deelkamp
@@ -208,12 +208,12 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # TODO: url_bond wordt niet (meer) gebruikt?
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            deelcomp_bk = DeelKampioenschap.objects.get(deel=DEEL_BK,
-                                                        competitie=deelkamp.competitie)
+            deelcomp_bk = Kampioenschap.objects.get(deel=DEEL_BK,
+                                                    competitie=deelkamp.competitie)
             context['url_bond'] = reverse('CompLaagBond:planning',
                                           kwargs={'deelkamp_pk': deelcomp_bk.pk})
 
-        deelcomps = (DeelCompetitie
+        deelcomps = (Regiocompetitie
                      .objects
                      .select_related('nhb_regio')
                      .filter(competitie=deelkamp.competitie,
@@ -223,9 +223,9 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # zoek het aantal regiowedstrijden erbij
         for deelcomp in deelcomps:
-            rondes = (DeelcompetitieRonde
+            rondes = (RegiocompetitieRonde
                       .objects
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(regiocompetitie=deelcomp)
                       .annotate(aantal_matches=Count('matches')))
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
                 deelcomp.rondes_count = "-"
@@ -255,13 +255,13 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK,
                              nhb_rayon=self.functie_nu.nhb_rayon))  # moet juiste rayon zijn
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         match = CompetitieMatch(
@@ -433,7 +433,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
-        deelkamps = match.deelkampioenschap_set.all()
+        deelkamps = match.kampioenschap_set.all()
         if len(deelkamps) == 0:
             raise Http404('Geen RK wedstrijd')
         deelkamp = deelkamps[0]
@@ -528,7 +528,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.all()
+        deelkamps = match.kampioenschap_set.all()
         if len(deelkamps) == 0:
             raise Http404('Geen RK wedstrijd')
         deelkamp = deelkamps[0]
@@ -689,12 +689,12 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste RKO aan de knoppen zit
@@ -768,12 +768,12 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste RKO aan de knoppen zit
@@ -970,7 +970,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen RK wedstrijd')
 

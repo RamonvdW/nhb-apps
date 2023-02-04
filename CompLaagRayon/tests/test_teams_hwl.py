@@ -8,8 +8,8 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse,
-                               RegioCompetitieSporterBoog, KampioenschapTeam, DeelKampioenschap, DEEL_RK)
+from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
+                               RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap, DEEL_RK)
 from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
@@ -225,13 +225,13 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
-        self.deelcomp18_regio111 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
-                                                              competitie__afstand=18)
+        self.deelcomp18_regio111 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+                                                               competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
-        self.deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                                              nhb_regio=self.regio_111)
+        self.deelcomp25_regio111 = Regiocompetitie.objects.get(competitie=self.comp_25,
+                                                               nhb_regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -301,10 +301,10 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         # print('aantal ingeschreven deelnemers:', RegioCompetitieSporterBoog.objects.count())
 
-        for obj in (RegioCompetitieSporterBoog
+        for obj in (RegiocompetitieSporterBoog
                     .objects
                     .select_related('sporterboog__sporter')
-                    .filter(deelcompetitie__competitie=self.comp_18)
+                    .filter(regiocompetitie__competitie=self.comp_18)
                     .all()):
             nr = obj.sporterboog.sporter.lid_nr
             if nr == 100002:
@@ -329,7 +329,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        deelkamp_rk3 = (DeelKampioenschap
+        deelkamp_rk3 = (Kampioenschap
                         .objects
                         .get(competitie=self.comp_18,
                              deel=DEEL_RK,
@@ -428,7 +428,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Kampioenschap niet gevonden')
 
         # repeat voor de 25m
-        deelkamp_rk3 = (DeelKampioenschap
+        deelkamp_rk3 = (Kampioenschap
                         .objects
                         .get(competitie=self.comp_25,
                              deel=DEEL_RK,
@@ -454,7 +454,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         self._create_deelnemers()
 
-        deelkamp_rk3 = (DeelKampioenschap
+        deelkamp_rk3 = (Kampioenschap
                         .objects
                         .get(competitie=self.comp_18,
                              deel=DEEL_RK,
@@ -493,7 +493,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Team niet gevonden')
 
             # herhaal voor 25m1p
-            deelkamp_rk3 = (DeelKampioenschap
+            deelkamp_rk3 = (Kampioenschap
                             .objects
                             .get(competitie=self.comp_25,
                                  deel=DEEL_RK,

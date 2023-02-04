@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import Competitie, KampioenschapTeam, DeelKampioenschap, DEEL_RK
+from Competitie.models import Competitie, KampioenschapTeam, Kampioenschap, DEEL_RK
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -46,7 +46,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.deelkamp_rk1 = DeelKampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
+        self.deelkamp_rk1 = Kampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
 
     def test_rk_teams_alle(self):
         # BB en BKO mogen deze pagina ophalen

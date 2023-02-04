@@ -157,7 +157,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
-        # regio 100 is valide, maar heeft geen deelcompetitie
+        # regio 100 is valide, maar heeft geen regiocompetitie
         url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'R', 'alle', 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)

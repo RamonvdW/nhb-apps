@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (DeelKampioenschap, DEEL_BK, KampioenschapIndivKlasseLimiet,
+from Competitie.models import (Kampioenschap, DEEL_BK, KampioenschapIndivKlasseLimiet,
                                KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE,
                                CompetitieMutatie, MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN)
 from Functie.models import Rollen
@@ -60,12 +60,12 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_BK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste BKO aan de knoppen zit
@@ -201,13 +201,13 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_BK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         if not deelkamp.heeft_deelnemerslijst:

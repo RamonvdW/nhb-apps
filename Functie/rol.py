@@ -9,7 +9,7 @@
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
 from Account.models import AccountSessions
-from Competitie.models import DeelKampioenschap, DEEL_RK, DEEL_BK
+from Competitie.models import Kampioenschap, DEEL_RK, DEEL_BK
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
 from Functie.models import Functie, Rollen, rol2url, url2rol
@@ -460,7 +460,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de BK's
-            qset = (DeelKampioenschap
+            qset = (Kampioenschap
                     .objects
                     .filter(competitie__afstand=functie_in.comp_type,
                             deel=DEEL_BK)
@@ -488,7 +488,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de RKs
-            qset = (DeelKampioenschap
+            qset = (Kampioenschap
                     .objects
                     .filter(competitie__afstand=functie_in.comp_type,
                             deel=DEEL_RK,

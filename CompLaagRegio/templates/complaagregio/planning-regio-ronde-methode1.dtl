@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -23,15 +23,15 @@
             <table class="white">
                 <tr>
                     <th>Competitie</th>
-                    <td>{{ ronde.deelcompetitie.competitie.beschrijving }}</td>
+                    <td>{{ ronde.regiocompetitie.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ ronde.deelcompetitie.nhb_regio.rayon}}</td>
+                    <td>{{ ronde.regiocompetitie.nhb_regio.rayon}}</td>
                 </tr>
                 <tr>
                     <th>Regio</th>
-                    <td>{{ ronde.deelcompetitie.nhb_regio }}</td>
+                    <td>{{ ronde.regiocompetitie.nhb_regio }}</td>
                 </tr>
                 {% if ronde.cluster %}
                     <tr>

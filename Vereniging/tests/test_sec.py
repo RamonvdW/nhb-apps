@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import Competitie, CompetitieIndivKlasse, RegioCompetitieSporterBoog
+from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -304,7 +304,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # probeer iemand in te schrijven
-        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
+        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB

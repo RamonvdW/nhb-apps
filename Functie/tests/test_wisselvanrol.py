@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap, DEEL_RK, DEEL_BK
+from Competitie.models import Competitie, CompetitieMatch, Kampioenschap, DEEL_RK, DEEL_BK
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -789,7 +789,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelkamp = DeelKampioenschap(
+        deelkamp = Kampioenschap(
                         competitie=comp,
                         deel=DEEL_BK,
                         functie=self.functie_bko)
@@ -827,7 +827,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelkamp = DeelKampioenschap(
+        deelkamp = Kampioenschap(
                         competitie=comp,
                         deel=DEEL_RK,
                         nhb_rayon=self.functie_rko.nhb_rayon,

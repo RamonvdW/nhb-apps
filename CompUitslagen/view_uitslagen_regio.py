@@ -9,9 +9,9 @@ from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
-                               Competitie, DeelCompetitie,
+                               Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSporterBoog)
+                               RegiocompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -188,14 +188,14 @@ class UitslagenRegioIndivView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
@@ -206,9 +206,9 @@ class UitslagenRegioIndivView(TemplateView):
         if not boogtype:
             raise Http404('Boogtype niet bekend')
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(regiocompetitie=deelcomp)
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
                                       'indiv_klasse__boogtype')
@@ -323,7 +323,7 @@ class UitslagenRegioTeamsView(TemplateView):
             vers = list()
             for team in (RegiocompetitieTeam
                          .objects
-                         .filter(deelcompetitie__competitie=comp,
+                         .filter(regiocompetitie__competitie=comp,
                                  vereniging__regio__regio_nr=gekozen_regio_nr)
                          .select_related('vereniging')
                          .order_by('vereniging__ver_nr')):
@@ -375,13 +375,13 @@ class UitslagenRegioTeamsView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
@@ -403,7 +403,7 @@ class UitslagenRegioTeamsView(TemplateView):
         poules = (RegiocompetitieTeamPoule
                   .objects
                   .prefetch_related('teams')
-                  .filter(deelcompetitie=deelcomp))
+                  .filter(regiocompetitie=deelcomp))
 
         team_pk2poule = dict()                      # [team.pk] = poule
         poule_pk2laagste_klasse_volgorde = dict()   # [team.pk] = team_klasse.volgorde
@@ -432,7 +432,7 @@ class UitslagenRegioTeamsView(TemplateView):
         teams = (RegiocompetitieTeam
                  .objects
                  .exclude(team_klasse=None)
-                 .filter(deelcompetitie=deelcomp,
+                 .filter(regiocompetitie=deelcomp,
                          team_type=context['teamtype'])
                  .select_related('vereniging',
                                  'team_klasse')

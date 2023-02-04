@@ -65,7 +65,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
         deelkamp = deelkamps[0]
@@ -271,7 +271,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
 
@@ -483,7 +483,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
 

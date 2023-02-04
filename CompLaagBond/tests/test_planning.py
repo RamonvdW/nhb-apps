@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK,
+from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap, DEEL_RK, DEEL_BK,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                KampioenschapSporterBoog)
@@ -124,21 +124,21 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(url_klassengrenzen_vaststellen)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        self.deelkamp_bk_18 = DeelKampioenschap.objects.filter(competitie=self.testdata.comp18,
-                                                               deel=DEEL_BK)[0]
-        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(competitie=self.testdata.comp18,
-                                                                   deel=DEEL_RK,
-                                                                   nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio_105 = DeelCompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                nhb_regio=self.regio_105)[0]
+        self.deelkamp_bk_18 = Kampioenschap.objects.filter(competitie=self.testdata.comp18,
+                                                           deel=DEEL_BK)[0]
+        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.testdata.comp18,
+                                                               deel=DEEL_RK,
+                                                               nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_regio_101 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
+                                                                 nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio_105 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
+                                                                 nhb_regio=self.regio_105)[0]
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
 
-        self.deelkamp_bk_25 = DeelKampioenschap.objects.filter(competitie=self.testdata.comp25,
-                                                               deel=DEEL_BK)[0]
+        self.deelkamp_bk_25 = Kampioenschap.objects.filter(competitie=self.testdata.comp25,
+                                                           deel=DEEL_BK)[0]
         self.functie_bko_25 = self.deelkamp_bk_25.functie
         self.functie_bko_25.accounts.add(self.account_bko_25)
 

@@ -7,7 +7,7 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelcompetitieRonde, CompetitieMatch, DeelKampioenschap, DEEL_RK
+from Competitie.models import RegiocompetitieRonde, CompetitieMatch, Kampioenschap, DEEL_RK
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -43,14 +43,14 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         context['geen_wedstrijden'] = True
 
-        pks1 = list(DeelcompetitieRonde
+        pks1 = list(RegiocompetitieRonde
                     .objects
-                    .filter(deelcompetitie__is_afgesloten=False,
+                    .filter(regiocompetitie__is_afgesloten=False,
                             matches__vereniging=self.functie_nu.nhb_ver)
                     .values_list('matches', flat=True))
 
         if self.toon_rk_bk:
-            pks2 = list(DeelKampioenschap
+            pks2 = list(Kampioenschap
                         .objects
                         .filter(is_afgesloten=False,
                                 rk_bk_matches__vereniging=self.functie_nu.nhb_ver)
@@ -75,13 +75,13 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             # dit is slechts fall-back
             if match.beschrijving == "":
                 # maak een passende beschrijving voor deze wedstrijd
-                rondes = match.deelcompetitieronde_set.all()
+                rondes = match.regiocompetitieronde_set.all()
                 if len(rondes) > 0:
                     ronde = rondes[0]
-                    match.beschrijving1 = ronde.deelcompetitie.competitie.beschrijving
+                    match.beschrijving1 = ronde.regiocompetitie.competitie.beschrijving
                     match.beschrijving2 = ronde.beschrijving
                 else:
-                    deelkamps = match.deelkampioenschap_set.all()
+                    deelkamps = match.kampioenschap_set.all()
                     if len(deelkamps) > 0:      # pragma: no branch
                         deelkamp = deelkamps[0]
                         match.beschrijving1 = deelkamp.competitie.beschrijving

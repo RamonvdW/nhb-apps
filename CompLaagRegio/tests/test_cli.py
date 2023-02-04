@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, DeelCompetitie,
-                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
@@ -52,7 +52,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.comp = comp
 
         dummy_functie = Functie.objects.filter(rol='RCL', nhb_regio__regio_nr=111)[0]
-        deelcomp = DeelCompetitie(
+        deelcomp = Regiocompetitie(
                             competitie=comp,
                             nhb_regio=regio_111,
                             functie=dummy_functie)
@@ -139,8 +139,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         sporterboog_bb.save()
         self.sporterboog_bb = sporterboog_bb
 
-        deelnemer_r = RegioCompetitieSporterBoog(
-                            deelcompetitie=deelcomp,
+        deelnemer_r = RegiocompetitieSporterBoog(
+                            regiocompetitie=deelcomp,
                             sporterboog=sporterboog_r,
                             bij_vereniging=ver,
                             indiv_klasse=klasse_r1,
@@ -148,8 +148,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         deelnemer_r.save()
         self.deelnemer_r = deelnemer_r
 
-        deelnemer_tr = RegioCompetitieSporterBoog(
-                            deelcompetitie=deelcomp,
+        deelnemer_tr = RegiocompetitieSporterBoog(
+                            regiocompetitie=deelcomp,
                             sporterboog=sporterboog_tr,
                             bij_vereniging=ver,
                             indiv_klasse=klasse_tr,
@@ -167,7 +167,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         team_klasse_r.boog_typen.add(boog_r)
 
         team = RegiocompetitieTeam(
-                            deelcompetitie=deelcomp,
+                            regiocompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=teamtype_r,
@@ -178,7 +178,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.team1 = team
 
         team = RegiocompetitieTeam(
-                            deelcompetitie=deelcomp,
+                            regiocompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=teamtype_r,
@@ -460,8 +460,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(f2.getvalue() == '')
 
         # maak een echte dupe aan
-        dupe = RegioCompetitieSporterBoog(
-                    deelcompetitie=self.deelnemer_r.deelcompetitie,
+        dupe = RegiocompetitieSporterBoog(
+                    regiocompetitie=self.deelnemer_r.regiocompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
                     indiv_klasse=self.deelnemer_r.indiv_klasse)
@@ -473,8 +473,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue('Gebruik --commit om' in f1.getvalue())
 
         # maak nog een dupe aan, voor extra coverage
-        dupe = RegioCompetitieSporterBoog(
-                    deelcompetitie=self.deelnemer_r.deelcompetitie,
+        dupe = RegiocompetitieSporterBoog(
+                    regiocompetitie=self.deelnemer_r.regiocompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
                     indiv_klasse=self.deelnemer_r.indiv_klasse)

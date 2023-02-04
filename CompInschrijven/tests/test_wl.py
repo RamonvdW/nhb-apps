@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import Competitie, CompetitieIndivKlasse, DeelCompetitie
+from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter
@@ -190,8 +190,8 @@ class TestCompInschrijvenWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
-                                                         competitie__afstand=18)
+        self.deelcomp_regio = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+                                                          competitie__afstand=18)
 
     def test_inschrijven(self):
         url = self.url_aanmelden % self.comp_18.pk

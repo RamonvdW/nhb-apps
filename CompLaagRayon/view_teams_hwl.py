@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,8 +11,8 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, DeelKampioenschap, DEEL_RK,
-                               RegioCompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam)
+from Competitie.models import (AG_NUL, Kampioenschap, DEEL_RK,
+                               RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -87,11 +87,11 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_HWL
 
-    def _get_deelkamp_rk(self, deelkamp_pk) -> DeelKampioenschap:
-        # haal de gevraagde deelkampioenschap op
+    def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
+        # haal de gevraagde kampioenschap op
         try:
             deelkamp_pk = int(deelkamp_pk[:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
@@ -99,7 +99,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
                              is_afgesloten=False,
                              deel=DEEL_RK,
                              nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         comp = deelkamp.competitie
@@ -171,7 +171,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         context['ver'] = self.functie_nu.nhb_ver
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelkamp'] = deelkamp = self._get_deelkamp_rk(kwargs['deelkamp_pk'])
 
         context['rk_bk_klassen_vastgesteld'] = is_vastgesteld = deelkamp.competitie.klassengrenzen_vastgesteld_rk_bk
@@ -214,19 +214,19 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
 
-    def _get_deelkamp_rk(self, deelkamp_pk) -> DeelKampioenschap:
-        # haal de gevraagde deelkampioenschap op
+    def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
+        # haal de gevraagde kampioenschap op
         try:
             deelkamp_pk = int(deelkamp_pk[:6])     # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
-                           .objects
-                           .select_related('competitie',
+            deelkamp = (Kampioenschap
+                        .objects
+                        .select_related('competitie',
                                            'nhb_rayon')
-                           .get(pk=deelkamp_pk,
+                        .get(pk=deelkamp_pk,
                                 is_afgesloten=False,
                                 deel=DEEL_RK,
                                 nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         comp = deelkamp.competitie
@@ -246,7 +246,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         deelkamp = self._get_deelkamp_rk(kwargs['deelkamp_pk'])
         ver = self.functie_nu.nhb_ver
         comp = deelkamp.competitie
@@ -477,9 +477,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                          .prefetch_related('tijdelijke_leden')
                          .values_list('tijdelijke_leden__pk', flat=True))
 
-            deelnemers = (RegioCompetitieSporterBoog
+            deelnemers = (RegiocompetitieSporterBoog
                           .objects
-                          .filter(deelcompetitie__competitie=comp,
+                          .filter(regiocompetitie__competitie=comp,
                                   # inschrijf_voorkeur_team=True,
                                   bij_vereniging=ver,
                                   sporterboog__boogtype__in=boog_pks)
@@ -604,9 +604,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                          .prefetch_related('tijdelijke_leden')
                          .values_list('tijdelijke_leden__pk', flat=True))
 
-            ok_pks = (RegioCompetitieSporterBoog
+            ok_pks = (RegiocompetitieSporterBoog
                       .objects
-                      .filter(deelcompetitie__competitie=comp,
+                      .filter(regiocompetitie__competitie=comp,
                               bij_vereniging=ver,
                               sporterboog__boogtype__in=boog_pks)
                       .values_list('pk', flat=True))

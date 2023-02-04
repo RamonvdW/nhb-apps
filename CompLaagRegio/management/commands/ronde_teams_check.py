@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,15 +21,15 @@ class Command(BaseCommand):
 
         for ronde_team in (RegiocompetitieRondeTeam
                            .objects
-                           .select_related('team__deelcompetitie__competitie',
-                                           'team__deelcompetitie__nhb_regio',
+                           .select_related('team__regiocompetitie__competitie',
+                                           'team__regiocompetitie__nhb_regio',
                                            'team__team_type',
                                            'team__vereniging')
-                           .order_by('team__deelcompetitie__competitie',
+                           .order_by('team__regiocompetitie__competitie',
                                      'ronde_nr',
                                      'team__pk')):
 
-            tup = (ronde_team.team.deelcompetitie.competitie.pk,
+            tup = (ronde_team.team.regiocompetitie.competitie.pk,
                    ronde_team.ronde_nr,
                    ronde_team.team.vereniging.ver_nr,
                    ronde_team.team.team_type.pk,
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 found[tup] = ronde_team
             else:
                 # dubbele!
-                self.stdout.write('Dupe team in %s' % ronde_team.team.deelcompetitie)
+                self.stdout.write('Dupe team in %s' % ronde_team.team.regiocompetitie)
                 self.stdout.write('   %s' % other_team)
                 for line in other_team.logboek.split('\n'):
                     self.stdout.write('       %s' % line)
@@ -51,8 +51,8 @@ class Command(BaseCommand):
 
             del tup
 
-            tup2 = (ronde_team.team.deelcompetitie.competitie.pk,
-                    ronde_team.team.deelcompetitie.nhb_regio.regio_nr)
+            tup2 = (ronde_team.team.regiocompetitie.competitie.pk,
+                    ronde_team.team.regiocompetitie.nhb_regio.regio_nr)
 
             try:
                 count[tup2][ronde_team.ronde_nr] += 1

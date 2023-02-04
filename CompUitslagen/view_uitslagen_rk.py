@@ -8,9 +8,9 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRayon
-from Competitie.models import (Competitie, DeelCompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
-                               RegioCompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
-                               DeelKampioenschap, DEEL_RK, DEELNAME_NEE, KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW)
+from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
+                               RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
+                               Kampioenschap, DEEL_RK, DEELNAME_NEE, KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW)
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -140,7 +140,7 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         try:
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
@@ -149,7 +149,7 @@ class UitslagenRayonIndivView(TemplateView):
                              competitie=comp,
                              deel=DEEL_RK,
                              nhb_rayon__rayon_nr=rayon_nr))
-        except DeelKampioenschap.DoesNotExist:
+        except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
         context['deelkamp'] = deelkamp
@@ -204,16 +204,16 @@ class UitslagenRayonIndivView(TemplateView):
             context['regiocomp_nog_actief'] = True
 
             # sporters komen uit de 4 regio's van het rayon
-            deelcomp_pks = (DeelCompetitie
+            deelcomp_pks = (Regiocompetitie
                             .objects
                             .filter(competitie__is_afgesloten=False,
                                     competitie=comp,
                                     nhb_regio__rayon__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
-            deelnemers = (RegioCompetitieSporterBoog
+            deelnemers = (RegiocompetitieSporterBoog
                           .objects
-                          .filter(deelcompetitie__pk__in=deelcomp_pks,
+                          .filter(regiocompetitie__pk__in=deelcomp_pks,
                                   indiv_klasse__boogtype=boogtype,
                                   aantal_scores__gte=comp.aantal_scores_voor_rk_deelname)
                           .select_related('indiv_klasse',
@@ -401,7 +401,7 @@ class UitslagenRayonTeamsView(TemplateView):
             raise Http404('Team type niet bekend')
 
         try:
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
@@ -410,7 +410,7 @@ class UitslagenRayonTeamsView(TemplateView):
                              competitie__is_afgesloten=False,
                              deel=DEEL_RK,
                              nhb_rayon__rayon_nr=rayon_nr))
-        except DeelKampioenschap.DoesNotExist:
+        except Kampioenschap.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelkamp'] = deelkamp

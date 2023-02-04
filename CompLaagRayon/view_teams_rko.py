@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import AG_NUL, Competitie, CompetitieTeamKlasse, KampioenschapTeam, DeelKampioenschap, DEEL_RK
+from Competitie.models import AG_NUL, Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap, DEEL_RK
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
@@ -61,7 +61,7 @@ class RayonTeamsTemplateView(TemplateView):
             if subset == 'alle':
                 # alle rayons
                 context['rayon'] = 'Alle'
-                deelkamp_pks = (DeelKampioenschap
+                deelkamp_pks = (Kampioenschap
                                 .objects
                                 .filter(competitie=comp,
                                         deel=DEEL_RK)
@@ -74,7 +74,7 @@ class RayonTeamsTemplateView(TemplateView):
                 except (ValueError, NhbRayon.DoesNotExist):
                     raise Http404('Selectie wordt niet ondersteund')
 
-                deelkamp_pks = (DeelKampioenschap
+                deelkamp_pks = (Kampioenschap
                                 .objects
                                 .filter(competitie=comp,
                                         nhb_rayon=context['rayon'])
@@ -102,12 +102,12 @@ class RayonTeamsTemplateView(TemplateView):
             # RKO mode
             try:
                 deelkamp_pk = int(kwargs['deelkamp_pk'][:6])    # afkappen voor de veiligheid
-                deelkamp = (DeelKampioenschap
+                deelkamp = (Kampioenschap
                             .objects
                             .select_related('competitie')
                             .get(pk=deelkamp_pk,
                                  deel=DEEL_RK))
-            except (ValueError, DeelKampioenschap.DoesNotExist):
+            except (ValueError, Kampioenschap.DoesNotExist):
                 raise Http404('Kampioenschap niet gevonden')
 
             if deelkamp.functie != self.functie_nu:

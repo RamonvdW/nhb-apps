@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.models import Competitie, DeelKampioenschap, DEEL_RK
+from Competitie.models import Competitie, Kampioenschap, DEEL_RK
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                                    competitie_klassengrenzen_vaststellen)
 import datetime
@@ -61,7 +61,7 @@ def zet_competitie_fase(comp, fase):
         # RK fases
         comp.alle_regiocompetities_afgesloten = True
 
-        for deelkamp in (DeelKampioenschap
+        for deelkamp in (Kampioenschap
                          .objects
                          .filter(competitie=comp,
                                  deel=DEEL_RK)):
@@ -143,7 +143,7 @@ def zet_competitie_fase(comp, fase):
 
     if fase == 'G':
         # alle regios afsluiten
-        for deelcomp in comp.deelcompetitie_set.filter(is_afgesloten=False):
+        for deelcomp in comp.regiocompetitie_set.filter(is_afgesloten=False):
             deelcomp.is_afgesloten = True
             deelcomp.save(update_fields=['is_afgesloten'])
         comp.save()

@@ -16,9 +16,9 @@ from django.core.management.base import BaseCommand
 from BasisTypen.models import ORGANISATIE_NHB
 from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse,
-                               DeelCompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK,
+                               Regiocompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
+                               Kampioenschap, DEEL_RK, DEEL_BK,
                                KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
                                KampioenschapTeam,
                                CompetitieTaken,
@@ -230,10 +230,10 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_initieel(self, competitie, deel):
         # bepaal de volgorde en rank van de deelnemers
-        # in alle klassen van de RK of BK deelcompetities
+        # in alle klassen van de RK of BK regiocompetities
 
         # via deelnemer kunnen we bepalen over welke kampioenschappen dit gaat
-        for deelkamp in (DeelKampioenschap
+        for deelkamp in (Kampioenschap
                          .objects
                          .filter(competitie=competitie,
                                  deel=deel)):
@@ -652,7 +652,7 @@ class Command(BaseCommand):
         if ronde_nr == 1:
             teams = (RegiocompetitieTeam
                      .objects
-                     .filter(deelcompetitie=deelcomp))
+                     .filter(regiocompetitie=deelcomp))
 
             if teams.count() == 0:
                 self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want 0 teams' % deelcomp)
@@ -660,7 +660,7 @@ class Command(BaseCommand):
         else:
             ronde_teams = (RegiocompetitieRondeTeam
                            .objects
-                           .filter(team__deelcompetitie=deelcomp,
+                           .filter(team__regiocompetitie=deelcomp,
                                    ronde_nr=deelcomp.huidige_team_ronde))
             if ronde_teams.count() == 0:
                 self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want 0 ronde teams' % deelcomp)
@@ -678,12 +678,12 @@ class Command(BaseCommand):
         ver_dict = dict()       # [ver_nr] = list(vsg, deelnemer_pk, boog_type_pk)
 
         # voor elke deelnemer het gemiddelde_begin_team_ronde invullen
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('bij_vereniging',
                                           'sporterboog',
                                           'sporterboog__boogtype')
-                          .filter(deelcompetitie=deelcomp,
+                          .filter(regiocompetitie=deelcomp,
                                   inschrijf_voorkeur_team=True)):
 
             # bij vaste teams altijd het AG gebruiken (anders kan invaller op een gegeven moment niet meer invallen)
@@ -717,7 +717,7 @@ class Command(BaseCommand):
                          .objects
                          .select_related('vereniging')
                          .prefetch_related('leden')
-                         .filter(deelcompetitie=deelcomp,
+                         .filter(regiocompetitie=deelcomp,
                                  team_type__pk=team_type_pk)
                          .order_by('-aanvangsgemiddelde')):     # hoogste eerst
 
@@ -756,7 +756,7 @@ class Command(BaseCommand):
 
                 # schrijf de namen van de leden in het logboek
                 ronde_team.logboek += '[%s] Geselecteerde leden:\n' % now_str
-                for deelnemer in (RegioCompetitieSporterBoog
+                for deelnemer in (RegiocompetitieSporterBoog
                                   .objects
                                   .select_related('sporterboog__sporter')
                                   .filter(pk__in=sporter_pks)):
@@ -801,11 +801,11 @@ class Command(BaseCommand):
                                    boogtype=boogtype)
                            .values_list('pk', flat=True))
 
-            deelnemers = (RegioCompetitieSporterBoog
+            deelnemers = (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter',
                                           'bij_vereniging')
-                          .filter(deelcompetitie__competitie=comp,
+                          .filter(regiocompetitie__competitie=comp,
                                   indiv_klasse__in=klassen_pks)
                           .order_by('-gemiddelde'))     # hoogste boven
 
@@ -854,7 +854,7 @@ class Command(BaseCommand):
 
         # sporter komen uit de 4 regio's van het rayon
         pks = list()
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .filter(competitie=competitie,
                                  nhb_regio__rayon__rayon_nr=rayon_nr)):
@@ -862,14 +862,14 @@ class Command(BaseCommand):
         # for
 
         # TODO: sorteren en kampioenen eerst zetten kan allemaal weg
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('indiv_klasse',
                                       'bij_vereniging__regio',
                                       'sporterboog__sporter',
                                       'sporterboog__sporter__bij_vereniging',
                                       'sporterboog__sporter__bij_vereniging__regio__rayon')
-                      .filter(deelcompetitie__in=pks,
+                      .filter(regiocompetitie__in=pks,
                               aantal_scores__gte=competitie.aantal_scores_voor_rk_deelname,
                               indiv_klasse__is_voor_rk_bk=True)         # skip aspiranten
                       .order_by('indiv_klasse__volgorde',               # groepeer per klasse
@@ -939,7 +939,7 @@ class Command(BaseCommand):
 
         # sporters moeten in het rayon van hun huidige vereniging geplaatst worden
         rayon_nr2deelkamp = dict()
-        for deelkamp in (DeelKampioenschap
+        for deelkamp in (Kampioenschap
                          .objects
                          .select_related('nhb_rayon')
                          .filter(competitie=comp,
@@ -947,7 +947,7 @@ class Command(BaseCommand):
             rayon_nr2deelkamp[deelkamp.nhb_rayon.rayon_nr] = deelkamp
         # for
 
-        for deelkamp in (DeelKampioenschap
+        for deelkamp in (Kampioenschap
                          .objects
                          .select_related('nhb_rayon')
                          .filter(competitie=comp,
@@ -992,7 +992,7 @@ class Command(BaseCommand):
             del bulk_lijst
         # for
 
-        for deelkamp in (DeelKampioenschap
+        for deelkamp in (Kampioenschap
                          .objects
                          .select_related('nhb_rayon')
                          .filter(competitie=comp,
@@ -1039,10 +1039,10 @@ class Command(BaseCommand):
 
         # maak een look-up tabel van RegioCompetitieSporterBoog naar KampioenschapSchutterBoog
         sporterboog_pk2regiocompetitiesporterboog = dict()
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('bij_vereniging')
-                          .filter(deelcompetitie__competitie=comp)):
+                          .filter(regiocompetitie__competitie=comp)):
             sporterboog_pk2regiocompetitiesporterboog[deelnemer.sporterboog.pk] = deelnemer
         # for
 
@@ -1150,7 +1150,7 @@ class Command(BaseCommand):
             aantal_pijlen = 2.0 * 25
         print('aantal_pijlen = %s' % aantal_pijlen)
 
-        deelkamp_bk = DeelKampioenschap.objects.get(deel=DEEL_BK, competitie=comp)
+        deelkamp_bk = Kampioenschap.objects.get(deel=DEEL_BK, competitie=comp)
 
         # verwijder alle deelnemers van een voorgaande run
         KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk).delete()
@@ -1260,7 +1260,7 @@ class Command(BaseCommand):
 
         elif code == MUTATIE_REGIO_TEAM_RONDE:
             self.stdout.write('[INFO] Verwerk mutatie %s: team ronde' % mutatie.pk)
-            self._verwerk_mutatie_regio_team_ronde(mutatie.deelcompetitie)
+            self._verwerk_mutatie_regio_team_ronde(mutatie.regiocompetitie)
 
         elif code == MUTATIE_DOORZETTEN_REGIO_NAAR_RK:
             self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten regiocompetitie' % mutatie.pk)
@@ -1304,7 +1304,7 @@ class Command(BaseCommand):
             mutatie = (CompetitieMutatie
                        .objects
                        .select_related('competitie',
-                                       'deelcompetitie',
+                                       'regiocompetitie',
                                        'kampioenschap',
                                        'indiv_klasse',
                                        'team_klasse',

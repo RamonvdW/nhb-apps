@@ -9,7 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.formats import localize
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import Competitie, DeelCompetitie, DeelKampioenschap, DEEL_BK
+from Competitie.models import Competitie, Regiocompetitie, Kampioenschap, DEEL_BK
 from Functie.models import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -47,7 +47,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
             context['rol_is_klaar'] = True
 
             # toon de competitie waar de functie een rol in heeft of had (BKO/RKO/RCL)
-            for deelcomp in (DeelCompetitie
+            for deelcomp in (Regiocompetitie
                              .objects
                              .filter(competitie=comp,
                                      functie=self.functie_nu)):
@@ -57,7 +57,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
             # for
 
             # toon de competitie waar de functie een rol in heeft of had (BKO/RKO/RCL)
-            for deelcomp in (DeelKampioenschap
+            for deelcomp in (Kampioenschap
                              .objects
                              .filter(competitie=comp,
                                      functie=self.functie_nu)):
@@ -85,7 +85,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                 comp.url_ag_vaststellen = reverse('CompBeheer:ag-vaststellen-afstand',
                                                   kwargs={'afstand': comp.afstand})
 
-            context['planning_deelkamps'] = (DeelKampioenschap
+            context['planning_deelkamps'] = (Kampioenschap
                                              .objects
                                              .filter(competitie=comp,
                                                      deel=DEEL_BK)
@@ -122,7 +122,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RCL:
             toon_handmatige_ag = False
             context['toon_clusters'] = True
-            context['planning_deelcomp'] = (DeelCompetitie
+            context['planning_deelcomp'] = (Regiocompetitie
                                             .objects
                                             .filter(competitie=comp,
                                                     functie=self.functie_nu,
@@ -177,7 +177,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                                                           'regio_pk': self.functie_nu.nhb_regio.pk})
 
             if comp.fase >= 'E':
-                context['afsluiten_deelcomp'] = (DeelCompetitie
+                context['afsluiten_deelcomp'] = (Regiocompetitie
                                                  .objects
                                                  .filter(competitie=comp,
                                                          functie=self.functie_nu,
@@ -197,7 +197,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                                                    kwargs={'regio': self.functie_nu.nhb_regio.regio_nr})
 
         elif self.rol_nu == Rollen.ROL_RKO:
-            deelkamps = (DeelKampioenschap
+            deelkamps = (Kampioenschap
                          .objects
                          .select_related('nhb_rayon',
                                          'competitie')
@@ -229,7 +229,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                                                           'rayon_pk': self.functie_nu.nhb_rayon.pk})
 
         elif self.rol_nu == Rollen.ROL_BKO:
-            deelkamps = (DeelKampioenschap
+            deelkamps = (Kampioenschap
                          .objects
                          .filter(competitie=comp,
                                  functie=self.functie_nu,

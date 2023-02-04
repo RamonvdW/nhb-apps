@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap
+from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
 from Score.models import Score, SCORE_TYPE_GEEN, ScoreHist
 from Sporter.models import SporterBoog
@@ -47,7 +47,7 @@ class TestCompetitieCliRegiocompVerwijderOudeData(E2EHelpers, TestCase):
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='00:00')
         match.save()
-        deelkamp = DeelKampioenschap.objects.all()[0]
+        deelkamp = Kampioenschap.objects.all()[0]
         deelkamp.rk_bk_matches.add(match)
 
         Score(waarde=0, afstand_meter=18, type=SCORE_TYPE_GEEN).save()

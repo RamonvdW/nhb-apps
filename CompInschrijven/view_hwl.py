@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                                BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSporterBoog,
+                               Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                CompetitieMatch, get_competitie_indiv_leeftijdsklassen)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
@@ -159,12 +159,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         is_aangemeld_dict = dict()   # [sporterboog.pk] = True/False
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
-                                          'deelcompetitie')
+                                          'regiocompetitie')
                           .filter(bij_vereniging=hwl_ver,
-                                  deelcompetitie__competitie=comp)):
+                                  regiocompetitie__competitie=comp)):
             is_aangemeld_dict[deelnemer.sporterboog.pk] = True
         # for
 
@@ -248,11 +248,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # rol is HWL (zie test_func)
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .get(competitie=self.comp,
                              nhb_regio=hwl_ver.regio))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             regio_organiseert_teamcomp = False
         else:
             regio_organiseert_teamcomp = deelcomp.regio_organiseert_teamcompetitie
@@ -280,7 +280,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         mijn_regio = self.functie_nu.nhb_ver.regio
 
         if not mijn_regio.is_administratief:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
@@ -292,10 +292,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if methode == INSCHRIJF_METHODE_1:
                 # toon de HWL alle wedstrijden in de regio, dus alle clusters
                 pks = list()
-                for ronde in (DeelcompetitieRonde
+                for ronde in (RegiocompetitieRonde
                               .objects
                               .prefetch_related('matches')
-                              .filter(deelcompetitie=deelcomp)):
+                              .filter(regiocompetitie=deelcomp)):
                     pks.extend(ronde.matches.values_list('pk', flat=True))
                 # for
 
@@ -389,8 +389,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             raise Http404('Geen wedstrijden in deze regio')
 
         # zoek de juiste DeelCompetitie erbij
-        deelcomp = DeelCompetitie.objects.get(competitie=comp,
-                                              nhb_regio=hwl_regio)
+        deelcomp = Regiocompetitie.objects.get(competitie=comp,
+                                               nhb_regio=hwl_regio)
         methode = deelcomp.inschrijf_methode
 
         # zoek eerst de voorkeuren op
@@ -407,10 +407,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         bulk_wedstrijden = list()
         if methode == INSCHRIJF_METHODE_1:
             pks = list()
-            for ronde in (DeelcompetitieRonde
+            for ronde in (RegiocompetitieRonde
                           .objects
                           .prefetch_related('matches')
-                          .filter(deelcompetitie=deelcomp)):
+                          .filter(regiocompetitie=deelcomp)):
                 # sta alle wedstrijden in de regio toe, dus alle clusters
                 pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
@@ -475,9 +475,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     raise PermissionDenied('Geen lid bij jouw vereniging')
 
                 # voorkom dubbele aanmelding
-                if (RegioCompetitieSporterBoog
+                if (RegiocompetitieSporterBoog
                         .objects
-                        .filter(deelcompetitie=deelcomp,
+                        .filter(regiocompetitie=deelcomp,
                                 sporterboog=sporterboog)
                         .count() > 0):
                     # al aangemeld - zou niet hier moeten zijn gekomen
@@ -493,8 +493,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
                 dvl = sporterboog.sporter.sinds_datum
 
-                aanmelding = RegioCompetitieSporterBoog(
-                                    deelcompetitie=deelcomp,
+                aanmelding = RegiocompetitieSporterBoog(
+                                    regiocompetitie=deelcomp,
                                     sporterboog=sporterboog,
                                     bij_vereniging=sporterboog.sporter.bij_vereniging,
                                     ag_voor_indiv=AG_NUL,
@@ -578,11 +578,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
         try:
             deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk))
-        except (ValueError, TypeError, DeelCompetitie.DoesNotExist):
+        except (ValueError, TypeError, Regiocompetitie.DoesNotExist):
             raise Http404('Verkeerde parameters')
 
         self.deelcomp = deelcomp
@@ -603,14 +603,14 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'sporterboog__boogtype',
                                       'bij_vereniging',
                                       'indiv_klasse')
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(regiocompetitie=deelcomp,
                               bij_vereniging=self.functie_nu.nhb_ver)
                       .order_by('indiv_klasse__volgorde',
                                 'sporterboog__sporter__voornaam',
@@ -694,12 +694,12 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         if deelnemer_pk:
             try:
                 deelnemer_pk = int(deelnemer_pk[:6])        # afkappen voor de veiligheid
-                deelnemer = (RegioCompetitieSporterBoog
+                deelnemer = (RegiocompetitieSporterBoog
                              .objects
                              .select_related('bij_vereniging',
-                                             'deelcompetitie')
+                                             'regiocompetitie')
                              .get(pk=deelnemer_pk))
-            except (ValueError, RegioCompetitieSporterBoog.DoesNotExist):
+            except (ValueError, RegiocompetitieSporterBoog.DoesNotExist):
                 raise Http404('Deelnemer niet gevonden')
 
             ver = deelnemer.bij_vereniging
@@ -710,7 +710,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             deelnemer.save(update_fields=['inschrijf_voorkeur_team'])
 
             url = reverse('CompInschrijven:leden-ingeschreven',
-                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+                          kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
             return HttpResponseRedirect(url)
 
         # all checked boxes are in the post request as keys, typically with value 'on'
@@ -718,8 +718,8 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             if key[0:0+3] == 'pk_':
                 pk = key[3:3+7]   # afkappen geeft bescherming
                 try:
-                    inschrijving = RegioCompetitieSporterBoog.objects.get(pk=pk)
-                except (ValueError, TypeError, RegioCompetitieSporterBoog.DoesNotExist):
+                    inschrijving = RegiocompetitieSporterBoog.objects.get(pk=pk)
+                except (ValueError, TypeError, RegiocompetitieSporterBoog.DoesNotExist):
                     # niet normaal
                     raise Http404('Geen valide inschrijving')
 

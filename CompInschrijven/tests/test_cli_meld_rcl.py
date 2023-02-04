@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, ORGANISATIE_WA
-from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieIndivKlasse
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -31,7 +31,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
 
         self.comp_18m = Competitie.objects.get(afstand='18')
 
-        self.deelcomp103_18m = (DeelCompetitie
+        self.deelcomp103_18m = (Regiocompetitie
                                 .objects
                                 .get(competitie=self.comp_18m,
                                      nhb_regio__regio_nr=103))
@@ -96,8 +96,8 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             mock_timezone.return_value = dt
 
             # schrijf iemand gisteren in
-            deelnemer = RegioCompetitieSporterBoog(
-                            deelcompetitie=self.deelcomp103_18m,
+            deelnemer = RegiocompetitieSporterBoog(
+                            regiocompetitie=self.deelcomp103_18m,
                             sporterboog=self.sporterboog,
                             bij_vereniging=self.ver,
                             indiv_klasse=self.indiv_klasse_bb)

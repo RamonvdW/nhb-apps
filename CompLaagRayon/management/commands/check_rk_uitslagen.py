@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelKampioenschap, DEEL_RK, CompetitieIndivKlasse, KampioenschapSporterBoog, DEELNAME_NEE
+from Competitie.models import Kampioenschap, DEEL_RK, CompetitieIndivKlasse, KampioenschapSporterBoog, DEELNAME_NEE
 
 
 class Command(BaseCommand):
@@ -24,7 +24,7 @@ class Command(BaseCommand):
         afstand = options['afstand']
         verbose = options['verbose']
 
-        for deelkamp in (DeelKampioenschap
+        for deelkamp in (Kampioenschap
                          .objects
                          .filter(competitie__afstand=afstand,
                                  deel=DEEL_RK).order_by('nhb_rayon__rayon_nr')):

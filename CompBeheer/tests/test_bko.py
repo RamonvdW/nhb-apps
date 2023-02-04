@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.core import management
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK,
-                               RegioCompetitieSporterBoog, KampioenschapSporterBoog)
+from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, Kampioenschap, DEEL_RK, DEEL_BK,
+                               RegiocompetitieSporterBoog, KampioenschapSporterBoog)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -141,21 +141,21 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        self.deelkamp_bk_18 = DeelKampioenschap.objects.filter(competitie=self.comp_18,
-                                                               deel=DEEL_BK)[0]
-        self.deelkamp_rayon1_18 = DeelKampioenschap.objects.filter(competitie=self.comp_18,
-                                                                   deel=DEEL_RK,
-                                                                   nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                                nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio_105 = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                                nhb_regio=self.regio_105)[0]
+        self.deelkamp_bk_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
+                                                           deel=DEEL_BK)[0]
+        self.deelkamp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
+                                                               deel=DEEL_RK,
+                                                               nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_regio_101 = Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                                 nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio_105 = Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                                 nhb_regio=self.regio_105)[0]
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
 
-        self.deelkamp_bk_25 = DeelKampioenschap.objects.filter(competitie=self.comp_25,
-                                                               deel=DEEL_BK)[0]
+        self.deelkamp_bk_25 = Kampioenschap.objects.filter(competitie=self.comp_25,
+                                                           deel=DEEL_BK)[0]
         self.functie_bko_25 = self.deelkamp_bk_25.functie
         self.functie_bko_25.accounts.add(self.account_bko_25)
 
@@ -182,7 +182,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                                         is_voor_rk_bk=True)[0]
 
         # recurve, lid 1
-        RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_101,
+        RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_101,
                                    sporterboog=self.sporterboog,
                                    bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                    indiv_klasse=klasse_r,
@@ -194,7 +194,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_101,
+        RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_101,
                                    sporterboog=sporterboog,
                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
                                    indiv_klasse=klasse_c,
@@ -206,7 +206,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        RegioCompetitieSporterBoog(deelcompetitie=self.deelcomp_regio_101,
+        RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_101,
                                    sporterboog=sporterboog,
                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
                                    indiv_klasse=klasse_c,
@@ -223,11 +223,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'F')
 
-        # zet een deelcompetitie die geen team competitie organiseert
+        # zet een regiocompetitie die geen team competitie organiseert
         self.deelcomp_regio_101.regio_organiseert_teamcompetitie = False
         self.deelcomp_regio_101.save(update_fields=['regio_organiseert_teamcompetitie'])
 
-        # zet een deelcompetitie team ronde > 7
+        # zet een regiocompetitie team ronde > 7
         self.deelcomp_regio_105.huidige_team_ronde = 8
         self.deelcomp_regio_105.save(update_fields=['huidige_team_ronde'])
 
@@ -238,9 +238,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compbeheer/bko-doorzetten-naar-rk.dtl', 'plein/site_layout.dtl'))
 
-        # sluit alle deelcompetitie regio
-        for obj in DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                 is_afgesloten=False):
+        # sluit alle regiocompetities
+        for obj in Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                  is_afgesloten=False):
             obj.is_afgesloten = True
             obj.save()
         # for
@@ -258,7 +258,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # nu echt doorzetten
         self._regioschutters_inschrijven()
 
-        self.assertEqual(3, RegioCompetitieSporterBoog.objects.count())
+        self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
         self.assertEqual(0, KampioenschapSporterBoog.objects.count())
 
         with self.assert_max_queries(20):
@@ -282,9 +282,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # fase F: pagina zonder knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'F')
 
-        # sluit alle deelcompetitie regio
-        for obj in DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                 is_afgesloten=False):
+        # sluit alle regiocompetities
+        for obj in Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                  is_afgesloten=False):
             obj.is_afgesloten = True
             obj.save()
         # for
@@ -295,7 +295,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # nu echt doorzetten
         self._regioschutters_inschrijven()
 
-        self.assertEqual(3, RegioCompetitieSporterBoog.objects.count())
+        self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
         self.assertEqual(0, KampioenschapSporterBoog.objects.count())
 
         self.lid_sporter_2.bij_vereniging = None
@@ -336,9 +336,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/bko-doorzetten-naar-bk.dtl', 'plein/site_layout.dtl'))
 
         # alle rayonkampioenschappen afsluiten
-        for obj in DeelKampioenschap.objects.filter(competitie=self.comp_18,
-                                                    is_afgesloten=False,
-                                                    deel=DEEL_RK):
+        for obj in Kampioenschap.objects.filter(competitie=self.comp_18,
+                                                is_afgesloten=False,
+                                                deel=DEEL_RK):
             obj.is_afgesloten = True
             obj.save()
         # for
@@ -361,8 +361,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.deelkamp_bk_18) != '')
 
-        deelkamp_bk_18 = DeelKampioenschap.objects.get(competitie=self.comp_18,
-                                                       deel=DEEL_BK)
+        deelkamp_bk_18 = Kampioenschap.objects.get(competitie=self.comp_18,
+                                                   deel=DEEL_BK)
         objs = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk_18)
         self.assertEqual(objs.count(), 0)       # worden nog niet gemaakt, dus 0
 

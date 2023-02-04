@@ -7,10 +7,10 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                TEAM_PUNTEN_MODEL_FORMULE1,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+                               Kampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -118,7 +118,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
                                        voor_wedstrijd=True)
         self.sporterboog.save()
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -154,12 +154,12 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = DeelKampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
+        self.deelcomp_bond_18 = Kampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
         self.cluster_101a_18 = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = NhbCluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -191,7 +191,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
-        deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
+        deelcomp = Regiocompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
 
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):
@@ -255,15 +255,15 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assert404(resp, 'Poule bestaat niet')
 
         # verkeerde beheerder
-        poule.deelcompetitie = self.deelcomp_regio101_25
-        poule.save(update_fields=['deelcompetitie'])
+        poule.regiocompetitie = self.deelcomp_regio101_25
+        poule.save(update_fields=['regiocompetitie'])
         bad_url = self.url_wijzig_poule % poule.pk
         resp = self.client.get(bad_url)
         self.assert403(resp)
         resp = self.client.post(bad_url)
         self.assert403(resp)
-        poule.deelcompetitie = self.deelcomp_regio112_18
-        poule.save(update_fields=['deelcompetitie'])
+        poule.regiocompetitie = self.deelcomp_regio112_18
+        poule.save(update_fields=['regiocompetitie'])
 
         # overzicht met een poule erin
         url = self.url_regio_poules % deelcomp.pk
@@ -332,7 +332,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
         # maak een poule aan
-        deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
+        deelcomp = Regiocompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
 
         # tot en met fase D mag alles nog
         comp = deelcomp.competitie
@@ -351,7 +351,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         for lp in range(9):
             # team zonder sporters maar wel in een klasse is genoeg voor een poule
             RegiocompetitieTeam(
-                    deelcompetitie=deelcomp,
+                    regiocompetitie=deelcomp,
                     vereniging=self.nhbver_112,
                     volg_nr=lp + 1,
                     team_type=type_r,
@@ -364,7 +364,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         type_c = TeamType.objects.get(afkorting='C')
         klasse_c_ere = CompetitieTeamKlasse.objects.filter(team_type=type_c).order_by('volgorde')[0]
         team_c = RegiocompetitieTeam(
-                        deelcompetitie=deelcomp,
+                        regiocompetitie=deelcomp,
                         vereniging=self.nhbver_112,
                         volg_nr=1,
                         team_type=type_c,

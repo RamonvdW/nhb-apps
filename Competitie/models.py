@@ -279,7 +279,7 @@ class Competitie(models.Model):
                 return
 
             # fase R: vaststellen uitslagen
-            if self.deelkampioenschap_set.filter(is_afgesloten=False, deel=DEEL_BK).count() > 0:
+            if self.kampioenschap_set.filter(is_afgesloten=False, deel=DEEL_BK).count() > 0:
                 self.fase = 'R'
                 return
 
@@ -308,7 +308,7 @@ class Competitie(models.Model):
                 return
 
             # fase M: vaststellen uitslag in elk rayon (RKO)
-            if self.deelkampioenschap_set.filter(is_afgesloten=False, deel=DEEL_RK).count() > 0:
+            if self.kampioenschap_set.filter(is_afgesloten=False, deel=DEEL_RK).count() > 0:
                 self.fase = 'M'
                 return
 
@@ -344,7 +344,7 @@ class Competitie(models.Model):
             return
 
         # fase F: vaststellen uitslag in elke regio (RCL)
-        if self.deelcompetitie_set.filter(is_afgesloten=False).count() > 0:
+        if self.regiocompetitie_set.filter(is_afgesloten=False).count() > 0:
             self.fase = 'F'
             return
 
@@ -583,7 +583,7 @@ class CompetitieMatch(models.Model):
         verbose_name_plural = "Competitie Matches"
 
 
-class DeelCompetitie(models.Model):
+class Regiocompetitie(models.Model):
     """ Deze database tabel bevat informatie over een deel van een competitie:
         regiocompetitie (16x), rayoncompetitie (4x) of bondscompetitie (1x)
     """
@@ -615,7 +615,7 @@ class DeelCompetitie(models.Model):
 
     # keuzes van de RCL voor de regiocompetitie teams
 
-    # doet deze deelcompetitie aan team competitie?
+    # doet deze regiocompetitie aan team competitie?
     regio_organiseert_teamcompetitie = models.BooleanField(default=True)
 
     # vaste teams? zo niet, dan voortschrijdend gemiddelde (VSG)
@@ -647,11 +647,11 @@ class DeelCompetitie(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class DeelcompetitieRonde(models.Model):
+class RegiocompetitieRonde(models.Model):
     """ Definitie van een competitieronde """
 
-    # bij welke deelcompetitie hoort deze (geeft 18m / 25m) + regio_nr + functie + is_afgesloten
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+    # bij welke regiocompetitie hoort deze (geeft 18m / 25m) + regio_nr + functie + is_afgesloten
+    regiocompetitie = models.ForeignKey(Regiocompetitie, on_delete=models.CASCADE)
 
     # het cluster waar deze planning specifiek bij hoort (optioneel)
     cluster = models.ForeignKey(NhbCluster, on_delete=models.PROTECT,
@@ -673,7 +673,7 @@ class DeelcompetitieRonde(models.Model):
         if self.cluster:
             msg = str(self.cluster)
         else:
-            msg = str(self.deelcompetitie.nhb_regio)
+            msg = str(self.regiocompetitie.nhb_regio)
 
         msg += " week %s" % self.week_nr
 
@@ -681,15 +681,15 @@ class DeelcompetitieRonde(models.Model):
         return msg
 
 
-class RegioCompetitieSporterBoog(models.Model):
+class RegiocompetitieSporterBoog(models.Model):
     """ Een sporterboog aangemeld bij een regiocompetitie """
 
     # wanneer is deze aanmelding gedaan?
     # (wordt gebruikt om de delta aan de RCL te melden)
     wanneer_aangemeld = models.DateField(auto_now_add=True)
 
-    # bij welke deelcompetitie hoort deze inschrijving?
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+    # bij welke regiocompetitie hoort deze inschrijving?
+    regiocompetitie = models.ForeignKey(Regiocompetitie, on_delete=models.CASCADE)
 
     # om wie gaat het?
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
@@ -778,8 +778,8 @@ class RegioCompetitieSporterBoog(models.Model):
             # help sorteren op gemiddelde (hoogste eerst)
             models.Index(fields=['-gemiddelde']),
 
-            # help de specifieke filters op deelcompetitie en aantal_scores
-            models.Index(fields=['aantal_scores', 'deelcompetitie']),
+            # help de specifieke filters op regiocompetitie en aantal_scores
+            models.Index(fields=['aantal_scores', 'regiocompetitie']),
         ]
 
     objects = models.Manager()      # for the editor only
@@ -789,7 +789,7 @@ class RegiocompetitieTeam(models.Model):
     """ Een team zoals aangemaakt door de HWL van de vereniging, voor de regiocompetitie """
 
     # bij welke seizoen en regio hoort dit team
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+    regiocompetitie = models.ForeignKey(Regiocompetitie, on_delete=models.CASCADE)
 
     # bij welke vereniging hoort dit team
     vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
@@ -804,7 +804,7 @@ class RegiocompetitieTeam(models.Model):
     team_naam = models.CharField(max_length=50, default='')
 
     # initiële leden van het team
-    leden = models.ManyToManyField(RegioCompetitieSporterBoog,
+    leden = models.ManyToManyField(RegiocompetitieSporterBoog,
                                    blank=True)    # mag leeg zijn
 
     # de berekende team sterkte / team gemiddelde
@@ -839,8 +839,8 @@ class RegiocompetitieTeamPoule(models.Model):
         Tot 8 teams kunnen in een poule geplaatst worden; verder aangevuld met dummies.
     """
 
-    # bij welke deelcompetitie hoort deze poule?
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+    # bij welke regiocompetitie hoort deze poule?
+    regiocompetitie = models.ForeignKey(Regiocompetitie, on_delete=models.CASCADE)
 
     # naam van de poule, bijvoorbeeld "ERE + A"
     beschrijving = models.CharField(max_length=100, default='')
@@ -867,12 +867,12 @@ class RegiocompetitieRondeTeam(models.Model):
     ronde_nr = models.PositiveSmallIntegerField(default=0)
 
     # leden die (automatisch) gekoppeld zijn aan het team
-    deelnemers_geselecteerd = models.ManyToManyField(RegioCompetitieSporterBoog,
+    deelnemers_geselecteerd = models.ManyToManyField(RegiocompetitieSporterBoog,
                                                      related_name='teamronde_geselecteerd',
                                                      blank=True)
 
     # feitelijke leden, inclusief invallers
-    deelnemers_feitelijk = models.ManyToManyField(RegioCompetitieSporterBoog,
+    deelnemers_feitelijk = models.ManyToManyField(RegiocompetitieSporterBoog,
                                                   related_name='teamronde_feitelijk',
                                                   blank=True)
 
@@ -900,7 +900,7 @@ class RegiocompetitieRondeTeam(models.Model):
         return "Ronde %s, team %s" % (self.ronde_nr, self.team)
 
 
-class DeelKampioenschap(models.Model):
+class Kampioenschap(models.Model):
     """ Deze tabel bevat informatie over een deel van de kampioenschappen 4xRK / 1xBK en Indiv/Teams:
     """
     DEEL = [(DEEL_RK, 'RK'),
@@ -953,7 +953,7 @@ class KampioenschapIndivKlasseLimiet(models.Model):
     """
 
     # voor welk kampioenschap (i.v.m. scheiding RKs)
-    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)
+    kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)
 
     # voor welke klasse is deze limiet
     indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
@@ -977,7 +977,7 @@ class KampioenschapTeamKlasseLimiet(models.Model):
     """
 
     # voor welk kampioenschap (i.v.m. scheiding RKs)
-    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)
+    kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)
 
     # voor welke klasse is deze limiet
     team_klasse = models.ForeignKey(CompetitieTeamKlasse,
@@ -1004,7 +1004,7 @@ class KampioenschapSporterBoog(models.Model):
     """ Een sporterboog aangemeld bij een rayon- of bondskampioenschap """
 
     # bij welke kampioenschap hoort deze inschrijving?
-    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)
+    kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)
 
     # om wie gaat het?
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
@@ -1109,7 +1109,7 @@ class KampioenschapTeam(models.Model):
     """ Een team zoals aangemaakt door de HWL van de vereniging, voor een RK en doorstroming naar BK """
 
     # bij welke seizoen en RK hoort dit team?
-    kampioenschap = models.ForeignKey(DeelKampioenschap, on_delete=models.CASCADE)        # nodig voor de migratie
+    kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)        # nodig voor de migratie
 
     # bij welke vereniging hoort dit team
     vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
@@ -1125,7 +1125,7 @@ class KampioenschapTeam(models.Model):
     team_naam = models.CharField(max_length=50, default='')
 
     # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
-    tijdelijke_leden = models.ManyToManyField(RegioCompetitieSporterBoog,
+    tijdelijke_leden = models.ManyToManyField(RegiocompetitieSporterBoog,
                                               related_name='kampioenschapteam_tijdelijke_leden',
                                               blank=True)    # mag leeg zijn
 
@@ -1188,13 +1188,13 @@ class CompetitieMutatie(models.Model):
                                    on_delete=models.CASCADE,
                                    null=True, blank=True)
 
-    # op welke deelcompetitie heeft deze mutatie betrekking?
-    deelcompetitie = models.ForeignKey(DeelCompetitie,
-                                       on_delete=models.CASCADE,
-                                       null=True, blank=True)
+    # op welke regiocompetitie heeft deze mutatie betrekking?
+    regiocompetitie = models.ForeignKey(Regiocompetitie,
+                                        on_delete=models.CASCADE,
+                                        null=True, blank=True)
 
     # op welke kampioenschap heeft deze mutatie betrekking?
-    kampioenschap = models.ForeignKey(DeelKampioenschap,
+    kampioenschap = models.ForeignKey(Kampioenschap,
                                       on_delete=models.CASCADE,
                                       null=True, blank=True)
 

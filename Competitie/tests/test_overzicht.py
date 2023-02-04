@@ -7,8 +7,8 @@
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Kampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
 from Functie.models import Rollen, Functie
 from NhbStructuur.models import NhbRegio
@@ -53,22 +53,22 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         dummy_functie = Functie.objects.get(rol='MWZ')
         regio_116 = NhbRegio.objects.get(regio_nr=116)
 
-        deelcomp_regio = DeelCompetitie(competitie=comp,
-                                        is_afgesloten=False,
-                                        nhb_regio=regio_116,
-                                        functie=dummy_functie)
+        deelcomp_regio = Regiocompetitie(competitie=comp,
+                                         is_afgesloten=False,
+                                         nhb_regio=regio_116,
+                                         functie=dummy_functie)
         deelcomp_regio.save()
 
-        deelkamp_rk = DeelKampioenschap(competitie=comp,
-                                        is_afgesloten=False,
-                                        deel=DEEL_RK,
-                                        functie=dummy_functie)
+        deelkamp_rk = Kampioenschap(competitie=comp,
+                                    is_afgesloten=False,
+                                    deel=DEEL_RK,
+                                    functie=dummy_functie)
         deelkamp_rk.save()
 
-        deelkamp_bk = DeelKampioenschap(competitie=comp,
-                                        is_afgesloten=False,
-                                        deel=DEEL_BK,
-                                        functie=dummy_functie)
+        deelkamp_bk = Kampioenschap(competitie=comp,
+                                    is_afgesloten=False,
+                                    deel=DEEL_BK,
+                                    functie=dummy_functie)
         deelkamp_bk.save()
 
         comp.bepaal_fase()

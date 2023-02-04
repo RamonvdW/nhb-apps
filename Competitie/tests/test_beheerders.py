@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSporterBoog,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
+                               Kampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -81,22 +81,22 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.account_rcl = self._prep_beheerder_lid('RCL')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
         # nu in fase A
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_BK).all():
             deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
+        for deelcomp in Regiocompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -274,7 +274,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # BKO 18m
-        deelkamp = DeelKampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)
+        deelkamp = Kampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)
         functie_bko = deelkamp.functie
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(functie_bko)
@@ -286,7 +286,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # RKO 25m Rayon 2
-        deelkamp = DeelKampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, nhb_rayon=self.rayon_2)
+        deelkamp = Kampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, nhb_rayon=self.rayon_2)
         functie_rko = deelkamp.functie
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_login_and_pass_otp(self.account_rko)
@@ -299,7 +299,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # RCL
-        deelcomp = DeelCompetitie.objects.get(competitie=comp18, nhb_regio=self.regio_101)
+        deelcomp = Regiocompetitie.objects.get(competitie=comp18, nhb_regio=self.regio_101)
         functie_rcl = deelcomp.functie
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
@@ -328,7 +328,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # TODO: add WL
 
         # coverage voor models __str__
-        obj = RegioCompetitieSporterBoog.objects.all()[0]
+        obj = RegiocompetitieSporterBoog.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
 # end of file

@@ -9,9 +9,9 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.models import (Competitie, DeelCompetitie, INSCHRIJF_METHODE_1, RegioCompetitieSporterBoog,
+from Competitie.models import (Competitie, Regiocompetitie, INSCHRIJF_METHODE_1, RegiocompetitieSporterBoog,
                                KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
-                               DeelKampioenschap)
+                               Kampioenschap)
 from Competitie.tests.test_helpers import zet_competitie_fase, competities_aanmaken, maak_competities_en_zet_fase_b
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -234,7 +234,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -242,7 +242,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='25', nhb_regio=self.ver.regio)
 
         # zet de 25m door naar fase C
         zet_competitie_fase(comp_25, 'C')
@@ -435,7 +435,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -473,8 +473,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
-        # zet de deelcompetitie op inschrijfmethode 1
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        # zet de regiocompetitie op inschrijfmethode 1
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
@@ -541,7 +541,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -549,8 +549,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        self.assertEqual(1, RegioCompetitieSporterBoog.objects.count())
-        deelnemer = RegioCompetitieSporterBoog.objects.all()[0]
+        self.assertEqual(1, RegiocompetitieSporterBoog.objects.count())
+        deelnemer = RegiocompetitieSporterBoog.objects.all()[0]
 
         # ingeschreven en geen knop meer voor aanmelden
         with self.assert_max_queries(27):
@@ -560,7 +560,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
         # laat de sporter doorstromen naar het RK
-        deelkamp_25 = DeelKampioenschap.objects.get(competitie__afstand='25', nhb_rayon=self.ver.regio.rayon)
+        deelkamp_25 = Kampioenschap.objects.get(competitie__afstand='25', nhb_rayon=self.ver.regio.rayon)
         kamp = KampioenschapSporterBoog(
                     kampioenschap=deelkamp_25,
                     sporterboog=sporterboog,
@@ -571,7 +571,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                     gemiddelde=9)
         kamp.save()
 
-        deelkamp_18 = DeelKampioenschap.objects.get(competitie__afstand='18', nhb_rayon=self.ver.regio.rayon)
+        deelkamp_18 = Kampioenschap.objects.get(competitie__afstand='18', nhb_rayon=self.ver.regio.rayon)
         kamp = KampioenschapSporterBoog(
                         kampioenschap=deelkamp_18,
                         sporterboog=sporterboog,

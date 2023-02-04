@@ -65,7 +65,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
-            # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
+            # het rayonnummer is verkrijgbaar via de regiocompetitie van de functie
             return (NhbVereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
@@ -106,7 +106,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         # toon de lijst van verenigingen in de regio
         if self.rol_nu == Rollen.ROL_RCL:
-            # het regionummer is verkrijgbaar via de deelcompetitie van de functie
+            # het regionummer is verkrijgbaar via de regiocompetitie van de functie
             objs = (NhbVereniging
                     .objects
                     .filter(regio=self.functie_nu.nhb_regio)

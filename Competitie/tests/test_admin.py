@@ -7,7 +7,7 @@
 from django.test import TestCase, RequestFactory
 from BasisTypen.models import TeamType
 from Competitie import admin
-from Competitie.models import (RegioCompetitieSporterBoog,
+from Competitie.models import (RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                KampioenschapTeam,
                                KampioenschapIndivKlasseLimiet)
@@ -36,7 +36,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         type_c = TeamType.objects.get(afkorting='C')
 
         team = RegiocompetitieTeam(
-                    deelcompetitie=deelcomp,
+                    regiocompetitie=deelcomp,
                     vereniging=ver,
                     team_type=type_c)
         team.save()
@@ -51,21 +51,21 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         factory = RequestFactory()
 
         # TeamAGListFilter
-        worker = admin.TeamAGListFilter(None, {'TeamAG': None}, RegioCompetitieSporterBoog, admin.RegioCompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegioCompetitieSporterBoog.objects.all())
+        worker = admin.TeamAGListFilter(None, {'TeamAG': None}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
+        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
-        worker = admin.TeamAGListFilter(None, {'TeamAG': 'Ontbreekt'}, RegioCompetitieSporterBoog, admin.RegioCompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegioCompetitieSporterBoog.objects.all())
+        worker = admin.TeamAGListFilter(None, {'TeamAG': 'Ontbreekt'}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
+        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         # ZelfstandigIngeschrevenListFilter
-        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': None}, RegioCompetitieSporterBoog, admin.RegioCompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegioCompetitieSporterBoog.objects.all())
+        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': None}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
+        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
-        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': 'Zelf'}, RegioCompetitieSporterBoog, admin.RegioCompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegioCompetitieSporterBoog.objects.all())
+        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': 'Zelf'}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
+        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
-        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': 'HWL'}, RegioCompetitieSporterBoog, admin.RegioCompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegioCompetitieSporterBoog.objects.all())
+        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': 'HWL'}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
+        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         # IncompleetTeamFilter
         worker = admin.IncompleetTeamFilter(None, {'incompleet': None}, KampioenschapTeam, admin.KampioenschapTeamAdmin)
@@ -96,7 +96,7 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
         self.assertEqual(1, qs.count())
 
-        request = factory.get('/beheer/Competitie/regiocompetitierondeteam/?team__deelcompetitie__competitie__id__exact=7')
+        request = factory.get('/beheer/Competitie/regiocompetitierondeteam/?team__regiocompetitie__competitie__id__exact=7')
         worker = admin.RondeTeamVerFilter(request, {'RondeTeamVer': None}, RegiocompetitieRondeTeam, admin.RegiocompetitieRondeTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 

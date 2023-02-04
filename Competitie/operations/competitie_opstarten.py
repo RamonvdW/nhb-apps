@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.models import (AG_NUL, AFSTANDEN, DEEL_RK, DEEL_BK,
                                Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelCompetitie, DeelKampioenschap, DeelcompetitieRonde)
+                               Regiocompetitie, Kampioenschap, RegiocompetitieRonde)
 from Functie.models import Functie
 from NhbStructuur.models import NhbRayon, NhbRegio
 from datetime import date
@@ -52,9 +52,9 @@ def bepaal_volgende_week_nummer(deelcomp, cluster):
         last_week_in_year = 53
 
     # zoek de bestaande records
-    objs = (DeelcompetitieRonde
+    objs = (RegiocompetitieRonde
             .objects
-            .filter(deelcompetitie=deelcomp,
+            .filter(regiocompetitie=deelcomp,
                     cluster=cluster))
 
     nrs = list()
@@ -84,8 +84,8 @@ def bepaal_volgende_week_nummer(deelcomp, cluster):
     return nieuwe_week_nr
 
 
-def maak_deelcompetitie_ronde(deelcomp, cluster=None):
-    """ Maak een nieuwe deelcompetitie ronde object aan
+def maak_regiocompetitie_ronde(deelcomp, cluster=None):
+    """ Maak een nieuwe regiocompetitie ronde object aan
         geef er een uniek week nummer aan.
     """
 
@@ -93,8 +93,8 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
 
     if nieuwe_week_nr:
         # maak een eigen wedstrijdenplan aan voor deze ronde
-        ronde = DeelcompetitieRonde()
-        ronde.deelcompetitie = deelcomp
+        ronde = RegiocompetitieRonde()
+        ronde.regiocompetitie = deelcomp
         ronde.cluster = cluster
         ronde.week_nr = nieuwe_week_nr
         ronde.save()
@@ -105,13 +105,13 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
     return ronde
 
 
-def _maak_deelcompetities(comp, regios, functies):
+def _maak_regiocompetities(comp, regios, functies):
 
     """ Maak de DeelCompetities voor een competitie aan """
 
-    # zoek de voorgaande deelcompetities erbij om instellingen over te kunnen nemen
+    # zoek de voorgaande regiocompetities erbij om instellingen over te kunnen nemen
     vorige_deelcomps = dict()   # [regio_nr] = DeelCompetitie()
-    for deelcomp in (DeelCompetitie
+    for deelcomp in (Regiocompetitie
                      .objects
                      .select_related('competitie',
                                      'nhb_regio')
@@ -120,14 +120,14 @@ def _maak_deelcompetities(comp, regios, functies):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
 
-    # maak de deelcompetities aan voor regiocompetities
+    # maak de regiocompetities aan voor regiocompetities
     bulk = list()
     for obj in regios:
         functie = functies[("RCL", comp.afstand, obj.regio_nr)]
-        deel = DeelCompetitie(competitie=comp,
-                              nhb_regio=obj,
-                              functie=functie,
-                              einde_teams_aanmaken=comp.einde_teamvorming)
+        deel = Regiocompetitie(competitie=comp,
+                               nhb_regio=obj,
+                               functie=functie,
+                               einde_teams_aanmaken=comp.einde_teamvorming)
         try:
             vorige = vorige_deelcomps[obj.regio_nr]
         except KeyError:
@@ -142,10 +142,10 @@ def _maak_deelcompetities(comp, regios, functies):
         bulk.append(deel)
     # for
 
-    DeelCompetitie.objects.bulk_create(bulk)
+    Regiocompetitie.objects.bulk_create(bulk)
 
 
-def _maak_deelkampioenschappen(comp, rayons, functies):
+def _maak_kampioenschappen(comp, rayons, functies):
 
     """ Maak de DeelKampioenschappen voor een competitie aan """
 
@@ -154,7 +154,7 @@ def _maak_deelkampioenschappen(comp, rayons, functies):
     # RK individueel en teams
     for rayon in rayons:
         functie = functies[("RKO", comp.afstand, rayon.rayon_nr)]
-        deelkamp = DeelKampioenschap(
+        deelkamp = Kampioenschap(
                             deel=DEEL_RK,
                             competitie=comp,
                             nhb_rayon=rayon,
@@ -164,13 +164,13 @@ def _maak_deelkampioenschappen(comp, rayons, functies):
 
     # BK individueel en teams
     functie = functies[("BKO", comp.afstand, 0)]
-    deelkamp = DeelKampioenschap(
+    deelkamp = Kampioenschap(
                     deel=DEEL_BK,
                     competitie=comp,
                     functie=functie)
     bulk.append(deelkamp)
 
-    DeelKampioenschap.objects.bulk_create(bulk)
+    Kampioenschap.objects.bulk_create(bulk)
 
 
 def _maak_competitieklassen(comp):
@@ -305,7 +305,7 @@ def bepaal_startjaar_nieuwe_competitie():
 
 def competities_aanmaken(jaar=None):
     """ Deze functie wordt aangeroepen als de BKO de nieuwe competitie op wil starten
-        We maken de 18m en 25m competitie aan en daaronder de deelcompetities voor regio, rayon en bond
+        We maken de 18m en 25m competitie aan en daaronder de regiocompetities voor regio, rayon en bond
 
         Wedstrijdklassen worden ook aangemaakt, maar het minimale AG wordt nog niet ingevuld
     """
@@ -373,8 +373,8 @@ def competities_aanmaken(jaar=None):
         pks = list(teams_klassen.values_list('team_type__pk', flat=True))
         comp.teamtypen.set(pks)
 
-        _maak_deelcompetities(comp, regios, functies)
-        _maak_deelkampioenschappen(comp, rayons, functies)
+        _maak_regiocompetities(comp, regios, functies)
+        _maak_kampioenschappen(comp, rayons, functies)
 
         _maak_competitieklassen(comp)
     # for

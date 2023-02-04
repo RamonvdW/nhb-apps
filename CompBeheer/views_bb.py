@@ -13,8 +13,8 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, DEEL_RK, DEELNAME_NEE,
-                               RegioCompetitieSporterBoog, RegiocompetitieTeam, KampioenschapSporterBoog,
+from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie, DEEL_RK, DEELNAME_NEE,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, KampioenschapSporterBoog,
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
@@ -440,8 +440,8 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.bk_laatste_wedstrijd = datums[10]
         comp.save()
 
-        # pas ook de deelcompetities aan
-        for deelcomp in (DeelCompetitie
+        # pas ook de regiocompetities aan
+        for deelcomp in (Regiocompetitie
                          .objects
                          .filter(competitie=comp)):
 
@@ -587,12 +587,12 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         pks = list()
         for comp in actuele_comps:
             pks.append(comp.pk)
-            aantal_indiv = (RegioCompetitieSporterBoog
+            aantal_indiv = (RegiocompetitieSporterBoog
                             .objects
-                            .filter(deelcompetitie__competitie=comp)
+                            .filter(regiocompetitie__competitie=comp)
                             .count())
 
-            qset = RegiocompetitieTeam.objects.filter(deelcompetitie__competitie=comp).select_related('vereniging__regio__rayon')
+            qset = RegiocompetitieTeam.objects.filter(regiocompetitie__competitie=comp).select_related('vereniging__regio__rayon')
             aantal_teams_ag_nul = qset.filter(aanvangsgemiddelde__lt=0.001).count()
 
             if comp.afstand == '18':
@@ -647,20 +647,20 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             aantal_leden_regio[regio_nr] = 0
         # for
 
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
-                          .filter(deelcompetitie__competitie__pk__in=pks)
+                          .filter(regiocompetitie__competitie__pk__in=pks)
                           .select_related('sporterboog__sporter',
                                           'sporterboog__sporter__account',
                                           'bij_vereniging__regio__rayon',
                                           'aangemeld_door',
-                                          'deelcompetitie__competitie')):
+                                          'regiocompetitie__competitie')):
 
             rayon_nr = deelnemer.bij_vereniging.regio.rayon.rayon_nr
             regio_nr = deelnemer.bij_vereniging.regio.regio_nr
             zelfstandig = deelnemer.aangemeld_door == deelnemer.sporterboog.sporter.account
 
-            if deelnemer.deelcompetitie.competitie.afstand == '18':
+            if deelnemer.regiocompetitie.competitie.afstand == '18':
                 aantal_18m_rayon[rayon_nr] += 1
                 aantal_18m_regio[regio_nr] += 1
                 if not deelnemer.inschrijf_voorkeur_rk_bk:
@@ -694,9 +694,9 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             context['aantal_25m_regio'].append(aantal_25m_regio[regio_nr])
         # for
 
-        qset = (RegioCompetitieSporterBoog
+        qset = (RegiocompetitieSporterBoog
                 .objects
-                .filter(deelcompetitie__competitie__pk__in=pks)
+                .filter(regiocompetitie__competitie__pk__in=pks)
                 .select_related('sporterboog',
                                 'sporterboog__sporter__account')
                 .distinct('sporterboog'))

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Score.models import Score
-from Competitie.models import CompetitieIndivKlasse, DeelcompetitieRonde, CompetitieMatch
+from Competitie.models import CompetitieIndivKlasse, RegiocompetitieRonde, CompetitieMatch
 from Score.models import Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -86,8 +86,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp18_regio[101].pk)
         with self.assert_max_queries(20):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp25_regio[101].pk)
-        ronde18 = DeelcompetitieRonde.objects.all()[0]
-        ronde25 = DeelcompetitieRonde.objects.all()[1]
+        ronde18 = RegiocompetitieRonde.objects.all()[0]
+        ronde25 = RegiocompetitieRonde.objects.all()[1]
 
         # maak een cluster planning aan
         # cluster = self.testdata.regio_cluster[101]
@@ -648,7 +648,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         uitslag.save()
         uitslag.scores.add(score)
 
-        ronde = DeelcompetitieRonde.objects.filter(deelcompetitie=self.testdata.deelcomp18_regio[101])[0]
+        ronde = RegiocompetitieRonde.objects.filter(regiocompetitie=self.testdata.deelcomp18_regio[101])[0]
         match = ronde.matches.all()[0]
         match.uitslag = uitslag
         match.save()

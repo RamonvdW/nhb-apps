@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
 from BasisTypen.models import GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
-from Competitie.models import CompetitieIndivKlasse, RegioCompetitieSporterBoog
+from Competitie.models import CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import SporterVoorkeuren
 
@@ -83,21 +83,21 @@ class Command(BaseCommand):
         # for
 
         prev_comp_pk = jaartal = -1
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('indiv_klasse',
                                           'sporterboog',
                                           'sporterboog__sporter',
-                                          'deelcompetitie__competitie')
-                          .order_by('deelcompetitie__competitie__pk')):     # pragma: no cover
+                                          'regiocompetitie__competitie')
+                          .order_by('regiocompetitie__competitie__pk')):     # pragma: no cover
 
-            comp_pk = deelnemer.deelcompetitie.competitie.pk
+            comp_pk = deelnemer.regiocompetitie.competitie.pk
             volgorde = deelnemer.indiv_klasse.volgorde
 
             if comp_pk != prev_comp_pk:
-                bepaler = KlasseBepaler(deelnemer.deelcompetitie.competitie)
+                bepaler = KlasseBepaler(deelnemer.regiocompetitie.competitie)
                 prev_comp_pk = comp_pk
-                jaartal = deelnemer.deelcompetitie.competitie.begin_jaar + 1
+                jaartal = deelnemer.regiocompetitie.competitie.begin_jaar + 1
 
             try:
                 wedstrijdgeslacht = sporter_pk2wedstrijdgeslacht[deelnemer.sporterboog.sporter.pk]

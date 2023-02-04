@@ -12,8 +12,8 @@ from django.utils.formats import localize
 from django.db.models import Q
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.models import (Competitie, DeelCompetitie,
-                               RegioCompetitieSporterBoog, KampioenschapSporterBoog,
+from Competitie.models import (Competitie, Regiocompetitie,
+                               RegiocompetitieSporterBoog, KampioenschapSporterBoog,
                                INSCHRIJF_METHODE_1, DEELNAME_NEE, DEEL_RK)
 from Functie.models import Functie, Rollen
 from Functie.rol import rol_get_huidige
@@ -161,9 +161,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         gebruik_knoppen = False
 
         # zoek alle inschrijvingen van deze sporter erbij
-        inschrijvingen = list(RegioCompetitieSporterBoog
+        inschrijvingen = list(RegiocompetitieSporterBoog
                               .objects
-                              .select_related('deelcompetitie',
+                              .select_related('regiocompetitie',
                                               'sporterboog')
                               .filter(sporterboog__sporter=sporter))
 
@@ -183,16 +183,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         comp_pks = [comp.pk for comp in comps]
 
-        # zoek deelcompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
+        # zoek regiocompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
         regio = sporter.bij_vereniging.regio
-        for deelcompetitie in (DeelCompetitie
-                               .objects
-                               .select_related('competitie')
-                               .exclude(competitie__is_afgesloten=True)
-                               .filter(competitie__pk__in=comp_pks,
-                                       nhb_regio=regio)
-                               .order_by('competitie__afstand')):
-            comp = deelcompetitie.competitie
+        for deelcomp in (Regiocompetitie
+                         .objects
+                         .select_related('competitie')
+                         .exclude(competitie__is_afgesloten=True)
+                         .filter(competitie__pk__in=comp_pks,
+                                 nhb_regio=regio)
+                         .order_by('competitie__afstand')):
+            comp = deelcomp.competitie
             comp.bepaal_fase()
 
             comp_boog_afk = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
@@ -200,7 +200,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             # doorloop elk boogtype waar de sporter informatie/wedstrijden voorkeur voor heeft
             for afk in boog_afkorting_wedstrijd:
                 if afk in comp_boog_afk:
-                    obj = copy.copy(deelcompetitie)
+                    obj = copy.copy(deelcomp)
                     objs.append(obj)
 
                     obj.boog_afkorting = afk
@@ -211,7 +211,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     # zoek uit of de sporter al ingeschreven is
                     sporterboog = boogafk2sporterboog[afk]
                     for inschrijving in inschrijvingen:
-                        if inschrijving.sporterboog == sporterboog and inschrijving.deelcompetitie == obj:
+                        if inschrijving.sporterboog == sporterboog and inschrijving.regiocompetitie == obj:
                             obj.is_ingeschreven = True
                             obj.afgemeld_voorkeur_rk = not inschrijving.inschrijf_voorkeur_rk_bk
                             inschrijvingen.remove(inschrijving)
@@ -238,7 +238,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     elif 'J' <= comp.fase <= 'N':
                         # zoek de inschrijving voor het RK erbij
                         for kampioen in kampioenen:
-                            if (kampioen.kampioenschap.competitie == deelcompetitie.competitie and
+                            if (kampioen.kampioenschap.competitie == deelcomp.competitie and
                                     kampioen.kampioenschap.deel == DEEL_RK and
                                     kampioen.sporterboog == sporterboog):
 
@@ -262,7 +262,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # zodat er afgemeld kan worden
         for inschrijving in inschrijvingen:
             afk = inschrijving.sporterboog.boogtype.afkorting
-            obj = inschrijving.deelcompetitie
+            obj = inschrijving.regiocompetitie
             objs.append(obj)
 
             obj.is_ingeschreven = True
@@ -413,16 +413,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     def _find_scores(sporter):
         scores = list()
 
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
-                          .select_related('deelcompetitie',
-                                          'deelcompetitie__competitie',
+                          .select_related('regiocompetitie',
+                                          'regiocompetitie__competitie',
                                           'sporterboog',
                                           'sporterboog__boogtype')
                           .filter(sporterboog__sporter=sporter)
-                          .order_by('deelcompetitie__competitie__afstand')):
+                          .order_by('regiocompetitie__competitie__afstand')):
 
-            comp = deelnemer.deelcompetitie.competitie
+            comp = deelnemer.regiocompetitie.competitie
 
             if comp.afstand == '18':
                 deelnemer.competitie_str = "18m Indoor"

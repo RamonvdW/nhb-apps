@@ -7,7 +7,7 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap, DEEL_BK, KampioenschapSporterBoog, DEELNAME_NEE, KampioenschapIndivKlasseLimiet, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN
+from Competitie.models import Competitie, CompetitieMatch, Kampioenschap, DEEL_BK, KampioenschapSporterBoog, DEELNAME_NEE, KampioenschapIndivKlasseLimiet, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN
 from Plein.menu import menu_dynamics
 import datetime
 
@@ -68,13 +68,13 @@ class UitslagenBKIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         try:
-            deelkamp_bk = (DeelKampioenschap
+            deelkamp_bk = (Kampioenschap
                            .objects
                            .select_related('competitie')
                            .get(deel=DEEL_BK,
                                 competitie__is_afgesloten=False,
                                 competitie__pk=comp_pk))
-        except DeelKampioenschap.DoesNotExist:
+        except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
         if comp.fase == 'P':
@@ -226,13 +226,13 @@ class UitslagenBKTeamsView(TemplateView):
         team_type = kwargs['team_type'][:3]           # afkappen voor de veiligheid
 
         try:
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie')
                         .get(deel=DEEL_BK,
                              competitie__is_afgesloten=False,
                              competitie__pk=comp_pk))
-        except DeelKampioenschap.DoesNotExist:
+        except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
         context['kruimels'] = (
