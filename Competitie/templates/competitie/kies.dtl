@@ -69,7 +69,7 @@
     </div>
 
 
-    {% if toon_management_competitie %}
+    {% if toon_management %}
 
         <!-- witruimte -->
         <div class="row center">
@@ -89,105 +89,14 @@
                 {% if url_seizoen_afsluiten %}
                     {% include 'plein/card.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
                 {% endif %}
+
+                {% include 'plein/card.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
+
             </div>
         </div>
 
     {% endif %}
 
-
-    {% if toon_aantal_inschrijvingen %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Statistiek</h4>
-            </div>
-        </div>
-
-        <!-- blauwe balk met informatie label : info -->
-        <div class="row-nhb-blauw">
-            <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
-                <table class="white">
-                    <tr>
-                        <th>Aanmeldingen</th>
-                        <td class="right-align"><br>Sporters<br>Teams</td>
-                        <td class="right-align"><b>Indoor</b><br>{{ totaal_18m_indiv }}<br>{{ totaal_18m_teams }}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b><br>{{ totaal_25m_indiv }}<br>{{ totaal_25m_teams }}</td>
-                    </tr>
-
-                    <tr>
-                        <th>Unieke sporters</th>
-                        <td class="right-align">{{ aantal_sporters }}</td>
-                        <td colspan="2"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Zelfstandig aangemeld</th>
-                        <td class="right-align">{{ aantal_zelfstandig }}{% if procent_zelfstandig %}<br>({{ procent_zelfstandig }}%){% endif %}</td>
-                        <td colspan="2"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Sporters met meerdere bogen</th>
-                        <td class="right-align">{{ aantal_multiboog }}</td>
-                        <td colspan="2"></td>
-                    </tr>
-
-                    <tr>
-                        <th>Deelnemers per rayon</th>
-                        <td class="right-align"><br>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
-                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_rayon %}<br>{{ aantal }}{% endfor %}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_rayon %}<br>{{ aantal }}{% endfor %}</td>
-                    </tr>
-
-                    <tr>
-                        <th>Deelnemers per regio</th>
-                        <td class="right-align"><br>Regio 101<br>Regio 102<br>Regio 103<br>Regio 104<br>Regio 105<br>Regio 106<br>Regio 107<br>Regio 108<br>Regio 109<br>Regio 110<br>Regio 111<br>Regio 112<br>Regio 113<br>Regio 114<br>Regio 115<br>Regio 116</td>
-                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_regio%}<br>{{ aantal }}{% endfor %}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_regio %}<br>{{ aantal }}{% endfor %}</td>
-                    </tr>
-
-                    <tr>
-                        <th>Bij inschrijving afgemeld voor RK</th>
-                        <td class="right-align"><br>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
-                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_geen_rk %}<br>{{ aantal }}{% endfor %}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_geen_rk %}<br>{{ aantal }}{% endfor %}</td>
-                    </tr>
-
-                    <tr>
-                        <th>Teams per rayon</th>
-                        <td class="right-align"><br>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
-                        <td class="right-align"><b>Indoor</b>{% for aantal in aantal_18m_teams %}<br>{{ aantal }}{% endfor %}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for aantal in aantal_25m_teams %}<br>{{ aantal }}{% endfor %}</td>
-                    </tr>
-
-                    {% if aantal_18m_teams_niet_af > 0 or aantal_25m_teams_niet_af > 0%}
-                        <tr>
-                            <th class="red-text">Aantal teams nog niet af</th>
-                            <td></td>
-                            <td class="right-align">{{ aantal_18m_teams_niet_af }}</td>
-                            <td class="right-align" style="padding-right:15px">{{ aantal_25m_teams_niet_af }}</td>
-                        </tr>
-                    {% endif %}
-
-                    <tr>
-                        <th>Zelfstandig aangemeld per regio</th>
-                        <td class="right-align"><br>Regio 101<br>Regio 102<br>Regio 103<br>Regio 104<br>Regio 105<br>Regio 106<br>Regio 107<br>Regio 108<br>Regio 109<br>Regio 110<br>Regio 111<br>Regio 112<br>Regio 113<br>Regio 114<br>Regio 115<br>Regio 116</td>
-                        <td class="right-align"><b>Indoor</b>{% for perc_str in perc_zelfstandig_18m_regio %}<br>{{ perc_str }}%{% endfor %}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for perc_str in perc_zelfstandig_25m_regio %}<br>{{ perc_str }}%{% endfor %}</td>
-                    </tr>
-
-                    <tr>
-                        <th>Deelname alle leden per regio</th>
-                        <td class="right-align"><br>Regio 101<br>Regio 102<br>Regio 103<br>Regio 104<br>Regio 105<br>Regio 106<br>Regio 107<br>Regio 108<br>Regio 109<br>Regio 110<br>Regio 111<br>Regio 112<br>Regio 113<br>Regio 114<br>Regio 115<br>Regio 116</td>
-                        <td class="right-align"><b>Indoor</b>{% for perc_str in perc_leden_18m_regio %}<br>{{ perc_str }}%{% endfor %}</td>
-                        <td class="right-align" style="padding-right:15px"><b>25m1pijl</b>{% for perc_str in perc_leden_25m_regio %}<br>{{ perc_str }}%{% endfor %}</td>
-                    </tr>
-
-                </table>
-            </div>
-        </div>
-    {% endif %}
 
     <!-- witruimte -->
     <div class="row center">

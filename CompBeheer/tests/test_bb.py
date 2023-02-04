@@ -29,6 +29,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
     url_kies = '/bondscompetities/'
     url_overzicht = '/bondscompetities/%s/'
+    url_overzicht_beheer = '/bondscompetities/%s/beheer/'
     url_aanmaken = '/bondscompetities/beheer/aanmaken/'
     url_instellingen = '/bondscompetities/beheer/instellingen-volgende-competitie/'
     url_wijzigdatums = '/bondscompetities/beheer/%s/wijzig-datums/'                             # comp_pk
@@ -36,6 +37,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
     url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen-tonen/'                     # comp_pk
     url_seizoen_afsluiten = '/bondscompetities/beheer/seizoen-afsluiten/'
+    url_statistiek = '/bondscompetities/beheer/statistiek/'
 
     testdata = None
 
@@ -331,6 +333,9 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         resp = self.client.get(self.url_seizoen_afsluiten)
         self.assert403(resp)
 
+        resp = self.client.get(self.url_statistiek)
+        self.assert403(resp)
+
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
@@ -479,7 +484,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # controleer dat het "ag vaststellen" kaartje er is
         # om te beginnen zonder "voor het laatst gedaan"
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp.pk)
+            resp = self.client.get(self.url_overzicht_beheer % comp.pk)
         urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen_afstand % comp.afstand in urls)
         self.assertNotContains(resp, "laatst gedaan op")
@@ -828,6 +833,27 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_seizoen_afsluiten)
         self.assert404(resp, 'Geen competitie gevonden')
+
+    def test_statistiek(self):
+        # moet BB zijn
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wisselnaarrol_bb()
+
+        # maak een competitie van het volgende seizoen aan
+        competities_aanmaken(jaar=2019)
+
+        for comp in Competitie.objects.all():
+            comp.klassengrenzen_vastgesteld = True
+            comp.save(update_fields=['klassengrenzen_vastgesteld'])
+        # for
+
+        # TODO: controleer dat het "kies" scherm het kaartje statistiek bevat
+
+        resp = self.client.get(self.url_statistiek)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bb-statistiek.dtl', 'plein/site_layout.dtl'))
+
 
 # TODO: gebruik assert_other_http_commands_not_supported
 

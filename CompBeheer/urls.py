@@ -30,6 +30,10 @@ urlpatterns = [
          views_bb.SeizoenAfsluitenView.as_view(),
          name='bb-seizoen-afsluiten'),
 
+    path('statistiek/',
+         views_bb.CompetitieStatistiekView.as_view(),
+         name='statistiek'),
+
     path('<comp_pk>/klassengrenzen-vaststellen/',
          views_bb.KlassengrenzenVaststellenView.as_view(),
          name='klassengrenzen-vaststellen'),

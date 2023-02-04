@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,6 @@ included_templates = (
     'plein/ga-naar-live-server.dtl',
     'feedback/sidebar.dtl',
     'logboek/common.dtl',
-    'competitie/tijdlijn.dtl',
     'snippets.dtl',
     'email_mailer/email_basis.dtl',
 )

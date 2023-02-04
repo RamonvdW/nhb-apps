@@ -373,6 +373,9 @@ class Competitie(models.Model):
                 # beheerders die de competitie opzetten zien competities die opgestart zijn
                 self.is_openbaar = True
 
+    def maak_seizoen_str(self):
+        return "%s/%s" % (self.begin_jaar, self.begin_jaar + 1)
+
     objects = models.Manager()      # for the editor only
 
 

@@ -15,6 +15,9 @@ pyotp
 # Excel read/write support
 openpyxl
 
+# voor bondspas plaatje maken
+pillow
+
 # QR code generation for 2FA
 qrcode
 
@@ -24,8 +27,5 @@ google-api-python-client
 
 # collecting payment service provide
 mollie-api-python
-
-# voor bondspas plaatje maken
-pillow
 
 # end of file

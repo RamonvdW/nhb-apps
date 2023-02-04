@@ -11,9 +11,24 @@ app_name = 'Competitie'
 
 urlpatterns = [
 
-    path('',
-         views_kies.CompetitieKiesView.as_view(),
-         name='kies'),
+    # voor beheerders
+    path('<comp_pk>/beheer/',
+         views_beheer.CompetitieBeheerView.as_view(),
+         name='beheer'),
+
+    path('<comp_pk>/tijdlijn/',
+         views_tijdlijn.CompetitieTijdlijnView.as_view(),
+         name='tijdlijn'),
+
+
+    # openbare pagina's
+    path('info/',
+         views_info.InfoCompetitieView.as_view(),
+         name='info-competitie'),
+
+    path('info/leeftijden/',
+         views_info.redirect_leeftijden,  # oud; redirects naar nieuw
+         name='info-leeftijden'),
 
     path('<comp_pk>/',
          views_overzicht.CompetitieOverzichtView.as_view(),
@@ -23,23 +38,10 @@ urlpatterns = [
          views_klassengrenzen.KlassengrenzenTonenView.as_view(),
          name='klassengrenzen-tonen'),
 
-    path('info/',
-         views_info.InfoCompetitieView.as_view(),
-         name='info-competitie'),
+    path('',
+         views_kies.CompetitieKiesView.as_view(),
+         name='kies'),
 
-    path('info/leeftijden/',
-         views_info.redirect_leeftijden,  # oud; redirects naar nieuw
-         name='info-leeftijden'),
-
-
-    # voor beheerders
-    path('<comp_pk>/beheer/',
-         views_beheer.CompetitieBeheerView.as_view(),
-         name='beheer'),
-
-    path('<comp_pk>/tijdlijn/',
-         views_tijdlijn.CompetitieTijdlijnView.as_view(),
-         name='tijdlijn'),
 ]
 
 # end of file

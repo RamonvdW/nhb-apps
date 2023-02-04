@@ -262,14 +262,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-
-        # statistiek voor de BB
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kies)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # BKO 18m
         deelkamp = DeelKampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)

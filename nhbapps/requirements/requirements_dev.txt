@@ -8,7 +8,7 @@ asgiref==3.6.0
     # via
     #   -r requirements.txt
     #   django
-beautifulsoup4==4.11.1
+beautifulsoup4==4.11.2
     # via -r requirements_dev.in
 cachetools==5.3.0
     # via
@@ -24,7 +24,7 @@ charset-normalizer==3.0.1
     #   requests
 coverage==7.1.0
     # via -r requirements_dev.in
-django==4.0.8
+django==4.0.9
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -41,7 +41,7 @@ google-api-core==2.11.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.74.0
+google-api-python-client==2.76.0
     # via -r requirements.txt
 google-auth==2.16.0
     # via
@@ -74,7 +74,7 @@ oauthlib==3.2.2
     # via
     #   -r requirements.txt
     #   requests-oauthlib
-openpyxl==3.0.10
+openpyxl==3.1.0
     # via -r requirements.txt
 packaging==23.0
     # via pip-review

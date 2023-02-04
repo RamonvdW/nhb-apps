@@ -12,13 +12,13 @@ certifi==2022.12.7
     # via requests
 charset-normalizer==3.0.1
     # via requests
-django==4.0.8
+django==4.0.9
     # via -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.11.0
     # via google-api-python-client
-google-api-python-client==2.74.0
+google-api-python-client==2.76.0
     # via -r requirements.in
 google-auth==2.16.0
     # via
@@ -40,7 +40,7 @@ mollie-api-python==2.13.0
     # via -r requirements.in
 oauthlib==3.2.2
     # via requests-oauthlib
-openpyxl==3.0.10
+openpyxl==3.1.0
     # via -r requirements.in
 pillow==9.4.0
     # via -r requirements.in
