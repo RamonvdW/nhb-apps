@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import KampioenschapSporterBoog, DEELNAME_NEE
+from Competitie.definities import DEELNAME_NEE
+from Competitie.models import KampioenschapSporterBoog
 from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
