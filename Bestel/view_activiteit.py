@@ -113,23 +113,37 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                          'webwinkel_keuze__koper')
                                          .all())
 
+            aantal_wedstrijd = False
+            aantal_webwinkel = False
+            laatste_wedstrijd_beschrijving = ''
+
             for product in bestelling.prods_list:
 
                 if product.wedstrijd_inschrijving:
+                    aantal_wedstrijd += 1
                     inschrijving = product.wedstrijd_inschrijving
                     product.beschrijving_str1 = 'Wedstrijd bij %s' % inschrijving.wedstrijd.organiserende_vereniging.ver_nr_en_naam()
                     product.beschrijving_str2 = 'voor %s (%s)' % (
                         inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam(),
                         inschrijving.sporterboog.boogtype.beschrijving)
                     product.beschrijving_str3 = inschrijving.wedstrijd.titel
+                    laatste_wedstrijd_beschrijving = product.beschrijving_str1
 
                 elif product.webwinkel_keuze:
+                    aantal_webwinkel += 1
                     keuze = product.webwinkel_keuze
                     product.beschrijving_str2 = keuze.product.omslag_titel
 
                 else:
                     product.geen_beschrijving = True
             # for
+
+            if aantal_webwinkel:
+                bestelling.beschrijving_kort = '%sx webwinkel' % aantal_webwinkel
+            elif aantal_wedstrijd:
+                bestelling.beschrijving_kort = '%sx %s' % (aantal_wedstrijd, laatste_wedstrijd_beschrijving)
+            else:
+                bestelling.beschrijving_kort = '?'
 
             bestelling.trans_list = list(bestelling
                                          .transacties
@@ -150,6 +164,18 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (None, 'Bestellingen en Betalingen'),
             )
+
+        now = timezone.now()
+
+        context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
+
+        begin_maand = datetime.datetime(day=1, month=now.month, year=now.year)
+        begin_maand = timezone.make_aware(begin_maand)
+
+        qset = Bestelling.objects.filter(aangemaakt__gte=begin_maand)
+
+        context['aantal_bestellingen'] = qset.count()
+        context['aantal_verkopers'] = qset.distinct('ontvanger').count()
 
         menu_dynamics(self.request, context)
         return context
