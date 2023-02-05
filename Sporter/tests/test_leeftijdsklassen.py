@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
-                               ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA)
+from BasisTypen.definities import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
+                                   ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_nhb,
@@ -16,7 +16,7 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_nhb,
                                       bereken_leeftijdsklasse_ifaa)
-from Sporter.models import Sporter, SporterVoorkeuren
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 

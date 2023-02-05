@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.models import Competitie, Kampioenschap, DEEL_RK
+from Competitie.definities import DEEL_RK
+from Competitie.models import Competitie, Kampioenschap
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                                    competitie_klassengrenzen_vaststellen)
 import datetime

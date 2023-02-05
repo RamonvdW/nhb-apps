@@ -6,12 +6,11 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, Regiocompetitie,
-                               Kampioenschap, DEEL_BK, DEEL_RK,
-                               KampioenschapSporterBoog, CompetitieIndivKlasse, CompetitieTeamKlasse,
+from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               Regiocompetitie, Kampioenschap, KampioenschapSporterBoog,
                                KampioenschapIndivKlasseLimiet, RegiocompetitieSporterBoog,
-                               CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND,
-                               INSCHRIJF_METHODE_1)
+                               CompetitieMutatie)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie

@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse, GESLACHT_ANDERS, GESLACHT_ALLE
+from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
-from Wedstrijden.models import (WedstrijdLocatie, INSCHRIJVING_STATUS_AFGEMELD, ORGANISATIE_WA,
-                                Wedstrijd, WedstrijdSessie, WedstrijdInschrijving)
+from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 

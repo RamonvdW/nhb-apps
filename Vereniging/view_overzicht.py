@@ -16,7 +16,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
-from Wedstrijden.models import BAAN_TYPE_EXTERN
+from Wedstrijden.definities import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
 import datetime
 

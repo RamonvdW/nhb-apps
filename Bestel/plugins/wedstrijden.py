@@ -9,10 +9,11 @@
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA
-from Wedstrijden.models import (WedstrijdKorting, WedstrijdInschrijving,
-                                WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
+from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                 INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
                                 INSCHRIJVING_STATUS_TO_STR)
+from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving
+
 from decimal import Decimal
 
 

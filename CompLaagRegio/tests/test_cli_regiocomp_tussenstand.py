@@ -7,13 +7,15 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
+from Competitie.definities import DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie,
                                RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch,
-                               Kampioenschap, DEEL_BK)
+                               Kampioenschap)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from Competitie.tests.test_helpers import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.definities import SCORE_WAARDE_VERWIJDERD
+from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers

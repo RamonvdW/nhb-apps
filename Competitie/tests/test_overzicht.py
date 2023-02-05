@@ -7,8 +7,8 @@
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
-from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Kampioenschap, DEEL_RK, DEEL_BK)
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
 from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
 from Functie.definities import Rollen
 from Functie.models import Functie

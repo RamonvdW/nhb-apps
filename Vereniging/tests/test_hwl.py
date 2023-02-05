@@ -8,8 +8,9 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieMatch, RegiocompetitieRonde,
-                               Kampioenschap, DEEL_RK, INSCHRIJF_METHODE_1)
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
+                               Regiocompetitie, RegiocompetitieRonde, Kampioenschap)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel

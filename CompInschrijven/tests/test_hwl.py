@@ -6,13 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import BOOGTYPE_AFKORTING_RECURVE
+from BasisTypen.definities import BOOGTYPE_AFKORTING_RECURVE
 from Functie.operations import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               Kampioenschap, DEEL_RK,
-                               RegiocompetitieRonde, CompetitieMatch)
+                               Kampioenschap, RegiocompetitieRonde, CompetitieMatch)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel

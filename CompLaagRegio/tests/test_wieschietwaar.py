@@ -8,8 +8,8 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieMatch,
-                               INSCHRIJF_METHODE_1)
+from Competitie.definities import INSCHRIJF_METHODE_1
+from Competitie.models import CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieMatch
 from Competitie.operations import maak_regiocompetitie_ronde
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog

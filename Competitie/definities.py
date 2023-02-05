@@ -4,11 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from decimal import Decimal
-
-
-AG_NUL = Decimal('0.000')
-AG_LAAGSTE_NIET_NUL = Decimal('0.001')
 
 AFSTANDEN = [('18', 'Indoor'),
              ('25', '25m 1pijl')]

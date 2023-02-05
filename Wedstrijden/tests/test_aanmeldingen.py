@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,8 +12,8 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
-from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
-                                WedstrijdKorting, INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING)
+from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from datetime import timedelta
 
 

@@ -18,7 +18,8 @@ from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Vereniging.models import Secretaris
-from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_BUITEN
+from Wedstrijden.definities import BAAN_TYPE_BUITEN
+from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io

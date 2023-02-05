@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,11 @@ from django.test import TestCase
 from django.core import management
 from django.conf import settings
 from django.utils import timezone
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIE_IFAA
-from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
-                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
-                           BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
+from BasisTypen.definities import ORGANISATIE_IFAA
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
+                               BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
+from Bestel.models import BestelMandje, BestelMutatie, Bestelling
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
                                         bestel_mutatieverzoek_webwinkel_keuze,
                                         bestel_mutatieverzoek_betaling_afgerond,
@@ -23,11 +24,11 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
-from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD, WedstrijdLocatie,
-                                WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_VERENIGING,
-                                WEDSTRIJD_KORTING_SPORTER,
-                                INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
+                                    WEDSTRIJD_KORTING_SPORTER,
+                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                    INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdLocatie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
 import io
 

@@ -7,10 +7,9 @@
 from django.conf import settings
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegiocompetitieRonde, CompetitieMatch,
-                               RegiocompetitieSporterBoog, INSCHRIJF_METHODE_1,
-                               Kampioenschap, DEEL_RK, DEEL_BK)
+                               RegiocompetitieRonde, CompetitieMatch, RegiocompetitieSporterBoog, Kampioenschap)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from CompLaagRegio.view_planning import competitie_week_nr_to_date

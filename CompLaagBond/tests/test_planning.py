@@ -6,13 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap, DEEL_RK, DEEL_BK,
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import (Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               KampioenschapSporterBoog)
-from Competitie.operations import competities_aanmaken
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers

@@ -9,7 +9,8 @@
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
 from Account.models import AccountSessions
-from Competitie.models import Kampioenschap, DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Kampioenschap
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
 from Functie.definities import Rollen, rol2url, url2rol

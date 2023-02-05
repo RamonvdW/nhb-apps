@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Bestel.models import Bestelling, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND
+from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND
+from Bestel.models import Bestelling
 from Functie.operations import Functie
 from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging

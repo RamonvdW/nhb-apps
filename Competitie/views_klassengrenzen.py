@@ -8,11 +8,11 @@ from django.views.generic import View
 from django.http import Http404
 from django.shortcuts import render, reverse
 from BasisTypen.definities import BLAZOEN2STR
-from Competitie.definities import AG_NUL
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
+from Score.definities import AG_NUL
 
 
 TEMPLATE_COMPETITIE_KLASSENGRENZEN_TONEN = 'competitie/klassengrenzen-tonen.dtl'

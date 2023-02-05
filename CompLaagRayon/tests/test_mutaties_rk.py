@@ -7,11 +7,13 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
+from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTEN,
+                                   MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
+                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN,
+                                   DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN,
-                               MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
-                               KampioenschapSporterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
+                               CompetitieMutatie, KampioenschapSporterBoog)
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers

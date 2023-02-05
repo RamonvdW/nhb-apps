@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd,
-                                WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD)
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 

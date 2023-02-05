@@ -6,9 +6,8 @@
 
 from django.test import TestCase
 from django.core import management
-from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
-                               CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DEEL_RK, DEEL_BK)
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Competitie, Kampioenschap, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers

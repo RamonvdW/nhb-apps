@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import Regiocompetitie, Kampioenschap, DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie, Functie
 from Mailer.models import MailQueue

@@ -10,7 +10,8 @@ from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Score.models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
+from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
+from Score.models import Score, ScoreHist, Uitslag
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers

@@ -6,9 +6,8 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, CompetitieMatch,
-                               INSCHRIJF_METHODE_1,
-                               Kampioenschap, DEEL_RK, DEEL_BK)
+from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, CompetitieMatch, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie

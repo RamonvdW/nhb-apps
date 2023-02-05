@@ -9,9 +9,9 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.models import (Competitie, Regiocompetitie, INSCHRIJF_METHODE_1, RegiocompetitieSporterBoog,
-                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
-                               Kampioenschap)
+from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
+                               Kampioenschap, KampioenschapSporterBoog)
 from Competitie.tests.test_helpers import zet_competitie_fase, competities_aanmaken, maak_competities_en_zet_fase_b
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging

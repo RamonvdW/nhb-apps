@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie, MUTATIE_INITIEEL,
+from Competitie.definities import MUTATIE_INITIEEL
+from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers

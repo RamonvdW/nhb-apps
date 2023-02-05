@@ -11,7 +11,8 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, ScoreHist, Score, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
+from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
+from Score.models import Aanvangsgemiddelde, ScoreHist, Score
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime

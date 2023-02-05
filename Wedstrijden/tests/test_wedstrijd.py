@@ -10,7 +10,8 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie
 import datetime
 
 

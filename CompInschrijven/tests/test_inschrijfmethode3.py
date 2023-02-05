@@ -5,15 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.models import BoogType
+from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_3
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
+from Competitie.operations import competities_aanmaken
+from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
-                               INSCHRIJF_METHODE_3,
-                               Kampioenschap, DEEL_RK, DEEL_BK)
-from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
