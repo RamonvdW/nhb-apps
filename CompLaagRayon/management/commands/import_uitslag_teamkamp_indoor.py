@@ -436,44 +436,47 @@ class Command(BaseCommand):
 
         self._importeer_voorronde(ws)
 
-        blad = 'Finales 8 teams'
-        try:
-            ws = prg[blad]
-        except KeyError:
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
-
-        winnaar = ws['V18'].value
-        if not winnaar:
-            # None or leeg
-            # dit blad is niet gebruikt - probeer het blad met finales met 4 teams
-            blad = 'Finales 4 teams'
+        if len(self.deelnemende_teams) == 0:
+            self.stdout.write('[INFO] Geen deelnemende teams, dus geen kampioen')
+        else:
+            blad = 'Finales 8 teams'
             try:
                 ws = prg[blad]
             except KeyError:
                 self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
                 return
 
-            winnaar = ws['R15'].value
+            winnaar = ws['V18'].value
             if not winnaar:
                 # None or leeg
-                self.stderr.write('[ERROR] Kan juiste finale blad niet bepalen (geen WINNAAR)')
-                return
+                # dit blad is niet gebruikt - probeer het blad met finales met 4 teams
+                blad = 'Finales 4 teams'
+                try:
+                    ws = prg[blad]
+                except KeyError:
+                    self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+                    return
 
-            self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
-            self._importeer_finales_4(ws)
-        else:
-            self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
-            self._importeer_finales_8(ws)
+                winnaar = ws['R15'].value
+                if not winnaar:
+                    # None or leeg
+                    self.stderr.write('[ERROR] Kan juiste finale blad niet bepalen (geen WINNAAR)')
+                    return
 
-        result = list()
-        for team_naam, team in self.deelnemende_teams.items():
-            tup = (team.result_rank, team.result_volgorde, team_naam)
-            result.append(tup)
-        # for
-        result.sort()
-        self.stdout.write('Resultaat:')
-        for rank, volgorde, naam in result:
-            self.stdout.write('%s %s %s' % (rank, volgorde, naam))
+                self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
+                self._importeer_finales_4(ws)
+            else:
+                self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
+                self._importeer_finales_8(ws)
+
+            result = list()
+            for team_naam, team in self.deelnemende_teams.items():
+                tup = (team.result_rank, team.result_volgorde, team_naam)
+                result.append(tup)
+            # for
+            result.sort()
+            self.stdout.write('Resultaat:')
+            for rank, volgorde, naam in result:
+                self.stdout.write('%s %s %s' % (rank, volgorde, naam))
 
 # end of file
