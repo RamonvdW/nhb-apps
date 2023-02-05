@@ -11,11 +11,12 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, Kampioenschap, DEEL_RK,
-                               RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK
+from Competitie.models import Kampioenschap, RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Score.definities import AG_NUL
 import datetime
 
 
@@ -221,11 +222,11 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                           'nhb_rayon')
+                                        'nhb_rayon')
                         .get(pk=deelkamp_pk,
-                                is_afgesloten=False,
-                                deel=DEEL_RK,
-                                nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
+                             is_afgesloten=False,
+                             deel=DEEL_RK,
+                             nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
         except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 

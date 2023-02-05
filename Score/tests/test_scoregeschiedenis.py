@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,10 +48,14 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
                     eerste_wedstrijd=einde_jaar,
                     laatst_mogelijke_wedstrijd=einde_jaar,
                     datum_klassengrenzen_rk_bk_teams=einde_jaar,
-                    rk_eerste_wedstrijd=einde_jaar,
-                    rk_laatste_wedstrijd=einde_jaar,
-                    bk_eerste_wedstrijd=einde_jaar,
-                    bk_laatste_wedstrijd=einde_jaar)
+                    rk_indiv_eerste_wedstrijd=einde_jaar,
+                    rk_indiv_laatste_wedstrijd=einde_jaar,
+                    rk_teams_eerste_wedstrijd=einde_jaar,
+                    rk_teams_laatste_wedstrijd=einde_jaar,
+                    bk_indiv_eerste_wedstrijd=einde_jaar,
+                    bk_indiv_laatste_wedstrijd=einde_jaar,
+                    bk_teams_eerste_wedstrijd=einde_jaar,
+                    bk_teams_laatste_wedstrijd=einde_jaar)
         comp.save()
 
         CompetitieMatch(competitie=comp,

@@ -12,15 +12,17 @@ from django.utils.formats import localize
 from django.db.models import Q
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.models import (Competitie, Regiocompetitie,
-                               RegiocompetitieSporterBoog, KampioenschapSporterBoog,
-                               INSCHRIJF_METHODE_1, DEELNAME_NEE, DEEL_RK)
-from Functie.models import Functie, Rollen
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
+from Functie.definities import Rollen
+from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
-from Records.models import IndivRecord, MATERIAALKLASSE
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_TEAM, AG_DOEL_INDIV
+from Records.definities import MATERIAALKLASSE
+from Records.models import IndivRecord
+from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
 import logging
 import copy

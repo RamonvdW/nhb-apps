@@ -11,14 +11,13 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (INSCHRIJF_METHODE_1, Regiocompetitie,
+from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1, MUTATIE_KAMP_CUT, DEELNAME_NEE
+from Competitie.models import (Regiocompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               RegiocompetitieRonde, CompetitieMatch,
-                               Kampioenschap, DEEL_RK, DEEL_BK,
-                               KampioenschapSporterBoog, KampioenschapTeam, CompetitieMutatie,
-                               MUTATIE_KAMP_CUT, DEELNAME_NEE)
-from Functie.models import Rollen
+                               RegiocompetitieRonde, CompetitieMatch, CompetitieMutatie,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging

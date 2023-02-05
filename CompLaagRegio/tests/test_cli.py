@@ -44,10 +44,14 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                     eerste_wedstrijd=datum,
                     laatst_mogelijke_wedstrijd=datum,
                     datum_klassengrenzen_rk_bk_teams=datum,
-                    rk_eerste_wedstrijd=datum,
-                    rk_laatste_wedstrijd=datum,
-                    bk_eerste_wedstrijd=datum,
-                    bk_laatste_wedstrijd=datum)
+                    rk_indiv_eerste_wedstrijd=datum,
+                    rk_indiv_laatste_wedstrijd=datum,
+                    rk_teams_eerste_wedstrijd=datum,
+                    rk_teams_laatste_wedstrijd=datum,
+                    bk_indiv_eerste_wedstrijd=datum,
+                    bk_indiv_laatste_wedstrijd=datum,
+                    bk_teams_eerste_wedstrijd=datum,
+                    bk_teams_laatste_wedstrijd=datum)
         comp.save()
         self.comp = comp
 

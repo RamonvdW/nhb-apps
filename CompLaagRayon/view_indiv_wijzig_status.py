@@ -10,9 +10,9 @@ from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (KampioenschapSporterBoog, CompetitieMutatie,
-                               MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN)
-from Functie.models import Rollen
+from Competitie.definities import MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN
+from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics

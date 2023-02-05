@@ -11,20 +11,22 @@ from django.core import management
 from django.utils import timezone
 from Account.models import Account, AccountEmail
 from Account.operations import account_create
-from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.definities import (GESLACHT_ANDERS,
+                                   ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
+                                   MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
+from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_RESERVE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie,
-                               Kampioenschap, DEEL_BK,
-                               RegiocompetitieSporterBoog,
-                               RegiocompetitieTeam, RegiocompetitieTeamPoule,
-                               KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE, KAMP_RANK_RESERVE)
+                               Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               RegiocompetitieTeamPoule,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.test_helpers import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, GESLACHT_ANDERS
+from Score.definities import AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Wedstrijden.models import WedstrijdLocatie
 from bs4 import BeautifulSoup
 from decimal import Decimal

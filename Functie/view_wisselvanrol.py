@@ -10,7 +10,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
-from Functie.models import Functie, Rollen, rol2url
+from Functie.definities import Rollen, rol2url
+from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
 from Functie.rol import (rol_mag_wisselen, rol_enum_pallet, rol_get_huidige, rol_get_huidige_functie,
                          rol_get_beschrijving, rol_evalueer_opnieuw)

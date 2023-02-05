@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging

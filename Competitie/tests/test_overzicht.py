@@ -10,7 +10,8 @@ from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Kampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
-from Functie.models import Rollen, Functie
+from Functie.definities import Rollen
+from Functie.models import Functie
 from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -46,8 +47,10 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
         comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
         comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
-        comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
-        comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
+        comp.rk_indiv_eerste_wedstrijd = comp.rk_indiv_laatste_wedstrijd = einde_jaar
+        comp.rk_teams_eerste_wedstrijd = comp.rk_teams_laatste_wedstrijd = einde_jaar
+        comp.bk_indiv_eerste_wedstrijd = comp.bk_indiv_laatste_wedstrijd = einde_jaar
+        comp.bk_teams_eerste_wedstrijd = comp.bk_teams_laatste_wedstrijd = einde_jaar
         comp.save()
 
         dummy_functie = Functie.objects.get(rol='MWZ')

@@ -8,7 +8,8 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from BasisTypen.models import BoogType, GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, GESLACHT_ANDERS, ORGANISATIE_IFAA
+from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, GESLACHT_ANDERS, ORGANISATIE_IFAA
+from BasisTypen.models import BoogType
 # mag niet afhankelijk zijn van Competitie
 from NhbStructuur.models import NhbVereniging
 import datetime

@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.utils import timezone
-from Bestel.models import (BestelMutatie, Bestelling,
-                           BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
-                           BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
-                           BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
-                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_ANNULEER,
-                           BESTELLING_STATUS_WACHT_OP_BETALING)
+from Bestel.definities import (BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
+                               BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
+                               BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
+                               BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_ANNULEER,
+                               BESTELLING_STATUS_WACHT_OP_BETALING)
+from Bestel.models import BestelMutatie, Bestelling
 from Overig.background_sync import BackgroundSync
 import time
 

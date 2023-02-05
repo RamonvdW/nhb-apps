@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ ondersteuning voor de leeftijdsklassen binnen de NHB applicaties """
 
-from django.utils import timezone
-from BasisTypen.models import (LeeftijdsKlasse, TemplateCompetitieIndivKlasse,
-                               GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
-                               ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA,
-                               BOOGTYPE_AFKORTING_RECURVE)
+from BasisTypen.definities import (GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
+                                   ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA,
+                                   BOOGTYPE_AFKORTING_RECURVE)
+from BasisTypen.models import LeeftijdsKlasse, TemplateCompetitieIndivKlasse
 
 
 def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):

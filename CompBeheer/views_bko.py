@@ -10,10 +10,10 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie, Kampioenschap, DEEL_RK,
-                               CompetitieTeamKlasse, KampioenschapTeam, MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
-                               MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK, MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK
+from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie, Kampioenschap,
+                               CompetitieTeamKlasse, KampioenschapTeam)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 

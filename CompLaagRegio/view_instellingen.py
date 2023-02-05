@@ -10,10 +10,10 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                               TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
-                               Competitie, Regiocompetitie)
-from Functie.models import Rollen
+from Competitie.definities import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, TEAM_PUNTEN,
+                                   TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES)
+from Competitie.models import Competitie, Regiocompetitie
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace

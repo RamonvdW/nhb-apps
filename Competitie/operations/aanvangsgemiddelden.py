@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from BasisTypen.models import TemplateCompetitieTeamKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Competitie.models import AG_NUL, get_competitie_boog_typen
+from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.models import TemplateCompetitieTeamKlasse
+from Competitie.models import get_competitie_boog_typen
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Sporter.models import Sporter, SporterBoog
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
+from Score.definities import AG_NUL, AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 
 
 def get_competitie_bogen(comp=None):

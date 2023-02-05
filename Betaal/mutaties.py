@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.utils import timezone
-from Betaal.models import (BetaalMutatie, BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
-                           BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED)
+from Betaal.definities import BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED
+from Betaal.models import BetaalMutatie
 from Overig.background_sync import BackgroundSync
 import datetime
 import time

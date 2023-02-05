@@ -9,10 +9,10 @@ from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (Regiocompetitie, KampioenschapIndivKlasseLimiet,
-                               Kampioenschap, DEEL_RK,
-                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import (Regiocompetitie,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren

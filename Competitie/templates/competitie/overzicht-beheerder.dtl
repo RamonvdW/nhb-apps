@@ -47,10 +47,8 @@
                 {% endif %}
 
                 <!-- datums wijzigen -->
-                {% if comp.fase < 'B' %}
-                    {% url 'CompBeheer:wijzig-datums' comp_pk=comp.pk as card_url %}
-                    {% include 'plein/card.dtl' with title="Zet datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
-                {% endif %}
+                {% url 'CompBeheer:wijzig-datums' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card.dtl' with title="Wijzig datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
 
                 {% if not comp.klassengrenzen_vastgesteld %}
                     <!-- ag vaststellen -->

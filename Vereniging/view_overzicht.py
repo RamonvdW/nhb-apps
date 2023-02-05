@@ -10,9 +10,9 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap,
-                               INSCHRIJF_METHODE_1, DEEL_RK)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken

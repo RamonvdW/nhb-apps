@@ -9,13 +9,14 @@ from django.http import HttpResponse, Http404
 from django.utils.formats import date_format
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
-                               BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
-                               BLAZOEN2STR, BLAZOEN2STR_COMPACT)
+from BasisTypen.definities import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
+                                   BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
+                                   BLAZOEN2STR, BLAZOEN2STR_COMPACT)
+from Competitie.definities import (DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL,
+                                   INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, CompetitieMatch,
-                               RegiocompetitieSporterBoog, DAGDEEL2LABEL,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL)
-from Functie.models import Rollen
+                               RegiocompetitieSporterBoog)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics

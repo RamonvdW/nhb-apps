@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import View
 from django.http import Http404
 from django.shortcuts import render, reverse
-from BasisTypen.models import BLAZOEN2STR
-from Competitie.models import AG_NUL, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Functie.models import Rollen
+from BasisTypen.definities import BLAZOEN2STR
+from Competitie.definities import AG_NUL
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 

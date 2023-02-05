@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from Betaal.models import BetaalActief, BETAAL_PAYMENT_ID_MAXLENGTH
 from Betaal.mutaties import betaal_mutatieverzoek_payment_status_changed

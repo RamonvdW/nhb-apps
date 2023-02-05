@@ -9,13 +9,12 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.definities import DEEL_RK, DEEL_BK, MUTATIE_KAMP_CUT, DEELNAME_NEE
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               CompetitieMatch, CompetitieMutatie,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               CompetitieMatch,
-                               Kampioenschap, DEEL_RK, DEEL_BK,
-                               KampioenschapSporterBoog, KampioenschapTeam, CompetitieMutatie,
-                               MUTATIE_KAMP_CUT, DEELNAME_NEE)
-from Functie.models import Rollen
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,13 +10,15 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
-                           BESTELLING_STATUS_GEANNULEERD)
+from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
+                               BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
+                               BESTELLING_STATUS_GEANNULEERD)
+from Bestel.models import Bestelling
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.operations.mutaties import bestel_mutatieverzoek_annuleer
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
-from Functie.models import Functie, Rollen
+from Functie.definities import Rollen
+from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from decimal import Decimal

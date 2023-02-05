@@ -12,7 +12,8 @@ from Account.models import AccountSessions
 from Competitie.models import Kampioenschap, DEEL_RK, DEEL_BK
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
-from Functie.models import Functie, Rollen, rol2url, url2rol
+from Functie.definities import Rollen, rol2url, url2rol
+from Functie.models import Functie
 from Functie.operations import account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
 from typing import Tuple

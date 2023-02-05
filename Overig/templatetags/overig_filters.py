@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import template
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from Competitie.models import DAGDEEL2LABEL
+from Competitie.definities import DAGDEEL2LABEL
 
 
 def filter_highlight(text, search_for):

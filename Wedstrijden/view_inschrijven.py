@@ -14,18 +14,19 @@ from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_IFAA, KalenderWedstrijdklasse
+from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
-from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
-                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
-                                INSCHRIJVING_STATUS_TO_STR,
-                                WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR)
+from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
+                                    INSCHRIJVING_STATUS_TO_STR,
+                                    WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
+                                    WEDSTRIJD_WA_STATUS_TO_STR)
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from datetime import timedelta
 
 

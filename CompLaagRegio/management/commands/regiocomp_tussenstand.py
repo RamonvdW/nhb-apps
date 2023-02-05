@@ -13,7 +13,8 @@ from django.db.utils import DataError, OperationalError, IntegrityError
 from Competitie.models import (CompetitieTaken,
                                Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieRonde,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.definities import SCORE_WAARDE_VERWIJDERD
+from Score.models import ScoreHist
 import traceback
 import datetime
 import time

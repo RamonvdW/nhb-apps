@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,8 @@ from django.db.models import F, Count
 from django.utils import timezone
 from django.urls import reverse
 from Account.models import Account, AccountEmail, AccountSessions
-from Functie.models import Functie, Rollen, rol2url, VerklaringHanterenPersoonsgegevens
+from Functie.definities import Rollen, rol2url
+from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol_get_huidige
 from Overig.forms import ZoekAccountForm
 from Plein.menu import menu_dynamics

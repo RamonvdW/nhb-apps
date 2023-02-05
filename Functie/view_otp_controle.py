@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,8 +13,8 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from Account.otp import account_otp_controleer, account_otp_loskoppelen
+from Functie.definities import Rollen
 from Functie.forms import OTPControleForm
-from Functie.models import Rollen
 from Functie.rol import rol_get_huidige
 from Mailer.operations import mailer_queue_email, render_email_template
 from Plein.menu import menu_dynamics

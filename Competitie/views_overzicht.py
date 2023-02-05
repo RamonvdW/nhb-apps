@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
 from Competitie.models import Competitie, get_competitie_boog_typen
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterBoog

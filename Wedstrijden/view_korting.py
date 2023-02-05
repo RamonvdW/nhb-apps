@@ -10,12 +10,12 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Sporter.models import Sporter
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import (Wedstrijd, WedstrijdKorting,
-                                WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
+from Wedstrijden.definities import WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI
+from Wedstrijden.models import Wedstrijd, WedstrijdKorting
 import datetime
 
 TEMPLATE_WEDSTRIJDEN_KORTINGEN_OVERZICHT = 'wedstrijden/kortingen-overzicht.dtl'

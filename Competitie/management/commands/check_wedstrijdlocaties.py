@@ -7,7 +7,8 @@
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Kampioenschap, CompetitieMatch, DEEL_BK, DEEL_RK
+from Competitie.definities import DEEL_BK, DEEL_RK
+from Competitie.models import Kampioenschap, CompetitieMatch
 from NhbStructuur.models import NhbVereniging
 
 

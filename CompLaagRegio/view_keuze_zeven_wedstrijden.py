@@ -9,9 +9,10 @@ from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Competitie.models import RegiocompetitieRonde, RegiocompetitieSporterBoog, INSCHRIJF_METHODE_1, CompetitieMatch
+from Competitie.definities import INSCHRIJF_METHODE_1
+from Competitie.models import RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch
 from Plein.menu import menu_dynamics
 
 

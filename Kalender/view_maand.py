@@ -10,42 +10,14 @@ from django.utils import timezone
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from Bestel.operations.mandje import eval_mandje_inhoud
+from Kalender.definities import MAANDEN, MAAND2URL
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import Wedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.models import Wedstrijd
 from datetime import date, timedelta
 
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
-
-MAANDEN = (
-    (1, 'januari', 'jan'),
-    (2, 'februari', 'feb'),
-    (3, 'maart', 'mrt'),
-    (4, 'april', 'apr'),
-    (5, 'mei', 'mei'),
-    (6, 'juni', 'jun'),
-    (7, 'juli', 'jul'),
-    (8, 'augustus', 'aug'),
-    (9, 'september', 'sep'),
-    (10, 'oktober', 'okt'),
-    (11, 'november', 'nov'),
-    (12, 'december', 'dec')
-)
-
-MAAND2URL = {
-    1: 'januari',
-    2: 'februari',
-    3: 'maart',
-    4: 'april',
-    5: 'mei',
-    6: 'juni',
-    7: 'juli',
-    8: 'augustus',
-    9: 'september',
-    10: 'oktober',
-    11: 'november',
-    12: 'december'
-}
 
 
 def get_url_eerstvolgende_maand_met_wedstrijd():
@@ -100,7 +72,7 @@ def maak_compacte_wanneer_str(datum_begin, datum_einde):
     else:
         # 30 mei - 2 juni 2022
         wanneer_str = "%s - %s" % (localize(datum_begin),
-                                       localize(datum_einde))
+                                   localize(datum_einde))
 
     return wanneer_str
 

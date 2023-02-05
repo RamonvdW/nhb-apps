@@ -7,14 +7,14 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
-                               Competitie, Regiocompetitie,
+from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES
+from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegiocompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 

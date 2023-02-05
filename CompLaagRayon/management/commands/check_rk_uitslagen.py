@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Kampioenschap, DEEL_RK, CompetitieIndivKlasse, KampioenschapSporterBoog, DEELNAME_NEE
+from Competitie.definities import DEEL_RK, DEELNAME_NEE
+from Competitie.models import Kampioenschap, CompetitieIndivKlasse, KampioenschapSporterBoog
 
 
 class Command(BaseCommand):

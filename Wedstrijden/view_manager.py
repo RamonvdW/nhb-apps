@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,13 +9,13 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIES2SHORT_STR
-from Functie.models import Rollen
+from BasisTypen.definities import ORGANISATIES2SHORT_STR
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import (Wedstrijd,
-                                ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS,
-                                WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
+from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS,
+                                    WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
+from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
 import datetime
 

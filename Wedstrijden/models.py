@@ -6,8 +6,8 @@
 
 from django.db import models
 from Account.models import Account
-from BasisTypen.models import (BoogType, KalenderWedstrijdklasse,
-                               ORGANISATIES, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB)
+from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from NhbStructuur.models import NhbVereniging
 from Score.models import Score, Uitslag
 from Sporter.models import Sporter, SporterBoog

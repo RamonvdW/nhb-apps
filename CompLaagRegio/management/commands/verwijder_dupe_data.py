@@ -8,7 +8,8 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.models import RegiocompetitieSporterBoog
-from Score.models import Score, SCORE_TYPE_SCORE
+from Score.definities import SCORE_TYPE_SCORE
+from Score.models import Score
 
 
 class Command(BaseCommand):

@@ -7,12 +7,13 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from NhbStructuur.models import NhbRayon
+from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
-                               Kampioenschap, DEEL_RK, DEELNAME_NEE, KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW)
-from Functie.models import Rollen
+                               Kampioenschap)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
+from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
 import datetime
 

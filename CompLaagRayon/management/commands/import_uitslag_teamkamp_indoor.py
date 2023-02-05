@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam, DEEL_RK
+from Competitie.definities import DEEL_RK
+from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from openpyxl.utils.exceptions import InvalidFileException
 from decimal import Decimal
 import openpyxl
@@ -318,7 +319,8 @@ class Command(BaseCommand):
                 kamp_team = self.deelnemende_teams[team_naam]
                 kamp_team.result_rank = rank
                 kamp_team.result_volgorde = rank
-                kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
+                if not self.dryrun:
+                    kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
             rank += 1
         # for
 
@@ -327,7 +329,8 @@ class Command(BaseCommand):
         for team_naam in vijfden:
             kamp_team = self.deelnemende_teams[team_naam]
             kamp_team.result_rank = 5
-            kamp_team.save(update_fields=['result_rank'])
+            if not self.dryrun:
+                kamp_team.save(update_fields=['result_rank'])
         # for
 
     def _importeer_finales_8(self, ws):

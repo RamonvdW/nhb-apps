@@ -13,12 +13,13 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie, DEEL_RK, DEELNAME_NEE,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam, KampioenschapSporterBoog,
-                               MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
+from Competitie.definities import (DEEL_RK, DEELNAME_NEE, MUTATIE_COMPETITIE_OPSTARTEN,
+                                   MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
+from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, KampioenschapSporterBoog)
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie
 from Logboek.models import schrijf_in_logboek

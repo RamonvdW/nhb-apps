@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import (Competitie, DEEL_RK, DEEL_BK,
-                               KampioenschapSporterBoog, DEELNAME_NEE, DEELNAME_JA,
-                               KAMP_RANK_UNKNOWN, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
+from Competitie.definities import (DEEL_RK, DEEL_BK,
+                                   DEELNAME_NEE, DEELNAME_JA,
+                                   KAMP_RANK_UNKNOWN, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
+from Competitie.models import Competitie, KampioenschapSporterBoog
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile

@@ -294,7 +294,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         zet_competitie_fase(comp_18, 'F')
 
         # haal de profiel pagina op
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(29):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -308,7 +308,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
         score_indiv_ag_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(29):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -319,7 +319,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # variant met Score zonder ScoreHist
         ScoreHist.objects.all().delete()
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(29):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -330,7 +330,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # zet de 25m door naar BK fase
         zet_competitie_fase(comp_18, 'K')
         zet_competitie_fase(comp_25, 'P')
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'Rayonkampioenschappen')      # 18m
         self.assertContains(resp, 'Bondskampioenschappen')      # 25m
@@ -407,7 +407,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase(self.comp_18, 'A2')
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

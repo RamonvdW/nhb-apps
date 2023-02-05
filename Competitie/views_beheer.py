@@ -9,8 +9,9 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.utils.formats import localize
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import Competitie, Regiocompetitie, Kampioenschap, DEEL_BK
-from Functie.models import Rollen
+from Competitie.definities import DEEL_BK
+from Competitie.models import Competitie, Regiocompetitie, Kampioenschap
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld

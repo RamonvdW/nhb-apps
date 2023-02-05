@@ -9,14 +9,15 @@ from django.urls import reverse
 from django.views.generic import View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch,
-                               AG_NUL, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
+from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN
+from Competitie.models import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch
 from Competitie.operations import KlasseBepaler
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
-from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
 from Sporter.models import SporterVoorkeuren, SporterBoog, get_sporter_voorkeuren
 from decimal import Decimal
 

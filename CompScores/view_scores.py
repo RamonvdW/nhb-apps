@@ -15,10 +15,11 @@ from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_dee
 from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
                                CompetitieMatch, update_uitslag_teamcompetitie)
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
+from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
+from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
 from types import SimpleNamespace
 import datetime

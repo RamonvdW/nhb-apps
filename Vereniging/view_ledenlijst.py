@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,9 +9,10 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 from Plein.menu import menu_dynamics
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_NHB
+from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_NHB
+from BasisTypen.models import LeeftijdsKlasse
 from Sporter.models import Sporter, SporterBoog
 
 

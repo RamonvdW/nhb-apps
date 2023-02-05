@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from BasisTypen.models import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
-                               ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
-                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+from BasisTypen.definities import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
+                                   ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
+                                   GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
 
 
 LEEFTIJDSKLASSEN = (

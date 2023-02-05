@@ -9,17 +9,18 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                               BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
-from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
+from BasisTypen.definities import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                                   BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
+from Competitie.definities import DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                CompetitieMatch, get_competitie_indiv_leeftijdsklassen)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter_voorkeuren
 import copy
 

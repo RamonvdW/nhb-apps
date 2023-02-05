@@ -8,10 +8,11 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
-from Functie.models import Rollen
+from Competitie.definities import INSCHRIJF_METHODE_1
+from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog, CompetitieMatch
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Competitie.models import INSCHRIJF_METHODE_1, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieMatch
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPREGIO_WIESCHIETWAAR = 'complaagregio/wieschietwaar-methode1.dtl'

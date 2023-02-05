@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from BasisTypen.models import GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
+from BasisTypen.definities import GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
 from Competitie.models import CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import SporterVoorkeuren

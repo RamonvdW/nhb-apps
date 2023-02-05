@@ -12,13 +12,15 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieTeamKlasse, AG_NUL, Regiocompetitie,
+from Competitie.definities import AG_NUL
+from Competitie.models import (CompetitieTeamKlasse, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM
+from Score.definities import AG_DOEL_TEAM
+from Score.models import AanvangsgemiddeldeHist
 from Score.operations import score_teams_ag_opslaan
 import datetime
 

@@ -12,13 +12,13 @@ from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Competitie.models import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                               Regiocompetitie, RegiocompetitieRonde, CompetitieMatch,
-                               Kampioenschap, DEEL_RK,
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2
+from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, CompetitieMatch,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               RegiocompetitieSporterBoog, RegiocompetitieTeam)
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam,
+                               Kampioenschap)
 from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr_to_date
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging

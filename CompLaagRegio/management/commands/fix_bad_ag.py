@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, RegiocompetitieSporterBoog, AG_NUL
+from Competitie.models import Competitie, RegiocompetitieSporterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterVoorkeuren
 
 

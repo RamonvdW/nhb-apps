@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.http import Http404
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Feedback.forms import FeedbackForm

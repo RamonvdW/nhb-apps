@@ -13,21 +13,23 @@ from django.db.models import Count
 from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
-                               ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA)
+from BasisTypen.definities import GESLACHT_ALLE, ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Betaal.models import BetaalInstellingenVereniging
-from Functie.models import Functie, Rollen
+from Functie.definities import Rollen
+from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
-from Wedstrijden.models import (Wedstrijd, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie,
-                                ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
-                                WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP,
-                                WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
-                                WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
+from Wedstrijden.definities import (BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN,
+                                    ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
+                                    WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP,
+                                    WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                    WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
+                                    WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
+from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 import datetime
 from types import SimpleNamespace
 

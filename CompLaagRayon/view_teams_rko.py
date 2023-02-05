@@ -10,11 +10,13 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import AG_NUL, Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap, DEEL_RK
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK
+from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
+from Score.definities import AG_NUL
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'complaagrayon/rko-teams.dtl'
 

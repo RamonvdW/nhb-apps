@@ -13,18 +13,17 @@ from django.utils import timezone
 from django.db.models import F
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
-from BasisTypen.models import ORGANISATIE_NHB
+from BasisTypen.definities import ORGANISATIE_NHB
 from BasisTypen.operations import get_organisatie_teamtypen
-from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse,
+from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
+                                   MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
+                                   MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN,
+                                   MUTATIE_REGIO_TEAM_RONDE,
+                                   MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK)
+from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTaken,
                                Regiocompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               Kampioenschap, DEEL_RK, DEEL_BK,
-                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
-                               KampioenschapTeam,
-                               CompetitieTaken,
-                               MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
-                               MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN, MUTATIE_REGIO_TEAM_RONDE,
-                               MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK)
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
                                    aanvangsgemiddelden_vaststellen_voor_afstand)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel

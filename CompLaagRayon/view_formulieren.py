@@ -10,10 +10,10 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, KampioenschapIndivKlasseLimiet, DEEL_RK,
-                               KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE, DEELNAME2STR,
-                               CompetitieMatch)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME2STR
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, KampioenschapIndivKlasseLimiet,
+                               KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren

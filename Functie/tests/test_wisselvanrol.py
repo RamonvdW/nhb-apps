@@ -775,10 +775,14 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     eerste_wedstrijd='2000-10-10',
                     laatst_mogelijke_wedstrijd='2000-10-10',
                     datum_klassengrenzen_rk_bk_teams='2000-10-10',
-                    rk_eerste_wedstrijd='2000-10-10',
-                    rk_laatste_wedstrijd='2000-10-10',
-                    bk_eerste_wedstrijd='2000-10-10',
-                    bk_laatste_wedstrijd='2000-10-10')
+                    rk_indiv_eerste_wedstrijd='2000-10-10',
+                    rk_indiv_laatste_wedstrijd='2000-10-10',
+                    rk_teams_eerste_wedstrijd='2000-10-10',
+                    rk_teams_laatste_wedstrijd='2000-10-10',
+                    bk_indiv_eerste_wedstrijd='2000-10-10',
+                    bk_indiv_laatste_wedstrijd='2000-10-10',
+                    bk_teams_eerste_wedstrijd='2000-10-10',
+                    bk_teams_laatste_wedstrijd='2000-10-10')
         comp.save()
 
         match = CompetitieMatch(
@@ -813,10 +817,14 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     eerste_wedstrijd='2000-10-10',
                     laatst_mogelijke_wedstrijd='2000-10-10',
                     datum_klassengrenzen_rk_bk_teams='2000-10-10',
-                    rk_eerste_wedstrijd='2000-10-10',
-                    rk_laatste_wedstrijd='2000-10-10',
-                    bk_eerste_wedstrijd='2000-10-10',
-                    bk_laatste_wedstrijd='2000-10-10')
+                    rk_indiv_eerste_wedstrijd='2000-10-10',
+                    rk_indiv_laatste_wedstrijd='2000-10-10',
+                    rk_teams_eerste_wedstrijd='2000-10-10',
+                    rk_teams_laatste_wedstrijd='2000-10-10',
+                    bk_indiv_eerste_wedstrijd='2000-10-10',
+                    bk_indiv_laatste_wedstrijd='2000-10-10',
+                    bk_teams_eerste_wedstrijd='2000-10-10',
+                    bk_teams_laatste_wedstrijd='2000-10-10')
         comp.save()
 
         match = CompetitieMatch(

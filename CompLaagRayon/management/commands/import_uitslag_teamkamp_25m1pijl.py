@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam, DEEL_RK
+from Competitie.definities import DEEL_RK
+from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from openpyxl.utils.exceptions import InvalidFileException
 from decimal import Decimal
 import openpyxl

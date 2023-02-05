@@ -4,10 +4,12 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from Competitie.models import Competitie, CompetitieMatch, Kampioenschap, DEEL_BK, KampioenschapSporterBoog, DEELNAME_NEE, KampioenschapIndivKlasseLimiet, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN
+from django.views.generic import TemplateView
+from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN
+from Competitie.models import (Competitie, CompetitieMatch,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet)
 from Plein.menu import menu_dynamics
 import datetime
 

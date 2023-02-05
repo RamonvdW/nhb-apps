@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db.models import Q
-from BasisTypen.models import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
-from Competitie.models import (RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2)
+from BasisTypen.definities import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
+from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2
+from Competitie.models import RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam
 from Sporter.models import SporterVoorkeuren
 from types import SimpleNamespace
 import math

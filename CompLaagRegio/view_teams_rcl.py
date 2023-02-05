@@ -11,12 +11,14 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (AG_NUL, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
-                               Competitie, CompetitieTeamKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
+from Competitie.definities import (AG_NUL,
+                                   TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
+                                   MUTATIE_REGIO_TEAM_RONDE)
+from Competitie.models import (Competitie, CompetitieTeamKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                               CompetitieMutatie, MUTATIE_REGIO_TEAM_RONDE)
+                               CompetitieMutatie)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon

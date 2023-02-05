@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_ALLE)
-from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
+from BasisTypen.definities import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                                   GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_ALLE)
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse
+from Score.definities import AG_NUL, AG_LAAGSTE_NIET_NUL, AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter
 from decimal import Decimal
 import datetime

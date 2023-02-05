@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from Bestel.models import BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK
+from Bestel.definities import BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK
 from decimal import Decimal
 
 

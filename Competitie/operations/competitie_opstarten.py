@@ -6,11 +6,12 @@
 
 from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
-from Competitie.models import (AG_NUL, AFSTANDEN, DEEL_RK, DEEL_BK,
-                               Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+from Competitie.definities import AFSTANDEN, DEEL_RK, DEEL_BK
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Regiocompetitie, Kampioenschap, RegiocompetitieRonde)
 from Functie.models import Functie
 from NhbStructuur.models import NhbRayon, NhbRegio
+from Score.definities import AG_NUL
 from datetime import date
 import datetime
 import logging
@@ -355,10 +356,14 @@ def competities_aanmaken(jaar=None):
                     eerste_wedstrijd=yearend,
                     laatst_mogelijke_wedstrijd=begin_rk,
                     datum_klassengrenzen_rk_bk_teams=begin_rk,
-                    rk_eerste_wedstrijd=begin_rk,
-                    rk_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
-                    bk_eerste_wedstrijd=begin_bk,
-                    bk_laatste_wedstrijd=begin_bk + datetime.timedelta(days=7))
+                    rk_indiv_eerste_wedstrijd=begin_rk,
+                    rk_indiv_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
+                    rk_teams_eerste_wedstrijd=begin_rk,
+                    rk_teams_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
+                    bk_indiv_eerste_wedstrijd=begin_bk,
+                    bk_indiv_laatste_wedstrijd=begin_bk + datetime.timedelta(days=7),
+                    bk_teams_eerste_wedstrijd=begin_bk,
+                    bk_teams_laatste_wedstrijd = begin_bk + datetime.timedelta(days=7))
 
         if afstand == '18':
             comp.laatst_mogelijke_wedstrijd = yearend

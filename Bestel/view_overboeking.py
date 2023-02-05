@@ -8,9 +8,10 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.models import Bestelling, BESTELLING_STATUS_AFGEROND
+from Bestel.definities import BESTELLING_STATUS_AFGEROND
+from Bestel.models import Bestelling
 from Bestel.operations.mutaties import bestel_overboeking_ontvangen
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from decimal import Decimal, InvalidOperation
