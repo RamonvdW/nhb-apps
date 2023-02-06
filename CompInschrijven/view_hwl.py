@@ -434,8 +434,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         if len(bulk_opmerking) > 500:
             bulk_opmerking = bulk_opmerking[:500]     # moet afkappen, anders database foutmelding
 
-        udvl = comp.uiterste_datum_lid
-
         bepaler = KlasseBepaler(comp)
 
         # all checked boxes are in the post request as keys, typically with value 'on'
@@ -534,8 +532,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 except LookupError as exc:
                     raise Http404(str(exc))
 
-                # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
-                if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:
+                # kijk of de sporter met een team mee wil en mag schieten voor deze competitie
+                if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
                     # is geen aspirant en was op tijd lid
                     aanmelding.inschrijf_voorkeur_team = bulk_team
 

@@ -452,44 +452,6 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.inschrijf_notitie, 'ben ik oud genoeg?')
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
 
-    def test_team_udvl(self):
-        # controleer dat het filter voor uiterste datum van lidmaatschap werkt
-
-        # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_bb()
-        self._competitie_aanmaken()
-
-        comp = Competitie.objects.get(afstand='18')
-        #   sporter1.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        comp.uiterste_datum_lid = datetime.date(year=2010, month=11, day=11)
-        comp.save()
-
-        # log in as schutter
-        self.client.logout()
-        self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren(100001)
-
-        # schrijf in voor de 18m Recurve, met AG
-        # geef ook team schieten en opmerking door
-        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
-        sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
-        self.assertTrue(res)
-
-        url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wil_in_team': 'yes'})
-        self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
-
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
-        self.assertEqual(inschrijving.regiocompetitie, deelcomp)
-        self.assertEqual(inschrijving.sporterboog, sporterboog)
-        self.assertEqual(inschrijving.bij_vereniging, sporterboog.sporter.bij_vereniging)
-        self.assertFalse(inschrijving.inschrijf_voorkeur_team)      # belangrijkste testresultaat
-
     def test_inschrijven_methode3_twee_dagdelen(self):
         regio_105 = NhbRegio.objects.get(pk=105)
         self.nhbver.regio = regio_105

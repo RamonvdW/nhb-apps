@@ -56,7 +56,6 @@
 
                 <tr>
                     <td {% if comp.fase_indiv == 'B' %}class="nhb-rood white-text center"{% else %}class="center"{% endif %}>B</td>
-                    <!-- {{ comp.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
                     <td>Open voor aanmelden individueel (sporter/HWL)<br>Planning regiocompetitie wedstrijden (RCL)</td>
                     <td>
                         {% if comp.fase_indiv > 'B' %}
@@ -268,7 +267,6 @@
 
                 <tr>
                     <td {% if comp.fase_teams == 'B' %}class="nhb-rood white-text center"{% else %}class="center"{% endif %}>B</td>
-                    <!-- {{ comp.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
                     <td>Aanmelden teams (HWL)<br>Koppel leden aan teams (HWL)<br>Handmatig AG invoeren (HWL)<br>AG controle (RCL)<br>Planning regiocompetitie wedstrijden (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'B' %}

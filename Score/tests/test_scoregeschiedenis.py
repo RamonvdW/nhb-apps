@@ -42,7 +42,6 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
 
         comp = Competitie(
                     begin_jaar=2000,
-                    uiterste_datum_lid=datetime.date(year=2000, month=1, day=1),
                     begin_aanmeldingen=einde_jaar,
                     einde_aanmeldingen=einde_jaar,
                     einde_teamvorming=einde_jaar,

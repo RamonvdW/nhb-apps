@@ -34,7 +34,6 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         einde_jaar = datetime.date(year=2000, month=12, day=31)
         comp = Competitie()
         comp.begin_jaar = 2000
-        comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
         comp.begin_fase_C = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
         comp.begin_fase_F = comp.einde_fase_F = einde_jaar
         comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
@@ -101,7 +100,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # zet competitie fase B zodat we in mogen schrijven
-        zet_competitie_fase(comp, 'B')
+        zet_competitie_fases(comp, 'B', 'B')
 
         # uitslagen met competitie in prep fase (B+)
         comp.begin_fase_C = way_before   # fase B

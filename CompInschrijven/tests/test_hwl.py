@@ -682,8 +682,6 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         # zet de udvl tussen de dvl van de twee schutters in
         # sporter_100003.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
         # sporter_100004.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        self.comp_18.uiterste_datum_lid = datetime.date(year=self.sporter_100004.sinds_datum.year, month=1, day=1)
-        self.comp_18.save()
 
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)

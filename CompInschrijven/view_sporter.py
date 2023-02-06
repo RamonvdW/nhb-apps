@@ -122,14 +122,10 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         context['is_klasse_onbekend'] = aanmelding.indiv_klasse.is_onbekend
         del aanmelding
 
-        udvl = comp.uiterste_datum_lid                      # uiterste datum van lidmaatschap
-        dvl = sporterboog.sporter.sinds_datum               # datum van lidmaatschap
-
         # geen aspirant, op tijd lid en op tijd aangemeld?
         mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
                              age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                             dvl < udvl
-                             and comp.fase == 'B')
+                             comp.fase == 'B')
         context['mag_team_schieten'] = mag_team_schieten
 
         # bepaal de inschrijfmethode voor deze regio
@@ -334,14 +330,10 @@ class RegiocompetitieAanmeldenView(View):
         except LookupError as exc:
             raise Http404(str(exc))
 
-        udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
-        dvl = sporterboog.sporter.sinds_datum               # datum van lidmaatschap
-
         # geen aspirant, op tijd lid en op tijd aangemeld?
         mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
                              age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                             dvl < udvl
-                             and deelcomp.competitie.fase == 'B')
+                             deelcomp.competitie.fase == 'B')
 
         # kijk of de sporter met een team mee wil schieten voor deze competitie
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':

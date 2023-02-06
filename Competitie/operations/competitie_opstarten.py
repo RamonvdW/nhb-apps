@@ -315,7 +315,6 @@ def competities_aanmaken(jaar=None):
         jaar = bepaal_startjaar_nieuwe_competitie()
 
     yearend = date(year=jaar, month=12, day=31)     # 31 december
-    udvl = date(year=jaar, month=8, day=1)          # 1 augustus
     begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
     begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei
 
@@ -349,7 +348,6 @@ def competities_aanmaken(jaar=None):
                     beschrijving='%s competitie %s/%s' % (beschrijving, jaar, jaar+1),
                     afstand=afstand,      # 18/25
                     begin_jaar=jaar,
-                    uiterste_datum_lid=udvl,
                     begin_aanmeldingen=yearend,
                     einde_aanmeldingen=yearend,
                     einde_teamvorming=yearend,

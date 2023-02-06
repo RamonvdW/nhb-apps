@@ -38,7 +38,6 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                     beschrijving='Test',
                     afstand='18',
                     begin_jaar=2000,
-                    uiterste_datum_lid=datum,
                     begin_aanmeldingen=datum,
                     einde_aanmeldingen=datum,
                     einde_teamvorming=datum,
