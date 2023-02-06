@@ -259,7 +259,7 @@ class RegioTeamsTemplateView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Regio Teams')
         )
 
@@ -497,7 +497,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'AG controle')
         )
 
@@ -761,7 +761,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Team Ronde')
         )
 
@@ -834,7 +834,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                     mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        url = reverse('Competitie:overzicht',
+        url = reverse('Competitie:beheer',
                       kwargs={'comp_pk': deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
 

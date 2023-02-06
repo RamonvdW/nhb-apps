@@ -116,7 +116,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Instellingen teams'),
         )
 
@@ -186,7 +186,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
         deelcomp.save(update_fields=updated)
 
-        url = reverse('Competitie:overzicht',
+        url = reverse('Competitie:beheer',
                       kwargs={'comp_pk': deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
 
@@ -281,7 +281,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Regio keuzes overzicht')
         )

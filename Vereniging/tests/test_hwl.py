@@ -327,7 +327,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         zet_competitie_fase(self.comp_25, 'J')
         self.comp_25.begin_fase_F -= datetime.timedelta(days=100)       # forceer 'beschikbaar vanaf' label
-        self.comp_25.save(update_fields=['eerste_wedstrijd'])
+        self.comp_25.save(update_fields=['begin_fase_F'])
         self.comp_25.bepaal_fase()
         self.assertEqual(self.comp_25.fase, 'J')
 

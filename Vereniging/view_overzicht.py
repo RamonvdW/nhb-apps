@@ -250,7 +250,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         # if comp.fase < 'B':
-                        #     kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                        #     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                         kaartjes.append(kaartje)
             # for
 

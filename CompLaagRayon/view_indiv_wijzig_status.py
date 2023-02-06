@@ -89,7 +89,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RKO:
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRayon:lijst-rk', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'RK selectie'),
                 (None, 'Wijzig sporter status')
             )

@@ -129,7 +129,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
              comp.beschrijving.replace(' competitie', '')),
             (None, 'Scores')
         )
@@ -313,7 +313,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             comp = deelcomp.competitie
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
                     comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk}), 'Scores'),
                 (None, self.kruimel)
@@ -1078,7 +1078,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:start-volgende-team-ronde', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Ronde'),
             (None, 'Team scores')
         )

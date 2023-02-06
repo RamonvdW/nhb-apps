@@ -128,7 +128,7 @@ def _maak_regiocompetities(comp, regios, functies):
         deel = Regiocompetitie(competitie=comp,
                                nhb_regio=obj,
                                functie=functie,
-                               einde_teams_aanmaken=comp.einde_teamvorming)
+                               begin_fase_D=comp.einde_teamvorming)
         try:
             vorige = vorige_deelcomps[obj.regio_nr]
         except KeyError:
@@ -348,20 +348,20 @@ def competities_aanmaken(jaar=None):
                     beschrijving='%s competitie %s/%s' % (beschrijving, jaar, jaar+1),
                     afstand=afstand,      # 18/25
                     begin_jaar=jaar,
-                    begin_aanmeldingen=yearend,
+                    begin_fase_C=yearend,
                     einde_aanmeldingen=yearend,
                     einde_teamvorming=yearend,
-                    eerste_wedstrijd=yearend,
-                    laatst_mogelijke_wedstrijd=begin_rk,
+                    begin_fase_F=yearend,
+                    einde_fase_F=begin_rk,
                     datum_klassengrenzen_rk_bk_teams=begin_rk,
-                    rk_indiv_eerste_wedstrijd=begin_rk,
-                    rk_indiv_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
-                    rk_teams_eerste_wedstrijd=begin_rk,
-                    rk_teams_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
-                    bk_indiv_eerste_wedstrijd=begin_bk,
-                    bk_indiv_laatste_wedstrijd=begin_bk + datetime.timedelta(days=7),
-                    bk_teams_eerste_wedstrijd=begin_bk,
-                    bk_teams_laatste_wedstrijd = begin_bk + datetime.timedelta(days=7))
+                    begin_fase_L_indiv=begin_rk,
+                    einde_fase_L_indiv=begin_rk + datetime.timedelta(days=7),
+                    begin_fase_L_teams=begin_rk,
+                    einde_fase_L_teams=begin_rk + datetime.timedelta(days=7),
+                    begin_fase_P_indiv=begin_bk,
+                    einde_fase_P_indiv=begin_bk + datetime.timedelta(days=7),
+                    begin_fase_P_teams=begin_bk,
+                    einde_fase_P_teams = begin_bk + datetime.timedelta(days=7))
 
         if afstand == '18':
             comp.einde_fase_F = yearend

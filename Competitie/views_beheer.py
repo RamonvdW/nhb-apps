@@ -159,7 +159,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
 
                     toon_handmatige_ag = True
 
-                comp.regio_einde_teams_aanmaken = obj.begin_fase_D
+                comp.regio_begin_fase_D = obj.begin_fase_D
             # for
 
             if comp.fase <= 'F':
@@ -304,14 +304,17 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         self._get_competitie_overzicht_beheerder(context, comp)
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
-        context['url_uitslagen'] = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+
+        if comp.fase >= 'B':
+            context['url_uitslagen'] = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+
         context['url_tijdlijn'] = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
 
         eval_open_taken(self.request)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Beheer')
         )
 

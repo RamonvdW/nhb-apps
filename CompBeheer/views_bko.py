@@ -102,7 +102,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Doorzetten')
         )
@@ -197,7 +197,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Competitie doorzetten')
         )
 
@@ -278,7 +278,7 @@ class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Doorzetten')
         )
@@ -309,7 +309,7 @@ class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
         comp.alle_bks_afgesloten = True
         comp.save(update_fields=['alle_bks_afgesloten'])
 
-        return HttpResponseRedirect(reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}))
+        return HttpResponseRedirect(reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}))
 
 
 class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
@@ -461,7 +461,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         context['grenzen'], context['niet_compleet_team'] = self._bepaal_klassengrenzen(comp)
 
         if context['niet_compleet_team']:
-            context['url_terug'] = reverse('Competitie:overzicht',
+            context['url_terug'] = reverse('Competitie:beheer',
                                            kwargs={'comp_pk': comp.pk})
 
         context['url_vaststellen'] = reverse('CompBeheer:klassengrenzen-vaststellen-rk-bk-teams',
@@ -469,7 +469,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Doorzetten')
         )
 
@@ -563,7 +563,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         comp.klassengrenzen_vastgesteld_rk_bk = True
         comp.save(update_fields=['klassengrenzen_vastgesteld_rk_bk'])
 
-        url = reverse('Competitie:overzicht',
+        url = reverse('Competitie:beheer',
                       kwargs={'comp_pk': comp.pk})
 
         return HttpResponseRedirect(url)

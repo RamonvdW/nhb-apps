@@ -201,9 +201,9 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         self.comp_18.begin_fase_F += datetime.timedelta(days=1)
         self.comp_18.save()
         post_datum_ok = self.comp_18.begin_fase_C.strftime('%Y-%m-%d')
-        # print('begin_aanmeldingen: %s' % comp_datum1)
+        # print('begin_fase_C: %s' % comp_datum1)
         post_datum_bad = self.comp_18.begin_fase_F.strftime('%Y-%m-%d')
-        # print('eerste_wedstrijd: %s' % comp_datum2)
+        # print('begin_fase_F: %s' % comp_datum2)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

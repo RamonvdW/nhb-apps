@@ -38,20 +38,20 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                     beschrijving='Test',
                     afstand='18',
                     begin_jaar=2000,
-                    begin_aanmeldingen=datum,
+                    begin_fase_C=datum,
                     einde_aanmeldingen=datum,
                     einde_teamvorming=datum,
-                    eerste_wedstrijd=datum,
-                    laatst_mogelijke_wedstrijd=datum,
+                    begin_fase_F=datum,
+                    einde_fase_F=datum,
                     datum_klassengrenzen_rk_bk_teams=datum,
-                    rk_indiv_eerste_wedstrijd=datum,
-                    rk_indiv_laatste_wedstrijd=datum,
-                    rk_teams_eerste_wedstrijd=datum,
-                    rk_teams_laatste_wedstrijd=datum,
-                    bk_indiv_eerste_wedstrijd=datum,
-                    bk_indiv_laatste_wedstrijd=datum,
-                    bk_teams_eerste_wedstrijd=datum,
-                    bk_teams_laatste_wedstrijd=datum)
+                    begin_fase_L_indiv=datum,
+                    einde_fase_L_indiv=datum,
+                    begin_fase_L_teams=datum,
+                    einde_fase_L_teams=datum,
+                    begin_fase_P_indiv=datum,
+                    einde_fase_P_indiv=datum,
+                    begin_fase_P_teams=datum,
+                    einde_fase_P_teams=datum)
         comp.save()
         self.comp = comp
 

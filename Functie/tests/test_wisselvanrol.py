@@ -769,20 +769,20 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     beschrijving='test',
                     afstand='18',
                     begin_jaar='2000',
-                    begin_aanmeldingen='2000-10-10',
+                    begin_fase_C='2000-10-10',
                     einde_aanmeldingen='2000-10-10',
                     einde_teamvorming='2000-10-10',
-                    eerste_wedstrijd='2000-10-10',
-                    laatst_mogelijke_wedstrijd='2000-10-10',
+                    begin_fase_F='2000-10-10',
+                    einde_fase_F='2000-10-10',
                     datum_klassengrenzen_rk_bk_teams='2000-10-10',
-                    rk_indiv_eerste_wedstrijd='2000-10-10',
-                    rk_indiv_laatste_wedstrijd='2000-10-10',
-                    rk_teams_eerste_wedstrijd='2000-10-10',
-                    rk_teams_laatste_wedstrijd='2000-10-10',
-                    bk_indiv_eerste_wedstrijd='2000-10-10',
-                    bk_indiv_laatste_wedstrijd='2000-10-10',
-                    bk_teams_eerste_wedstrijd='2000-10-10',
-                    bk_teams_laatste_wedstrijd='2000-10-10')
+                    begin_fase_L_indiv='2000-10-10',
+                    einde_fase_L_indiv='2000-10-10',
+                    begin_fase_L_teams='2000-10-10',
+                    einde_fase_L_teams='2000-10-10',
+                    begin_fase_P_indiv='2000-10-10',
+                    einde_fase_P_indiv='2000-10-10',
+                    begin_fase_P_teams='2000-10-10',
+                    einde_fase_P_teams='2000-10-10')
         comp.save()
 
         match = CompetitieMatch(
@@ -810,20 +810,20 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     beschrijving='test',
                     afstand='18',
                     begin_jaar='2000',
-                    begin_aanmeldingen='2000-10-10',
+                    begin_fase_C='2000-10-10',
                     einde_aanmeldingen='2000-10-10',
                     einde_teamvorming='2000-10-10',
-                    eerste_wedstrijd='2000-10-10',
-                    laatst_mogelijke_wedstrijd='2000-10-10',
+                    begin_fase_F='2000-10-10',
+                    einde_fase_F='2000-10-10',
                     datum_klassengrenzen_rk_bk_teams='2000-10-10',
-                    rk_indiv_eerste_wedstrijd='2000-10-10',
-                    rk_indiv_laatste_wedstrijd='2000-10-10',
-                    rk_teams_eerste_wedstrijd='2000-10-10',
-                    rk_teams_laatste_wedstrijd='2000-10-10',
-                    bk_indiv_eerste_wedstrijd='2000-10-10',
-                    bk_indiv_laatste_wedstrijd='2000-10-10',
-                    bk_teams_eerste_wedstrijd='2000-10-10',
-                    bk_teams_laatste_wedstrijd='2000-10-10')
+                    begin_fase_L_indiv='2000-10-10',
+                    einde_fase_L_indiv='2000-10-10',
+                    begin_fase_L_teams='2000-10-10',
+                    einde_fase_L_teams='2000-10-10',
+                    begin_fase_P_indiv='2000-10-10',
+                    einde_fase_P_indiv='2000-10-10',
+                    begin_fase_P_teams='2000-10-10',
+                    einde_fase_P_teams='2000-10-10')
         comp.save()
 
         match = CompetitieMatch(
