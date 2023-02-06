@@ -115,10 +115,10 @@
                             <tr>
                                 <th>Teams aanmaken toestaan tot en met</th>
                                 <td>{% if readonly_na_fase_D %}
-                                        <span>{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}</span>
+                                        <span>{{ deelcomp.begin_fase_D|date:'Y-m-d' }}</span>
                                     {% else %}
                                         <input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)"{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %}>
-                                        <input type="hidden" name="einde_teams_aanmaken" id="datum1_out" value="{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}">
+                                        <input type="hidden" name="begin_fase_D" id="datum1_out" value="{{ deelcomp.begin_fase_D|date:'Y-m-d' }}">
                                     {% endif %}
                                 </td>
                             </tr>
@@ -171,7 +171,7 @@
                 const competitieJaren = [{{  deelcomp.competitie.begin_jaar }}, {{ deelcomp.competitie.begin_jaar }} + 1]
 
                 M.Datepicker.init(el, {
-                    defaultDate: new Date("{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}"),
+                    defaultDate: new Date("{{ deelcomp.begin_fase_D|date:'Y-m-d' }}"),
                     setDefaultDate: true,
                     minDate: minDate, maxDate: maxDate,
                     yearRange: competitieJaren

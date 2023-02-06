@@ -41,7 +41,10 @@ class Migration(migrations.Migration):
             model_name='competitie',
             name='uiterste_datum_lid',
         ),
-
+        migrations.RemoveField(
+            model_name='competitie',
+            name='einde_teamvorming',
+        ),
         migrations.RenameField(
             model_name='competitie',
             old_name='alle_regiocompetities_afgesloten',
@@ -55,6 +58,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='competitie',
             name='begin_fase_C',
+            field=models.DateField(default='2000-01-01'),
+        ),
+        migrations.RenameField(
+            model_name='competitie',
+            old_name='einde_aanmeldingen',
+            new_name='einde_fase_C',
+        ),
+        migrations.AlterField(
+            model_name='competitie',
+            name='einde_fase_C',
             field=models.DateField(default='2000-01-01'),
         ),
         migrations.RenameField(

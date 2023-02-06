@@ -121,6 +121,9 @@ def _maak_regiocompetities(comp, regios, functies):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
 
+    # deadline voor het inschrijven van de teams
+    begin_fase_d = comp.begin_fase_F - datetime.timedelta(days=10)
+
     # maak de regiocompetities aan voor regiocompetities
     bulk = list()
     for obj in regios:
@@ -128,7 +131,7 @@ def _maak_regiocompetities(comp, regios, functies):
         deel = Regiocompetitie(competitie=comp,
                                nhb_regio=obj,
                                functie=functie,
-                               begin_fase_D=comp.einde_teamvorming)
+                               begin_fase_D=begin_fase_d)
         try:
             vorige = vorige_deelcomps[obj.regio_nr]
         except KeyError:
@@ -349,8 +352,7 @@ def competities_aanmaken(jaar=None):
                     afstand=afstand,      # 18/25
                     begin_jaar=jaar,
                     begin_fase_C=yearend,
-                    einde_aanmeldingen=yearend,
-                    einde_teamvorming=yearend,
+                    einde_fase_C=yearend,
                     begin_fase_F=yearend,
                     einde_fase_F=begin_rk,
                     datum_klassengrenzen_rk_bk_teams=begin_rk,

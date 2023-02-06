@@ -15,7 +15,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.definities import (DEEL_RK, DEELNAME_NEE, MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
-from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie,
+from Competitie.models import (Competitie, CompetitieMutatie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, KampioenschapSporterBoog)
 from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
@@ -27,7 +27,6 @@ from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from Sporter.models import Sporter
-import datetime
 import time
 
 
@@ -35,7 +34,6 @@ TEMPLATE_COMPETITIE_INSTELLINGEN = 'compbeheer/bb-instellingen-nieuwe-competitie
 TEMPLATE_COMPETITIE_AANMAKEN = 'compbeheer/bb-competities-aanmaken.dtl'
 TEMPLATE_COMPETITIE_KLASSENGRENZEN_VASTSTELLEN = 'compbeheer/bb-klassengrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'compbeheer/bb-ag-vaststellen.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'compbeheer/bb-wijzig-datums.dtl'
 TEMPLATE_COMPETITIE_SEIZOEN_AFSLUITEN = 'compbeheer/bb-seizoen-afsluiten.dtl'
 TEMPLATE_COMPETITIE_STATISTIEK = 'compbeheer/bb-statistiek.dtl'
 
@@ -348,113 +346,6 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                                'Klassengrenzen vastgesteld voor %s' % comp.beschrijving)
 
         return redirect('Competitie:beheer', comp_pk=comp.pk)
-
-
-class WijzigDatumsView(UserPassesTestMixin, TemplateView):
-
-    """ Django class-based view voor het wijzigen van de competitie datums """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_WIJZIG_DATUMS
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
-            comp = Competitie.objects.get(pk=comp_pk)
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        context['comp'] = comp
-
-        context['wijzig_url'] = reverse('CompBeheer:wijzig-datums',
-                                        kwargs={'comp_pk': comp.pk})
-
-        comp.datum1 = comp.begin_fase_C
-        comp.datum2 = comp.einde_aanmeldingen
-        comp.datum3 = comp.einde_teamvorming
-        comp.datum4 = comp.begin_fase_F
-        comp.datum5 = comp.einde_fase_F
-        comp.datum6 = comp.datum_klassengrenzen_rk_bk_teams
-        comp.datum7 = comp.begin_fase_L_indiv
-        comp.datum8 = comp.einde_fase_L_indiv
-        comp.datum9 = comp.begin_fase_P_indiv
-        comp.datum10 = comp.einde_fase_P_indiv
-
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
-                comp.beschrijving.replace(' competitie', '')),
-            (None, 'Fase datums'),
-        )
-
-        menu_dynamics(self.request, context)
-        return context
-
-    @staticmethod
-    def post(request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            --> de beheerder wil deze klassengrenzen vaststellen
-        """
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
-            comp = Competitie.objects.get(pk=comp_pk)
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        datums = list()
-        for datum_nr in range(10):
-            datum_s = request.POST.get('datum%s' % (datum_nr + 1), None)
-            if not datum_s:
-                # alle datums zijn verplicht
-                raise Http404('Verplichte parameter ontbreekt')
-
-            try:
-                datum_p = datetime.datetime.strptime(datum_s, '%Y-%m-%d')
-            except ValueError:
-                raise Http404('Geen valide datum')
-
-            datums.append(datum_p.date())
-        # for
-
-        oud_einde_teamvorming = comp.einde_teamvorming
-
-        datums.insert(0, None)      # dummy
-        comp.begin_fase_C = datums[1]
-        comp.einde_aanmeldingen = datums[2]
-        comp.einde_teamvorming = datums[3]
-        comp.begin_fase_F = datums[4]
-        comp.einde_fase_F = datums[5]
-        comp.datum_klassengrenzen_rk_bk_teams = datums[6]
-        comp.begin_fase_L_indiv = datums[7]
-        comp.einde_fase_L_indiv = datums[8]
-        comp.begin_fase_P_indiv = datums[9]
-        comp.einde_fase_P_indiv = datums[10]
-        comp.save()
-
-        # pas ook de regiocompetities aan
-        for deelcomp in (Regiocompetitie
-                         .objects
-                         .filter(competitie=comp)):
-
-            # volg mee met wijzigingen in de competitie datums
-            # neem ook meteen template datums mee (2001-01-01)
-            if deelcomp.begin_fase_D == oud_einde_teamvorming or deelcomp.begin_fase_D.year < comp.begin_jaar:
-                deelcomp.begin_fase_D = comp.einde_teamvorming
-                deelcomp.save(update_fields=['einde_teams_aanmaken'])
-        # for
-
-        return HttpResponseRedirect(reverse('Competitie:beheer',
-                                            kwargs={'comp_pk': comp.pk}))
 
 
 class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):

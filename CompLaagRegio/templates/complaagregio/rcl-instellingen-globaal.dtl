@@ -44,7 +44,7 @@
                         <td class="center hide-on-large-and-up">{{ deelcomp.short_inschrijfmethode_str }}</td>
                         <td class="hide-on-med-and-down">{{ deelcomp.inschrijfmethode_str }}</td>
                         <td class="center">{{ deelcomp.teamcomp_str }}</td>
-                        <td>{{ deelcomp.einde_teams_aanmaken_str }}</td>
+                        <td>{{ deelcomp.begin_fase_D_str }}</td>
                         <td class="center">{{ deelcomp.team_type_str }}</td>
                         <td class="center hide-on-med-and-up">{{ deelcomp.short_puntenmodel_str }}</td>
                         <td class="hide-on-small-only">{{ deelcomp.puntenmodel_str }}</td>

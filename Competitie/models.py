@@ -59,18 +59,17 @@ class Competitie(models.Model):
     # fase B: voorbereidingen door RCL
 
     begin_fase_C = models.DateField(default='2000-01-01')
+    einde_fase_C = models.DateField(default='2000-01-01')
 
     # fase C: aanmelden sporters en teams
     #         teams aanmaken + koppel sporters + handmatig teams AG (HWL)
     #         controle handmatig AG (RCL)
     #         poules voorbereiden
 
-    einde_aanmeldingen = models.DateField()
-    einde_teamvorming = models.DateField()
+    # Regiocompetitie bevat de (regio specifieke) begin_fase_D
 
-    # fase D: teams compleet maken of verwijderen (HWL)
+    # fase D: incomplete teams verwijderen (RCL)
     #         alle teams in een poule plaatsen (RCL)
-    #         elke regio heeft een eigen datum begin_fase_D (zie Regiocompetitie)
 
     # eerste datum wedstrijden
     begin_fase_F = models.DateField(default='2000-01-01')
@@ -93,11 +92,13 @@ class Competitie(models.Model):
     # aantal scores dat een individuele sporter neergezet moet hebben om gerechtigd te zijn voor deelname aan het RK
     aantal_scores_voor_rk_deelname = models.PositiveSmallIntegerField(default=6)
 
+    # RK teams kunnen ingeschreven worden tot deze deadline
     datum_klassengrenzen_rk_bk_teams = models.DateField()
 
     # fase J: RK deelnemers bevestigen deelname
     #         HWL's kunnen invallers koppelen voor RK teams
     #         RKO's moeten planning wedstrijden afronden
+    #         verwijder incomplete RK teams (RKO)
 
     # zijn de team klassengrenzen voor de RK/BK vastgesteld?
     klassengrenzen_vastgesteld_rk_bk = models.BooleanField(default=False)

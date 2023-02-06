@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -29,7 +29,7 @@
         <div class="col s12">
             <h4>Teams</h4>
             {% if mag_wijzigen %}
-                <p>Wijzigen kan tot <b>{{ deelcomp.einde_teams_aanmaken }}</b></p>
+                <p>Wijzigen kan tot <b>{{ deelcomp.begin_fase_D }}</b></p>
             {% else %}
                 <p >De deadline is gepasseerd, dus de teams kunnen niet meer aangepast worden<br>Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te selecteren</p>
             {% endif %}

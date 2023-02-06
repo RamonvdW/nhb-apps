@@ -39,12 +39,10 @@
 
                 <tr>
                     <td class="center{% if comp.fase_indiv == 'A' %} nhb-rood white-text{% endif %}">A</td>
-                    <td>Vaststellen aanvangsgemiddelden (Bondsbureau)<br>Vaststellen klassengrenzen (Bondsbureau)<br>Clusters instellen (RCL)<br>Planning regiocompetitie wedstrijden (RCL)</td>
+                    <td>Clusters instellen (RCL)<br>Clusters instellen (RCL)<br>Vaststellen aanvangsgemiddelden (BKO)<br>Vaststellen klassengrenzen (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'A' %}
                             <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>tot {{ comp.begin_fase_C }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -56,50 +54,49 @@
 
                 <tr>
                     <td {% if comp.fase_indiv == 'B' %}class="nhb-rood white-text center"{% else %}class="center"{% endif %}>B</td>
-                    <td>Open voor aanmelden individueel (sporter/HWL)<br>Planning regiocompetitie wedstrijden (RCL)</td>
+                    <td>Planning regiocompetitie wedstrijden invoeren (RCL)</td>
                     <td>
                         {% if comp.fase_indiv > 'B' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>{{ comp.begin_fase_C }}{% if comp.einde_aanmeldingen > comp.begin_fase_C %}<br>tot en met{{ comp.einde_aanmeldingen }}{% endif %}</span>
+                            <span>tot {{ comp.begin_fase_C }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
+
                 <tr>
-                    <td {% if comp.fase_indiv == 'E' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>E</td>
-                    <td>Regio wedstrijden (sporters)<br>Scores invoeren (HWL)<br>Publiceer tussenstand regiocompetitie (automatisch)<br>Publiceer voorlopige deelnemerslijst RK (automatisch)</td>
+                    <td {% if comp.fase_indiv == 'C' %}class="nhb-rood white-text center"{% else %}class="center"{% endif %}>C</td>
+                    <td>Open voor aanmelden individueel (sporter/HWL)</td>
                     <td>
-                        {% if comp.fase_indiv > 'E' %}
+                        {% if comp.fase_indiv > 'C' %}
                             <span class="green-text">Afgerond</span>
-                        {% elif comp.fase_indiv == 'E' %}
-                            <span>tot en met {{ comp.einde_fase_F }}</span>
                         {% else %}
-                            <span>vanaf {{ comp.begin_fase_F }}{% if comp.einde_fase_F > comp.begin_fase_F %}<br>tot en met {{ comp.einde_fase_F }}{% endif %}</span>
+                            <span>vanaf {{ comp.begin_fase_C }}</span>   <!-- zelfstandig afmelden kan tot einde_fase_C -->
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_indiv == 'F' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>F</td>
-                    <td>Vaststellen eindstand regiocompetitie (RCL)</td>
+                    <td>Regio wedstrijden (sporters)<br>Scores invoeren (HWL)<br>Publiceer tussenstand regiocompetitie (automatisch)<br>Publiceer voorlopige deelnemerslijst RK (automatisch)</td>
                     <td>
                         {% if comp.fase_indiv > 'F' %}
                             <span class="green-text">Afgerond</span>
+                        {% elif comp.fase_indiv == 'F' %}
+                            <span>tot en met {{ comp.einde_fase_F }}</span>
                         {% else %}
-                            <span>tot {{ comp.einde_fase_F }}</span>
+                            <span>vanaf {{ comp.begin_fase_F }} tot en met {{ comp.einde_fase_F }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_indiv == 'G' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>G</td>
-                    <td>Afsluiten regiocompetitie (BKO)<br>Deelnemerslijst RK opstellen (automatisch)</td>
+                    <td>Vaststellen eindstand regiocompetitie (RCL)<br>Competitie doorzetten naar de RK fase (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'G' %}
                             <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>{{ comp.einde_fase_G }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -115,56 +112,31 @@
                     <td>
                         {% if comp.fase_indiv > 'J' %}
                             <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>tot {{ comp.datum_klassengrenzen_rk_bk_teams }}</span>
+                            <!-- tot begin_fase_K -->
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_indiv == 'K' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>K</td>
-                    <td>Wedstrijd voorbereiden (HWL)<br>Afmelden bij vereniging (sporter)</td>
+                    <td>RK wedstrijd voorbereiden (HWL)<br>Afmelden bij vereniging (sporter)<br>Reserve sporters oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_indiv > 'K' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>tot {{ comp.einde_fase_K }}</span>
+                            <span>tot {{ comp.begin_fase_L }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_indiv == 'L' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>L</td>
-                    <td>RK wedstrijden</td>
+                    <td>RK wedstrijden<br>RK programma met uitslag insturen (HWL)<br>RK uitslag inlezen en publiceren<br>Competitie doorzetten naar de BK fase (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'L' %}
                             <span class="green-text">Afgerond</span>
-                        {% elif comp.fase_indiv == 'L' %}
-                            <span>tot en met {{ comp.einde_fase_L_indiv }}</span>
-                        {% else %}
-                            <span>{{ comp.begin_fase_L_indiv }}{% if comp.einde_fase_L_indiv > comp.begin_fase_L_indiv %}<br>tot en met {{ comp.einde_fase_L_indiv }}{% endif %}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_indiv == 'M' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>M</td>
-                    <td>Uitslagen RK wedstrijden overnemen<br>Uitslag publiceren (automatisch)<br>Uitslag controleren (RKO)</td>
-                    <td>
-                        {% if comp.fase_indiv > 'M' %}
-                            <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>tot {{ comp.einde_fase_M }}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_indiv == 'N' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>N</td>
-                    <td>Afsluiten RK individueel (BKO)<br>Niet openbare deelnemerslijst BK opstellen (automatisch)</td>
-                    <td>
-                        {% if comp.fase_indiv > 'N' %}
-                            <span class="green-text">Afgerond</span>
+                        {% elif comp.fase_indiv != 'L' %}
+                            <span>vanaf {{ comp.begin_fase_L_indiv }} tot en met {{ comp.einde_fase_L_indiv }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -175,51 +147,41 @@
                 </tr>
 
                 <tr>
+                    <td {% if comp.fase_indiv == 'N' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>N</td>
+                    <td>Kleine BK klassen samenvoegen (BKO)<br>BK deelnemerslijst publiceren (BKO)</td>
+                    <td>
+                        {% if comp.fase_indiv > 'N' %}
+                            <span class="green-text">Afgerond</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
                     <td {% if comp.fase_teams == 'O' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>O</td>
-                    <td>Kleine BK klassen samenvoegen (BKO)<br>BK deelnemerslijst publiceren (BKO)<br>Uitnodigingen versturen (Bondsbureau)</td>
+                    <td>BK wedstrijden voorbereiden (HWL)<br>Afmeldingen bij vereniging (sporter)<br>Reserve sporters oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_teams > 'O' %}
                             <span class="green-text">Afgerond</span>
+                        {% else %}
+                            <span>tot {{ comp.begin_fase_P_indiv }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_indiv == 'P' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>P</td>
-                    <td>BK wedstrijd voorbereiden (HWL)<br>Afmelden bij vereniging (sporter/HWL)<br>Reserve sporters oproepen (HWL)</td>
+                    <td>BK wedstrijden<br>BK programma met uitslag insturen (HWL)<br>BK uitslag inlezen en publiceren<br>Uitslag bevestigen (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'P' %}
                             <span class="green-text">Afgerond</span>
+                        {% else %}
+                            <span>vanaf {{ comp.begin_fase_P_indiv }} tot en met {{ comp.einde_fase_P_indiv }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_indiv == 'Q' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>Q</td>
-                    <td>BK wedstrijden</td>
-                    <td>
-                        {% if comp.fase_indiv > 'Q' %}
-                            <span class="green-text">Afgerond</span>
-                        {% elif comp.fase_indiv == 'Q' %}
-                            <span>tot en met {{ comp.einde_fase_P_teams }}</span>
-                        {% else %}
-                            <span>{{ comp.begin_fase_P_teams }}{% if comp.einde_fase_P_teams > comp.begin_fase_P_teams %}<br>tot en met {{ comp.einde_fase_P_teams }}{% endif %}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_indiv == 'R' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>R</td>
-                    <td>Uitslagen BK wedstrijden overnemen<br>Uitslag publiceren (automatisch)<br>Uitslag controleren (BKO)</td>
-                    <td>
-                        {% if comp.fase_indiv > 'R' %}
-                            <span class="green-text">Afgerond</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_indiv == 'S' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>S</td>
                     <td>Afsluiten competitie seizoen (Bondsbureau)</td>
                     <td></td>
                 </tr>
@@ -250,12 +212,10 @@
 
                 <tr>
                     <td class="center{% if comp.fase_teams == 'A' %} nhb-rood white-text{% endif %}">A</td>
-                    <td>Vaststellen aanvangsgemiddelden (Bondsbureau)<br>Vaststellen klassengrenzen (Bondsbureau)<br>Regio instellingen teamcompetitie (RCL)<br>Planning regiocompetitie wedstrijden (RCL)</td>
+                    <td>Regio instellingen teamcompetitie (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'A' %}
                             <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>tot {{ comp.begin_fase_C }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -266,79 +226,60 @@
                 </tr>
 
                 <tr>
-                    <td {% if comp.fase_teams == 'B' %}class="nhb-rood white-text center"{% else %}class="center"{% endif %}>B</td>
-                    <td>Aanmelden teams (HWL)<br>Koppel leden aan teams (HWL)<br>Handmatig AG invoeren (HWL)<br>AG controle (RCL)<br>Planning regiocompetitie wedstrijden (RCL)</td>
+                    <td class="center{% if comp.fase_teams == 'B' %} nhb-rood white-text{% endif %}">B</td>
+                    <td>Regio instellingen teamcompetitie (RCL)<br>Planning regiocompetitie wedstrijden invoeren (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'B' %}
                             <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>{{ comp.begin_fase_C }}{% if comp.einde_aanmeldingen > comp.begin_fase_C %}<br>tot en met{{ comp.einde_aanmeldingen }}{% endif %}</span>
                         {% endif %}
                     </td>
                 </tr>
 
+
                 <tr>
-                    <td {% if comp.fase_teams == 'C' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>C</td>
-                    <td>Teams compleet maken of verwijderen (HWL)</td>
+                    <td {% if comp.fase_teams == 'C' %}class="nhb-rood white-text center"{% else %}class="center"{% endif %}>C</td>
+                    <td>Aanmelden teams (HWL)<br>Handmatig AG invoeren (HWL)<br>Koppel leden aan teams (HWL)<br>AG controle (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'C' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            {% if comp.regio_begin_fase_D %}
-                                <span>tot {{ comp.regio_begin_fase_D }}<span class="nhb-blauw-text"> (regio-specifieke datum)</span></span>
-                            {% else %}
-                                <span>tot {{ comp.einde_teamvorming }}</span>
-                            {% endif %}
+                            <span>vanaf {{ comp.begin_fase_C }} tot {% if comp.regio_begin_fase_D %}{{ comp.regio_begin_fase_D }}{% else %}regio specifieke einddatum{% endif %}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_teams == 'D' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>D</td>
-                    <td>Alle teams in een poule plaatsen (RCL)</td>
+                    <td>Alle teams in een poule plaatsen (RCL)<br>Niet complete teams verwijderen (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'D' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>tot {{ comp.begin_fase_F }}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_teams == 'E' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>E</td>
-                    <td>Koppel team invallers voor elke ronde (HWL)<br>Koppel scores aan teams (RCL)<br>Bepaal team wedstrijdpunten (automatisch)<br>Publiceer tussenstand teamcompetitie (automatisch)<br>Doorzetten naar volgende ronde (RCL)<br>Open inschrijving RK teams (HWL)</td>
-                    <td>
-                        {% if comp.fase_teams > 'E' %}
-                            <span class="green-text">Afgerond</span>
-                        {% elif comp.fase_teams == 'E' %}
-                            <span>tot en met {{ comp.einde_fase_F }}</span>
-                        {% else %}
-                            <span>vanaf {{ comp.begin_fase_F }}{% if comp.einde_fase_F > comp.begin_fase_F %}<br>tot en met {{ comp.einde_fase_F }}{% endif %}</span>
+                            <span>tot {{ comp.regio_begin_fase_F }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_teams == 'F' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>F</td>
-                    <td>Vaststellen eindstand regiocompetitie (RCL)</td>
+                    <td>Koppel team invallers voor elke ronde (HWL)<br>Koppel scores aan teams (RCL)<br>Bepaal team wedstrijdpunten (automatisch)<br>Publiceer tussenstand teamcompetitie (automatisch)<br>Doorzetten naar volgende ronde (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'F' %}
                             <span class="green-text">Afgerond</span>
+                        {% elif comp.fase_teams == 'F' %}
+                            <span>tot en met {{ comp.einde_fase_F }}</span>
                         {% else %}
-                            <span>tot {{ comp.einde_fase_F }}</span>
+                            <span>vanaf {{ comp.begin_fase_F }} tot en met {{ comp.einde_fase_F }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_teams == 'G' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>G</td>
-                    <td>Afsluiten regiocompetitie (BKO)<br>Verwijder niet gerechtigde sporters uit RK teams (automatisch)</td>
+                    <td>Competitie doorzetten naar de RK fase (BKO)<br>Verwijder niet gerechtigde sporters uit RK teams (automatisch)</td>
                     <td>
                         {% if comp.fase_teams > 'G' %}
                             <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>{{ comp.einde_fase_G }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -349,61 +290,43 @@
                 </tr>
 
                 <tr>
+                    <td></td>
+                    <td>Open inschrijving RK teams (HWL)</td>
+                    <td>vanaf ##TBD##</td>
+                </tr>
+
+                <tr>
                     <td {% if comp.fase_teams == 'J' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>J</td>
-                    <td>Teams compleet maken (HWL)<br>Afmelden teams (HWL)<br>Vaststellen klassengrenzen RK/BK team (BKO)</td>
+                    <td>RK teams compleet maken (HWL)<br>Verwijder niet complete RK teams (RKO)<br>Vaststellen klassengrenzen RK/BK team (BKO)</td>
                     <td>
                         {% if comp.fase_teams > 'J' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>tot {{ comp.datum_klassengrenzen_rk_bk_teams }}</span>
+                            <span>tot ongeveer {{ comp.datum_klassengrenzen_rk_bk_teams }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_teams == 'K' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>K</td>
-                    <td>Voorbereiden RK wedstrijd (HWL)<br>Afmelden bij vereniging</td>
+                    <td>RK wedstrijd voorbereiden (HWL)<br>Afmelden bij vereniging (sporters/team)<br>Reserve teams oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_teams > 'K' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>tot {{ comp.einde_fase_K }}</span>
+                            <span>tot {{ comp.begin_fase_L_teams }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_teams == 'L' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>L</td>
-                    <td>RK teams wedstrijden</td>
+                    <td>RK teams wedstrijden<br>RK programma met uitslag insturen (HWL)<br>Uitslag inlezen en publiceren<br>Competitie doorzetten naar de BK fase (BKO)</td>
                     <td>
                         {% if comp.fase_teams > 'L' %}
                             <span class="green-text">Afgerond</span>
-                        {% elif comp.fase_teams == 'L' %}
-                            <span>tot en met {{ comp.einde_fase_L_team }}</span>
-                        {% else %}
-                            <span>{{ comp.begin_fase_L_team }}{% if comp.einde_fase_L_team > comp.begin_fase_L_team %}<br>tot en met {{ comp.einde_fase_L_team }}{% endif %}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_teams == 'M' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>M</td>
-                    <td>Uitslagen RK wedstrijden overnemen<br>Uitslag publiceren (automatisch)<br>Uitslag controleren (RKO)</td>
-                    <td>
-                        {% if comp.fase_teams > 'M' %}
-                            <span class="green-text">Afgerond</span>
-                        {% else %}
-                            <span>tot {{ comp.einde_fase_M }}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_teams == 'N' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>N</td>
-                    <td>Afsluiten RK teams (BKO)<br>Niet openbare deelnemerslijst BK teams opstellen (automatisch)</td>
-                    <td>
-                        {% if comp.fase_teams > 'N' %}
-                            <span class="green-text">Afgerond</span>
+                        {% elif comp.fase_teams != 'L' %}
+                            <span>{{ comp.begin_fase_L_teams }} tot en met {{ comp.einde_fase_L_teams }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -414,51 +337,41 @@
                 </tr>
 
                 <tr>
+                    <td {% if comp.fase_teams == 'N' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>N</td>
+                    <td>Kleine BK klassen samenvoegen (BKO)<br>BK deelnemerslijst publiceren (BKO)</td>
+                    <td>
+                        {% if comp.fase_teams > 'N' %}
+                            <span class="green-text">Afgerond</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
                     <td {% if comp.fase_teams == 'O' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>O</td>
-                    <td>Kleine BK klassen samenvoegen (BKO)<br>BK deelnemerslijst publiceren (BKO)<br>Uitnodigingen versturen (Bondsbureau)</td>
+                    <td>BK wedstrijden voorbereiden (HWL)<br>Afmeldingen bij vereniging (sporter)<br>Reserve teams oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_teams > 'O' %}
                             <span class="green-text">Afgerond</span>
+                        {% else %}
+                            <span>tot {{ comp.begin_fase_P_indiv }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td {% if comp.fase_teams == 'P' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>P</td>
-                    <td>BK wedstrijd voorbereiden (HWL)<br>Afmelden bij vereniging (sporter/HWL)<br>Reserve teams oproepen (HWL)</td>
+                    <td>BK wedstrijden<br>BK programma met uitslag insturen (HWL)<br>BK uitslag inlezen en publiceren<br>Uitslag bevestigen (BKO)</td>
                     <td>
                         {% if comp.fase_teams > 'P' %}
                             <span class="green-text">Afgerond</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_teams == 'Q' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>Q</td>
-                    <td>BK teams wedstrijden</td>
-                    <td>
-                        {% if comp.fase_teams > 'Q' %}
-                            <span class="green-text">Afgerond</span>
-                        {% elif comp.fase_teams == 'Q' %}
-                            <span>tot en met {{ comp.einde_fase_P_teams }}</span>
                         {% else %}
-                            <span>{{ comp.begin_fase_P_teams }}{% if comp.einde_fase_P_teams > comp.begin_fase_P_teams %}<br>tot en met {{ comp.einde_fase_P_teams }}{% endif %}</span>
+                            <span>vanaf {{ comp.begin_fase_P_teams }} tot en met {{ comp.einde_fase_P_teams }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
-                    <td {% if comp.fase_teams == 'R' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>R</td>
-                    <td>Uitslagen BK wedstrijden overnemen<br>Uitslag publiceren (automatisch)<br>Uitslag controleren (BKO)</td>
-                    <td>
-                        {% if comp.fase_teams > 'R' %}
-                            <span class="green-text">Afgerond</span>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td {% if comp.fase_teams == 'S' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>S</td>
+                    <td {% if comp.fase_indiv == 'Q' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>Q</td>
                     <td>Afsluiten competitie seizoen (Bondsbureau)</td>
                     <td></td>
                 </tr>

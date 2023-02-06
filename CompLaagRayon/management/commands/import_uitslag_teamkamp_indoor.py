@@ -113,9 +113,13 @@ class Command(BaseCommand):
         return deelnemer
 
     def _get_team(self, team_naam, ver_nr, row_nr, team_klasse):
+        if self.verbose:
+            self.stdout.write('[DEBUG] get_team: team_klasse=%s' % repr(team_klasse))
+            
         up_naam = team_naam.upper()
         sel_teams = list()
         for team in self.teams_cache:
+            # self.stdout.write('[DEBUG] cached team: %s' % repr(team))
             if team.vereniging.ver_nr == ver_nr:
                 if team.team_naam.upper() == up_naam:
                     if team_klasse is None or team.team_klasse == team_klasse:

@@ -43,8 +43,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         comp = Competitie(
                     begin_jaar=2000,
                     begin_fase_C=einde_jaar,
-                    einde_aanmeldingen=einde_jaar,
-                    einde_teamvorming=einde_jaar,
+                    einde_fase_C=einde_jaar,
                     begin_fase_F=einde_jaar,
                     einde_fase_F=einde_jaar,
                     datum_klassengrenzen_rk_bk_teams=einde_jaar,

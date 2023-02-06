@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import views_bb, views_bko
+from CompBeheer import views_bb, views_bko, views_wijzig_datums
 
 app_name = 'CompBeheer'
 
@@ -39,7 +39,7 @@ urlpatterns = [
          name='klassengrenzen-vaststellen'),
 
     path('<comp_pk>/wijzig-datums/',
-         views_bb.WijzigDatumsView.as_view(),
+         views_wijzig_datums.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
 
 

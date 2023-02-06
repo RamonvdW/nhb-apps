@@ -306,7 +306,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         if comp.fase >= 'B':
-            context['url_uitslagen'] = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+            context['url_uitslagen'] = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['url_tijdlijn'] = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
 

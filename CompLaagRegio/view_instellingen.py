@@ -170,7 +170,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                 deelcomp.regio_team_punten_model = punten
                 updated.append('regio_team_punten_model')
 
-            einde_s = request.POST.get('einde_teams_aanmaken', '')[:10]       # yyyy-mm-dd
+            einde_s = request.POST.get('begin_fase_D', '')[:10]       # yyyy-mm-dd
             if einde_s:
                 try:
                     einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
@@ -182,7 +182,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                     if einde_p < comp.begin_fase_C or einde_p >= comp.begin_fase_F:
                         raise Http404('Datum buiten toegestane reeks')
                     deelcomp.begin_fase_D = einde_p
-                    updated.append('einde_teams_aanmaken')
+                    updated.append('begin_fase_D')
 
         deelcomp.save(update_fields=updated)
 
@@ -259,7 +259,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelcomp.teamcomp_str = 'Ja'
 
-                deelcomp.einde_teams_aanmaken_str = localize(deelcomp.begin_fase_D)
+                deelcomp.begin_fase_D_str = localize(deelcomp.begin_fase_D)
 
                 if deelcomp.regio_heeft_vaste_teams:
                     deelcomp.team_type_str = 'Vast'
@@ -270,7 +270,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.puntenmodel_str = punten2str[deelcomp.regio_team_punten_model]
             else:
                 deelcomp.teamcomp_str = 'Nee'
-                deelcomp.einde_teams_aanmaken_str = '-'
+                deelcomp.begin_fase_D_str = '-'
                 deelcomp.team_type_str = '-'
                 deelcomp.short_puntenmodel_str = '-'
                 deelcomp.puntenmodel_str = '-'

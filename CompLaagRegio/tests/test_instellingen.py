@@ -221,19 +221,19 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
             resp = self.client.post(url, {'teams': 'ja',
                                           'team_alloc': 'vast',
                                           'team_punten': 'F1',
-                                          'einde_teams_aanmaken': post_datum_ok})
+                                          'begin_fase_D': post_datum_ok})
         self.assert_is_redirect_not_plein(resp)
 
         # late date
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'teams': 'ja',
-                                          'einde_teams_aanmaken': post_datum_bad})
+                                          'begin_fase_D': post_datum_bad})
         self.assert404(resp, 'Datum buiten toegestane reeks')
 
         # late date - not checked when teams=nee
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'teams': 'nee',
-                                          'einde_teams_aanmaken': post_datum_bad})
+                                          'begin_fase_D': post_datum_bad})
         self.assert_is_redirect_not_plein(resp)
         # teamcompetitie staat nu op Nee
         # zet teamcompetitie weer op Ja
@@ -245,7 +245,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         # bad date
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'teams': 'ja',
-                                          'einde_teams_aanmaken': 'xxx'})
+                                          'begin_fase_D': 'xxx'})
         self.assert404(resp, 'Datum fout formaat')
 
         # fase B en C
@@ -276,7 +276,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                 resp = self.client.post(url, {'teams': 'nee',
                                               'team_alloc': 'vsg',
                                               'team_punten': nieuwe_punten,
-                                              'einde_teams_aanmaken': post_datum_ok})
+                                              'begin_fase_D': post_datum_ok})
             self.assert_is_redirect_not_plein(resp)
 
             deelcomp_post = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)

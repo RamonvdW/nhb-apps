@@ -412,7 +412,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         zet_competitie_fase(self.comp_18, 'B')
-        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
         self._create_deelnemers()
@@ -542,7 +542,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Mag niet (meer) wijzigen')
 
         # herstel de datum en verwijder het team
-        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_teamvorming
+        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.begin_fase_F - datetime.timedelta(days=10)
         self.deelcomp18_regio111.save()
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
@@ -577,7 +577,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         zet_competitie_fase(self.comp_18, 'B')
-        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
         self._create_deelnemers()
@@ -601,10 +601,10 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_25, 'B')
         self._create_deelnemers(do_25=True)
 
-        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
-        self.deelcomp25_regio111.begin_fase_D = self.deelcomp25_regio111.competitie.einde_aanmeldingen
+        self.deelcomp25_regio111.begin_fase_D = self.deelcomp25_regio111.competitie.einde_fase_C
         self.deelcomp25_regio111.save()
 
         # maak een 18m team aan
@@ -739,7 +739,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'B')
         self._create_deelnemers()
 
-        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
         # maak een team aan
@@ -823,7 +823,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
         # maak een team aan
         zet_competitie_fase(self.comp_18, 'B')
-        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
         self._create_deelnemers()
