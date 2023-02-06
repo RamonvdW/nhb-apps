@@ -712,10 +712,10 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
             expected_month, expected_day = 1, 1
             expected_year += 1
 
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_aanmeldingen)
+        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_fase_C)
         self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.einde_aanmeldingen)
         self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.eerste_wedstrijd)
+        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_fase_F)
 
         # niet BB
         url = self.url_wijzigdatums % comp.pk
@@ -751,10 +751,10 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         # controleer dat de nieuwe datums opgeslagen zijn
         comp = Competitie.objects.get(pk=comp.pk)
-        self.assertEqual(datetime.date(year=2019, month=8, day=9), comp.begin_aanmeldingen)
+        self.assertEqual(datetime.date(year=2019, month=8, day=9), comp.begin_fase_C)
         self.assertEqual(datetime.date(year=2019, month=9, day=10), comp.einde_aanmeldingen)
         self.assertEqual(datetime.date(year=2019, month=10, day=11), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=2019, month=11, day=12), comp.eerste_wedstrijd)
+        self.assertEqual(datetime.date(year=2019, month=11, day=12), comp.begin_fase_F)
 
         # check corner cases
 

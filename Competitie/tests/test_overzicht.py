@@ -7,12 +7,9 @@
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
-from Competitie.definities import DEEL_RK, DEEL_BK
-from Competitie.models import Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
-from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
+from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_b
 from Functie.definities import Rollen
-from Functie.models import Functie
-from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -20,6 +17,8 @@ import datetime
 class TestCompetitieOverzicht(E2EHelpers, TestCase):
 
     """ tests voor de Competitie applicatie, pagina Overzicht """
+
+    test_after = ('Competitie.tests.test_tijdlijn',)
 
     url_overzicht = '/bondscompetities/%s/'
 
@@ -31,197 +30,21 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         teamtype = TeamType.objects.all()[0]
         CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
 
-    def test_zet_fase(self):
-        now = timezone.now()
-        now = datetime.date(year=now.year, month=now.month, day=now.day)
-        einde_jaar = datetime.date(year=now.year, month=12, day=31)
-        # einde_jaar is goed, behalve in the laatste 2 weken
-        if now > einde_jaar - datetime.timedelta(days=15):       # pragma: no cover
-            einde_jaar += datetime.timedelta(days=15)
-        gisteren = now - datetime.timedelta(days=1)
-
-        # maak een competitie aan en controleer de fase
-        comp = Competitie()
-        comp.begin_jaar = 2000
-        comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
-        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
-        comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
-        comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
-        comp.rk_indiv_eerste_wedstrijd = comp.rk_indiv_laatste_wedstrijd = einde_jaar
-        comp.rk_teams_eerste_wedstrijd = comp.rk_teams_laatste_wedstrijd = einde_jaar
-        comp.bk_indiv_eerste_wedstrijd = comp.bk_indiv_laatste_wedstrijd = einde_jaar
-        comp.bk_teams_eerste_wedstrijd = comp.bk_teams_laatste_wedstrijd = einde_jaar
-        comp.save()
-
-        dummy_functie = Functie.objects.get(rol='MWZ')
-        regio_116 = NhbRegio.objects.get(regio_nr=116)
-
-        deelcomp_regio = Regiocompetitie(competitie=comp,
-                                         is_afgesloten=False,
-                                         nhb_regio=regio_116,
-                                         functie=dummy_functie)
-        deelcomp_regio.save()
-
-        deelkamp_rk = Kampioenschap(competitie=comp,
-                                    is_afgesloten=False,
-                                    deel=DEEL_RK,
-                                    functie=dummy_functie)
-        deelkamp_rk.save()
-
-        deelkamp_bk = Kampioenschap(competitie=comp,
-                                    is_afgesloten=False,
-                                    deel=DEEL_BK,
-                                    functie=dummy_functie)
-        deelkamp_bk.save()
-
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        comp.begin_aanmeldingen = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        # maak de klassen aan
-        self._maak_twee_klassen(comp)
-
-        comp.begin_aanmeldingen = comp.einde_aanmeldingen
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        comp.klassengrenzen_vastgesteld = True
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        # tussen begin en einde aanmeldingen = B
-        comp.begin_aanmeldingen = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'B')
-
-        # na einde aanmeldingen tot einde_teamvorming = C
-        comp.einde_aanmeldingen = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'C')
-
-        # na einde teamvorming tot eerste wedstrijd = D
-        comp.einde_teamvorming = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'D')
-
-        # na eerste wedstrijd = E
-        comp.eerste_wedstrijd = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'E')
-
-        # na laatste wedstrijd = F
-        comp.laatst_mogelijke_wedstrijd = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'F')
-
-        # na afsluiten regio deelcomp = G
-        deelcomp_regio.is_afgesloten = True
-        deelcomp_regio.save()
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'G')
-
-        comp.alle_regiocompetities_afgesloten = True
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
-
-        comp.klassengrenzen_vastgesteld_rk_bk = True
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'K')
-
-        comp.rk_eerste_wedstrijd = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'L')
-
-        comp.rk_laatste_wedstrijd = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'M')
-
-        # na afsluiten RK = N
-        deelkamp_rk.is_afgesloten = True
-        deelkamp_rk.save()
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'N')
-
-        comp.alle_rks_afgesloten = True
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'P')
-
-        comp.bk_eerste_wedstrijd = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'Q')
-
-        comp.bk_laatste_wedstrijd = gisteren
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'R')
-
-        # na afsluiten BK = S
-        deelkamp_bk.is_afgesloten = True
-        deelkamp_bk.save()
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'S')
-
-        comp.alle_bks_afgesloten = True
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'S')
-
-        comp.is_afgesloten = True
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'Z')
-
-    def test_zet_competitie_fase(self):
-        # test de helper functie die de competitie fase forceert
-        einde_jaar = datetime.date(year=2000, month=12, day=31)
-        comp = Competitie()
-        comp.begin_jaar = 2000
-        comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
-        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
-        comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
-        comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
-        comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
-        comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
-        comp.save()
-
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        zet_competitie_fase(comp, 'A')
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        # maak de klassen aan en controleer de fase weer
-        self._maak_twee_klassen(comp)
-        zet_competitie_fase(comp, 'A')
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        comp.klassengrenzen_vastgesteld = True
-        zet_competitie_fase(comp, 'A')
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'A')
-
-        sequence = 'BCDEGJKLNPQSQPNLKJGEDCBKSEBZLQC'  # let op! F en R kunnen niet
-        for fase in sequence:
-            zet_competitie_fase(comp, fase)
-            comp.bepaal_fase()
-            self.assertEqual(comp.fase, fase)
-        # for
-
     def test_openbaar(self):
         einde_jaar = datetime.date(year=2000, month=12, day=31)
         comp = Competitie()
         comp.begin_jaar = 2000
         comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
-        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
-        comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
+        comp.begin_fase_C = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
+        comp.begin_fase_F = comp.einde_fase_F = einde_jaar
         comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
-        comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
-        comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
+        comp.begin_fase_L_indiv = comp.einde_fase_L_indiv = einde_jaar
+        comp.begin_fase_L_teams = comp.einde_fase_L_teams = einde_jaar
+        comp.begin_fase_P_indiv = comp.einde_fase_P_indiv = einde_jaar
+        comp.begin_fase_P_teams = comp.einde_fase_P_teams = einde_jaar
         comp.save()
 
-        zet_competitie_fase(comp, 'A')
+        zet_competitie_fases(comp, 'A', 'A')
 
         # altijd openbaar voor BB en BKO
         comp.bepaal_openbaar(Rollen.ROL_BB)
@@ -268,7 +91,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp = comp_25
 
         # fase A
-        comp.begin_aanmeldingen = now + datetime.timedelta(days=1)      # morgen
+        comp.begin_fase_C = now + datetime.timedelta(days=1)      # morgen
         comp.save()
         comp.bepaal_fase()
         self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
@@ -281,7 +104,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         zet_competitie_fase(comp, 'B')
 
         # uitslagen met competitie in prep fase (B+)
-        comp.begin_aanmeldingen = way_before   # fase B
+        comp.begin_fase_C = way_before   # fase B
         comp.einde_aanmeldingen = way_before   # fase C
         comp.save()
         comp.bepaal_fase()
@@ -294,7 +117,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
 
         # uitslagen met competitie in scorende fase (E+)
         comp.einde_teamvorming = way_before    # fase D
-        comp.eerste_wedstrijd = way_before     # fase E
+        comp.begin_fase_F = way_before     # fase E
         comp.save()
         comp.bepaal_fase()
         self.assertTrue(comp.fase >= 'E')

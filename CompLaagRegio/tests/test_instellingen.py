@@ -197,12 +197,12 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         # when the phase is set artificially, some dates are left behind
         # let's repair that here
         self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.eerste_wedstrijd = self.comp_18.begin_aanmeldingen
-        self.comp_18.eerste_wedstrijd += datetime.timedelta(days=1)
+        self.comp_18.begin_fase_F = self.comp_18.begin_fase_C
+        self.comp_18.begin_fase_F += datetime.timedelta(days=1)
         self.comp_18.save()
-        post_datum_ok = self.comp_18.begin_aanmeldingen.strftime('%Y-%m-%d')
+        post_datum_ok = self.comp_18.begin_fase_C.strftime('%Y-%m-%d')
         # print('begin_aanmeldingen: %s' % comp_datum1)
-        post_datum_bad = self.comp_18.eerste_wedstrijd.strftime('%Y-%m-%d')
+        post_datum_bad = self.comp_18.begin_fase_F.strftime('%Y-%m-%d')
         # print('eerste_wedstrijd: %s' % comp_datum2)
 
         with self.assert_max_queries(20):

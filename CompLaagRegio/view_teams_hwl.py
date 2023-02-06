@@ -122,9 +122,9 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
         now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                  month=deelcomp.einde_teams_aanmaken.month,
-                                  day=deelcomp.einde_teams_aanmaken.day,
+        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                  month=deelcomp.begin_fase_D.month,
+                                  day=deelcomp.begin_fase_D.day,
                                   hour=0,
                                   minute=0,
                                   second=0)
@@ -226,9 +226,9 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
         now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                  month=deelcomp.einde_teams_aanmaken.month,
-                                  day=deelcomp.einde_teams_aanmaken.day,
+        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                  month=deelcomp.begin_fase_D.month,
+                                  day=deelcomp.begin_fase_D.day,
                                   hour=0,
                                   minute=0,
                                   second=0)
@@ -336,9 +336,9 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         ver = self.functie_nu.nhb_ver
 
         now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                  month=deelcomp.einde_teams_aanmaken.month,
-                                  day=deelcomp.einde_teams_aanmaken.day,
+        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                  month=deelcomp.begin_fase_D.month,
+                                  day=deelcomp.begin_fase_D.day,
                                   hour=0,
                                   minute=0,
                                   second=0)
@@ -398,9 +398,9 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             ver = self.functie_nu.nhb_ver
 
             now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                      month=deelcomp.einde_teams_aanmaken.month,
-                                      day=deelcomp.einde_teams_aanmaken.day,
+            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                      month=deelcomp.begin_fase_D.month,
+                                      day=deelcomp.begin_fase_D.day,
                                       hour=0,
                                       minute=0,
                                       second=0)
@@ -682,9 +682,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_HWL:
             context['readonly'] = readonly = (comp.fase > 'D')
             now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                      month=deelcomp.einde_teams_aanmaken.month,
-                                      day=deelcomp.einde_teams_aanmaken.day,
+            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                      month=deelcomp.begin_fase_D.month,
+                                      day=deelcomp.begin_fase_D.day,
                                       hour=0,
                                       minute=0,
                                       second=0)
@@ -792,9 +792,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_HWL:
             readonly = (comp.fase > 'D')
             now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                      month=deelcomp.einde_teams_aanmaken.month,
-                                      day=deelcomp.einde_teams_aanmaken.day,
+            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                      month=deelcomp.begin_fase_D.month,
+                                      day=deelcomp.begin_fase_D.day,
                                       hour=0,
                                       minute=0,
                                       second=0)

@@ -366,7 +366,7 @@ def competities_aanmaken(jaar=None):
                     bk_teams_laatste_wedstrijd = begin_bk + datetime.timedelta(days=7))
 
         if afstand == '18':
-            comp.laatst_mogelijke_wedstrijd = yearend
+            comp.einde_fase_F = yearend
 
         comp.save()
 

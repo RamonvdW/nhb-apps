@@ -12,147 +12,196 @@ from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vas
 import datetime
 
 
-def zet_competitie_fase(comp, fase):
-    """ deze helper weet hoe de competitie datums gemanipuleerd moeten worden
-        zodat models.Competitie.bepaal_fase() de gevraagde fase terug zal geven
-    """
+def _zet_competitie_indiv_fase(comp, indiv_fase):
 
-    if fase == 'Z':
-        comp.is_afgesloten = True
-        comp.save()
+    if indiv_fase == 'Q':
+        comp.bk_indiv_afgesloten = True
         return
 
-    comp.is_afgesloten = False
-
-    if fase == 'S':
-        comp.alle_bks_afgesloten = True
-        comp.save()
-        return
-
-    comp.alle_bks_afgesloten = False
+    comp.bk_indiv_afgesloten = False
 
     now = timezone.now()
     vandaag = datetime.date(year=now.year, month=now.month, day=now.day)
     gister = vandaag - datetime.timedelta(days=1)
     morgen = vandaag + datetime.timedelta(days=1)
 
-    if fase >= 'P':
-        # BK fases
-        comp.alle_rks_afgesloten = True
-        if fase == 'P':
-            comp.bk_eerste_wedstrijd = morgen
-            comp.save()
+    if indiv_fase >= 'O':
+        # BK fases (deel 2)
+        comp.bk_indiv_klassen_zijn_samengevoegd = True
+
+        if indiv_fase == 'O':
+            comp.begin_fase_P_indiv = morgen
             return
 
-        comp.bk_eerste_wedstrijd = gister
-
-        if fase == 'Q':
-            comp.bk_laatste_wedstrijd = morgen  # vandaag mag ook
-            comp.save()
-            return
-
-        # fase R of S: vaststellen uitslagen + afsluiten BK
-        comp.bk_laatste_wedstrijd = gister
-        comp.save()
+        comp.begin_fase_P_indiv = gister
         return
 
-    comp.alle_rks_afgesloten = False
+    comp.bk_indiv_klassen_zijn_samengevoegd = False
 
-    if fase >= 'J':
+    if indiv_fase == 'N':
+        # BK fases (deel 1)
+        comp.rk_indiv_afgesloten = True
+        return
+
+    comp.rk_indiv_afgesloten = False
+
+    if indiv_fase >= 'J':
         # RK fases
-        comp.alle_regiocompetities_afgesloten = True
+        comp.regiocompetitie_is_afgesloten = True
 
-        for deelkamp in (Kampioenschap
-                         .objects
-                         .filter(competitie=comp,
-                                 deel=DEEL_RK)):
-            deelkamp.heeft_deelnemerslijst = True
-            deelkamp.save(update_fields=['heeft_deelnemerslijst'])
-        # for
-
-        if fase == 'J':
-            comp.klassengrenzen_vastgesteld_rk_bk = False
-            comp.datum_klassengrenzen_rk_bk_teams = morgen
-            comp.save()
+        if indiv_fase == 'J':
+            # fase J: begin fase K is minsten 2 weken weg
+            comp.begin_fase_L_indiv = morgen + datetime.timedelta(days=14)
             return
 
-        comp.klassengrenzen_vastgesteld_rk_bk = True
-
-        if fase == 'K':
-            comp.rk_eerste_wedstrijd = morgen + datetime.timedelta(days=14)
-            comp.save()
+        if indiv_fase == 'K':
+            # fase K: tot begin fase L
+            comp.begin_fase_L_indiv = morgen
             return
 
-        comp.rk_eerste_wedstrijd = gister
-
-        if fase == 'L':
-            comp.rk_laatste_wedstrijd = morgen  # vandaag mag ook
-            comp.save()
-            return
-
-        # fase M of N: vaststellen uitslag in elk rayon + afsluiten RK
-        comp.rk_laatste_wedstrijd = gister
-        comp.save()
+        # fase L
+        comp.begin_fase_L_indiv = gister
         return
 
-    comp.alle_regiocompetities_afgesloten = False
+    comp.regiocompetitie_is_afgesloten = False
 
     # fase A begon toen de competitie werd aangemaakt
 
-    if fase == 'A':
-        comp.begin_aanmeldingen = morgen
+    if indiv_fase == 'A':
         comp.klassengrenzen_vastgesteld = False
-        comp.save()
         return
 
     if comp.competitieindivklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar fase %s zonder competitie indiv klassen!" % fase)
 
+    comp.klassengrenzen_vastgesteld = True
+
+    if indiv_fase == 'B':
+        comp.begin_fase_C = morgen
+        return
+
+    comp.begin_fase_C = gister
+
+    if indiv_fase == 'C':
+        comp.begin_fase_F = morgen
+        return
+
+    comp.begin_fase_F = gister
+    if indiv_fase == 'F':
+        comp.einde_fase_F = morgen
+        return
+
+    # fase G
+    comp.einde_fase_F = gister
+
+
+def _zet_competitie_team_fase(comp, team_fase):
+
+    if team_fase == 'Q':
+        comp.bk_teams_afgesloten = True
+        return
+
+    comp.bk_teams_afgesloten = False
+
+    now = timezone.now()
+    vandaag = datetime.date(year=now.year, month=now.month, day=now.day)
+    gister = vandaag - datetime.timedelta(days=1)
+    morgen = vandaag + datetime.timedelta(days=1)
+
+    if team_fase >= 'O':
+        # BK fases (deel 2)
+        comp.bk_teams_klassen_zijn_samengevoegd = True
+
+        if team_fase == 'O':
+            comp.begin_fase_P_teams = morgen
+            return
+
+        comp.begin_fase_P_teams = gister
+        return
+
+    comp.bk_teams_klassen_zijn_samengevoegd = False
+
+    if team_fase == 'N':
+        # BK teams (fase 1)
+        comp.rk_teams_afgesloten = True
+        return
+
+    comp.rk_teams_afgesloten = False
+
+    if team_fase >= 'J':
+        # RK fases
+        comp.regiocompetitie_is_afgesloten = True
+
+        if team_fase == 'J':
+            comp.klassengrenzen_vastgesteld_rk_bk = False
+            return
+
+        comp.klassengrenzen_vastgesteld_rk_bk = True
+
+        if team_fase == 'K':
+            comp.begin_fase_L_teams = morgen
+            return
+
+        comp.begin_fase_L_teams = gister
+        return
+
+    comp.regiocompetitie_is_afgesloten = False
+
+    # fase A begon toen de competitie werd aangemaakt
+
+    if team_fase == 'A':
+        comp.klassengrenzen_vastgesteld = False
+        return
+
     if comp.competitieteamklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar fase %s zonder competitie team klassen!" % fase)
 
     comp.klassengrenzen_vastgesteld = True
-    comp.begin_aanmeldingen = gister
 
-    if fase == 'B':
-        comp.einde_aanmeldingen = morgen
+    if team_fase == 'B':
+        comp.begin_fase_C = morgen
+        return
+
+    comp.begin_fase_C = gister
+
+    if team_fase in ('C', 'D'):
+        comp.begin_fase_F = morgen
+        return
+
+    comp.begin_fase_F = gister
+
+    if team_fase == 'F':
+        comp.einde_fase_F = morgen
+        return
+
+    # fase G
+    comp.einde_fase_F = gister
+
+
+def zet_competitie_fases(comp, indiv_fase, team_fase):
+    """ deze helper weet hoe de Competitie datums en vlaggen gemanipuleerd moeten worden
+        om de competitie in de gevraagde fases te krijgen.
+    """
+
+    # sommige fases kunnen alleen synchroon gezet worden
+    if indiv_fase in ('A', 'B', 'C', 'F', 'G', 'Q', 'Z'):
+        if team_fase != indiv_fase:
+            raise NotImplementedError("Combinatie indiv_fase=%s en team_fase=%s niet ondersteund" % (indiv_fase, team_fase))
+
+    if isinstance(comp.begin_fase_L_indiv, str):
+        raise NotImplementedError("Kan niet rekenen met string datums (object moet uit database geladen zijn)")
+
+    if indiv_fase == 'Z':
+        comp.is_afgesloten = True
         comp.save()
         return
 
-    comp.einde_aanmeldingen = gister
+    comp.is_afgesloten = False
 
-    if fase == 'C':
-        comp.einde_teamvorming = morgen     # vandaag mag ook
-        comp.save()
-        return
+    _zet_competitie_indiv_fase(comp, indiv_fase)
+    _zet_competitie_team_fase(comp, team_fase)
 
-    comp.einde_teamvorming = gister
-
-    if fase == 'D':
-        comp.eerste_wedstrijd = morgen
-        comp.save()
-        return
-
-    comp.eerste_wedstrijd = gister
-
-    if fase == 'E':
-        comp.laatst_mogelijke_wedstrijd = morgen
-        comp.save()
-        return
-
-    comp.laatst_mogelijke_wedstrijd = gister
-
-    if fase == 'G':
-        # alle regios afsluiten
-        for deelcomp in comp.regiocompetitie_set.filter(is_afgesloten=False):
-            deelcomp.is_afgesloten = True
-            deelcomp.save(update_fields=['is_afgesloten'])
-        comp.save()
-        return
-
-    # fase F: vaststellen uitslag in elke regio + afsluiten regiocompetitie
     comp.save()
-    return
 
 
 def maak_competities_en_zet_fase_b(startjaar=None):
@@ -174,8 +223,8 @@ def maak_competities_en_zet_fase_b(startjaar=None):
     competitie_klassengrenzen_vaststellen(comp_18)
     competitie_klassengrenzen_vaststellen(comp_25)
 
-    zet_competitie_fase(comp_18, 'B')
-    zet_competitie_fase(comp_25, 'B')
+    zet_competitie_fases(comp_18, 'B', 'B')
+    zet_competitie_fases(comp_25, 'B', 'B')
 
     return comp_18, comp_25
 

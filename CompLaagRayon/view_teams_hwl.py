@@ -110,7 +110,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
             # staat niet meer open voor instellen RK teams
             raise Http404('Competitie is niet in de juiste fase 1')
 
-        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
+        vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
         if datetime.date.today() < vanaf:
             raise Http404('Competitie is niet in de juiste fase 2')
 
@@ -237,7 +237,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             # staat niet meer open voor instellen RK teams
             raise Http404('Competitie is niet in de juiste fase 1')
 
-        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
+        vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
         if datetime.date.today() < vanaf:
             raise Http404('Competitie is niet in de juiste fase 2')
 

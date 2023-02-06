@@ -179,9 +179,9 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                 else:
                     einde_p = einde_p.date()
                     comp = deelcomp.competitie
-                    if einde_p < comp.begin_aanmeldingen or einde_p >= comp.eerste_wedstrijd:
+                    if einde_p < comp.begin_fase_C or einde_p >= comp.begin_fase_F:
                         raise Http404('Datum buiten toegestane reeks')
-                    deelcomp.einde_teams_aanmaken = einde_p
+                    deelcomp.begin_fase_D = einde_p
                     updated.append('einde_teams_aanmaken')
 
         deelcomp.save(update_fields=updated)
@@ -259,7 +259,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelcomp.teamcomp_str = 'Ja'
 
-                deelcomp.einde_teams_aanmaken_str = localize(deelcomp.einde_teams_aanmaken)
+                deelcomp.einde_teams_aanmaken_str = localize(deelcomp.begin_fase_D)
 
                 if deelcomp.regio_heeft_vaste_teams:
                     deelcomp.team_type_str = 'Vast'

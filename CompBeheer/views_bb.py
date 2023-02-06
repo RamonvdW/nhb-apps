@@ -379,16 +379,16 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         context['wijzig_url'] = reverse('CompBeheer:wijzig-datums',
                                         kwargs={'comp_pk': comp.pk})
 
-        comp.datum1 = comp.begin_aanmeldingen
+        comp.datum1 = comp.begin_fase_C
         comp.datum2 = comp.einde_aanmeldingen
         comp.datum3 = comp.einde_teamvorming
-        comp.datum4 = comp.eerste_wedstrijd
-        comp.datum5 = comp.laatst_mogelijke_wedstrijd
+        comp.datum4 = comp.begin_fase_F
+        comp.datum5 = comp.einde_fase_F
         comp.datum6 = comp.datum_klassengrenzen_rk_bk_teams
-        comp.datum7 = comp.rk_eerste_wedstrijd
-        comp.datum8 = comp.rk_laatste_wedstrijd
-        comp.datum9 = comp.bk_eerste_wedstrijd
-        comp.datum10 = comp.bk_laatste_wedstrijd
+        comp.datum7 = comp.begin_fase_L_indiv
+        comp.datum8 = comp.einde_fase_L_indiv
+        comp.datum9 = comp.begin_fase_P_indiv
+        comp.datum10 = comp.einde_fase_P_indiv
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -429,16 +429,16 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         oud_einde_teamvorming = comp.einde_teamvorming
 
         datums.insert(0, None)      # dummy
-        comp.begin_aanmeldingen = datums[1]
+        comp.begin_fase_C = datums[1]
         comp.einde_aanmeldingen = datums[2]
         comp.einde_teamvorming = datums[3]
-        comp.eerste_wedstrijd = datums[4]
-        comp.laatst_mogelijke_wedstrijd = datums[5]
+        comp.begin_fase_F = datums[4]
+        comp.einde_fase_F = datums[5]
         comp.datum_klassengrenzen_rk_bk_teams = datums[6]
-        comp.rk_eerste_wedstrijd = datums[7]
-        comp.rk_laatste_wedstrijd = datums[8]
-        comp.bk_eerste_wedstrijd = datums[9]
-        comp.bk_laatste_wedstrijd = datums[10]
+        comp.begin_fase_L_indiv = datums[7]
+        comp.einde_fase_L_indiv = datums[8]
+        comp.begin_fase_P_indiv = datums[9]
+        comp.einde_fase_P_indiv = datums[10]
         comp.save()
 
         # pas ook de regiocompetities aan
@@ -448,8 +448,8 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
             # volg mee met wijzigingen in de competitie datums
             # neem ook meteen template datums mee (2001-01-01)
-            if deelcomp.einde_teams_aanmaken == oud_einde_teamvorming or deelcomp.einde_teams_aanmaken.year < comp.begin_jaar:
-                deelcomp.einde_teams_aanmaken = comp.einde_teamvorming
+            if deelcomp.begin_fase_D == oud_einde_teamvorming or deelcomp.begin_fase_D.year < comp.begin_jaar:
+                deelcomp.begin_fase_D = comp.einde_teamvorming
                 deelcomp.save(update_fields=['einde_teams_aanmaken'])
         # for
 

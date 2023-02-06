@@ -80,7 +80,7 @@ class UitslagenBKIndivView(TemplateView):
             raise Http404('Kampioenschap niet gevonden')
 
         if comp.fase == 'P':
-            context['bevestig_tot_datum'] = comp.bk_eerste_wedstrijd - datetime.timedelta(days=14)
+            context['bevestig_tot_datum'] = comp.begin_fase_P_indiv - datetime.timedelta(days=14)
 
         # haal de planning erbij: competitie klasse --> competitie match
         indiv2match = dict()    # [indiv_pk] = CompetitieMatch

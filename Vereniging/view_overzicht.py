@@ -173,7 +173,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 else:
                     kaartje.img = static('plein/badge_nhb_25m1p.png')
                 if comp.fase < 'B':
-                    kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                    kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                 kaartjes.append(kaartje)
 
             for deelcomp in deelcomps:
@@ -195,7 +195,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje.url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
                             if comp.fase < 'B':
-                                kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                                kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                             kaartjes.append(kaartje)
             # for
             del deelcomp
@@ -221,7 +221,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
-                        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
+                        vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
                         if datetime.date.today() < vanaf:
                             kaartje.beschikbaar_vanaf = localize(vanaf)
                         kaartjes.append(kaartje)

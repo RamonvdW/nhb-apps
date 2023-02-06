@@ -195,7 +195,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # zet de inschrijving open
         now = timezone.now()
         for comp in Competitie.objects.all():
-            comp.begin_aanmeldingen = now.date()
+            comp.begin_fase_C = now.date()
             comp.save()
         # for
 

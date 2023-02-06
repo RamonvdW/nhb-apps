@@ -121,7 +121,7 @@ class UitslagenRayonIndivView(TemplateView):
         context['comp'] = comp
 
         if comp.fase == 'J':
-            context['bevestig_tot_datum'] = comp.rk_eerste_wedstrijd - datetime.timedelta(days=14)
+            context['bevestig_tot_datum'] = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 

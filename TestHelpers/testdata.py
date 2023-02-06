@@ -21,7 +21,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieTeamPoule,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.definities import AG_DOEL_INDIV
@@ -994,7 +994,7 @@ class TestData(object):
         url = self.url_inschrijven % comp.pk
 
         # zet competitie fase B zodat we in mogen schrijven
-        zet_competitie_fase(comp, 'B')
+        zet_competitie_fases(comp, 'B', 'B')
 
         client = Client()
 

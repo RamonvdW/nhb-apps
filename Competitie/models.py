@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.utils import timezone
 from Account.models import Account
 from BasisTypen.definities import BLAZOEN_CHOICES, BLAZOEN_40CM
 from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType,
@@ -17,13 +16,13 @@ from Competitie.definities import (AFSTANDEN,
                                    DAGDELEN,
                                    DEELNAME_CHOICES, DEELNAME_ONBEKEND,
                                    MUTATIE_TO_STR, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_CUT)
+from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
-import datetime
 import logging
 
 my_logger = logging.getLogger('NHBApps.Competitie')
@@ -42,94 +41,127 @@ class Competitie(models.Model):
     # seizoen
     begin_jaar = models.PositiveSmallIntegerField()     # 2019
 
-    # wanneer moet een sporter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
-    uiterste_datum_lid = models.DateField()     # TODO: niet meer gebruiken; mag weg
-
     # alle ondersteunde typen bogen en teams
     teamtypen = models.ManyToManyField(TeamType)
     boogtypen = models.ManyToManyField(BoogType)
 
-    # fase A: aanmaken competitie, vaststellen klassen
+    # ---------------
+    # Regiocompetitie
+    # ---------------
+
+    # fase A: voorbereidingen door RCL en BKO
+    #         AG vaststellen (BKO)
+    #         klassengrenzen indiv + teams vaststellen (BKO)
+    #         instellingen teams (RCL)
+
     klassengrenzen_vastgesteld = models.BooleanField(default=False)
 
-    # ----
-    # fases en datums regiocompetitie
-    # ----
+    # fase B: voorbereidingen door RCL
 
-    begin_aanmeldingen = models.DateField()
-    # fase B: aanmelden sporters
+    begin_fase_C = models.DateField(default='2000-01-01')
+
+    # fase C: aanmelden sporters en teams
+    #         teams aanmaken + koppel sporters + handmatig teams AG (HWL)
+    #         controle handmatig AG (RCL)
+    #         poules voorbereiden
+
     einde_aanmeldingen = models.DateField()
-    # fase C: samenstellen vaste teams (HWL)
     einde_teamvorming = models.DateField()
-    # fase D: aanmaken poules (RCL)
-    eerste_wedstrijd = models.DateField()
-    # fase E: wedstrijden
-    laatst_mogelijke_wedstrijd = models.DateField()
-    # fase F: vaststellen uitslagen in elke regio (vaste duur: 1 week)
-    # fase G: afsluiten regiocompetitie (BKO)
-    #         verstuur RK uitnodigingen + vraag bevestigen deelname
-    #         vertaal regio teams naar RK teams
-    alle_regiocompetities_afgesloten = models.BooleanField(default=False)
 
-    # ----
-    # fases en datums rayonkampioenschappen
-    # ----
+    # fase D: teams compleet maken of verwijderen (HWL)
+    #         alle teams in een poule plaatsen (RCL)
+    #         elke regio heeft een eigen datum begin_fase_D (zie Regiocompetitie)
+
+    # eerste datum wedstrijden
+    begin_fase_F = models.DateField(default='2000-01-01')
+    einde_fase_F = models.DateField(default='2000-01-01')
+
+    # fase F: wedstrijden
+    #         RCL hanteert de team rondes
+
+    # fase G: wacht op afsluiten regiocompetitie (RCLs, daarna BKO)
+    #         verstuur RK uitnodigingen + vraag bevestigen deelname
+    #         deelnemerslijsten RKs opstellen
+
+    # is de regiocompetitie nodig bezig?
+    regiocompetitie_is_afgesloten = models.BooleanField(default=False)
+
+    # ---------------------
+    # Rayonkampioenschappen
+    # ---------------------
 
     # aantal scores dat een individuele sporter neergezet moet hebben om gerechtigd te zijn voor deelname aan het RK
     aantal_scores_voor_rk_deelname = models.PositiveSmallIntegerField(default=6)
 
-    # fase J: RK deelnemers bevestigen deelname
-    #         HWL's kunnen RK teams te repareren
-    #         einde fase J: BKO bevestigd klassengrenzen RK/BK teams
     datum_klassengrenzen_rk_bk_teams = models.DateField()
 
-    klassengrenzen_vastgesteld_rk_bk = models.BooleanField(default=False)
-
-    # fase K: einde: 2 weken voor begin fase L
-    #         RK deelnemers bevestigen deelname
+    # fase J: RK deelnemers bevestigen deelname
     #         HWL's kunnen invallers koppelen voor RK teams
     #         RKO's moeten planning wedstrijden afronden
-    rk_indiv_eerste_wedstrijd = models.DateField()        # einde fase K moet 2 weken voor de eerste wedstrijd zijn
-    rk_teams_eerste_wedstrijd = models.DateField(default='2000-01-01')
 
-    # fase L: wedstrijden
-    #         stuur emails uitnodiging deelname + locatie details
-    rk_indiv_laatste_wedstrijd = models.DateField()
-    rk_teams_laatste_wedstrijd = models.DateField(default='2000-01-01')
+    # zijn de team klassengrenzen voor de RK/BK vastgesteld?
+    klassengrenzen_vastgesteld_rk_bk = models.BooleanField(default=False)
 
-    # fase M: vaststellen en publiceren uitslag
-    # fase N: afsluiten rayonkampioenschappen
-    alle_rks_afgesloten = models.BooleanField(default=False)
+    # fase K: RK wedstrijden voorbereiden door vereniging: afmeldingen ontvangen, reserves oproepen
+    #         (begint 2 weken voor eerste wedstrijd)
+
+    # RK wedstrijd datums
+    begin_fase_L_indiv = models.DateField(default='2000-01-01')
+    einde_fase_L_indiv = models.DateField(default='2000-01-01')
+
+    begin_fase_L_teams = models.DateField(default='2000-01-01')
+    einde_fase_L_teams = models.DateField(default='2000-01-01')
+
+    # fase L: RK wedstrijden, uitslagen ontvangen, inlezen en publiceren
+
+    # RK uitslag bevestigd?
+    rk_indiv_afgesloten = models.BooleanField(default=False)
+    rk_teams_afgesloten = models.BooleanField(default=False)
+
+    # fase N: RK uitslag bevestigd
+
+    # automatisch: BK deelnemerslijst vastgesteld (niet openbaar)
+
+    # ----
+    # Bondskampioenschappen
+    # ----
+
+    # fase N: kleine BK klassen samenvoegen
+
+    # kleine BK klassen samengevoegd?
+    bk_indiv_klassen_zijn_samengevoegd = models.BooleanField(default=False)
+    bk_teams_klassen_zijn_samengevoegd = models.BooleanField(default=False)
+
+    # fase O: BK deelnemerslijsten openbaar
+    #         BK wedstrijden voorbereiden: afmeldingen/oproepen reserves
+
+    # BK wedstrijden datums
+    begin_fase_P_indiv = models.DateField(default='2000-01-01')
+    einde_fase_P_indiv = models.DateField(default='2000-01-01')
+
+    begin_fase_P_teams = models.DateField(default='2000-01-01')
+    einde_fase_P_teams = models.DateField(default='2000-01-01')
+
+    # fase P: BK wedstrijden, uitslagen ontvangen, inlezen en publiceren
+
+    # BK uitslag bevestigd?
+    bk_indiv_afgesloten = models.BooleanField(default=False)
+    bk_teams_afgesloten = models.BooleanField(default=False)
+
+    # fase Q: BK uitslag bevestigd
+
+    # nog te wijzigen?
+    is_afgesloten = models.BooleanField(default=False)
+
+    # fase Z: competitie afgesloten
 
     # als het RK afgelast is, toon dan deze tekst
     rk_is_afgelast = models.BooleanField(default=False)
     rk_afgelast_bericht = models.TextField(blank=True)
 
-    # ----
-    # fases en datums bondskampioenschappen
-    # ----
-
-    # fase O: kleine BK klassen samenvoegen
-    bk_indiv_klassen_zijn_samengevoegd = models.BooleanField(default=False)
-    bk_teams_klassen_zijn_samengevoegd = models.BooleanField(default=False)
-
-    # fase P: bevestig deelnemers; oproepen reserves
-    bk_indiv_eerste_wedstrijd = models.DateField()
-    bk_teams_eerste_wedstrijd = models.DateField(default='2000-01-01')
-
-    # fase Q: wedstrijden
-    bk_indiv_laatste_wedstrijd = models.DateField()
-    bk_teams_laatste_wedstrijd = models.DateField(default='2000-01-01')
-
-    # fase R: vaststellen en publiceren uitslag
-    alle_bks_afgesloten = models.BooleanField(default=False)
-
     # als het BK afgelast is, toon dan deze tekst
     bk_is_afgelast = models.BooleanField(default=False)
     bk_afgelast_bericht = models.TextField(blank=True)
-
-    # nog te wijzigen?
-    is_afgesloten = models.BooleanField(default=False)
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -145,180 +177,13 @@ class Competitie(models.Model):
 
     def bepaal_fase(self):
         """ bepaalde huidige fase van de competitie en zet self.fase_indiv en self.fase_teams """
-        self.fase_indiv = self._bepaal_fase_indiv()
-        self.fase_teams = self._bepaal_fase_teams()
+        self.fase_indiv = bepaal_fase_indiv(self)
+        self.fase_teams = bepaal_fase_teams(self)
 
         print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (self.afstand, self.fase_indiv, self.fase_teams))
 
         # zet self.fase, voor backwards compatibility
         self.fase = self.fase_indiv
-
-    def _bepaal_fase_indiv(self) -> str:
-        """ bepaal de fase van de individuele competitie """
-
-        # fase A was totdat dit object gemaakt werd
-
-        if self.is_afgesloten:
-            return 'Z'
-
-        if self.alle_bks_afgesloten:
-            return 'S'
-
-        now = timezone.now()
-        now = datetime.date(year=now.year, month=now.month, day=now.day)
-
-        if self.alle_rks_afgesloten:
-            # in BK fases
-            if now < self.bk_indiv_eerste_wedstrijd:
-                # fase P: bevestig deelnemers; oproepen reserves
-                return 'P'
-
-            if now <= self.bk_indiv_laatste_wedstrijd:
-                # fase Q: wedstrijden
-                return 'Q'
-
-            # fase R: vaststellen uitslagen
-            if self.kampioenschap_set.filter(is_afgesloten=False, deel=DEEL_BK).count() > 0:
-                return 'R'
-
-            # fase S: afsluiten bondscompetitie
-            return 'S'
-
-        if self.alle_regiocompetities_afgesloten:
-            # in RK fase
-
-            if not self.klassengrenzen_vastgesteld_rk_bk:
-                # fase J, tot de BKO deze handmatig doorzet
-                # datum_klassengrenzen_rk_bk_teams is indicatief
-                return 'J'
-
-            # fase K tot 2 weken voor fase L
-            if now < self.rk_indiv_eerste_wedstrijd - datetime.timedelta(days=14):
-                # fase K: bevestig deelnemers; oproepen reserves
-                return 'K'
-
-            if now <= self.rk_indiv_laatste_wedstrijd:
-                # fase L: wedstrijden
-                return 'L'
-
-            # fase M: vaststellen uitslag in elk rayon (RKO)
-            if self.kampioenschap_set.filter(is_afgesloten=False, deel=DEEL_RK).count() > 0:
-                return 'M'
-
-            # fase N: afsluiten rayonkampioenschappen (BKO)
-            return 'N'
-
-        # regiocompetitie fases
-        if not self.klassengrenzen_vastgesteld or now < self.begin_aanmeldingen:
-            # A = vaststellen klassengrenzen, instellingen regio en planning regiocompetitie wedstrijden
-            #     tot aanmeldingen beginnen; nog niet open voor aanmelden
-            return 'A'
-
-        if now <= self.einde_aanmeldingen:
-            # B = open voor inschrijvingen en aanmaken teams
-            return 'B'
-
-        if now <= self.einde_teamvorming:
-            # C = afronden definitie teams
-            return 'C'
-
-        if now < self.eerste_wedstrijd:
-            # D = aanmaken poules en afronden wedstrijdschema's
-            return 'D'
-
-        if now < self.laatst_mogelijke_wedstrijd:
-            # E = Begin wedstrijden
-            return 'E'
-
-        # fase F: vaststellen uitslag in elke regio (RCL)
-        if self.regiocompetitie_set.filter(is_afgesloten=False).count() > 0:
-            return 'F'
-
-        # fase G: afsluiten regiocompetitie (BKO)
-        return 'G'
-
-    def _bepaal_fase_teams(self) -> str:
-        """ bepaal de fase van de teamcompetitie """
-        # fase A was totdat dit object gemaakt werd
-
-        if self.is_afgesloten:
-            return 'Z'
-
-        if self.alle_bks_afgesloten:
-            return 'S'
-
-        now = timezone.now()
-        now = datetime.date(year=now.year, month=now.month, day=now.day)
-
-        if self.alle_rks_afgesloten:
-            # in BK fases
-            if now < self.bk_teams_eerste_wedstrijd:
-                # fase P: bevestig deelnemers; oproepen reserves
-                return 'P'
-
-            if now <= self.bk_teams_laatste_wedstrijd:
-                # fase Q: wedstrijden
-                return 'Q'
-
-            # fase R: vaststellen uitslagen
-            if self.kampioenschap_set.filter(is_afgesloten=False, deel=DEEL_BK).count() > 0:
-                return 'R'
-
-            # fase S: afsluiten bondscompetitie
-            return 'S'
-
-        if self.alle_regiocompetities_afgesloten:
-            # in RK fase
-
-            if not self.klassengrenzen_vastgesteld_rk_bk:
-                # fase J, tot de BKO deze handmatig doorzet
-                # datum_klassengrenzen_rk_bk_teams is indicatief
-                return 'J'
-
-            # fase K tot 2 weken voor fase L
-            if now < self.rk_teams_eerste_wedstrijd - datetime.timedelta(days=14):
-                # fase K: bevestig deelnemers; oproepen reserves
-                return 'K'
-
-            if now <= self.rk_teams_laatste_wedstrijd:
-                # fase L: wedstrijden
-                return 'L'
-
-            # fase M: vaststellen uitslag in elk rayon (RKO)
-            if self.kampioenschap_set.filter(is_afgesloten=False, deel=DEEL_RK).count() > 0:
-                return 'M'
-
-            # fase N: afsluiten rayonkampioenschappen (BKO)
-            return 'N'
-
-        # regiocompetitie fases
-        if not self.klassengrenzen_vastgesteld or now < self.begin_aanmeldingen:
-            # A = vaststellen klassengrenzen, instellingen regio en planning regiocompetitie wedstrijden
-            #     tot aanmeldingen beginnen; nog niet open voor aanmelden
-            return 'A'
-
-        if now <= self.einde_aanmeldingen:
-            # B = open voor inschrijvingen en aanmaken teams
-            return 'B'
-
-        if now <= self.einde_teamvorming:
-            # C = afronden definitie teams
-            return 'C'
-
-        if now < self.eerste_wedstrijd:
-            # D = aanmaken poules en afronden wedstrijdschema's
-            return 'D'
-
-        if now < self.laatst_mogelijke_wedstrijd:
-            # E = Begin wedstrijden
-            return 'E'
-
-        # fase F: vaststellen uitslag in elke regio (RCL)
-        if self.regiocompetitie_set.filter(is_afgesloten=False).count() > 0:
-            return 'F'
-
-        # fase G: afsluiten regiocompetitie (BKO)
-        return 'G'
 
     def bepaal_openbaar(self, rol_nu):
         """ deze functie bepaalt of de competitie openbaar is voor de huidige rol
@@ -591,7 +456,7 @@ class Regiocompetitie(models.Model):
     regio_heeft_vaste_teams = models.BooleanField(default=True)
 
     # tot welke datum mogen teams aangemeld aangemaakt worden (verschilt per regio)
-    einde_teams_aanmaken = models.DateField(default='2001-01-01')
+    begin_fase_D = models.DateField(default='2001-01-01')
 
     # punten model
     regio_team_punten_model = models.CharField(max_length=2,
