@@ -12,7 +12,7 @@ from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
-from Competitie.tests.test_helpers import zet_competitie_fase, competities_aanmaken, maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import zet_competitie_fases, competities_aanmaken, maak_competities_en_zet_fase_b
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -245,7 +245,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         deelcomp = Regiocompetitie.objects.get(competitie__afstand='25', nhb_regio=self.ver.regio)
 
         # zet de 25m door naar fase C
-        zet_competitie_fase(comp_25, 'C')
+        zet_competitie_fases(comp_25, 'C', 'C')
 
         # controleer dat inschrijven nog mogelijk is voor 25m en uitschrijven voor 18m
         with self.assert_max_queries(23):
@@ -291,7 +291,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog_bb.save()
 
         # zet de 18m ook door naar fase F
-        zet_competitie_fase(comp_18, 'F')
+        zet_competitie_fases(comp_18, 'F', 'F')
 
         # haal de profiel pagina op
         with self.assert_max_queries(29):
@@ -328,8 +328,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # zet de 18m door naar RK fase
         # zet de 25m door naar BK fase
-        zet_competitie_fase(comp_18, 'K')
-        zet_competitie_fase(comp_25, 'P')
+        zet_competitie_fases(comp_18, 'K')
+        zet_competitie_fases(comp_25, 'P')
         with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'Rayonkampioenschappen')      # 18m
@@ -406,12 +406,11 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._prep_voorkeuren()
 
         # competitie wordt niet getoond in vroege fases
-        zet_competitie_fase(self.comp_18, 'A2')
+        zet_competitie_fases(self.comp_18, 'B', 'B')
         with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        zet_competitie_fase(self.comp_18, 'B')
 
         # met standaard voorkeuren worden de regiocompetities getoond
         voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=self.sporter1)
@@ -583,7 +582,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         kamp.save()
 
         # regiocompetitie fase
-        zet_competitie_fase(comp_18, 'E')
+        zet_competitie_fases(comp_18, 'F', 'F')
 
         # controleer pre-afmelden
         with self.assert_max_queries(27):
@@ -606,7 +605,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, 'Je bent alvast afgemeld voor de Rayonkampioenschappen')
 
         # RK fase
-        zet_competitie_fase(comp_18, 'J')
+        zet_competitie_fases(comp_18, 'J', 'J')
 
         # kampioenschap deelname: onbekend
         with self.assert_max_queries(27):
@@ -644,7 +643,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, 'Je bent afgemeld')
 
         # BK fase
-        zet_competitie_fase(comp_18, 'P')
+        zet_competitie_fases(comp_18, 'O', 'O')
         with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -652,7 +651,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
         # afsluitende fase
-        zet_competitie_fase(comp_18, 'S')
+        zet_competitie_fases(comp_18, 'q', 'Q')
         with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

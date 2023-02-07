@@ -38,7 +38,7 @@ class Command(BaseCommand):
     def _bepaal_deel(self):
         """ bepaal of we de RK of BK gaan importeren """
         comp = Competitie.objects.filter(afstand='18').order_by('begin_jaar')[0]    # pak de oudeste
-        if comp.alle_rks_afgesloten:
+        if comp.rk_teams_afgesloten:
             self.deel = DEEL_BK
 
     def _deelnemers_ophalen(self):

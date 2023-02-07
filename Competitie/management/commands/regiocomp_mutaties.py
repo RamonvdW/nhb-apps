@@ -1211,14 +1211,14 @@ class Command(BaseCommand):
         """ de BKO heeft gevraagd alles klaar te maken voor het BK individueel """
 
         # controleer dat de competitie in fase N is
-        if not comp.alle_rks_afgesloten:
+        if not comp.rk_indiv_afgesloten:
 
             # individuele deelnemers vaststellen
             self._maak_deelnemerslijst_bks(comp)
 
             # ga door naar fase P
-            comp.alle_rks_afgesloten = True
-            comp.save(update_fields=['alle_rks_afgesloten'])
+            comp.rk_indiv_afgesloten = True
+            comp.save(update_fields=['rk_indiv_afgesloten'])
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie

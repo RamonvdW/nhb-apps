@@ -120,16 +120,17 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 # fase B of later
                 comp.inschrijven = 'De inschrijving is gesloten'
 
-                if comp.alle_rks_afgesloten:
+                if comp.rk_indiv_afgesloten:
                     comp.fase_str = 'Bondskampioenschappen'
-                elif comp.alle_regiocompetities_afgesloten:
+                elif comp.regiocompetitie_is_afgesloten:
                     comp.fase_str = 'Rayonkampioenschappen'
                 else:
                     comp.fase_str = 'Regiocompetitie'
 
-                    if comp.fase < 'C':
+                    if comp.fase_indiv == 'C':
                         comp.inschrijven = 'De inschrijving is open tot %s' % localize(comp.einde_fase_C)
-                    elif comp.fase < 'F':
+                    elif comp.fase <= 'F':
+                        # tijdens de hele wedstrijden fase kan er aangemeld worden
                         comp.inschrijven = 'Aanmelden kan nog tot %s' % localize(comp.einde_fase_F)
 
                 comps.append(comp)

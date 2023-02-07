@@ -181,7 +181,7 @@ class Competitie(models.Model):
         self.fase_indiv = bepaal_fase_indiv(self)
         self.fase_teams = bepaal_fase_teams(self)
 
-        print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (self.afstand, self.fase_indiv, self.fase_teams))
+        # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (self.afstand, self.fase_indiv, self.fase_teams))
 
         # zet self.fase, voor backwards compatibility
         self.fase = self.fase_indiv
@@ -197,15 +197,17 @@ class Competitie(models.Model):
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             # IT, BB en BKO zien alles
             self.is_openbaar = True
-        else:
-            if not hasattr(self, 'fase'):
-                self.bepaal_fase()
 
-            if self.fase >= 'B':
+        elif rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
+            # beheerders die de competitie opzetten zien competities die opgestart zijn
+            self.is_openbaar = True
+
+        else:
+            if not hasattr(self, 'fase_indiv'):
+                self.fase_indiv = bepaal_fase_indiv(self)
+
+            if self.fase_indiv >= 'C':
                 # modale gebruiker ziet alleen competities vanaf open-voor-inschrijving
-                self.is_openbaar = True
-            elif rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
-                # beheerders die de competitie opzetten zien competities die opgestart zijn
                 self.is_openbaar = True
 
     def maak_seizoen_str(self):
