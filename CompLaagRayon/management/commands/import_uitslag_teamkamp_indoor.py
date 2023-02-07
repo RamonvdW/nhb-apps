@@ -319,7 +319,18 @@ class Command(BaseCommand):
 
         rank = 1
         for team_naam in (goud, zilver, brons, vierde):
-            if team_naam:
+            if isinstance(team_naam, list):
+                volgorde = rank
+                for naam in team_naam:
+                    kamp_team = self.deelnemende_teams[naam]
+                    kamp_team.result_rank = rank
+                    kamp_team.result_volgorde = volgorde
+                    if not self.dryrun:
+                        kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
+                    volgorde += 1
+                # for
+                rank += 1  # skip 4
+            elif team_naam:
                 kamp_team = self.deelnemende_teams[team_naam]
                 kamp_team.result_rank = rank
                 kamp_team.result_volgorde = rank
@@ -372,9 +383,13 @@ class Command(BaseCommand):
         if ws['V30'].value == '3e':
             brons = team_naam_1
             vierde = team_naam_2
-        else:
+        elif ws['V30'].value == '4e':
             brons = team_naam_2
             vierde = team_naam_1
+        else:
+            # gelijk geëindigd
+            brons = [team_naam_1, team_naam_2]
+            vierde = None
 
         for team_naam in (goud, zilver, brons, vierde):
             if team_naam in final_8:
@@ -406,9 +421,13 @@ class Command(BaseCommand):
         if ws['R30'].value == '3e':
             brons = team_naam_1
             vierde = team_naam_2
-        else:
+        elif ws['R30'].value == '4e':
             brons = team_naam_2
             vierde = team_naam_1
+        else:
+            # gelijk geëindigd
+            brons = [team_naam_1, team_naam_2]
+            vierde = None
 
         self._zet_rank_en_volgorde(goud, zilver, brons, vierde, [])
 
