@@ -161,14 +161,17 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                          .select_related('competitie')
                          .filter(competitie__afstand=self.functie_nu.comp_type,
                                  nhb_regio__regio_nr=regio_nr)
-                         .order_by('competitie__begin_jaar'))
+                         .order_by('competitie__begin_jaar'))       # oudste eerst
+
             if deelcomps.count() < 1:
                 raise Http404('Competitie niet gevonden')
+
+            deelcomp = deelcomps[0]  # neem de oudste
         except ValueError:
             raise Http404('Competitie niet gevonden')
 
         # elke RCL mag de medailles lijst van elke andere regio inzien, dus geen check hier
-        context['deelcomp'] = deelcomp = deelcomps[0]   # neem de oudste
+        context['deelcomp'] = deelcomp
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
