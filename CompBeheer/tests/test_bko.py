@@ -11,7 +11,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, Kampioenschap,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog)
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -218,10 +218,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         url = self.url_doorzetten_rk % self.comp_18.pk
 
+        # TODO: deze logica gaat veranderen + opsplitsing indiv/teams
         # fase F: pagina zonder knop 'doorzetten'
-        zet_competitie_fase(self.comp_18, 'F')
+        zet_competitie_fases(self.comp_18, 'G', 'G')
         self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase, 'F')
+        self.assertEqual(self.comp_18.fase_indiv, 'G', 'G')
 
         # zet een regiocompetitie die geen team competitie organiseert
         self.deelcomp_regio_101.regio_organiseert_teamcompetitie = False
@@ -245,10 +246,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             obj.save()
         # for
 
+        # TODO: deze logica gaat veranderen + opsplitsing indiv/teams
         # fase G: pagina met knop 'doorzetten'
-        zet_competitie_fase(self.comp_18, 'G')
+        zet_competitie_fases(self.comp_18, 'G', 'G')
         self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase, 'G')
+        self.assertEqual(self.comp_18.fase_indiv, 'G')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -279,8 +281,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
+        # TODO: deze logica gaat veranderen + opsplitsing indiv/teams
         # fase F: pagina zonder knop 'doorzetten'
-        zet_competitie_fase(self.comp_18, 'F')
+        zet_competitie_fases(self.comp_18, 'G', 'G')
 
         # sluit alle regiocompetities
         for obj in Regiocompetitie.objects.filter(competitie=self.comp_18,
@@ -289,8 +292,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             obj.save()
         # for
 
+        # TODO: deze logica gaat veranderen + opsplitsing indiv/teams
         # fase G: pagina met knop 'doorzetten'
-        zet_competitie_fase(self.comp_18, 'G')
+        zet_competitie_fases(self.comp_18, 'G', 'G')
 
         # nu echt doorzetten
         self._regioschutters_inschrijven()
@@ -321,9 +325,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         url = self.url_doorzetten_bk % self.comp_18.pk
 
         # fase M: pagina zonder knop 'doorzetten'
-        zet_competitie_fase(self.comp_18, 'M')
+        zet_competitie_fases(self.comp_18, 'N', 'N')
         self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase, 'M')
+        self.assertEqual(self.comp_18.fase_indiv, 'N')
 
         # zet een rayon met status 'afgesloten'
         self.deelkamp_rayon1_18.is_afgesloten = True
@@ -344,9 +348,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # for
 
         # fase N: pagina met knop 'doorzetten'
-        zet_competitie_fase(self.comp_18, 'N')
+        zet_competitie_fases(self.comp_18, 'N', 'N')
         self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase, 'N')
+        self.assertEqual(self.comp_18.fase_indiv, 'N')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -399,7 +403,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie niet gevonden')
 
         # juiste comp_pk maar verkeerde fase
-        zet_competitie_fase(self.comp_18, 'C')
+        zet_competitie_fases(self.comp_18, 'C', 'C')
         resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
 
@@ -422,9 +426,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        zet_competitie_fase(self.comp_18, 'R')
+        zet_competitie_fases(self.comp_18, 'P', 'P')
         self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase, 'R')
+        self.assertEqual(self.comp_18.fase_indiv, 'P')
 
         url = self.url_doorzetten_voorbij_bk % self.comp_18.pk
 
@@ -454,7 +458,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
-        zet_competitie_fase(self.testdata.comp25, 'G')
+        zet_competitie_fases(self.testdata.comp25, 'G', 'G')
 
         url = self.url_teams_klassengrenzen_vaststellen % 999999
         resp = self.client.get(url)
@@ -475,7 +479,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
+        self.assertEqual(comp.fase_indiv, 'J')
 
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
         with self.assert_max_queries(20):

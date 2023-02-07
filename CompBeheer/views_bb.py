@@ -388,7 +388,7 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
 
         context['url_afsluiten'] = reverse('CompBeheer:bb-seizoen-afsluiten')
         for comp in comps:
-            if comp.fase != 'S':
+            if comp.fase_indiv != 'Q' or comp.fase_teams != 'Q':
                 context['url_afsluiten'] = None
         # for
 
@@ -423,8 +423,8 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen competitie gevonden')
 
         for comp in comps:
-            if comp.fase != 'S':
-                raise Http404('Alle competities nog niet in fase S')
+            if comp.fase_indiv != 'Q' or comp.fase_teams != 'Q':
+                raise Http404('Alle competities nog niet in fase Q')
         # for
 
         for comp in comps:

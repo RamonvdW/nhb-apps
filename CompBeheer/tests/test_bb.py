@@ -11,7 +11,7 @@ from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSC
 from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -662,7 +662,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)        # redirect = success
 
         # kies pagina ophalen als BB, dan worden alle competities getoond
-        zet_competitie_fase(comp_18, 'B')
+        zet_competitie_fases(comp_18, 'B', 'B')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)
@@ -745,6 +745,8 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
                                           'datum8': '2020-05-01',
                                           'datum9': '2020-05-12',
                                           'datum10': '2020-06-12',
+                                          'datum11': '2020-07-12',
+                                          'datum12': '2020-08-12',
                                           })
         self.assert_is_redirect(resp, self.url_overzicht % comp.pk)
 
@@ -793,7 +795,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_seizoen_afsluiten)
-        self.assert404(resp, 'Alle competities nog niet in fase S')
+        self.assert404(resp, 'Alle competities nog niet in fase Q')
 
         # maak een HistComp aan die straks doorgezet gaat worden
         hist = HistCompetitie(
@@ -806,9 +808,9 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        # fase S: alle BK's afgesloten
-        zet_competitie_fase(self.comp_18, 'S')
-        zet_competitie_fase(self.comp_25, 'S')
+        # fase Q: alle BK's afgesloten
+        zet_competitie_fases(self.comp_18, 'Q', 'Q')
+        zet_competitie_fases(self.comp_25, 'Q', 'Q')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_seizoen_afsluiten)

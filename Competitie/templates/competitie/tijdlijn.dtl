@@ -124,7 +124,7 @@
                         {% if comp.fase_indiv > 'K' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>tot {{ comp.begin_fase_L }}</span>
+                            <span>tot {{ comp.begin_fase_L_indiv }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -255,7 +255,9 @@
                         {% if comp.fase_teams > 'D' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>tot {{ comp.regio_begin_fase_F }}</span>
+                            {% if comp.regio_begin_fase_D %}
+                                <span>tot {{ comp.regio_begin_fase_D }}</span>
+                            {% endif %}
                         {% endif %}
                     </td>
                 </tr>

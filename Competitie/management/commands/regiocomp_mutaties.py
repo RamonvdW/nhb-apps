@@ -1112,10 +1112,10 @@ class Command(BaseCommand):
         """ de BKO heeft gevraagd de regiocompetitie af te sluiten en alles klaar te maken voor het RK """
 
         # controleer dat de competitie in fase G is
-        if not comp.alle_regiocompetities_afgesloten:
+        if not comp.regiocompetitie_is_afgesloten:
             # ga door naar fase J
-            comp.alle_regiocompetities_afgesloten = True
-            comp.save(update_fields=['alle_regiocompetities_afgesloten'])
+            comp.regiocompetitie_is_afgesloten = True
+            comp.save(update_fields=['regiocompetitie_is_afgesloten'])
 
             # verwijder alle eerder aangemaakte KampioenschapSchutterBoog
             # verwijder eerst alle eerder gekoppelde team leden

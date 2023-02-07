@@ -93,7 +93,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp.begin_fase_C = now + datetime.timedelta(days=1)      # morgen
         comp.save()
         comp.bepaal_fase()
-        self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
+        self.assertTrue(comp.fase < 'C', msg="comp.fase=%s (expected: below C)" % comp.fase)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -102,23 +102,22 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         # zet competitie fase B zodat we in mogen schrijven
         zet_competitie_fases(comp, 'B', 'B')
 
-        # uitslagen met competitie in prep fase (B+)
+        # uitslagen met competitie in prep fase (C+)
         comp.begin_fase_C = way_before   # fase B
         comp.einde_fase_C = way_before   # fase C
         comp.save()
         comp.bepaal_fase()
-        # self.assertTrue(comp.fase >= 'B')
-        self.assertTrue(comp.fase >= 'B', msg="comp.fase=%s (expected: not below B)" % comp.fase)
+        self.assertTrue(comp.fase >= 'C', msg="comp.fase=%s (expected: not below C)" % comp.fase)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
-        # uitslagen met competitie in scorende fase (E+)
-        comp.begin_fase_F = way_before     # fase E
+        # uitslagen met competitie in scorende fase (F+)
+        comp.begin_fase_F = way_before     # fase F
         comp.save()
         comp.bepaal_fase()
-        self.assertTrue(comp.fase >= 'E')
+        self.assertTrue(comp.fase >= 'F')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

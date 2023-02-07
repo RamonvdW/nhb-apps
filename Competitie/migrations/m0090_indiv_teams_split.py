@@ -12,7 +12,7 @@ def zet_team_datums(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     comp_klas = apps.get_model('Competitie', 'Competitie')
 
-    for comp in comp_klas.objects.all():
+    for comp in comp_klas.objects.all():                        # pragma: no cover
         comp.begin_fase_L_teams = comp.begin_fase_L_indiv
         comp.einde_fase_L_teams = comp.einde_fase_L_indiv
 
