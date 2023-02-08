@@ -12,7 +12,7 @@ from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
                                Regiocompetitie, RegiocompetitieRonde, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -263,14 +263,14 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
         self.deelcomp_regio.save()
 
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fases(self.comp_18, 'C', 'C')
 
         # maak nog een competitie aan waarvoor geen kaartjes getoond worden
         competities_aanmaken(jaar=2100)
         comp = Competitie.objects.get(afstand='25', begin_jaar=2100)
-        zet_competitie_fase(comp, 'S')
+        zet_competitie_fases(comp, 'Q', 'Q')
         comp = Competitie.objects.get(afstand='18', begin_jaar=2100)
-        zet_competitie_fase(comp, 'S')
+        zet_competitie_fases(comp, 'Q', 'Q')
 
     def _zet_sporter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -309,11 +309,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # zet de competities door naar andere fases
-        zet_competitie_fase(self.comp_18, 'E')
+        zet_competitie_fases(self.comp_18, 'F', 'F')
         self.deelcomp_regio.huidige_team_ronde = 1
         self.deelcomp_regio.save()
 
-        zet_competitie_fase(self.comp_25, 'E')
+        zet_competitie_fases(self.comp_25, 'F', 'F')
         deelcomp = Regiocompetitie.objects.get(competitie=self.comp_25,
                                                nhb_regio=self.regio_111)
         deelcomp.regio_organiseert_teamcompetitie = False
@@ -325,7 +325,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
-        zet_competitie_fase(self.comp_25, 'J')
+        zet_competitie_fases(self.comp_25, 'J', 'J')
         self.comp_25.begin_fase_F -= datetime.timedelta(days=100)       # forceer 'beschikbaar vanaf' label
         self.comp_25.save(update_fields=['begin_fase_F'])
         self.comp_25.bepaal_fase()

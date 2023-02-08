@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetiti
                                RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch,
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist
@@ -487,9 +487,9 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         # zet the competitie in een later fase zodat overschrijvingen niet meer gedaan worden
         for comp in Competitie.objects.all():
-            zet_competitie_fase(comp, 'K')
+            zet_competitie_fases(comp, 'K', 'K')
             comp.bepaal_fase()
-            self.assertEqual(comp.fase, 'K')
+            self.assertEqual(comp.fase_indiv, 'K')
         # for
         sporter.bij_vereniging = ver
         sporter.save()

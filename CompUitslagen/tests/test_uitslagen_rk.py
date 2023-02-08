@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, KampioenschapIndivKlasseLimiet
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -126,7 +126,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         # als BKO: doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
-        zet_competitie_fase(self.testdata.comp18, 'G')
+        zet_competitie_fases(self.testdata.comp18, 'G', 'G')
 
         url = self.url_doorzetten_rk % self.testdata.comp18.pk
         resp = self.client.post(url)
@@ -135,7 +135,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
+        self.assertEqual(comp.fase_indiv, 'J')
 
         # ophalen in fase J geeft "bevestig tot datum"
         url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
@@ -152,7 +152,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'K')
+        self.assertEqual(comp.fase_teams, 'K')
 
         url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
         with self.assert_max_queries(20):
@@ -234,7 +234,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
-        zet_competitie_fase(self.testdata.comp25, 'G')
+        zet_competitie_fases(self.testdata.comp25, 'G', 'G')
 
         url = self.url_doorzetten_rk % self.testdata.comp25.pk
         resp = self.client.post(url)

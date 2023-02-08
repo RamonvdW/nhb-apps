@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlass
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -480,7 +480,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # verkeerde fase
-        zet_competitie_fase(self.comp_18, 'K')
+        zet_competitie_fases(self.comp_18, 'K', 'K')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie fase')

@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEEL_RK
 from Competitie.models import KampioenschapTeam, Kampioenschap
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -137,7 +137,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
 
         # stel de RK/BK klassegrenzen vast
-        zet_competitie_fase(self.testdata.comp25, 'J')
+        zet_competitie_fases(self.testdata.comp25, 'J', 'J')
         resp = self.client.post(self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)
 

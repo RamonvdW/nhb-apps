@@ -9,7 +9,7 @@ from django.utils import timezone
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieRonde, CompetitieMatch)
-from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_c
+from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_c
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.definities import AG_DOEL_INDIV
@@ -230,7 +230,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # competitie in verkeerde fase
         comp = deelcomp.competitie    # Competitie.objects.get(pk=deelcomp.competitie.pk)
-        zet_competitie_fase(comp, 'K')
+        zet_competitie_fases(comp, 'K', 'K')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bevestig_aanmelden % (deelcomp.pk, sporterboog.pk))
         self.assert404(resp, 'Verkeerde competitie fase')
@@ -790,7 +790,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert404(resp, 'Inschrijving niet gevonden')
 
         # special: probeer inschrijving met competitie in verkeerde fase
-        zet_competitie_fase(deelcomp.competitie, 'K')
+        zet_competitie_fases(deelcomp.competitie, 'K', 'K')
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})

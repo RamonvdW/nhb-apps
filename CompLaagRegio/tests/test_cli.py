@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
@@ -242,7 +242,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'R', '18')
         self.assertTrue('[ERROR] Kan de competitie niet vinden' in f1.getvalue())
 
-        zet_competitie_fase(self.comp, 'C')
+        zet_competitie_fases(self.comp, 'C', 'C')
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '999999', 'R', '18')
         self.assertTrue('[ERROR] Sporter 999999 niet gevonden' in f1.getvalue())
@@ -367,7 +367,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         self.assertTrue('[ERROR] Competitie in fase A is niet ondersteund' in f1.getvalue())
 
-        zet_competitie_fase(self.comp, 'F')
+        zet_competitie_fases(self.comp, 'G', 'G')
 
         # geen aangemaakte regios
         with self.assert_max_queries(20):
@@ -392,7 +392,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('fix_bad_ag', '18')
         self.assertTrue('[ERROR] Competitie is in de verkeerde fase' in f1.getvalue())
 
-        zet_competitie_fase(self.comp, 'B')
+        zet_competitie_fases(self.comp, 'C', 'C')
 
         with self.assert_max_queries(20):
             self.run_management_command('fix_bad_ag', '18')

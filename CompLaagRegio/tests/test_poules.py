@@ -11,7 +11,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -201,7 +201,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # tot en met fase D mag alles nog
         comp = deelcomp.competitie
-        zet_competitie_fase(comp, 'D')
+        zet_competitie_fases(comp, 'C', 'D')
 
         # maak een poule aan
         self.assertEqual(0, RegiocompetitieTeamPoule.objects.count())
@@ -273,7 +273,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # na fase D mag je nog kijken maar niet aanpassen
         comp = deelcomp.competitie
-        zet_competitie_fase(comp, 'E')
+        zet_competitie_fases(comp, 'F', 'F')
 
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):
@@ -303,8 +303,8 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # TODO: controleer dat de teams gekoppeld aan de poule niet meer te wijzigen zijn
 
-        # zet fase F, dan mag niets meer gewijzigd worden
-        zet_competitie_fase(comp, 'F')
+        # zet fase G, dan mag niets meer gewijzigd worden
+        zet_competitie_fases(comp, 'G', 'G')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -316,7 +316,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # terug naar fase D
         comp = deelcomp.competitie
-        zet_competitie_fase(comp, 'D')
+        zet_competitie_fases(comp, 'C', 'D')
 
         # verwijder een poule
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
@@ -335,7 +335,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # tot en met fase D mag alles nog
         comp = deelcomp.competitie
-        zet_competitie_fase(comp, 'B')
+        zet_competitie_fases(comp, 'C', 'C')
 
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):

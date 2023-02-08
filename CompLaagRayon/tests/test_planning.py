@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                KampioenschapIndivKlasseLimiet, RegiocompetitieSporterBoog,
                                CompetitieMutatie)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Uitslag
@@ -823,7 +823,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko2_18)
         self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
-        zet_competitie_fase(self.comp_18, 'J')
+        zet_competitie_fases(self.comp_18, 'J', 'J')
 
         deelnemer = KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,
                                              sporterboog=self.sporterboog,
@@ -845,7 +845,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
-        zet_competitie_fase(self.comp_18, 'J')
+        zet_competitie_fases(self.comp_18, 'J', 'J')
 
         deelnemer = KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,
                                              sporterboog=self.sporterboog,
@@ -895,7 +895,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        zet_competitie_fase(self.comp_18, 'J')
+        zet_competitie_fases(self.comp_18, 'J', 'J')
 
         deelnemer = KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,
                                              sporterboog=self.sporterboog,

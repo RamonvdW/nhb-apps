@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -132,7 +132,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         # zet de datum voor inschrijven op vandaag
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            zet_competitie_fase(comp, 'B')
+            zet_competitie_fases(comp, 'C', 'C')
         # for
 
         lid_nr = 110000
@@ -254,7 +254,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compinschrijven/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
 
         # verkeerde fase
-        zet_competitie_fase(comp, 'Z')
+        zet_competitie_fases(comp, 'Z', 'Z')
         url = self.url_aangemeld_alles % comp.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)

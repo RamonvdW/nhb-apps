@@ -11,7 +11,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.definities import DEEL_RK
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
-from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_c
+from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_c
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan
@@ -341,8 +341,8 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
             self.assert404(resp, 'Competitie is niet in de juiste fase 1')
 
-        # zet competitie in fase E
-        zet_competitie_fase(self.comp_18, 'E')
+        # zet competitie in fase F
+        zet_competitie_fases(self.comp_18, 'F', 'F')
 
         # competitie in de verkeerde fase
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=30):
@@ -436,7 +436,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase E
-        zet_competitie_fase(self.comp_25, 'E')
+        zet_competitie_fases(self.comp_25, 'F', 'F')
 
         # verplaats het openingstijdstip
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
@@ -461,8 +461,8 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                              deel=DEEL_RK,
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
-        # zet competitie in fase E (nodig om een team aan te maken)
-        zet_competitie_fase(self.comp_18, 'E')
+        # zet competitie in fase F (nodig om een team aan te maken)
+        zet_competitie_fases(self.comp_18, 'F', 'F')
 
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             # maak een team aan
@@ -501,7 +501,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                                  nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
             # zet competitie in fase E (nodig om een team aan te maken)
-            zet_competitie_fase(self.comp_25, 'E')
+            zet_competitie_fases(self.comp_25, 'F', 'F')
 
             # maak een team aan
             team.delete()

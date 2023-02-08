@@ -271,7 +271,7 @@ class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         comp.bepaal_fase()
-        if comp.fase != 'R':
+        if comp.fase_indiv != 'P':          # TODO: implementatie voor teams
             raise Http404('Verkeerde competitie fase')
 
         context['url_doorzetten'] = reverse('CompBeheer:bko-doorzetten-voorbij-bk', kwargs={'comp_pk': comp.pk})
@@ -303,11 +303,11 @@ class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         comp.bepaal_fase()
-        if comp.fase != 'R':
+        if comp.fase_indiv != 'P':
             raise Http404('Verkeerde competitie fase')
 
-        comp.alle_bks_afgesloten = True
-        comp.save(update_fields=['alle_bks_afgesloten'])
+        comp.bk_indiv_afgesloten = True     # TODO: ondersteuning teams
+        comp.save(update_fields=['bk_indiv_afgesloten'])
 
         return HttpResponseRedirect(reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}))
 

@@ -10,7 +10,7 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
-from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_c
+from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_c
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Score.definities import AG_NUL
@@ -396,8 +396,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0))
         self.assert404(resp, 'Team niet gevonden')
 
-        # zet de competitie naar > fase E
-        zet_competitie_fase(self.comp_18, 'F')
+        # zet de competitie naar > fase F
+        zet_competitie_fases(self.comp_18, 'G', 'G')
 
         resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assert404(resp, 'Competitie is niet in de juiste fase')
@@ -411,7 +411,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fases(self.comp_18, 'C', 'C')
         self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
@@ -576,7 +576,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fases(self.comp_18, 'C', 'C')
         self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
@@ -597,8 +597,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
-        zet_competitie_fase(self.comp_25, 'B')
+        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fases(self.comp_25, 'C', 'C')
         self._create_deelnemers(do_25=True)
 
         self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
@@ -736,7 +736,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fases(self.comp_18, 'C', 'C')
         self._create_deelnemers()
 
         self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
@@ -822,7 +822,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maak een team aan
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fases(self.comp_18, 'C', 'C')
         self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.einde_fase_C
         self.deelcomp18_regio111.save()
 
@@ -876,7 +876,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie is niet in de juiste fase')
 
         # zet de competitie door naar de wedstrijd fase
-        zet_competitie_fase(self.comp_18, 'E')
+        zet_competitie_fases(self.comp_18, 'F', 'F')
 
         # verkeerde ronde nummer
         with self.assert_max_queries(20):

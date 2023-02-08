@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN
 from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
@@ -32,7 +31,6 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
     url_overzicht_beheer = '/bondscompetities/%s/beheer/'
     url_aanmaken = '/bondscompetities/beheer/aanmaken/'
     url_instellingen = '/bondscompetities/beheer/instellingen-volgende-competitie/'
-    url_wijzigdatums = '/bondscompetities/beheer/%s/wijzig-datums/'                             # comp_pk
     url_ag_vaststellen_afstand = '/bondscompetities/beheer/ag-vaststellen/%s/'                  # afstand
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
     url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen-tonen/'                     # comp_pk
@@ -694,90 +692,6 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, ' zijn nog niet vastgesteld')
         self.assertNotContains(resp, 'De klassengrenzen voor de ')
-
-    def test_wijzig_datums(self):
-
-        expected_month, expected_day = 12, 31
-        expected_year = 2019
-
-        # creëer een competitie met regiocompetities
-        competities_aanmaken(jaar=expected_year)
-        # nu in fase A
-
-        comp = Competitie.objects.all()[0]
-
-        now = timezone.now()
-        if now.month == expected_month and now.day == expected_day:     # pragma: no cover
-            # avoid testcase from failing one day per year
-            expected_month, expected_day = 1, 1
-            expected_year += 1
-
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_fase_C)
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.einde_fase_C)
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_fase_F)
-
-        # niet BB
-        url = self.url_wijzigdatums % comp.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-        # wordt BB
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        # get
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-wijzig-datums.dtl', 'plein/site_layout.dtl'))
-
-        # post
-        with self.assert_max_queries(21):
-            resp = self.client.post(url, {'datum1': '2019-08-09',
-                                          'datum2': '2019-09-10',
-                                          'datum3': '2019-10-11',
-                                          'datum4': '2019-11-12',
-                                          'datum5': '2019-11-12',
-                                          'datum6': '2020-02-01',
-                                          'datum7': '2019-02-12',
-                                          'datum8': '2020-05-01',
-                                          'datum9': '2020-05-12',
-                                          'datum10': '2020-06-12',
-                                          'datum11': '2020-07-12',
-                                          'datum12': '2020-08-12',
-                                          })
-        self.assert_is_redirect(resp, self.url_overzicht % comp.pk)
-
-        # controleer dat de nieuwe datums opgeslagen zijn
-        comp = Competitie.objects.get(pk=comp.pk)
-        self.assertEqual(datetime.date(year=2019, month=8, day=9), comp.begin_fase_C)
-        self.assertEqual(datetime.date(year=2019, month=9, day=10), comp.einde_fase_C)
-        self.assertEqual(datetime.date(year=2019, month=11, day=12), comp.begin_fase_F)
-
-        # check corner cases
-
-        # alle datums verplicht
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assert404(resp, 'Verplichte parameter ontbreekt')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': 'null',
-                                          'datum2': 'hallo',
-                                          'datum3': '0',
-                                          'datum4': '2019-13-42'})
-        self.assert404(resp, 'Geen valide datum')
-
-        # foute comp_pk bij get
-        url = self.url_wijzigdatums % 999999
-        resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
-
-        # foute comp_pk bij post
-        resp = self.client.post(url)
-        self.assert404(resp, 'Competitie niet gevonden')
 
     def test_seizoen_afsluiten(self):
         # moet BB zijn

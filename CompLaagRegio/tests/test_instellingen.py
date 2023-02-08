@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -192,7 +192,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         # fase A
 
         # tijdens competitie fase A mogen alle instellingen aangepast worden
-        zet_competitie_fase(self.comp_18, 'A')
+        zet_competitie_fases(self.comp_18, 'A', 'A')
 
         # when the phase is set artificially, some dates are left behind
         # let's repair that here
@@ -248,46 +248,40 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                           'begin_fase_D': 'xxx'})
         self.assert404(resp, 'Datum fout formaat')
 
-        # fase B en C
-
         # tot en met fase C mogen de team punten en datum aanmaken teams aangepast worden
         oude_punten = 'F1'
+        zet_competitie_fases(self.comp_18, 'B', 'B')
 
-        for fase in ('B', 'C'):
-            zet_competitie_fase(self.comp_18, fase)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
 
-            with self.assert_max_queries(20):
-                resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)  # 200 = OK
-            self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('complaagregio/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
+        deelcomp_pre = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertTrue(deelcomp_pre.regio_organiseert_teamcompetitie)
+        self.assertTrue(deelcomp_pre.regio_heeft_vaste_teams)
+        self.assertEqual(deelcomp_pre.regio_team_punten_model, oude_punten)
+        if oude_punten == 'F1':
+            nieuwe_punten = '2P'
+        else:
+            nieuwe_punten = 'SS'
 
-            deelcomp_pre = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
-            self.assertTrue(deelcomp_pre.regio_organiseert_teamcompetitie)
-            self.assertTrue(deelcomp_pre.regio_heeft_vaste_teams)
-            self.assertEqual(deelcomp_pre.regio_team_punten_model, oude_punten)
-            if oude_punten == 'F1':
-                nieuwe_punten = '2P'
-            else:
-                nieuwe_punten = 'SS'
+        # all params present
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'teams': 'nee',
+                                          'team_alloc': 'vsg',
+                                          'team_punten': nieuwe_punten,
+                                          'begin_fase_D': post_datum_ok})
+        self.assert_is_redirect_not_plein(resp)
 
-            # all params present
-            with self.assert_max_queries(20):
-                resp = self.client.post(url, {'teams': 'nee',
-                                              'team_alloc': 'vsg',
-                                              'team_punten': nieuwe_punten,
-                                              'begin_fase_D': post_datum_ok})
-            self.assert_is_redirect_not_plein(resp)
+        deelcomp_post = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertTrue(deelcomp_post.regio_organiseert_teamcompetitie)
+        self.assertTrue(deelcomp_post.regio_heeft_vaste_teams)
+        self.assertEqual(deelcomp_post.regio_team_punten_model, nieuwe_punten)
 
-            deelcomp_post = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
-            self.assertTrue(deelcomp_post.regio_organiseert_teamcompetitie)
-            self.assertTrue(deelcomp_post.regio_heeft_vaste_teams)
-            self.assertEqual(deelcomp_post.regio_team_punten_model, nieuwe_punten)
-            oude_punten = nieuwe_punten
-
-        # fase D
-
-        zet_competitie_fase(self.comp_18, 'E')
+        # controleer niet meer wijzigbaar in latere fase
+        zet_competitie_fases(self.comp_18, 'F', 'F')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -302,8 +296,8 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
         url = self.url_regio_instellingen % (self.comp_18.pk, 112)
 
-        # na fase F zijn de instellingen niet meer in te zien
-        zet_competitie_fase(self.comp_18, 'K')      # fase G is niet te zetten
+        # na fase G zijn de instellingen niet meer in te zien
+        zet_competitie_fases(self.comp_18, 'G', 'G')
 
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie fase')

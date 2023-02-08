@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.operations import maak_functie
@@ -29,9 +28,6 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         uur_00 = datetime.time(hour=0)
         uur_19 = datetime.time(hour=19)
 
-        now = timezone.now()
-        einde_jaar = datetime.date(year=now.year, month=12, day=31)
-
         uitslag18 = Uitslag(max_score=300,
                             afstand=18)
         uitslag18.save()
@@ -41,20 +37,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         uitslag25.save()
 
         comp = Competitie(
-                    begin_jaar=2000,
-                    begin_fase_C=einde_jaar,
-                    einde_fase_C=einde_jaar,
-                    begin_fase_F=einde_jaar,
-                    einde_fase_F=einde_jaar,
-                    datum_klassengrenzen_rk_bk_teams=einde_jaar,
-                    begin_fase_L_indiv=einde_jaar,
-                    einde_fase_L_indiv=einde_jaar,
-                    begin_fase_L_teams=einde_jaar,
-                    einde_fase_L_teams=einde_jaar,
-                    begin_fase_P_indiv=einde_jaar,
-                    einde_fase_P_indiv=einde_jaar,
-                    begin_fase_P_teams=einde_jaar,
-                    einde_fase_P_teams=einde_jaar)
+                    begin_jaar=2000)
         comp.save()
 
         CompetitieMatch(competitie=comp,

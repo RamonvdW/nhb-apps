@@ -59,7 +59,6 @@ class Competitie(models.Model):
     # fase B: voorbereidingen door RCL
 
     begin_fase_C = models.DateField(default='2000-01-01')
-    einde_fase_C = models.DateField(default='2000-01-01')
 
     # fase C: aanmelden sporters en teams
     #         teams aanmaken + koppel sporters + handmatig teams AG (HWL)
@@ -93,7 +92,7 @@ class Competitie(models.Model):
     aantal_scores_voor_rk_deelname = models.PositiveSmallIntegerField(default=6)
 
     # RK teams kunnen ingeschreven worden tot deze deadline
-    datum_klassengrenzen_rk_bk_teams = models.DateField()
+    datum_klassengrenzen_rk_bk_teams = models.DateField(default='2000-01-01')
 
     # fase J: RK deelnemers bevestigen deelname
     #         HWL's kunnen invallers koppelen voor RK teams

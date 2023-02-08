@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Competitie.definities import DEELNAME_NEE
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Wedstrijden.models import WedstrijdLocatie
@@ -66,7 +66,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.e2e_check_rol('BKO')
 
         # zet de competitie in fase J (=vereiste vaststellen klassengrenzen)
-        zet_competitie_fase(self.testdata.comp18, 'J')
+        zet_competitie_fases(self.testdata.comp18, 'J', 'J')
 
         # stel de klassegrenzen vast
         resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
@@ -74,8 +74,8 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         # zet de competities in fase L
-        zet_competitie_fase(self.testdata.comp18, 'L')
-        zet_competitie_fase(self.testdata.comp25, 'L')
+        zet_competitie_fases(self.testdata.comp18, 'L', 'L')
+        zet_competitie_fases(self.testdata.comp25, 'L', 'L')
 
         loc = WedstrijdLocatie(banen_18m=8,
                                banen_25m=8,

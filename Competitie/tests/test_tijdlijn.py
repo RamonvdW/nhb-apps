@@ -35,7 +35,6 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
         print('  begin_jaar: %s' % repr(comp.begin_jaar))
         print('  klassegrenzen_vastgesteld: %s' % repr(comp.klassengrenzen_vastgesteld))
         print('  begin_fase_C: %s' % repr(comp.begin_fase_C))
-        print('  einde_fase_C: %s' % repr(comp.einde_fase_C))
         print('  begin_fase_F: %s' % repr(comp.begin_fase_F))
         print('  einde_fase_F: %s' % repr(comp.einde_fase_F))
         print('  regiocompetitie_is_afgesloten: %s' % repr(comp.regiocompetitie_is_afgesloten))
@@ -59,11 +58,8 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
 
     def test_zet_fase_indiv(self):
         # test de helper functie die de competitie fase forceert
-        einde_jaar = datetime.date(year=2000, month=12, day=31)
         comp = Competitie(
-                    begin_jaar=2000,
-                    einde_fase_C=einde_jaar,
-                    datum_klassengrenzen_rk_bk_teams=einde_jaar)
+                    begin_jaar=2000)
         comp.save()
         comp = Competitie.objects.get(pk=comp.pk)
 
@@ -100,11 +96,8 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
 
     def test_zet_fase_team(self):
         # test de helper functie die de competitie fase forceert
-        einde_jaar = datetime.date(year=2000, month=12, day=31)
         comp = Competitie(
-                    begin_jaar=2000,
-                    einde_fase_C=einde_jaar,
-                    datum_klassengrenzen_rk_bk_teams=einde_jaar)
+                    begin_jaar=2000)
         comp.save()
         comp = Competitie.objects.get(pk=comp.pk)
 

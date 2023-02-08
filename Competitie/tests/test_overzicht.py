@@ -32,15 +32,8 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
 
     def test_openbaar(self):
         einde_jaar = datetime.date(year=2000, month=12, day=31)
-        comp = Competitie()
-        comp.begin_jaar = 2000
-        comp.begin_fase_C = comp.einde_fase_C = einde_jaar
-        comp.begin_fase_F = comp.einde_fase_F = einde_jaar
-        comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
-        comp.begin_fase_L_indiv = comp.einde_fase_L_indiv = einde_jaar
-        comp.begin_fase_L_teams = comp.einde_fase_L_teams = einde_jaar
-        comp.begin_fase_P_indiv = comp.einde_fase_P_indiv = einde_jaar
-        comp.begin_fase_P_teams = comp.einde_fase_P_teams = einde_jaar
+        comp = Competitie(
+                    begin_jaar=2000)
         comp.save()
 
         zet_competitie_fases(comp, 'A', 'A')
@@ -75,8 +68,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assertFalse(comp.is_openbaar)
 
         # vanaf fase B altijd openbaar
-        comp.fase = 'B'
-
+        comp.fase_indiv = 'C'
         comp.bepaal_openbaar(Rollen.ROL_SPORTER)
         self.assertTrue(comp.is_openbaar)
 
@@ -104,7 +96,6 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
 
         # uitslagen met competitie in prep fase (C+)
         comp.begin_fase_C = way_before   # fase B
-        comp.einde_fase_C = way_before   # fase C
         comp.save()
         comp.bepaal_fase()
         self.assertTrue(comp.fase >= 'C', msg="comp.fase=%s (expected: not below C)" % comp.fase)

@@ -28,7 +28,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_competitie_overzicht = '/bondscompetities/%s/'                                          # comp_pk
+    url_competitie_beheer = '/bondscompetities/%s/beheer/'                                      # comp_pk
     url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                            # comp_pk
     url_doorzetten_bk = '/bondscompetities/beheer/%s/doorzetten-bk/'                            # comp_pk
     url_doorzetten_voorbij_bk = '/bondscompetities/beheer/%s/doorzetten-voorbij-bk/'            # comp_pk
@@ -427,6 +427,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         zet_competitie_fases(self.comp_18, 'P', 'P')
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
         self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase_indiv, 'P')
 
@@ -448,7 +449,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # echt doorzetten
         self.e2e_wissel_naar_functie(self.functie_bko_18)
         resp = self.client.post(url)
-        self.assert_is_redirect(resp, self.url_competitie_overzicht % self.comp_18.pk)
+        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)
 
     def test_rk_bk_klassengrenzen(self):
         # maak een paar teams aan

@@ -10,7 +10,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_3
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -142,7 +142,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         deelcomp.save(update_fields=['inschrijf_methode', 'toegestane_dagdelen'])
 
         # zet de datum voor inschrijven op vandaag
-        zet_competitie_fase(comp, 'B')
+        zet_competitie_fases(comp, 'C', 'C')
 
         lid_nr = 110000
         recurve_boog_pk = BoogType.objects.get(afkorting='R').pk
@@ -324,9 +324,9 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # landelijk
-        zet_competitie_fase(comp, 'C')
+        zet_competitie_fases(comp, 'C', 'C')
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'C')
+        self.assertEqual(comp.fase_indiv, 'C')
 
         # als HWL is deze pagina niet beschikbaar
         url = self.url_behoefte3 % (999999, 101)

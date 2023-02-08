@@ -60,15 +60,9 @@ class Migration(migrations.Migration):
             name='begin_fase_C',
             field=models.DateField(default='2000-01-01'),
         ),
-        migrations.RenameField(
+        migrations.RemoveField(
             model_name='competitie',
-            old_name='einde_aanmeldingen',
-            new_name='einde_fase_C',
-        ),
-        migrations.AlterField(
-            model_name='competitie',
-            name='einde_fase_C',
-            field=models.DateField(default='2000-01-01'),
+            name='einde_aanmeldingen',
         ),
         migrations.RenameField(
             model_name='regiocompetitie',
@@ -97,6 +91,11 @@ class Migration(migrations.Migration):
         ),
 
         # RK
+        migrations.AlterField(
+            model_name='competitie',
+            name='datum_klassengrenzen_rk_bk_teams',
+            field=models.DateField(default='2000-01-01'),
+        ),
         migrations.RenameField(
             model_name='competitie',
             old_name='rk_eerste_wedstrijd',

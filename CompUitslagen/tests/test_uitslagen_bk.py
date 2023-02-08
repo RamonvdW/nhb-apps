@@ -6,11 +6,8 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import Competitie, CompetitieMatch
-from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
-import datetime
 
 
 class TestCompUitslagenBK(E2EHelpers, TestCase):

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Competitie.models import KampioenschapTeam
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -50,8 +50,8 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         self.e2e_check_rol('BKO')
 
         # zet de competitie in fase J (=vereiste vaststellen klassengrenzen)
-        zet_competitie_fase(self.testdata.comp25, 'J')
-        zet_competitie_fase(self.testdata.comp18, 'J')
+        zet_competitie_fases(self.testdata.comp25, 'J', 'J')
+        zet_competitie_fases(self.testdata.comp18, 'J', 'J')
 
         # stel de klassegrenzen vast
         resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp25.pk)
@@ -61,8 +61,8 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         # zet de competities in fase L
-        zet_competitie_fase(self.testdata.comp18, 'L')
-        zet_competitie_fase(self.testdata.comp25, 'L')
+        zet_competitie_fases(self.testdata.comp18, 'L', 'L')
+        zet_competitie_fases(self.testdata.comp25, 'L', 'L')
 
     def test_25m(self):
         # file NOK

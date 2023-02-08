@@ -14,7 +14,7 @@ from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMutatie, KampioenschapSporterBoog)
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -53,7 +53,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         cls.testdata.maak_label_regiokampioenen(25, cls.regio_nr_begin, cls.regio_nr_einde)
 
         # zet de competitie in fase J
-        zet_competitie_fase(cls.testdata.comp18, 'J')
+        zet_competitie_fases(cls.testdata.comp18, 'J', 'J')
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -968,7 +968,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         # fase E
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
-        zet_competitie_fase(comp, 'E')
+        zet_competitie_fases(comp, 'F', 'F')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assert404(resp, 'Pagina kan nog niet gebruikt worden')
@@ -981,14 +981,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig_status % deelnemer_pks[1])
         self.assert404(resp, 'Mag nog niet wijzigen')
 
-        # fase P
-        zet_competitie_fase(comp, 'P')
+        # fase O (oproepen reserves)
+        zet_competitie_fases(comp, 'O', 'O')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assert404(resp, 'Pagina kan niet meer gebruikt worden')
 
         # tijdens fase K en L mag de pagina gebruikt worden
-        zet_competitie_fase(comp, 'K')
+        zet_competitie_fases(comp, 'K', 'K')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -1015,14 +1015,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties()
 
-        zet_competitie_fase(comp, 'L')
+        zet_competitie_fases(comp, 'L', 'L')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
-        zet_competitie_fase(comp, 'M')
+        zet_competitie_fases(comp, 'N', 'N')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assert404(resp, 'Pagina kan niet meer gebruikt worden')

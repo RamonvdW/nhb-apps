@@ -352,7 +352,6 @@ def competities_aanmaken(jaar=None):
                     afstand=afstand,      # 18/25
                     begin_jaar=jaar,
                     begin_fase_C=yearend,
-                    einde_fase_C=yearend,
                     begin_fase_F=yearend,
                     einde_fase_F=begin_rk,
                     datum_klassengrenzen_rk_bk_teams=begin_rk,

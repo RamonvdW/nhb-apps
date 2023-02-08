@@ -11,7 +11,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieRonde, CompetitieMatch, RegiocompetitieSporterBoog, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tests.test_helpers import zet_competitie_fases
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
@@ -1486,7 +1486,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         url = self.url_afsluiten_regio % self.deelcomp_regio101_18.pk
 
         # nog niet afsluitbaar
-        zet_competitie_fase(self.comp_18, 'E')
+        zet_competitie_fases(self.comp_18, 'F', 'F')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -1500,7 +1500,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.assertEqual(Taak.objects.count(), 0)
 
         # wel afsluitbaar
-        zet_competitie_fase(self.comp_18, 'F')
+        zet_competitie_fases(self.comp_18, 'F', 'F')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
