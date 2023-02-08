@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_c
 from Functie.definities import Rollen
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -85,7 +85,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         now = datetime.date(year=now.year, month=now.month, day=now.day)
         way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
 
-        comp_18, comp_25 = maak_competities_en_zet_fase_b(startjaar=2020)
+        comp_18, comp_25 = maak_competities_en_zet_fase_c(startjaar=2020)
 
         comp = comp_25
 

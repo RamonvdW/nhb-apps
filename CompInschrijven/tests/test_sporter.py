@@ -9,7 +9,7 @@ from django.utils import timezone
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieRonde, CompetitieMatch)
-from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_c
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.definities import AG_DOEL_INDIV
@@ -120,7 +120,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
     @staticmethod
     def _competitie_aanmaken():
-        maak_competities_en_zet_fase_b()
+        maak_competities_en_zet_fase_c()
 
     def test_inschrijven(self):
         # log in as BB en maak de competitie aan

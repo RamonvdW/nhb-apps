@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from Competitie.definities import DEEL_RK
-from Competitie.models import Competitie, Kampioenschap
+from Competitie.models import Competitie
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                                    competitie_klassengrenzen_vaststellen)
 import datetime
@@ -204,8 +203,10 @@ def zet_competitie_fases(comp, indiv_fase, team_fase):
     comp.save()
 
 
-def maak_competities_en_zet_fase_b(startjaar=None):
-    """ Competities 18m en 25m aanmaken, AG vaststellen, klassengrenzen vaststelen, instellen op fase B """
+def maak_competities_en_zet_fase_c(startjaar=None):
+    """ Competities 18m en 25m aanmaken, AG vaststellen, klassengrenzen vaststelen, instellen op fase C
+        zodat er ingeschreven kan worden.
+    """
 
     # dit voorkomt kennis en afhandelen van achtergrondtaken in alle applicatie test suites
 
@@ -223,8 +224,8 @@ def maak_competities_en_zet_fase_b(startjaar=None):
     competitie_klassengrenzen_vaststellen(comp_18)
     competitie_klassengrenzen_vaststellen(comp_25)
 
-    zet_competitie_fases(comp_18, 'B', 'B')
-    zet_competitie_fases(comp_25, 'B', 'B')
+    zet_competitie_fases(comp_18, 'C', 'C')
+    zet_competitie_fases(comp_25, 'C', 'C')
 
     return comp_18, comp_25
 

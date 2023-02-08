@@ -11,7 +11,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (CompetitieIndivKlasse, Regiocompetitie, CompetitieMatch, RegiocompetitieSporterBoog,
                                Kampioenschap, DEEL_RK, DEEL_BK)
 from Competitie.operations import maak_regiocompetitie_ronde
-from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -178,7 +178,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
     def _maak_competitie(self):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
-        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
         self.deelcomp_regio_18 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
                                                              competitie__afstand='18')

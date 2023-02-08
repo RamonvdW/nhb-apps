@@ -218,19 +218,19 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                             obj.is_ingeschreven = True
                             obj.afgemeld_voorkeur_rk = not inschrijving.inschrijf_voorkeur_rk_bk
                             inschrijvingen.remove(inschrijving)
-                            if comp.fase <= 'B':
+                            if comp.fase_indiv <= 'C':
                                 obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                                            kwargs={'deelnemer_pk': inschrijving.pk})
                                 gebruik_knoppen = True
 
-                            if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
+                            if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase_indiv <= 'F':
                                 obj.url_schietmomenten = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
                                                                  kwargs={'deelnemer_pk': inschrijving.pk})
                                 gebruik_knoppen = True
                             break
                     # for
 
-                    if 'B' <= comp.fase < 'F':
+                    if 'C' <= comp.fase_indiv <= 'F':
                         # niet ingeschreven?
                         if not obj.is_ingeschreven:
                             obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
@@ -238,7 +238,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                                                 'deelcomp_pk': obj.pk})
                             gebruik_knoppen = True
 
-                    elif 'J' <= comp.fase <= 'N':
+                    elif 'J' <= comp.fase_indiv <= 'N':
                         # zoek de inschrijving voor het RK erbij
                         for kampioen in kampioenen:
                             if (kampioen.kampioenschap.competitie == deelcomp.competitie and
@@ -255,7 +255,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                                                             'rayon_nr': kampioen.kampioenschap.nhb_rayon.rayon_nr})
                         # for
 
-                    elif 'P' <= comp.fase < 'R':
+                    elif 'O' <= comp.fase_indiv < 'P':
                         # FUTURE: zelfde logica voor het BK
                         pass
             # for
@@ -274,7 +274,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             comp = obj.competitie
             comp.bepaal_fase()
-            if comp.fase <= 'B':
+            if comp.fase_indiv <= 'C':
                 obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                            kwargs={'deelnemer_pk': inschrijving.pk})
                 gebruik_knoppen = True

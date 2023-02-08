@@ -12,7 +12,7 @@ from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_regiocompetitie_ronde
-from Competitie.tests.test_helpers import maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -184,7 +184,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
     def _maak_competitie(self):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
-        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
         self.deelcomp_regio_18 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
                                                              competitie__afstand='18')

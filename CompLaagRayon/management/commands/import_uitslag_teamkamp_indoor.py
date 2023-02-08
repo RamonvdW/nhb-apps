@@ -310,6 +310,13 @@ class Command(BaseCommand):
         # for
 
     def _zet_rank_en_volgorde(self, goud, zilver, brons, vierde, vijfden):
+
+        # remove empty names
+        if isinstance(brons, list):
+            brons = [team_naam for team_naam in brons if team_naam]
+            if len(brons) == 1:
+                brons = brons[0]
+
         if self.verbose:
             self.stdout.write('[DEBUG] goud: %s' % repr(goud))
             self.stdout.write('[DEBUG] zilver: %s' % repr(zilver))

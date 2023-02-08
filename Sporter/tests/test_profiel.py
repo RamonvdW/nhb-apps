@@ -12,7 +12,7 @@ from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
-from Competitie.tests.test_helpers import zet_competitie_fases, competities_aanmaken, maak_competities_en_zet_fase_b
+from Competitie.tests.test_helpers import zet_competitie_fases, competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -190,7 +190,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     def _competitie_aanmaken(self):
         # competitie aanmaken
-        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
         # zet de inschrijving open
         now = timezone.now()
@@ -215,7 +215,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
         # competitie aanmaken
-        comp_18, comp_25 = maak_competities_en_zet_fase_b()
+        comp_18, comp_25 = maak_competities_en_zet_fase_c()
 
         # log in as sporter
         self.e2e_login(self.account_normaal)
@@ -532,7 +532,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     def test_rk(self):
         # controleer het melden van de RK deelname status
 
-        comp_18, comp_25 = maak_competities_en_zet_fase_b()
+        comp_18, comp_25 = maak_competities_en_zet_fase_c()
 
         # log in as sporter
         self.e2e_login(self.account_normaal)
