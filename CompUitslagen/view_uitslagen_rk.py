@@ -539,7 +539,10 @@ class UitslagenRayonTeamsView(TemplateView):
 
             if team.result_rank > 0:
                 team.rank = team.result_rank
-                team.rk_score_str = str(team.result_teamscore)
+                if team.result_teamscore < 10:
+                    team.rk_score_str = '(blanco)'
+                else:
+                    team.rk_score_str = str(team.result_teamscore)
                 team.heeft_uitslag = True
 
                 originele_lid_nrs = list(team.gekoppelde_leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
@@ -547,6 +550,8 @@ class UitslagenRayonTeamsView(TemplateView):
                 lid_nrs = list()
                 for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
                     deelnemer.result_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
+                    if deelnemer.result_totaal < 10:
+                        deelnemer.result_totaal = '-'
                     deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                     lid_nr = deelnemer.sporterboog.sporter.lid_nr
                     if lid_nr not in originele_lid_nrs:
