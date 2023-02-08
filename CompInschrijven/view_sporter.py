@@ -65,7 +65,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # controleer dat de competitie aanmeldingen accepteert
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase >= 'F':
+        if comp.fase_indiv < 'C' or comp.fase_indiv >= 'G':
             raise Http404('Verkeerde competitie fase')
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
@@ -260,7 +260,7 @@ class RegiocompetitieAanmeldenView(View):
 
         # controleer dat de competitie aanmeldingen accepteert
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
+        if deelcomp.competitie.fase_indiv < 'C' or deelcomp.competitie.fase_indiv >= 'G':
             raise Http404('Verkeerde competitie fase')
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;

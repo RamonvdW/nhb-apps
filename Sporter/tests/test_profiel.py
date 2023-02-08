@@ -244,15 +244,15 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         deelcomp = Regiocompetitie.objects.get(competitie__afstand='25', nhb_regio=self.ver.regio)
 
-        # zet de 25m door naar fase C
-        zet_competitie_fases(comp_25, 'C', 'C')
+        # zet de 25m door naar fase F
+        zet_competitie_fases(comp_25, 'F', 'F')     # zet einde_fase_F
 
         # controleer dat inschrijven nog mogelijk is voor 25m en uitschrijven voor 18m
         with self.assert_max_queries(23):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')     # 18m
-        self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')      # 25m
+        self.assertContains(resp, 'Aanmelden kan nog tot ')      # 25m
         urls = self.extract_all_urls(resp, skip_menu=True)
         urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls2), 1)
@@ -299,8 +299,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'De inschrijving is gesloten')        # 18m
-        self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')      # 25m
+        self.assertContains(resp, 'De inschrijving is gesloten')            # 18m
+        self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')    # 25m
 
         # zet aanvangsgemiddelden voor 18m en 25m
         Score.objects.all().delete()        # nieuw vastgestelde AG is van vandaag
@@ -328,8 +328,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # zet de 18m door naar RK fase
         # zet de 25m door naar BK fase
-        zet_competitie_fases(comp_18, 'K')
-        zet_competitie_fases(comp_25, 'P')
+        zet_competitie_fases(comp_18, 'K', 'K')
+        zet_competitie_fases(comp_25, 'P', 'P')
         with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'Rayonkampioenschappen')      # 18m
