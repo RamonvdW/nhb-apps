@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
+from Records.definities import disc2str, disc2url, url2disc, gesl2str, makl2str, lcat2str
 from Records.models import IndivRecord, BesteIndivRecords
 from types import SimpleNamespace
 
@@ -22,32 +23,6 @@ DISCIPLINE_TO_ICON = {
     '18': static('plein/badge_nhb_indoor.png'),
     '25': static('plein/badge_nhb_25m1p.png')
 }
-
-# vertaling van velden naar urlconf elementen en terug
-disc2str = {'OD': 'Outdoor',
-            '18': 'Indoor',
-            '25': '25m 1pijl'}
-
-gesl2str = {'M': 'Mannen',
-            'V': 'Vrouwen'}
-
-makl2str = {'R': 'Recurve',
-            'C': 'Compound',
-            'BB': 'Barebow',
-            'IB': 'Instinctive bow',        # TODO: Traditional
-            'LB': 'Longbow'}
-
-lcat2str = {'M': 'Masters (50+)',
-            'S': 'Senioren',
-            'J': 'Junioren (t/m 20 jaar)',
-            'C': 'Cadetten (t/m 17 jaar)',
-            'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
-
-disc2url = {'OD': 'outdoor',
-            '18': 'indoor',
-            '25': '25m1pijl'}
-
-url2disc = {v: k for k, v in disc2url.items()}
 
 
 class RecordsVerbeterbaarKiesDisc(ListView):

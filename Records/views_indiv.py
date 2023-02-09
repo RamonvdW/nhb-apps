@@ -1,85 +1,21 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
 from django.views.generic import TemplateView
 from Plein.menu import menu_dynamics
+from Records.definities import (url2gesl, url2disc, url2lcat, url2makl, url2verb, url2para,
+                                gesl2url, disc2url, lcat2url, makl2url, verb2url, para2url,
+                                gesl2str, disc2str, lcat2str, makl2str, verb2str,
+                                lcat2short)
 from Records.models import IndivRecord
 from types import SimpleNamespace
 
 
 TEMPLATE_RECORDS_INDIV = 'records/records_indiv.dtl'
-
-
-# vertaling van velden naar urlconf elementen en terug
-disc2str = {'OD': 'Outdoor',
-            '18': 'Indoor',
-            '25': '25m 1pijl'}
-
-gesl2str = {'M': 'Mannen',
-            'V': 'Vrouwen'}
-
-makl2str = {'R': 'Recurve',
-            'C': 'Compound',
-            'BB': 'Barebow',
-            'IB': 'Instinctive bow',
-            'LB': 'Longbow'}
-
-lcat2str = {'M': 'Masters (50+)',
-            'S': 'Senioren',
-            'J': 'Junioren (t/m 20 jaar)',
-            'C': 'Cadetten (t/m 17 jaar)',
-            'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
-
-lcat2short = {'M': 'Masters',
-              'S': 'Senioren',
-              'J': 'Junioren',
-              'C': 'Cadetten',
-              'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
-
-verb2str = {True: 'Ja',
-            False: 'Nee'}
-
-disc2url = {'OD': 'outdoor',
-            '18': 'indoor',
-            '25': '25m1pijl'}
-
-gesl2url = {'M': 'mannen',
-            'V': 'vrouwen'}
-
-makl2url = {'R': 'recurve',
-            'C': 'compound',
-            'BB': 'barebow',
-            'IB': 'instinctive-bow',
-            'LB': 'longbow'}
-
-lcat2url = {'M': 'masters',
-            'S': 'senioren',
-            'J': 'junioren',
-            'C': 'cadetten',
-            'U': 'gecombineerd'}
-
-verb2url = {True: 'ja',
-            False: 'nee'}
-
-# let op: in sync houden met settings.RECORDS_TOEGESTANE_PARA_KLASSEN
-para2url = {'Open': 'open',
-            'Staand': 'staand',
-            'W1': 'W1',
-            'W2': 'W2',
-            'VI1': 'VI1',
-            'VI2/3': 'VI2-3',
-            '': 'nvt'}
-
-url2disc = {v: k for k, v in disc2url.items()}
-url2gesl = {v: k for k, v in gesl2url.items()}
-url2makl = {v: k for k, v in makl2url.items()}
-url2lcat = {v: k for k, v in lcat2url.items()}
-url2verb = {v: k for k, v in verb2url.items()}
-url2para = {v: k for k, v in para2url.items()}
 
 
 class RecordsIndivView(TemplateView):
