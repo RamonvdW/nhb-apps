@@ -20,7 +20,7 @@ MATERIAALKLASSE = [('R', 'Recurve'),
                    ('C', 'Compound'),
                    ('BB', 'Barebow'),
                    ('LB', 'Longbow'),
-                   # ('TR', 'Traditional'),
+                   ('TR', 'Traditional'),
                    ('IB', 'Instinctive bow')]   # IB = legacy
 
 LEEFTIJDSCATEGORIE = [('M', 'Master'),
@@ -44,7 +44,8 @@ gesl2str = {'M': 'Mannen',
 makl2str = {'R': 'Recurve',
             'C': 'Compound',
             'BB': 'Barebow',
-            'IB': 'Instinctive bow',        # TODO: Traditional
+            'IB': 'Instinctive bow',
+            'TR': 'Traditional',
             'LB': 'Longbow'}
 
 lcat2str = {'M': 'Masters (50+)',
@@ -73,6 +74,7 @@ makl2url = {'R': 'recurve',
             'C': 'compound',
             'BB': 'barebow',
             'IB': 'instinctive-bow',
+            'TR': 'traditional',
             'LB': 'longbow'}
 
 lcat2url = {'M': 'masters',

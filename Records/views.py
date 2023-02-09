@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
+from Records.definities import disc2str, gesl2str, makl2str, lcat2str
 from Records.models import IndivRecord
 from Records.forms import ZoekForm
 from Sporter.models import Sporter
@@ -26,26 +27,6 @@ DISCIPLINE_TO_ICON = {
     '18': static('plein/badge_nhb_indoor.png'),
     '25': static('plein/badge_nhb_25m1p.png')
 }
-
-# vertaling van velden naar urlconf elementen en terug
-disc2str = {'OD': 'Outdoor',
-            '18': 'Indoor',
-            '25': '25m 1pijl'}
-
-gesl2str = {'M': 'Mannen',
-            'V': 'Vrouwen'}
-
-makl2str = {'R': 'Recurve',
-            'C': 'Compound',
-            'BB': 'Barebow',
-            'IB': 'Instinctive bow',
-            'LB': 'Longbow'}
-
-lcat2str = {'M': 'Masters (50+)',
-            'S': 'Senioren',
-            'J': 'Junioren (t/m 20 jaar)',
-            'C': 'Cadetten (t/m 17 jaar)',
-            'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
 
 
 class RecordsOverzichtView(ListView):
