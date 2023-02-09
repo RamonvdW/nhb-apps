@@ -149,8 +149,8 @@
             {% endif %}
 
             <!-- BKO kaartjes -->
-            {% if bko_doorzetten %}
-                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten.titel_doorzetten icon="mediation" url=bko_doorzetten.url_doorzetten %}
+            {% if bko_doorzetten_indiv %}
+                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten_indiv.titel_doorzetten icon="mediation" url=bko_doorzetten_indiv.url_doorzetten %}
             {% endif %}
 
             <!-- BK selectie -->
@@ -236,6 +236,11 @@
 
             {% if url_klassengrenzen_rk_bk_vaststellen %}
                 {% include 'plein/card.dtl' with title="Doorzetten" text=tekst_klassengrenzen_rk_bk_vaststellen icon="mediation" url=url_klassengrenzen_rk_bk_vaststellen %}
+            {% endif %}
+
+            <!-- BKO kaartjes -->
+            {% if bko_doorzetten_teams %}
+                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten_teams.titel_doorzetten icon="mediation" url=bko_doorzetten_teams.url_doorzetten %}
             {% endif %}
 
             {% if regio_instellingen_globaal %}

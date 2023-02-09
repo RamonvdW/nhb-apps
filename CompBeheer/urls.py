@@ -44,17 +44,25 @@ urlpatterns = [
 
 
     # BKO schermen
-    path('<comp_pk>/doorzetten-rk/',
-         views_bko.DoorzettenNaarRKView.as_view(),
-         name='bko-doorzetten-naar-rk'),
+    path('<comp_pk>/regio-doorzetten-naar-rk/',
+         views_bko.DoorzettenRegioNaarRKView.as_view(),
+         name='bko-doorzetten-regio-naar-rk'),
 
-    path('<comp_pk>/doorzetten-bk/',
-         views_bko.DoorzettenNaarBKView.as_view(),
-         name='bko-doorzetten-naar-bk'),
+    path('<comp_pk>/rk-indiv-doorzetten-naar-bk/',
+         views_bko.DoorzettenIndivRKNaarBKView.as_view(),
+         name='bko-rk-indiv-doorzetten-naar-bk'),
 
-    path('<comp_pk>/doorzetten-voorbij-bk/',
-         views_bko.DoorzettenVoorbijBKView.as_view(),
-         name='bko-doorzetten-voorbij-bk'),
+    path('<comp_pk>/rk-teams-doorzetten-naar-bk/',
+         views_bko.DoorzettenTeamsRKNaarBKView.as_view(),
+         name='bko-rk-teams-doorzetten-naar-bk'),
+
+    path('<comp_pk>/bk-indiv-eindstand-bevestigen/',
+         views_bko.BevestigEindstandBKIndivView.as_view(),
+         name='bko-bevestig-eindstand-bk-indiv'),
+
+    path('<comp_pk>/bk-teams-eindstand-bevestigen/',
+         views_bko.BevestigEindstandBKTeamsView.as_view(),
+         name='bko-bevestig-eindstand-bk-teams'),
 
     path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',
          views_bko.KlassengrenzenTeamsVaststellenView.as_view(),
