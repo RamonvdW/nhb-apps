@@ -35,6 +35,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp = Competitie(
                     begin_jaar=2000)
         comp.save()
+        comp = Competitie.objects.get(pk=comp.pk)
 
         zet_competitie_fases(comp, 'A', 'A')
 

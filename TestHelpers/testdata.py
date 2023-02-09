@@ -993,8 +993,8 @@ class TestData(object):
 
         url = self.url_inschrijven % comp.pk
 
-        # zet competitie fase B zodat we in mogen schrijven
-        zet_competitie_fases(comp, 'B', 'B')
+        # zet competitie fase C zodat we in mogen schrijven
+        zet_competitie_fases(comp, 'C', 'C')
 
         client = Client()
 

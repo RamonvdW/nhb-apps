@@ -72,7 +72,7 @@
                         {% if comp.fase_indiv > 'C' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>vanaf {{ comp.begin_fase_C }}</span>   <!-- zelfstandig afmelden kan tot einde_fase_C -->
+                            <span>vanaf {{ comp.begin_fase_C }}</span>   <!-- zelfstandig afmelden kan tot einde_fase_F -->
                         {% endif %}
                     </td>
                 </tr>

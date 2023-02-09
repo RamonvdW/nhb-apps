@@ -32,27 +32,12 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         teamtype_r = TeamType.objects.get(afkorting='R2')
 
-        datum = datetime.date(year=2000, month=1, day=1)
-
         comp = Competitie(
                     beschrijving='Test',
                     afstand='18',
-                    begin_jaar=2000,
-                    begin_fase_C=datum,
-                    einde_fase_C=datum,
-                    begin_fase_F=datum,
-                    einde_fase_F=datum,
-                    datum_klassengrenzen_rk_bk_teams=datum,
-                    begin_fase_L_indiv=datum,
-                    einde_fase_L_indiv=datum,
-                    begin_fase_L_teams=datum,
-                    einde_fase_L_teams=datum,
-                    begin_fase_P_indiv=datum,
-                    einde_fase_P_indiv=datum,
-                    begin_fase_P_teams=datum,
-                    einde_fase_P_teams=datum)
+                    begin_jaar=2000)
         comp.save()
-        self.comp = comp
+        self.comp = Competitie.objects.get(pk=comp.pk)
 
         dummy_functie = Functie.objects.filter(rol='RCL', nhb_regio__regio_nr=111)[0]
         deelcomp = Regiocompetitie(
