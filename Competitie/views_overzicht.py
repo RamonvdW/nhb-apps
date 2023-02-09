@@ -76,7 +76,7 @@ class CompetitieOverzichtView(TemplateView):
                                             kwargs={'comp_pk': comp.pk,
                                                     'team_type': team_type})
 
-        tussen_eind = "Tussen" if comp.fase < 'G' else "Eind"
+        tussen_eind = "Tussen" if comp.fase_indiv < 'G' else "Eind"
         context['text_regio_indiv'] = tussen_eind + 'stand voor de regiocompetitie individueel'
         context['text_regio_teams'] = tussen_eind + 'stand voor de regiocompetitie teams'
 

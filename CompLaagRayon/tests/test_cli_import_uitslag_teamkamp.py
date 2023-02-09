@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Competitie.models import KampioenschapTeam
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 

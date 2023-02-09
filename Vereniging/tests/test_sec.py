@@ -8,7 +8,7 @@ from django.test import TestCase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog

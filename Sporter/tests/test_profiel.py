@@ -12,7 +12,8 @@ from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
-from Competitie.tests.test_helpers import zet_competitie_fases, competities_aanmaken, maak_competities_en_zet_fase_c
+from Competitie.tijdlijn import zet_competitie_fases
+from Comeptitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel

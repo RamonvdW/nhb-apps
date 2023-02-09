@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, KampioenschapIndivKlasseLimiet
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 

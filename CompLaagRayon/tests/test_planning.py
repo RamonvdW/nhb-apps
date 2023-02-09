@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                KampioenschapIndivKlasseLimiet, RegiocompetitieSporterBoog,
                                CompetitieMutatie)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Uitslag
@@ -134,6 +134,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
+        zet_test_datum('2019-08-01')
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -202,16 +203,22 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
         comp.bepaal_fase()
-        # print('comp: %s --> fase=%s' % (comp, comp.fase))
-        self.assertTrue('B' < comp.fase < 'G')
+        # print('competitie_sluit_alle_regiocompetities: comp: %s --> fase_indiv=%s, fase_teams=%s' % (comp, comp.fase_indiv, comp.fase_teams))
+        self.assertTrue('B' <= comp.fase_indiv <= 'G')
+        self.assertTrue('B' <= comp.fase_teams <= 'G')
         for deelcomp in Regiocompetitie.objects.filter(competitie=comp):
             if not deelcomp.is_afgesloten:          # pragma: no branch
                 deelcomp.is_afgesloten = True
-                deelcomp.save()
+                deelcomp.save(update_fields=['is_afgesloten'])
         # for
 
+        #comp.regiocompetitie_is_afgesloten = True
+        #comp.save(update_fields=['regiocompetitie_is_afgesloten'])
+
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'G')
+        # print('competitie_sluit_alle_regiocompetities: comp: %s --> fase_indiv=%s, fase_teams=%s' % (comp, comp.fase_indiv, comp.fase_teams))
+        self.assertEqual(comp.fase_indiv, 'G')
+        self.assertEqual(comp.fase_teams, 'G')
 
     def _deelnemers_aanmaken(self):
         KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,

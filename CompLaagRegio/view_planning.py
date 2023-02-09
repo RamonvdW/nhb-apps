@@ -1353,7 +1353,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         if not deelcomp.is_afgesloten:
             deelcomp.competitie.bepaal_fase()
-            if deelcomp.competitie.fase == 'F':
+            if deelcomp.competitie.fase_indiv == deelcomp.competitie.fase_teams == 'G':
                 context['url_afsluiten'] = reverse('CompLaagRegio:afsluiten-regiocomp',
                                                    kwargs={'deelcomp_pk': deelcomp.pk})
 
@@ -1383,7 +1383,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
         if not deelcomp.is_afgesloten:
 
             deelcomp.competitie.bepaal_fase()
-            if deelcomp.competitie.fase != 'F':
+            if not (deelcomp.competitie.fase_indiv == deelcomp.competitie.fase_teams == 'G'):
                 # nog niet mogelijk om af te sluiten
                 raise Http404('Verkeerde competitie fase')
 

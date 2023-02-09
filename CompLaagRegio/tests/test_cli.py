@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN

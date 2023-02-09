@@ -136,7 +136,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                 obj.url = reverse('CompLaagRegio:regio-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
 
-                if obj.regio_organiseert_teamcompetitie and 'E' <= comp.fase <= 'F':
+                if obj.regio_organiseert_teamcompetitie and 'F' <= comp.fase_teams <= 'G':
                     obj.titel_team_ronde = "Team Ronde"
                     obj.tekst_team_ronde = "Stel de team punten vast en zet de teamcompetitie door naar de volgende ronde."
                     obj.url_team_ronde = reverse('CompLaagRegio:start-volgende-team-ronde',
@@ -177,7 +177,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                                                   kwargs={'comp_pk': comp.pk,
                                                           'regio_pk': self.functie_nu.nhb_regio.pk})
 
-            if comp.fase >= 'F':
+            if comp.fase_indiv == 'G':      # teams follows
                 context['afsluiten_deelcomp'] = (Regiocompetitie
                                                  .objects
                                                  .filter(competitie=comp,
@@ -248,20 +248,20 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                 # geef de BKO de mogelijkheid om
                 # - de regiocompetitie door te zetten naar de rayonkampioenschappen
                 # - de RK door te zetten naar de BK
-                if 'E' <= comp.fase <= 'G':
+                if comp.fase_indiv == 'G':      # teams volgt
                     comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-naar-rk',
                                                   kwargs={'comp_pk': comp.pk})
-                    comp.titel_doorzetten = '%s doorzetten naar de volgende fase (Regio naar RK)' % comp.beschrijving
+                    comp.titel_doorzetten = '%s doorzetten naar de volgende fase (regio naar RK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
 
-                elif 'M' <= comp.fase < 'P':
+                elif comp.fase_indiv == 'L':
                     comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-naar-bk',
                                                   kwargs={'comp_pk': comp.pk})
-                    comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
+                    comp.titel_doorzetten = '%s individueel doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
 
-                else:
-                    # BK fase
+                elif 'N' <= comp.fase_indiv <= 'O':
+                    # BK prep fase
                     # geeft de BKO de mogelijkheid om de deelnemerslijst voor het BK te bewerken
                     context['url_selectie_bk'] = reverse('CompLaagBond:bk-selectie',
                                                          kwargs={'deelkamp_pk': deelkamp.pk})
@@ -269,11 +269,22 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                     context['url_limieten_bk'] = reverse('CompLaagBond:wijzig-limieten',
                                                          kwargs={'deelkamp_pk': deelkamp.pk})
 
-                    if comp.fase == 'R':
-                        comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-voorbij-bk',
-                                                      kwargs={'comp_pk': comp.pk})
-                        comp.titel_doorzetten = '%s doorzetten voorbij het BK' % comp.beschrijving
-                        context['bko_doorzetten'] = comp
+                elif comp.fase_indiv == 'P':
+                    # bevestig uitslag BK
+                    comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-voorbij-bk',       # TODO: rename
+                                                  kwargs={'comp_pk': comp.pk})
+                    comp.titel_doorzetten = '%s uitslag BK bevestigen' % comp.beschrijving
+                    context['bko_doorzetten'] = comp
+
+                # teams
+                if comp.fase_teams == 'L':
+                    # TODO: apart kaartje maken voor teams
+                    comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-naar-bk',
+                                                  kwargs={'comp_pk': comp.pk})
+                    comp.titel_doorzetten = '%s teams doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
+                    context['bko_doorzetten'] = comp
+
+                # TODO: meer opties voor teamcompetitie
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

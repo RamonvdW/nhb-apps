@@ -103,11 +103,12 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'E':
+
+        if comp.fase_teams > 'F':
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
 
-        self.readonly = (comp.fase > 'C')
+        self.readonly = comp.fase_teams > 'C'
 
         if self.rol_nu == Rollen.ROL_WL:
             self.readonly = True
@@ -121,6 +122,8 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
+        context['readonly'] = self.readonly
+
         now = timezone.now()
         einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
                                   month=deelcomp.begin_fase_D.month,
@@ -131,7 +134,6 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         einde = timezone.make_aware(einde)
         mag_wijzigen = (now < einde) and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
-        context['readonly'] = self.readonly
 
         if deelcomp.competitie.afstand == '18':
             aantal_pijlen = 30

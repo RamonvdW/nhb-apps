@@ -13,7 +13,7 @@ from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHOD
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog,
                                Kampioenschap, RegiocompetitieRonde, CompetitieMatch)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren

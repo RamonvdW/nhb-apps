@@ -10,7 +10,7 @@ from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSC
 from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from Functie.operations import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging

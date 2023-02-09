@@ -340,10 +340,10 @@ def competities_aanmaken(jaar=None):
         functies[(functie.rol, afstand, nr)] = functie
     # for
 
-    now = timezone.now()
-    if now.month == 12 and now.day == 31:               # pragma: no cover
-        # avoid failing test cases one day per year
-        yearend = date(year=jaar+1, month=1, day=1)     # 31 december + 1 day
+    # now = timezone.now()
+    # if now.month == 12 and now.day == 31:               # pragma: no cover
+    #     # avoid failing test cases one day per year
+    #     yearend = date(year=jaar+1, month=1, day=1)     # 31 december + 1 day
 
     # maak de Competitie aan voor 18m en 25m
     for afstand, beschrijving in AFSTANDEN:

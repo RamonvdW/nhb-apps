@@ -14,7 +14,7 @@ from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMutatie, KampioenschapSporterBoog)
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

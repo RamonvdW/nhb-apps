@@ -10,7 +10,8 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
-from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_c
+from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Score.definities import AG_NUL

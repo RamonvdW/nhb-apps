@@ -11,7 +11,8 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.definities import DEEL_RK
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
-from Competitie.tests.test_helpers import zet_competitie_fases, maak_competities_en_zet_fase_c
+from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan

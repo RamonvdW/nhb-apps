@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlass
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog

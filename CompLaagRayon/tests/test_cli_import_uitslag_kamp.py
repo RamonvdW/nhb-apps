@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Competitie.definities import DEELNAME_NEE
 from Competitie.models import KampioenschapSporterBoog
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 

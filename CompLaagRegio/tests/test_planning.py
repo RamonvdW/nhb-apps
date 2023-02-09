@@ -11,7 +11,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieRonde, CompetitieMatch, RegiocompetitieSporterBoog, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
@@ -1507,6 +1507,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
         hrefs = self.extract_all_urls(resp, skip_menu=True)
+        self.assertGreater(len(hrefs), 0)
         self.assertEqual(hrefs[0], url)
 
         # echt afsluiten

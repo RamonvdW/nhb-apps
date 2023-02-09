@@ -21,7 +21,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieTeamPoule,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.definities import AG_DOEL_INDIV
