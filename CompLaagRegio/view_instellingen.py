@@ -146,7 +146,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             # niet meer te wijzigen
             raise Http404('Verkeerde competitie fase')
 
-        readonly_partly = (deelcomp.competitie.fase >= 'B')
+        readonly_partly = (deelcomp.competitie.fase_indiv >= 'C')
         updated = list()
 
         if not readonly_partly:

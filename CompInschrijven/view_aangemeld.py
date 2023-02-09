@@ -140,7 +140,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -198,7 +198,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -264,7 +264,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -579,7 +579,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -657,7 +657,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -757,7 +757,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -887,7 +887,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp

@@ -26,7 +26,7 @@ class CompetitieOverzichtView(TemplateView):
     def _get_uitslagen(self, context, comp):
 
         # kijk of de uitslagen klaar zijn om te tonen
-        context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
+        context['toon_uitslagen'] = (comp.fase_indiv >= 'C')      # inschrijving is open
 
         wed_boog = 'r'
 
@@ -105,11 +105,11 @@ class CompetitieOverzichtView(TemplateView):
         comp.bepaal_fase()                     # zet comp.fase
         comp.bepaal_openbaar(Rollen.ROL_NONE)  # zet comp.is_openbaar
 
-        if comp.fase >= 'B':
+        if comp.fase_indiv >= 'C':
             context['toon_uitslagen'] = True
             self._get_uitslagen(context, comp)
 
-        if 'B' <= comp.fase <= 'E':
+        if comp.is_open_voor_inschrijven():
             comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-alles',
                                               kwargs={'comp_pk': comp.pk})
 

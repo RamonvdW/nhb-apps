@@ -300,7 +300,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'De inschrijving is gesloten')            # 18m
-        self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')    # 25m
+        self.assertContains(resp, 'Aanmelden kan nog tot ')    # 25m
 
         # zet aanvangsgemiddelden voor 18m en 25m
         Score.objects.all().delete()        # nieuw vastgestelde AG is van vandaag

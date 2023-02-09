@@ -35,7 +35,7 @@ class Command(BaseCommand):
         comp.bepaal_fase()
         self.stdout.write('[INFO] Fase: %s' % comp.fase)
 
-        if not ('B' <= comp.fase <= 'E'):
+        if not comp.is_open_voor_inschrijven():
             self.stderr.write('[ERROR] Competitie is in de verkeerde fase')
             return
 

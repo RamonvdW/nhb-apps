@@ -71,7 +71,7 @@ def _zet_competitie_indiv_fase(comp, indiv_fase):
         return
 
     if comp.competitieindivklasse_set.count() == 0:      # pragma: no cover
-        raise NotImplementedError("Kan niet naar fase %s zonder competitie indiv klassen!" % fase)
+        raise NotImplementedError("Kan niet naar indiv fase %s zonder competitie indiv klassen!" % indiv_fase)
 
     comp.klassengrenzen_vastgesteld = True
 
@@ -153,7 +153,7 @@ def _zet_competitie_team_fase(comp, team_fase):
         return
 
     if comp.competitieteamklasse_set.count() == 0:      # pragma: no cover
-        raise NotImplementedError("Kan niet naar fase %s zonder competitie team klassen!" % fase)
+        raise NotImplementedError("Kan niet naar team fase %s zonder competitie team klassen!" % team_fase)
 
     comp.klassengrenzen_vastgesteld = True
 

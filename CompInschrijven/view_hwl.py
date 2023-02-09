@@ -64,7 +64,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         comp.bepaal_fase()
 
         # check dat competitie open is voor inschrijvingen
-        if not ('B' <= comp.fase <= 'E'):
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         objs = list()
@@ -275,7 +275,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['tweede_jaar'] = self.comp.begin_jaar + 1
         context['url_aanmelden'] = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
         context['mag_aanmelden'] = True
-        context['mag_team_schieten'] = self.comp.fase == 'B' and regio_organiseert_teamcomp
+        context['mag_team_schieten'] = self.comp.fase_indiv == 'C' and regio_organiseert_teamcomp
 
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = self.functie_nu.nhb_ver.regio
@@ -377,7 +377,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         # check dat competitie open is voor inschrijvingen
         comp.bepaal_fase()
-        if not ('B' <= comp.fase <= 'E'):
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         # rol is HWL (zie test_func)
@@ -395,7 +395,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         methode = deelcomp.inschrijf_methode
 
         # zoek eerst de voorkeuren op
-        mag_team_schieten = comp.fase == 'B'
+        mag_team_schieten = comp.fase_indiv == 'C'
         bulk_team = False
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             bulk_team = True
@@ -666,7 +666,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                               kwargs={'deelcomp_pk': self.deelcomp.pk})
             comp = self.deelcomp.competitie
             comp.bepaal_fase()
-            if comp.fase <= 'B':
+            if comp.fase_indiv <= 'C':
                 context['mag_afmelden'] = True
 
         methode = self.deelcomp.inschrijf_methode

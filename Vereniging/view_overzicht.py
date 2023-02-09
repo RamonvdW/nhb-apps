@@ -172,7 +172,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     kaartje.img = static('plein/badge_nhb_indoor.png')
                 else:
                     kaartje.img = static('plein/badge_nhb_25m1p.png')
-                if comp.fase < 'B':
+                if comp.fase_indiv < 'C':
                     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                 kaartjes.append(kaartje)
 
@@ -194,7 +194,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'
                             kaartje.url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
-                            if comp.fase < 'B':
+                            if comp.fase_indiv < 'C':
                                 kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                             kaartjes.append(kaartje)
             # for
@@ -231,7 +231,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
                     # 4 - ingeschreven
-                    if 'B' <= comp.fase <= 'F':         # vanaf RK fase niet meer tonen
+                    if 'C' <= comp.fase_indiv <= 'G':         # vanaf RK fase niet meer tonen
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Ingeschreven"
                         kaartje.tekst = "Overzicht ingeschreven leden."
@@ -243,13 +243,13 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartjes.append(kaartje)
 
                     # 5 - wie schiet waar
-                    if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1 and 'B' <= comp.fase <= 'F':
+                    if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1 and 'C' <= comp.fase_indiv <= 'F':
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
                         kaartje.tekst = 'Overzicht gekozen wedstrijden.'
                         kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
-                        # if comp.fase < 'B':
+                        # if comp.fase_indiv < 'C':
                         #     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                         kaartjes.append(kaartje)
             # for

@@ -185,6 +185,13 @@ class Competitie(models.Model):
         # zet self.fase, voor backwards compatibility
         self.fase = self.fase_indiv
 
+    def is_open_voor_inschrijven(self):
+        if not hasattr(self, 'fase_indiv'):
+            self.fase_indiv = bepaal_fase_indiv(self)
+
+        # inschrijven mag het hele seizoen, ook tijdens de wedstrijden
+        return 'C' <= self.fase_indiv <= 'F'
+
     def bepaal_openbaar(self, rol_nu):
         """ deze functie bepaalt of de competitie openbaar is voor de huidige rol
             en zet de is_openbaar variabele op het object.

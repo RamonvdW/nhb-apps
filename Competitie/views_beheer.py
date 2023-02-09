@@ -101,20 +101,20 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             # laat alle teams zien, ook de teams die nog niet af zijn of nog niet in een poule zitten
-            # vanaf fase E laten we dit niet meer zien en komen de RK Teams in beeld
-            if 'B' <= comp.fase <= 'E':
+            # vanaf fase F laten we dit niet meer zien en komen de RK Teams in beeld
+            if 'B' <= comp.fase_teams <= 'F':
                 context['tekst_regio_teams_alle'] = "Alle aangemelde teams voor de regio teamcompetitie"
                 context['url_regio_teams_alle'] = reverse('CompLaagRegio:regio-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
-        if comp.fase == 'J' and not comp.klassengrenzen_vastgesteld_rk_bk and self.rol_nu == Rollen.ROL_BKO:
+        if comp.fase_teams == 'J' and not comp.klassengrenzen_vastgesteld_rk_bk and self.rol_nu == Rollen.ROL_BKO:
             context['tekst_klassengrenzen_rk_bk_vaststellen'] = "Open inschrijving RK teams sluiten en de klassengrenzen voor het RK teams en BK teams vaststellen."
             context['url_klassengrenzen_rk_bk_vaststellen'] = reverse('CompBeheer:klassengrenzen-vaststellen-rk-bk-teams',
                                                                       kwargs={'comp_pk': comp.pk})
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            if comp.fase < 'L':
+            if comp.fase_teams < 'L':
                 context['tekst_rayon_teams_alle'] = "Alle aangemelde teams voor de rayonkampioenschappen teams"
                 context["url_rayon_teams_alle"] = reverse('CompLaagRayon:rayon-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
@@ -162,7 +162,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                 comp.regio_begin_fase_D = obj.begin_fase_D
             # for
 
-            if comp.fase <= 'F':
+            if comp.fase_teams <= 'F':
                 comp.url_regio_instellingen = reverse('CompLaagRegio:regio-instellingen',
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
@@ -172,12 +172,12 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                                                            kwargs={'comp_pk': comp.pk,
                                                                    'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
-            if 'B' <= comp.fase <= 'E':
+            if comp.is_open_voor_inschrijven():
                 comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-regio',
                                                   kwargs={'comp_pk': comp.pk,
                                                           'regio_pk': self.functie_nu.nhb_regio.pk})
 
-            if comp.fase >= 'E':
+            if comp.fase >= 'F':
                 context['afsluiten_deelcomp'] = (Regiocompetitie
                                                  .objects
                                                  .filter(competitie=comp,
@@ -224,7 +224,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                 context['url_limieten_rk'] = reverse('CompLaagRayon:rayon-limieten',
                                                      kwargs={'deelkamp_pk': deelkamp.pk})
 
-            if 'B' <= comp.fase <= 'E':
+            if comp.is_open_voor_inschrijven():
                 comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-rayon',
                                                   kwargs={'comp_pk': comp.pk,
                                                           'rayon_pk': self.functie_nu.nhb_rayon.pk})
@@ -297,7 +297,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         comp.einde_fase_K = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
         comp.einde_fase_M = comp.einde_fase_L_indiv + datetime.timedelta(days=7)
 
-        if 'B' <= comp.fase <= 'E':
+        if comp.is_open_voor_inschrijven():
             comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-alles',
                                               kwargs={'comp_pk': comp.pk})
 
@@ -305,7 +305,7 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        if comp.fase >= 'B':
+        if comp.fase_indiv >= 'C':
             context['url_uitslagen'] = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['url_tijdlijn'] = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})

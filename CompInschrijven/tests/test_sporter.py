@@ -128,7 +128,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
-        # log in as schutter
+        # log in as sporter
         self.client.logout()
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren(100001)

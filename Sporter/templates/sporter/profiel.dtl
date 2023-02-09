@@ -189,7 +189,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        {% elif deelcomp.competitie.fase < 'B' %}
+                                        {% elif deelcomp.competitie.fase_indiv < 'C' %}
                                             <span>Inschrijven kan nog niet</span>
                                         {% endif %}
                                     {% endif %}

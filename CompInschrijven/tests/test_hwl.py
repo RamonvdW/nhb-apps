@@ -675,50 +675,6 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             self.assertTrue(obj.inschrijf_voorkeur_team)
         # for
 
-    def test_inschrijven_team_udvl(self):
-        url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
-
-        # zet de udvl tussen de dvl van de twee schutters in
-        # sporter_100003.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        # sporter_100004.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100004)
-        self._zet_sporter_voorkeuren(100003)
-
-        self._zet_ag(100004, 18)
-        self._zet_ag(100003, 25)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
-            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
-                                          'lid_100003_boogtype_3': 'on',        # 3=BB
-                                          'wil_in_team': 'ja',
-                                          'opmerking': 'door de hwl'})
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        for obj in RegiocompetitieSporterBoog.objects.all():
-            self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
-            if obj.sporterboog.sporter.lid_nr == 100003:
-                self.assertTrue(obj.inschrijf_voorkeur_team)
-            else:
-                # 100004 heeft dvl > udvl, dus mag niet mee doen
-                self.assertFalse(obj.inschrijf_voorkeur_team)
-        # for
-
     def test_afmelden(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)

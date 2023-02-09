@@ -40,8 +40,7 @@ class Command(BaseCommand):
             # alleen nieuwe aanmeldingen rapporteren als de open inschrijving gesloten is
             # en de competitie nog in de actieve wedstrijden periode is waarin mensen zich in kunnen schrijven
             comp = deelcomp.competitie
-            comp.bepaal_fase()
-            if 'B' < comp.fase <= 'E':
+            if comp.is_open_voor_inschrijven():
                 tup = (deelcomp.competitie.afstand, deelcomp.nhb_regio.regio_nr)
                 afstand_regio2deelcomp[tup] = deelcomp
         # for

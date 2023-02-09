@@ -689,7 +689,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             comp.bepaal_openbaar(self.rol_nu)
 
             if comp.is_openbaar:
-                if comp.fase >= 'B':
+                if comp.fase_indiv >= 'C':
                     actuele_comps.append(comp)
                     context['seizoen'] = comp.maak_seizoen_str()
         # for

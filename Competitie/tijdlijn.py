@@ -45,7 +45,7 @@ def bepaal_fase_indiv(comp) -> str:
             # fase J: bevestig deelname of afmelden
             return 'J'
 
-        if now <= comp.begin_fase_L_indiv:
+        if now < comp.begin_fase_L_indiv:
             # fase K: voorbereiden wedstrijden
             return 'K'
 
@@ -58,15 +58,15 @@ def bepaal_fase_indiv(comp) -> str:
         #     tot aanmeldingen beginnen; nog niet open voor aanmelden
         return 'A'
 
-    if now <= comp.begin_fase_C:
+    if now < comp.begin_fase_C:
         # B = voorbereidingen door RCL
         return 'B'
 
-    if now <= comp.begin_fase_F:
+    if now < comp.begin_fase_F:
         # C = open voor inschrijvingen
         return 'C'
 
-    if now < comp.einde_fase_F:
+    if now <= comp.einde_fase_F:
         # F = Wedstrijden
         return 'F'
 
@@ -125,7 +125,7 @@ def bepaal_fase_teams(comp) -> str:
         # fase A: vaststellen klassengrenzen, instellingen regio teams
         return 'A'
 
-    if now <= comp.begin_fase_C:
+    if now < comp.begin_fase_C:
         # fase B: instellingen regio teams
         return 'B'
 
@@ -136,7 +136,7 @@ def bepaal_fase_teams(comp) -> str:
         # fase D: aanmaken poules en afronden wedstrijdschema's
         return 'C'
 
-    if now < comp.einde_fase_F:
+    if now <= comp.einde_fase_F:
         # F = Wedstrijden
         return 'F'
 

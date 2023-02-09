@@ -70,15 +70,15 @@ class CompetitieKiesView(TemplateView):
                 else:
                     comp.card_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
 
-                if comp.fase < 'B':
+                if comp.fase_indiv < 'C':
                     comp.text = "Hier worden de voorbereidingen voor getroffen voor de volgende bondscompetitie."
                 else:
                     comp.text = "Alle informatie en uitslagen van de actuele bondscompetitie."
 
-                if comp.fase == 'B' and rol_nu == Rollen.ROL_SPORTER:
+                if comp.fase_indiv == 'C' and rol_nu == Rollen.ROL_SPORTER:
                     context['toon_inschrijven'] = True
 
-                if comp.fase >= 'B':
+                if comp.fase_indiv >= 'C':
                     self.actuele_regio_comps.append(comp)
 
             try:

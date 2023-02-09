@@ -125,7 +125,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # geen aspirant, op tijd lid en op tijd aangemeld?
         mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
                              age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                             comp.fase == 'B')
+                             comp.fase_indiv == 'C')
         context['mag_team_schieten'] = mag_team_schieten
 
         # bepaal de inschrijfmethode voor deze regio
@@ -333,7 +333,7 @@ class RegiocompetitieAanmeldenView(View):
         # geen aspirant, op tijd lid en op tijd aangemeld?
         mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
                              age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                             deelcomp.competitie.fase == 'B')
+                             deelcomp.competitie.fase_indiv == 'C')
 
         # kijk of de sporter met een team mee wil schieten voor deze competitie
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
@@ -421,7 +421,7 @@ class RegiocompetitieAfmeldenView(View):
         # controleer de fase van de competitie
         comp = deelnemer.regiocompetitie.competitie
         comp.bepaal_fase()
-        if comp.fase != 'B':
+        if comp.fase_indiv != 'C':
             raise Http404('Competitie is in de verkeerde fase')
 
         # schrijf de sporter uit
