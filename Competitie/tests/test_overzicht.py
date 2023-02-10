@@ -87,7 +87,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp.begin_fase_C = now + datetime.timedelta(days=1)      # morgen
         comp.save()
         comp.bepaal_fase()
-        self.assertTrue(comp.fase < 'C', msg="comp.fase=%s (expected: below C)" % comp.fase)
+        self.assertTrue(comp.fase_indiv < 'C', msg="comp.fase_indiv=%s (expected: below C)" % comp.fase_indiv)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -100,7 +100,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp.begin_fase_C = way_before   # fase B
         comp.save()
         comp.bepaal_fase()
-        self.assertTrue(comp.fase >= 'C', msg="comp.fase=%s (expected: not below C)" % comp.fase)
+        self.assertTrue(comp.fase_indiv >= 'C', msg="comp.fase_indiv=%s (expected: not below C)" % comp.fase_indiv)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -110,7 +110,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp.begin_fase_F = way_before     # fase F
         comp.save()
         comp.bepaal_fase()
-        self.assertTrue(comp.fase >= 'F')
+        self.assertTrue(comp.fase_indiv >= 'F')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

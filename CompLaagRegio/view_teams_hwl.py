@@ -320,8 +320,8 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if comp.fase > 'D':
-            # staat niet meer open voor instellen regiocompetitie teams
+        if comp.fase_teams > 'D':
+            # mag niet meer wijzigen
             raise Http404('Competitie is niet in de juiste fase')
 
         return deelcomp
@@ -546,7 +546,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         comp = deelnemer.regiocompetitie.competitie
         comp.bepaal_fase()
 
-        if comp.fase < 'E':
+        if comp.fase_teams < 'F':
             context['url_opslaan'] = reverse('CompLaagRegio:wijzig-ag',
                                              kwargs={'deelnemer_pk': deelnemer.pk})
 
@@ -682,7 +682,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['readonly'] = readonly = (comp.fase > 'D')
+            context['readonly'] = readonly = (comp.fase_teams > 'D')
             now = timezone.now()
             einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
                                       month=deelcomp.begin_fase_D.month,
@@ -694,7 +694,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = (now <= einde) and not readonly
         else:
             # RCL
-            context['readonly'] = (comp.fase > 'D')
+            context['readonly'] = (comp.fase_teams > 'D')       # TODO: de RCL langer rechten geven?
             mag_wijzigen = True
 
         context['mag_wijzigen'] = mag_wijzigen
@@ -792,7 +792,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
 
         if self.rol_nu == Rollen.ROL_HWL:
-            readonly = (comp.fase > 'D')
+            readonly = (comp.fase_teams > 'D')
             now = timezone.now()
             einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
                                       month=deelcomp.begin_fase_D.month,
@@ -804,7 +804,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = (now <= einde) and not readonly
         else:
             # RCL
-            readonly = (comp.fase > 'D')
+            readonly = (comp.fase_teams > 'D')
             mag_wijzigen = not readonly
 
         if not mag_wijzigen:
@@ -892,8 +892,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase not in ('E', 'F'):
-            # staat niet meer open voor instellen regiocompetitie teams
+        if comp.fase_teams != 'F':
             raise Http404('Competitie is niet in de juiste fase')
 
         if self.rol_nu == Rollen.ROL_WL:
@@ -911,7 +910,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         if not (1 <= deelcomp.huidige_team_ronde <= 7):
             raise Http404('Competitie ronde klopt niet')
 
-        context['readonly'] = self.readonly
+        context['readonly'] = self.readonly     # voor WL
 
         teams = (RegiocompetitieTeam
                  .objects

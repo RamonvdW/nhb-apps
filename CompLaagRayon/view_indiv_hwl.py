@@ -62,13 +62,10 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        if comp.fase <= 'G':
-            raise Http404('Pagina kan nog niet gebruikt worden')
+        if comp.fase_indiv not in ('J', 'K', 'L'):
+            raise Http404('Pagina niet gebruikt worden')
 
-        if comp.fase > 'L':
-            raise Http404('Pagina kan niet meer gebruikt worden')
-
-        mag_wijzigen = ('J' <= comp.fase <= 'K')
+        mag_wijzigen = ('J' <= comp.fase_indiv <= 'K')
 
         deelnemers = (KampioenschapSporterBoog
                       .objects

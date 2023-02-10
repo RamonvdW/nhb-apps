@@ -79,8 +79,10 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        if not deelkamp.heeft_deelnemerslijst or comp.fase > 'Q':
-            raise Http404('Verkeerde fase')
+        if comp.fase_indiv not in ('N', 'O', 'P'):
+            raise Http404('Verkeerde competitie fase')
+
+        # TODO: wel inzichtelijk maar readonly maken tijdens fase P
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -346,12 +348,8 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'P':
+        if comp.fase_indiv not in ('N', 'O'):
             raise Http404('Mag nog niet wijzigen')
-
-        # fase Q = wedstrijden, maar dan willen we de BKO toch de status nog aan laten passen
-        if comp.fase > 'Q':
-            raise Http404('Mag niet meer wijzigen')
 
         sporter = deelnemer.sporterboog.sporter
         deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
@@ -391,10 +389,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'P':
-            raise Http404('Mag nog niet wijzigen')
-
-        if comp.fase > 'Q':
+        if comp.fase_indiv not in ('N', 'O'):
             raise Http404('Mag niet meer wijzigen')
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]

@@ -60,7 +60,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        context['readonly'] = readonly = (comp.fase > 'D')
+        context['readonly'] = readonly = (comp.fase_teams > 'D')
 
         context['regio'] = deelcomp.nhb_regio
 
@@ -190,10 +190,10 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if comp.fase > 'E':
+        if comp.fase_teams >= 'F':
             raise Http404('Poules kunnen niet meer aangepast worden')
 
-        context['mag_koppelen'] = (comp.fase <= 'D')
+        context['mag_koppelen'] = (comp.fase_teams <= 'D')
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
 
@@ -252,10 +252,10 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'E':
+        if comp.fase_teams >= 'F':
             raise Http404('Poules kunnen niet meer aangepast worden')
 
-        mag_koppelen = comp.fase <= 'D'
+        mag_koppelen = comp.fase_teams <= 'D'
 
         if request.POST.get('verwijder_poule', ''):
             if mag_koppelen:

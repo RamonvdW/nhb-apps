@@ -49,7 +49,7 @@ class CompetitieKiesView(TemplateView):
                                'begin_jaar')):
 
             comp.bepaal_fase()
-            if comp.fase == 'S':
+            if comp.fase_indiv == comp.fase_teams == 'Q':
                 seizoen_afsluiten += 1
 
             if comp.begin_jaar == begin_jaar:

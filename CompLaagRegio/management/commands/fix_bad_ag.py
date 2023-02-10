@@ -33,7 +33,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Gekozen competitie: %s' % comp)
 
         comp.bepaal_fase()
-        self.stdout.write('[INFO] Fase: %s' % comp.fase)
+        self.stdout.write('[INFO] Competitie fase_teams: %s' % comp.fase_teams)
 
         if not comp.is_open_voor_inschrijven():
             self.stderr.write('[ERROR] Competitie is in de verkeerde fase')

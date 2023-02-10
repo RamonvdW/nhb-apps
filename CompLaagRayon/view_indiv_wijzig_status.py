@@ -66,12 +66,8 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'J':
-            raise Http404('Mag nog niet wijzigen')
-
-        # fase L = wedstrijden, maar dan willen we de RKO toch de status nog aan laten passen
-        if comp.fase > 'L':
-            raise Http404('Mag niet meer wijzigen')
+        if comp.fase_indiv not in ('J', 'K'):
+            raise Http404('Mag niet wijzigen')
 
         sporter = deelnemer.sporterboog.sporter
         deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
@@ -121,11 +117,8 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'J':
-            raise Http404('Mag nog niet wijzigen')
-
-        if comp.fase > 'L':
-            raise Http404('Mag niet meer wijzigen')
+        if comp.fase_indiv not in ('J', 'K'):
+            raise Http404('Mag niet wijzigen')
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]
         afmelden = str(request.POST.get('afmelden', ''))[:2]

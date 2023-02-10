@@ -242,7 +242,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
         comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
+        self.assertEqual(comp.fase_teams, 'J')
 
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
         resp = self.client.post(url)

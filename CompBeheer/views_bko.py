@@ -90,14 +90,14 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
             raise Http404('Verkeerde competitie')
 
         comp.bepaal_fase()
-        if comp.fase < 'E' or comp.fase >= 'K':
+        if comp.fase_indiv < 'E' or comp.fase_indiv >= 'J':
             # kaartjes werd niet getoond, dus je zou hier niet moeten zijn
             raise Http404('Verkeerde competitie fase')
 
         context['comp'] = comp
         context['regio_status'] = self._get_regio_status(comp)
 
-        if comp.fase == 'G':
+        if comp.fase_indiv == 'G':
             # klaar om door te zetten
             context['url_doorzetten'] = reverse('CompBeheer:bko-doorzetten-regio-naar-rk',
                                                 kwargs={'comp_pk': comp.pk})
@@ -126,7 +126,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase != 'G':
+        if comp.fase_indiv != 'G':
             raise Http404('Verkeerde competitie fase')
 
         # fase G garandeert dat alle regiocompetities afgesloten zijn
@@ -267,29 +267,28 @@ class DoorzettenTeamsRKNaarBKView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase_indiv != 'L':
+        if comp.fase_teams != 'L':
             raise Http404('Verkeerde competitie fase')
 
-        if comp.fase == 'N':
-            # klaar om door te zetten
-            context['url_doorzetten'] = reverse('CompBeheer:bko-rk-teams-doorzetten-naar-bk',
+        # klaar om door te zetten
+        context['url_doorzetten'] = reverse('CompBeheer:bko-rk-teams-doorzetten-naar-bk',
                                                 kwargs={'comp_pk': comp.pk})
-        else:
-            # bepaal de status van elk rayon
 
-            status2str = {True: 'Afgesloten', False: 'Actief'}
+        # bepaal de status van elk rayon
+        status2str = {True: 'Afgesloten', False: 'Actief'}
 
-            context['rk_status'] = deelkamps = (Kampioenschap
-                                                .objects
-                                                .select_related('nhb_rayon')
-                                                .filter(competitie=comp,
-                                                        deel=DEEL_RK)
-                                                .order_by('nhb_rayon__rayon_nr'))
-            for deelkamp in deelkamps:
-                deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
-                deelkamp.status_str = status2str[deelkamp.is_afgesloten]
-                deelkamp.indiv_str = status2str[deelkamp.is_klaar_indiv]
-                deelkamp.team_str = status2str[deelkamp.is_klaar_teams]
+        context['rk_status'] = deelkamps = (Kampioenschap
+                                            .objects
+                                            .select_related('nhb_rayon')
+                                            .filter(competitie=comp,
+                                                    deel=DEEL_RK)
+                                            .order_by('nhb_rayon__rayon_nr'))
+        for deelkamp in deelkamps:
+            deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
+            deelkamp.status_str = status2str[deelkamp.is_afgesloten]
+            deelkamp.indiv_str = status2str[deelkamp.is_klaar_indiv]
+            deelkamp.team_str = status2str[deelkamp.is_klaar_teams]
+        # for
 
         context['comp'] = comp
 
@@ -632,7 +631,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         if comp.klassengrenzen_vastgesteld_rk_bk:
             raise Http404('De klassengrenzen zijn al vastgesteld')
 
-        if comp.fase != 'J':
+        if comp.fase_teams != 'J':
             raise Http404('Competitie niet in de juiste fase')
 
         context['grenzen'], context['niet_compleet_team'] = self._bepaal_klassengrenzen(comp)
@@ -671,7 +670,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         if comp.klassengrenzen_vastgesteld_rk_bk:
             raise Http404('De klassengrenzen zijn al vastgesteld')
 
-        if comp.fase != 'J':
+        if comp.fase_teams != 'J':
             raise Http404('Competitie niet in de juiste fase')
 
         # vul de klassengrenzen in voor RK/BK  teams

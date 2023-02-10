@@ -106,7 +106,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        if not ('E' <= comp.fase <= 'K'):
+        if not ('F' <= comp.fase_teams <= 'K'):
             # staat niet meer open voor instellen RK teams
             raise Http404('Competitie is niet in de juiste fase 1')
 
@@ -114,7 +114,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         if datetime.date.today() < vanaf:
             raise Http404('Competitie is niet in de juiste fase 2')
 
-        deelkamp.open_inschrijving = comp.fase <= 'G'       # regio vs RK fase
+        deelkamp.open_inschrijving = comp.fase_teams < 'J'       # regio vs RK fase
 
         deelkamp.datum_einde_knutselen_teams_rk_bk = comp.datum_klassengrenzen_rk_bk_teams
 
@@ -233,7 +233,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        if not ('E' <= comp.fase <= 'J'):
+        if not ('F' <= comp.fase_teams <= 'J'):
             # staat niet meer open voor instellen RK teams
             raise Http404('Competitie is niet in de juiste fase 1')
 
@@ -448,9 +448,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        context['alleen_bekijken'] = alleen_bekijken = (comp.fase >= 'K')
+        context['alleen_bekijken'] = alleen_bekijken = (comp.fase_teams > 'J')
 
-        if not ('E' <= comp.fase <= 'L'):       # vanaf fase K kunnen invallers gekoppeld worden
+        if not ('F' <= comp.fase_teams <= 'L'):
             raise Http404('Competitie is niet in de juiste fase')
 
         boog_typen = rk_team.team_type.boog_typen.all()
@@ -464,7 +464,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         ag_str = "%05.1f" % (rk_team.aanvangsgemiddelde * aantal_pijlen)
         rk_team.ag_str = ag_str.replace('.', ',')
 
-        if comp.fase <= 'G':
+        if comp.fase_teams <= 'G':
             # alle leden van de vereniging die meedoen aan de regiocompetitie mogen gekozen worden
 
             context['onder_voorbehoud'] = True
@@ -588,10 +588,10 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         comp = deelkamp.competitie
         comp.bepaal_fase()
-        if not ('E' <= comp.fase <= 'J'):
+        if not ('E' <= comp.fase_teams <= 'J'):
             raise Http404('Competitie is niet in de juiste fase')
 
-        open_inschrijving = comp.fase <= 'G'        # regio vs RK fase
+        open_inschrijving = comp.fase_teams <= 'G'        # regio vs RK fase
 
         # toegestane boogtypen en schutters
         boog_pks = rk_team.team_type.boog_typen.values_list('pk', flat=True)

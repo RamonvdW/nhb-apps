@@ -79,7 +79,7 @@ class UitslagenBKIndivView(TemplateView):
         except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
-        if comp.fase == 'P':
+        if comp.fase_indiv == 'O':
             context['bevestig_tot_datum'] = comp.begin_fase_P_indiv - datetime.timedelta(days=14)
 
         # haal de planning erbij: competitie klasse --> competitie match

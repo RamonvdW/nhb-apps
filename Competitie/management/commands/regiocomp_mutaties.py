@@ -1005,7 +1005,6 @@ class Command(BaseCommand):
             self._verwerk_mutatie_initieel_deelkamp(deelkamp)
 
             # stuur de RKO een taak ('ter info')
-            rko_namen = list()
             functie_rko = deelkamp.functie
             now = timezone.now()
             taak_deadline = now
@@ -1188,8 +1187,10 @@ class Command(BaseCommand):
 
             # print('kampioen:', kampioen.result_rank, som_scores, gemiddelde_scores, "%.3f" % gemiddelde, kampioen)
 
+            is_verplaatst = False
             try:
                 indiv_klasse = temp_klassen_map[kampioen.indiv_klasse.volgorde]
+                is_verplaatst = True
             except KeyError:
                 # behoud oude klasse
                 indiv_klasse = kampioen.indiv_klasse
@@ -1202,7 +1203,7 @@ class Command(BaseCommand):
                         gemiddelde=gemiddelde,
                         gemiddelde_scores=gemiddelde_scores)
 
-            if kampioen.result_rank == 1:
+            if kampioen.result_rank == 1 and not is_verplaatst:
                 nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.nhb_rayon.naam
                 nieuw.deelname = DEELNAME_JA
 

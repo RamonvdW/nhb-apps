@@ -203,7 +203,7 @@ class RegioTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
+            if comp.fase_teams <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
             totaal_teams += 1
@@ -236,7 +236,7 @@ class RegioTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
+            if comp.fase_teams <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
 
@@ -452,7 +452,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase > 'F':
+        if deelcomp.competitie.fase > 'G':
             raise Http404('Verkeerde competitie fase')
 
         context['deelcomp'] = deelcomp

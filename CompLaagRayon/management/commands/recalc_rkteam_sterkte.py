@@ -18,10 +18,9 @@ class Command(BaseCommand):
 
         for comp in Competitie.objects.filter(is_afgesloten=False):
             comp.bepaal_fase()
+            self.stdout.write('[INFO] Competitie %s is in fase_teams=%s' % (comp, comp.fase_teams))
 
-            self.stdout.write('[INFO] Competitie %s is in fase %s' % (comp, comp.fase))
-
-            if comp.fase == 'J':
+            if comp.fase_teams == 'J':
                 count = 0
                 for rk_team in (KampioenschapTeam
                                 .objects

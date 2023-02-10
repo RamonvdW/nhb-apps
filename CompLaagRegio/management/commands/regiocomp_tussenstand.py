@@ -87,7 +87,7 @@ class Command(BaseCommand):
         # rk_comp_pks = list()
         for comp in Competitie.objects.filter(is_afgesloten=False):
             comp.bepaal_fase()
-            if comp.fase <= 'F':
+            if comp.fase_indiv <= 'F':
                 # in fase van de regiocompetitie
                 regio_comp_pks.append(comp.pk)
         # for

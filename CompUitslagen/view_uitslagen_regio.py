@@ -240,7 +240,7 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
             # in plaats van allemaal 0,000 willen we het AG tonen tijdens de inschrijffase
-            if comp.fase < 'E':
+            if comp.fase_indiv < 'F':
                 deelnemer.gemiddelde = deelnemer.ag_voor_indiv
 
             deelnemer_count.aantal_in_groep += 1
@@ -388,7 +388,7 @@ class UitslagenRegioTeamsView(TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'F':
+        if comp.fase_teams > 'F':
             deelcomp.huidige_team_ronde = 8     # voorkomt kleurmarkering ronde 7 als actieve ronde
 
         context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)

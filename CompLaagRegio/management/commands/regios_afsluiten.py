@@ -58,8 +58,8 @@ class Command(BaseCommand):
 
         comp = comps[0]
         comp.bepaal_fase()
-        if comp.fase < 'F' or comp.fase > 'G':
-            self.stderr.write('[ERROR] Competitie in fase %s is niet ondersteund' % comp.fase)
+        if comp.fase_indiv < 'F' or comp.fase_indiv > 'G':
+            self.stderr.write('[ERROR] Competitie in fase_indiv %s is niet ondersteund' % comp.fase_indiv)
             return
 
         self._sluit_regios(comp, regio_van, regio_tot)

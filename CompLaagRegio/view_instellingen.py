@@ -26,7 +26,7 @@ TEMPLATE_COMPREGIO_INSTELLINGEN_REGIO_GLOBAAL = 'complaagregio/rcl-instellingen-
 
 class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view kan de RCL instellingen voor de regiocompetitie aanpassen """
+    """ Deze view kan de RCL instellingen voor de regio teamcompetitie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_RCL_INSTELLINGEN
@@ -63,14 +63,14 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase > 'F':
+        if deelcomp.competitie.fase_teams > 'F':
             raise Http404('Verkeerde competitie fase')
 
-        if deelcomp.competitie.fase > 'A':
-            context['readonly_na_fase_A'] = True
+        if deelcomp.competitie.fase_teams > 'B':
+            context['readonly_blok_1'] = True
 
-            if deelcomp.competitie.fase > 'D':
-                context['readonly_na_fase_D'] = True
+            if deelcomp.competitie.fase_teams > 'C':
+                context['readonly_blok_2'] = True
 
         context['deelcomp'] = deelcomp
 
@@ -142,11 +142,11 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase > 'D':
+        if deelcomp.competitie.fase_teams > 'D':
             # niet meer te wijzigen
             raise Http404('Verkeerde competitie fase')
 
-        readonly_partly = (deelcomp.competitie.fase_indiv >= 'C')
+        readonly_partly = (deelcomp.competitie.fase_teams >= 'C')
         updated = list()
 
         if not readonly_partly:

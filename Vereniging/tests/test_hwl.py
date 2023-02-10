@@ -330,7 +330,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_25.begin_fase_F -= datetime.timedelta(days=100)       # forceer 'beschikbaar vanaf' label
         self.comp_25.save(update_fields=['begin_fase_F'])
         self.comp_25.bepaal_fase()
-        self.assertEqual(self.comp_25.fase, 'J')
+        self.assertEqual(self.comp_25.fase_indiv, 'J')
 
         RegiocompetitieRonde.objects.all().delete()
 

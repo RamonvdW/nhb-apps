@@ -120,7 +120,7 @@ class UitslagenRayonIndivView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        if comp.fase == 'J':
+        if comp.fase_indiv == 'J':
             context['bevestig_tot_datum'] = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid

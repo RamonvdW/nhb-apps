@@ -26,21 +26,16 @@ TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
 # korte beschrijving van de competitie fase voor de HWL
 comp_fase_kort = {
     'A': 'opstarten',
-    'B': 'inschrijven',
-    'C': 'inschrijven teams',
-    'D': 'voorbereiding regiocompetitie',
-    'E': 'wedstrijden regio',
-    'F': 'vaststellen uitslag regio',
-    'G': 'afsluiten regiocompetitie',
+    'C': 'inschrijven',
+    'F': 'wedstrijden regio',
+    'G': 'vaststellen uitslag regio',
     'J': 'voorbereiding RK',
     'K': 'voorbereiding RK',
     'L': 'wedstrijden RK',
-    'M': 'uitslagen RK overnemen',
-    'N': 'afsluiten RK',
-    'P': 'voorbereiding BK',
-    'Q': 'wedstrijden BK',
-    'R': 'uitslagen BK overnemen',
-    'S': 'afsluiten competitie',
+    'N': 'vaststellen uitslagen RK ',
+    'O': 'voorbereiding BK',
+    'P': 'wedstrijden BK',
+    'Q': 'einde competitie',
 }
 
 
@@ -148,7 +143,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
                 kaartje.anker = 'competitie_%s' % comp.pk
-                kaartje.comp_fase = "%s (%s)" % (comp.fase, comp_fase_kort[comp.fase])
+                kaartje.comp_fase = "%s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])
                 kaartjes.append(kaartje)
 
                 prev_jaar = begin_jaar
@@ -163,7 +158,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartjes.append(kaartje)
 
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
-            if comp.fase < 'F' and self.rol_nu != Rollen.ROL_WL:
+            if comp.fase_indiv < 'F' and self.rol_nu != Rollen.ROL_WL:
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
@@ -178,7 +173,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
-                    if deelcomp.regio_organiseert_teamcompetitie and 'E' <= comp.fase <= 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
+                    if deelcomp.regio_organiseert_teamcompetitie and comp.fase_teams == 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
                         # team invallers opgeven
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
@@ -188,7 +183,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartjes.append(kaartje)
                     else:
                         # 2 - teams aanmaken
-                        if deelcomp.regio_organiseert_teamcompetitie and comp.fase <= 'E':
+                        if deelcomp.regio_organiseert_teamcompetitie and comp.fase_teams == 'C':
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'
@@ -204,7 +199,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             for deelkamp_rk in deelkamps_rk:
                 if deelkamp_rk.competitie == comp:
                     if deelkamp_rk.heeft_deelnemerslijst:
-                        if 'J' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
+                        if 'J' <= comp.fase_indiv <= 'K' and self.rol_nu != Rollen.ROL_WL:
                             # RK voorbereidende fase
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Deelnemers RK"
@@ -214,7 +209,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje.icon = 'rule'
                             kaartjes.append(kaartje)
 
-                    if 'E' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
+                    if 'F' <= comp.fase_teams <= 'K' and self.rol_nu != Rollen.ROL_WL:
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."

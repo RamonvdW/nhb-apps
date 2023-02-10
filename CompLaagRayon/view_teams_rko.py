@@ -54,7 +54,7 @@ class RayonTeamsTemplateView(TemplateView):
             context['comp'] = comp
             comp.bepaal_fase()
 
-            open_inschrijving = comp.fase <= 'G'
+            open_inschrijving = comp.fase_teams <= 'G'
 
             subset = kwargs['subset'][:10]      # afkappen voor de veiligheid
             if subset == 'auto':
@@ -121,7 +121,7 @@ class RayonTeamsTemplateView(TemplateView):
             context['comp'] = comp = deelkamp.competitie
             comp.bepaal_fase()
 
-            open_inschrijving = comp.fase <= 'G'
+            open_inschrijving = comp.fase_teams <= 'G'
 
             context['rayon'] = self.functie_nu.nhb_rayon
 
@@ -224,7 +224,7 @@ class RayonTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase <= 'K' and self.rol_nu == Rollen.ROL_RKO:
+            if comp.fase_teams <= 'K' and self.rol_nu == Rollen.ROL_RKO:
                 team.url_aanpassen = reverse('CompLaagRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': team.pk})
 
