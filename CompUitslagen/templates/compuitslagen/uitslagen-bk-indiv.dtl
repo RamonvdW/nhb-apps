@@ -168,7 +168,7 @@
                             <!-- 5 cols -->
                             <th>Sporter</th>
                             <th class="hide-on-small-only">Vereniging</th>
-                            <th class="center">Gemiddelde</th>
+                            <th class="center">RK score</th>
                             <th></th>   <!-- label: Kampioen Rayon # -->
                             <th>BK scores</th>
 
@@ -194,7 +194,7 @@
                         <!-- 5 cols -->
                         <td>{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen BK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
-                        <td class="center">{{ obj.gemiddelde }}</td>
+                        <td class="center">{{ obj.rk_score }}</td>
                         {% if obj.is_reserve %}
                             <td><i>Reserve</i></td>
                         {% else %}

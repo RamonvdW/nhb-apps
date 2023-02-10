@@ -99,6 +99,11 @@ class UitslagenBKIndivView(TemplateView):
 
         wkl2limiet = dict()    # [pk] = aantal
 
+        if comp.afstand == '18':
+            aantal_pijlen = 2 * 30
+        else:
+            aantal_pijlen = 2 * 25
+
         if deelkamp_bk.heeft_deelnemerslijst:
             # deelnemers/reserveschutters van het BK tonen
             deelnemers = (KampioenschapSporterBoog
@@ -166,6 +171,8 @@ class UitslagenBKIndivView(TemplateView):
                 deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
                 deelnemer.geen_deelname_risico = deelnemer.sporterboog.sporter.bij_vereniging != deelnemer.bij_vereniging
+
+                deelnemer.rk_score = round(deelnemer.gemiddelde * aantal_pijlen)
 
                 if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True

@@ -1155,12 +1155,23 @@ class Command(BaseCommand):
         # verwijder alle deelnemers van een voorgaande run
         KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk).delete()
 
+        # maak een vertaal tabel voor de individuele klassen voor seizoen 2022/2023
+        # 1410 TR jeugd kl1  --> 1400 TR kl 1
+        # 1210 C Onder21 kl1 --> 1200 C kl 1
+        # 1221 C Onder18 kl2 --> 1220 C Onder18 kl1
+        temp_klassen_map = dict()
+        temp_klassen_map[1410] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1400)
+        temp_klassen_map[1210] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1200)
+        temp_klassen_map[1221] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1220)
+
         bulk = list()
         for kampioen in (KampioenschapSporterBoog
                          .objects
                          .filter(kampioenschap__competitie=comp,
-                                 kampioenschap__deel=DEEL_RK)
+                                 kampioenschap__deel=DEEL_RK,
+                                 result_rank__lt=100)
                          .exclude(deelname=DEELNAME_NEE)
+                         .exclude(result_rank=0)
                          .select_related('kampioenschap',
                                          'kampioenschap__nhb_rayon',
                                          'indiv_klasse',
@@ -1175,12 +1186,18 @@ class Command(BaseCommand):
             else:
                 gemiddelde_scores = "%03d%03d" % (kampioen.result_score_2, kampioen.result_score_1)
 
-            print('kampioen:', kampioen.result_rank, som_scores, gemiddelde_scores, "%.3f" % gemiddelde, kampioen)
+            # print('kampioen:', kampioen.result_rank, som_scores, gemiddelde_scores, "%.3f" % gemiddelde, kampioen)
+
+            try:
+                indiv_klasse = temp_klassen_map[kampioen.indiv_klasse.volgorde]
+            except KeyError:
+                # behoud oude klasse
+                indiv_klasse = kampioen.indiv_klasse
 
             nieuw = KampioenschapSporterBoog(
                         kampioenschap=deelkamp_bk,
                         sporterboog=kampioen.sporterboog,
-                        indiv_klasse=kampioen.indiv_klasse,
+                        indiv_klasse=indiv_klasse,
                         bij_vereniging=kampioen.bij_vereniging,
                         gemiddelde=gemiddelde,
                         gemiddelde_scores=gemiddelde_scores)
@@ -1214,9 +1231,6 @@ class Command(BaseCommand):
 
             # individuele deelnemers vaststellen
             self._maak_deelnemerslijst_bks(comp)
-
-            # teams vaststellen
-            krak
 
             # ga door naar fase P
             comp.alle_rks_afgesloten = True
