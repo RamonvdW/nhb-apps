@@ -93,7 +93,7 @@
             {% endif %}
 
             {% if url_uitslagen %}
-                {% include 'plein/card.dtl' with title='Uitslagen' text='Toon de uitslagen van deze competitie' icon="scoreboard" url=url_uitslagen %}
+                {% include 'plein/card.dtl' with title='Uitslagenlijsten' text='Toon de deelnemerslijsten en uitslagen van deze competitie' icon="scoreboard" url=url_uitslagen %}
             {% endif %}
         </div>
     </div>
@@ -150,7 +150,7 @@
 
             <!-- BKO kaartjes -->
             {% if bko_doorzetten_indiv %}
-                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten_indiv.titel_doorzetten icon="mediation" url=bko_doorzetten_indiv.url_doorzetten %}
+                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten_indiv.titel_doorzetten icon="mediation" url=bko_doorzetten_indiv.url_doorzetten_indiv %}
             {% endif %}
 
             <!-- BK selectie -->
@@ -240,7 +240,7 @@
 
             <!-- BKO kaartjes -->
             {% if bko_doorzetten_teams %}
-                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten_teams.titel_doorzetten icon="mediation" url=bko_doorzetten_teams.url_doorzetten %}
+                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten_teams.titel_doorzetten icon="mediation" url=bko_doorzetten_teams.url_doorzetten_teaqms %}
             {% endif %}
 
             {% if regio_instellingen_globaal %}

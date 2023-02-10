@@ -38,6 +38,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
     url_regio_teams_bestand = '/bondscompetities/regio/%s/teams/als-bestand/'     # deelcomp_pk
     url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'                     # deelcomp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
+    url_overzicht_beheer = '/bondscompetities/%s/beheer/'                                       # comp_pk
 
     testdata = None
 
@@ -530,7 +531,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # start de eerste ronde op
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
         # nog een paar om concurrency echt flink te testen
         self.client.post(url, {'snel': 1})
@@ -614,7 +615,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # start de eerste ronde op
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
         self.verwerk_regiocomp_mutaties()
 
@@ -680,7 +681,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # start de eerste ronde op
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
         self.verwerk_regiocomp_mutaties()
 
@@ -737,7 +738,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # start de eerste ronde op
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
         self.verwerk_regiocomp_mutaties()
 

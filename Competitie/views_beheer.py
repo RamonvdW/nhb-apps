@@ -249,15 +249,15 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
                 # - de regiocompetitie door te zetten naar de rayonkampioenschappen
                 # - de RK door te zetten naar de BK
                 if comp.fase_indiv == 'G':      # teams volgt
-                    comp.url_doorzetten = reverse('CompBeheer:bko-doorzetten-regio-naar-rk',
-                                                  kwargs={'comp_pk': comp.pk})
+                    comp.url_doorzetten_indiv = reverse('CompBeheer:bko-doorzetten-regio-naar-rk',
+                                                        kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (regio naar RK)' % comp.beschrijving
                     context['bko_doorzetten_indiv'] = comp
 
                 elif comp.fase_indiv == 'L':
                     # afsluiten RK individueel
-                    comp.url_doorzetten= reverse('CompBeheer:bko-rk-indiv-doorzetten-naar-bk',
-                                                 kwargs={'comp_pk': comp.pk})
+                    comp.url_doorzetten_indiv = reverse('CompBeheer:bko-rk-indiv-doorzetten-naar-bk',
+                                                        kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s individueel doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
                     context['bko_doorzetten_indiv'] = comp
 
@@ -272,22 +272,22 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
 
                 elif comp.fase_indiv == 'P':
                     # bevestig uitslag BK individueel
-                    comp.url_doorzetten = reverse('CompBeheer:bko-bevestig-eindstand-bk-indiv',
-                                                  kwargs={'comp_pk': comp.pk})
+                    comp.url_doorzetten_indiv = reverse('CompBeheer:bko-bevestig-eindstand-bk-indiv',
+                                                        kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s uitslag BK individueel bevestigen' % comp.beschrijving
                     context['bko_doorzetten_indiv'] = comp
 
                 # teams
                 if comp.fase_teams == 'L':
-                    comp.url_doorzetten = reverse('CompBeheer:bko-rk-teams-doorzetten-naar-bk',
-                                                  kwargs={'comp_pk': comp.pk})
+                    comp.url_doorzetten_teams = reverse('CompBeheer:bko-rk-teams-doorzetten-naar-bk',
+                                                        kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s teams doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
                     context['bko_doorzetten_teams'] = comp
 
                 elif comp.fase_teams == 'P':
                     # bevestig uitslag BK teams
-                    comp.url_doorzetten = reverse('CompBeheer:bko-bevestig-eindstand-bk-teams',
-                                                  kwargs={'comp_pk': comp.pk})
+                    comp.url_doorzetten_teams = reverse('CompBeheer:bko-bevestig-eindstand-bk-teams',
+                                                        kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s uitslag BK teams bevestigen' % comp.beschrijving
                     context['bko_doorzetten_teams'] = comp
 

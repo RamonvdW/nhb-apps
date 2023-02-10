@@ -35,6 +35,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
     url_team_invallers = '/bondscompetities/regio/teams-vereniging/%s/invallers/'               # deelcomp_pk
     url_team_invallers_koppelen = '/bondscompetities/regio/teams-vereniging/invallers-koppelen/%s/'  # ronde_team_pk
     url_rcl_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'                           # deelcomp_pk
+    url_overzicht_beheer = '/bondscompetities/%s/beheer/'                                       # comp_pk
 
     testdata = None
 
@@ -893,7 +894,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         url = self.url_rcl_volgende_ronde % self.deelcomp18_regio111.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.comp_18.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.comp_18.pk)
 
         self.verwerk_regiocomp_mutaties()
         self.assertEqual(2, RegiocompetitieRondeTeam.objects.count())

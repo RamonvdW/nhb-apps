@@ -229,7 +229,7 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_initieel(self, competitie, deel):
         # bepaal de volgorde en rank van de deelnemers
-        # in alle klassen van de RK of BK regiocompetities
+        # in alle klassen van de RK of BK
 
         # via deelnemer kunnen we bepalen over welke kampioenschappen dit gaat
         for deelkamp in (Kampioenschap
@@ -1154,6 +1154,16 @@ class Command(BaseCommand):
         # verwijder alle deelnemers van een voorgaande run
         KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk).delete()
 
+        # TODO: verwijder dit zodra het kaartje gemaakt i
+        # maak een vertaal tabel voor de individuele klassen voor seizoen 2022/2023
+        # 1410 TR jeugd kl1  --> 1400 TR kl 1
+        # 1210 C Onder21 kl1 --> 1200 C kl 1
+        # 1221 C Onder18 kl2 --> 1220 C Onder18 kl1
+        temp_klassen_map = dict()
+        temp_klassen_map[1410] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1400)
+        temp_klassen_map[1210] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1200)
+        temp_klassen_map[1221] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1220)
+
         bulk = list()
         for kampioen in (KampioenschapSporterBoog
                          .objects
@@ -1178,10 +1188,16 @@ class Command(BaseCommand):
 
             # print('kampioen:', kampioen.result_rank, som_scores, gemiddelde_scores, "%.3f" % gemiddelde, kampioen)
 
+            try:
+                indiv_klasse = temp_klassen_map[kampioen.indiv_klasse.volgorde]
+            except KeyError:
+                # behoud oude klasse
+                indiv_klasse = kampioen.indiv_klasse
+
             nieuw = KampioenschapSporterBoog(
                         kampioenschap=deelkamp_bk,
                         sporterboog=kampioen.sporterboog,
-                        indiv_klasse=kampioen.indiv_klasse,
+                        indiv_klasse=indiv_klasse,
                         bij_vereniging=kampioen.bij_vereniging,
                         gemiddelde=gemiddelde,
                         gemiddelde_scores=gemiddelde_scores)

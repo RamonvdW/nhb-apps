@@ -170,32 +170,34 @@ class DoorzettenIndivRKNaarBKView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
+        context['comp'] = comp
+
         comp.bepaal_fase()
         if comp.fase_indiv != 'L':
             raise Http404('Verkeerde competitie fase')
 
-        if comp.fase == 'N':
-            # klaar om door te zetten
-            context['url_doorzetten'] = reverse('CompBeheer:bko-doorzetten-naar-bk',
+        # bepaal de status van elk rayon
+
+        status2str = {True: 'Afgesloten', False: 'Actief'}
+
+        context['rk_status'] = deelkamps = (Kampioenschap
+                                            .objects
+                                            .select_related('nhb_rayon')
+                                            .filter(competitie=comp,
+                                                    deel=DEEL_RK)
+                                            .order_by('nhb_rayon__rayon_nr'))
+        klaar = True
+        for deelkamp in deelkamps:
+            deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
+            deelkamp.status_str = status2str[deelkamp.is_afgesloten]
+            deelkamp.indiv_str = status2str[deelkamp.is_klaar_indiv]
+            if not deelkamp.is_klaar_indiv:
+                klaar = False
+        # for
+
+        if klaar:
+            context['url_doorzetten'] = reverse('CompBeheer:bko-rk-indiv-doorzetten-naar-bk',
                                                 kwargs={'comp_pk': comp.pk})
-        else:
-            # bepaal de status van elk rayon
-
-            status2str = {True: 'Afgesloten', False: 'Actief'}
-
-            context['rk_status'] = deelkamps = (Kampioenschap
-                                                .objects
-                                                .select_related('nhb_rayon')
-                                                .filter(competitie=comp,
-                                                        deel=DEEL_RK)
-                                                .order_by('nhb_rayon__rayon_nr'))
-            for deelkamp in deelkamps:
-                deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
-                deelkamp.status_str = status2str[deelkamp.is_afgesloten]
-                deelkamp.indiv_str = status2str[deelkamp.is_klaar_indiv]
-                deelkamp.team_str = status2str[deelkamp.is_klaar_teams]
-
-        context['comp'] = comp
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -222,7 +224,7 @@ class DoorzettenIndivRKNaarBKView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase != 'N':
+        if comp.fase_indiv != 'L':
             raise Http404('Verkeerde competitie fase')
 
         # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
@@ -270,7 +272,7 @@ class DoorzettenTeamsRKNaarBKView(UserPassesTestMixin, TemplateView):
 
         if comp.fase == 'N':
             # klaar om door te zetten
-            context['url_doorzetten'] = reverse('CompBeheer:bko-doorzetten-naar-bk',
+            context['url_doorzetten'] = reverse('CompBeheer:bko-rk-teams-doorzetten-naar-bk',
                                                 kwargs={'comp_pk': comp.pk})
         else:
             # bepaal de status van elk rayon
@@ -316,7 +318,7 @@ class DoorzettenTeamsRKNaarBKView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase != 'N':
+        if comp.fase_teams != 'L':
             raise Http404('Verkeerde competitie fase')
 
         # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
@@ -370,7 +372,8 @@ class BevestigEindstandBKIndivView(UserPassesTestMixin, TemplateView):
         if comp.fase_indiv != 'P':          # TODO: implementatie voor teams
             raise Http404('Verkeerde competitie fase')
 
-        context['url_doorzetten'] = reverse('CompBeheer:bko-doorzetten-voorbij-bk', kwargs={'comp_pk': comp.pk})
+        context['url_doorzetten'] = reverse('CompBeheer:bko-bevestig-eindstand-bk-indiv',
+                                            kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -447,7 +450,8 @@ class BevestigEindstandBKTeamsView(UserPassesTestMixin, TemplateView):
         if comp.fase_indiv != 'P':          # TODO: implementatie voor teams
             raise Http404('Verkeerde competitie fase')
 
-        context['url_doorzetten'] = reverse('CompBeheer:bko-doorzetten-voorbij-bk', kwargs={'comp_pk': comp.pk})
+        context['url_doorzetten'] = reverse('CompBeheer:bko-bevestig-eindstand-bk-teams',
+                                            kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
