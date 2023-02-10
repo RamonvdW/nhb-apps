@@ -203,8 +203,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
             deelkamp = (DeelKampioenschap
                         .objects
-                        .select_related('competitie',
-                                        'nhb_rayon')
+                        .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_BK))
         except (ValueError, DeelKampioenschap.DoesNotExist):
@@ -248,7 +247,12 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde', 'Notities'])
+        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'RK score', 'Notities'])
+
+        if deelkamp.competitie.afstand == '18':
+            aantal_pijlen = 2 * 30
+        else:
+            aantal_pijlen = 2 * 25
 
         for deelnemer in deelnemers:
 
@@ -273,8 +277,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
                         label += " "
                     label += "(deelname onzeker)"
 
-                gem_str = "%.3f" % deelnemer.gemiddelde
-                gem_str = gem_str.replace('.', ',')     # nederlands
+                rk_score = round(deelnemer.gemiddelde * aantal_pijlen)
 
                 para_notities = ''
 
@@ -295,7 +298,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
                                  ver_str,                  # [nnnn] Naam
                                  label,
                                  deelnemer.indiv_klasse.beschrijving,
-                                 gem_str,
+                                 rk_score,
                                  para_notities])
         # for
 
