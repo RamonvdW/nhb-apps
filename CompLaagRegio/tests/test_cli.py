@@ -349,8 +349,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('regios_afsluiten', '18', '101', '102')
-
-        self.assertTrue('[ERROR] Competitie in fase A is niet ondersteund' in f1.getvalue())
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue('[ERROR] Competitie in fase_indiv A is niet ondersteund' in f1.getvalue())
 
         zet_competitie_fases(self.comp, 'G', 'G')
 

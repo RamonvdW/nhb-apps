@@ -32,7 +32,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'          # comp_pk
     url_doorzetten_rk_naar_bk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'    # comp_pk
     url_doorzetten_rk_naar_bk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'    # comp_pk
-    url_doorzetten_voorbij_bk = '/bondscompetities/beheer/%s/doorzetten-voorbij-bk/'            # comp_pk
+    url_bevestig_eindstand_bk_indiv = '/bondscompetities/beheer/%s/bk-indiv-eindstand-bevestigen/'  # comp_pk
+    url_bevestig_eindstand_bk_teams = '/bondscompetities/beheer/%s/bk-teams-eindstand-bevestigen/'  # comp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'      # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
@@ -406,10 +407,16 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(self.url_doorzetten_rk_naar_bk_teams % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
-        resp = self.client.get(self.url_doorzetten_voorbij_bk % 999999)
+        resp = self.client.get(self.url_bevestig_eindstand_bk_indiv % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
-        resp = self.client.post(self.url_doorzetten_voorbij_bk % 999999)
+        resp = self.client.post(self.url_bevestig_eindstand_bk_indiv % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        resp = self.client.get(self.url_bevestig_eindstand_bk_teams % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        resp = self.client.post(self.url_bevestig_eindstand_bk_teams % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
         # juiste comp_pk maar verkeerde fase
@@ -432,13 +439,19 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(self.url_doorzetten_rk_naar_bk_teams % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
 
-        resp = self.client.get(self.url_doorzetten_voorbij_bk % self.comp_18.pk)
+        resp = self.client.get(self.url_bevestig_eindstand_bk_indiv % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
 
-        resp = self.client.post(self.url_doorzetten_voorbij_bk % self.comp_18.pk)
+        resp = self.client.post(self.url_bevestig_eindstand_bk_indiv % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
 
-    def test_doorzetten_voorbij_bk(self):
+        resp = self.client.get(self.url_bevestig_eindstand_bk_teams % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        resp = self.client.post(self.url_bevestig_eindstand_bk_teams % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+    def test_bevestig_eindstand_bk_indiv(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
@@ -447,7 +460,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase_indiv, 'P')
 
-        url = self.url_doorzetten_voorbij_bk % self.comp_18.pk
+        url = self.url_bevestig_eindstand_bk_indiv % self.comp_18.pk
 
         # pagina ophalen
         resp = self.client.get(url)
