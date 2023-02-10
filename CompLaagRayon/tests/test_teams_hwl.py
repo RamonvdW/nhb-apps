@@ -11,7 +11,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.definities import DEEL_RK
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
@@ -343,7 +343,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Competitie is niet in de juiste fase 1')
 
         # zet competitie in fase F
-        zet_competitie_fases(self.comp_18, 'F', 'F')
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
         # competitie in de verkeerde fase
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=30):
@@ -437,7 +437,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase E
-        zet_competitie_fases(self.comp_25, 'F', 'F')
+        zet_competitie_fase_regio_wedstrijden(self.comp_25)
 
         # verplaats het openingstijdstip
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
@@ -463,7 +463,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase F (nodig om een team aan te maken)
-        zet_competitie_fases(self.comp_18, 'F', 'F')
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             # maak een team aan
@@ -502,7 +502,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                                  nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
             # zet competitie in fase E (nodig om een team aan te maken)
-            zet_competitie_fases(self.comp_25, 'F', 'F')
+            zet_competitie_fase_regio_wedstrijden(self.comp_25)
 
             # maak een team aan
             team.delete()

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Competitie.definities import DEELNAME_NEE
 from Competitie.models import KampioenschapSporterBoog
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -57,8 +57,8 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
         cls.testdata.maak_rk_deelnemers(25, ver_nr, 101)                # ander rayon
 
         # zet de competities in fase L
-        zet_competitie_fases(cls.testdata.comp18, 'L', 'L')
-        zet_competitie_fases(cls.testdata.comp25, 'L', 'L')
+        zet_competitie_fase_rk_wedstrijden(cls.testdata.comp18)
+        zet_competitie_fase_rk_wedstrijden(cls.testdata.comp25)
 
         # prev_klasse = None
         # for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand=18).prefetch_related('indiv_klasse').order_by('indiv_klasse__volgorde'):

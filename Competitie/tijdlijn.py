@@ -227,6 +227,30 @@ def zet_competitie_fases(comp, indiv_fase, team_fase):
     comp.save()
 
 
+def zet_competitie_fase_regio_prep(comp):
+    zet_competitie_fases(comp, 'B', 'B')
+
+
+def zet_competitie_fase_regio_inschrijven(comp):
+    zet_competitie_fases(comp, 'C', 'C')
+
+
+def zet_competitie_fase_regio_wedstrijden(comp):
+    zet_competitie_fases(comp, 'F', 'F')
+
+
+def zet_competitie_fase_rk_prep(comp):
+    zet_competitie_fases(comp, 'J', 'J')
+
+
+def zet_competitie_fase_rk_wedstrijden(comp):
+    zet_competitie_fases(comp, 'L', 'L')
+
+
+def zet_competitie_fase_afsluiten(comp):
+    zet_competitie_fases(comp, 'Q', 'Q')
+
+
 def bepaal_fase_indiv(comp) -> str:
     """ bepaal de fase van de individuele competitie """
 

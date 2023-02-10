@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEEL_RK
 from Competitie.models import KampioenschapTeam, Kampioenschap
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -19,9 +19,8 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # deelkamp_pk
-    url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset
-    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                       # comp_pk
+    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'                           # deelkamp_pk
+    url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'                    # comp_pk, subset
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
     regio_nr = 101
@@ -137,7 +136,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
 
         # stel de RK/BK klassegrenzen vast
-        zet_competitie_fases(self.testdata.comp25, 'J', 'J')
+        zet_competitie_fase_rk_prep(self.testdata.comp25)
         resp = self.client.post(self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)
 

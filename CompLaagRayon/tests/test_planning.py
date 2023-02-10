@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                KampioenschapIndivKlasseLimiet, RegiocompetitieSporterBoog,
                                CompetitieMutatie)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum
+from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_rk_prep
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Uitslag
@@ -39,7 +39,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'      # deelcomp_pk
     url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
     url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'                        # deelcomp_pk
-    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                        # comp_pk
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'  # comp_pk
+    url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'    # comp_pk
+    url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'    # comp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp.pk
 
     testdata = None
@@ -211,9 +213,6 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
                 deelcomp.is_afgesloten = True
                 deelcomp.save(update_fields=['is_afgesloten'])
         # for
-
-        #comp.regiocompetitie_is_afgesloten = True
-        #comp.save(update_fields=['regiocompetitie_is_afgesloten'])
 
         comp.bepaal_fase()
         # print('competitie_sluit_alle_regiocompetities: comp: %s --> fase_indiv=%s, fase_teams=%s' % (comp, comp.fase_indiv, comp.fase_teams))
@@ -625,7 +624,6 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_alvast_afgemeld(self):
-
         # maak een deelnemer aan die wel mee wilt doen met het RK
         deelnemer = RegiocompetitieSporterBoog(
                                 sporterboog=self.sporterboog,
@@ -661,7 +659,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        resp = self.client.post(self.url_doorzetten_regio_naar_rk % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # laat de mutaties verwerken
@@ -690,7 +688,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        resp = self.client.post(self.url_doorzetten_regio_naar_rk % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # laat de mutaties verwerken
@@ -830,7 +828,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko2_18)
         self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
-        zet_competitie_fases(self.comp_18, 'J', 'J')
+        zet_competitie_fase_rk_prep(self.comp_18)
 
         deelnemer = KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,
                                              sporterboog=self.sporterboog,
@@ -852,7 +850,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
-        zet_competitie_fases(self.comp_18, 'J', 'J')
+        zet_competitie_fase_rk_prep(self.comp_18)
 
         deelnemer = KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,
                                              sporterboog=self.sporterboog,
@@ -878,22 +876,22 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assertEqual(CompetitieMutatie.objects.count(), 0)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0', 'snel': 1})
+            self.client.post(url, {'bevestig': '0', 'afmelden': '0', 'snel': 1})
         self.assertEqual(CompetitieMutatie.objects.count(), 0)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
+            self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
         self.assertEqual(CompetitieMutatie.objects.count(), 1)
 
         # bevestigen mag niet, want geen lid bij vereniging
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
+            self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
         self.assertEqual(CompetitieMutatie.objects.count(), 1)
 
         # verbouw 'time' en voer een test uit zonder 'snel'
         time.sleep = self._dummy_sleep
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1'})
+            self.client.post(url, {'bevestig': '0', 'afmelden': '1'})
         time.sleep = sleep_oud
         self.assertEqual(CompetitieMutatie.objects.count(), 2)
 
@@ -902,7 +900,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        zet_competitie_fases(self.comp_18, 'J', 'J')
+        zet_competitie_fase_rk_prep(self.comp_18)
 
         deelnemer = KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,
                                              sporterboog=self.sporterboog,

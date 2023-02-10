@@ -239,9 +239,15 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
 
+        if self.rol_nu == Rollen.ROL_HWL:
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+        else:
+            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (comp_url, comp.beschrijving.replace(' competitie', '')),
             (None, 'Planning'),
         )
 
@@ -346,9 +352,15 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
 
+        if self.rol_nu == Rollen.ROL_HWL:
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+        else:
+            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (comp_url, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk}), 'Planning'),
             (None, 'Cluster')
         )
@@ -566,14 +578,20 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         if len(niet_lijst):
             context['wkl_niet_gebruikt'] = [beschrijving for _, beschrijving in niet_lijst]
 
+        comp = ronde.regiocompetitie.competitie
+
         if self.rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
 
-        comp = ronde.regiocompetitie.competitie
+        if self.rol_nu == Rollen.ROL_HWL:
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+        else:
+            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = [
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (comp_url, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
             (None, 'Week')
         ]
@@ -768,17 +786,23 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         comp = ronde.regiocompetitie.competitie
 
+        if self.rol_nu == Rollen.ROL_HWL:
+            # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+        else:
+            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+
         if ronde.cluster:
             context['kruimels'] = [
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (comp_url, comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
                 (None, 'Cluster wedstrijden')
             ]
         else:
             context['kruimels'] = [
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (comp_url, comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
                 (None, 'Wedstrijden')
             ]

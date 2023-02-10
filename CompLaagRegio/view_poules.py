@@ -130,7 +130,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'D':
+        if comp.fase_teams > 'D':
             raise Http404('Poules kunnen niet meer aangepast worden')
 
         aantal = (RegiocompetitieTeamPoule

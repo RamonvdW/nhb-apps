@@ -14,7 +14,8 @@ from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMutatie, KampioenschapSporterBoog)
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                 zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden)
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -53,7 +54,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         cls.testdata.maak_label_regiokampioenen(25, cls.regio_nr_begin, cls.regio_nr_einde)
 
         # zet de competitie in fase J
-        zet_competitie_fases(cls.testdata.comp18, 'J', 'J')
+        zet_competitie_fase_rk_prep(cls.testdata.comp18)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -966,9 +967,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_status % 999999)
         self.assert404(resp, 'Deelnemer niet gevonden')
 
-        # fase E
+        # fase F
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
-        zet_competitie_fases(comp, 'F', 'F')
+        zet_competitie_fase_regio_wedstrijden(comp)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assert404(resp, 'Pagina kan nog niet gebruikt worden')
@@ -1015,7 +1016,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties()
 
-        zet_competitie_fases(comp, 'L', 'L')
+        zet_competitie_fase_rk_wedstrijden(comp)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

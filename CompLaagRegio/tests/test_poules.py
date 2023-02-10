@@ -11,7 +11,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum
+from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum, zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -274,7 +274,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # na fase D mag je nog kijken maar niet aanpassen
         comp = deelcomp.competitie
-        zet_competitie_fases(comp, 'F', 'F')
+        zet_competitie_fase_regio_wedstrijden(comp)
 
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):
@@ -336,7 +336,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # tot en met fase D mag alles nog
         comp = deelcomp.competitie
-        zet_competitie_fases(comp, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(comp)
 
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):

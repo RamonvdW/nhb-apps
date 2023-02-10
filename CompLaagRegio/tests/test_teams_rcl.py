@@ -564,7 +564,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # doorzetten met scores werkt wel
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
@@ -587,7 +587,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # doorzetten
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
@@ -649,7 +649,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # doorzetten met scores werkt wel
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
@@ -710,7 +710,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # doorzetten met scores werkt wel
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
@@ -760,7 +760,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
         self.verwerk_regiocomp_mutaties()
 
         self.deelcomp_regio112_18 = Regiocompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
@@ -769,7 +769,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         # nog een keer doorzetten doet niets
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.deelcomp_regio112_18.competitie.pk)
 
         # laat de laatste mutatie (doorzetten ronde 7) nog een keer verwerken
         self.assertEqual(1, CompetitieMutatie.objects.count())

@@ -22,8 +22,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
     url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
     url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rayon-teams/'                    # comp_pk, team_type
     url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
-
-    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                              # comp_pk
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'          # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
     regio_nr = 101
@@ -41,7 +40,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         cls.ver_nr = ver_nr = data.regio_ver_nrs[cls.regio_nr][2]
         data.maak_bondscompetities()
         data.maak_inschrijvingen_regiocompetitie(18, ver_nr=ver_nr)     # tijdelijke RK deelnemerslijst
-        #data.maak_inschrijvingen_regiocompetitie(25, ver_nr=ver_nr)
+        # data.maak_inschrijvingen_regiocompetitie(25, ver_nr=ver_nr)
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
         s2 = timezone.now()
         d = s2 - s1
@@ -128,7 +127,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
         zet_competitie_fases(self.testdata.comp18, 'G', 'G')
 
-        url = self.url_doorzetten_rk % self.testdata.comp18.pk
+        url = self.url_doorzetten_regio_naar_rk % self.testdata.comp18.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
         self.verwerk_regiocomp_mutaties()
@@ -236,7 +235,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
         zet_competitie_fases(self.testdata.comp25, 'G', 'G')
 
-        url = self.url_doorzetten_rk % self.testdata.comp25.pk
+        url = self.url_doorzetten_regio_naar_rk % self.testdata.comp25.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
         self.verwerk_regiocomp_mutaties()

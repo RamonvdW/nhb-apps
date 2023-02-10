@@ -7,7 +7,7 @@
 from Competitie.models import Competitie
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                                    competitie_klassengrenzen_vaststellen)
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
 
 
 def maak_competities_en_zet_fase_c(startjaar=None):
@@ -31,8 +31,8 @@ def maak_competities_en_zet_fase_c(startjaar=None):
     competitie_klassengrenzen_vaststellen(comp_18)
     competitie_klassengrenzen_vaststellen(comp_25)
 
-    zet_competitie_fases(comp_18, 'C', 'C')
-    zet_competitie_fases(comp_25, 'C', 'C')
+    zet_competitie_fase_regio_inschrijven(comp_18)
+    zet_competitie_fase_regio_inschrijven(comp_25)
 
     return comp_18, comp_25
 

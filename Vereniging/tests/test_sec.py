@@ -8,7 +8,7 @@ from django.test import TestCase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
@@ -257,7 +257,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -288,7 +288,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

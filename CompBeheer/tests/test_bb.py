@@ -10,7 +10,7 @@ from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSC
 from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie)
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_afsluiten
 from Functie.operations import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -660,7 +660,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)        # redirect = success
 
         # kies pagina ophalen als BB, dan worden alle competities getoond
-        zet_competitie_fases(comp_18, 'B', 'B')
+        zet_competitie_fase_regio_prep(comp_18)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)
@@ -723,8 +723,8 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # fase Q: alle BK's afgesloten
-        zet_competitie_fases(self.comp_18, 'Q', 'Q')
-        zet_competitie_fases(self.comp_25, 'Q', 'Q')
+        zet_competitie_fase_afsluiten(self.comp_18)
+        zet_competitie_fase_afsluiten(self.comp_25)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_seizoen_afsluiten)

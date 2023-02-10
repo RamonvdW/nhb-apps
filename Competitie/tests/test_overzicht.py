@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_prep
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.definities import Rollen
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -94,7 +94,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # zet competitie fase B zodat we in mogen schrijven
-        zet_competitie_fases(comp, 'B', 'B')
+        zet_competitie_fase_regio_prep(comp)
 
         # uitslagen met competitie in prep fase (C+)
         comp.begin_fase_C = way_before   # fase B

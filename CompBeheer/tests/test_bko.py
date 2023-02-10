@@ -11,7 +11,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, Kampioenschap,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog)
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -29,8 +29,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_competitie_beheer = '/bondscompetities/%s/beheer/'                                      # comp_pk
-    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                            # comp_pk
-    url_doorzetten_bk = '/bondscompetities/beheer/%s/doorzetten-bk/'                            # comp_pk
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'      # comp_pk
+    url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/doorzetten-rk/'                      # comp_pk
+    url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/doorzetten-rk/'                      # comp_pk
+    url_doorzetten_bk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'        # comp_pk
+    url_doorzetten_bk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'        # comp_pk
     url_doorzetten_voorbij_bk = '/bondscompetities/beheer/%s/doorzetten-voorbij-bk/'            # comp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
@@ -216,7 +219,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        url = self.url_doorzetten_rk % self.comp_18.pk
+        url = self.url_doorzetten_regio_naar_rk % self.comp_18.pk
 
         # TODO: deze logica gaat veranderen + opsplitsing indiv/teams
         # fase F: pagina zonder knop 'doorzetten'
@@ -403,7 +406,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie niet gevonden')
 
         # juiste comp_pk maar verkeerde fase
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
         resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
 

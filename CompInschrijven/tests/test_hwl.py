@@ -13,7 +13,7 @@ from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHOD
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog,
                                Kampioenschap, RegiocompetitieRonde, CompetitieMatch)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -365,7 +365,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie fase')
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         # stel 1 schutter in die op randje aspirant/cadet zit
         self._zet_sporter_voorkeuren(100004)
@@ -488,7 +488,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100003, 25)
 
         url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -552,7 +552,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100003, 25)
 
         url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -617,7 +617,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_sporter_voorkeuren(100003)
 
         url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(25):
             resp = self.client.get(url)
@@ -635,7 +635,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
     def test_aanmelden_team(self):
         url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         # anon
         self.e2e_logout()
@@ -688,7 +688,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         url = self.url_aanmelden % self.comp_18.pk
         with self.assert_max_queries(20):
@@ -777,7 +777,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_sporter_voorkeuren(100002)
         self._zet_ag(100002, 18)
         url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
         # zet het min_ag te hoog
         for klasse in CompetitieIndivKlasse.objects.filter(competitie=self.comp_18, boogtype__afkorting='R', min_ag__lt=8.0):
             klasse.min_ag = 8.0     # > 7.42 van zet_ag
@@ -806,7 +806,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         regio.save()
 
         url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -819,7 +819,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
     def test_met_ag_teams(self):
         url = self.url_aanmelden % self.comp_18.pk
-        zet_competitie_fases(self.comp_18, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         # anon
         self.e2e_logout()

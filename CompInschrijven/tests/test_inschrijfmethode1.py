@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, CompetitieMatch, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -147,7 +147,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
         # zet de datum voor inschrijven op vandaag
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            zet_competitie_fases(comp, 'C', 'C')
+            zet_competitie_fase_regio_inschrijven(comp)
         # for
 
     def _maak_wedstrijden(self):
@@ -360,7 +360,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # landelijk
-        zet_competitie_fases(comp, 'C', 'C')
+        zet_competitie_fase_regio_inschrijven(comp)
         comp.bepaal_fase()
         self.assertEqual(comp.fase_indiv, 'C')
 

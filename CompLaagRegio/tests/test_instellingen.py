@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_prep
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -250,7 +250,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
         # tot en met fase C mogen de team punten en datum aanmaken teams aangepast worden
         oude_punten = 'F1'
-        zet_competitie_fases(self.comp_18, 'B', 'B')
+        zet_competitie_fase_regio_prep(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -281,7 +281,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         self.assertEqual(deelcomp_post.regio_team_punten_model, nieuwe_punten)
 
         # controleer niet meer wijzigbaar in latere fase
-        zet_competitie_fases(self.comp_18, 'F', 'F')
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

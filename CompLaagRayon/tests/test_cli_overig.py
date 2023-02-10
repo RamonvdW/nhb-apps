@@ -8,7 +8,7 @@ from django.test import TestCase
 from Competitie.definities import MUTATIE_INITIEEL
 from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -33,7 +33,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
 
         # zet de competities in fase J
-        zet_competitie_fases(data.comp18, 'J', 'J')
+        zet_competitie_fase_rk_prep(data.comp18)
 
         klasse = (CompetitieIndivKlasse
                   .objects
