@@ -110,7 +110,8 @@
             <div class="row">
                 <div style="padding:10px">
                     <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
-                        <p>Aanmelden of afmelden voor de BK wedstrijd kan bij het bondsbureau tot en met <b>{{ bevestig_tot_datum }}</b></p>
+                        <p>Deelnemers krijgen persoonlijk bericht met verdere instructies</p>
+                        <!-- <p>Aanmelden of afmelden voor de BK wedstrijd kan bij het bondsbureau tot en met <b>{{ bevestig_tot_datum }}</b></p> -->
                     </div>
                 </div>
             </div>

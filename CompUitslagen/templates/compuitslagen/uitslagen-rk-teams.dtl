@@ -224,9 +224,10 @@
                 <td colspan="5" class="nhb-table-onderrand"></td>
             </tr>
         </table>
-    {% endif %}
 
-    <p class="center">Sporter met ** achter de naam is invaller</p>
+        <p class="center">Sporter met ** achter de naam is invaller</p>
+
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rk-teams" %}
 
