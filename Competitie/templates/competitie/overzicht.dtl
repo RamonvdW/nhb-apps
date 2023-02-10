@@ -73,7 +73,7 @@
     <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
             <!-- toon klassen -->
-            {% if comp.fase >= 'A2' %}
+            {% if comp.fase_indiv > 'A' %}
                 {% url 'Competitie:klassengrenzen-tonen' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
             {% endif %}

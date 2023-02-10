@@ -122,6 +122,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-statistiek" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-statistiek" %}
 
 {% endblock %}

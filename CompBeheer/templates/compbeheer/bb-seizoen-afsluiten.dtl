@@ -67,7 +67,7 @@
                     {% for comp in comps %}
                         <tr>
                             <td>{{ comp.beschrijving }}</td>
-                            <td class="center {% if comp.fase == 'S' %}green-text{% else %}red white-text{% endif %}">{{ comp.fase }}</td>
+                            <td class="center {% if comp.fase_indiv == 'Q' %}green-text{% else %}red white-text{% endif %}">{{ comp.fase }}</td>
                         </tr>
 
                     {% endfor %}
@@ -76,6 +76,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-afsluiten-competitie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bb-seizoen-afsluiten" %}
 
 {% endblock %}

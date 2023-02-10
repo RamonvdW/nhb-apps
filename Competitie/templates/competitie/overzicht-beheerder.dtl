@@ -129,7 +129,7 @@
                 {% include 'plein/card.dtl' with title="Medailles" text="Toon de toegekende medailles voor elke klasse." icon="military_tech" url=url_medailles %}
             {% endif %}
 
-            {% if comp.fase >= 'E' %}
+            {% if comp.fase_indiv >= 'F' %}
 
                 <!-- RK selectie -->
                 {% if url_lijst_rk %}
@@ -182,7 +182,7 @@
     <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
 
-            {% if comp.url_regio_instellingen and comp.fase < 'B' %}
+            {% if comp.url_regio_instellingen and comp.fase_teams <= 'C' %}
                 {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
             {% endif %}
 
@@ -213,15 +213,15 @@
 
             {% endfor %}
 
-            {% if comp.url_regio_instellingen and comp.fase >= 'B' %}
+            {% if comp.url_regio_instellingen and comp.fase_teams >= 'B' %}
                 {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
             {% endif %}
 
-            {% if comp.url_regio_handmatige_ag and comp.fase >= 'B' %}
+            {% if comp.url_regio_handmatige_ag and comp.fase_teams >= 'B' %}
                 {% include 'plein/card.dtl' with title="AG controle" text="Handmatig ingevoerde aanvangsgemiddelden voor de teamcompetitie." icon="how_to_reg" url=comp.url_regio_handmatige_ag %}
             {% endif %}
 
-            {% if comp.fase >= 'E' %}
+            {% if comp.fase_teams >= 'F' %}
 
                 <!-- RK teams -->
                 {% if url_rayon_teams_alle %}

@@ -452,7 +452,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase > 'G':
+        if deelcomp.competitie.fase_teams > 'G':
             raise Http404('Verkeerde competitie fase')
 
         context['deelcomp'] = deelcomp

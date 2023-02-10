@@ -137,7 +137,7 @@
 
 
     <!-- uitleg over tijdstippen -->
-    {% if not comp.rk_is_afgelast and comp.fase <= 'L' %}
+    {% if not comp.rk_is_afgelast and comp.fase_indiv >= 'J' and comp.fase_indiv <= 'L' %}
         {% if not regiocomp_nog_actief %}
             <div class="row">
                 <div style="padding:10px">

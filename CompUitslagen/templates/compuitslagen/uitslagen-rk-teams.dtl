@@ -29,7 +29,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslag RK teams</h3>
-            <p>{% if comp.fase > 'L' %}Eindstand{% else %}Deelnemerslijst{% endif %} van de rayon<wbr>kampioenschappen voor teams</p>
+            <p>{% if comp.fase_teams > 'L' %}Eindstand{% else %}Deelnemerslijst{% endif %} van de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>
 
@@ -112,7 +112,7 @@
     </div>
 
     <!-- uitleg over tijdstippen -->
-    {% if not comp.rk_is_afgelast and comp.fase <= 'L' %}
+    {% if not comp.rk_is_afgelast and comp.fase_teams >= 'J' and comp.fase_teams <= 'L' %}
 
         <div class="row">
             <div style="padding:10px">

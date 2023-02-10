@@ -191,8 +191,6 @@ class Competitie(models.Model):
     def bepaal_openbaar(self, rol_nu):
         """ deze functie bepaalt of de competitie openbaar is voor de huidige rol
             en zet de is_openbaar variabele op het object.
-
-            let op: self.fase moet gezet zijn
         """
         self.is_openbaar = False
 
