@@ -105,7 +105,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         for obj in (KampioenschapTeam
                     .objects
                     .filter(kampioenschap=deelkamp)
-                    # .exclude(rank=0)        # afgemeld
+                    .exclude(team_klasse=None)
                     .select_related('team_klasse')):
             try:
                 team_klasse2count[obj.team_klasse.pk] += 4
