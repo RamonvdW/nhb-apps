@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from Competitie.models import Kampioenschap, DEEL_BK, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
 
 
 class Command(BaseCommand):
-    help = "Controleer rank, volgorde en gemiddelde in RK deelnemerslijst"
+    help = "Controleer rank, volgorde en gemiddelde in BK deelnemerslijst"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -20,8 +20,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('afstand', type=str, choices=('18', '25'),
                             help='Competitie afstand (18/25)')
-        parser.add_argument('rayon', type=int, choices=range(1, 4+1),
-                            help='rayon nummer (1..4)')
         parser.add_argument('--verbose', action='store_true')
 
     def _out_block(self, block):
@@ -49,10 +47,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         afstand = options['afstand']
-        rayon_nr = options['rayon']
         self.verbose = options['verbose']
 
-        kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, nhb_rayon__rayon_nr=rayon_nr)
+        kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, deel=DEEL_BK)
 
         klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
         for limiet in KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=kampioenschap):
