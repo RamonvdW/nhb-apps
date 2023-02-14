@@ -38,7 +38,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
     url_regio_teams_bestand = '/bondscompetities/regio/%s/teams/als-bestand/'     # deelcomp_pk
     url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'                     # deelcomp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
-    url_overzicht_beheer = '/bondscompetities/%s/beheer/'                                       # comp_pk
+    url_overzicht_beheer = '/bondscompetities/beheer/%s/'                                       # comp_pk
 
     testdata = None
 

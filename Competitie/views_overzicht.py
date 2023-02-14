@@ -114,7 +114,7 @@ class CompetitieOverzichtView(TemplateView):
                                               kwargs={'comp_pk': comp.pk})
 
         if rol_get_huidige(self.request) in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
-            context['url_beheer'] = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+            context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         if rol_get_huidige(self.request) in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL):
             context['url_tijdlijn'] = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})

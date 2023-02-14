@@ -35,7 +35,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
     url_team_invallers = '/bondscompetities/regio/teams-vereniging/%s/invallers/'               # deelcomp_pk
     url_team_invallers_koppelen = '/bondscompetities/regio/teams-vereniging/invallers-koppelen/%s/'  # ronde_team_pk
     url_rcl_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'                           # deelcomp_pk
-    url_overzicht_beheer = '/bondscompetities/%s/beheer/'                                       # comp_pk
+    url_overzicht_beheer = '/bondscompetities/beheer/%s/'                                       # comp_pk
 
     testdata = None
 

@@ -27,7 +27,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     url_kies = '/bondscompetities/'
     url_tijdlijn = '/bondscompetities/%s/tijdlijn/'             # comp_pk
     url_overzicht = '/bondscompetities/%s/'                     # comp_pk
-    url_overzicht_beheer = '/bondscompetities/%s/beheer/'       # comp_pk
+    url_overzicht_beheer = '/bondscompetities/beheer/%s/'       # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
 
     @classmethod

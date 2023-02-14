@@ -385,7 +385,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         else:
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
                 (None, 'Teams'),    # TODO: details invullen
                 (None, 'Wijzig team')
             )
@@ -561,7 +561,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             # RCL
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
+                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                  comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-ag-controle',
                          kwargs={'comp_pk': comp.pk,

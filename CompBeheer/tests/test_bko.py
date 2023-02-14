@@ -28,7 +28,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_competitie_beheer = '/bondscompetities/%s/beheer/'                                          # comp_pk
+    url_competitie_beheer = '/bondscompetities/beheer/%s/'                                          # comp_pk
     url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'          # comp_pk
     url_doorzetten_rk_naar_bk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'    # comp_pk
     url_doorzetten_rk_naar_bk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'    # comp_pk
@@ -326,10 +326,10 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         url = self.url_doorzetten_rk_naar_bk_indiv % self.comp_18.pk
 
-        # fase M: pagina zonder knop 'doorzetten'
-        zet_competitie_fases(self.comp_18, 'N', 'N')
+        # fase L: pagina zonder knop 'doorzetten'
+        zet_competitie_fases(self.comp_18, 'L', 'L')
         self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase_indiv, 'N')
+        self.assertEqual(self.comp_18.fase_indiv, 'L')
 
         # zet een rayon met status 'afgesloten'
         self.deelkamp_rayon1_18.is_afgesloten = True
@@ -342,17 +342,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/bko-doorzetten-naar-bk.dtl', 'plein/site_layout.dtl'))
 
         # alle rayonkampioenschappen afsluiten
-        for obj in Kampioenschap.objects.filter(competitie=self.comp_18,
-                                                is_afgesloten=False,
-                                                deel=DEEL_RK):
-            obj.is_afgesloten = True
-            obj.save()
-        # for
-
-        # fase N: pagina met knop 'doorzetten'
-        zet_competitie_fases(self.comp_18, 'N', 'N')
-        self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase_indiv, 'N')
+        self.comp_18.rk_indiv_afgesloten = True
+        self.comp_18.save(update_fields=['rk_indiv_afgesloten'])
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

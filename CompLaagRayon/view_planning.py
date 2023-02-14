@@ -237,7 +237,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Planning RK')
         )
 
@@ -505,7 +505,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRayon:rayon-planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
             (None, 'Wijzig RK wedstrijd')
         )
@@ -755,7 +755,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'RK limieten')
         )
 
@@ -935,7 +935,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+        url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         return HttpResponseRedirect(url)
 

@@ -59,7 +59,7 @@ class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):
         context['comp'] = comp
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
-            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         else:
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
 

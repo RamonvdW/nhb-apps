@@ -28,7 +28,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
     url_kies = '/bondscompetities/'
     url_overzicht = '/bondscompetities/%s/'
-    url_overzicht_beheer = '/bondscompetities/%s/beheer/'
+    url_overzicht_beheer = '/bondscompetities/beheer/%s/'
     url_aanmaken = '/bondscompetities/beheer/aanmaken/'
     url_instellingen = '/bondscompetities/beheer/instellingen-volgende-competitie/'
     url_ag_vaststellen_afstand = '/bondscompetities/beheer/ag-vaststellen/%s/'                  # afstand

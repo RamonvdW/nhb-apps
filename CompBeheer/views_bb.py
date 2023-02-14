@@ -221,7 +221,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Aanvangsgemiddelden')
         )
@@ -270,7 +270,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                 mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
             # while
 
-        return redirect('Competitie:beheer', comp_pk=comp.pk)
+        return redirect('CompBeheer:overzicht', comp_pk=comp.pk)
 
 
 class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
@@ -318,7 +318,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Klassegrenzen')
         )
@@ -345,7 +345,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                                'Competitie',
                                'Klassengrenzen vastgesteld voor %s' % comp.beschrijving)
 
-        return redirect('Competitie:beheer', comp_pk=comp.pk)
+        return redirect('CompBeheer:overzicht', comp_pk=comp.pk)
 
 
 class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):

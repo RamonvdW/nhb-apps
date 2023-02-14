@@ -66,7 +66,7 @@ class CompetitieKiesView(TemplateView):
                     comp.img_src = static('plein/badge_nhb_25m1p.png')
 
                 if link_naar_beheer:
-                    comp.card_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+                    comp.card_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
                 else:
                     comp.card_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
 

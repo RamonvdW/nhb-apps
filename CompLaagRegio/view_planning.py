@@ -243,7 +243,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
         else:
-            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -356,7 +356,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
         else:
-            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -587,7 +587,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
         else:
-            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = [
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -790,7 +790,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
         else:
-            comp_url = reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         if ronde.cluster:
             context['kruimels'] = [
@@ -1096,7 +1096,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = [
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
             (url_planning_week, 'Week'),
             (None, 'Wijzig wedstrijd')
@@ -1383,7 +1383,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:beheer', kwargs={'comp_pk': deelcomp.competitie.pk}),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': deelcomp.competitie.pk}),
                 deelcomp.competitie.beschrijving.replace(' competitie', '')),
             (None, 'Sluit regiocompetitie')
         )
