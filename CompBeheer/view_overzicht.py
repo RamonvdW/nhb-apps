@@ -70,8 +70,19 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
                     url=url)
         kaartjes_algemeen.append(kaartje)
 
-    # TODO: Competitie afsluiten
-    # if rol_nu == Rollen.ROL_BB:
+    if rol_nu == Rollen.ROL_BB:
+
+        # Wijzig datums
+        url = reverse('CompBeheer:wijzig-datums', kwargs={'comp_pk': comp.pk})
+        kaartje = SimpleNamespace(
+                    prio=3,
+                    titel="Wijzig datums",
+                    icoon="build",
+                    tekst="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie.",
+                    url=url)
+        kaartjes_algemeen.append(kaartje)
+
+        # TODO: Competitie afsluiten
 
 
 class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
@@ -137,18 +148,26 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
             context['rol_is_klaar'] = False
 
         # kaartjes ophalen bij de verschillende applicaties
-        context['kaartjes_algemeen'] = kaartjes_algemeen = list()
-        context['kaartjes_indiv'] = kaartjes_indiv = list()
-        context['kaartjes_teams'] = kaartjes_teams = list()
+        kaartjes_algemeen = list()
+        kaartjes_indiv = list()
+        kaartjes_teams = list()
 
         get_kaartjes_beheer(self.rol_nu, self.functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams)
         get_kaartjes_regio(self.rol_nu, self.functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams)
         get_kaartjes_rayon(self.rol_nu, self.functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams)
         get_kaartjes_bond(self.rol_nu, self.functie_nu, comp, kaartjes_algemeen, kaartjes_indiv, kaartjes_teams)
 
-        kaartjes_algemeen.sort(key=lambda kaartje: kaartje.prio)
-        kaartjes_indiv.sort(key=lambda kaartje: kaartje.prio)
-        kaartjes_teams.sort(key=lambda kaartje: kaartje.prio)
+        if len(kaartjes_algemeen):
+            kaartjes_algemeen.sort(key=lambda kaartje: kaartje.prio)
+            context['kaartjes_algemeen'] = kaartjes_algemeen
+
+        if len(kaartjes_indiv):
+            kaartjes_indiv.sort(key=lambda kaartje: kaartje.prio)
+            context['kaartjes_indiv'] = kaartjes_indiv
+
+        if len(kaartjes_teams):
+            kaartjes_teams.sort(key=lambda kaartje: kaartje.prio)
+            context['kaartjes_teams'] = kaartjes_teams
 
         eval_open_taken(self.request)
 

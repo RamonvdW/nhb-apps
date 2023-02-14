@@ -197,11 +197,11 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             del context['wkl_niet_gebruikt']
 
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.nhb_rayon == deelkamp.nhb_rayon:
-            context['url_nieuwe_wedstrijd'] = reverse('CompLaagRayon:rayon-planning',
+            context['url_nieuwe_wedstrijd'] = reverse('CompLaagRayon:planning',
                                                       kwargs={'deelkamp_pk': deelkamp.pk})
 
             for wedstrijd in context['wedstrijden_rk']:
-                wedstrijd.url_wijzig = reverse('CompLaagRayon:rayon-wijzig-wedstrijd',
+                wedstrijd.url_wijzig = reverse('CompLaagRayon:wijzig-wedstrijd',
                                                kwargs={'match_pk': wedstrijd.pk})
             # for
 
@@ -271,7 +271,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         deelkamp.rk_bk_matches.add(match)
 
-        return HttpResponseRedirect(reverse('CompLaagRayon:rayon-wijzig-wedstrijd',
+        return HttpResponseRedirect(reverse('CompLaagRayon:wijzig-wedstrijd',
                                             kwargs={'match_pk': match.pk}))
 
 
@@ -498,15 +498,15 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(deelkamp, match)
 
-        context['url_opslaan'] = reverse('CompLaagRayon:rayon-wijzig-wedstrijd', kwargs={'match_pk': match.pk})
+        context['url_opslaan'] = reverse('CompLaagRayon:wijzig-wedstrijd', kwargs={'match_pk': match.pk})
 
-        context['url_verwijderen'] = reverse('CompLaagRayon:rayon-verwijder-wedstrijd',
+        context['url_verwijderen'] = reverse('CompLaagRayon:verwijder-wedstrijd',
                                              kwargs={'match_pk': match.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRayon:rayon-planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
+            (reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning RK'),
             (None, 'Wijzig RK wedstrijd')
         )
 
@@ -660,7 +660,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if len(gekozen_team_klassen):
             match.team_klassen.add(*gekozen_team_klassen)
 
-        url = reverse('CompLaagRayon:rayon-planning', kwargs={'deelkamp_pk': deelkamp.pk})
+        url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)
 
 
@@ -749,7 +749,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             wkl.limiet = limiet.limiet
         # for
 
-        context['url_opslaan'] = reverse('CompLaagRayon:rayon-limieten',
+        context['url_opslaan'] = reverse('CompLaagRayon:limieten',
                                          kwargs={'deelkamp_pk': deelkamp.pk})
 
         comp = deelkamp.competitie
@@ -987,7 +987,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         match.delete()
 
-        url = reverse('CompLaagRayon:rayon-planning', kwargs={'deelkamp_pk': deelkamp.pk})
+        url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp.pk})
         return HttpResponseRedirect(url)
 
 

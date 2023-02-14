@@ -26,8 +26,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_competitie_overzicht = '/bondscompetities/%s/'                                          # comp_pk
-    url_planning = '/bondscompetities/bk/%s/planning/'                                          # deelkamp_pk
-    url_limieten = '/bondscompetities/bk/%s/limieten/'                                          # deelkamp_pk
+    url_planning = '/bondscompetities/bk/planning/%s/'                                          # deelkamp_pk
+    url_limieten = '/bondscompetities/bk/planning/%s/limieten/'                                 # deelkamp_pk
     url_wijzig_wedstrijd = '/bondscompetities/bk/planning/wedstrijd/wijzig/%s/'                 # match.pk
     url_verwijder_wedstrijd = '/bondscompetities/bk/planning/wedstrijd/verwijder/%s/'           # match.pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp.pk

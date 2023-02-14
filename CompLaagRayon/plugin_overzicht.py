@@ -78,7 +78,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         # Planning RK wedstrijden
         url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp_rk.pk})
         kaartje = SimpleNamespace(
-                    prio=5,
+                    prio=3,
                     titel="Planning %s" % deelkamp_rk.nhb_rayon.naam,
                     icoon="pending_actions",
                     tekst="Planning voor %s voor deze competitie." % deelkamp_rk.nhb_rayon.naam,
@@ -98,7 +98,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
 
         # RK limieten (indiv & teams)
         if 'J' <= comp.fase_indiv <= 'L' or 'J' <= comp.fase_teams <= 'L':
-            url = reverse('CompLaagRayon:rayon-limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+            url = reverse('CompLaagRayon:limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
             kaartje = SimpleNamespace(
                         prio=5,
                         titel="RK limieten",

@@ -16,19 +16,19 @@ urlpatterns = [
     # RKO: planning RK
     path('planning/<deelkamp_pk>/limieten/',
          view_planning.RayonLimietenView.as_view(),
-         name='rayon-limieten'),
+         name='limieten'),
 
     path('planning/<deelkamp_pk>/',
          view_planning.RayonPlanningView.as_view(),
-         name='rayon-planning'),
+         name='planning'),
 
     path('planning/wedstrijd/wijzig/<match_pk>/',
          view_planning.WijzigRayonWedstrijdView.as_view(),
-         name='rayon-wijzig-wedstrijd'),
+         name='wijzig-wedstrijd'),
 
     path('planning/wedstrijd/verwijder/<match_pk>/',
          view_planning.VerwijderWedstrijdView.as_view(),
-         name='rayon-verwijder-wedstrijd'),
+         name='verwijder-wedstrijd'),
 
 
     # HWL: individueel

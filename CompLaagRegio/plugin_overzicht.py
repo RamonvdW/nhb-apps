@@ -21,16 +21,6 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
 
     if rol_nu == Rollen.ROL_BB:
 
-        # Wijzig datums
-        url = reverse('CompBeheer:wijzig-datums', kwargs={'comp_pk': comp.pk})
-        kaartje = SimpleNamespace(
-                    prio=5,
-                    titel="Wijzig datums",
-                    icoon="build",
-                    tekst="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie.",
-                    url=url)
-        kaartjes_algemeen.append(kaartje)
-
         if not comp.klassengrenzen_vastgesteld:
             # AG vaststellen
             tekst = "AG vaststellen voor alle sporters a.h.v. uitslag vorig seizoen "

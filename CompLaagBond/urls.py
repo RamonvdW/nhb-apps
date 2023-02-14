@@ -13,13 +13,13 @@ urlpatterns = [
 
     # base url: bondscompetities/bk/
 
-    path('<deelkamp_pk>/planning/',
-         view_planning.PlanningView.as_view(),
-         name='planning'),
-
-    path('<deelkamp_pk>/limieten/',
+    path('planning/<deelkamp_pk>/limieten/',
          view_planning.WijzigLimietenView.as_view(),
          name='wijzig-limieten'),
+
+    path('planning/<deelkamp_pk>/',
+         view_planning.PlanningView.as_view(),
+         name='planning'),
 
     path('planning/wedstrijd/wijzig/<match_pk>/',
          view_planning.WijzigWedstrijdView.as_view(),

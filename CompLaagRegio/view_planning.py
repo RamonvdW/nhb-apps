@@ -234,7 +234,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             rayon = Kampioenschap.objects.get(competitie=deelcomp.competitie,
                                               deel=DEEL_RK,
                                               nhb_rayon=deelcomp.nhb_regio.rayon)
-            context['url_rayon'] = reverse('CompLaagRayon:rayon-planning',
+            context['url_rayon'] = reverse('CompLaagRayon:planning',
                                            kwargs={'deelkamp_pk': rayon.pk})
 
         comp = deelcomp.competitie

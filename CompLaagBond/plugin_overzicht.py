@@ -26,7 +26,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         # Planning BK wedstrijden
         url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp_bk.pk})
         kaartje = SimpleNamespace(
-                    prio=5,
+                    prio=3,
                     titel="Planning",
                     icoon="pending_actions",
                     tekst="Landelijke planning voor deze competitie.",
