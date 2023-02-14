@@ -81,8 +81,15 @@ class CompetitieOverzichtView(TemplateView):
         context['text_regio_teams'] = tussen_eind + 'stand voor de regiocompetitie teams'
 
         # TODO: ook melden dat dit de tijdelijke deelnemerslijst is (tijdens regiocompetitie)
-        tussen_eind = "Tussen" if comp.fase_indiv <= 'N' else "Eind"
-        context['text_rayon_indiv'] = tussen_eind + 'stand voor de rayonkampioenschappen individueel'
+        if comp.fase_indiv <= 'G':
+            tussen_eind = 'Preliminaire lijst'
+        elif comp.fase_indiv <= 'L':
+            tussen_eind = "Tussenstand"
+        else:
+            tussen_eind = "Eindstand"
+        context['text_rayon_indiv'] = tussen_eind + ' voor de rayonkampioenschappen individueel'
+
+        tussen_eind = "Tussen" if comp.fase_teams <= 'N' else "Eind"
         context['text_rayon_teams'] = tussen_eind + 'stand voor de rayonkampioenschappen teams'
 
         context['text_bond_indiv'] = 'Tussenstand voor de landelijke bondskampioenschappen'
@@ -115,9 +122,6 @@ class CompetitieOverzichtView(TemplateView):
 
         if rol_get_huidige(self.request) in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
-
-        if rol_get_huidige(self.request) in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL):
-            context['url_tijdlijn'] = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

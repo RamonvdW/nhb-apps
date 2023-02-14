@@ -15,6 +15,8 @@ from Plein.menu import menu_dynamics
 import datetime
 
 
+# TODO: verhuizen naar CompBeheer
+
 TEMPLATE_COMPETITIE_OVERZICHT_TIJDLIJN = 'competitie/tijdlijn.dtl'
 
 

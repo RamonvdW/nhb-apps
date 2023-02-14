@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import views_bb, views_bko, views_wijzig_datums
+from CompBeheer import views_bb, views_bko, view_overzicht, view_wijzig_datums
 
 app_name = 'CompBeheer'
 
 urlpatterns = [
 
-    # base url: bondscompetities/manage/
+    # base url: bondscompetities/beheer/
 
     # BB schermen
     path('instellingen-volgende-competitie/',
@@ -39,7 +39,7 @@ urlpatterns = [
          name='klassengrenzen-vaststellen'),
 
     path('<comp_pk>/wijzig-datums/',
-         views_wijzig_datums.WijzigDatumsView.as_view(),
+         view_wijzig_datums.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
 
 
@@ -67,6 +67,12 @@ urlpatterns = [
     path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',
          views_bko.KlassengrenzenTeamsVaststellenView.as_view(),
          name='klassengrenzen-vaststellen-rk-bk-teams'),
+
+
+    # landing page voor beheerders
+    path('<comp_pk>/',
+         view_overzicht.CompetitieBeheerView.as_view(),
+         name='overzicht')
 ]
 
 # end of file

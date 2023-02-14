@@ -39,7 +39,7 @@
 
                 <tr>
                     <td class="center{% if comp.fase_indiv == 'A' %} nhb-rood white-text{% endif %}">A</td>
-                    <td>Clusters instellen (RCL)<br>Clusters instellen (RCL)<br>Vaststellen aanvangsgemiddelden (BKO)<br>Vaststellen klassengrenzen (BKO)</td>
+                    <td>Clusters instellen (RCL)<br>Vaststellen aanvangsgemiddelden (BKO)<br>Vaststellen klassengrenzen (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'A' %}
                             <span class="green-text">Afgerond</span>

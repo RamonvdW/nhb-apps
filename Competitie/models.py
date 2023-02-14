@@ -472,11 +472,6 @@ class Regiocompetitie(models.Model):
     #    8 = afgesloten
     huidige_team_ronde = models.PositiveSmallIntegerField(default=0)
 
-    def heeft_poules_nodig(self):
-        # centrale plek om de poules behoefte te controleren
-        # poule zijn onafhankelijk van punten model: 10 teams zijn te verdelen over 2 poules
-        return self.regio_organiseert_teamcompetitie
-
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "%s - %s" % (self.competitie, self.nhb_regio)
