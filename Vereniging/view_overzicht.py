@@ -57,6 +57,16 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
+    @staticmethod
+    def _get_comp_fases(comp):
+        if comp.fase_indiv == comp.fase_teams:
+            indiv = "Competitie fase: %s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])
+            teams = None
+        else:
+            indiv = "Competitie fase individueel: %s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])
+            teams = "Competitie fase teams: %s (%s)" % (comp.fase_teams, comp_fase_kort[comp.fase_teams])
+        return indiv, teams
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -115,11 +125,13 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden
+        # 0 - tijdlijn
         # 1 - aanmelden
         # 2 - teams regio aanmelden / aanpassen
         # 3 - teams rk
         # 4 - ingeschreven
         # 5 - wie schiet waar (voor inschrijfmethode 1)
+        # 6 - uitslagen
         context['kaartjes'] = kaartjes = list()
         prev_jaar = 0
         prev_afstand = 0
@@ -143,7 +155,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
                 kaartje.anker = 'competitie_%s' % comp.pk
-                kaartje.comp_fase = "%s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])
+                kaartje.comp_fase_indiv, kaartje.comp_fase_teams = self._get_comp_fases(comp)
                 kaartjes.append(kaartje)
 
                 prev_jaar = begin_jaar
@@ -249,6 +261,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartjes.append(kaartje)
             # for
 
+            if comp.fase_indiv >= 'C':
+                # 5 - uitslagen
+                kaartje = SimpleNamespace(
+                                titel="Uitslagenlijsten",
+                                tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
+                                icon='scoreboard',
+                                url=reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}))
+                kaartjes.append(kaartje)
         # for
 
         if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):

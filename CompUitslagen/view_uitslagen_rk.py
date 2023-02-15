@@ -77,7 +77,7 @@ class UitslagenRayonIndivView(TemplateView):
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
 
-            boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+            boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                         kwargs={'comp_pk': comp.pk,
                                                 'comp_boog': boogtype.afkorting.lower(),
                                                 'rayon_nr': gekozen_rayon_nr})
@@ -95,7 +95,7 @@ class UitslagenRayonIndivView(TemplateView):
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
                 rayon.sel = 'rayon_%s' % rayon.pk
-                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                          kwargs={'comp_pk': comp.pk,
                                                  'comp_boog': comp_boog,
                                                  'rayon_nr': rayon.rayon_nr})
@@ -340,7 +340,7 @@ class UitslagenRayonTeamsView(TemplateView):
             else:
                 team.selected = False
 
-            team.zoom_url = reverse('CompUitslagen:uitslagen-rayon-teams-n',
+            team.zoom_url = reverse('CompUitslagen:uitslagen-rk-teams-n',
                                     kwargs={'comp_pk': comp.pk,
                                             'team_type': team.afkorting.lower(),
                                             'rayon_nr': gekozen_rayon_nr})
@@ -363,7 +363,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 if rayon.selected:
                     context['rayon'] = rayon
 
-                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-teams-n',
+                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rk-teams-n',
                                          kwargs={'comp_pk': comp.pk,
                                                  'team_type': teamtype_afkorting,
                                                  'rayon_nr': rayon.rayon_nr})
@@ -534,8 +534,6 @@ class UitslagenRayonTeamsView(TemplateView):
                     deelnemer.sporter_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                 # for
                 aantal_regels += 1
-
-            # TODO: dit scherm is zowel een kandidaat-deelnemerslijst als de uitslag
 
             if team.result_rank > 0:
                 team.rank = team.result_rank

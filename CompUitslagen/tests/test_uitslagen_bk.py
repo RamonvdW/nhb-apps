@@ -16,8 +16,8 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_uitslagen_bond_indiv = '/bondscompetities/uitslagen/%s/%s/bond-individueel/'     # comp_pk, comp_boog
-    url_uitslagen_bond_teams = '/bondscompetities/uitslagen/%s/%s/bond-teams/'           # comp_pk, team_type
+    url_uitslagen_bond_indiv = '/bondscompetities/uitslagen/%s/%s/bk-individueel/'     # comp_pk, comp_boog
+    url_uitslagen_bond_teams = '/bondscompetities/uitslagen/%s/%s/bk-teams/'           # comp_pk, team_type
 
     regio_nr = 101
     ver_nr = 0      # wordt in setupTestData ingevuld

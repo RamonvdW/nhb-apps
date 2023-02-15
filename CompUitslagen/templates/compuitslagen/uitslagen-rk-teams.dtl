@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag RK{% endblock %}
+{% block title %}Uitslag RK teams{% endblock %}
 
 {% block pagina %}
 
@@ -29,7 +29,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslag RK teams</h3>
-            <p>{% if comp.fase_teams > 'L' %}Eindstand{% else %}Deelnemerslijst{% endif %} van de rayon<wbr>kampioenschappen voor teams</p>
+            <p>{% if comp.fase_teams > 'L' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>
 

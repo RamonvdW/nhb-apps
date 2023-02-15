@@ -66,58 +66,62 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
     elif rol_nu == Rollen.ROL_RKO:
 
         # zoek het RK kampioenschap erbij
-        deelkamp_rk = (Kampioenschap
-                       .objects
-                       .select_related('competitie',
-                                       'nhb_rayon')
-                       .get(deel=DEEL_RK,
-                            competitie=comp,
-                            functie=functie_nu,
-                            is_afgesloten=False))
-
-        # Planning RK wedstrijden
-        url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp_rk.pk})
-        kaartje = SimpleNamespace(
-                    prio=3,
-                    titel="Planning %s" % deelkamp_rk.nhb_rayon.naam,
-                    icoon="pending_actions",
-                    tekst="Planning voor %s voor deze competitie." % deelkamp_rk.nhb_rayon.naam,
-                    url=url)
-        kaartjes_algemeen.append(kaartje)
-
-        # RK selectie individueel
-        if 'J' <= comp.fase_indiv <= 'L':
-            url = reverse('CompLaagRayon:lijst-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+        try:
+            deelkamp_rk = (Kampioenschap
+                           .objects
+                           .select_related('competitie',
+                                           'nhb_rayon')
+                           .get(deel=DEEL_RK,
+                                competitie=comp,
+                                functie=functie_nu,
+                                is_afgesloten=False))
+        except Kampioenschap.DoesNotExist:
+            # verkeerde RKO (Indoor / 25m1pijl mix-up)
+            pass
+        else:
+            # Planning RK wedstrijden
+            url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp_rk.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
-                        titel="RK selectie",
-                        icoon="rule",
-                        tekst="Selectie van sporters voor de Rayonkampioenschappen.",
+                        prio=3,
+                        titel="Planning %s" % deelkamp_rk.nhb_rayon.naam,
+                        icoon="pending_actions",
+                        tekst="Planning voor %s voor deze competitie." % deelkamp_rk.nhb_rayon.naam,
                         url=url)
             kaartjes_algemeen.append(kaartje)
 
-        # RK limieten (indiv & teams)
-        if 'J' <= comp.fase_indiv <= 'L' or 'J' <= comp.fase_teams <= 'L':
-            url = reverse('CompLaagRayon:limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
-            kaartje = SimpleNamespace(
-                        prio=5,
-                        titel="RK limieten",
-                        icoon="accessibility_new",
-                        tekst="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen.",
-                        url=url)
-            kaartjes_indiv.append(kaartje)
-            kaartjes_teams.append(kaartje)
+            # RK selectie individueel
+            if 'J' <= comp.fase_indiv <= 'L':
+                url = reverse('CompLaagRayon:lijst-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                kaartje = SimpleNamespace(
+                            prio=5,
+                            titel="RK selectie",
+                            icoon="rule",
+                            tekst="Selectie van sporters voor de Rayonkampioenschappen.",
+                            url=url)
+                kaartjes_algemeen.append(kaartje)
 
-        # Ingeschreven RK teams (inschrijving opent tijdens fase F)
-        if 'F' <= comp.fase_teams <= 'L':
-            url = reverse('CompLaagRayon:rayon-teams', kwargs={'deelkamp_pk': deelkamp_rk.pk})
-            kaartje = SimpleNamespace(
-                        prio=5,
-                        titel="RK teams",
-                        icoon="api",
-                        tekst="Aangemelde teams voor de Rayonkampioenschappen in %s." % deelkamp_rk.nhb_rayon.naam,
-                        url=url)
-            kaartjes_teams.append(kaartje)
+            # RK limieten (indiv & teams)
+            if 'J' <= comp.fase_indiv <= 'L' or 'J' <= comp.fase_teams <= 'L':
+                url = reverse('CompLaagRayon:limieten', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                kaartje = SimpleNamespace(
+                            prio=5,
+                            titel="RK limieten",
+                            icoon="accessibility_new",
+                            tekst="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen.",
+                            url=url)
+                kaartjes_indiv.append(kaartje)
+                kaartjes_teams.append(kaartje)
+
+            # Ingeschreven RK teams (inschrijving opent tijdens fase F)
+            if 'F' <= comp.fase_teams <= 'L':
+                url = reverse('CompLaagRayon:rayon-teams', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                kaartje = SimpleNamespace(
+                            prio=5,
+                            titel="RK teams",
+                            icoon="api",
+                            tekst="Aangemelde teams voor de Rayonkampioenschappen in %s." % deelkamp_rk.nhb_rayon.naam,
+                            url=url)
+                kaartjes_teams.append(kaartje)
 
 
 # end of file

@@ -62,10 +62,10 @@ class CompetitieOverzichtView(TemplateView):
                                              kwargs={'comp_pk': comp.pk,
                                                      'team_type': team_type})
 
-        context['url_rayon_indiv'] = reverse('CompUitslagen:uitslagen-rayon-indiv',
+        context['url_rayon_indiv'] = reverse('CompUitslagen:uitslagen-rk-indiv',
                                              kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': wed_boog})
-        context['url_rayon_teams'] = reverse('CompUitslagen:uitslagen-rayon-teams',
+        context['url_rayon_teams'] = reverse('CompUitslagen:uitslagen-rk-teams',
                                              kwargs={'comp_pk': comp.pk,
                                                      'team_type': team_type})
 

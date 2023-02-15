@@ -18,11 +18,11 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'                    # comp_pk, comp_boog
-    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
-    url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rayon-teams/'                    # comp_pk, team_type
-    url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
-    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'          # comp_pk
+    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rk-individueel/'                    # comp_pk, comp_boog
+    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rk-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
+    url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rk-teams/'                    # comp_pk, team_type
+    url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rk-teams/%s/'               # comp_pk, team_type, rayon_nr
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'       # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
 
     regio_nr = 101
