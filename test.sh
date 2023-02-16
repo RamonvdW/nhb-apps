@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,6 +14,12 @@ LOG="/tmp/test_out.txt"
 
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
+
+if [ -z "$VIRTUAL_ENV" ]
+then
+    echo "[ERROR] Virtual environment not activated"
+    exit 1
+fi
 
 [ -e "$LOG" ] && rm "$LOG"
 touch "$LOG"
