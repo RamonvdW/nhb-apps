@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.db.models import F
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from BasisTypen.models import TeamType
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, DEEL_RK, DEEL_BK,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMatch, RegioCompetitieSporterBoog, KampioenschapSporterBoog,
@@ -377,6 +377,30 @@ class IncompleetTeamFilter(admin.SimpleListFilter):
         return queryset
 
 
+class KampioenschapTypeFilter(admin.SimpleListFilter):
+
+    title = "Soort kampioenschap"
+
+    parameter_name = 'incompleet'
+
+    default_value = None
+
+    def lookups(self, request, model_admin):                    # pragma: no cover
+        """ Return list of tuples for the sidebar """
+        return [
+            ('RK', 'RK teams'),
+            ('BK', 'BK teams')
+        ]
+
+    def queryset(self, request, queryset):
+        selection = self.value()
+        if selection == 'RK':
+            queryset = queryset.filter(kampioenschap__deel=DEEL_RK)
+        elif selection == 'BK':
+            queryset = queryset.filter(kampioenschap__deel=DEEL_BK)
+        return queryset
+
+
 class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('tijdelijke_leden',
@@ -384,7 +408,9 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                          'feitelijke_leden')
 
     list_filter = ('kampioenschap__competitie',
+                   KampioenschapTypeFilter,
                    'vereniging__regio__rayon',
+                   'team_type',
                    GebruikteKlassenFilter,
                    IncompleetTeamFilter)
 

@@ -181,8 +181,7 @@ class Command(BaseCommand):
                     break       # uit de for
         # for
 
-        # sorteer op gemiddelde en daarna op het volgnummer in de lijst
-        # want sorteren op obj gaat niet
+        # sorteer op gemiddelde en daarna op de positie in de lijst (want sorteren op obj gaat niet)
         lijst.sort(reverse=True)
 
         # volgorde uitdelen voor deze kandidaat-deelnemers

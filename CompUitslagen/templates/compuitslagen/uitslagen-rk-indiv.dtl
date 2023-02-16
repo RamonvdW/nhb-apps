@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag RK{% endblock %}
+{% block title %}Uitslag RK individueel{% endblock %}
 
 {% block pagina %}
 
@@ -157,12 +157,12 @@
                 {% if obj.break_klasse %}
                     {% if not obj.is_eerste_break %}
                         <tr>
-                            <td colspan="{% if obj.toon_uitslag %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+                            <td colspan="6" class="nhb-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
-                        <td colspan="{% if obj.toon_uitslag %}8{% else %}7{% endif %}" class="center">
+                        <td colspan="8" class="center">
                             <h5>{{ obj.klasse_str }}</h5>
                             {% if obj.match %}
                                 {% if comp.rk_is_afgelast %}<s>{% endif %}
@@ -180,7 +180,6 @@
 
                         {% if obj.toon_uitslag %}
 
-                            <!-- 6 cols -->
                             <th class="center">Plaats</th>  <!-- rank -->
                             <th>Sporter</th>
                             <th class="hide-on-small-only">Vereniging</th>
@@ -189,12 +188,11 @@
 
                         {% else %}
 
-                            <!-- 5 cols -->
                             <th>Sporter</th>
                             <th class="hide-on-small-only">Vereniging</th>
                             <th class="center">Gemiddelde</th>
                             <th></th>   <!-- label: regiokampioen -->
-                            <th>RK scores</th>
+                            <th colspan="2">RK scores</th>
 
                         {% endif %}
                         <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
@@ -205,7 +203,6 @@
 
                     {% if obj.toon_uitslag%}
 
-                        <!-- 6 cols -->
                         <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}</td>
                         <td>{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{{ obj.ver_str }}</td>
@@ -215,7 +212,6 @@
 
                     {% else %}
 
-                        <!-- 5 cols -->
                         <td>{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen RK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
                         <td class="center">{{ obj.gemiddelde }}</td>
@@ -226,7 +222,7 @@
                         {% else %}
                             <td></td>
                         {% endif %}
-                        <td><i class="grey-text">volgt later</i></td>       <!-- RK scores -->
+                        <td colspan="2"><i class="grey-text">volgt later</i></td>       <!-- RK scores -->
 
                     {% endif %}
                 </tr>
@@ -234,7 +230,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="{% if obj.toon_uitslag %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+                <td colspan="6" class="nhb-table-onderrand"></td>
             </tr>
         </table>
 
