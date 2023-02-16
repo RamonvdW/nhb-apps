@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fase_regio_prep
+from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -18,9 +18,9 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompetitieBeheerders(E2EHelpers, TestCase):
+class TestCompBeheerOverzicht(E2EHelpers, TestCase):
 
-    """ tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ tests voor de CompBeheer applicatie, Overzicht pagina """
 
     test_after = ('Functie',)
 
@@ -129,7 +129,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # zet de datum voor inschrijven op vandaag
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            zet_competitie_fase_regio_prep(comp)
+            zet_competitie_fase_regio_inschrijven(comp)
         # for
 
     def _maak_leden_met_voorkeuren(self):
@@ -271,7 +271,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # BKO 18m
         deelkamp = Kampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)
@@ -283,7 +283,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # RKO 25m Rayon 2
         deelkamp = Kampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, nhb_rayon=self.rayon_2)
@@ -296,7 +296,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # RCL
         deelcomp = Regiocompetitie.objects.get(competitie=comp18, nhb_regio=self.regio_101)
@@ -308,7 +308,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht_beheer % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
