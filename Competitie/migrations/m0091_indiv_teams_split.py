@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Competitie', 'm0089_rename'),
+        ('Competitie', 'm0090_rename'),
     ]
 
     # migratie functies

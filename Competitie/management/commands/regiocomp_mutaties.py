@@ -180,8 +180,7 @@ class Command(BaseCommand):
                     break       # uit de for
         # for
 
-        # sorteer op gemiddelde en daarna op het volgnummer in de lijst
-        # want sorteren op obj gaat niet
+        # sorteer op gemiddelde en daarna op de positie in de lijst (want sorteren op obj gaat niet)
         lijst.sort(reverse=True)
 
         # volgorde uitdelen voor deze kandidaat-deelnemers
@@ -229,7 +228,7 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_initieel(self, competitie, deel):
         # bepaal de volgorde en rank van de deelnemers
-        # in alle klassen van de RK of BK
+        # in alle klassen van de RK of BK deelcompetities
 
         # via deelnemer kunnen we bepalen over welke kampioenschappen dit gaat
         for deelkamp in (Kampioenschap
@@ -1155,11 +1154,11 @@ class Command(BaseCommand):
 
         # TODO: verwijder dit zodra het kaartje gemaakt i
         # maak een vertaal tabel voor de individuele klassen voor seizoen 2022/2023
-        # 1410 TR jeugd kl1  --> 1400 TR kl 1
+        # 1410 TR jeugd kl1  --> 1401 TR kl 2
         # 1210 C Onder21 kl1 --> 1200 C kl 1
         # 1221 C Onder18 kl2 --> 1220 C Onder18 kl1
         temp_klassen_map = dict()
-        temp_klassen_map[1410] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1400)
+        temp_klassen_map[1410] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1401)
         temp_klassen_map[1210] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1200)
         temp_klassen_map[1221] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1220)
 

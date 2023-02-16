@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('NhbStructuur', 'm0031_squashed'),
         ('Functie', 'm0016_rol_mww'),
-        ('Competitie', 'm0088_squashed'),
+        ('Competitie', 'm0089_squashed'),
     ]
 
     # migratie functies

@@ -9,8 +9,8 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN
 from Competitie.models import (Competitie, CompetitieMatch,
-                               Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet,
-                               KampioenschapTeam, KampioenschapIndivKlasseLimiet)
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 import datetime
@@ -265,12 +265,12 @@ class UitslagenBKTeamsView(TemplateView):
             raise Http404('Team type niet bekend')
 
         try:
-            deelkamp = (Kampioenschap
-                        .objects
-                        .select_related('competitie')
-                        .get(deel=DEEL_BK,
-                             competitie__is_afgesloten=False,
-                             competitie__pk=comp_pk))
+            deelkamp_bk = (Kampioenschap
+                           .objects
+                           .select_related('competitie')
+                           .get(deel=DEEL_BK,
+                                competitie__is_afgesloten=False,
+                                competitie__pk=comp_pk))
         except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
@@ -291,7 +291,7 @@ class UitslagenBKTeamsView(TemplateView):
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
-        match_pks = list(deelkamp.rk_bk_matches.values_list('pk', flat=True))
+        match_pks = list(deelkamp_bk.rk_bk_matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
                       .objects
                       .prefetch_related('team_klassen')
@@ -305,22 +305,30 @@ class UitslagenBKTeamsView(TemplateView):
                 teamklasse2match[klasse.pk] = match
         # for
 
+        # voor conversie team gemiddelde naar RK score
         if comp.afstand == '18':
-            aantal_pijlen = 30
+            aantal_pijlen = 2 * 30
         else:
-            aantal_pijlen = 25
+            aantal_pijlen = 2 * 25
+
+        wkl2limiet = dict()  # [pk] = aantal
+        for limiet in (KampioenschapTeamKlasseLimiet
+                       .objects
+                       .select_related('team_klasse')
+                       .filter(kampioenschap=deelkamp_bk)):
+            wkl2limiet[limiet.team_klasse.pk] = limiet.limiet
+        # for
 
         bk_teams = (KampioenschapTeam
                     .objects
-                    .filter(kampioenschap=deelkamp,
-                            team_type=teamtype)
+                    .filter(kampioenschap=deelkamp_bk,
+                            team_klasse__team_type=teamtype)
                     .select_related('team_klasse',
                                     'vereniging')
                     .prefetch_related('gekoppelde_leden',
                                       'feitelijke_leden')
                     .order_by('team_klasse__volgorde',
-                              'result_rank',
-                              '-aanvangsgemiddelde'))       # sterkste team eerst
+                              'volgorde'))
 
         context['bk_teams'] = totaal_lijst = list()
 
@@ -341,7 +349,7 @@ class UitslagenBKTeamsView(TemplateView):
                     teller = klasse_teams_done[0]
                 elif len(klasse_teams_plan) > 0:
                     # er is geen uitslag, maar misschien hebben teams vrijstelling
-                    if deelkamp.is_afgesloten:
+                    if deelkamp_bk.is_afgesloten:
                         for plan_team in klasse_teams_plan:
                             plan_team.rank = ''
                             plan_team.niet_deelgenomen = True
@@ -367,14 +375,25 @@ class UitslagenBKTeamsView(TemplateView):
                 klasse_teams_done = list()
                 klasse_teams_plan = list()
 
+                try:
+                    limiet = wkl2limiet[team.team_klasse.pk]
+                except KeyError:
+                    limiet = 8
+                    if "ERE" in team.team_klasse.beschrijving:
+                        limiet = 12
+
+                print('limiet=%s voor klasse %s' % (limiet, team.team_klasse))
                 prev_klasse = team.team_klasse
                 aantal_regels = 2
                 rank = 0
 
             team.ver_nr = team.vereniging.ver_nr
             team.ver_str = str(team.vereniging)
-            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            team.ag_str = team.ag_str.replace('.', ',')
+            rk_score = round(team.aanvangsgemiddelde * aantal_pijlen)
+            if rk_score < 10:
+                team.rk_score_str = '(blanco)'
+            else:
+                team.rk_score_str = str(rk_score)
             team.toon_team_leden = False
             aantal_regels += 1
 
@@ -391,12 +410,15 @@ class UitslagenBKTeamsView(TemplateView):
                 # for
                 aantal_regels += 1
 
+            if team.rank > limiet:
+                team.is_reserve = True
+
             if team.result_rank > 0:
                 team.rank = team.result_rank
                 if team.result_teamscore < 10:
-                    team.rk_score_str = '(blanco)'
+                    team.bk_score_str = '(blanco)'
                 else:
-                    team.rk_score_str = str(team.result_teamscore)
+                    team.bk_score_str = str(team.result_teamscore)
                 team.heeft_uitslag = True
 
                 originele_lid_nrs = list(team.gekoppelde_leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
@@ -445,7 +467,7 @@ class UitslagenBKTeamsView(TemplateView):
             teller = klasse_teams_done[0]
         elif len(klasse_teams_plan) > 0:
             # er is geen uitslag, maar misschien hebben teams vrijstelling
-            if deelkamp.is_afgesloten:
+            if deelkamp_bk.is_afgesloten:
                 for plan_team in klasse_teams_plan:
                     plan_team.rank = ''
                     plan_team.niet_deelgenomen = True

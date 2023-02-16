@@ -115,12 +115,12 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr>
-                            <td colspan="5" class="nhb-table-onderrand"></td>
+                            <td colspan="6" class="nhb-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
-                        <td colspan="7" class="center">
+                        <td colspan="8" class="center">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.match %}
                                 {% if comp.rk_is_afgelast %}<s>{% endif %}
@@ -141,18 +141,25 @@
                             <span class="hide-on-small-only">Vereniging</span>
                         </th>
                         <th>Team</th>
-                        <th class="center hide-on-small-only">RK score</th>
+                        <th></th>       <!-- label: Rayonkampioen -->
+                        <th class="center hide-on-small-only">{% if not team.heeft_uitslag %}RK score{% endif %}</th>
                         <th class="right-align" style="padding-right:10px">BK scores</th>
                         <td rowspan="{{ team.aantal_regels }}" class="nhb-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
                 <tr{% if team.niet_deelgenomen %} class="grey-text"{% endif %}>
+
+                    <!-- rank -->
                     <td class="center">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
+
+                    <!-- vereniging -->
                     <td>
                         <span class="hide-on-med-and-up">{{ team.ver_nr }}</span>
                         <span class="hide-on-small-only">{{ team.ver_str }}</span>
                     </td>
+
+                    <!-- team naam + team leden -->
                     <td>
                         {% if team.heeft_uitslag %}
                             <b>{{ team.team_naam }}</b><br>
@@ -163,20 +170,29 @@
                             <span>{{ team.team_naam }}</span>
                         {% endif %}
                     </td>
-                    <td class="center hide-on-small-only">
-                        {% if team.heeft_uitslag %}
-                            <b>{{ team.ag_str }}</b>
-                            <br>
-                            {% for deelnemer in team.deelnemers %}
-                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.gemiddelde }}</span><br>
-                            {% endfor %}
-                        {% else %}
-                            <span>{{ team.ag_str }}</span>
+
+                    <!-- label -->
+                    <td class="hide-on-small-only">
+                        {% if not team.heeft_uitslag %}
+                            {% if team.is_reserve %}
+                                <i>Reserve</i>
+                            {% else %}
+                                <span>{{ team.rk_kampioen_label }}</span>
+                            {% endif %}
                         {% endif %}
                     </td>
+
+                    <!-- RK score (alleen op deelnemerslijst) -->
+                    <td class="center hide-on-small-only">
+                        {% if not team.heeft_uitslag %}
+                            <span>{{ team.rk_score_str }}</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- BK score (uitslag) -->
                     <td class="right-align" style="padding-right:10px">
                         {% if team.heeft_uitslag %}
-                            <b>{{ team.rk_score_str }}</b><br>
+                            <b>{{ team.bk_score_str }}</b><br>
                             {% for deelnemer in team.deelnemers %}
                                 <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.result_totaal }}</span><br>
                             {% endfor %}
@@ -200,7 +216,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="5" class="nhb-table-onderrand"></td>
+                <td colspan="6" class="nhb-table-onderrand"></td>
             </tr>
         </table>
 

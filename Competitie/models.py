@@ -264,6 +264,8 @@ class CompetitieIndivKlasse(models.Model):
     # op welk soort blazoen schiet deze klasse in de kampioenschappen (geen keuze)
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
+    # TODO: standaard limiet toevoegen voor elke klasse: 24
+
     def __str__(self):
         msg = self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
         if self.is_voor_rk_bk:
@@ -326,6 +328,8 @@ class CompetitieTeamKlasse(models.Model):
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
     team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
+
+    # TODO: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
 
     def __str__(self):
         msg = self.beschrijving + ' [' + self.team_afkorting + '] (%.3f)' % self.min_ag
@@ -805,7 +809,7 @@ class KampioenschapIndivKlasseLimiet(models.Model):
 
 class KampioenschapTeamKlasseLimiet(models.Model):
     """ Deze database tabel bevat de limieten voor het aantal teams in een RK of BK
-        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
+        wedstrijdklasse. De RKO/BKO kan dit bijstellen specifiek voor zijn kampioenschap.
     """
 
     # voor welk kampioenschap (i.v.m. scheiding RKs)
@@ -854,16 +858,15 @@ class KampioenschapSporterBoog(models.Model):
     # kampioenen hebben een label
     kampioen_label = models.CharField(max_length=50, default='', blank=True)
 
-    # positie van deze sporter in de lijst zoals vastgesteld aan het begin van het RK
-    # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt de sporter zich af
-    # wordt gebruikt om de sporters in originele volgorde te tonen aan de RKO, inclusief afmeldingen
+    # Positie van deze sporter in de lijst zoals vastgesteld aan het begin van het RK
+    # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt de sporter zich af.
+    # Wordt gebruikt om de sporters in originele volgorde te tonen aan de RKO, inclusief afmeldingen
     # bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
     volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
 
     # deelname positie van de sporter in de meest up-to-date lijst
     # de eerste N (tot de limiet/cut, standaard 24) zijn deelnemers; daarna reserve sporters
-    # afmeldingen hebben rank 0
-    rank = models.PositiveSmallIntegerField(default=0)
+    rank = models.PositiveSmallIntegerField(default=0)      # afmeldingen hebben rank 0
 
     # wanneer hebben we een bevestiging gevraagd hebben via e-mail
     # fase K: aan het begin van fase K wordt een uitnodiging gestuurd om deelname te bevestigen
@@ -955,6 +958,22 @@ class KampioenschapTeam(models.Model):
 
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
     team_naam = models.CharField(max_length=50, default='')
+
+    # kan dit team deelnemen, of niet?
+    deelname = models.CharField(max_length=1, choices=DEELNAME_CHOICES, default=DEELNAME_ONBEKEND)
+
+    # kampioenen hebben een label
+    rk_kampioen_label = models.CharField(max_length=50, default='', blank=True)
+
+    # Positie van dit team in de lijst zoals vastgesteld aan het begin van het BK
+    # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt het team zich af.
+    # Wordt gebruikt om het team in originele volgorde te tonen aan de BKO, inclusief afmeldingen
+    # bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
+    volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
+
+    # deelname positie van het team in de meest up-to-date lijst
+    # de eerste N (tot de limiet/cut, standaard 8) zijn deelnemers; daarna reserve teams
+    rank = models.PositiveSmallIntegerField(default=0)      # afmeldingen hebben rank 0
 
     # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
     tijdelijke_leden = models.ManyToManyField(RegiocompetitieSporterBoog,

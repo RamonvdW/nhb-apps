@@ -30,7 +30,8 @@ class Migration(migrations.Migration):
                 ('Competitie', 'm0084_cleanup'),
                 ('Competitie', 'm0085_result_volgorde'),
                 ('Competitie', 'm0086_prep_bk'),
-                ('Competitie', 'm0087_team_volgorde')]
+                ('Competitie', 'm0087_team_volgorde'),
+                ('Competitie', 'm0088_bk_teams')]
 
     # dit is de eerste
     initial = True
@@ -337,27 +338,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='CompetitieMutatie',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('when', models.DateTimeField(auto_now_add=True)),
-                ('mutatie', models.PositiveSmallIntegerField(default=0)),
-                ('is_verwerkt', models.BooleanField(default=False)),
-                ('door', models.CharField(default='', max_length=50)),
-                ('cut_oud', models.PositiveSmallIntegerField(default=0)),
-                ('cut_nieuw', models.PositiveSmallIntegerField(default=0)),
-                ('deelcompetitie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.deelcompetitie')),
-                ('deelnemer', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.kampioenschapsporterboog')),
-                ('competitie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitie')),
-                ('kampioenschap', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.deelkampioenschap')),
-                ('indiv_klasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitieindivklasse')),
-                ('team_klasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitieteamklasse')),
-            ],
-            options={
-                'verbose_name': 'Competitie mutatie',
-            },
-        ),
-        migrations.CreateModel(
             name='KampioenschapTeamKlasseLimiet',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -384,14 +364,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='CompetitieTaken',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('hoogste_scorehist', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Score.scorehist')),
-                ('hoogste_mutatie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Competitie.competitiemutatie')),
-            ],
-        ),
-        migrations.CreateModel(
             name='KampioenschapTeam',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -408,6 +380,40 @@ class Migration(migrations.Migration):
                 ('result_volgorde', models.PositiveSmallIntegerField(default=0)),
                 ('result_teamscore', models.PositiveSmallIntegerField(default=0)),
                 ('team_klasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitieteamklasse')),
+                ('rank', models.PositiveSmallIntegerField(default=0)),
+                ('rk_kampioen_label', models.CharField(blank=True, default='', max_length=50)),
+                ('volgorde', models.PositiveSmallIntegerField(default=0)),
+                ('deelname', models.CharField(choices=[('?', 'Onbekend'), ('J', 'Bevestigd'), ('N', 'Afgemeld')],
+                                           default='?', max_length=1)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='CompetitieMutatie',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('when', models.DateTimeField(auto_now_add=True)),
+                ('mutatie', models.PositiveSmallIntegerField(default=0)),
+                ('is_verwerkt', models.BooleanField(default=False)),
+                ('door', models.CharField(default='', max_length=50)),
+                ('cut_oud', models.PositiveSmallIntegerField(default=0)),
+                ('cut_nieuw', models.PositiveSmallIntegerField(default=0)),
+                ('deelcompetitie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.deelcompetitie')),
+                ('deelnemer', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.kampioenschapsporterboog')),
+                ('competitie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitie')),
+                ('kampioenschap', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.deelkampioenschap')),
+                ('indiv_klasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitieindivklasse')),
+                ('team_klasse', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.competitieteamklasse')),
+            ],
+            options={
+                'verbose_name': 'Competitie mutatie',
+            },
+        ),
+        migrations.CreateModel(
+            name='CompetitieTaken',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('hoogste_scorehist', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Score.scorehist')),
+                ('hoogste_mutatie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Competitie.competitiemutatie')),
             ],
         ),
         migrations.RunPython(init_taken),
