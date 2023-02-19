@@ -9,7 +9,8 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_prep
+from Competitie.tijdlijn import (zet_test_datum, zet_competitie_fases,
+                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven)
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -116,6 +117,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
+        zet_test_datum('2019-08-01')
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -198,12 +200,12 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         # let's repair that here
         self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
         self.comp_18.begin_fase_F = self.comp_18.begin_fase_C
-        self.comp_18.begin_fase_F += datetime.timedelta(days=1)
+        self.comp_18.begin_fase_F += datetime.timedelta(days=2)
         self.comp_18.save()
         post_datum_ok = self.comp_18.begin_fase_C.strftime('%Y-%m-%d')
-        # print('begin_fase_C: %s' % comp_datum1)
+        # print('post_datum_ok: %s' % post_datum_ok)
         post_datum_bad = self.comp_18.begin_fase_F.strftime('%Y-%m-%d')
-        # print('begin_fase_F: %s' % comp_datum2)
+        # print('post_datum_bad: %s' % post_datum_bad)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -235,6 +237,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
             resp = self.client.post(url, {'teams': 'nee',
                                           'begin_fase_D': post_datum_bad})
         self.assert_is_redirect_not_plein(resp)
+
         # teamcompetitie staat nu op Nee
         # zet teamcompetitie weer op Ja
         with self.assert_max_queries(20):
@@ -248,9 +251,10 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
                                           'begin_fase_D': 'xxx'})
         self.assert404(resp, 'Datum fout formaat')
 
-        # tot en met fase C mogen de team punten en datum aanmaken teams aangepast worden
+        # zet fase C: alleen het WP model en datum aanmaken teams mogen nog aangepast worden
         oude_punten = 'F1'
-        zet_competitie_fase_regio_prep(self.comp_18)
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
+        post_datum_ok = self.comp_18.begin_fase_C.strftime('%Y-%m-%d')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

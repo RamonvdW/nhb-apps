@@ -105,6 +105,7 @@ class CompetitieOverzichtView(TemplateView):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
+            # TODO: externe links naar een oude competitie komen hier --> stuur ze door naar de kies pagina
             raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp

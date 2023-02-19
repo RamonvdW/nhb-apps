@@ -108,7 +108,7 @@ class LeeftijdsKlasse(models.Model):
     # WA, IFAA of nationaal
     organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)
 
-    # SH = Senioren mannen, etc.
+    # SH = Senioren heren, etc.
     afkorting = models.CharField(max_length=5)
 
     # complete beschrijving: 'Onder 18, meisjes'

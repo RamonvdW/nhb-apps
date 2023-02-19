@@ -66,9 +66,11 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         if deelcomp.competitie.fase_teams > 'F':
             raise Http404('Verkeerde competitie fase')
 
+        # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
         if deelcomp.competitie.fase_teams > 'B':
             context['readonly_blok_1'] = True
 
+            # in fase C mag nog aangepast worden: de deadline voor het aanmaken van de teams + WP model keuze
             if deelcomp.competitie.fase_teams > 'C':
                 context['readonly_blok_2'] = True
 
@@ -142,14 +144,16 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase_teams > 'D':
-            # niet meer te wijzigen
+        if deelcomp.competitie.fase_teams > 'C':
+            # niets meer te wijzigen
             raise Http404('Verkeerde competitie fase')
 
-        readonly_partly = (deelcomp.competitie.fase_teams >= 'C')
+        # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
+        readonly_blok_1 = (deelcomp.competitie.fase_teams > 'B')
+
         updated = list()
 
-        if not readonly_partly:
+        if not readonly_blok_1:
             # deze velden worden alleen doorgegeven als ze te wijzigen zijn
             teams = request.POST.get('teams', '?')[:3]  # ja/nee
             alloc = request.POST.get('team_alloc', '?')[:4]  # vast/vsg
