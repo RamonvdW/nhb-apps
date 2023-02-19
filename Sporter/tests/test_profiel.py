@@ -12,8 +12,10 @@ from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
-from Competitie.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
-                                 zet_competitie_fase_regio_prep, zet_competitie_fase_rk_prep,
+from Competitie.tijdlijn import (zet_competitie_fases,
+                                 zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
+                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,
+                                 zet_competitie_fase_rk_prep,
                                  zet_competitie_fase_afsluiten)
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
@@ -293,8 +295,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog_bb.voor_wedstrijd = False
         sporterboog_bb.save()
 
-        # zet de 18m ook door naar fase F
-        zet_competitie_fase_regio_wedstrijden(comp_18)
+        # zet de 18m ook door naar fase G
+        zet_competitie_fase_regio_afsluiten(comp_18)
 
         # haal de profiel pagina op
         with self.assert_max_queries(29):
@@ -436,6 +438,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
         # schrijf de sporter in voor de 18m Recurve
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')

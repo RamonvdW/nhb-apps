@@ -120,7 +120,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 # fase B of later
                 comp.inschrijven = 'De inschrijving is gesloten'
 
-                if comp.rk_indiv_afgesloten:
+                if comp.rk_indiv_afgesloten and comp.rk_teams_afgesloten:
                     comp.fase_str = 'Bondskampioenschappen'
                 elif comp.regiocompetitie_is_afgesloten:
                     comp.fase_str = 'Rayonkampioenschappen'

@@ -24,8 +24,14 @@ def zet_test_datum(date_str: str):
 
 def _zet_competitie_indiv_fase(comp, indiv_fase):
 
+    comp.bk_indiv_afgesloten = True
+    comp.bk_indiv_klassen_zijn_samengevoegd = True
+    comp.rk_indiv_afgesloten = True
+    comp.regiocompetitie_is_afgesloten = True
+    comp.klassengrenzen_vastgesteld = True
+
     if indiv_fase == 'Q':
-        comp.bk_indiv_afgesloten = True
+        # comp.bk_indiv_afgesloten = True
         return
 
     comp.bk_indiv_afgesloten = False
@@ -42,7 +48,7 @@ def _zet_competitie_indiv_fase(comp, indiv_fase):
 
     if indiv_fase >= 'O':
         # BK fases (deel 2)
-        comp.bk_indiv_klassen_zijn_samengevoegd = True
+        # comp.bk_indiv_klassen_zijn_samengevoegd = True
 
         if indiv_fase == 'O':
             comp.begin_fase_P_indiv = morgen
@@ -55,14 +61,14 @@ def _zet_competitie_indiv_fase(comp, indiv_fase):
 
     if indiv_fase == 'N':
         # BK fases (deel 1)
-        comp.rk_indiv_afgesloten = True
+        # comp.rk_indiv_afgesloten = True
         return
 
     comp.rk_indiv_afgesloten = False
 
     if indiv_fase >= 'J':
         # RK fases
-        comp.regiocompetitie_is_afgesloten = True
+        # comp.regiocompetitie_is_afgesloten = True
 
         if indiv_fase == 'J':
             # fase J: begin fase K is minsten 2 weken weg
@@ -89,7 +95,7 @@ def _zet_competitie_indiv_fase(comp, indiv_fase):
     if comp.competitieindivklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar indiv fase %s zonder competitie indiv klassen!" % indiv_fase)
 
-    comp.klassengrenzen_vastgesteld = True
+    # comp.klassengrenzen_vastgesteld = True
 
     if indiv_fase == 'B':
         comp.begin_fase_C = morgen
@@ -112,8 +118,13 @@ def _zet_competitie_indiv_fase(comp, indiv_fase):
 
 def _zet_competitie_team_fase(comp, team_fase):
 
+    comp.bk_teams_afgesloten = True
+    comp.bk_teams_klassen_zijn_samengevoegd = True
+    comp.rk_teams_afgesloten = True
+    comp.klassengrenzen_vastgesteld_rk_bk = True
+
     if team_fase == 'Q':
-        comp.bk_teams_afgesloten = True
+        # comp.bk_teams_afgesloten = True
         return
 
     comp.bk_teams_afgesloten = False
@@ -130,7 +141,6 @@ def _zet_competitie_team_fase(comp, team_fase):
 
     if team_fase >= 'O':
         # BK fases (deel 2)
-        comp.bk_teams_klassen_zijn_samengevoegd = True
 
         if team_fase == 'O':
             comp.begin_fase_P_teams = morgen
@@ -143,20 +153,19 @@ def _zet_competitie_team_fase(comp, team_fase):
 
     if team_fase == 'N':
         # BK teams (fase 1)
-        comp.rk_teams_afgesloten = True
+        # comp.rk_teams_afgesloten = True
         return
 
     comp.rk_teams_afgesloten = False
 
     if team_fase >= 'J':
         # RK fases
-        comp.regiocompetitie_is_afgesloten = True
 
         if team_fase == 'J':
             comp.klassengrenzen_vastgesteld_rk_bk = False
             return
 
-        comp.klassengrenzen_vastgesteld_rk_bk = True
+        # comp.klassengrenzen_vastgesteld_rk_bk = True
 
         if team_fase == 'K':
             comp.begin_fase_L_teams = morgen
@@ -165,18 +174,15 @@ def _zet_competitie_team_fase(comp, team_fase):
         comp.begin_fase_L_teams = gister
         return
 
-    comp.regiocompetitie_is_afgesloten = False
+    comp.klassengrenzen_vastgesteld_rk_bk = False
 
     # fase A begon toen de competitie werd aangemaakt
 
     if team_fase == 'A':
-        comp.klassengrenzen_vastgesteld = False
         return
 
     if comp.competitieteamklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar team fase %s zonder competitie team klassen!" % team_fase)
-
-    comp.klassengrenzen_vastgesteld = True
 
     if team_fase == 'B':
         comp.begin_fase_C = morgen
