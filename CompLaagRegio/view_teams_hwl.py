@@ -396,6 +396,20 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
+        try:
+            team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
+        except (ValueError, KeyError):
+            raise Http404('Geen valide parameter')
+
+        try:
+            team = (RegiocompetitieTeam
+                    .objects
+                    .select_related('team_type')
+                    .get(pk=team_pk,
+                         regiocompetitie=deelcomp))
+        except RegiocompetitieTeam.DoesNotExist:
+            raise Http404('Team niet gevonden')
+
         if self.rol_nu == Rollen.ROL_HWL:
             ver = self.functie_nu.nhb_ver
 
@@ -413,20 +427,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         else:
             # RCL
             ver = None      # wordt later ingevuld
-
-        try:
-            team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
-        except (ValueError, KeyError):
-            raise Http404('Geen valide parameter')
-
-        try:
-            team = (RegiocompetitieTeam
-                    .objects
-                    .select_related('team_type')
-                    .get(pk=team_pk,
-                         regiocompetitie=deelcomp))
-        except RegiocompetitieTeam.DoesNotExist:
-            raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL:
             if team.vereniging != self.functie_nu.nhb_ver:
@@ -834,7 +834,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         for key in request.POST.keys():
             if key.startswith('deelnemer_'):
                 try:
-                    pk = int(key[10:])
+                    pk = int(key[10:10+7])      # afkappen voor de veiligheid
                 except ValueError:
                     pass
                 else:

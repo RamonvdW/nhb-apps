@@ -265,7 +265,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         poule.regiocompetitie = self.deelcomp_regio112_18
         poule.save(update_fields=['regiocompetitie'])
 
-        # overzicht met een poule erin
+        # overzicht poules
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -274,7 +274,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # na fase D mag je nog kijken maar niet aanpassen
         comp = deelcomp.competitie
-        zet_competitie_fase_regio_wedstrijden(comp)
+        zet_competitie_fase_regio_wedstrijden(comp)         # fase F
 
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):
@@ -283,14 +283,14 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
 
-        # maak een poule aan
+        # bad: maak een poule aan
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
 
-        # fase E: wijzig de poule
+        # poule details (wijzig scherm, read-only)
         url = self.url_wijzig_poule % poule.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)

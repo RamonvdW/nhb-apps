@@ -190,9 +190,6 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if comp.fase_teams >= 'F':
-            raise Http404('Poules kunnen niet meer aangepast worden')
-
         context['mag_koppelen'] = (comp.fase_teams <= 'D')
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
@@ -252,8 +249,6 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase_teams >= 'F':
-            raise Http404('Poules kunnen niet meer aangepast worden')
 
         mag_koppelen = comp.fase_teams <= 'D'
 

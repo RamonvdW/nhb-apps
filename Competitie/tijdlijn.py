@@ -239,6 +239,10 @@ def zet_competitie_fase_regio_wedstrijden(comp):
     zet_competitie_fases(comp, 'F', 'F')
 
 
+def zet_competitie_fase_regio_afsluiten(comp):
+    zet_competitie_fases(comp, 'G', 'G')
+
+
 def zet_competitie_fase_rk_prep(comp):
     zet_competitie_fases(comp, 'J', 'J')
 

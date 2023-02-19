@@ -972,7 +972,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         zet_competitie_fase_regio_wedstrijden(comp)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
-        self.assert404(resp, 'Pagina kan nog niet gebruikt worden')
+        self.assert404(resp, 'Pagina kan niet gebruikt worden')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])

@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                KampioenschapIndivKlasseLimiet, RegiocompetitieSporterBoog,
                                CompetitieMutatie)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_rk_prep
+from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Uitslag
@@ -32,16 +32,16 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
-    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk
-    url_wijzig_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/wijzig/%s/'          # match_pk
-    url_verwijder_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/verwijder/%s/'    # match_pk
-    url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'                   # deelcomp_pk
-    url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'      # deelcomp_pk
+    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                    # deelcomp_pk
+    url_wijzig_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/wijzig/%s/'              # match_pk
+    url_verwijder_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/verwijder/%s/'        # match_pk
+    url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'                       # deelcomp_pk
+    url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'          # deelcomp_pk
     url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'                        # deelcomp_pk
-    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'  # comp_pk
-    url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'    # comp_pk
-    url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'    # comp_pk
+    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'                            # deelcomp_pk
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'      # comp_pk
+    url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'        # comp_pk
+    url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'        # comp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp.pk
 
     testdata = None
@@ -205,19 +205,13 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
         comp.bepaal_fase()
-        # print('competitie_sluit_alle_regiocompetities: comp: %s --> fase_indiv=%s, fase_teams=%s' % (comp, comp.fase_indiv, comp.fase_teams))
-        self.assertTrue('B' <= comp.fase_indiv <= 'G')
-        self.assertTrue('B' <= comp.fase_teams <= 'G')
+        self.assertEqual(comp.fase_indiv, 'G')
+        self.assertEqual(comp.fase_teams, 'G')
         for deelcomp in Regiocompetitie.objects.filter(competitie=comp):
             if not deelcomp.is_afgesloten:          # pragma: no branch
                 deelcomp.is_afgesloten = True
                 deelcomp.save(update_fields=['is_afgesloten'])
         # for
-
-        comp.bepaal_fase()
-        # print('competitie_sluit_alle_regiocompetities: comp: %s --> fase_indiv=%s, fase_teams=%s' % (comp, comp.fase_indiv, comp.fase_teams))
-        self.assertEqual(comp.fase_indiv, 'G')
-        self.assertEqual(comp.fase_teams, 'G')
 
     def _deelnemers_aanmaken(self):
         KampioenschapSporterBoog(kampioenschap=self.deelkamp_rayon1_18,
@@ -656,6 +650,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         # nu doorzetten naar RK fase
+        zet_competitie_fase_regio_afsluiten(self.comp_18)
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
@@ -685,6 +680,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagrayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         # nu doorzetten naar RK fase
+        zet_competitie_fase_regio_afsluiten(self.comp_18)
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)

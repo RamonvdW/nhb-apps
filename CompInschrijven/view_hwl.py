@@ -490,7 +490,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
                 # bepaal in welke wedstrijdklasse de schutter komt
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
-                dvl = sporterboog.sporter.sinds_datum
 
                 aanmelding = RegiocompetitieSporterBoog(
                                     regiocompetitie=deelcomp,
