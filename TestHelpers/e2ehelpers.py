@@ -213,7 +213,76 @@ class E2EHelpers(TestCase):
         if rol_nu != rol_verwacht:
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
+    def _interpreteer_resp(self, resp):
+        long_msg = list()
+        long_msg.append("status code: %s" % resp.status_code)
+        long_msg.append(repr(resp))
+
+        is_attachment = False
+        if resp.status_code == 302:
+            msg = "redirect to url: %s" % resp.url
+            long_msg.append(msg)
+            return msg, long_msg
+
+        try:
+            header = resp['Content-Disposition']
+        except KeyError:
+            pass
+        else:
+            is_attachment = header.startswith('attachment; filename')
+
+            if is_attachment:
+                msg = 'content is an attachment: %s...' % str(resp.content)[:20]
+                long_msg.append(msg)
+                return msg, long_msg
+
+        content = str(resp.content)
+        content = self._remove_debug_toolbar(content)
+        if len(content) < 50:
+            msg = "very short content: %s" % content
+            long_msg.append(msg)
+            return msg, long_msg
+
+        is_404 = resp.status_code == 404
+        if not is_404:
+            is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
+
+        if is_404:
+            pos = content.find('<meta path="')
+            if pos > 0:
+                # pagina bestaat echt niet
+                sub = content[pos+12:pos+300]
+                pos = sub.find('"')
+                msg = '404 pagina niet gevonden: %s' % sub[:pos]
+                long_msg.append(msg)
+                return msg, long_msg
+
+            # zoek de expliciete foutmelding
+            pos = content.find('<code>')
+            if pos > 0:
+                sub = content[pos + 6:]
+                pos = sub.find('</code>')
+                msg = '404 met melding %s' % repr(sub[:pos])
+                long_msg.append(msg)
+                return msg, long_msg
+
+        if not is_attachment:
+            long_msg.append('templates used:')
+            for templ in resp.templates:
+                long_msg.append('   %s' % repr(templ.name))
+            # for
+
+        soup = BeautifulSoup(content, features="html.parser")
+        long_msg.append(soup.prettify())
+
+        return '', long_msg
+
     def e2e_dump_resp(self, resp):                        # pragma: no cover
+        short_msg, long_msg = self._interpreteer_resp(resp)
+        print("\ne2e_dump_resp:")
+        print("\n".join(long_msg))
+        return
+
         print("\ne2e_dump_resp:\nstatus code:", resp.status_code)
         print(repr(resp))
         is_attachment = False
@@ -226,12 +295,6 @@ class E2EHelpers(TestCase):
                 pass
             else:
                 is_attachment = header.startswith('attachment; filename')
-
-            if not is_attachment:
-                print('templates used:')
-                for templ in resp.templates:
-                    print('   %s' % repr(templ.name))
-                # for
 
         if is_attachment:
             print('content is an attachment: %s...' % str(resp.content)[:20])
@@ -246,14 +309,29 @@ class E2EHelpers(TestCase):
                     is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
                     if is_404:
                         pos = content.find('<meta path="')
-                        if pos < 0:
-                            # geen page-not-found maar fout-in-pagina
-                            is_404 = False
-                        else:
+                        if pos > 0:
+                            # pagina bestaat echt niet
                             sub = content[pos+12:pos+300]
                             pos = sub.find('"')
                             print('404 pagina niet gevonden: %s' % sub[:pos])
+                        else:
+                            # zoek de expliciete foutmelding
+                            pos = content.find('<code>')
+                            if pos > 0:
+                                sub = content[pos + 6:]
+                                pos = sub.find('</code>')
+                                melding = sub[:pos]
+                                print('404 met melding %s' % repr(melding))
+                            else:
+                                is_404 = False
+
                 if not is_404:
+                    if not is_attachment:
+                        print('templates used:')
+                        for templ in resp.templates:
+                            print('   %s' % repr(templ.name))
+                        # for
+
                     soup = BeautifulSoup(content, features="html.parser")
                     print(soup.prettify())
 
@@ -696,10 +774,16 @@ class E2EHelpers(TestCase):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         lst = self._get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
-            self.e2e_dump_resp(resp)
+            short_msg, long_msg = self._interpreteer_resp(resp)
+            if short_msg:
+                msg = short_msg + " in plaats van de juiste templates"
+                self.fail(msg=msg)
+
+            print(long_msg)
             msg = "Following templates should have been used: %s\n" % repr(lst)
             msg += "Actually used: %s" % repr([t.name for t in resp.templates])
-            self.assertTrue(False, msg=msg)
+            msg += "\n" + short_msg
+            self.fail(msg=msg)
 
     def e2e_assert_logged_in(self):
         resp = self.client.get('/account/logout/', follow=False)
