@@ -73,7 +73,7 @@ urlpatterns = [
          name='bko-bevestig-eindstand-bk-teams'),
 
     path('<comp_pk>/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/',
-         views_bko.KlassengrenzenTeamsVaststellenView.as_view(),
+         views_bko.KlassengrenzenVaststellenRkBkTeamsView.as_view(),
          name='klassengrenzen-vaststellen-rk-bk-teams'),
 
 

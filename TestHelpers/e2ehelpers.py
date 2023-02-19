@@ -777,12 +777,11 @@ class E2EHelpers(TestCase):
             short_msg, long_msg = self._interpreteer_resp(resp)
             if short_msg:
                 msg = short_msg + " in plaats van de juiste templates"
-                self.fail(msg=msg)
-
-            print(long_msg)
-            msg = "Following templates should have been used: %s\n" % repr(lst)
-            msg += "Actually used: %s" % repr([t.name for t in resp.templates])
-            msg += "\n" + short_msg
+            else:
+                print("\n".join(long_msg))
+                msg = "Following templates should have been used: %s\n" % repr(lst)
+                msg += "Actually used: %s" % repr([t.name for t in resp.templates])
+                msg += "\n" + short_msg
             self.fail(msg=msg)
 
     def e2e_assert_logged_in(self):
@@ -1058,6 +1057,8 @@ class E2EHelpers(TestCase):
                 if line.startswith('[WARNING] '):                               # pragma: no cover
                     print(line)
             # for
+
+        return f1, f2
 
     def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False, fail_on_error=True):
         # vraag de achtergrondtaak om de mutaties te verwerken

@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
+from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -22,21 +23,6 @@ import datetime
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
-
-# korte beschrijving van de competitie fase voor de HWL
-comp_fase_kort = {
-    'A': 'opstarten',
-    'C': 'inschrijven',
-    'F': 'wedstrijden regio',
-    'G': 'vaststellen uitslag regio',
-    'J': 'voorbereiding RK',
-    'K': 'voorbereiding RK',
-    'L': 'wedstrijden RK',
-    'N': 'vaststellen uitslagen RK ',
-    'O': 'voorbereiding BK',
-    'P': 'wedstrijden BK',
-    'Q': 'einde competitie',
-}
 
 
 class OverzichtView(UserPassesTestMixin, TemplateView):
@@ -56,16 +42,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    @staticmethod
-    def _get_comp_fases(comp):
-        if comp.fase_indiv == comp.fase_teams:
-            indiv = "Competitie fase: %s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])
-            teams = None
-        else:
-            indiv = "Competitie fase individueel: %s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])
-            teams = "Competitie fase teams: %s (%s)" % (comp.fase_teams, comp_fase_kort[comp.fase_teams])
-        return indiv, teams
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -155,7 +131,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
                 kaartje.anker = 'competitie_%s' % comp.pk
-                kaartje.comp_fase_indiv, kaartje.comp_fase_teams = self._get_comp_fases(comp)
+                kaartje.comp_fase_indiv, kaartje.comp_fase_teams = maak_comp_fase_beschrijvingen(comp)
                 kaartjes.append(kaartje)
 
                 prev_jaar = begin_jaar

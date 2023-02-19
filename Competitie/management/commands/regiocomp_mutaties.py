@@ -1145,7 +1145,6 @@ class Command(BaseCommand):
             aantal_pijlen = 2.0 * 30
         else:
             aantal_pijlen = 2.0 * 25
-        print('aantal_pijlen = %s' % aantal_pijlen)
 
         deelkamp_bk = Kampioenschap.objects.get(deel=DEEL_BK, competitie=comp)
 

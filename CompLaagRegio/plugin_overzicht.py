@@ -71,7 +71,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         prio=6,
                         titel="Regio keuzes",
                         icoon="flaky",
-                        tekst="Overzicht van de keuzes gemaakt per regio",
+                        tekst="Overzicht van de keuzes gemaakt per regio.",
                         url=url)
         kaartjes_teams.append(kaartje)
 

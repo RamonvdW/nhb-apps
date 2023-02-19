@@ -8,6 +8,28 @@ from django.utils import timezone
 import datetime
 
 
+# korte beschrijving van de competitie fase
+comp_fase_kort = {
+    'A': 'opstarten',
+    'C': 'inschrijven',
+    'F': 'wedstrijden regio',
+    'G': 'vaststellen uitslag regio',
+    'J': 'voorbereiding RK',
+    'K': 'voorbereiding RK',
+    'L': 'wedstrijden RK',
+    'N': 'vaststellen uitslagen RK ',
+    'O': 'voorbereiding BK',
+    'P': 'wedstrijden BK',
+    'Q': 'einde competitie',
+}
+
+
+def maak_comp_fase_beschrijvingen(comp):
+    indiv = "Competitie fase individueel: %s (%s)" % (comp.fase_indiv, comp_fase_kort[comp.fase_indiv])
+    teams = "Competitie fase teams: %s (%s)" % (comp.fase_teams, comp_fase_kort[comp.fase_teams])
+    return indiv, teams
+
+
 # wordt gebruikt vanuit Competitie.tijdlijn
 test_met_deze_evaluatie_datum = None
 

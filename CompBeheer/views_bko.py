@@ -145,7 +145,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Competitie:kies'))
 
 
-class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
+class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de BKO de teams klassengrenzen voor het RK en BK vaststellen """
 
@@ -410,7 +410,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
     template_name = None
     expected_fase = '?'
     check_indiv_fase = True
-    url_name = None
+    url_name = None             # naar POST handler, voor doorzetten
     mutatie_code = None
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -479,6 +479,8 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
                           door=door_str,
                           competitie=comp).save()
 
+        # we wachten niet tot deze verwerkt is
+
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
 
@@ -518,9 +520,9 @@ class KleineBKKlassenZijnSamengevoegdIndivView(DoorzettenBasisView):
     """ Met deze view kan de BKO bevestigen dat kleine individuele BK klassen samengevoegd zijn """
 
     template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_INDIV
-    expected_fase = 'P'
+    expected_fase = 'N'
     check_indiv_fase = True
-    url_name = 'bko-   bk-indiv'
+    url_name = 'bko-bk-indiv-kleine-klassen'
 
     def doorzetten(self, account, comp):
         comp.bk_indiv_klassen_zijn_samengevoegd = True
@@ -532,9 +534,9 @@ class KleineBKKlassenZijnSamengevoegdTeamsView(DoorzettenBasisView):
     """ Met deze view kan de BKO bevestigen dat kleine BK teams klassen samengevoegd zijn """
 
     template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_TEAMS
-    expected_fase = 'P'
+    expected_fase = 'N'
     check_indiv_fase = False
-    url_name = 'bko-   -bk-teams'
+    url_name = 'bko-bk-teams-kleine-klassen'
 
     def doorzetten(self, account, comp):
         comp.bk_teams_klassen_zijn_samengevoegd = True
