@@ -29,13 +29,13 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
 
     url_competitie_beheer = '/bondscompetities/beheer/%s/'                                          # comp_pk
-    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'          # comp_pk
-    url_doorzetten_rk_naar_bk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'    # comp_pk
-    url_doorzetten_rk_naar_bk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'    # comp_pk
-    url_bevestig_eindstand_bk_indiv = '/bondscompetities/beheer/%s/bk-indiv-eindstand-bevestigen/'  # comp_pk
-    url_bevestig_eindstand_bk_teams = '/bondscompetities/beheer/%s/bk-teams-eindstand-bevestigen/'  # comp_pk
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'          # comp_pk
+    url_doorzetten_rk_naar_bk_indiv = '/bondscompetities/beheer/%s/doorzetten/rk-indiv-naar-bk/'    # comp_pk
+    url_doorzetten_rk_naar_bk_teams = '/bondscompetities/beheer/%s/doorzetten/rk-teams-naar-bk/'    # comp_pk
+    url_bevestig_eindstand_bk_indiv = '/bondscompetities/beheer/%s/doorzetten/bk-indiv-eindstand-bevestigen/'  # comp_pk
+    url_bevestig_eindstand_bk_teams = '/bondscompetities/beheer/%s/doorzetten/bk-teams-eindstand-bevestigen/'  # comp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'      # comp_pk
-    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     regio_nr = 101
     ver_nr = 0      # wordt in setupTestData ingevuld
@@ -239,7 +239,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-naar-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
 
         # sluit alle regiocompetities
         for obj in Regiocompetitie.objects.filter(competitie=self.comp_18,
@@ -257,7 +257,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-naar-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
 
         # nu echt doorzetten
         self._regioschutters_inschrijven()
@@ -339,7 +339,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-naar-bk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-2a-rk-naar-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
         # alle rayonkampioenschappen afsluiten
         self.comp_18.rk_indiv_afgesloten = True
@@ -349,7 +349,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-naar-bk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-2a-rk-naar-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
         # nu echt doorzetten
         with self.assert_max_queries(20):
@@ -457,7 +457,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-voorbij-bk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4a-bevestig-eindstand-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
         # verkeerde BKO
         self.e2e_wissel_naar_functie(self.functie_bko_25)
@@ -507,7 +507,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp,
-                                  ('compbeheer/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl', 'plein/site_layout.dtl'))
+                                  ('compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk

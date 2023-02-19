@@ -23,18 +23,18 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         if not comp.klassengrenzen_vastgesteld_rk_bk and comp.fase_teams == 'J':
             url = reverse('CompBeheer:klassengrenzen-vaststellen-rk-bk-teams', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=2,
                         titel="Doorzetten",
                         icoon="mediation",
                         tekst="Open inschrijving RK teams sluiten en de klassengrenzen voor het RK teams en BK teams vaststellen.",
                         url=url)
-            kaartjes_algemeen.append(kaartje)
+            kaartjes_teams.append(kaartje)
 
         # afsluiten RK individueel / doorzetten naar BK individueel
         if comp.fase_indiv == 'L':
             url = reverse('CompBeheer:bko-rk-indiv-doorzetten-naar-bk', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=2,
                         titel="Doorzetten",
                         icoon="mediation",
                         tekst="%s individueel doorzetten naar de volgende fase (RK naar BK)" % comp.beschrijving,
@@ -45,7 +45,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         if comp.fase_teams == 'L':
             url = reverse('CompBeheer:bko-rk-teams-doorzetten-naar-bk', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=2,
                         titel="Doorzetten",
                         icoon="mediation",
                         tekst="%s teams doorzetten naar de volgende fase (RK naar BK)" % comp.beschrijving,
@@ -57,7 +57,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             url = reverse('CompLaagRayon:rayon-teams-alle', kwargs={'comp_pk': comp.pk, 'subset': 'auto'})
             kaartje = SimpleNamespace(
                         prio=5,
-                        titel="RK limieten",
+                        titel="RK teams",
                         icoon="api",
                         tekst="Alle aangemelde teams voor de Rayonkampioenschappen.",
                         url=url)

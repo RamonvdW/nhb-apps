@@ -758,9 +758,9 @@ class Kampioenschap(models.Model):
     functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
 
     # is de beheerder klaar?
-    is_klaar_indiv = models.BooleanField(default=False)
-    is_klaar_teams = models.BooleanField(default=False)
-    is_afgesloten = models.BooleanField(default=False)
+    is_klaar_indiv = models.BooleanField(default=False)     # TODO: wordt niet gebruikt
+    is_klaar_teams = models.BooleanField(default=False)     # TODO: wordt niet gebruikt
+    is_afgesloten = models.BooleanField(default=False)      # TODO: wordt niet gebruikt
 
     # wedstrijden
     rk_bk_matches = models.ManyToManyField(CompetitieMatch, blank=True)

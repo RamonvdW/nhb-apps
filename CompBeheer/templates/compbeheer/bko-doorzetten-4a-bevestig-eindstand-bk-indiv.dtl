@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -21,8 +21,8 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             <div class="white center" style="padding:10px">
-                <p>Als BKO wil je de competitie doorzetten naar de volgende fase: voorbij de bondskampioenschappen.</p>
-                <p>Hiermee geef je aan dat de uitslagen van de BK's vastgesteld zijn (toekomst: en alle uitslagen ingeladen zijn).</p>
+                <p>Als BKO wil je de eindstand van de Bondskampioenschappen <b>individuele</b> bevestigen.</p>
+                <p>Hiermee zet je de individuele competitie door naar de volgende fase.</p>
 
                 {% if url_doorzetten %}
                     <br>
@@ -36,6 +36,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-voorbij-bk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-bevestig-eindstand-bk-indiv" %}
 
 {% endblock %}

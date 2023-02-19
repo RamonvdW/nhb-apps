@@ -976,17 +976,17 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag nog niet wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag nog niet wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
         # fase O (oproepen reserves)
         zet_competitie_fases(comp, 'O', 'O')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
-        self.assert404(resp, 'Pagina kan niet meer gebruikt worden')
+        self.assert404(resp, 'Pagina kan niet gebruikt worden')
 
         # tijdens fase K en L mag de pagina gebruikt worden
         zet_competitie_fases(comp, 'K', 'K')
@@ -1026,15 +1026,15 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         zet_competitie_fases(comp, 'N', 'N')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
-        self.assert404(resp, 'Pagina kan niet meer gebruikt worden')
+        self.assert404(resp, 'Pagina kan niet gebruikt worden')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag niet meer wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag niet meer wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
         # sporter van andere vereniging
         andere_ver = self.ver_nrs[0]

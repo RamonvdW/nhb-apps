@@ -56,7 +56,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         if comp.fase_indiv == 'G':
             url = reverse('CompBeheer:bko-doorzetten-regio-naar-rk', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
-                prio=5,
+                prio=2,
                 titel="Doorzetten",
                 icoon="mediation",
                 tekst="%s doorzetten naar de volgende fase (regio naar RK)" % comp.beschrijving,
@@ -68,7 +68,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
         # laat de regio instellingen zien voor alle relevante regios
         url = reverse('CompLaagRegio:regio-instellingen-globaal', kwargs={'comp_pk': comp.pk})
         kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=6,
                         titel="Regio keuzes",
                         icoon="flaky",
                         tekst="Overzicht van de keuzes gemaakt per regio",

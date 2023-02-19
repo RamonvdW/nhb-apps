@@ -10,19 +10,21 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK
-from Competitie.models import (Competitie, Regiocompetitie, CompetitieMutatie, Kampioenschap,
-                               CompetitieTeamKlasse, KampioenschapTeam)
+from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
+                                   MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK)
+from Competitie.models import Competitie, Regiocompetitie, CompetitieMutatie, CompetitieTeamKlasse, KampioenschapTeam
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 
-TEMPLATE_COMPBEHEER_DOORZETTEN_REGIO_NAAR_RK = 'compbeheer/bko-doorzetten-naar-rk.dtl'
-TEMPLATE_COMPBEHEER_DOORZETTEN_INDIV_RK_NAAR_BK = 'compbeheer/bko-doorzetten-naar-bk.dtl'
-TEMPLATE_COMPBEHEER_DOORZETTEN_TEAMS_RK_NAAR_BK = 'compbeheer/bko-doorzetten-naar-bk.dtl'
-TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_INDIV = 'compbeheer/bko-doorzetten-voorbij-bk.dtl'
-TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_TEAMS = 'compbeheer/bko-doorzetten-voorbij-bk.dtl'
-TEMPLATE_COMPBEHEER_KLASSENGRENZEN_TEAMS_VASTSTELLEN = 'compbeheer/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_REGIO_NAAR_RK = 'compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_RK_BK_TEAMS = 'compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_INDIV = 'compbeheer/bko-doorzetten-2a-rk-naar-bk-indiv.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_TEAMS = 'compbeheer/bko-doorzetten-2b-rk-naar-bk-teams.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_INDIV = 'compbeheer/bko-doorzetten-3a-bk-kleine-klassen-indiv.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_TEAMS = 'compbeheer/bko-doorzetten-3b-bk-kleine-klassen-teams.dtl'
+TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_INDIV = 'compbeheer/bko-doorzetten-4a-bevestig-eindstand-bk-indiv.dtl'
+TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_TEAMS = 'compbeheer/bko-doorzetten-4b-bevestig-eindstand-bk-teams.dtl'
 
 
 class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
@@ -90,8 +92,8 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
             raise Http404('Verkeerde competitie')
 
         comp.bepaal_fase()
-        if comp.fase_indiv < 'E' or comp.fase_indiv >= 'J':
-            # kaartjes werd niet getoond, dus je zou hier niet moeten zijn
+        if comp.fase_indiv < 'F' or comp.fase_indiv >= 'J':
+            # kaartje werd niet getoond, dus je zou hier niet moeten zijn
             raise Http404('Verkeerde competitie fase')
 
         context['comp'] = comp
@@ -143,357 +145,12 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Competitie:kies'))
 
 
-class DoorzettenIndivRKNaarBKView(UserPassesTestMixin, TemplateView):
-
-    """ Met deze view kan de BKO de competitie doorzetten naar de BK fase """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_INDIV_RK_NAAR_BK
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BKO
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        context['comp'] = comp
-
-        comp.bepaal_fase()
-        if comp.fase_indiv != 'L':
-            raise Http404('Verkeerde competitie fase')
-
-        # bepaal de status van elk rayon
-
-        status2str = {True: 'Afgesloten', False: 'Actief'}
-
-        context['rk_status'] = deelkamps = (Kampioenschap
-                                            .objects
-                                            .select_related('nhb_rayon')
-                                            .filter(competitie=comp,
-                                                    deel=DEEL_RK)
-                                            .order_by('nhb_rayon__rayon_nr'))
-        klaar = True
-        for deelkamp in deelkamps:
-            deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
-            deelkamp.status_str = status2str[deelkamp.is_afgesloten]
-            deelkamp.indiv_str = status2str[deelkamp.is_klaar_indiv]
-            if not deelkamp.is_klaar_indiv:
-                klaar = False
-        # for
-
-        if klaar:
-            context['url_doorzetten'] = reverse('CompBeheer:bko-rk-indiv-doorzetten-naar-bk',
-                                                kwargs={'comp_pk': comp.pk})
-
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Competitie doorzetten')
-        )
-
-        menu_dynamics(self.request, context)
-        return context
-
-    @staticmethod
-    def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Doorzetten naar de volgende fase' gebruikt wordt
-            door de BKO, om de competitie door te zetten van de RK naar de BK fase.
-        """
-
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        comp.bepaal_fase()
-        if comp.fase_indiv != 'L':
-            raise Http404('Verkeerde competitie fase')
-
-        # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
-        # dit voorkomt ook race conditions / dubbel uitvoeren
-        account = request.user
-        door_str = "BKO %s" % account.volledige_naam()
-
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK,
-                          door=door_str,
-                          competitie=comp).save()
-
-        return HttpResponseRedirect(reverse('Competitie:kies'))
-
-
-class DoorzettenTeamsRKNaarBKView(UserPassesTestMixin, TemplateView):
-
-    """ Met deze view kan de BKO de competitie doorzetten naar de BK fase """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_TEAMS_RK_NAAR_BK
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BKO
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        comp.bepaal_fase()
-        if comp.fase_teams != 'L':
-            raise Http404('Verkeerde competitie fase')
-
-        # klaar om door te zetten
-        context['url_doorzetten'] = reverse('CompBeheer:bko-rk-teams-doorzetten-naar-bk',
-                                                kwargs={'comp_pk': comp.pk})
-
-        # bepaal de status van elk rayon
-        status2str = {True: 'Afgesloten', False: 'Actief'}
-
-        context['rk_status'] = deelkamps = (Kampioenschap
-                                            .objects
-                                            .select_related('nhb_rayon')
-                                            .filter(competitie=comp,
-                                                    deel=DEEL_RK)
-                                            .order_by('nhb_rayon__rayon_nr'))
-        for deelkamp in deelkamps:
-            deelkamp.rayon_str = 'Rayon %s' % deelkamp.nhb_rayon.rayon_nr
-            deelkamp.status_str = status2str[deelkamp.is_afgesloten]
-            deelkamp.indiv_str = status2str[deelkamp.is_klaar_indiv]
-            deelkamp.team_str = status2str[deelkamp.is_klaar_teams]
-        # for
-
-        context['comp'] = comp
-
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Competitie doorzetten')
-        )
-
-        menu_dynamics(self.request, context)
-        return context
-
-    @staticmethod
-    def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Doorzetten naar de volgende fase' gebruikt wordt
-            door de BKO, om de competitie door te zetten van de RK naar de BK fase.
-        """
-
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        comp.bepaal_fase()
-        if comp.fase_teams != 'L':
-            raise Http404('Verkeerde competitie fase')
-
-        # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
-        # dit voorkomt ook race conditions / dubbel uitvoeren
-        account = request.user
-        door_str = "BKO %s" % account.volledige_naam()
-
-        CompetitieMutatie(mutatie=MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK,
-                          door=door_str,
-                          competitie=comp).save()
-
-        return HttpResponseRedirect(reverse('Competitie:kies'))
-
-
-class BevestigEindstandBKIndivView(UserPassesTestMixin, TemplateView):
-
-    """ Met deze view kan de BKO de BK wedstrijden afsluiten """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_INDIV
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.functie_nu = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return rol_nu == Rollen.ROL_BKO
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        # correcte beheerder?
-        if comp.afstand != self.functie_nu.comp_type:
-            raise PermissionDenied('Niet de beheerder')
-
-        comp.bepaal_fase()
-        if comp.fase_indiv != 'P':          # TODO: implementatie voor teams
-            raise Http404('Verkeerde competitie fase')
-
-        context['url_doorzetten'] = reverse('CompBeheer:bko-bevestig-eindstand-bk-indiv',
-                                            kwargs={'comp_pk': comp.pk})
-
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
-                comp.beschrijving.replace(' competitie', '')),
-            (None, 'Doorzetten')
-        )
-
-        menu_dynamics(self.request, context)
-        return context
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'BK afsluiten' gebruikt wordt door de BKO.
-        """
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        # correcte beheerder?
-        if comp.afstand != self.functie_nu.comp_type:
-            raise PermissionDenied('Niet de beheerder')
-
-        comp.bepaal_fase()
-        if comp.fase_indiv != 'P':
-            raise Http404('Verkeerde competitie fase')
-
-        comp.bk_indiv_afgesloten = True     # TODO: ondersteuning teams
-        comp.save(update_fields=['bk_indiv_afgesloten'])
-
-        return HttpResponseRedirect(reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}))
-
-
-class BevestigEindstandBKTeamsView(UserPassesTestMixin, TemplateView):
-
-    """ Met deze view kan de BKO de BK teams afsluiten """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_INDIV
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.functie_nu = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return rol_nu == Rollen.ROL_BKO
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        # correcte beheerder?
-        if comp.afstand != self.functie_nu.comp_type:
-            raise PermissionDenied('Niet de beheerder')
-
-        comp.bepaal_fase()
-        if comp.fase_indiv != 'P':          # TODO: implementatie voor teams
-            raise Http404('Verkeerde competitie fase')
-
-        context['url_doorzetten'] = reverse('CompBeheer:bko-bevestig-eindstand-bk-teams',
-                                            kwargs={'comp_pk': comp.pk})
-
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
-                comp.beschrijving.replace(' competitie', '')),
-            (None, 'Doorzetten')
-        )
-
-        menu_dynamics(self.request, context)
-        return context
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'BK afsluiten' gebruikt wordt door de BKO.
-        """
-        try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-            comp = (Competitie
-                    .objects
-                    .get(pk=comp_pk,
-                         is_afgesloten=False))
-        except (ValueError, Competitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
-
-        # correcte beheerder?
-        if comp.afstand != self.functie_nu.comp_type:
-            raise PermissionDenied('Niet de beheerder')
-
-        comp.bepaal_fase()
-        if comp.fase_indiv != 'P':
-            raise Http404('Verkeerde competitie fase')
-
-        comp.bk_indiv_afgesloten = True     # TODO: ondersteuning teams
-        comp.save(update_fields=['bk_indiv_afgesloten'])
-
-        return HttpResponseRedirect(reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}))
-
-
 class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de BKO de teams klassengrenzen voor het RK en BK vaststellen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_KLASSENGRENZEN_TEAMS_VASTSTELLEN
+    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_RK_BK_TEAMS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -743,6 +400,173 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                       kwargs={'comp_pk': comp.pk})
 
         return HttpResponseRedirect(url)
+
+
+class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de BKO een "doorzetten" actie in gang zetten """
+
+    # class variables shared by all instances
+    template_name = None
+    expected_fase = '?'
+    check_indiv_fase = True
+    url_name = None
+    mutatie_code = None
+
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.functie_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return rol_nu == Rollen.ROL_BKO
+
+    def _check_competitie_fase(self, comp_pk_str):
+        try:
+            comp_pk = int(comp_pk_str[:6])  # afkappen voor de veiligheid
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk,
+                         is_afgesloten=False))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        # correcte beheerder?
+        if comp.afstand != self.functie_nu.comp_type:
+            raise PermissionDenied('Niet de beheerder')
+
+        comp.bepaal_fase()
+
+        if self.check_indiv_fase:
+            check_fase = comp.fase_indiv
+        else:
+            check_fase = comp.fase_teams
+
+        if check_fase != self.expected_fase:
+            raise Http404('Verkeerde competitie fase')
+
+        return comp
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        comp = self._check_competitie_fase(kwargs['comp_pk'])
+        context['comp'] = comp
+
+        context['url_doorzetten'] = reverse('CompBeheer:%s' % self.url_name,
+                                            kwargs={'comp_pk': comp.pk})
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Competitie doorzetten')
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+    def doorzetten(self, account, comp):
+        # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
+        # dit voorkomt ook race conditions / dubbel uitvoeren
+        door_str = "BKO %s" % account.volledige_naam()
+
+        CompetitieMutatie(mutatie=self.mutatie_code,
+                          door=door_str,
+                          competitie=comp).save()
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
+
+        comp = self._check_competitie_fase(kwargs['comp_pk'])
+
+        self.doorzetten(request.user, comp)
+
+        # url = reverse('Competitie:kies')
+        url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
+        return HttpResponseRedirect(url)
+
+
+class DoorzettenIndivRKNaarBKView(DoorzettenBasisView):
+
+    """ Met deze view kan de BKO de individuele competitie doorzetten naar de BK fase """
+
+    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_INDIV
+    expected_fase = 'L'
+    check_indiv_fase = True
+    url_name = 'bko-rk-indiv-doorzetten-naar-bk'
+    mutatie_code = MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK
+
+
+class DoorzettenTeamsRKNaarBKView(DoorzettenBasisView):
+
+    """ Met deze view kan de BKO de teamcompetitie doorzetten naar de BK fase """
+
+    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_TEAMS
+    expected_fase = 'L'
+    check_indiv_fase = False
+    url_name = 'bko-rk-teams-doorzetten-naar-bk'
+    mutatie_code = MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK
+
+
+class KleineBKKlassenZijnSamengevoegdIndivView(DoorzettenBasisView):
+
+    """ Met deze view kan de BKO bevestigen dat kleine individuele BK klassen samengevoegd zijn """
+
+    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_INDIV
+    expected_fase = 'P'
+    check_indiv_fase = True
+    url_name = 'bko-   bk-indiv'
+
+    def doorzetten(self, account, comp):
+        comp.bk_indiv_klassen_zijn_samengevoegd = True
+        comp.save(update_fields=['bk_indiv_klassen_zijn_samengevoegd'])
+
+
+class KleineBKKlassenZijnSamengevoegdTeamsView(DoorzettenBasisView):
+
+    """ Met deze view kan de BKO bevestigen dat kleine BK teams klassen samengevoegd zijn """
+
+    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_TEAMS
+    expected_fase = 'P'
+    check_indiv_fase = False
+    url_name = 'bko-   -bk-teams'
+
+    def doorzetten(self, account, comp):
+        comp.bk_teams_klassen_zijn_samengevoegd = True
+        comp.save(update_fields=['bk_teams_klassen_zijn_samengevoegd'])
+
+
+class BevestigEindstandBKIndivView(DoorzettenBasisView):
+
+    """ Met deze view kan de BKO de eindstand van de BK individueel bevestigen """
+
+    template_name = TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_INDIV
+    expected_fase = 'P'
+    check_indiv_fase = True
+    url_name = 'bko-bevestig-eindstand-bk-indiv'
+
+    def doorzetten(self, account, comp):
+        comp.bk_indiv_afgesloten = True
+        comp.save(update_fields=['bk_indiv_afgesloten'])
+
+
+class BevestigEindstandBKTeamsView(DoorzettenBasisView):
+
+    """ Met deze view kan de BKO de eindstand van de BK teams bevestigen """
+
+    template_name = TEMPLATE_COMPBEHEER_BEVESTIG_EINDSTAND_BK_TEAMS
+    expected_fase = 'P'
+    check_indiv_fase = False
+    url_name = 'bko-bevestig-eindstand-bk-teams'
+
+    def doorzetten(self, account, comp):
+        comp.bk_teams_afgesloten = True
+        comp.save(update_fields=['bk_teams_afgesloten'])
 
 
 # end of file

@@ -412,7 +412,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase_regio_prep(self.comp_18)
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

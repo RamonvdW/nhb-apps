@@ -22,8 +22,8 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
     url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rk-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
     url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rk-teams/'                    # comp_pk, team_type
     url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rk-teams/%s/'               # comp_pk, team_type, rayon_nr
-    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'       # comp_pk
-    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'       # comp_pk
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     regio_nr = 101
     ver_nr = 0      # wordt in setupTestData ingevuld

@@ -11,7 +11,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum, zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven
+from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum, zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -305,15 +305,18 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         # TODO: controleer dat de teams gekoppeld aan de poule niet meer te wijzigen zijn
 
         # zet fase G, dan mag niets meer gewijzigd worden
-        zet_competitie_fases(comp, 'G', 'G')
+        zet_competitie_fase_regio_afsluiten(comp)
 
+        # kijken mag altijd nog
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': 'nieuwe test'})
-        self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
+        self.assert_is_redirect_not_plein(resp)
 
         # terug naar fase D
         comp = deelcomp.competitie

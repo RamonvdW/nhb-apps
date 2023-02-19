@@ -63,7 +63,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
 
         if comp.fase_indiv not in ('J', 'K', 'L'):
-            raise Http404('Pagina niet gebruikt worden')
+            raise Http404('Pagina kan niet gebruikt worden')
 
         mag_wijzigen = ('J' <= comp.fase_indiv <= 'K')
 

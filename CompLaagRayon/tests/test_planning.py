@@ -39,9 +39,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'          # deelcomp_pk
     url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
     url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'                            # deelcomp_pk
-    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/regio-doorzetten-naar-rk/'      # comp_pk
-    url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/rk-indiv-doorzetten-naar-bk/'        # comp_pk
-    url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/rk-teams-doorzetten-naar-bk/'        # comp_pk
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'      # comp_pk
+    url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/doorzetten/rk-indiv-naar-bk/'        # comp_pk
+    url_doorzetten_rk_teams = '/bondscompetities/beheer/%s/doorzetten/rk-teams-naar-bk/'        # comp_pk
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp.pk
 
     testdata = None

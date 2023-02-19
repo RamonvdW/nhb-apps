@@ -31,7 +31,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
     rayon_nr = 4
     ver_nr = 0
 
-    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     @classmethod
     def setUpTestData(cls):

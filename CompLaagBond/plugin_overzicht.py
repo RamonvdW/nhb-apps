@@ -33,17 +33,6 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                     url=url)
         kaartjes_algemeen.append(kaartje)
 
-        # Doorzetten van fase J naar K = klassengrenzen RK/BK vaststellen
-        if comp.fase_teams == 'J' and not comp.klassengrenzen_vastgesteld_rk_bk:
-            url = reverse('CompBeheer:klassengrenzen-vaststellen-rk-bk-teams', kwargs={'comp_pk': comp.pk})
-            kaartje = SimpleNamespace(
-                        prio=5,
-                        titel="Doorzetten",
-                        icoon="mediation",
-                        tekst="Open inschrijving RK teams sluiten en de klassengrenzen voor het RK teams en BK teams vaststellen.",
-                        url=url)
-            kaartjes_teams.append(kaartje)
-
         # BK selectie (individueel)
         if 'N' <= comp.fase_indiv <= 'O':
             url = reverse('CompLaagBond:bk-selectie', kwargs={'deelkamp_pk': deelkamp_bk.pk})
@@ -71,7 +60,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         if comp.fase_indiv == 'P':
             url = reverse('CompBeheer:bko-bevestig-eindstand-bk-indiv', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=2,
                         titel="Doorzetten",
                         icoon="mediation",
                         tekst="%s uitslag BK individueel bevestigen" % comp.beschrijving,
@@ -82,7 +71,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         if comp.fase_teams == 'P':
             url = reverse('CompBeheer:bko-bevestig-eindstand-bk-teams', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=2,
                         titel="Doorzetten",
                         icoon="mediation",
                         tekst="%s uitslag BK teams bevestigen" % comp.beschrijving,

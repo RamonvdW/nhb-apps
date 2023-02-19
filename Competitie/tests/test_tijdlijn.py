@@ -15,7 +15,7 @@ import datetime
 
 class TestCompetitieTijdlijn(E2EHelpers, TestCase):
 
-    """ tests voor de Competitie applicatie, pagina Overzicht """
+    """ tests voor de Competitie applicatie, module Tijdlijn """
 
     url_overzicht = '/bondscompetities/%s/'
 
@@ -27,7 +27,7 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
         teamtype = TeamType.objects.all()[0]
         CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
 
-    def _dump_comp(self, comp, msg=''):
+    def _dump_comp(self, comp, msg=''):         # pragma: no cover
         print('\nCompetitie dump:')
         if msg:
             print(msg)

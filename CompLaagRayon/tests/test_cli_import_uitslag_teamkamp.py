@@ -14,7 +14,7 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, import van de RK/BK teams uitslag """
 
-    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     test_file_25m = 'CompLaagRayon/management/testfiles/test_rk-25m1p_teams.xlsm'
     test_file1_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor_teams_4.xlsm'
