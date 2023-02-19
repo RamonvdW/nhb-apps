@@ -179,9 +179,8 @@ class KalenderMaandView(TemplateView):
 
         # bepaal of het knopje voor het mandje getoond moet worden
         if self.request.user.is_authenticated:
+            context['menu_toon_mandje'] = True
             eval_mandje_inhoud(self.request)
-
-        context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
             (None, 'Wedstrijdkalender'),
