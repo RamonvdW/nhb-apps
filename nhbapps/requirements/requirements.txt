@@ -20,7 +20,7 @@ google-api-core==2.11.0
     # via google-api-python-client
 google-api-python-client==2.78.0
     # via -r requirements.in
-google-auth==2.16.0
+google-auth==2.16.1
     # via
     #   -r requirements.in
     #   google-api-core
@@ -44,7 +44,7 @@ openpyxl==3.1.1
     # via -r requirements.in
 pillow==9.4.0
     # via -r requirements.in
-protobuf==4.21.12
+protobuf==4.22.0
     # via
     #   google-api-core
     #   googleapis-common-protos

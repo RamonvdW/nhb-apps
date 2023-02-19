@@ -43,7 +43,7 @@ google-api-core==2.11.0
     #   google-api-python-client
 google-api-python-client==2.78.0
     # via -r requirements.txt
-google-auth==2.16.0
+google-auth==2.16.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -88,7 +88,7 @@ pip-review==1.3.0
     # via -r requirements_dev.in
 prettytable==3.6.0
     # via pip-licenses
-protobuf==4.21.12
+protobuf==4.22.0
     # via
     #   -r requirements.txt
     #   google-api-core
