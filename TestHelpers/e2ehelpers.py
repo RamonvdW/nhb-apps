@@ -283,58 +283,6 @@ class E2EHelpers(TestCase):
         print("\n".join(long_msg))
         return
 
-        print("\ne2e_dump_resp:\nstatus code:", resp.status_code)
-        print(repr(resp))
-        is_attachment = False
-        if resp.status_code == 302:
-            print("redirect to url:", resp.url)
-        else:
-            try:
-                header = resp['Content-Disposition']
-            except KeyError:
-                pass
-            else:
-                is_attachment = header.startswith('attachment; filename')
-
-        if is_attachment:
-            print('content is an attachment: %s...' % str(resp.content)[:20])
-        else:
-            content = str(resp.content)
-            content = self._remove_debug_toolbar(content)
-            if len(content) < 50:
-                print("very short content:", content)
-            else:
-                is_404 = resp.status_code == 404
-                if not is_404:
-                    is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
-                    if is_404:
-                        pos = content.find('<meta path="')
-                        if pos > 0:
-                            # pagina bestaat echt niet
-                            sub = content[pos+12:pos+300]
-                            pos = sub.find('"')
-                            print('404 pagina niet gevonden: %s' % sub[:pos])
-                        else:
-                            # zoek de expliciete foutmelding
-                            pos = content.find('<code>')
-                            if pos > 0:
-                                sub = content[pos + 6:]
-                                pos = sub.find('</code>')
-                                melding = sub[:pos]
-                                print('404 met melding %s' % repr(melding))
-                            else:
-                                is_404 = False
-
-                if not is_404:
-                    if not is_attachment:
-                        print('templates used:')
-                        for templ in resp.templates:
-                            print('   %s' % repr(templ.name))
-                        # for
-
-                    soup = BeautifulSoup(content, features="html.parser")
-                    print(soup.prettify())
-
     def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
@@ -831,11 +779,13 @@ class E2EHelpers(TestCase):
                 self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
-        if resp.status_code != 302:  # pragma: no cover
+        if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
-            msg = "status_code: %s != 302" % resp.status_code
             if resp.status_code == 200:
-                self.e2e_dump_resp(resp)
+                short_msg, _ = self._interpreteer_resp(resp)
+                msg = "no redirect but " + short_msg
+            else:
+                msg = "status_code: %s != 302" % resp.status_code
                 msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
             self.fail(msg=msg)
         pos = expected_url.find('##')
