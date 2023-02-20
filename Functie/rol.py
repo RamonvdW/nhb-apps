@@ -259,12 +259,13 @@ def rol_get_huidige(request):
         van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
         een rol uit de groep Rollen.ROL_xxx
     """
-    try:
-        rol = request.session[SESSIONVAR_ROL_HUIDIGE]
-        if not request.user.is_authenticated and rol != Rollen.ROL_NONE:
-            my_logger.warning('{rol_get_huidige} sessie zegt rol=%s voor anon user' % rol)
-    except KeyError:
-        rol = Rollen.ROL_NONE
+    rol = Rollen.ROL_NONE
+    if request.user.is_authenticated:
+        try:
+            rol = request.session[SESSIONVAR_ROL_HUIDIGE]
+        except KeyError:
+            pass
+
     return rol
 
 
@@ -275,42 +276,38 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     """
     rol = rol_get_huidige(request)
     functie = None
-    try:
-        functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
-        if not request.user.is_authenticated:
-            my_logger.warning('{rol_get_huidige_functie} sessie zegt functie_pk=%s voor anon user' % functie_pk)
-    except KeyError:
-        # geen functie opgeslagen
-        # of geen pk-like nummer
-        pass
-    else:
-        if functie_pk:      # filter None
-            try:
-                functie_pk = int(functie_pk)
-            except ValueError:
-                # slecht getal
-                pass
-            else:
+    if request.user.is_authenticated:
+        try:
+            functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
+        except KeyError:
+            # geen functie opgeslagen
+            # of geen pk-like nummer
+            pass
+        else:
+            if functie_pk:      # filter None
                 try:
+                    functie_pk = int(functie_pk)
                     functie = (Functie
                                .objects
                                .select_related('nhb_rayon',
                                                'nhb_regio', 'nhb_regio__rayon',
                                                'nhb_ver', 'nhb_ver__regio')
                                .get(pk=functie_pk))
-                except Functie.DoesNotExist:
-                    # niet bestaande pk
+                except (ValueError, Functie.DoesNotExist):
+                    # slecht getal of geen bestaande functie
                     pass
                 else:
-                    if ((functie.rol == 'HWL' and rol != Rollen.ROL_HWL) or
-                            (functie.rol == 'SEC' and rol != Rollen.ROL_SEC) or
-                            (functie.rol == 'WL' and rol != Rollen.ROL_WL) or
-                            (functie.rol == 'RKO' and rol != Rollen.ROL_RKO) or
-                            (functie.rol == 'BKO' and rol != Rollen.ROL_BKO) or
-                            (functie.rol == 'RCL' and rol != Rollen.ROL_RCL) or
-                            (functie.rol == 'MWZ' and rol != Rollen.ROL_MWZ) or
-                            (functie.rol == 'MWW' and rol != Rollen.ROL_MWW)):
-                        # afwijkende combinatie!
+                    bad = ((functie.rol == 'HWL' and rol != Rollen.ROL_HWL) or
+                           (functie.rol == 'SEC' and rol != Rollen.ROL_SEC) or
+                           (functie.rol == 'WL'  and rol != Rollen.ROL_WL)  or
+                           (functie.rol == 'RKO' and rol != Rollen.ROL_RKO) or
+                           (functie.rol == 'BKO' and rol != Rollen.ROL_BKO) or
+                           (functie.rol == 'RCL' and rol != Rollen.ROL_RCL) or
+                           (functie.rol == 'MWZ' and rol != Rollen.ROL_MWZ) or
+                           (functie.rol == 'MWW' and rol != Rollen.ROL_MWW))
+
+                    if bad:
+                        # afwijkende combinatie
                         my_logger.warning(
                             '{rol_get_huidige_functie} sessie zegt functie_pk=%s met rol=%s terwijl rol=%s' % (
                                 functie_pk, repr(functie.rol), repr(rol)))
