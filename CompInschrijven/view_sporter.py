@@ -259,8 +259,9 @@ class RegiocompetitieAanmeldenView(View):
             raise Http404('Sporter of competitie niet gevonden')
 
         # controleer dat de competitie aanmeldingen accepteert
-        deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase_indiv < 'C' or deelcomp.competitie.fase_indiv >= 'G':
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        if comp.fase_indiv < 'C' or comp.fase_indiv >= 'G':
             raise Http404('Verkeerde competitie fase')
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;

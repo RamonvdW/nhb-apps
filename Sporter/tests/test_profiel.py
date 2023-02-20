@@ -195,14 +195,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     def _competitie_aanmaken(self):
         # competitie aanmaken
+        # en de inschrijving open zetten
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
-
-        # zet de inschrijving open
-        now = timezone.now()
-        for comp in Competitie.objects.all():
-            comp.begin_fase_C = now.date()
-            comp.save()
-        # for
 
     def test_anon(self):
         # zonder login --> terug naar het plein
@@ -483,6 +477,15 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
+
+        # print('Aantal Competitie: %s' % Competitie.objects.count())
+        # comp_18 = deelcomp.competitie
+        # comp_18.bepaal_fase()
+        # from Functie.rol import Rollen
+        # comp_18.bepaal_openbaar(Rollen.ROL_SPORTER)
+        # print('comp_18: %s' % comp_18)
+        # print('comp_18.fase_indiv=%s, fase_teams=%s' % (comp_18.fase_indiv, comp_18.fase_teams))
+        # print('comp_18.is_openbaar=%s' % comp_18.is_openbaar)
 
         # log in as sporter en prep voor inschrijving
         self.e2e_login(self.account_normaal)
