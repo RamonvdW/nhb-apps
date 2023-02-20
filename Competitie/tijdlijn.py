@@ -11,6 +11,7 @@ import datetime
 # korte beschrijving van de competitie fase
 comp_fase_kort = {
     'A': 'opstarten',
+    'B': 'voorbereiden',
     'C': 'inschrijven',
     'F': 'wedstrijden regio',
     'G': 'vaststellen uitslag regio',

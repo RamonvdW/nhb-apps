@@ -408,6 +408,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # log in as sporter
         self.e2e_login(self.account_normaal)
+        self.assertTrue(self.sporter1.account == self.account_normaal)
         self._prep_voorkeuren()
 
         # competitie wordt niet getoond in vroege fases
