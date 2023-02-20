@@ -71,7 +71,7 @@ class RecordsVerbeterbaarInDiscipline(ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE
 
-    boogtype2filter = {'alles': '', 'recurve': 'R', 'compound': 'C', 'barebow': 'BB', 'longbow': 'LB', 'instinctive': 'IB'}
+    boogtype2filter = {'alles': '', 'recurve': 'R', 'compound': 'C', 'barebow': 'BB', 'longbow': 'LB', 'instinctive': 'IB', 'traditional': 'TR'}
     geslacht2filter = {'alles': '', 'man': 'M', 'vrouw': 'V'}
     leeftijd2filter = {'alles': '', 'para': 'U', 'master': 'M', 'senior': 'S', 'junior': 'J', 'cadet': 'C'}
 
@@ -103,6 +103,7 @@ class RecordsVerbeterbaarInDiscipline(ListView):
         objs = (BesteIndivRecords
                 .objects
                 .filter(discipline=discipline)
+                .exclude(beste=None)
                 .select_related('beste')
                 .order_by('volgorde'))
 
