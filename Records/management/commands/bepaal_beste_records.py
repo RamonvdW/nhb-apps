@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Records.models import IndivRecord, BesteIndivRecords
 
 GESLACHT2INDEX = {'M': 1, 'V': 2}
 
-MATERIAALKLASSE2INDEX = {'R': 1, 'C': 2, 'BB': 3, 'LB': 4, 'IB': 5}
+MATERIAALKLASSE2INDEX = {'R': 1, 'C': 2, 'BB': 3, 'LB': 4, 'IB': 5, 'TR': 6}
 
 LEEFTIJDSCATEGORIE2INDEX = {'C': 1, 'J': 2, 'S': 3, 'M': 4, 'U': 5}
 
