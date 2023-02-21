@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from django.utils.dateparse import parse_date
-from Records.models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
+from Records.definities import LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
+from Records.models import IndivRecord
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils.dateparse import parse_date
-from Records.models import (IndivRecord, BesteIndivRecords,
-                            LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE)
+from Records.definities import LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
+from Records.models import IndivRecord, BesteIndivRecords
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -186,7 +186,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(17, len(urls))
+        self.assertEqual(18, len(urls))
         self.assertTrue('/records/record-18-43/' in urls)
 
         self.e2e_assert_other_http_commands_not_supported(url)
@@ -201,7 +201,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(17, len(urls))
+        self.assertEqual(18, len(urls))
         self.assertTrue('/records/record-25-45/' in urls)
 
     def test_combies(self):
