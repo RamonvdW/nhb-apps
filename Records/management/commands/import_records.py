@@ -8,7 +8,7 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from BasisTypen.definities import GESLACHT_MAN, GESLACHT_VROUW
+from BasisTypen.models import GESLACHT_MAN, GESLACHT_VROUW
 from Records.definities import MATERIAALKLASSEN
 from Records.models import IndivRecord
 from Sporter.models import Sporter

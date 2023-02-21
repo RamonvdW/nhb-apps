@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from BasisTypen.definities import GESLACHT_MAN, GESLACHT_VROUW
+from BasisTypen.models import GESLACHT_MAN, GESLACHT_VROUW
 
 DISCIPLINE = [('OD', 'Outdoor'),
               ('18', 'Indoor'),
