@@ -39,7 +39,6 @@ QRCODE_VERSION = 8
 
 class SvgEmbeddedInHtmlImage(SvgPathImage):
     def _write(self, stream):
-        self.process()
         Tree.ElementTree(self._img).write(stream,
                                           encoding="utf-8",
                                           xml_declaration=False,
