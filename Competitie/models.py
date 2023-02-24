@@ -420,8 +420,8 @@ class CompetitieMatch(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Competitie Match"
-        verbose_name_plural = "Competitie Matches"
+        verbose_name = "Competitie match"
+        verbose_name_plural = "Competitie matches"
 
 
 class Regiocompetitie(models.Model):
@@ -777,8 +777,8 @@ class Kampioenschap(models.Model):
         return msg
 
     class Meta:
-        verbose_name = "Deel kampioenschap"
-        verbose_name_plural = "Deel kampioenschappen"
+        verbose_name = "Kampioenschap"
+        verbose_name_plural = "Kampioenschappen"
 
     objects = models.Manager()      # for the editor only
 

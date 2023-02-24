@@ -65,6 +65,14 @@ class Migration(migrations.Migration):
             model_name='regiocompetitiesporterboog',
             index=models.Index(fields=['aantal_scores', 'regiocompetitie'], name='Competitie__aantal__258001_idx'),
         ),
+        migrations.AlterModelOptions(
+            name='kampioenschap',
+            options={'verbose_name': 'Kampioenschap', 'verbose_name_plural': 'Kampioenschappen'},
+        ),
+        migrations.AlterModelOptions(
+            name='competitiematch',
+            options={'verbose_name': 'Competitie match', 'verbose_name_plural': 'Competitie matches'},
+        ),
     ]
 
 # end of file
