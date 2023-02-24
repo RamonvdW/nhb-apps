@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.contrib.admin.sites import AdminSite
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
+from django.template.response import TemplateResponse
+from django.contrib.admin.sites import AdminSite
 from Account.rechten import account_rechten_is_otp_verified
 from collections import OrderedDict
 
@@ -75,6 +76,7 @@ class BeheerAdminSite(AdminSite):
                 and request.user.is_authenticated
                 and account_rechten_is_otp_verified(request))
 
+    # overrides django/contrib/admin/sites.py:AdminSite:get_app_list
     def get_app_list(self, request):
         """ kopie van contrib/admin/sites.py aangepast om de modellen niet meer te sorteren """
         app_dict = self._build_app_dict(request)
@@ -86,5 +88,36 @@ class BeheerAdminSite(AdminSite):
         app_list = [elem for elem in app_list if elem['app_label'] != 'auth']
 
         return app_list
+
+    # overrides django/contrib/admin/sites.py:AdminSite:app_index
+    def app_index(self, request, app_label, extra_context=None):
+        """ deze functie wordt aangeroepen om de lijst van modellen binnen een applicatie te tonen"""
+
+        app_dict = self._build_app_dict(request, app_label)
+        if not app_dict:
+            raise Http404("The requested admin page does not exist.")
+
+        # sorteren is uitgezet zodat de volgorde uit models.py aangehouden wordt
+
+        # Sort the models alphabetically within each app.
+        # app_dict["models"].sort(key=lambda x: x["name"])
+
+        context = {
+            **self.each_context(request),
+            "title": "%(app)s administration" % {"app": app_dict["name"]},
+            "subtitle": None,
+            "app_list": [app_dict],
+            "app_label": app_label,
+            **(extra_context or {}),
+        }
+
+        request.current_app = self.name
+
+        return TemplateResponse(
+            request,
+            self.app_index_template
+            or ["admin/%s/app_index.html" % app_label, "admin/app_index.html"],
+            context,
+        )
 
 # end of file
