@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.utils import timezone
 import datetime
 
@@ -39,10 +40,7 @@ def zet_test_datum(date_str: str):
 
     global test_met_deze_evaluatie_datum
 
-    datum = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-    datum = datetime.date(year=datum.year, month=datum.month, day=datum.day)
-
-    test_met_deze_evaluatie_datum = datum
+    test_met_deze_evaluatie_datum = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
 
 
 def _zet_competitie_indiv_fase(comp, indiv_fase):
@@ -60,12 +58,10 @@ def _zet_competitie_indiv_fase(comp, indiv_fase):
     comp.bk_indiv_afgesloten = False
 
     if test_met_deze_evaluatie_datum:
-        now = test_met_deze_evaluatie_datum
+        vandaag = test_met_deze_evaluatie_datum
     else:
-        now = timezone.now()
-        now = datetime.date(year=now.year, month=now.month, day=now.day)
+        vandaag = timezone.now().date()
 
-    vandaag = datetime.date(year=now.year, month=now.month, day=now.day)
     gister = vandaag - datetime.timedelta(days=1)
     morgen = vandaag + datetime.timedelta(days=1)
 
@@ -153,12 +149,10 @@ def _zet_competitie_team_fase(comp, team_fase):
     comp.bk_teams_afgesloten = False
 
     if test_met_deze_evaluatie_datum:
-        now = test_met_deze_evaluatie_datum
+        vandaag = test_met_deze_evaluatie_datum
     else:
-        now = timezone.now()
-        now = datetime.date(year=now.year, month=now.month, day=now.day)
+        vandaag = timezone.now().date()
 
-    vandaag = datetime.date(year=now.year, month=now.month, day=now.day)
     gister = vandaag - datetime.timedelta(days=1)
     morgen = vandaag + datetime.timedelta(days=1)
 
@@ -424,6 +418,35 @@ def bepaal_fase_teams(comp) -> str:
 
     # fase G: doorzetten naar RK fase door BKO
     return 'G'
+
+
+def is_open_voor_inschrijven_rk_teams(comp):
+
+    """
+        comp.fase_teams moet al gezet zijn
+
+        Returns: is_open, vanaf_datum
+
+        True,  None:        Deze competitie open is voor het aanmelden van RK teams
+        False, vanaf_datum: De inschrijving gaat binnenkort open
+        False, None:        De inschrijving ver in de toekomst of in het verre verleden
+    """
+
+    if 'F' <= comp.fase_teams <= 'J':
+
+        vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
+
+        if test_met_deze_evaluatie_datum:
+            vandaag = test_met_deze_evaluatie_datum
+        else:
+            vandaag = timezone.now().date()
+
+        if vandaag >= vanaf:
+            return True, None
+
+        return False, vanaf
+
+    return False, None
 
 
 # end of file

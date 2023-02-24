@@ -293,8 +293,18 @@
 
                 <tr>
                     <td></td>
-                    <td>Open inschrijving RK teams (HWL)</td>
-                    <td>vanaf ##TBD##</td>
+                    <td>Aanmelden RK teams (HWL)</td>
+                    <td>
+                        {% if comp.rk_teams_is_open %}
+                            <span>tot ongeveer {{ comp.datum_klassengrenzen_rk_bk_teams }}</span>
+                        {% else %}
+                            {% if comp.rk_teams_vanaf_datum %}
+                                <span>vanaf {{ comp.rk_teams_vanaf_datum }}</span>
+                            {% else %}
+                                <span class="green-text">Afgerond</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
                 </tr>
 
                 <tr>
@@ -350,7 +360,7 @@
 
                 <tr>
                     <td class="center{% if comp.fase_teams == 'O' %} nhb-rood white-text{% endif %}">O</td>
-                    <td>BK wedstrijden voorbereiden (HWL)<br>Afmeldingen bij vereniging (sporter)<br>Reserve teams oproepen (HWL)</td>
+                    <td>BK wedstrijden voorbereiden (HWL)<br>Afmelden bij vereniging (sporter)<br>Reserve teams oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_teams > 'O' %}
                             <span class="green-text">Afgerond</span>

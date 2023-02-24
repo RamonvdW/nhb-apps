@@ -19,7 +19,8 @@ from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, 
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN,
                                    MUTATIE_REGIO_TEAM_RONDE,
-                                   MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK)
+                                   MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK,
+                                   MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK)
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTaken,
                                Regiocompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
@@ -39,6 +40,8 @@ import sys
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
 my_logger = logging.getLogger('NHBApps.RegiocompMutaties')
+
+# TODO: opsplitsen naar CompLaag*/operations/xxx
 
 
 class Command(BaseCommand):
@@ -1109,6 +1112,8 @@ class Command(BaseCommand):
     def _verwerk_mutatie_regio_afsluiten(self, comp):
         """ de BKO heeft gevraagd de regiocompetitie af te sluiten en alles klaar te maken voor het RK """
 
+        # TODO: verplaats naar CompLaagRegio/operations/...
+
         # controleer dat de competitie in fase G is
         if not comp.regiocompetitie_is_afgesloten:
             # ga door naar fase J
@@ -1135,7 +1140,7 @@ class Command(BaseCommand):
 
             # versturen e-mails uitnodigingen naar de deelnemers gebeurt tijdens opstarten elk uur
 
-    def _maak_deelnemerslijst_bks(self, comp):
+    def _maak_deelnemerslijst_bk_indiv(self, comp):
         """ bepaal de individuele deelnemers van het BK
             per klasse zijn dit de rayonkampioenen (4x) aangevuld met de sporters met de hoogste kwalificatie scores
             iedereen die scores neergezet heeft in het RK komt in de lijst
@@ -1229,11 +1234,29 @@ class Command(BaseCommand):
         if not comp.rk_indiv_afgesloten:
 
             # individuele deelnemers vaststellen
-            self._maak_deelnemerslijst_bks(comp)
+            self._maak_deelnemerslijst_bk_indiv(comp)
 
-            # ga door naar fase P
+            # ga door naar fase N
             comp.rk_indiv_afgesloten = True
             comp.save(update_fields=['rk_indiv_afgesloten'])
+
+    def _maak_deelnemerslijst_bk_teams(self, comp):
+        # TODO: integreer CompLaagBond/management/commands/maak_bk_teams_lijst
+        # stop deze in CompLaagBonds/operations/...
+        pass
+
+    def _verwerk_mutatie_opstarten_bk_teams(self, comp):
+        """ de BKO heeft gevraagd alles klaar te maken voor het BK teams """
+
+        # controleer dat de competitie in fase N is
+        if not comp.rk_teams_afgesloten:
+
+            # individuele deelnemers vaststellen
+            self._maak_deelnemerslijst_bk_teams(comp)
+
+            # ga door naar fase N
+            comp.rk_teams_afgesloten = True
+            comp.save(update_fields=['rk_teams_afgesloten'])
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
@@ -1273,7 +1296,7 @@ class Command(BaseCommand):
             self._verwerk_mutatie_afmelden_indiv(mutatie.deelnemer)
 
         elif code == MUTATIE_REGIO_TEAM_RONDE:
-            self.stdout.write('[INFO] Verwerk mutatie %s: team ronde' % mutatie.pk)
+            self.stdout.write('[INFO] Verwerk mutatie %s: regio team ronde' % mutatie.pk)
             self._verwerk_mutatie_regio_team_ronde(mutatie.regiocompetitie)
 
         elif code == MUTATIE_DOORZETTEN_REGIO_NAAR_RK:
@@ -1281,8 +1304,12 @@ class Command(BaseCommand):
             self._verwerk_mutatie_regio_afsluiten(mutatie.competitie)
 
         elif code == MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK:
-            self.stdout.write('[INFO] Verwerk mutatie %s: doorzetten van RK naar BK' % mutatie.pk)
+            self.stdout.write('[INFO] Verwerk mutatie %s: indiv doorzetten van RK naar BK' % mutatie.pk)
             self._verwerk_mutatie_opstarten_bk_indiv(mutatie.competitie)
+
+        elif code == MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK:
+            self.stdout.write('[INFO] Verwerk mutatie %s: teams doorzetten van RK naar BK' % mutatie.pk)
+            self._verwerk_mutatie_opstarten_bk_teams(mutatie.competitie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))

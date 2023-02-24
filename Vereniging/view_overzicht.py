@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.utils.formats import localize
 from django.views.generic import TemplateView
@@ -12,14 +11,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
-from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
+from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 from Wedstrijden.definities import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
-import datetime
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -187,27 +185,29 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             for deelkamp_rk in deelkamps_rk:
                 if deelkamp_rk.competitie == comp:
                     if deelkamp_rk.heeft_deelnemerslijst:
-                        if 'J' <= comp.fase_indiv <= 'K' and self.rol_nu != Rollen.ROL_WL:
-                            # RK voorbereidende fase
-                            kaartje = SimpleNamespace()
-                            kaartje.titel = "Deelnemers RK"
-                            kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
-                            kaartje.url = reverse('CompLaagRayon:lijst-rk-ver',
-                                                  kwargs={'deelkamp_pk': deelkamp_rk.pk})
-                            kaartje.icon = 'rule'
-                            kaartjes.append(kaartje)
+                        if self.rol_nu != Rollen.ROL_WL:
+                            if 'J' <= comp.fase_indiv <= 'K':
+                                # RK voorbereidende fase
+                                kaartje = SimpleNamespace()
+                                kaartje.titel = "Deelnemers RK"
+                                kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
+                                kaartje.url = reverse('CompLaagRayon:lijst-rk-ver',
+                                                      kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                                kaartje.icon = 'rule'
+                                kaartjes.append(kaartje)
 
-                    if 'F' <= comp.fase_teams <= 'K' and self.rol_nu != Rollen.ROL_WL:
-                        kaartje = SimpleNamespace()
-                        kaartje.titel = "Teams RK"
-                        kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
-                        kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
-                        kaartje.icon = 'api'
-                        # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
-                        vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
-                        if datetime.date.today() < vanaf:
-                            kaartje.beschikbaar_vanaf = localize(vanaf)
-                        kaartjes.append(kaartje)
+                    if self.rol_nu != Rollen.ROL_WL:
+                        is_open, vanaf_datum = is_open_voor_inschrijven_rk_teams(comp)
+                        if is_open or vanaf_datum:
+                            kaartje = SimpleNamespace()
+                            kaartje.titel = "Teams RK"
+                            kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
+                            kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                            kaartje.icon = 'api'
+                            # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
+                            if vanaf_datum:
+                                kaartje.beschikbaar_vanaf = localize(vanaf_datum)
+                            kaartjes.append(kaartje)
             # for
             del deelkamp_rk
 

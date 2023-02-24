@@ -9,6 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie
+from Competitie.tijdlijn import is_open_voor_inschrijven_rk_teams
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
@@ -53,10 +54,7 @@ class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()                  # zet comp.fase
         comp.bepaal_openbaar(self.rol_nu)   # zet comp.is_openbaar
 
-        comp.einde_fase_F = comp.einde_fase_F + datetime.timedelta(days=7)
-        comp.einde_fase_G = comp.einde_fase_F + datetime.timedelta(days=1)
-        comp.einde_fase_K = comp.begin_fase_L_indiv - datetime.timedelta(days=14)
-        comp.einde_fase_M = comp.einde_fase_L_indiv + datetime.timedelta(days=7)
+        comp.rk_teams_is_open, comp.rk_teams_vanaf_datum = is_open_voor_inschrijven_rk_teams(comp)
 
         context['comp'] = comp
 
@@ -65,11 +63,17 @@ class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):
         else:
             comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
 
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (comp_url, comp.beschrijving.replace(' competitie', '')),
-            (None, 'Tijdlijn')
-        )
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_HWL):
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (None, 'Tijdlijn')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (comp_url, comp.beschrijving.replace(' competitie', '')),
+                (None, 'Tijdlijn')
+            )
 
         menu_dynamics(self.request, context)
         return context
