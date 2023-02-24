@@ -13,7 +13,7 @@ def fix_lkl_43(apps, _):
     lkl_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
 
     lkl = lkl_klas.objects.get(volgorde=43)
-    lkl.klasse_kort = 'Gemengd'
+    lkl.klasse_kort = 'Senior'
     lkl.save(update_fields=['klasse_kort'])
 
 

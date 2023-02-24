@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -62,18 +62,18 @@
                     <td>Onder 18</td>
                     <td>-</td>
                     <td>17</td>
-                    <td>Onder 21, 21+</td>
+                    <td>Onder 21, Senior</td>
                 </tr>
 
                 <tr>
                     <td>Onder 21</td>
                     <td>-</td>
                     <td>20</td>
-                    <td>21+</td>
+                    <td>Senior</td>
                 </tr>
 
                 <tr>
-                    <td>21+</td>
+                    <td>Senior</td>
                     <td>21</td>
                     <td>-</td>
                     <td>-</td>
@@ -83,7 +83,7 @@
                     <td>50+</td>
                     <td>50</td>
                     <td>-</td>
-                    <td>21+</td>
+                    <td>Senior</td>
                 </tr>
 
             </table>
@@ -116,32 +116,32 @@
                     <td>Onder 12</td>
                     <td>-</td>
                     <td>11</td>
-                    <td>Onder 14, Onder 18, Onder 21, 21+</td>
+                    <td>Onder 14, Onder 18, Onder 21, Senior</td>
                 </tr>
 
                 <tr>
                     <td>Onder 14</td>
                     <td>-</td>
                     <td>13</td>
-                    <td>Onder 18, Onder 21, 21+</td>
+                    <td>Onder 18, Onder 21, Senior</td>
                 </tr>
 
                 <tr>
                     <td>Onder 18</td>
                     <td>-</td>
                     <td>17</td>
-                    <td>Onder 21, 21+</td>
+                    <td>Onder 21, Senior</td>
                 </tr>
 
                 <tr>
                     <td>Onder 21</td>
                     <td>-</td>
                     <td>20</td>
-                    <td>21+</td>
+                    <td>Senior</td>
                 </tr>
 
                 <tr>
-                    <td>21+</td>
+                    <td>Senior</td>
                     <td>21</td>
                     <td>-</td>
                     <td>-</td>
@@ -151,14 +151,14 @@
                     <td>50+</td>
                     <td>50</td>
                     <td>-</td>
-                    <td>21+</td>
+                    <td>Senior</td>
                 </tr>
 
                 <tr>
                     <td>60+</td>
                     <td>60</td>
                     <td>-</td>
-                    <td>50+, 21+</td>
+                    <td>50+, Senior</td>
                 </tr>
 
             </table>
@@ -281,7 +281,7 @@
                 </tr>
 
                 <tr>
-                    <td>21+</td>
+                    <td>Senior</td>
                     <td>Geboren {{ comp_1.vanaf21 }} of eerder</td>
                     <td>Geboren {{ comp_2.vanaf21 }} of eerder</td>
                 </tr>
