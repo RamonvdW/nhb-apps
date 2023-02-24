@@ -56,6 +56,27 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartjes_indiv.append(kaartje)
             kaartjes_teams.append(kaartje)
 
+        # BK programma's
+        if comp.fase_indiv == 'O':
+            url = reverse('CompLaagBond:formulier-indiv-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+            kaartje = SimpleNamespace(
+                        prio=2,
+                        titel="BK programma's",
+                        icoon="download_for_offline",
+                        tekst="Download de BK programma's om te versturen",
+                        url=url)
+            kaartjes_indiv.append(kaartje)
+
+        if comp.fase_teams == 'O':
+            url = reverse('CompLaagBond:formulier-teams-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+            kaartje = SimpleNamespace(
+                        prio=2,
+                        titel="BK programma's",
+                        icoon="download_for_offline",
+                        tekst="Download de BK programma's om te versturen",
+                        url=url)
+            kaartjes_teams.append(kaartje)
+
         # Doorzetten BK individueel / bevestig uitslag
         if comp.fase_indiv == 'P':
             url = reverse('CompBeheer:bko-bevestig-eindstand-bk-indiv', kwargs={'comp_pk': comp.pk})

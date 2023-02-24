@@ -116,7 +116,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             if 'F' <= comp.fase_teams <= 'L':
                 url = reverse('CompLaagRayon:rayon-teams', kwargs={'deelkamp_pk': deelkamp_rk.pk})
                 kaartje = SimpleNamespace(
-                            prio=5,
+                            prio=4,
                             titel="RK teams",
                             icoon="api",
                             tekst="Aangemelde teams voor de Rayonkampioenschappen in %s." % deelkamp_rk.nhb_rayon.naam,

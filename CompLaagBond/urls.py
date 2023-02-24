@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagBond import view_planning, view_indiv
+from CompLaagBond import view_planning, view_indiv, view_formulieren
 
 app_name = 'CompLaagBond'
 
@@ -41,6 +41,24 @@ urlpatterns = [
     path('selectie/wijzig-status-bk-deelnemer/<deelnemer_pk>/',
          view_indiv.WijzigStatusBkDeelnemerView.as_view(),
          name='wijzig-status-bk-deelnemer'),
+
+
+    # BKO: download lijsten
+    path('download-formulier/indiv/<deelkamp_pk>/',
+         view_formulieren.DownloadBkIndivFormulierenView.as_view(),
+         name='formulier-indiv-lijst'),
+
+    path('download-formulier/teams/<deelkamp_pk>/',
+         view_formulieren.DownloadBkTeamsFormulierenView.as_view(),
+         name='formulier-teams-lijst'),
+
+    path('download-formulier/indiv/<match_pk>/<klasse_pk>/',
+         view_formulieren.FormulierBkIndivAlsBestandView.as_view(),
+         name='formulier-indiv-als-bestand'),
+
+    path('download-formulier/teams/<match_pk>/<klasse_pk>/',
+         view_formulieren.FormulierBkTeamsAlsBestandView.as_view(),
+         name='formulier-teams-als-bestand'),
 
 ]
 
