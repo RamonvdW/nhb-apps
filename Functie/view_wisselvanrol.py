@@ -159,7 +159,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             obj.ver_naam = ''
             if obj.nhb_ver and obj.rol != 'MWW':
-                obj.ver_naam = obj.nhb_ver.naam
+                obj.ver_naam = '%s (%s)' % (obj.nhb_ver.naam, obj.nhb_ver.plaats)
 
             if self.functie_nu:
                 obj.selected = (obj.pk == self.functie_nu.pk)
@@ -232,7 +232,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
                     objs.append({'titel': functie.beschrijving,
                                  'kort': kort,
-                                 'ver_naam': functie.nhb_ver.naam,
+                                 'ver_naam': '%s (%s)' % (functie.nhb_ver.naam, functie.nhb_ver.plaats),
                                  'url': url,
                                  'volgorde': volgorde,
                                  'pk': functie.pk})
@@ -249,15 +249,9 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                     func = pk2func[functie_pk]
                     ver = func.nhb_ver
 
-                    func.beschrijving = 'HWL %s ' % ver.ver_nr
+                    func.beschrijving = 'HWL %s %s (%s)' % (ver.ver_nr, ver.naam, ver.plaats)
                     func.selected = (ver.ver_nr == selected_hwl)
                     func.url = url
-
-                    naam = ver.naam
-                    if len(naam) > 30:
-                        naam = naam[:30].strip()
-                        naam += '..'
-                    func.beschrijving += naam
 
                     tup = (ver.ver_nr, func)
                     hwls.append(tup)

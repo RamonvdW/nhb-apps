@@ -119,7 +119,7 @@
                         <li>
                             <label class="black-text" for="id_{{ ver.sel }}">
                                 <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
-                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
+                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }} ({{ ver.plaats }})</span>
                             </label>
                         </li>
                     {% endfor %}
