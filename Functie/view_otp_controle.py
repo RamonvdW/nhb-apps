@@ -136,6 +136,8 @@ class OTPControleView(TemplateView):
                 next_url = form.cleaned_data.get('next_url')
                 if not next_url:
                     next_url = reverse('Functie:wissel-van-rol')
+                if next_url[-1] != '/':
+                    next_url += '/'
                 return HttpResponseRedirect(next_url)
 
             # controle is mislukt (is al gelogd en in het logboek geschreven)

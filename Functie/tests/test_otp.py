@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -273,10 +273,18 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
         # juiste otp code + next url
         code = get_otp_code(self.testdata.account_admin)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/niet-bekend/'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'De gegevens worden niet geaccepteerd')
+
+        # juiste otp code + next url
+        code = get_otp_code(self.testdata.account_admin)
         with self.assert_max_queries(21):
-            resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/iets/'})
+            resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/'})
         self.assertEqual(resp.status_code, 302)
-        self.assert_is_redirect(resp, '/records/iets/')
+        self.assert_is_redirect(resp, '/records/')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_controle, post=False)
 
