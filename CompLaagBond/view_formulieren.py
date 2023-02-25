@@ -11,9 +11,9 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEELNAME_NEE, DEELNAME2STR
-from Competitie.models import (Kampioenschap,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse, KampioenschapIndivKlasseLimiet,
-                               KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch)
+from Competitie.models import (Kampioenschap, CompetitieMatch,
+                               CompetitieIndivKlasse, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog,
+                               CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet, KampioenschapTeam)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -423,21 +423,27 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws = prg['Deelnemers en Scores']
 
-        ws['B1'] = 'Bondskampioenschappen teams %s' % comp.beschrijving
-        ws['B4'] = 'Klasse: ' + klasse_str
-        ws['D3'] = match.datum_wanneer.strftime('%Y-%m-%d')
-        ws['E3'] = match.vereniging.naam     # organisatie
+        ws['B1'] = 'BK teams %s, Klasse: %s' % (comp.beschrijving, klasse_str)
+        ws['H4'] = match.datum_wanneer.strftime('%Y-%m-%d')
+        ws['B4'] = match.vereniging.naam     # organisatie
         if match.locatie:
-            ws['H3'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['F4'] = match.locatie.adres       # adres van de wedstrijdlocatie
         else:
-            ws['H3'] = 'Onbekend'
+            ws['F4'] = 'Onbekend'
+
+        max_teams = 12 if "ERE" in klasse_str else 8
+        try:
+            limiet = KampioenschapTeamKlasseLimiet.objects.get(kampioenschap=deelkamp, team_klasse=team_klasse)
+            max_teams = limiet.limiet
+        except KampioenschapTeamKlasseLimiet.DoesNotExist:
+            pass
 
         teams = (KampioenschapTeam
                  .objects
                  .filter(kampioenschap=deelkamp,
                          team_klasse=team_klasse.pk)
-                 .select_related('vereniging',
-                                 'vereniging__regio__rayon')
+                 .exclude(deelname=DEELNAME_NEE)
+                 .select_related('vereniging')
                  .prefetch_related('gekoppelde_leden')
                  .order_by('-aanvangsgemiddelde'))      # sterkste team bovenaan
 
@@ -451,9 +457,6 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             ver = team.vereniging
             if ver.ver_nr not in ver_nrs:
                 ver_nrs.append(ver.ver_nr)
-
-            # regio
-            ws['C' + row] = ver.regio.regio_nr      # TODO: weglaten of aanpassen?
 
             # vereniging
             ws['D' + row] = '[%s] %s' % (ver.ver_nr, ver.naam)
@@ -511,6 +514,8 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             # while
 
             volg_nr += 1
+            if volg_nr == max_teams:
+                break
         # for
 
         while volg_nr < 12:
@@ -518,7 +523,6 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             row = str(row_nr)
 
             # vereniging leeg maken
-            ws['C' + row] = '-'          # regio
             ws['D' + row] = 'n.v.t.'     # vereniging
             ws['F' + row] = 'n.v.t.'     # team naam
             ws['G' + row] = ''           # team sterkte
