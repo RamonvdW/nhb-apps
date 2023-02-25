@@ -22,7 +22,6 @@ from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
 from copy import copy
 import openpyxl
-import textwrap
 import zipfile
 import shutil
 import os
@@ -200,51 +199,51 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # for
 
         if comp.afstand == '18':
-            excel_name = 'template-excel-rk-indoor-indiv.xlsm'
+            excel_name = 'template-excel-bk-indoor-indiv.xlsx'
             ws_name = 'Voorronde'
         else:
-            excel_name = 'template-excel-rk-25m1pijl-indiv.xlsm'
+            excel_name = 'template-excel-bk-25m1pijl-indiv.xlsx'
             ws_name = 'Wedstrijd'
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_individueel-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
+        fname = "bk-programma_individueel_"
         fname += klasse_str.lower().replace(' ', '-')
-        fname += '.xlsm'
+        fname += '.xlsx'
 
         # make een kopie van het RK programma in een tijdelijk bestand
-        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
+        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagBond', 'files', excel_name)
         tmp_file = NamedTemporaryFile()
         try:
             shutil.copyfile(fpath, tmp_file.name)
         except FileNotFoundError:
-            raise Http404('Kan RK programma niet vinden')
+            raise Http404('Kan BK programma niet vinden')
 
         # open de kopie, zodat we die aan kunnen passen
         try:
             prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
         except (OSError, zipfile.BadZipFile, KeyError):
-            raise Http404('Kan RK programma niet openen')
+            raise Http404('Kan BK programma niet openen')
 
-        # maak wijzigingen in het RK programma
+        # maak wijzigingen in het BK programma
         ws = prg[ws_name]
 
-        ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.nhb_rayon.rayon_nr, klasse.beschrijving)
+        ws['C4'] = 'BK %s, Klasse: %s' % (comp.beschrijving, klasse.beschrijving)
 
         ws['D5'] = match.vereniging.naam     # organisatie
-        ws['F5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
         if match.locatie:
-            ws['H5'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['G5'] = match.locatie.adres       # adres van de wedstrijdlocatie
         else:
-            ws['H5'] = 'Onbekend'
+            ws['G5'] = 'Onbekend'
+        ws['J5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
 
-        ws['A32'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        ws['A35'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
-        i_font = ws['I7'].font
-        i_align = ws['I7'].alignment
-        i_format = ws['I7'].number_format
+        # i_font = ws['I8'].font
+        i_align = ws['I8'].alignment            # right align
+        i_format = ws['I8'].number_format       # 0,000
 
-        d_align = ws['D7'].alignment
-        g_align = ws['G7'].alignment
+        # d_align = ws['D8'].alignment
+        # g_align = ws['G8'].alignment
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -260,8 +259,8 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         baan_letter = 'A'
         deelnemer_nr = 0
 
-        row1_nr = 6
-        row2_nr = 35
+        row1_nr = 9 - 1
+        row2_nr = 39 - 1
         for deelnemer in deelnemers:
 
             para_notities = ''
@@ -279,13 +278,9 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                     para_notities += voorkeuren.opmerking_para_sporter
 
             is_deelnemer = False
-            reserve_str = ''
             if deelnemer.deelname != DEELNAME_NEE:
                 deelnemer_nr += 1
-                if deelnemer_nr > limiet:
-                    reserve_str = ' (reserve)'
-                else:
-                    is_deelnemer = True
+                is_deelnemer = deelnemer_nr <= limiet
 
             if is_deelnemer:
                 row1_nr += 1
@@ -293,11 +288,11 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             else:
                 row2_nr += 1
                 row = str(row2_nr)
-                ws['D' + row].alignment = copy(d_align)
-                ws['G' + row].alignment = copy(g_align)
-                ws['I' + row].alignment = copy(i_align)
-                ws['I' + row].font = copy(i_font)
-                ws['I' + row].number_format = copy(i_format)
+                # ws['D' + row].alignment = copy(d_align)
+                # ws['G' + row].alignment = copy(g_align)
+                ws['I' + row].alignment = copy(i_align)             # right-align
+                # ws['I' + row].font = copy(i_font)
+                ws['I' + row].number_format = copy(i_format)        # 0,000
 
             if is_deelnemer:
                 ws['A' + row] = baan_nr
@@ -316,18 +311,17 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
             # vereniging
             ver = deelnemer.bij_vereniging
-            ws['F' + row] = '%s %s' % (ver.ver_nr, ver.naam)
+            ws['F' + row] = ver.ver_nr
+            ws['G' + row] = ver.naam
 
-            # regio
-            ws['G' + row] = ver.regio.regio_nr
-
-            ws['H' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
+            if not is_deelnemer:
+                ws['H' + row] = DEELNAME2STR[deelnemer.deelname]
 
             # gemiddelde
             ws['I' + row] = deelnemer.gemiddelde
 
             if para_notities:
-                ws['R' + row] = para_notities
+                ws['Q' + row] = para_notities
         # for
 
         # geef het aangepaste RK programma aan de client
@@ -360,8 +354,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                      .objects
                      .select_related('vereniging',
                                      'locatie')
-                     .get(pk=match_pk,
-                          vereniging=self.functie_nu.nhb_ver))
+                     .get(pk=match_pk))
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -373,7 +366,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_BK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
 
@@ -400,29 +393,29 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         boog_pks = list(boog_typen.values_list('pk', flat=True))
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_teams-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
+        fname = "bk-programma_teams_"
         fname += klasse_str.lower().replace(' ', '-')
-        fname += '.xlsm'
+        fname += '.xlsx'
 
         if comp.afstand == '18':
-            excel_name = 'template-excel-rk-indoor-teams.xlsm'
+            excel_name = 'template-excel-bk-indoor-teams.xlsx'
         else:
-            excel_name = 'template-excel-rk-25m1pijl-teams.xlsm'
+            excel_name = 'template-excel-bk-25m1pijl-teams.xlsx'
 
         # make een kopie van het RK programma in een tijdelijk bestand
-        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
+        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagBond', 'files', excel_name)
         tmp_file = NamedTemporaryFile()
 
         try:
             shutil.copyfile(fpath, tmp_file.name)
         except FileNotFoundError:
-            raise Http404('Kan RK programma niet vinden')
+            raise Http404('Kan BK programma niet vinden')
 
         # open de kopie, zodat we die aan kunnen passen
         try:
             prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
         except (OSError, zipfile.BadZipFile, KeyError):
-            raise Http404('Kan RK programma niet openen')
+            raise Http404('Kan BK programma niet openen')
 
         # maak wijzigingen in het RK programma
         ws = prg['Uitleg']
@@ -430,7 +423,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws = prg['Deelnemers en Scores']
 
-        ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelkamp.nhb_rayon.rayon_nr, comp.beschrijving)
+        ws['B1'] = 'Bondskampioenschappen teams %s' % comp.beschrijving
         ws['B4'] = 'Klasse: ' + klasse_str
         ws['D3'] = match.datum_wanneer.strftime('%Y-%m-%d')
         ws['E3'] = match.vereniging.naam     # organisatie
@@ -444,7 +437,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                  .filter(kampioenschap=deelkamp,
                          team_klasse=team_klasse.pk)
                  .select_related('vereniging',
-                                 'vereniging__regio')
+                                 'vereniging__regio__rayon')
                  .prefetch_related('gekoppelde_leden')
                  .order_by('-aanvangsgemiddelde'))      # sterkste team bovenaan
 
@@ -460,7 +453,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                 ver_nrs.append(ver.ver_nr)
 
             # regio
-            ws['C' + row] = ver.regio.regio_nr
+            ws['C' + row] = ver.regio.regio_nr      # TODO: weglaten of aanpassen?
 
             # vereniging
             ws['D' + row] = '[%s] %s' % (ver.ver_nr, ver.naam)
