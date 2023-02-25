@@ -152,10 +152,16 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         for obj in (Functie
                     .objects
                     .filter(pk__in=pks)
-                    .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
-                    .only('beschrijving', 'rol',
-                          'nhb_ver__ver_nr', 'nhb_ver__naam',
-                          'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
+                    .select_related('nhb_ver',
+                                    'nhb_regio',
+                                    'nhb_rayon')
+                    .only('beschrijving',
+                          'rol',
+                          'nhb_ver__ver_nr',
+                          'nhb_ver__naam',
+                          'nhb_ver__plaats',
+                          'nhb_rayon__rayon_nr',
+                          'nhb_regio__regio_nr')):
 
             obj.ver_naam = ''
             if obj.nhb_ver and obj.rol != 'MWW':
@@ -202,9 +208,13 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                         .select_related('nhb_ver',
                                         'nhb_regio',
                                         'nhb_rayon')
-                        .only('beschrijving', 'rol',
-                              'nhb_ver__ver_nr', 'nhb_ver__naam',
-                              'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
+                        .only('beschrijving',
+                              'rol',
+                              'nhb_ver__ver_nr',
+                              'nhb_ver__naam',
+                              'nhb_ver__plaats',
+                              'nhb_rayon__rayon_nr',
+                              'nhb_regio__regio_nr')):
                 pk2func[obj.pk] = obj
             # for
 
@@ -228,11 +238,12 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                     else:
                         kort = 'WL'
 
-                    kort += ' %s' % functie.nhb_ver.ver_nr
+                    ver = functie.nhb_ver
+                    kort += ' %s' % ver.ver_nr
 
                     objs.append({'titel': functie.beschrijving,
                                  'kort': kort,
-                                 'ver_naam': '%s (%s)' % (functie.nhb_ver.naam, functie.nhb_ver.plaats),
+                                 'ver_naam': '%s (%s)' % (ver.naam, ver.plaats),
                                  'url': url,
                                  'volgorde': volgorde,
                                  'pk': functie.pk})
@@ -247,13 +258,13 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
                 if rol == Rollen.ROL_HWL:
                     func = pk2func[functie_pk]
-                    ver = func.nhb_ver
 
+                    ver = functie.nhb_ver
                     func.beschrijving = 'HWL %s %s (%s)' % (ver.ver_nr, ver.naam, ver.plaats)
-                    func.selected = (ver.ver_nr == selected_hwl)
+                    func.selected = (functie.nhb_ver.ver_nr == selected_hwl)
                     func.url = url
 
-                    tup = (ver.ver_nr, func)
+                    tup = (functie.nhb_ver.ver_nr, func)
                     hwls.append(tup)
             # for
 
