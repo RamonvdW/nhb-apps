@@ -513,7 +513,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_is_bestand(resp)
+        self.assert200_is_bestand_csv(resp)
 
         # zet teamcompetitie uit
         self.deelcomp_regio_18.regio_organiseert_teamcompetitie = False
@@ -521,7 +521,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_is_bestand(resp)
+        self.assert200_is_bestand_csv(resp)
 
         # niet bestaande wedstrijd
         url = self.url_waarschijnlijke_bestand % 999999

@@ -124,7 +124,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         # for
 
     @staticmethod
-    def _make_bad_xlsm_file(fpath):
+    def _make_bad_file(fpath):
         with zipfile.ZipFile(fpath, 'w') as xlsm:
             xlsm.writestr('hello.txt', 'Hello World')
 
@@ -151,8 +151,8 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # indiv + teams klassen
-        self.match.team_klassen.set([self.testdata.comp18_klassen_team['R2'][0],
-                                     self.testdata.comp18_klassen_team['R2'][1]])       # Recurve A met 2 teams
+        self.match.team_klassen.set([self.testdata.comp18_klassen_teams['R2'][0],
+                                     self.testdata.comp18_klassen_teams['R2'][1]])       # Recurve A met 2 teams
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -219,14 +219,14 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         # normaal
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_file(resp)
+        self.assert200_is_bestand_xlsm(resp)
 
         # zonder locatie
         self.match.locatie = None
         self.match.save(update_fields=['locatie'])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_file(resp)
+        self.assert200_is_bestand_xlsm(resp)
 
         # niet bestaand RK programma
         with override_settings(INSTALL_PATH='/tmp'):
@@ -234,7 +234,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
-        self._make_bad_xlsm_file(self.xlsm_fpath_18_indiv)
+        self._make_bad_file(self.xlsm_fpath_18_indiv)
         with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
@@ -284,10 +284,10 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_file(resp)
+        self.assert200_is_bestand_xlsm(resp)
 
     def test_download_teams(self):
-        klasse = self.testdata.comp18_klassen_team['R2'][1]     # Recurve A met 2 teams
+        klasse = self.testdata.comp18_klassen_teams['R2'][1]     # Recurve A met 2 teams
         url = self.url_forms_download_teams % (self.match.pk, klasse.pk)
 
         # ophalen zonder inlog
@@ -302,14 +302,14 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         # normaal
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_file(resp)
+        self.assert200_is_bestand_xlsm(resp)
 
         # zonder locatie
         self.match.locatie = None
         self.match.save(update_fields=['locatie'])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_file(resp)
+        self.assert200_is_bestand_xlsm(resp)
 
         # niet bestaand RK programma
         with override_settings(INSTALL_PATH='/tmp'):
@@ -317,7 +317,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
-        self._make_bad_xlsm_file(self.xlsm_fpath_18_teams)
+        self._make_bad_file(self.xlsm_fpath_18_teams)
         with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
@@ -349,12 +349,12 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr, limit_boogtypen=['R', 'BB'])
         self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, per_team=3, limit_teamtypen=['R2'])
         self.deelkamp_25.rk_bk_matches.add(self.match)
-        klasse = self.testdata.comp25_klassen_team['R2'][0]
+        klasse = self.testdata.comp25_klassen_teams['R2'][0]
         self.match.team_klassen.add(klasse)
         url = self.url_forms_download_teams % (self.match.pk, klasse.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_file(resp)
+        self.assert200_is_bestand_xlsm(resp)
 
     def test_bad(self):
         url = self.url_forms % self.match.pk
@@ -373,8 +373,8 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.match.save(update_fields=['locatie'])
 
         # enable teams
-        self.match.team_klassen.set([self.testdata.comp18_klassen_team['R2'][0],
-                                     self.testdata.comp18_klassen_team['R2'][1]])       # Recurve A met 2 teams
+        self.match.team_klassen.set([self.testdata.comp18_klassen_teams['R2'][0],
+                                     self.testdata.comp18_klassen_teams['R2'][1]])       # Recurve A met 2 teams
 
         # geen klassengrenzen vastgesteld
         self.testdata.comp18.klassengrenzen_vastgesteld_rk_bk = False
@@ -395,7 +395,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         url = self.url_forms_download_indiv % (self.match.pk, klasse.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_file(resp)
+        self.assert200_is_bestand_xlsm(resp)
 
 
 # end of file

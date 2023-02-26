@@ -687,17 +687,6 @@ class E2EHelpers(TestCase):
                 # for
                 self.fail(msg=msg)
 
-    def assert_is_bestand(self, response):
-        # check the headers that make this a download
-        # print("response: ", repr([(a,b) for a,b in response.items()]))
-        content_type_header = response['Content-Type']
-        self.assertEqual(content_type_header, 'text/csv')
-        content_disposition_header = response['Content-Disposition']
-        self.assertTrue(content_disposition_header.startswith('attachment; filename='))
-
-        # ensure the file is not empty
-        self.assertTrue(len(str(response.content)) > 30)
-
     @staticmethod
     def _get_templates_not_used(resp, template_names):
         """ returns True when any of the templates have not been used """
@@ -804,6 +793,17 @@ class E2EHelpers(TestCase):
             self.fail(msg=msg)
 
         self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
+
+    def assert_is_redirect_login(self, resp):
+        if resp.status_code != 302:                     # pragma: no cover
+            # geef een iets uitgebreider antwoord
+            msg = "status_code: %s != 302" % resp.status_code
+            if resp.status_code == 200:
+                self.e2e_dump_resp(resp)
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
+
+        self.assertTrue(resp.url.startswith, '/account/login/')
 
     @staticmethod
     def _find_statement(query, start):                  # pragma: no cover
@@ -962,14 +962,29 @@ class E2EHelpers(TestCase):
                 pagina = pagina[:pos]
             self.fail(msg='404 pagina, maar geen expected_msg! Inhoud pagina: %s' % repr(pagina))
 
-    def assert200_file(self, resp):
+    def _assert_bestand(self, resp, expected_content_type):
         if resp.status_code != 200:                                 # pragma: no cover
             self.e2e_dump_resp(resp)
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
 
-        header = resp['Content-Disposition']
-        if not header.startswith('attachment; filename'):           # pragma: no cover
-            self.fail(msg="Response is geen file attachment")
+        # check the headers that make this a download
+        # print("response: ", repr([(a,b) for a,b in response.items()]))
+        content_type_header = resp['Content-Type']
+        self.assertEqual(expected_content_type, content_type_header)
+        content_disposition_header = resp['Content-Disposition']
+        self.assertTrue(content_disposition_header.startswith('attachment; filename='))
+
+        # ensure the file is not empty
+        self.assertTrue(len(str(resp.content)) > 30)
+
+    def assert200_is_bestand_csv(self, resp):
+        self._assert_bestand(resp, 'text/csv')
+
+    def assert200_is_bestand_xlsx(self, resp):
+        self._assert_bestand(resp, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    def assert200_is_bestand_xlsm(self, resp):
+        self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
 
     def run_management_command(self, *args, report_exit_code=True):
         """ Helper om code duplicate te verminderen en bij een SystemExit toch de traceback (in stderr) te tonen """

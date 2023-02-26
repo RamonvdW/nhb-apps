@@ -151,7 +151,7 @@ def _maak_regiocompetities(comp, regios, functies):
 
 def _maak_kampioenschappen(comp, rayons, functies):
 
-    """ Maak de DeelKampioenschappen voor een competitie aan """
+    """ Maak de Kampioenschappen voor een competitie aan """
 
     bulk = list()
 

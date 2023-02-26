@@ -40,7 +40,10 @@ def zet_test_datum(date_str: str):
 
     global test_met_deze_evaluatie_datum
 
-    test_met_deze_evaluatie_datum = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+    if date_str:
+        test_met_deze_evaluatie_datum = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+    else:
+        test_met_deze_evaluatie_datum = None
 
 
 def _zet_competitie_indiv_fase(comp, indiv_fase):

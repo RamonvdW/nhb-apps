@@ -155,11 +155,11 @@ class TestData(object):
         self.comp18 = None                      # Competitie
         self.comp25 = None                      # Competitie
 
-        self.deelkamp18_bk = None               # DeelKampioenschap
-        self.deelkamp25_bk = None               # DeelKampioenschap
+        self.deelkamp18_bk = None               # Kampioenschap
+        self.deelkamp25_bk = None               # Kampioenschap
 
-        self.deelkamp18_rk = dict()             # [rayon_nr] DeelKampioenschap
-        self.deelkamp25_rk = dict()             # [rayon_nr] DeelKampioenschap
+        self.deelkamp18_rk = dict()             # [rayon_nr] Kampioenschap
+        self.deelkamp25_rk = dict()             # [rayon_nr] Kampioenschap
 
         self.deelcomp18_regio = dict()          # [regio_nr] DeelCompetitie
         self.deelcomp25_regio = dict()          # [regio_nr] DeelCompetitie
@@ -187,8 +187,8 @@ class TestData(object):
         self.comp18_klassen_indiv = dict()      # [boogtype afkorting] = [klasse, ...]
         self.comp25_klassen_indiv = dict()      # [boogtype afkorting] = [klasse, ...]
 
-        self.comp18_klassen_team = dict()       # [teamtype afkorting] = [klasse, ...]
-        self.comp25_klassen_team = dict()       # [teamtype afkorting] = [klasse, ...]
+        self.comp18_klassen_teams = dict()      # [teamtype afkorting] = [klasse, ...]
+        self.comp25_klassen_teams = dict()      # [teamtype afkorting] = [klasse, ...]
 
         # all inschrijvingen
         self.comp18_deelnemers = list()
@@ -967,9 +967,9 @@ class TestData(object):
 
             afkorting = klasse.team_type.afkorting
             if klasse.competitie.afstand == '18':
-                klassen = self.comp18_klassen_team
+                klassen = self.comp18_klassen_teams
             else:
-                klassen = self.comp25_klassen_team
+                klassen = self.comp25_klassen_teams
 
             try:
                 klassen[afkorting].append(klasse)
@@ -1070,14 +1070,14 @@ class TestData(object):
             deelnemers = self.comp18_deelnemers
             deelnemers_team = self.comp18_deelnemers_team
             deelnemers_geen_team = self.comp18_deelnemers_geen_team
-            klassen = self.comp18_klassen_team
+            klassen = self.comp18_klassen_teams
             regioteams = self.comp18_regioteams
         else:
             deelcomp = self.deelcomp25_regio[regio_nr]
             deelnemers = self.comp25_deelnemers
             deelnemers_team = self.comp25_deelnemers_team
             deelnemers_geen_team = self.comp25_deelnemers_geen_team
-            klassen = self.comp25_klassen_team
+            klassen = self.comp25_klassen_teams
             regioteams = self.comp25_regioteams
 
         # verdeel de deelnemers per boogtype
@@ -1630,6 +1630,19 @@ class TestData(object):
             score1 -= 2
             score2 -= 1
         # for
+
+    def maak_bk_deelnemers(self, afstand, ver_nr, limit_boogtypen=('R', 'C', 'BB', 'LB', 'TR')):
+        """ Maak de BK deelnemers aan, alsof ze doorgestroomd zijn vanuit de RK
+
+            afstand = 18 / 25
+        """
+        pass
+
+    def maak_inschrijvingen_bk_teams(self, afstand, ver_nr, per_team=3, limit_teamtypen=['R2']):
+        """ maak voor deze vereniging een paar teams aan voor de BK teams inschrijving
+            en koppel er meteen een aantal (RK) deelnemers van de vereniging aan.
+        """
+        pass
 
 
 # end of file

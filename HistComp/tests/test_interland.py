@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -231,14 +231,14 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_is_bestand(resp)
+        self.assert200_is_bestand_csv(resp)
 
         # download een lege lijst
         url = self.url_interland_download % self.klasse_pk_leeg
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_is_bestand(resp)
+        self.assert200_is_bestand_csv(resp)
 
     def test_bad(self):
         # log in als BB

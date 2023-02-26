@@ -433,7 +433,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_is_bestand(resp)
+        self.assert200_is_bestand_csv(resp)
 
         # RCL 25
         self.e2e_wissel_naar_functie(self.functie_rcl101_25)
@@ -441,7 +441,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_is_bestand(resp)
+        self.assert200_is_bestand_csv(resp)
 
         # niet bestaande deelcomp
         resp = self.client.get(self.url_regio_teams_bestand % 999999)

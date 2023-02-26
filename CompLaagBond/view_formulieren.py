@@ -29,6 +29,8 @@ import os
 
 TEMPLATE_DOWNLOAD_BK_FORMULIEREN = 'complaagbond/bko-download-bk-formulieren.dtl'
 
+CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
 
 class DownloadBkFormulierenView(TemplateView):
 
@@ -56,9 +58,10 @@ class DownloadBkFormulierenView(TemplateView):
                          .objects
                          .filter(pk=deelkamp_pk,
                                  deel=DEEL_BK)
-                         .select_related('competitie')
+                         .select_related('competitie',
+                                         'functie')
                          .order_by('competitie__begin_jaar'))           # oudste eerst
-        except (ValueError, Kampioenschap.DoesNotExist):
+        except ValueError:
             raise Http404('Kampioenschap niet gevonden')
 
         if len(deelkamps) == 0:
@@ -324,8 +327,8 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                 ws['Q' + row] = para_notities
         # for
 
-        # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        # geef het aangepaste BK programma aan de client
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 
@@ -647,8 +650,8 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         ws['B' + row].font = copy(efgh_font)
         ws['B' + row].alignment = copy(f_align)
 
-        # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        # geef het aangepaste BK programma aan de client
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 

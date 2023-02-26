@@ -28,6 +28,8 @@ import os
 
 TEMPLATE_DOWNLOAD_RK_FORMULIER = 'complaagrayon/hwl-download-rk-formulier.dtl'
 
+CONTENT_TYPE_XLSM = 'application/vnd.ms-excel.sheet.macroEnabled.12'
+
 
 class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
@@ -437,7 +439,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # for
 
         # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSM)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 
@@ -761,7 +763,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         ws['B' + row].alignment = copy(f_align)
 
         # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSM)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 

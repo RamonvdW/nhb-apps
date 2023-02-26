@@ -142,7 +142,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
         # verpruts de klasse van 1 team
         team = KampioenschapTeam.objects.get(pk=self.testdata.comp25_kampioenschapteams[0].pk)
-        for klasse in self.testdata.comp25_klassen_team['R2']:          # pragma: no branch
+        for klasse in self.testdata.comp25_klassen_teams['R2']:         # pragma: no branch
             if not klasse.is_voor_teams_rk_bk:                          # pragma: no branch
                 team.team_klasse = klasse
                 team.save(update_fields=['team_klasse'])
