@@ -792,9 +792,7 @@ class KampioenschapIndivKlasseLimiet(models.Model):
     kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)
 
     # voor welke klasse is deze limiet
-    indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
-                                     on_delete=models.CASCADE,
-                                     blank=True, null=True)
+    indiv_klasse = models.ForeignKey(CompetitieIndivKlasse, on_delete=models.CASCADE)
 
     # maximum aantal deelnemers in deze klasse
     limiet = models.PositiveSmallIntegerField(default=24)
@@ -816,9 +814,7 @@ class KampioenschapTeamKlasseLimiet(models.Model):
     kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)
 
     # voor welke klasse is deze limiet
-    team_klasse = models.ForeignKey(CompetitieTeamKlasse,
-                                    on_delete=models.CASCADE,
-                                    blank=True, null=True)
+    team_klasse = models.ForeignKey(CompetitieTeamKlasse, on_delete=models.CASCADE)
 
     # maximum aantal deelnemers in deze klasse
     limiet = models.PositiveSmallIntegerField(default=24)

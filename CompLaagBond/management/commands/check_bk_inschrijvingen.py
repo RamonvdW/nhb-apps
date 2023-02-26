@@ -49,7 +49,11 @@ class Command(BaseCommand):
         afstand = options['afstand']
         self.verbose = options['verbose']
 
-        kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, deel=DEEL_BK)
+        try:
+            kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, deel=DEEL_BK)
+        except Kampioenschap.DoesNotExist:
+            self.stderr.write('[ERROR] BK niet gevonden')
+            return
 
         klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
         for limiet in KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=kampioenschap):

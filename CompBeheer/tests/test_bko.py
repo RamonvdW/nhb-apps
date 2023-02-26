@@ -33,9 +33,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'          # comp_pk
     url_doorzetten_rk_naar_bk_indiv = '/bondscompetities/beheer/%s/doorzetten/rk-indiv-naar-bk/'    # comp_pk
     url_doorzetten_rk_naar_bk_teams = '/bondscompetities/beheer/%s/doorzetten/rk-teams-naar-bk/'    # comp_pk
-    url_bevestig_eindstand_bk_indiv = '/bondscompetities/beheer/%s/doorzetten/bk-indiv-eindstand-bevestigen/'  # comp_pk
-    url_bevestig_eindstand_bk_teams = '/bondscompetities/beheer/%s/doorzetten/bk-teams-eindstand-bevestigen/'  # comp_pk
-    url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'      # comp_pk
+    url_doorzetten_bk_kleine_indiv = '/bondscompetities/beheer/%s/doorzetten/bk-indiv-kleine-klassen-zijn-samengevoegd/'     # comp_pk
+    url_doorzetten_bk_kleine_teams = '/bondscompetities/beheer/%s/doorzetten/bk-teams-kleine-klassen-zijn-samengevoegd/'     # comp_pk
+    url_bevestig_eindstand_bk_indiv = '/bondscompetities/beheer/%s/doorzetten/bk-indiv-eindstand-bevestigen/'   # comp_pk
+    url_bevestig_eindstand_bk_teams = '/bondscompetities/beheer/%s/doorzetten/bk-teams-eindstand-bevestigen/'   # comp_pk
+    url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'                  # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     regio_nr = 101
@@ -215,142 +217,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                    indiv_klasse=klasse_c,
                                    aantal_scores=6).save()
 
-    def test_doorzetten_regio_naar_rk(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-
-        url = self.url_doorzetten_regio_naar_rk % self.comp_18.pk
-
-        # wedstrijden fase: geen knop om door te zetten
-        zet_competitie_fase_regio_wedstrijden(self.comp_18)
-
-        # status ophalen
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
-
-        # zet een regiocompetitie die geen team competitie organiseert
-        self.deelcomp_regio_101.regio_organiseert_teamcompetitie = False
-        self.deelcomp_regio_101.save(update_fields=['regio_organiseert_teamcompetitie'])
-
-        # zet een regiocompetitie team ronde > 7
-        self.deelcomp_regio_105.huidige_team_ronde = 8
-        self.deelcomp_regio_105.save(update_fields=['huidige_team_ronde'])
-
-        # status ophalen
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
-
-        # sluit alle regiocompetities
-        for obj in Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                  is_afgesloten=False):
-            obj.is_afgesloten = True
-            obj.save()
-        # for
-
-        # afsluitende fase, met de knop 'doorzetten'
-        zet_competitie_fase_regio_afsluiten(self.comp_18)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
-
-        # nu echt doorzetten
-        self._regioschutters_inschrijven()
-
-        self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
-        self.assertEqual(0, KampioenschapSporterBoog.objects.count())
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
-
-        # laat de mutatie verwerken
-        self.verwerk_regiocomp_mutaties()
-
-        self.assertEqual(3, KampioenschapSporterBoog.objects.count())
-
-        # verkeerde competitie/BKO
-        resp = self.client.get(self.url_doorzetten_regio_naar_rk % self.comp_25.pk)
-        self.assert404(resp, 'Verkeerde competitie')
-
-    def test_doorzetten_regio_naar_rk_geen_lid(self):
-        # variant van doorzetten_rk met een lid dat niet meer bij een vereniging aangesloten is
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-
-        self._regioschutters_inschrijven()
-
-        self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
-        self.assertEqual(0, KampioenschapSporterBoog.objects.count())
-
-        zet_competitie_fase_regio_afsluiten(self.comp_18)       # fase G
-
-        self.lid_sporter_2.bij_vereniging = None
-        self.lid_sporter_2.save()
-
-        url = self.url_doorzetten_regio_naar_rk % self.comp_18.pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
-
-        # laat de mutatie verwerken
-        f1, f2 = self.verwerk_regiocomp_mutaties(show_warnings=False)
-        self.assertTrue("[WARNING] Sporter 100009 - Compound is geen RK deelnemer want heeft geen vereniging" in f2.getvalue())
-
-        # het lid zonder vereniging komt NIET in de RK selectie
-        self.assertEqual(2, KampioenschapSporterBoog.objects.count())
-
-        # verdere tests in test_planning_rayon.test_geen_vereniging check
-
-    def test_doorzetten_rk_naar_bk_indiv(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-
-        url = self.url_doorzetten_rk_naar_bk_indiv % self.comp_18.pk
-
-        # fase L: pagina zonder knop 'doorzetten'
-        zet_competitie_fases(self.comp_18, 'L', 'L')
-        self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase_indiv, 'L')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-2a-rk-naar-bk-indiv.dtl', 'plein/site_layout.dtl'))
-
-        # nu echt doorzetten
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)       # redirect = Success
-
-        # kietel de achtergrondtaak
-        self.verwerk_regiocomp_mutaties()
-
-        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase_indiv, 'N')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, "Verkeerde competitie fase")
-
-        self.assertTrue(str(self.deelkamp_bk_18) != '')
-
-        # TODO: maak RK deelnemers met resultaten aan, voor een betere test
-        deelkamp_bk_18 = Kampioenschap.objects.get(competitie=self.comp_18,
-                                                   deel=DEEL_BK)
-        objs = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk_18)
-        self.assertEqual(objs.count(), 0)       # worden nog niet gemaakt, dus 0
-
     def test_bad(self):
         # moet BKO zijn
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -430,93 +296,105 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(self.url_bevestig_eindstand_bk_teams % self.comp_18.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
 
-    def test_bevestig_eindstand_bk_indiv(self):
+    def test_doorzetten_1a(self):
+        # regio naar rk
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        url = self.url_bevestig_eindstand_bk_indiv % self.comp_18.pk
+        url = self.url_doorzetten_regio_naar_rk % self.comp_18.pk
 
-        # pagina ophalen in de verkeerde fase
-        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.bepaal_fase()
-        self.assertNotEqual(self.comp_18.fase_indiv, 'P')
-        resp = self.client.get(url)
-        self.assert404(resp, 'Verkeerde competitie fase')
+        # wedstrijden fase: geen knop om door te zetten
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
-        zet_competitie_fases(self.comp_18, 'P', 'P')
-        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase_indiv, 'P')
-
-        # pagina ophalen
-        resp = self.client.get(url)
+        # status ophalen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4a-bevestig-eindstand-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
 
-        # verkeerde BKO
-        self.e2e_wissel_naar_functie(self.functie_bko_25)
-        resp = self.client.get(url)
-        self.assert403(resp)
-        resp = self.client.post(url)
-        self.assert403(resp)
+        # zet een regiocompetitie die geen team competitie organiseert
+        self.deelcomp_regio_101.regio_organiseert_teamcompetitie = False
+        self.deelcomp_regio_101.save(update_fields=['regio_organiseert_teamcompetitie'])
 
-        # echt doorzetten
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-        resp = self.client.post(url)
-        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)
+        # zet een regiocompetitie team ronde > 7
+        self.deelcomp_regio_105.huidige_team_ronde = 8
+        self.deelcomp_regio_105.save(update_fields=['huidige_team_ronde'])
 
-        # achtergrond taak wordt niet gebruikt
+        # status ophalen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
 
-        # check nieuwe fase
-        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.bepaal_fase()
-        self.assertTrue(self.comp_18.fase_indiv, 'Q')
+        # sluit alle regiocompetities
+        for obj in Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                  is_afgesloten=False):
+            obj.is_afgesloten = True
+            obj.save()
+        # for
 
-    def test_bevestig_eindstand_bk_teams(self):
+        # afsluitende fase, met de knop 'doorzetten'
+        zet_competitie_fase_regio_afsluiten(self.comp_18)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
+
+        # nu echt doorzetten
+        self._regioschutters_inschrijven()
+
+        self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
+        self.assertEqual(0, KampioenschapSporterBoog.objects.count())
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
+
+        # laat de mutatie verwerken
+        self.verwerk_regiocomp_mutaties()
+
+        self.assertEqual(3, KampioenschapSporterBoog.objects.count())
+
+        # verkeerde competitie/BKO
+        resp = self.client.get(self.url_doorzetten_regio_naar_rk % self.comp_25.pk)
+        self.assert404(resp, 'Verkeerde competitie')
+
+    def test_doorzetten_1a_geen_lid(self):
+        # variant van doorzetten_rk met een lid dat niet meer bij een vereniging aangesloten is
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        url = self.url_bevestig_eindstand_bk_teams % self.comp_18.pk
+        self._regioschutters_inschrijven()
 
-        # pagina ophalen in de verkeerde fase
-        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.bepaal_fase()
-        self.assertNotEqual(self.comp_18.fase_teams, 'P')
-        resp = self.client.get(url)
-        self.assert404(resp, 'Verkeerde competitie fase')
+        self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
+        self.assertEqual(0, KampioenschapSporterBoog.objects.count())
 
-        zet_competitie_fases(self.comp_18, 'P', 'P')
-        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.bepaal_fase()
-        self.assertEqual(self.comp_18.fase_teams, 'P')
+        zet_competitie_fase_regio_afsluiten(self.comp_18)       # fase G
 
-        # pagina ophalen
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4b-bevestig-eindstand-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.lid_sporter_2.bij_vereniging = None
+        self.lid_sporter_2.save()
 
-        # verkeerde BKO
-        self.e2e_wissel_naar_functie(self.functie_bko_25)
-        resp = self.client.get(url)
-        self.assert403(resp)
-        resp = self.client.post(url)
-        self.assert403(resp)
+        url = self.url_doorzetten_regio_naar_rk % self.comp_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
-        # echt doorzetten
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-        resp = self.client.post(url)
-        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)
+        # laat de mutatie verwerken
+        f1, f2 = self.verwerk_regiocomp_mutaties(show_warnings=False)
+        self.assertTrue("[WARNING] Sporter 100009 - Compound is geen RK deelnemer want heeft geen vereniging" in f2.getvalue())
 
-        # achtergrond taak wordt niet gebruikt
+        # het lid zonder vereniging komt NIET in de RK selectie
+        self.assertEqual(2, KampioenschapSporterBoog.objects.count())
 
-        # check nieuwe fase
-        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
-        self.comp_18.bepaal_fase()
-        self.assertTrue(self.comp_18.fase_teams, 'Q')
+        # verdere tests in test_planning_rayon.test_geen_vereniging check
 
-    def test_rk_bk_klassengrenzen(self):
+    def test_doorzetten_1b(self):
+        # klassengrenzen rk bk teams
+
         # maak een paar teams aan
         self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.nhbver_101.ver_nr, ook_incomplete_teams=False)
         self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.nhbver_101.ver_nr)
@@ -565,5 +443,237 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
 
+    def test_doorzetten_2a(self):
+        # rk naar bk indiv
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        # TODO: maak RK deelnemers met resultaten aan, voor een betere test
+
+        url = self.url_doorzetten_rk_naar_bk_indiv % self.comp_18.pk
+
+        # fase L: pagina zonder knop 'doorzetten'
+        zet_competitie_fases(self.comp_18, 'L', 'L')
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_indiv, 'L')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-2a-rk-naar-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # nu echt doorzetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)       # redirect = Success
+
+        # kietel de achtergrondtaak
+        self.verwerk_regiocomp_mutaties()
+
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_indiv, 'N')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, "Verkeerde competitie fase")
+
+        self.assertTrue(str(self.deelkamp_bk_18) != '')
+
+        deelkamp_bk_18 = Kampioenschap.objects.get(competitie=self.comp_18,
+                                                   deel=DEEL_BK)
+        objs = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk_18)
+        self.assertEqual(objs.count(), 0)       # worden nog niet gemaakt, dus 0
+
+    def test_doorzetten_2b(self):
+        # rk naar bk teams
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        # TODO: maak RK teams met resultaten aan, voor een betere test
+
+        url = self.url_doorzetten_rk_naar_bk_teams % self.comp_18.pk
+
+        # fase L: pagina zonder knop 'doorzetten'
+        zet_competitie_fases(self.comp_18, 'L', 'L')
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_teams, 'L')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-2b-rk-naar-bk-teams.dtl', 'plein/site_layout.dtl'))
+
+        # nu echt doorzetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)       # redirect = Success
+
+        # kietel de achtergrondtaak
+        self.verwerk_regiocomp_mutaties()
+
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_teams, 'N')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, "Verkeerde competitie fase")
+
+    def test_doorzetten_3a(self):
+        # bk kleine indiv klassen samengevoegd
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        url = self.url_doorzetten_bk_kleine_indiv % self.comp_18.pk
+
+        # samenvoegen van klassen kan in fase N
+        zet_competitie_fases(self.comp_18, 'N', 'L')
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_indiv, 'N')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-3a-bk-kleine-klassen-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # nu echt doorzetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)       # redirect = Success
+
+        # achtergrond taak wordt hier niet voor gebruikt
+
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_indiv, 'O')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, "Verkeerde competitie fase")
+
+    def test_doorzetten_3b(self):
+        # bk kleine team klassen samengevoegd
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        url = self.url_doorzetten_bk_kleine_teams % self.comp_18.pk
+
+        # samenvoegen van klassen kan in fase N
+        zet_competitie_fases(self.comp_18, 'L', 'N')
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_teams, 'N')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-3b-bk-kleine-klassen-teams.dtl', 'plein/site_layout.dtl'))
+
+        # nu echt doorzetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)       # redirect = Success
+
+        # achtergrond taak wordt hier niet voor gebruikt
+
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_teams, 'O')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, "Verkeerde competitie fase")
+
+    def test_doorzetten_4a(self):
+        # bevestig eindstand bk indiv
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        url = self.url_bevestig_eindstand_bk_indiv % self.comp_18.pk
+
+        # pagina ophalen in de verkeerde fase
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertNotEqual(self.comp_18.fase_indiv, 'P')
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        zet_competitie_fases(self.comp_18, 'P', 'P')
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_indiv, 'P')
+
+        # pagina ophalen
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4a-bevestig-eindstand-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde BKO
+        self.e2e_wissel_naar_functie(self.functie_bko_25)
+        resp = self.client.get(url)
+        self.assert403(resp)
+        resp = self.client.post(url)
+        self.assert403(resp)
+
+        # echt doorzetten
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+        resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)
+
+        # achtergrond taak wordt niet gebruikt
+
+        # check nieuwe fase
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertTrue(self.comp_18.fase_indiv, 'Q')
+
+    def test_doorzetten_4b(self):
+        # bevestig eindstand bk teams
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        url = self.url_bevestig_eindstand_bk_teams % self.comp_18.pk
+
+        # pagina ophalen in de verkeerde fase
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertNotEqual(self.comp_18.fase_teams, 'P')
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        zet_competitie_fases(self.comp_18, 'P', 'P')
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase_teams, 'P')
+
+        # pagina ophalen
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4b-bevestig-eindstand-bk-teams.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde BKO
+        self.e2e_wissel_naar_functie(self.functie_bko_25)
+        resp = self.client.get(url)
+        self.assert403(resp)
+        resp = self.client.post(url)
+        self.assert403(resp)
+
+        # echt doorzetten
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+        resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)
+
+        # achtergrond taak wordt niet gebruikt
+
+        # check nieuwe fase
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.bepaal_fase()
+        self.assertTrue(self.comp_18.fase_teams, 'Q')
 
 # end of file

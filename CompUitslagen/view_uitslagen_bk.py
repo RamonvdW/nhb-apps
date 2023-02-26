@@ -284,7 +284,7 @@ class UitslagenBKTeamsView(TemplateView):
                 toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
             else:
                 # geen beheerder, dus sporter
-                if account.sporter_set.count() > 0:
+                if account.sporter_set.count() > 0:         # pragma: no branch
                     sporter = account.sporter_set.all()[0]
                     if sporter.is_actief_lid and sporter.bij_vereniging:
                         toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
