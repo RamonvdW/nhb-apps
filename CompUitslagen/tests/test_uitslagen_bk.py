@@ -35,7 +35,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
         cls.testdata.maak_bondscompetities()
         cls.testdata.maak_rk_deelnemers(18, cls.ver_nr, cls.regio_nr)
-        cls.testdata.maak_inschrijvingen_rk_teamcompetitie(18, cls.ver_nr)
+        cls.testdata.maak_rk_teams(18, cls.ver_nr)
         # TODO: uitslag RK indiv + doorstromen naar BK indiv
         # TODO: uitslag RK teams + doorstromen naar BK teams
         s2 = timezone.now()

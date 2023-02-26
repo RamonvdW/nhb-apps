@@ -111,7 +111,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     def test_rko_teams(self):
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr)
-        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr)
+        self.testdata.maak_rk_teams(25, self.ver_nr)
 
         url = self.url_rko_teams % self.testdata.deelkamp25_rk[1].pk        # rayon 1
 

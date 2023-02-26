@@ -39,8 +39,8 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
 
             # test file is voor een recurve-klasse
             per_team = 3 if ver_nr == 4121 else 4
-            data.maak_inschrijvingen_rk_teamcompetitie(25, ver_nr, per_team, limit_teamtypen=['R2'])
-            data.maak_inschrijvingen_rk_teamcompetitie(18, ver_nr, per_team, limit_teamtypen=['R2'])
+            data.maak_rk_teams(25, ver_nr, per_team, limit_teamtypen=['R2'])
+            data.maak_rk_teams(18, ver_nr, per_team, limit_teamtypen=['R2'])
         # for
 
     def setUp(self):

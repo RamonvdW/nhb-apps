@@ -15,7 +15,7 @@ from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
                                    MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
-from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_RESERVE
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_RESERVE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
                                RegiocompetitieTeamPoule,
@@ -189,6 +189,9 @@ class TestData(object):
 
         self.comp18_klassen_teams = dict()      # [teamtype afkorting] = [klasse, ...]
         self.comp25_klassen_teams = dict()      # [teamtype afkorting] = [klasse, ...]
+
+        self.comp18_klassen_rk_bk_teams = dict()    # [teamtype afkorting] = [klasse, ...]
+        self.comp25_klassen_rk_bk_teams = dict()    # [teamtype afkorting] = [klasse, ...]
 
         # all inschrijvingen
         self.comp18_deelnemers = list()
@@ -966,15 +969,25 @@ class TestData(object):
                        .all()):
 
             afkorting = klasse.team_type.afkorting
+
             if klasse.competitie.afstand == '18':
                 klassen = self.comp18_klassen_teams
+                klassen_rk_bk = self.comp18_klassen_rk_bk_teams
             else:
                 klassen = self.comp25_klassen_teams
+                klassen_rk_bk = self.comp25_klassen_rk_bk_teams
 
             try:
                 klassen[afkorting].append(klasse)
             except KeyError:
                 klassen[afkorting] = [klasse]
+
+            if klasse.is_voor_teams_rk_bk:
+                try:
+                    klassen_rk_bk[afkorting].append(klasse)
+                except KeyError:
+                    klassen_rk_bk[afkorting] = [klasse]
+
         # for
 
     def maak_inschrijvingen_regiocompetitie(self, afstand=18, ver_nr=None):
@@ -1472,7 +1485,7 @@ class TestData(object):
             gem = round(gem, 3)
         # for
 
-    def maak_inschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, per_team=4, limit_teamtypen=('R2', 'C')):
+    def maak_rk_teams(self, afstand, ver_nr, per_team=4, limit_teamtypen=('R2', 'C'), zet_klasse=False):
         """ maak voor deze vereniging een paar teams aan voor de RK teams inschrijving
             en koppel er meteen een aantal RK deelnemers van de vereniging aan.
         """
@@ -1482,12 +1495,14 @@ class TestData(object):
 
         if afstand == 18:
             deelkamp = self.deelkamp18_rk[rayon_nr]
-            rk_deelnemers = self.comp18_rk_deelnemers
             rk_teams = self.comp18_kampioenschapteams
+            team_klassen = self.comp18_klassen_rk_bk_teams
+            rk_deelnemers = self.comp18_rk_deelnemers
         else:
             deelkamp = self.deelkamp25_rk[rayon_nr]
-            rk_deelnemers = self.comp25_rk_deelnemers
             rk_teams = self.comp25_kampioenschapteams
+            team_klassen = self.comp25_klassen_rk_bk_teams
+            rk_deelnemers = self.comp25_rk_deelnemers
 
         # verdeel de deelnemers per boogtype
         deelnemers_per_boog = dict()   # [boogtype.afkorting] = list(deelnemer)
@@ -1547,6 +1562,9 @@ class TestData(object):
                                 team_naam='rk-%s-%s-%s' % (ver_nr, next_nr, afkorting),
                                 # team_klasse wordt later bepaald door de BKO
                                 aanvangsgemiddelde=team_ag)
+                    if zet_klasse:
+                        team.team_klasse = team_klassen[afkorting][0]
+
                     bulk.append(team)
 
                     tup = (team, koppel)
@@ -1632,17 +1650,121 @@ class TestData(object):
         # for
 
     def maak_bk_deelnemers(self, afstand, ver_nr, limit_boogtypen=('R', 'C', 'BB', 'LB', 'TR')):
-        """ Maak de BK deelnemers aan, alsof ze doorgestroomd zijn vanuit de RK
-
+        """ Laat RK deelnemers doorstromen naar de BK
             afstand = 18 / 25
         """
-        pass
 
-    def maak_inschrijvingen_bk_teams(self, afstand, ver_nr, per_team=3, limit_teamtypen=['R2']):
-        """ maak voor deze vereniging een paar teams aan voor de BK teams inschrijving
-            en koppel er meteen een aantal (RK) deelnemers van de vereniging aan.
-        """
-        pass
+        if afstand == 18:
+            deelkamp_bk = self.deelkamp18_bk
+            rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp18_rk.values()]
+            pijlen = 2.0 * 30
+        else:
+            deelkamp_bk = self.deelkamp25_bk
+            rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp25_rk.values()]
+            pijlen = 2.0 * 25
+
+        bulk = list()
+        prev_klasse = None
+        volgorde = 0
+        for rk_deelnemer in (KampioenschapSporterBoog
+                             .objects
+                             .filter(kampioenschap__pk__in=rk_pks)
+                             .prefetch_related('sporterboog',
+                                               'indiv_klasse',
+                                               'bij_vereniging')
+                             .order_by('indiv_klasse',
+                                       'result_rank')):
+
+            if rk_deelnemer.indiv_klasse != prev_klasse:
+                prev_klasse = rk_deelnemer.indiv_klasse
+                volgorde = 0
+
+            volgorde += 1
+            deelname = DEELNAME_JA if volgorde <= 24 else DEELNAME_NEE
+            ag = rk_deelnemer.result_score_1 + rk_deelnemer.result_score_2
+            ag /= pijlen
+            scores_str = '%03d%03d' % (max(rk_deelnemer.result_score_1, rk_deelnemer.result_score_2),
+                                       min(rk_deelnemer.result_score_1, rk_deelnemer.result_score_2))
+
+            bk_deelnemer = KampioenschapSporterBoog(
+                                kampioenschap=deelkamp_bk,
+                                sporterboog=rk_deelnemer.sporterboog,
+                                indiv_klasse=rk_deelnemer.indiv_klasse,
+                                bij_vereniging=rk_deelnemer.bij_vereniging,
+                                volgorde=volgorde,
+                                deelname=deelname,
+                                gemiddelde=ag,
+                                gemiddelde_scores=scores_str)
+            bulk.append(bk_deelnemer)
+
+            if len(bulk) >= 500:
+                KampioenschapSporterBoog.objects.bulk_create(bulk)
+                bulk = list()
+
+        # for
+
+        if len(bulk):
+            KampioenschapSporterBoog.objects.bulk_create(bulk)
+
+    def maak_bk_teams(self, afstand):
+        """ Laat BK teams doorstromen naar de BK """
+
+        if afstand == 18:
+            deelkamp_bk = self.deelkamp18_bk
+            rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp18_rk.values()]
+            pijlen = 30.0
+        else:
+            deelkamp_bk = self.deelkamp25_bk
+            rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp25_rk.values()]
+            pijlen = 25.0
+
+        rk_team_leden = dict()   # [(ver_nr, volg_nr, team_type_afkorting)] = rk_team gekoppelde_leden
+
+        bulk = list()
+        prev_klasse = None
+        volgorde = 0
+        for rk_team in (KampioenschapTeam
+                        .objects
+                        .filter(kampioenschap__pk__in=rk_pks)
+                        .prefetch_related('team_klasse',
+                                          'team_type',
+                                          'vereniging')
+                        .prefetch_related('gekoppelde_leden')
+                        .order_by('team_klasse',
+                                  'result_rank')):
+
+            tup = (rk_team.vereniging.ver_nr, rk_team.volg_nr, rk_team.team_type.afkorting)
+            rk_team_leden[tup] = list(rk_team.gekoppelde_leden.all())
+
+            if rk_team.team_klasse != prev_klasse:
+                prev_klasse = rk_team.team_klasse
+                volgorde = 0
+
+            volgorde += 1
+
+            ag = rk_team.result_teamscore / pijlen
+
+            bk_team = KampioenschapTeam(
+                            kampioenschap=deelkamp_bk,
+                            vereniging=rk_team.vereniging,
+                            volg_nr=rk_team.volg_nr,
+                            team_type=rk_team.team_type,
+                            team_naam=rk_team.team_naam,
+                            volgorde=volgorde,
+                            team_klasse=rk_team.team_klasse,
+                            aanvangsgemiddelde=ag)
+
+            bulk.append(bk_team)
+        # for
+
+        if len(bulk):
+            KampioenschapTeam.objects.bulk_create(bulk)
+
+        for bk_team in KampioenschapTeam.objects.filter(kampioenschap=deelkamp_bk):
+            tup = (bk_team.vereniging.ver_nr, bk_team.volg_nr, bk_team.team_type.afkorting)
+            leden = rk_team_leden[tup]
+            bk_team.gekoppelde_leden.set(leden)
+        # for
 
 
 # end of file

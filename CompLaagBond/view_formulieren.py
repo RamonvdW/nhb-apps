@@ -254,8 +254,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                               indiv_klasse=klasse.pk)
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
-                                      'bij_vereniging',
-                                      'bij_vereniging__regio')
+                                      'bij_vereniging')
                       .order_by('rank'))
 
         baan_nr = 1
@@ -498,7 +497,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                     naam_str += ' **'
                 ws['F' + row] = naam_str
 
-                # regio gemiddelde
+                # RK gemiddelde
                 ws['G' + row] = deelnemer.gemiddelde
 
                 aantal += 1
@@ -573,11 +572,10 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                           .filter(kampioenschap=deelkamp,
                                   bij_vereniging__ver_nr__in=ver_nrs,
                                   sporterboog__boogtype__pk__in=boog_pks)       # filter op toegestane boogtypen
-                          .select_related('bij_vereniging__regio',
+                          .select_related('bij_vereniging',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype')
-                          .order_by('bij_vereniging__regio',
-                                    'bij_vereniging',
+                          .order_by('bij_vereniging',
                                     '-gemiddelde')):                            # hoogste eerst
 
             row_nr += 1

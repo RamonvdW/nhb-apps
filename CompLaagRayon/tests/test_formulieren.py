@@ -47,11 +47,11 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         cls.ver = data.vereniging[ver_nr]
 
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr, limit_boogtypen=['R', 'BB'])
-        data.maak_inschrijvingen_rk_teamcompetitie(18, ver_nr, per_team=3, limit_teamtypen=['R2'])
+        data.maak_rk_teams(18, ver_nr, per_team=3, limit_teamtypen=['R2'])
 
         ver_nr = data.regio_ver_nrs[cls.regio_nr][1]
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr, limit_boogtypen=['R', 'BB'])
-        data.maak_inschrijvingen_rk_teamcompetitie(18, ver_nr, per_team=3, limit_teamtypen=['R2'])
+        data.maak_rk_teams(18, ver_nr, per_team=3, limit_teamtypen=['R2'])
 
         s2 = timezone.now()
         d = s2 - s1
@@ -347,7 +347,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         # 25m
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr, limit_boogtypen=['R', 'BB'])
-        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, per_team=3, limit_teamtypen=['R2'])
+        self.testdata.maak_rk_teams(25, self.ver_nr, per_team=3, limit_teamtypen=['R2'])
         self.deelkamp_25.rk_bk_matches.add(self.match)
         klasse = self.testdata.comp25_klassen_teams['R2'][0]
         self.match.team_klassen.add(klasse)
