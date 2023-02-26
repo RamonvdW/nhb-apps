@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ class IndivRecordAdmin(admin.ModelAdmin):
     search_fields = ('naam', 'plaats', 'score', 'volg_nr')
 
     # filter mogelijkheid
-    list_filter = ('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse',
+    list_filter = ('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse', 'verbeterbaar',
                    'is_european_record', 'is_world_record')
 
     autocomplete_fields = ('sporter',)

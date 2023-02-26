@@ -31,38 +31,8 @@ class RecordsIndivView(TemplateView):
         self.params = dict()
         self.spec = None
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            gesl = url2gesl[self.kwargs['gesl']]
-            disc = url2disc[self.kwargs['disc']]
-            lcat = url2lcat[self.kwargs['lcat']]
-            makl = url2makl[self.kwargs['makl']]
-            verb = url2verb[self.kwargs['verb']]
-            para = url2para[self.kwargs['para']]
-            nr = int(self.kwargs['nummer'])
-        except KeyError:
-            # initieel zijn er geen parameters
-            # ook bij gerommel terugvallen op initieel
-            gesl = 'M'
-            disc = 'OD'
-            lcat = 'S'
-            makl = 'R'
-            verb = True
-            para = ''
-            nr = 0
-
-        # in geval van para kijken we niet naar de lcat of disc
-        if para:
-            lcat = 'U'
-            # para records alleen voor Outdoor en Indoor, dus wissel weg van 25m1pijl indien gekozen
-            if disc == '25':
-                disc = '18'
-        else:
-            if lcat == 'U':
-                lcat = 'S'
+    @staticmethod
+    def _maak_filters(context, gesl, disc, lcat, makl, para, verb, soort_nieuwste, spec, heeft_niet_verb):
 
         # voorbereiden voor alle reverse() aanroepen
         gesl_url = gesl2url[gesl]
@@ -70,50 +40,7 @@ class RecordsIndivView(TemplateView):
         lcat_url = lcat2url[lcat]
         makl_url = makl2url[makl]
         para_url = para2url[para]
-
-        # zoek alle records die aan de 4-tuple of 5-tuple voldoen
-        # dit minimaliseert het aantal database verzoeken dat we moeten doen
-        alle = (IndivRecord
-                .objects
-                .filter(discipline=disc,
-                        geslacht=gesl,
-                        leeftijdscategorie=lcat,
-                        materiaalklasse=makl,
-                        para_klasse=para)
-                .order_by('soort_record',
-                          'volg_nr'))           # niet functioneel, wel handig voor test
-
-        heeft_niet_verb = False
-        for obj in alle:
-            if not obj.verbeterbaar:
-                heeft_niet_verb = True
-                break
-        # for
-
-        if heeft_niet_verb:
-            alle = alle.filter(verbeterbaar=verb)
-        else:
-            verb = True
-
         verb_url = verb2url[verb]
-
-        # haal de record soorten uit de volledige lijst
-        soort_nieuwste = dict()     # ["soort_record"] = IndivRecord()
-        nieuwste_record = None
-        spec = None
-        for obj in alle:
-            try:
-                if obj.datum > soort_nieuwste[obj.soort_record].datum:
-                    soort_nieuwste[obj.soort_record] = obj
-            except KeyError:
-                soort_nieuwste[obj.soort_record] = obj
-
-            if not nieuwste_record or obj.datum > nieuwste_record.datum:
-                nieuwste_record = obj
-
-            if obj.volg_nr == nr:
-                spec = obj
-        # for
 
         context['soorten'] = soorten = list()
         for soort_record, obj in soort_nieuwste.items():
@@ -129,12 +56,6 @@ class RecordsIndivView(TemplateView):
             soorten.append(obj)
         # for
 
-        if not spec:
-            # speciaal geval: pak het nieuwste record
-            spec = nieuwste_record
-
-        context['obj_record'] = spec
-
         for obj in soorten:
             if spec.soort_record == obj.soort_record:
                 # deze is "gekozen" en moet dus disabled worden
@@ -143,52 +64,8 @@ class RecordsIndivView(TemplateView):
 
         context['toon_soorten'] = (len(soorten) > 0)
 
-        # zoek nu de records die bij dit filter passen, aflopend gesorteerd op datum
-        # (deze zitten in 'alle' maar dit is eenvoudiger tegen geringe database kosten)
-        if spec:
-            objs = (IndivRecord
-                    .objects
-                    .filter(geslacht=gesl,
-                            discipline=disc,
-                            leeftijdscategorie=lcat,
-                            materiaalklasse=makl,
-                            soort_record=spec.soort_record,
-                            para_klasse=spec.para_klasse)
-                    .order_by('-datum'))
-
-            for obj in objs:
-                obj.is_specifieke_record = (obj.volg_nr == spec.volg_nr)
-                obj.url = reverse('Records:indiv-all',
-                                  kwargs={'gesl': gesl_url,
-                                          'disc': disc_url,
-                                          'lcat': lcat_url,
-                                          'makl': makl_url,
-                                          'verb': verb_url,
-                                          'para': para_url,
-                                          'nummer': obj.volg_nr})
-            # for
-        else:
-            objs = list()
-
-        context['object_list'] = objs
-        context['op_pagina'] = 'records-indiv'
-
-        if spec:
-            # voeg informatie toe voor de template
-            spec.gesl_str = gesl2str[spec.geslacht]
-            spec.disc_str = disc2str[spec.discipline]
-            spec.lcat_str = lcat2str[spec.leeftijdscategorie]
-            spec.makl_str = makl2str[spec.materiaalklasse]
-
-            spec.url_specifiek = reverse('Records:specifiek',
-                                         kwargs={'discipline': disc,        # let op: niet disc_url
-                                                 'nummer': spec.volg_nr})
-
-            context['op_pagina'] += "_%s-%s" % (spec.discipline, spec.volg_nr)
-
         nummer = 0
 
-        # vul de filters
         context['gesl_filters'] = opties = list()
         for afk, url in gesl2url.items():
             optie = SimpleNamespace()
@@ -215,15 +92,16 @@ class RecordsIndivView(TemplateView):
 
             optie = SimpleNamespace()
             optie.beschrijving = disc2str[afk]
-            if afk != disc:
-                optie.zoom_url = reverse('Records:indiv-all',
-                                         kwargs={'gesl': gesl_url,
-                                                 'disc': url,
-                                                 'lcat': lcat_url,
-                                                 'makl': makl_url,
-                                                 'verb': verb_url,
-                                                 'para': para_url,
-                                                 'nummer': nummer})
+            optie.sel = 'disc_' + afk
+            optie.zoom_url = reverse('Records:indiv-all',
+                                     kwargs={'gesl': gesl_url,
+                                             'disc': url,
+                                             'lcat': lcat_url,
+                                             'makl': makl_url,
+                                             'verb': verb_url,
+                                             'para': para_url,
+                                             'nummer': nummer})
+            optie.selected = (afk == disc)
             opties.append(optie)
         # for
 
@@ -322,6 +200,140 @@ class RecordsIndivView(TemplateView):
                                          'para': para2url[''],
                                          'nummer': nummer})
         opties.insert(0, optie)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            gesl = url2gesl[self.kwargs['gesl']]
+            disc = url2disc[self.kwargs['disc']]
+            lcat = url2lcat[self.kwargs['lcat']]
+            makl = url2makl[self.kwargs['makl']]
+            verb = url2verb[self.kwargs['verb']]
+            para = url2para[self.kwargs['para']]
+            nr = int(self.kwargs['nummer'])
+        except KeyError:
+            # initieel zijn er geen parameters
+            # ook bij gerommel terugvallen op initieel
+            gesl = 'M'
+            disc = 'OD'
+            lcat = 'S'
+            makl = 'R'
+            verb = True
+            para = ''
+            nr = 0
+
+        # in geval van para kijken we niet naar de lcat of disc
+        if para:
+            lcat = 'U'
+            # para records alleen voor Outdoor en Indoor, dus wissel weg van 25m1pijl indien gekozen
+            if disc == '25':
+                disc = '18'
+        else:
+            if lcat == 'U':
+                lcat = 'S'
+
+        # zoek alle records die aan de 4-tuple of 5-tuple voldoen
+        # dit minimaliseert het aantal database verzoeken dat we moeten doen
+        alle = (IndivRecord
+                .objects
+                .filter(discipline=disc,
+                        geslacht=gesl,
+                        leeftijdscategorie=lcat,
+                        materiaalklasse=makl,
+                        para_klasse=para)
+                .order_by('soort_record',
+                          'volg_nr'))           # niet functioneel, wel handig voor test
+
+        heeft_niet_verb = False
+        for obj in alle:
+            if not obj.verbeterbaar:
+                heeft_niet_verb = True
+                break
+        # for
+
+        if heeft_niet_verb:
+            alle = alle.filter(verbeterbaar=verb)
+        else:
+            verb = True
+
+        # haal de record soorten uit de volledige lijst
+        soort_nieuwste = dict()     # ["soort_record"] = IndivRecord()
+        nieuwste_record = None
+        spec = None
+        for obj in alle:
+            try:
+                if obj.datum > soort_nieuwste[obj.soort_record].datum:
+                    soort_nieuwste[obj.soort_record] = obj
+            except KeyError:
+                soort_nieuwste[obj.soort_record] = obj
+
+            if not nieuwste_record or obj.datum > nieuwste_record.datum:
+                nieuwste_record = obj
+
+            if obj.volg_nr == nr:
+                spec = obj
+        # for
+
+        if not spec:
+            # speciaal geval: pak het nieuwste record
+            spec = nieuwste_record
+
+        context['obj_record'] = spec
+
+        self._maak_filters(context, gesl, disc, lcat, makl, para, verb, soort_nieuwste, spec, heeft_niet_verb)
+
+        # voorbereiden voor alle reverse() aanroepen
+        gesl_url = gesl2url[gesl]
+        disc_url = disc2url[disc]
+        lcat_url = lcat2url[lcat]
+        makl_url = makl2url[makl]
+        para_url = para2url[para]
+        verb_url = verb2url[verb]
+
+        # zoek nu de records die bij dit filter passen, aflopend gesorteerd op datum
+        # (deze zitten in 'alle' maar dit is eenvoudiger tegen geringe database kosten)
+        if spec:
+            objs = (IndivRecord
+                    .objects
+                    .filter(geslacht=gesl,
+                            discipline=disc,
+                            leeftijdscategorie=lcat,
+                            materiaalklasse=makl,
+                            soort_record=spec.soort_record,
+                            para_klasse=spec.para_klasse)
+                    .order_by('-datum'))
+
+            for obj in objs:
+                obj.is_specifieke_record = (obj.volg_nr == spec.volg_nr)
+                obj.url = reverse('Records:indiv-all',
+                                  kwargs={'gesl': gesl_url,
+                                          'disc': disc_url,
+                                          'lcat': lcat_url,
+                                          'makl': makl_url,
+                                          'verb': verb_url,
+                                          'para': para_url,
+                                          'nummer': obj.volg_nr})
+            # for
+        else:
+            objs = list()
+
+        context['object_list'] = objs
+        context['op_pagina'] = 'records-indiv'
+
+        if spec:
+            # voeg informatie toe voor de template
+            spec.gesl_str = gesl2str[spec.geslacht]
+            spec.disc_str = disc2str[spec.discipline]
+            spec.lcat_str = lcat2str[spec.leeftijdscategorie]
+            spec.makl_str = makl2str[spec.materiaalklasse]
+
+            spec.url_specifiek = reverse('Records:specifiek',
+                                         kwargs={'discipline': disc,        # let op: niet disc_url
+                                                 'nummer': spec.volg_nr})
+
+            context['op_pagina'] += "_%s-%s" % (spec.discipline, spec.volg_nr)
 
         context['kruimels'] = (
             (reverse('Records:overzicht'), 'Records'),
