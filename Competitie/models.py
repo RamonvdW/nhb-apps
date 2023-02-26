@@ -821,8 +821,7 @@ class KampioenschapTeamKlasseLimiet(models.Model):
 
     def __str__(self):
         msg = "%s : " % self.limiet
-        if self.team_klasse:
-            msg += "%s - " % self.team_klasse.beschrijving
+        msg += "%s - " % self.team_klasse.beschrijving
         msg += "%s" % self.kampioenschap
         return msg
 
