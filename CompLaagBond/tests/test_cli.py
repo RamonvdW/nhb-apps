@@ -153,13 +153,13 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         deelnemer.save()
 
         f1, f2 = self.run_management_command('check_bk_inschrijvingen', '18')
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertFalse('ERROR' in f1.getvalue())
         self.assertTrue("geen afwijkingen" in f2.getvalue())
 
         # verbose
         f1, f2 = self.run_management_command('check_bk_inschrijvingen', '18', '--verbose')
-        print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertFalse('ERROR' in f1.getvalue())
 
 
 # end of file

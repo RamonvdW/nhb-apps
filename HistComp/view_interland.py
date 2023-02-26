@@ -25,9 +25,10 @@ RESULTS_PER_PAGE = 100
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive", "Longbow")
 
-
 MINIMALE_LEEFTIJD_JEUGD_INTERLAND = 13      # alles jonger wordt niet getoond
 MAXIMALE_LEEFTIJD_JEUGD_INTERLAND = 20      # boven deze leeftijd Senior
+
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 class InterlandView(UserPassesTestMixin, TemplateView):
@@ -161,7 +162,7 @@ class InterlandAlsBestandView(InterlandView):
         if indivs is None:
             raise Http404('Geen sporters gevonden')
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="interland.csv"'
 
         response.write(BOM_UTF8)

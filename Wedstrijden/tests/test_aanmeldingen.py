@@ -419,7 +419,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         url = self.url_aanmeldingen_download_tsv % self.wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_csv(resp)
+        self.assert200_is_bestand_tsv(resp)
 
         url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
         with self.assert_max_queries(20):
@@ -455,7 +455,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
-        self.assert200_is_bestand_csv(resp)
+        self.assert200_is_bestand_tsv(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)

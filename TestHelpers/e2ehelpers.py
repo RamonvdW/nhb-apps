@@ -978,7 +978,10 @@ class E2EHelpers(TestCase):
         self.assertTrue(len(str(resp.content)) > 30)
 
     def assert200_is_bestand_csv(self, resp):
-        self._assert_bestand(resp, 'text/csv')
+        self._assert_bestand(resp, 'text/csv; charset=UTF-8')
+
+    def assert200_is_bestand_tsv(self, resp):
+        self._assert_bestand(resp, 'text/tab-separated-values; charset=UTF-8')
 
     def assert200_is_bestand_xlsx(self, resp):
         self._assert_bestand(resp, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

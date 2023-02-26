@@ -28,6 +28,8 @@ import csv
 TEMPLATE_WEDSTRIJDEN_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
 TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS = 'wedstrijden/aanmelding-details.dtl'
 
+CONTENT_TYPE_TSV = 'text/tab-separated-values; charset=UTF-8'
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 # TODO: HWL moet sporter kunnen verplaatsen naar een andere sessie
 
@@ -215,7 +217,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
                                   'wanneer',
                                   'status'))
 
-        response = HttpResponse(content_type='text/tab-separated-values; charset=UTF-8')
+        response = HttpResponse(content_type=CONTENT_TYPE_TSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.txt"'
 
         # Ianseo supports a tab-separate file with specific column order, without headers
@@ -323,7 +325,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                                   'wanneer',
                                   'status'))
 
-        response = HttpResponse(content_type='text/csv; charset=UTF-8')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
 
         response.write(BOM_UTF8)
