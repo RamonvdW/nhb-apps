@@ -29,6 +29,8 @@ import csv
 TEMPLATE_COMPBOND_BK_SELECTIE = 'complaagbond/bk-selectie.dtl'
 TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER = 'complaagbond/wijzig-status-bk-deelnemer.dtl'
 
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
+
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
@@ -246,7 +248,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="bond_alle.csv"'
 
         response.write(BOM_UTF8)

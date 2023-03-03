@@ -34,6 +34,8 @@ TEMPLATE_COMPREGIO_RCL_TEAMS = 'complaagregio/rcl-teams.dtl'
 TEMPLATE_COMPREGIO_RCL_AG_CONTROLE = 'complaagregio/rcl-ag-controle.dtl'
 TEMPLATE_COMPREGIO_RCL_TEAM_RONDE = 'complaagregio/rcl-team-ronde.dtl'
 
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
+
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
@@ -339,7 +341,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
         else:
             aantal_pijlen = 25
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-teams-regio-%s.csv"' % regio_nr
 
         response.write(BOM_UTF8)

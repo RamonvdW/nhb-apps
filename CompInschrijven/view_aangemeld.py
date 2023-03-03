@@ -30,6 +30,8 @@ TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'compinschrijven/lijst-aangemeld-regio.dtl
 TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE = 'compinschrijven/inschrijfmethode1-behoefte.dtl'
 TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE = 'compinschrijven/inschrijfmethode3-behoefte.dtl'
 
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
+
 JA_NEE = {
     False: 'Nee',
     True: 'Ja'
@@ -345,7 +347,7 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
 
         regio = context['regio']
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-regio-%s.csv"' % regio.regio_nr
 
         response.write(BOM_UTF8)
@@ -706,7 +708,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         dagdelen = [DAGDEEL2LABEL[dagdeel][0] for dagdeel in context['dagdelen']]
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
         response.write(BOM_UTF8)
@@ -923,7 +925,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="inschrijf-keuzes-%s.csv"' % regio.regio_nr
 
         response.write(BOM_UTF8)

@@ -23,6 +23,8 @@ import csv
 
 TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/rko-rk-selectie.dtl'
 
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
+
 
 class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
@@ -272,7 +274,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelkamp.nhb_rayon.rayon_nr
 
         response.write(BOM_UTF8)

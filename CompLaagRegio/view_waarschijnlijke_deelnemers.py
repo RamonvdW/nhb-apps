@@ -19,6 +19,8 @@ import csv
 
 TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'complaagregio/waarschijnlijke-deelnemers-regio.dtl'
 
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
+
 
 class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
@@ -161,7 +163,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
 
         sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, match)
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="waarschijnlijke-deelnemers-%s.csv"' % match.pk
 
         response.write(BOM_UTF8)
