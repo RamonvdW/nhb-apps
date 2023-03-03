@@ -23,7 +23,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, planning voor het BK """
 
-    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
     url_competitie_overzicht = '/bondscompetities/%s/'                                          # comp_pk
     url_planning = '/bondscompetities/bk/planning/%s/'                                          # deelkamp_pk

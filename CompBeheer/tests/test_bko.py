@@ -27,7 +27,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     """ tests voor de CompBeheer applicatie, module BKO """
 
-    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
     url_competitie_beheer = '/bondscompetities/beheer/%s/'                                          # comp_pk
     url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'          # comp_pk

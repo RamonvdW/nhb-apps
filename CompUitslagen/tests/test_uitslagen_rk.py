@@ -16,7 +16,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
     """ tests voor de CompUitslagen applicatie, module Uitslagen RK """
 
-    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
     url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rk-individueel/'                    # comp_pk, comp_boog
     url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rk-individueel/%s/'               # comp_pk, comp_boog, rayon_nr

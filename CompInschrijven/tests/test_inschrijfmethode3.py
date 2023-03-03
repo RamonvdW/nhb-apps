@@ -23,7 +23,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
     """ tests voor de CompInschrijven applicatie, inschrijfmethode 3 """
 
-    test_after = ('Competitie.tests.test_beheerders',)
+    test_after = ('Competitie.tests.test_tijdlijn',)
 
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
     url_behoefte3 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
