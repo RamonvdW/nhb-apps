@@ -908,6 +908,8 @@ class KampioenschapSporterBoog(models.Model):
         else:
             substr = "RK rayon %s" % self.kampioenschap.nhb_rayon.rayon_nr
 
+        substr += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
+
         return "%s [%s] %s (%s)" % (
                     substr,
                     self.sporterboog.sporter.lid_nr,
@@ -931,6 +933,8 @@ class KampioenschapSporterBoog(models.Model):
             # help sorteren op volgorde en gemiddelde
             models.Index(fields=['volgorde', '-gemiddelde']),
         ]
+
+        ordering = ['volgorde']
 
     objects = models.Manager()      # for the editor only
 

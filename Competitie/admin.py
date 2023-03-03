@@ -501,6 +501,29 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class RkBkIndivKlasseFilter(admin.SimpleListFilter):
+
+    title = "Indiv Klasse (RK/BK)"
+
+    parameter_name = 'indiv_klasse_rk_bk'
+
+    default_value = None
+
+    def lookups(self, request, model_admin):                    # pragma: no cover
+        """ Return list of tuples for the sidebar """
+        return [(klasse.volgorde, klasse.beschrijving) for klasse in (CompetitieIndivKlasse
+                                                                      .objects
+                                                                      .filter(is_voor_rk_bk=True)
+                                                                      .distinct('volgorde')
+                                                                      .order_by('volgorde'))]
+
+    def queryset(self, request, queryset):
+        selection = self.value()
+        if selection:
+            queryset = queryset.filter(indiv_klasse__volgorde=selection)
+        return queryset
+
+
 class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
 
     fieldsets = (
@@ -554,6 +577,7 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                    'kampioenschap__nhb_rayon',
                    'deelname',
                    'sporterboog__boogtype',
+                   RkBkIndivKlasseFilter,
                    ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
                    'sporterboog__sporter__bij_vereniging')
 
