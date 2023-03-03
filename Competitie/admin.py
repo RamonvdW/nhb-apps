@@ -581,6 +581,8 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                    ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
                    'sporterboog__sporter__bij_vereniging')
 
+    ordering = ['volgorde']
+
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.obj = None

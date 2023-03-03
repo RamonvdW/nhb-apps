@@ -934,8 +934,6 @@ class KampioenschapSporterBoog(models.Model):
             models.Index(fields=['volgorde', '-gemiddelde']),
         ]
 
-        ordering = ['volgorde']
-
     objects = models.Manager()      # for the editor only
 
 
