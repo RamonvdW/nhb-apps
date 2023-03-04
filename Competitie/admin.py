@@ -372,9 +372,9 @@ class IncompleetTeamFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         selection = self.value()
         if selection == 'incompleet':
-            queryset = queryset.filter(aanvangsgemiddelde__lte=0.0001)
+            queryset = queryset.filter(aanvangsgemiddelde__lt=1)
         elif selection == 'compleet':
-            queryset = queryset.filter(aanvangsgemiddelde__gt=0)
+            queryset = queryset.filter(aanvangsgemiddelde__gte=1)
         return queryset
 
 
@@ -382,7 +382,7 @@ class KampioenschapTypeFilter(admin.SimpleListFilter):
 
     title = "Soort kampioenschap"
 
-    parameter_name = 'incompleet'
+    parameter_name = 'rk_bk_type'
 
     default_value = None
 
