@@ -130,14 +130,15 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             # link naar de waarschijnlijke deelnemerslijst
             if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (match.uitslag and match.uitslag.is_bevroren):
                 if match.is_rk:
-                    match.url_waarschijnlijke_deelnemers = reverse('CompLaagRayon:download-formulier',
-                                                                   kwargs={'match_pk': match.pk})
-                if match.is_bk:
+                    match.url_lijst = reverse('CompLaagRayon:download-formulier',
+                                              kwargs={'match_pk': match.pk})
+                elif match.is_bk:
                     # geen knoppen - formulier wordt door BKO opgestuurd
                     pass
+
                 else:
-                    match.url_waarschijnlijke_deelnemers = reverse('CompLaagRegio:waarschijnlijke-deelnemers',
-                                                                   kwargs={'match_pk': match.pk})
+                    match.url_lijst = reverse('CompLaagRegio:waarschijnlijke-deelnemers',
+                                              kwargs={'match_pk': match.pk})
 
             context['geen_wedstrijden'] = False
         # for

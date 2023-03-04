@@ -50,8 +50,8 @@
                             <!-- knop om de (waarschijnlijke) deelnemerslijst te zien -->
                             {% if not uitslag_invoeren %}
                                 <td>
-                                    {% if obj.url_waarschijnlijke_deelnemers %}
-                                        <a class="btn-nhb-rood" href="{{ obj.url_waarschijnlijke_deelnemers }}">{% if obj.is_rk %}RK programma{% else %}Toon lijst{% endif %}</a>
+                                    {% if obj.url_lijst %}
+                                        <a class="btn-nhb-rood" href="{{ obj.url_lijst }}">{% if obj.is_rk %}RK programma{% elif obj.is_bk %}BK programma{% else %}Toon lijst{% endif %}</a>
                                     {% endif %}
                                 </td>
                             {% endif %}
