@@ -12,7 +12,7 @@ from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
 from Records.definities import disc2str, gesl2str, makl2str, lcat2str
-from Records.models import IndivRecord
+from Records.models import IndivRecord, AnderRecord
 from Records.forms import ZoekForm
 from Sporter.models import Sporter
 
@@ -83,6 +83,8 @@ class RecordsOverzichtView(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['andere_records'] = AnderRecord.objects.order_by('pk')
 
         context['kruimels'] = (
             (None, 'Records'),

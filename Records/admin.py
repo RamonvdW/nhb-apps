@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Records.models import IndivRecord, BesteIndivRecords
+from Records.models import IndivRecord, BesteIndivRecords, AnderRecord
 
 
 class IndivRecordAdmin(admin.ModelAdmin):
@@ -27,7 +27,13 @@ class BesteIndivRecordsAdmin(admin.ModelAdmin):
     list_filter = ('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse')
 
 
+class AnderRecordAdmin(admin.ModelAdmin):
+
+    pass
+
+
 admin.site.register(IndivRecord, IndivRecordAdmin)
 admin.site.register(BesteIndivRecords, BesteIndivRecordsAdmin)
+admin.site.register(AnderRecord, AnderRecordAdmin)
 
 # end of file
