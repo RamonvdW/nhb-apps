@@ -134,6 +134,24 @@ class UitslagenRegioIndivView(TemplateView):
 
             context['ver_filters'] = vers
 
+    @staticmethod
+    def _lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str):
+        rank = 0
+        is_first = True
+        for obj in objs1 + objs2:
+            rank += 1
+            obj.rank = rank
+            objs.append(obj)
+
+            if is_first:
+                obj.break_klasse = True
+                obj.is_eerste_groep = is_eerste_groep
+                obj.klasse_str = klasse_str
+                obj.aantal_in_groep = 2 + len(objs1) + len(objs2)
+                is_first = False
+
+        # for
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -194,24 +212,23 @@ class UitslagenRegioIndivView(TemplateView):
                       .order_by('indiv_klasse__volgorde',
                                 '-gemiddelde'))
 
-        klasse = -1
-        rank = 0
         objs = list()
-        deelnemer_count = None
+        objs1 = list()      # primary lijst (genoeg scores)
+        objs2 = list()      # secundaire lijst (te weinig scores)
+        klasse = -1
+        klasse_str = None
+        is_eerste_groep = True
         for deelnemer in deelnemers:
 
-            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
-            if deelnemer.break_klasse:
-                deelnemer_count = deelnemer
-                deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
-                deelnemer.is_eerste_groep = (klasse == -1)
-                deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
-                rank = 0
-            klasse = deelnemer.indiv_klasse.volgorde
+            if klasse != deelnemer.indiv_klasse.volgorde:
+                self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
+                is_eerste_groep = False
+                objs1 = list()
+                objs2 = list()
+                klasse_str = deelnemer.indiv_klasse.beschrijving
+                klasse = deelnemer.indiv_klasse.volgorde
 
-            rank += 1
             sporter = deelnemer.sporterboog.sporter
-            deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
@@ -219,9 +236,15 @@ class UitslagenRegioIndivView(TemplateView):
             if comp.fase_indiv < 'F':
                 deelnemer.gemiddelde = deelnemer.ag_voor_indiv
 
-            deelnemer_count.aantal_in_groep += 1
-            objs.append(deelnemer)
+            # zet sporters met te weinig scores in een secundair lijst die volgt op de primaire lijst
+            if True and deelcomp.is_afgesloten and deelnemer.aantal_scores < comp.aantal_scores_voor_rk_deelname:
+                # eindstand en te weinig scores
+                objs2.append(deelnemer)
+            else:
+                objs1.append(deelnemer)
         # for
+
+        self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
 
         context['deelnemers'] = objs
         context['heeft_deelnemers'] = (len(objs) > 0)
