@@ -164,7 +164,6 @@ class UitslagenVerenigingIndivView(TemplateView):
         regio_nr = ver.regio.regio_nr
         context['url_terug'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
-                                               'zes_scores': 'alle',
                                                'comp_boog': comp_boog,
                                                'regio_nr': regio_nr})
 

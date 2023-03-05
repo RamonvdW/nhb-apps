@@ -65,9 +65,8 @@ class UitslagenRegioIndivView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV
     url_name = 'CompUitslagen:uitslagen-regio-indiv-n'
-    order_gemiddelde = '-gemiddelde'
 
-    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
+    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog):
         """ filter optie voor de regio """
 
         # boogtype filters
@@ -86,7 +85,6 @@ class UitslagenRegioIndivView(TemplateView):
 
             boogtype.zoom_url = reverse(self.url_name,
                                         kwargs={'comp_pk': comp.pk,
-                                                'zes_scores': zes_scores,
                                                 'comp_boog': boogtype.afkorting.lower(),
                                                 'regio_nr': gekozen_regio_nr})
         # for
@@ -114,7 +112,6 @@ class UitslagenRegioIndivView(TemplateView):
 
                 regio.zoom_url = reverse(self.url_name,
                                          kwargs={'comp_pk': comp.pk,
-                                                 'zes_scores': zes_scores,
                                                  'comp_boog': comp_boog,
                                                  'regio_nr': regio.regio_nr})
             # for
@@ -137,21 +134,6 @@ class UitslagenRegioIndivView(TemplateView):
 
             context['ver_filters'] = vers
 
-        context['zes_scores_checked'] = (zes_scores == 'zes')
-        if zes_scores == 'alle':
-            zes_scores_next = 'zes'
-        else:
-            zes_scores_next = 'alle'
-        context['zes_scores_next'] = reverse(self.url_name,
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'zes_scores': zes_scores_next,
-                                                     'comp_boog': comp_boog,
-                                                     'regio_nr': gekozen_regio_nr})
-
-    @staticmethod
-    def filter_zes_scores(deelnemers):
-        return deelnemers.filter(aantal_scores__gte=6)
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -166,10 +148,6 @@ class UitslagenRegioIndivView(TemplateView):
 
         comp.bepaal_fase()
         context['comp'] = comp
-
-        zes_scores = kwargs['zes_scores']
-        if zes_scores not in ('alle', 'zes'):
-            zes_scores = 'alle'
 
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor de veiligheid
 
@@ -200,7 +178,7 @@ class UitslagenRegioIndivView(TemplateView):
 
         context['deelcomp'] = deelcomp
 
-        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog, zes_scores)
+        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog)
 
         boogtype = context['comp_boog']
         if not boogtype:
@@ -213,10 +191,8 @@ class UitslagenRegioIndivView(TemplateView):
                                       'bij_vereniging',
                                       'indiv_klasse__boogtype')
                       .filter(indiv_klasse__boogtype=boogtype)
-                      .order_by('indiv_klasse__volgorde', self.order_gemiddelde))
-
-        if zes_scores == 'zes':
-            deelnemers = self.filter_zes_scores(deelnemers)
+                      .order_by('indiv_klasse__volgorde',
+                                '-gemiddelde'))
 
         klasse = -1
         rank = 0

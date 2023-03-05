@@ -25,13 +25,29 @@ urlpatterns = [
          name='uitslagen-vereniging-indiv'),
 
     # regio
-    path('<comp_pk>/<comp_boog>/<zes_scores>/regio-individueel/<regio_nr>/',
+    path('<comp_pk>/<comp_boog>/regio-individueel/<regio_nr>/',
          view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
          name='uitslagen-regio-indiv-n'),
 
-    path('<comp_pk>/<comp_boog>/<zes_scores>/regio-individueel/',
+    path('<comp_pk>/<comp_boog>/alle/regio-individueel/<regio_nr>/',        # voor backwards compatibility
+         view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv-n-alle'),
+
+    path('<comp_pk>/<comp_boog>/zes/regio-individueel/<regio_nr>/',         # voor backwards compatibility
+         view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv-n-zes'),
+
+    path('<comp_pk>/<comp_boog>/regio-individueel/',
          view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
          name='uitslagen-regio-indiv'),
+
+    path('<comp_pk>/<comp_boog>/alle/regio-individueel/',                   # voor backwards compatibility
+         view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv-alle'),
+
+    path('<comp_pk>/<comp_boog>/zes/regio-individueel/',                    # voor backwards compatibility
+         view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv-zes'),
 
     path('<comp_pk>/<team_type>/regio-teams/',
          view_uitslagen_regio.UitslagenRegioTeamsView.as_view(),

@@ -56,7 +56,6 @@ class CompetitieOverzichtView(TemplateView):
 
         context['url_regio_indiv'] = reverse('CompUitslagen:uitslagen-regio-indiv',
                                              kwargs={'comp_pk': comp.pk,
-                                                     'zes_scores': 'alle',
                                                      'comp_boog': wed_boog})
         context['url_regio_teams'] = reverse('CompUitslagen:uitslagen-regio-teams',
                                              kwargs={'comp_pk': comp.pk,
