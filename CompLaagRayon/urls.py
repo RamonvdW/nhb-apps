@@ -7,7 +7,7 @@
 from django.urls import path
 from CompLaagRayon import (view_planning, view_formulieren,
                            view_indiv_rko, view_indiv_hwl, view_indiv_wijzig_status,
-                           view_teams_rko, view_teams_hwl)
+                           view_teams_rko, view_teams_hwl, view_bko)
 
 app_name = 'CompLaagRayon'
 
@@ -93,6 +93,15 @@ urlpatterns = [
     path('download-formulier-teams/<match_pk>/<klasse_pk>/',
          view_formulieren.FormulierTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
+
+    # BKO
+    path('<comp_pk>/extra-deelnemer/',
+         view_bko.ExtraDeelnemerView.as_view(),
+         name='rayon-extra-deelnemer'),
+
+    path('<comp_pk>/extra-deelnemer/<deelnemer_pk>/toevoegen/',
+         view_bko.ExtraDeelnemerView.as_view(),
+         name='rayon-extra-deelnemer-toevoegen'),
 ]
 
 # end of file

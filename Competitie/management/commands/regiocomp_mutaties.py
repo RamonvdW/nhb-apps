@@ -18,7 +18,7 @@ from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN,
-                                   MUTATIE_REGIO_TEAM_RONDE,
+                                   MUTATIE_REGIO_TEAM_RONDE, MUTATIE_EXTRA_RK_DEELNEMER,
                                    MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK,
                                    MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK)
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTaken,
@@ -1258,6 +1258,10 @@ class Command(BaseCommand):
             comp.rk_teams_afgesloten = True
             comp.save(update_fields=['rk_teams_afgesloten'])
 
+    def _verwerk_mutatie_extra_rk_deelnemer(self, deelnemer):
+        # gebruik de methode van opnieuw aanmelden om deze sporter op de reserve-lijst te krijgen
+        self._opnieuw_aanmelden_indiv(deelnemer)
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
@@ -1310,6 +1314,10 @@ class Command(BaseCommand):
         elif code == MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK:
             self.stdout.write('[INFO] Verwerk mutatie %s: teams doorzetten van RK naar BK' % mutatie.pk)
             self._verwerk_mutatie_opstarten_bk_teams(mutatie.competitie)
+
+        elif code == MUTATIE_EXTRA_RK_DEELNEMER:
+            self.stdout.write('[INFO] Verwerk mutatie %s: extra RK deelnemer' % mutatie.pk)
+            self._verwerk_mutatie_extra_rk_deelnemer(mutatie.deelnemer)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))

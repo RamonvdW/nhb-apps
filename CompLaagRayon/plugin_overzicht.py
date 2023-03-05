@@ -63,6 +63,17 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         url=url)
             kaartjes_teams.append(kaartje)
 
+        # inschreven RK teams (open inschrijving RK teams tijdens fase F)
+        if 'J' <= comp.fase_teams <= 'K':
+            url = reverse('CompLaagRayon:rayon-extra-deelnemer', kwargs={'comp_pk': comp.pk})
+            kaartje = SimpleNamespace(
+                        prio=5,
+                        titel="Extra deelnemer",
+                        icoon="person_add",
+                        tekst="Voeg een regiocompetitie deelnemer toe aan het RK (aspirant of na score correctie).",
+                        url=url)
+            kaartjes_indiv.append(kaartje)
+
     elif rol_nu == Rollen.ROL_RKO:
 
         # zoek het RK kampioenschap erbij
