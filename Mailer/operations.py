@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -139,7 +139,7 @@ def render_email_template(context, email_template_name):
         Returns: email body in text, html + email_template_name
     """
 
-    context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_nhb_jubileum.png')
+    context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_nhb.png')
     context['logo_width'] = 213
     context['logo_height'] = 50
 
