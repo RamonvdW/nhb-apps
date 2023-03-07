@@ -242,8 +242,8 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         ws['A35'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
         # i_font = ws['I8'].font
-        i_align = ws['I8'].alignment            # right align
-        i_format = ws['I8'].number_format       # 0,000
+        i_align = ws['I8'].alignment            # gemiddelde: right align
+        i_format = ws['I8'].number_format       # gemiddelde: 0,000
 
         # d_align = ws['D8'].alignment
         # g_align = ws['G8'].alignment
@@ -292,9 +292,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                 row = str(row2_nr)
                 # ws['D' + row].alignment = copy(d_align)
                 # ws['G' + row].alignment = copy(g_align)
-                ws['I' + row].alignment = copy(i_align)             # right-align
                 # ws['I' + row].font = copy(i_font)
-                ws['I' + row].number_format = copy(i_format)        # 0,000
 
             if is_deelnemer:
                 ws['A' + row] = baan_nr
@@ -321,6 +319,8 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
             # gemiddelde
             ws['I' + row] = deelnemer.gemiddelde
+            ws['I' + row].alignment = copy(i_align)
+            ws['I' + row].number_format = copy(i_format)
 
             if para_notities:
                 ws['Q' + row] = para_notities
