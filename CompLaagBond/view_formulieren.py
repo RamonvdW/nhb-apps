@@ -223,7 +223,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+            prg = openpyxl.load_workbook(tmp_file)
         except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan BK programma niet openen')
 
@@ -415,7 +415,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+            prg = openpyxl.load_workbook(tmp_file)
         except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan BK programma niet openen')
 
