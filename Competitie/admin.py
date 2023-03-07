@@ -470,6 +470,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                                                       'sporterboog__boogtype',
                                                       'kampioenschap__nhb_rayon')
                                       .filter(kampioenschap__competitie=self.competitie,
+                                              kampioenschap__deel=DEEL_RK,      # RK gekwalificeerde sporters koppelen, voor zowel RK als BK
                                               bij_vereniging=self.obj.vereniging,
                                               sporterboog__boogtype__pk__in=self.boog_pks)
                                       .order_by('sporterboog__sporter__lid_nr'))

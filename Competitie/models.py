@@ -910,11 +910,11 @@ class KampioenschapSporterBoog(models.Model):
 
         substr += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
 
-        return "%s [%s] %s (%s)" % (
-                    substr,
+        return "[%s] %s (%s) %s" % (
                     self.sporterboog.sporter.lid_nr,
                     self.sporterboog.sporter.volledige_naam(),
-                    self.sporterboog.boogtype.beschrijving)
+                    self.sporterboog.boogtype.beschrijving,
+                    substr)
 
     class Meta:
         verbose_name = "Kampioenschap sporterboog"
