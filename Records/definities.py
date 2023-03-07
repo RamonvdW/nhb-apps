@@ -70,7 +70,6 @@ verb2str = {True: 'Ja',
 makl2url = {'R': 'recurve',
             'C': 'compound',
             'BB': 'barebow',
-            # 'IB': 'instinctive-bow',
             'TR': 'traditional',
             'LB': 'longbow'}
 
