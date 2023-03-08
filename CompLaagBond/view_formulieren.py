@@ -425,7 +425,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws = prg['Deelnemers en Scores']
 
-        ws['B1'] = 'BK teams %s, Klasse: %s' % (comp.beschrijving, klasse_str)
+        ws['B2'] = 'BK teams %s, Klasse: %s' % (comp.beschrijving, klasse_str)
         ws['H4'] = match.datum_wanneer.strftime('%Y-%m-%d')
         ws['B4'] = match.vereniging.naam     # organisatie
         if match.locatie:
