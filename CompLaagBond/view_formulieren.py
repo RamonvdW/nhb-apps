@@ -420,9 +420,6 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             raise Http404('Kan BK programma niet openen')
 
         # maak wijzigingen in het RK programma
-        ws = prg['Uitleg']
-        ws['A5'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
-
         ws = prg['Deelnemers en Scores']
 
         ws['B2'] = 'BK teams %s, Klasse: %s' % (comp.beschrijving, klasse_str)
