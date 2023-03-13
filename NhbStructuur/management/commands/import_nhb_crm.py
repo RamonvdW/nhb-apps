@@ -811,7 +811,7 @@ class Command(BaseCommand):
                         else:
                             # nog niet gekoppeld
                             if maak_account_vereniging_secretaris(obj, account):
-                                self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie en heeft krijgt een e-mail" % (
+                                self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie en krijgt een e-mail" % (
                                                         sporter.lid_nr, obj.ver_nr))
                                 sec_account_pks.append(account.pk)
                             else:
