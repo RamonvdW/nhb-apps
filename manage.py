@@ -1,13 +1,14 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 
-# this line + shebang ensures python is taken from the user's PATH
-# python sees this as a string and ignores it
-"exec" "python3" "$0" "$@"
-
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+# this line + shebang ensures python is taken from the user's PATH
+# python sees this as a string and ignores it
+# note: -u = unbuffered stdout/stderr
+"exec" "python3" "-u" "$0" "$@"
 
 from django.core.management import execute_from_command_line
 from TestHelpers.e2estatus import validated_templates, included_templates, consistent_email_templates

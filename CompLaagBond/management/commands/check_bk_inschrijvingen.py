@@ -106,22 +106,21 @@ class Command(BaseCommand):
                 if kampioen.volgorde != prev_volgorde + 1:
                     block.append('[ERROR] Volgorde niet consecutief (pk=%s)' % kampioen.pk)
 
-                if kampioen.gemiddelde > prev_gemiddelde:
-                    if not net_na_cut:
-                        block.append('[ERROR] Gemiddelde is niet consecutief (pk=%s)' % kampioen.pk)
-
             prev_volgorde = kampioen.volgorde
-            prev_gemiddelde = kampioen.gemiddelde
+            if kampioen.rank:
+                if kampioen.rank == limiet:
+                    net_na_cut = True
 
-            net_na_cut = False
-            if kampioen.rank != 0:
                 if prev_rank:
                     if kampioen.rank != prev_rank + 1:
                         block.append('[ERROR] Rank niet consecutief (pk=%s)' % kampioen.pk)
-                prev_rank = kampioen.rank
 
-                if kampioen.rank == limiet:
-                    net_na_cut = True
+                if prev_rank > 0 and kampioen.gemiddelde > prev_gemiddelde:
+                    if not net_na_cut:
+                        block.append('[ERROR] Gemiddelde is niet consecutief (pk=%s)' % kampioen.pk)
+
+                prev_rank = kampioen.rank
+                prev_gemiddelde = kampioen.gemiddelde
         # for
 
         self._out_block(block)
