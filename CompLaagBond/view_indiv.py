@@ -93,8 +93,7 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
                                       'sporterboog',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
-                      .filter(kampioenschap=deelkamp,
-                              volgorde__lte=48)             # max 48 schutters per klasse tonen
+                      .filter(kampioenschap=deelkamp)
                       .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                 '-gemiddelde'))             # aflopend op gemiddelde
