@@ -116,7 +116,7 @@ class UitslagenBKIndivView(TemplateView):
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
                           .filter(kampioenschap=deelkamp_bk,
                                   indiv_klasse__boogtype=boogtype,
-                                  rank__lte=48)                      # toon tot 48 sporters per klasse
+                                  volgorde__lte=48)                  # toon tot 48 sporters per klasse
                           .select_related('indiv_klasse',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging',

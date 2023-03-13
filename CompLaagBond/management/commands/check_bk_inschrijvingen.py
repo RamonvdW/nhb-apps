@@ -114,7 +114,6 @@ class Command(BaseCommand):
             if kampioen.rank:
                 if kampioen.rank == limiet:
                     net_na_cut = True
-                    block.append('[DEBUG] Net na cut')
 
                 if prev_rank:
                     if kampioen.rank != prev_rank + 1:

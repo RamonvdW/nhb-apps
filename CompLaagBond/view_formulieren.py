@@ -250,8 +250,10 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
+                      .exclude(deelname=DEELNAME_NEE)       # iedereen die afgemeld is weglaten
                       .filter(kampioenschap=deelkamp,
-                              indiv_klasse=klasse.pk)
+                              indiv_klasse=klasse.pk,
+                              volgorde__lte=48)
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
