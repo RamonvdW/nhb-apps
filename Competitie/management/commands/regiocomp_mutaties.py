@@ -1227,6 +1227,10 @@ class Command(BaseCommand):
         # bepaal nu voor elke klasse de volgorde van de deelnemers
         self._verwerk_mutatie_initieel_deelkamp(deelkamp_bk)
 
+        # behoud maximaal 48 sporters in elke klasse: 24 deelnemers en 24 reserven
+        qset = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk, volgorde__gt=48)
+        qset.delete()
+
     def _verwerk_mutatie_opstarten_bk_indiv(self, comp):
         """ de BKO heeft gevraagd alles klaar te maken voor het BK individueel """
 

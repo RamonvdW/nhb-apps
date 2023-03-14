@@ -14,7 +14,6 @@ def verwijder_afgemeld(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     teamkamp_klas = apps.get_model('Competitie', 'KampioenschapTeam')
 
-    print()
     for team in teamkamp_klas.objects.filter(team_naam__contains="AFGEMELD"):
         if team.team_naam.endswith(" [AFGEMELD]"):
             team.team_naam = team.team_naam[:-11]
