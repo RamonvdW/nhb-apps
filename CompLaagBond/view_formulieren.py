@@ -10,7 +10,7 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, DEELNAME_NEE, DEELNAME2STR
+from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (Kampioenschap, CompetitieMatch,
                                CompetitieIndivKlasse, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog,
                                CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet, KampioenschapTeam)
@@ -370,13 +370,13 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelkamps = match.kampioenschap_set.filter(deel=DEEL_BK)
-        if len(deelkamps) == 0:
+        deelkamps_bk = match.kampioenschap_set.filter(deel=DEEL_BK)
+        if len(deelkamps_bk) == 0:
             raise Http404('Geen kampioenschap')
 
-        deelkamp = deelkamps[0]
+        deelkamp_bk = deelkamps_bk[0]
 
-        comp = deelkamp.competitie
+        comp = deelkamp_bk.competitie
         # TODO: check fase
 
         if comp.afstand == '18':
@@ -434,14 +434,14 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         max_teams = 12 if "ERE" in klasse_str else 8
         try:
-            limiet = KampioenschapTeamKlasseLimiet.objects.get(kampioenschap=deelkamp, team_klasse=team_klasse)
+            limiet = KampioenschapTeamKlasseLimiet.objects.get(kampioenschap=deelkamp_bk, team_klasse=team_klasse)
             max_teams = limiet.limiet
         except KampioenschapTeamKlasseLimiet.DoesNotExist:
             pass
 
         teams = (KampioenschapTeam
                  .objects
-                 .filter(kampioenschap=deelkamp,
+                 .filter(kampioenschap=deelkamp_bk,
                          team_klasse=team_klasse.pk)
                  .exclude(deelname=DEELNAME_NEE)
                  .select_related('vereniging')
@@ -566,9 +566,12 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         row_nr = 16
         prev_ver = None
+        # alle RK deelnemers mogen schieten in het team
+        # (sporter hoeft niet persoonlijk geplaatst te zijn voor het BK)
         for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(kampioenschap=deelkamp,
+                          .filter(kampioenschap__competitie=comp,
+                                  kampioenschap__deel=DEEL_RK,
                                   bij_vereniging__ver_nr__in=ver_nrs,
                                   sporterboog__boogtype__pk__in=boog_pks)       # filter op toegestane boogtypen
                           .select_related('bij_vereniging',
