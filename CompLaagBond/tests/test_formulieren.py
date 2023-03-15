@@ -82,7 +82,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         loc.save()
         loc.verenigingen.add(self.ver)
 
-        # maak een RK wedstrijd aan
+        # maak een BK wedstrijd aan
         self.match = CompetitieMatch(
                         competitie=self.testdata.comp18,
                         beschrijving='test wedstrijd BK',

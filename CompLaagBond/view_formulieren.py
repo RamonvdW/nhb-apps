@@ -136,7 +136,7 @@ class DownloadBkTeamsFormulierenView(UserPassesTestMixin, DownloadBkFormulierenV
 
 class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
-    """ Geef de HWL het ingevulde wedstrijdformulier voor een RK wedstrijd bij deze vereniging """
+    """ Geef de HWL het ingevulde wedstrijdformulier voor een BK wedstrijd bij deze vereniging """
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
@@ -213,7 +213,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsx'
 
-        # make een kopie van het RK programma in een tijdelijk bestand
+        # make een kopie van het BK programma in een tijdelijk bestand
         fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagBond', 'files', excel_name)
         tmp_file = NamedTemporaryFile()
         try:
@@ -338,7 +338,7 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
 class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
-    """ Geef de HWL het ingevulde wedstrijdformulier voor een RK wedstrijd bij deze vereniging """
+    """ Geef de BKO het ingevulde wedstrijdformulier voor een BK wedstrijd """
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
@@ -421,8 +421,18 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan BK programma niet openen')
 
-        # maak wijzigingen in het RK programma
+        # maak wijzigingen in het BK programma
         ws = prg['Deelnemers en Scores']
+
+        if "ERE" in klasse_str:
+            max_teams = 12
+        else:
+            max_teams = 8
+            # maximaal 4 teams naar de finale, dus verwijder het blad voor 8 team finale
+            del prg['Finales 8 teams']
+
+            # verwijder 4 regels in Uitslag (voor teams 9..12)
+            prg['Uitslag'].delete_rows(17, 4)
 
         ws['B2'] = 'BK teams %s, Klasse: %s' % (comp.beschrijving, klasse_str)
         ws['H4'] = match.datum_wanneer.strftime('%Y-%m-%d')
@@ -432,7 +442,6 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         else:
             ws['F4'] = 'Onbekend'
 
-        max_teams = 12 if "ERE" in klasse_str else 8
         try:
             limiet = KampioenschapTeamKlasseLimiet.objects.get(kampioenschap=deelkamp_bk, team_klasse=team_klasse)
             max_teams = limiet.limiet
@@ -472,7 +481,10 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
             # vul de 4 sporters in
             aantal = 0
-            for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter').all():
+            for deelnemer in (team
+                              .gekoppelde_leden
+                              .select_related('sporterboog__sporter')
+                              .order_by('-gemiddelde')):        # hoogste gemiddelde bovenaan
                 row_nr += 1
                 row = str(row_nr)
 
@@ -545,6 +557,10 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         # while
 
         ws['B82'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+
+        if "ERE" not in klasse_str:
+            # verwijder teams 9..12 in Deelnemers en Scores
+            ws.delete_rows(56, 24)
 
         # alle gerechtigde deelnemers opnemen op een apart tabblad, met gemiddelde en boogtype
         ws = prg['Toegestane deelnemers']

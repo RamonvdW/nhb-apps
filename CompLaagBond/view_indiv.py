@@ -36,8 +36,8 @@ mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de (kandidaat) schutters van en RK zien,
-        met mogelijkheid voor de RKO om deze te bevestigen.
+    """ Deze view laat de (kandidaat) deelnemers van en BK zien,
+        met mogelijkheid voor de BKO om deze te bevestigen.
     """
 
     # class variables shared by all instances
@@ -57,10 +57,6 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-
-        # er zijn 2 situaties:
-        # 1) regiocompetities zijn nog niet afgesloten --> verwijst naar pagina tussenstand rayon
-        # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
@@ -199,7 +195,7 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
 class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
-    """ Deze klasse wordt gebruikt om de RK selectie lijst
+    """ Deze klasse wordt gebruikt om de BK selectie lijst
         te downloaden als csv bestand
     """
 
@@ -220,7 +216,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         # laat alleen de juiste BKO de lijst ophalen
         if self.functie_nu != deelkamp.functie:
-            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste BKO
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -313,7 +309,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
 class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de BKO de status van een RK selectie aanpassen """
+    """ Deze view laat de BKO de status van een BK selectie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER
@@ -402,7 +398,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Geen toegang tot deze competitie')
 
         account = request.user
-        door_str = "RKO %s" % account.volledige_naam()
+        door_str = "BKO %s" % account.volledige_naam()
 
         if bevestig == "1":
             if not deelnemer.bij_vereniging:
