@@ -308,7 +308,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # for
 
         if comp.afstand == '18':
-            excel_name = 'template-excel-rk-indoor-indiv.xlsm'          # TODO: migrate to xlsx
+            excel_name = 'template-excel-rk-indoor-indiv.xlsx'
             ws_name = 'Voorronde'
         else:
             excel_name = 'template-excel-rk-25m1pijl-indiv.xlsx'
@@ -336,24 +336,24 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # maak wijzigingen in het RK programma
         ws = prg[ws_name]
 
-        ws['B2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.nhb_rayon.rayon_nr, klasse.beschrijving)
+        ws['C2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.nhb_rayon.rayon_nr, klasse.beschrijving)
 
-        ws['C3'] = match.vereniging.naam     # organisatie
-        ws['G3'] = "Datum: " + match.datum_wanneer.strftime('%Y-%m-%d')
+        ws['D3'] = match.vereniging.naam     # organisatie
+        ws['J3'] = "Datum: " + match.datum_wanneer.strftime('%Y-%m-%d')
 
         if match.locatie:
-            ws['I3'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['H3'] = match.locatie.adres       # adres van de wedstrijdlocatie
         else:
-            ws['I3'] = 'Onbekend'
+            ws['H3'] = 'Onbekend'
 
-        ws['A31'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        ws['A33'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
-        e_align = ws['E6'].alignment        # bondsnummer
-        h_align = ws['H6'].alignment        # regio nummer
+        d_align = ws['D7'].alignment        # bondsnummer
+        g_align = ws['G7'].alignment        # regio nummer
 
-        i_font = ws['I6'].font              # gemiddelde (getal met 3 decimalen)
-        i_align = ws['I6'].alignment
-        i_format = ws['I6'].number_format
+        i_font = ws['I7'].font              # gemiddelde (getal met 3 decimalen)
+        i_align = ws['I7'].alignment
+        i_format = ws['I7'].number_format
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -369,8 +369,8 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         baan_letter = 'A'
         deelnemer_nr = 0
 
-        row1_nr = 5
-        row2_nr = 34
+        row1_nr = 7 - 1
+        row2_nr = 37 - 1
         for deelnemer in deelnemers:
 
             para_notities = ''
@@ -402,15 +402,15 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             else:
                 row2_nr += 1
                 row = str(row2_nr)
-                ws['E' + row].alignment = copy(e_align)     # bondsnummer
-                ws['H' + row].alignment = copy(h_align)
+                ws['D' + row].alignment = copy(d_align)     # bondsnummer
+                ws['G' + row].alignment = copy(g_align)
                 ws['I' + row].alignment = copy(i_align)
                 ws['I' + row].font = copy(i_font)
                 ws['I' + row].number_format = copy(i_format)
 
             if is_deelnemer:
-                ws['B' + row] = baan_nr
-                ws['C' + row] = baan_letter
+                ws['A' + row] = baan_nr
+                ws['B' + row] = baan_letter
 
                 baan_nr += 1
                 if baan_nr > aantal_banen:
@@ -418,28 +418,32 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                     baan_letter = chr(ord(baan_letter) + 1)
 
             # bondsnummer
-            ws['E' + row] = deelnemer.sporterboog.sporter.lid_nr
+            ws['D' + row] = deelnemer.sporterboog.sporter.lid_nr
 
             # volledige naam
-            ws['F' + row] = deelnemer.sporterboog.sporter.volledige_naam()
+            ws['E' + row] = deelnemer.sporterboog.sporter.volledige_naam()
 
             # vereniging
             ver = deelnemer.bij_vereniging
-            ws['G' + row] = '%s %s' % (ver.ver_nr, ver.naam)
+            ws['F' + row] = '%s %s' % (ver.ver_nr, ver.naam)
 
             # regio
-            ws['H' + row] = ver.regio.regio_nr
+            ws['G' + row] = ver.regio.regio_nr
 
             # gemiddelde
             ws['I' + row] = deelnemer.gemiddelde
 
             # deelname
-            ws['R' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
+            ws['T' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
 
             # notities
-            # TODO: regiokampioen label toevoegen?
+            if deelnemer.kampioen_label:
+                if para_notities != '':
+                    para_notities += '\n'
+                para_notities += deelnemer.kampioen_label
+
             if para_notities:
-                ws['S' + row] = para_notities
+                ws['U' + row] = para_notities
         # for
 
         # geef het aangepaste RK programma aan de client
