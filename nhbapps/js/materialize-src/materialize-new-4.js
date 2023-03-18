@@ -1169,7 +1169,7 @@ M.AutoInit = function (context) {
 
   var registry = {
     Autocomplete: root.querySelectorAll('.autocomplete:not(.no-autoinit)'),
-    Carousel: root.querySelectorAll('.carousel:not(.no-autoinit)'),
+    //Carousel: root.querySelectorAll('.carousel:not(.no-autoinit)'),
     Chips: root.querySelectorAll('.chips:not(.no-autoinit)'),
     Collapsible: root.querySelectorAll('.collapsible:not(.no-autoinit)'),
     Datepicker: root.querySelectorAll('.datepicker:not(.no-autoinit)'),
@@ -1180,9 +1180,9 @@ M.AutoInit = function (context) {
     Pushpin: root.querySelectorAll('.pushpin:not(.no-autoinit)'),
     ScrollSpy: root.querySelectorAll('.scrollspy:not(.no-autoinit)'),
     FormSelect: root.querySelectorAll('select:not(.no-autoinit)'),
-    Sidenav: root.querySelectorAll('.sidenav:not(.no-autoinit)'),
-    Tabs: root.querySelectorAll('.tabs:not(.no-autoinit)'),
-    TapTarget: root.querySelectorAll('.tap-target:not(.no-autoinit)'),
+    //Sidenav: root.querySelectorAll('.sidenav:not(.no-autoinit)'),
+    //Tabs: root.querySelectorAll('.tabs:not(.no-autoinit)'),
+    //TapTarget: root.querySelectorAll('.tap-target:not(.no-autoinit)'),
     Timepicker: root.querySelectorAll('.timepicker:not(.no-autoinit)'),
     Tooltip: root.querySelectorAll('.tooltipped:not(.no-autoinit)'),
     FloatingActionButton: root.querySelectorAll('.fixed-action-btn:not(.no-autoinit)')
@@ -4012,6 +4012,7 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(Parallax, 'parallax', 'M_Parallax');
   }
 })(cash);
+/*
 ;(function ($, anim) {
   'use strict';
 
@@ -4025,7 +4026,7 @@ $jscomp.polyfill = function (e, r, p, m) {
   /**
    * @class
    *
-   */
+   *
 
   var Tabs = function (_Component6) {
     _inherits(Tabs, _Component6);
@@ -4035,7 +4036,7 @@ $jscomp.polyfill = function (e, r, p, m) {
      * @constructor
      * @param {Element} el
      * @param {Object} options
-     */
+     *
     function Tabs(el, options) {
       _classCallCheck(this, Tabs);
 
@@ -4050,7 +4051,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * @prop {Function} onShow
        * @prop {Boolean} swipeable
        * @prop {Number} responsiveThreshold
-       */
+       *
       _this22.options = $.extend({}, Tabs.defaults, options);
 
       // Setup
@@ -4079,7 +4080,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown component
-       */
+       *
       value: function destroy() {
         this._removeEventHandlers();
         this._indicator.parentNode.removeChild(this._indicator);
@@ -4095,7 +4096,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup Event Handlers
-       */
+       *
 
     }, {
       key: "_setupEventHandlers",
@@ -4109,7 +4110,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Remove Event Handlers
-       */
+       *
 
     }, {
       key: "_removeEventHandlers",
@@ -4120,7 +4121,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Handle window Resize
-       */
+       *
 
     }, {
       key: "_handleWindowResize",
@@ -4136,7 +4137,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle tab click
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleTabClick",
@@ -4211,7 +4212,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Generate elements for tab indicator.
-       */
+       *
 
     }, {
       key: "_createIndicator",
@@ -4232,7 +4233,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup first active tab link.
-       */
+       *
 
     }, {
       key: "_setupActiveTabLink",
@@ -4261,7 +4262,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup swipeable tabs
-       */
+       *
 
     }, {
       key: "_setupSwipeableTabs",
@@ -4310,7 +4311,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown normal tabs.
-       */
+       *
 
     }, {
       key: "_teardownSwipeableTabs",
@@ -4325,7 +4326,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup normal tabs.
-       */
+       *
 
     }, {
       key: "_setupNormalTabs",
@@ -4343,7 +4344,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown normal tabs.
-       */
+       *
 
     }, {
       key: "_teardownNormalTabs",
@@ -4361,7 +4362,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * set tabs and tab width
-       */
+       *
 
     }, {
       key: "_setTabsAndTabWidth",
@@ -4373,7 +4374,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Finds right attribute for indicator based on active tab.
        * @param {cash} el
-       */
+       *
 
     }, {
       key: "_calcRightPos",
@@ -4384,7 +4385,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Finds left attribute for indicator based on active tab.
        * @param {cash} el
-       */
+       *
 
     }, {
       key: "_calcLeftPos",
@@ -4401,7 +4402,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Animates Indicator to active tab.
        * @param {Number} prevIndex
-       */
+       *
 
     }, {
       key: "_animateIndicator",
@@ -4436,7 +4437,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Select tab.
        * @param {String} tabId
-       */
+       *
 
     }, {
       key: "select",
@@ -4454,7 +4455,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Get Instance
-       */
+       *
 
     }, {
       key: "getInstance",
@@ -4478,6 +4479,7 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(Tabs, 'tabs', 'M_Tabs');
   }
 })(cash, M.anime);
+*/
 ;(function ($, anim) {
   'use strict';
 
@@ -5444,7 +5446,8 @@ $jscomp.polyfill = function (e, r, p, m) {
   };
 
   return Waves;
-});;(function ($, anim) {
+});
+;(function ($, anim) {
   'use strict';
 
   var _defaults = {
@@ -5802,7 +5805,8 @@ $jscomp.polyfill = function (e, r, p, m) {
     return new Toast(options);
   };
 })(cash, M.anime);
-;(function ($, anim) {
+;/*
+(function ($, anim) {
   'use strict';
 
   var _defaults = {
@@ -5820,7 +5824,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
   /**
    * @class
-   */
+   *
 
   var Sidenav = function (_Component8) {
     _inherits(Sidenav, _Component8);
@@ -5830,7 +5834,7 @@ $jscomp.polyfill = function (e, r, p, m) {
      * @constructor
      * @param {Element} el
      * @param {Object} options
-     */
+     *
     function Sidenav(el, options) {
       _classCallCheck(this, Sidenav);
 
@@ -5851,25 +5855,25 @@ $jscomp.polyfill = function (e, r, p, m) {
        * @prop {Function} onOpenEnd - Function called when sidenav finishes entering
        * @prop {Function} onCloseStart - Function called when sidenav starts exiting
        * @prop {Function} onCloseEnd - Function called when sidenav finishes exiting
-       */
+       *
       _this31.options = $.extend({}, Sidenav.defaults, options);
 
       /**
        * Describes open/close state of Sidenav
        * @type {Boolean}
-       */
+       *
       _this31.isOpen = false;
 
       /**
        * Describes if Sidenav is fixed
        * @type {Boolean}
-       */
+       *
       _this31.isFixed = _this31.el.classList.contains('sidenav-fixed');
 
       /**
        * Describes if Sidenav is being draggeed
        * @type {Boolean}
-       */
+       *
       _this31.isDragged = false;
 
       // Window size variables for window resize checks
@@ -5892,7 +5896,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown component
-       */
+       *
       value: function destroy() {
         this._removeEventHandlers();
         this._enableBodyScrolling();
@@ -5969,7 +5973,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Trigger Click
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleTriggerClick",
@@ -5990,7 +5994,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * Set variables needed at the beginning of drag
        * and stop any current transition.
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_startDrag",
@@ -6011,7 +6015,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Set variables needed at each drag move update tick
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_dragMoveUpdate",
@@ -6030,7 +6034,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handles Dragging of Sidenav
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleDragTargetDrag",
@@ -6064,7 +6068,7 @@ $jscomp.polyfill = function (e, r, p, m) {
          * transformX is the drag displacement
          * transformPrefix is the initial transform placement
          * Invert values if Sidenav is right edge
-         */
+         *
         var transformX = totalDeltaX;
         var transformPrefix = 'translateX(-100%)';
         if (this.options.edge === 'right') {
@@ -6082,7 +6086,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Handle Drag Target Release
-       */
+       *
 
     }, {
       key: "_handleDragTargetRelease",
@@ -6102,7 +6106,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Close Drag
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleCloseDrag",
@@ -6149,7 +6153,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Handle Close Release
-       */
+       *
 
     }, {
       key: "_handleCloseRelease",
@@ -6168,7 +6172,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Handles closing of Sidenav when element with class .sidenav-close
-       */
+       *
 
     }, {
       key: "_handleCloseTriggerClick",
@@ -6181,7 +6185,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Handle Window Resize
-       */
+       *
 
     }, {
       key: "_handleWindowResize",
@@ -6417,7 +6421,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Get Instance
-       */
+       *
 
     }, {
       key: "getInstance",
@@ -6439,7 +6443,7 @@ $jscomp.polyfill = function (e, r, p, m) {
    * @static
    * @memberof Sidenav
    * @type {Array.<Sidenav>}
-   */
+   *
 
 
   Sidenav._sidenavs = [];
@@ -6450,6 +6454,7 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(Sidenav, 'sidenav', 'M_Sidenav');
   }
 })(cash, M.anime);
+*/
 ;(function ($, anim) {
   'use strict';
 
@@ -10909,7 +10914,7 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(CharacterCounter, 'characterCounter', 'M_CharacterCounter');
   }
 })(cash);
-;(function ($) {
+/*;(function ($) {
   'use strict';
 
   var _defaults = {
@@ -10927,7 +10932,7 @@ $jscomp.polyfill = function (e, r, p, m) {
   /**
    * @class
    *
-   */
+   *
 
   var Carousel = function (_Component18) {
     _inherits(Carousel, _Component18);
@@ -10937,7 +10942,7 @@ $jscomp.polyfill = function (e, r, p, m) {
      * @constructor
      * @param {Element} el
      * @param {Object} options
-     */
+     *
     function Carousel(el, options) {
       _classCallCheck(this, Carousel);
 
@@ -10957,7 +10962,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * @prop {Boolean} indicators
        * @prop {Boolean} noWrap
        * @prop {Function} onCycleTo
-       */
+       *
       _this62.options = $.extend({}, Carousel.defaults, options);
 
       // Setup
@@ -11030,7 +11035,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown component
-       */
+       *
       value: function destroy() {
         this._removeEventHandlers();
         this.el.M_Carousel = undefined;
@@ -11038,7 +11043,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup Event Handlers
-       */
+       *
 
     }, {
       key: "_setupEventHandlers",
@@ -11078,7 +11083,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Remove Event Handlers
-       */
+       *
 
     }, {
       key: "_removeEventHandlers",
@@ -11108,7 +11113,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Carousel Tap
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleCarouselTap",
@@ -11133,7 +11138,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Carousel Drag
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleCarouselDrag",
@@ -11176,7 +11181,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Carousel Release
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleCarouselRelease",
@@ -11217,7 +11222,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Carousel Click
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleCarouselClick",
@@ -11243,7 +11248,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Indicator CLick
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleIndicatorClick",
@@ -11259,7 +11264,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Throttle Resize
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleResize",
@@ -11279,7 +11284,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Set carousel height based on first slide
        * @param {Booleam} imageOnly - true for image slides
-       */
+       *
 
     }, {
       key: "_setCarouselHeight",
@@ -11316,7 +11321,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Get x position from event
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_xpos",
@@ -11333,7 +11338,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Get y position from event
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_ypos",
@@ -11350,7 +11355,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Wrap index
        * @param {Number} x
-       */
+       *
 
     }, {
       key: "_wrap",
@@ -11360,7 +11365,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Tracks scrolling information
-       */
+       *
 
     }, {
       key: "_track",
@@ -11382,7 +11387,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Auto scrolls to nearest carousel item.
-       */
+       *
 
     }, {
       key: "_autoScroll",
@@ -11405,7 +11410,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Scroll to target
        * @param {Number} x
-       */
+       *
 
     }, {
       key: "_scroll",
@@ -11536,7 +11541,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * @param {Number} opacity
        * @param {Number} zIndex
        * @param {String} transform
-       */
+       *
 
     }, {
       key: "_updateItemStyle",
@@ -11551,7 +11556,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * Cycle to target
        * @param {Number} n
        * @param {Function} callback
-       */
+       *
 
     }, {
       key: "_cycleTo",
@@ -11597,7 +11602,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Cycle to next item
        * @param {Number} [n]
-       */
+       *
 
     }, {
       key: "next",
@@ -11620,7 +11625,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Cycle to previous item
        * @param {Number} [n]
-       */
+       *
 
     }, {
       key: "prev",
@@ -11645,7 +11650,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * Cycle to nth item
        * @param {Number} [n]
        * @param {Function} callback
-       */
+       *
 
     }, {
       key: "set",
@@ -11672,7 +11677,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Get Instance
-       */
+       *
 
     }, {
       key: "getInstance",
@@ -11696,6 +11701,8 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(Carousel, 'carousel', 'M_Carousel');
   }
 })(cash);
+*/
+/*
 ;(function ($) {
   'use strict';
 
@@ -11707,7 +11714,7 @@ $jscomp.polyfill = function (e, r, p, m) {
   /**
    * @class
    *
-   */
+   *
 
   var TapTarget = function (_Component19) {
     _inherits(TapTarget, _Component19);
@@ -11717,7 +11724,7 @@ $jscomp.polyfill = function (e, r, p, m) {
      * @constructor
      * @param {Element} el
      * @param {Object} options
-     */
+     *
     function TapTarget(el, options) {
       _classCallCheck(this, TapTarget);
 
@@ -11730,7 +11737,7 @@ $jscomp.polyfill = function (e, r, p, m) {
        * @member TapTarget#options
        * @prop {Function} onOpen - Callback function called when feature discovery is opened
        * @prop {Function} onClose - Callback function called when feature discovery is closed
-       */
+       *
       _this67.options = $.extend({}, TapTarget.defaults, options);
 
       _this67.isOpen = false;
@@ -11750,7 +11757,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Teardown component
-       */
+       *
       value: function destroy() {
         this._removeEventHandlers();
         this.el.TapTarget = undefined;
@@ -11758,7 +11765,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup Event Handlers
-       */
+       *
 
     }, {
       key: "_setupEventHandlers",
@@ -11779,7 +11786,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Remove Event Handlers
-       */
+       *
 
     }, {
       key: "_removeEventHandlers",
@@ -11792,7 +11799,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Target Click
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleTargetClick",
@@ -11803,7 +11810,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Origin Click
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleOriginClick",
@@ -11814,7 +11821,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Resize
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleResize",
@@ -11825,7 +11832,7 @@ $jscomp.polyfill = function (e, r, p, m) {
       /**
        * Handle Resize
        * @param {Event} e
-       */
+       *
 
     }, {
       key: "_handleDocumentClick",
@@ -11839,7 +11846,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Setup Tap Target
-       */
+       *
 
     }, {
       key: "_setup",
@@ -11886,7 +11893,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Calculate positioning
-       */
+       *
 
     }, {
       key: "_calculatePositioning",
@@ -11975,7 +11982,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Open TapTarget
-       */
+       *
 
     }, {
       key: "open",
@@ -11998,7 +12005,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Close Tap Target
-       */
+       *
 
     }, {
       key: "close",
@@ -12026,7 +12033,7 @@ $jscomp.polyfill = function (e, r, p, m) {
 
       /**
        * Get Instance
-       */
+       *
 
     }, {
       key: "getInstance",
@@ -12050,6 +12057,7 @@ $jscomp.polyfill = function (e, r, p, m) {
     M.initializeJqueryWrapper(TapTarget, 'tapTarget', 'M_TapTarget');
   }
 })(cash);
+*/
 ;(function ($) {
   'use strict';
 

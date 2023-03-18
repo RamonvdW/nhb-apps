@@ -153,7 +153,7 @@
             {% block pagina %}{% endblock %}
         </div>
 
-        <script src="{% static 'materialize-new-11_min.js' %}"></script>
+        <script src="{% static 'materialize-new-12_min.js' %}"></script>
         <script src="{% static 'site_layout-9_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
