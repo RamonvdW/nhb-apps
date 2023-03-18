@@ -9,7 +9,8 @@ from django.db.models.query_utils import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import TemplateView
 from django.urls import reverse
-from Bestel.definities import BESTELLING_STATUS2STR
+from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING,
+                               BESTELLING_STATUS_MISLUKT)
 from Bestel.forms import ZoekAccountForm
 from Bestel.models import Bestelling
 from Functie.definities import Rollen
@@ -74,16 +75,28 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                         Q(producten__wedstrijd_inschrijving__sporterboog__sporter__lid_nr=nr))
                                 .order_by('-bestel_nr'))            # nieuwste eerst
             except ValueError:
-                bestellingen = (Bestelling
-                                .objects
-                                .select_related('account',
-                                                'ontvanger',
-                                                'ontvanger__vereniging')
-                                .filter(Q(account__unaccented_naam__icontains=zoekterm) |
-                                        Q(ontvanger__vereniging__naam__icontains=zoekterm) |
-                                        Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm) |
-                                        Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm))
-                                .order_by('-bestel_nr'))            # nieuwste eerst
+                if zoekterm == "**":
+                    bestellingen = (Bestelling
+                                    .objects
+                                    .select_related('account',
+                                                    'ontvanger',
+                                                    'ontvanger__vereniging')
+                                    .filter(status__in=(BESTELLING_STATUS_NIEUW,
+                                                        BESTELLING_STATUS_WACHT_OP_BETALING,
+                                                        BESTELLING_STATUS_MISLUKT))
+                                    .order_by('-bestel_nr'))            # nieuwste eerst
+                    context['zoekt_status'] = True
+                else:
+                    bestellingen = (Bestelling
+                                    .objects
+                                    .select_related('account',
+                                                    'ontvanger',
+                                                    'ontvanger__vereniging')
+                                    .filter(Q(account__unaccented_naam__icontains=zoekterm) |
+                                            Q(ontvanger__vereniging__naam__icontains=zoekterm) |
+                                            Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm) |
+                                            Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm))
+                                    .order_by('-bestel_nr'))            # nieuwste eerst
         else:
             # toon de 50 nieuwste bestellingen
             context['nieuwste'] = True
@@ -115,8 +128,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                          'webwinkel_keuze__koper')
                                          .all())
 
-            aantal_wedstrijd = False
-            aantal_webwinkel = False
+            aantal_wedstrijd = 0
+            aantal_webwinkel = 0
             laatste_wedstrijd_beschrijving = ''
 
             for product in bestelling.prods_list:
@@ -140,10 +153,14 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                     product.geen_beschrijving = True
             # for
 
+            beschrijvingen = list()
             if aantal_webwinkel:
-                bestelling.beschrijving_kort = '%sx webwinkel' % aantal_webwinkel
-            elif aantal_wedstrijd:
-                bestelling.beschrijving_kort = '%sx %s' % (aantal_wedstrijd, laatste_wedstrijd_beschrijving)
+                beschrijvingen.append('%sx webwinkel' % aantal_webwinkel)
+            if aantal_wedstrijd:
+                beschrijvingen.append('%sx %s' % (aantal_wedstrijd, laatste_wedstrijd_beschrijving))
+
+            if len(beschrijvingen):
+                bestelling.beschrijving_kort = " + ".join(beschrijvingen)
             else:
                 bestelling.beschrijving_kort = '?'
 

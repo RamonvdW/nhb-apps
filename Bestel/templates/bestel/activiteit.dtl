@@ -39,6 +39,7 @@
         <div class="col s12">
             <h4>Details specifieke gebruiker</h4>
             <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker</p>
+            <p>Zoek op ** om nog te betalen / mislukte betalingen te zoeken</p>
         </div>
     </div>
     <!-- zoekformulier -->
@@ -117,15 +118,23 @@
                                     <tr>
                                         <th>Status:</th>
                                         <td>{% if bestelling.status == 'N' %}
-                                                <span>Nieuw</span><span class="grey-text"> | Te betalen | Afgerond | Mislukt | Geannuleerd</span>
+                                                {% if zoekt_status %}<b>Nieuw</b>{% else %}<span>Nieuw</span>{% endif %}
+                                                <span class="grey-text"> | Te betalen | Afgerond | Mislukt | Geannuleerd</span>
                                             {% elif bestelling.status == 'B' %}
-                                                <span class="grey-text">Nieuw | </span>Te betalen<span class="grey-text"> | Afgerond | Mislukt | Geannuleerd</span>
+                                                <span class="grey-text">Nieuw | </span>
+                                                {% if zoekt_status %}<b>Te betalen</b>{% else %}<span>Te betalen</span>{% endif %}
+                                                <span class="grey-text"> | Afgerond | Mislukt | Geannuleerd</span>
                                             {% elif bestelling.status == 'A' %}
-                                                <span class="grey-text">Nieuw | Te betalen | </span>Afgerond<span class="grey-text"> | Mislukt | Geannuleerd</span>
+                                                <span class="grey-text">Nieuw | Te betalen | </span>
+                                                <span>Afgerond</span>
+                                                <span class="grey-text"> | Mislukt | Geannuleerd</span>
                                             {% elif bestelling.status == 'F' %}
-                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | </span><span>Mislukt</span><span class="grey-text"> | Geannuleerd</span>
+                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | </span>
+                                                {% if zoekt_status %}<b>Mislukt</b>{% else %}<span>Mislukt</span>{% endif %}
+                                                <span class="grey-text"> | Geannuleerd</span>
                                             {% elif bestelling.status == 'G' %}
-                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | Mislukt | </span><span>Geannuleerd</span>
+                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | Mislukt | </span>
+                                                <span>Geannuleerd</span>
                                             {% else %}
                                                 <i class="red-text">Onverwacht ({{ bestelling.status }})</i>
                                             {% endif %}
@@ -151,10 +160,12 @@
                                             <td>{{ transactie }}</td>
                                         </tr>
                                     {% empty %}
-                                        <tr>
-                                            <th>Transactie:</th>
-                                            <td><i>Nog geen transacties</i></td>
-                                        </tr>
+                                        {% if bestelling.totaal_euro > 0.001 %}
+                                            <tr>
+                                                <th>Transactie:</th>
+                                                <td><i>Nog geen transacties</i></td>
+                                            </tr>
+                                        {% endif %}
                                     {% endfor %}
 
                                     <tr>
