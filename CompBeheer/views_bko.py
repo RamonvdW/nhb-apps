@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect, Http404
+from django.conf import settings
 from django.urls import reverse
+from django.http import HttpResponseRedirect, Http404
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -14,8 +15,11 @@ from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK)
 from Competitie.models import Competitie, Regiocompetitie, CompetitieMutatie, CompetitieTeamKlasse, KampioenschapTeam
 from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige, rol_get_huidige_functie
+from Functie.rol import rol_get_huidige_functie
+from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
+
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 TEMPLATE_COMPBEHEER_DOORZETTEN_REGIO_NAAR_RK = 'compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_RK_BK_TEAMS = 'compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl'
@@ -141,6 +145,10 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                           door=door_str,
                           competitie=comp).save()
+
+        mutatie_ping.ping()
+
+        # we wachten niet tot deze verwerkt is
 
         return HttpResponseRedirect(reverse('Competitie:kies'))
 
@@ -478,6 +486,8 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         CompetitieMutatie(mutatie=self.mutatie_code,
                           door=door_str,
                           competitie=comp).save()
+
+        mutatie_ping.ping()
 
         # we wachten niet tot deze verwerkt is
 
