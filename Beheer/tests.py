@@ -63,6 +63,7 @@ BEHEER_PAGINAS = (
     '/beheer/Opleidingen/opleidingdiploma/',
     '/beheer/Opleidingen/opleidingmoment/',
     '/beheer/Overig/sitetijdelijkeurl/',
+    '/beheer/Records/anderrecord/',
     '/beheer/Records/besteindivrecords/',
     '/beheer/Records/indivrecord/',
     '/beheer/Score/aanvangsgemiddelde/',
