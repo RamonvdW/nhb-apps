@@ -19,10 +19,23 @@ def zet_team_datums(apps, _):
         comp.begin_fase_P_teams = comp.begin_fase_P_indiv
         comp.einde_fase_P_teams = comp.einde_fase_P_indiv
 
+        # alle_rks_afgesloten is opgesplitst in two aparte velden
+        # en er zijn aparte stappen aan toegevoegd voor BK-prep
+        comp.rk_teams_afgesloten = comp.rk_indiv_afgesloten
+        comp.bk_indiv_klassen_zijn_samengevoegd = comp.rk_indiv_afgesloten
+        comp.bk_teams_klassen_zijn_samengevoegd = comp.rk_indiv_afgesloten
+
+        # alle_bks_afgesloten is opgesplitst in twee aparte velden
+        comp.bk_teams_afgesloten = comp.bk_indiv_afgesloten
+
         comp.save(update_fields=['begin_fase_L_teams',
                                  'einde_fase_L_teams',
                                  'begin_fase_P_teams',
-                                 'einde_fase_P_teams'])
+                                 'einde_fase_P_teams',
+                                 'rk_teams_afgesloten',
+                                 'bk_indiv_klassen_zijn_samengevoegd',
+                                 'bk_teams_klassen_zijn_samengevoegd',
+                                 'bk_teams_afgesloten'])
     # for
 
 
