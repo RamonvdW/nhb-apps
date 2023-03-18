@@ -94,6 +94,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                             'ontvanger__vereniging')
                             .order_by('-bestel_nr'))                # nieuwste eerst
 
+        bestellingen = bestellingen.distinct('bestel_nr')       # verwijder dupes
+
         context['bestellingen'] = list(bestellingen[:50])
         for bestelling in context['bestellingen']:
             bestelling.bestel_nr_str = bestelling.mh_bestel_nr()
