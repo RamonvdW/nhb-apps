@@ -57,7 +57,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartjes_teams.append(kaartje)
 
         # BK programma's
-        if comp.fase_indiv == 'O':
+        if comp.fase_indiv in ('O', 'P'):
             url = reverse('CompLaagBond:formulier-indiv-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
             kaartje = SimpleNamespace(
                         prio=2,
@@ -67,7 +67,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                         url=url)
             kaartjes_indiv.append(kaartje)
 
-        if comp.fase_teams == 'O':
+        if comp.fase_teams in ('O', 'P'):
             url = reverse('CompLaagBond:formulier-teams-lijst', kwargs={'deelkamp_pk': deelkamp_bk.pk})
             kaartje = SimpleNamespace(
                         prio=2,
