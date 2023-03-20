@@ -16,7 +16,7 @@ import sys
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag BK Indoor"
+    help = "Importeer uitslag BK Indoor Individueel"
 
     blad_voorronde = 'Voorronde'
     blad_finales = 'Finale'
@@ -535,16 +535,17 @@ class Command(BaseCommand):
         self._report_no_shows()
 
         # toon het resultaat
-        unsorted = list()
-        for deelnemer in self.bk_deelnemers:
-            msg = 'Volgorde=%s, Rank=%s, Q-scores=%s, %s, deelnemer=%s' % (
-                    deelnemer.result_volgorde, deelnemer.result_rank,
-                    deelnemer.result_score_1, deelnemer.result_score_2, deelnemer)
-            tup = (deelnemer.result_volgorde, msg)
-            unsorted.append(tup)
-        # for
-        unsorted.sort()
-        for _, msg in unsorted:
-            self.stdout.write(msg)
+        if self.verbose > 0:
+            unsorted = list()
+            for deelnemer in self.bk_deelnemers:
+                msg = 'Volgorde=%s, Rank=%s, Q-scores=%s, %s, deelnemer=%s' % (
+                        deelnemer.result_volgorde, deelnemer.result_rank,
+                        deelnemer.result_score_1, deelnemer.result_score_2, deelnemer)
+                tup = (deelnemer.result_volgorde, msg)
+                unsorted.append(tup)
+            # for
+            unsorted.sort()
+            for _, msg in unsorted:
+                self.stdout.write(msg)
 
 # end of file
