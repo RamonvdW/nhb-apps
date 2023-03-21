@@ -203,6 +203,20 @@ class Command(BaseCommand):
             # for
         # for
 
+    def _get_lid_nr(self, ws, col_str, row_str):
+        lid_nr_str = ws[col_str + row_str].value
+        if lid_nr_str:
+            try:
+                lid_nr = int(lid_nr_str[1:1 + 6])  # [123456] Naam
+            except ValueError:
+                pass
+            else:
+                return lid_nr
+
+        if lid_nr_str != 'BYE':
+            self.stdout.write('[WARNING] Geen valide bondsnummer op regel %s in %s' % (row_str, repr(lid_nr_str)))
+        return None
+
     def _importeer_finales(self, ws, aantal_finalisten):
         """ Zoek uit wie er in de finale zaten """
 
@@ -241,73 +255,47 @@ class Command(BaseCommand):
         if aantal_finalisten == 16:
             # 1/8 finales (final 16)
             for row_str in rows_16:
-                lid_nr_str = ws[col_16 + row_str].value
-                if lid_nr_str:
-                    try:
-                        lid_nr = int(lid_nr_str[1:1+6])     # [123456] Naam
-                    except ValueError:
-                        pass
-                    else:
-                        final_16.append(lid_nr)
+                lid_nr = self._get_lid_nr(ws, col_16, row_str)
+                if lid_nr:
+                    final_16.append(lid_nr)
             # for
 
         if aantal_finalisten >= 8:
             # 1/4 finales (final 8)
             for row_str in rows_8:
-                lid_nr_str = ws[col_8 + row_str].value
-                if lid_nr_str:
-                    try:
-                        lid_nr = int(lid_nr_str[1:1+6])     # [123456] Naam
-                    except ValueError:
-                        pass
-                    else:
-                        final_8.append(lid_nr)
+                lid_nr = self._get_lid_nr(ws, col_8, row_str)
+                if lid_nr:
+                    final_8.append(lid_nr)
             # for
 
         # 1/2 finales (final 4)
         for row_str in rows_4:
-            lid_nr_str = ws[col_4 + row_str].value
-            if lid_nr_str:
-                try:
-                    lid_nr = int(lid_nr_str[1:1+6])     # [123456] Naam
-                except ValueError:
-                    pass
-                else:
-                    final_4.append(lid_nr)
+            lid_nr = self._get_lid_nr(ws, col_4, row_str)
+            if lid_nr:
+                final_4.append(lid_nr)
         # for
 
         # gouden finale (final 2)
         for row_str in rows_f12:
-            lid_nr_str = ws[col_f + row_str].value
-            # print('cell[%s%s] = %s' % (col_f, row_str, repr(lid_nr_str)))
-            if lid_nr_str:
-                try:
-                    lid_nr = int(lid_nr_str[1:1+6])     # [123456] Naam
-                except ValueError:
-                    pass
-                else:
-                    final_2.append(lid_nr)
+            lid_nr = self._get_lid_nr(ws, col_f, row_str)
+            if lid_nr:
+                final_2.append(lid_nr)
 
-                    # heeft deze sporter goud?
-                    result = ws[col_r + row_str].value
-                    if result == 'Goud':
-                        goud = lid_nr
+                # heeft deze sporter goud?
+                result = ws[col_r + row_str].value
+                if result == 'Goud':
+                    goud = lid_nr
 
         # for
 
         # bronzen finale (plek 3, 4)
         for row_str in rows_f34:
-            lid_nr_str = ws[col_f + row_str].value
-            if lid_nr_str:
-                try:
-                    lid_nr = int(lid_nr_str[1:1+6])     # [123456] Naam
-                except ValueError:
-                    pass
-                else:
-                    # heeft deze sporter brons?
-                    result = ws[col_r + row_str].value
-                    if result == 'Brons':
-                        brons = lid_nr
+            lid_nr = self._get_lid_nr(ws, col_f, row_str)
+            if lid_nr:
+                # heeft deze sporter brons?
+                result = ws[col_r + row_str].value
+                if result == 'Brons':
+                    brons = lid_nr
 
         # for
 
