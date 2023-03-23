@@ -12,12 +12,12 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
+class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, import van de RK/BK uitslag """
 
-    real_testfile_25m1pijl = 'CompLaagRayon/management/testfiles/test_rk-25m1p_indiv.xlsm'
-    real_testfile_indoor = 'CompLaagRayon/management/testfiles/test_rk-indoor_indiv.xlsm'
+    real_testfile_25m1pijl = 'CompLaagRayon/management/testfiles/test_rk-25m1p_indiv.xlsx'
+    real_testfile_indoor = 'CompLaagRayon/management/testfiles/test_rk-indoor-indiv.xlsx'
 
     testdata = None
     rayon_nr = 3
@@ -73,18 +73,18 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
 
     def test_25m(self):
         # file NOK
-        self.run_management_command('import_uitslag_kamp_25m1pijl', 'bestand', 'blad', 'A', 'B', 'C')
+        self.run_management_command('import_uitslag_rk_25m1pijl_indiv', 'bestand', 'blad', 'A', 'B', 'C')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
         # blad NOK
-        f1, f2 = self.run_management_command('import_uitslag_kamp_25m1pijl', self.real_testfile_25m1pijl, 'blad', 'A', 'B', 'C')
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, 'blad', 'A', 'B', 'C')
         self.assertTrue("[ERROR] Kan blad 'blad' niet vinden" in f1.getvalue())
 
         # kolommen NOK
-        f1, f2 = self.run_management_command('import_uitslag_kamp_25m1pijl', self.real_testfile_25m1pijl, 'Wedstrijd', 'A', 'B', 'C')
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, 'Wedstrijd', 'A', 'B', 'C')
         self.assertTrue('[ERROR] Vereiste kolommen: ' in f1.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_kamp_25m1pijl', self.real_testfile_25m1pijl, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O', '--dryrun')
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O', '--dryrun')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue('[ERROR] Kan deelnemer niet bepalen voor regel 7' in f1.getvalue())
@@ -95,7 +95,7 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
         self.assertTrue('[WARNING] Regel 14 wordt overgeslagen (geen scores)' in f2.getvalue())
 
         # echte import
-        self.run_management_command('import_uitslag_kamp_25m1pijl', self.real_testfile_25m1pijl, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O')
+        self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O')
 
         # geef de dupe-check iets om op te reageren
         deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand=25,
@@ -104,7 +104,7 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
         deelnemer.save(update_fields=['result_counts'])
 
         # tweede import zodat dupe check gedaan wordt
-        f1, f2 = self.run_management_command('import_uitslag_kamp_25m1pijl', self.real_testfile_25m1pijl, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O')
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue(' heeft al andere resultaten!' in f1.getvalue())
@@ -112,21 +112,21 @@ class TestCompLaagRayonCliImportUitslagKamp(E2EHelpers, TestCase):
 
     def test_18m(self):
         # file NOK
-        self.run_management_command('import_uitslag_kamp_indoor', 'bestand')
+        self.run_management_command('import_uitslag_rk_indoor_indiv', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen')
 
-        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor, '--dryrun')
+        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_indiv', self.real_testfile_indoor, '--dryrun', '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-        self.assertTrue('(Longbow) hoort in klasse: Longbow klasse 2' in f1.getvalue())
+        self.assertTrue('hoort in klasse: Longbow klasse 2' in f1.getvalue())
         self.assertTrue('[ERROR] Geen RK deelnemer op regel 23: 123456' in f1.getvalue())
         self.assertTrue("[ERROR] Probleem met scores op regel 25: 'n/a' en 'n/a'" in f1.getvalue())
         self.assertTrue("[INFO] Klasse: Recurve klasse 6" in f2.getvalue())
         self.assertTrue("[WARNING] Regel 24 wordt overgeslagen (geen scores)" in f2.getvalue())
-        self.assertTrue("Volgorde=1, Rank=1, Q-scores=204, 228, deelnemer=RK rayon 3 [301849]" in f2.getvalue())
+        self.assertTrue("Volgorde=1, Rank=1, Q-scores=204, 228, deelnemer=[301849]" in f2.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_kamp_indoor', self.real_testfile_indoor)
+        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_indiv', self.real_testfile_indoor)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

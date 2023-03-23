@@ -10,7 +10,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
+class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, import van de RK/BK teams uitslag """
 

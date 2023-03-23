@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import (DEEL_RK, DEEL_BK,
+from Competitie.definities import (DEEL_RK,
                                    DEELNAME_NEE, DEELNAME_JA,
-                                   KAMP_RANK_UNKNOWN, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
-from Competitie.models import Competitie, KampioenschapSporterBoog
+                                   KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
+from Competitie.models import KampioenschapSporterBoog
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
@@ -16,18 +16,19 @@ import sys
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag Indoor kampioenschap"
+    help = "Importeer uitslag RK Indoor Individueel"
 
     blad_voorronde = 'Voorronde'
-    blad_finales = 'Finale'
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.deel = DEEL_RK
+        self.max_score = 300
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
         self.rk_deelnemers = list()     # [KampioenschapSporterBoog, ...]
         self.dryrun = True
         self.verbose = False
+        self.deelkamp_pk = None
+        self.klasse_pk = None
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
@@ -35,17 +36,11 @@ class Command(BaseCommand):
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
 
-    def _bepaal_deel(self):
-        """ bepaal of we de RK of BK gaan importeren """
-        comp = Competitie.objects.filter(afstand='18').order_by('begin_jaar')[0]    # pak de oudeste
-        if comp.rk_teams_afgesloten:
-            self.deel = DEEL_BK
-
     def _deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .filter(kampioenschap__competitie__afstand='18',
-                                  kampioenschap__deel=self.deel)
+                                  kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
@@ -64,13 +59,9 @@ class Command(BaseCommand):
         col_lid_nr = 'D'
         col_score1 = 'J'
         col_score2 = 'K'
-        col_result = 'Q'
-
-        klasse_pk = None
-        deelkamp_pk = None
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
-        row_nr = 4
+        row_nr = 7 - 1
         nix_count = 0
         while nix_count < 10:
             row_nr += 1
@@ -97,9 +88,9 @@ class Command(BaseCommand):
                             deelnemer = deelnemers[0]
                         else:
                             deelnemer = None
-                            if klasse_pk:
+                            if self.klasse_pk:
                                 for kandidaat in deelnemers:
-                                    if kandidaat.indiv_klasse.pk == klasse_pk:
+                                    if kandidaat.indiv_klasse.pk == self.klasse_pk:
                                         deelnemer = kandidaat
                                 # for
                             if deelnemer is None:
@@ -127,24 +118,22 @@ class Command(BaseCommand):
                         if deelnemer.result_rank > 0:
                             dupe_check = True
 
-                        if klasse_pk != deelnemer.indiv_klasse.pk:
-                            if klasse_pk:
+                        if self.klasse_pk != deelnemer.indiv_klasse.pk:
+                            if self.klasse_pk:
                                 self.stderr.write('[ERROR] Deelnemer %s hoort in klasse: %s' % (
                                                     deelnemer, deelnemer.indiv_klasse))
                             else:
-                                klasse_pk = deelnemer.indiv_klasse.pk
-                                deelkamp_pk = deelnemer.kampioenschap.pk
+                                self.klasse_pk = deelnemer.indiv_klasse.pk
+                                self.deelkamp_pk = deelnemer.kampioenschap.pk
                                 self.stdout.write('[INFO] Klasse: %s' % deelnemer.indiv_klasse)
 
                         score1 = ws[col_score1 + row].value
                         score2 = ws[col_score2 + row].value
-                        result = ws[col_result + row].value
 
                         try:
                             score1 = int(score1)
                             score2 = int(score2)
                         except (TypeError, ValueError):
-                            # if deelnemer.deelname != DEELNAME_NEE:      # afgemeld?
                             if score1 is None and score2 is None:
                                 self.stdout.write('[WARNING] Regel %s wordt overgeslagen (geen scores)' % row)
                             else:
@@ -152,17 +141,14 @@ class Command(BaseCommand):
                                                     row, repr(score1), repr(score2)))
                         else:
                             totaal = score1 + score2
-                            if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
-                                if result and len(str(result)) > 1:
-                                    # dit is de rayonkampioen
-                                    rank = 1
-                                else:
-                                    # wel meegedaan, maar met het huidige RK programma weten we niet genoeg
-                                    rank = KAMP_RANK_UNKNOWN
+                            if score1 > self.max_score or score2 > self.max_score:
+                                self.stderr.write('[ERROR] Te hoge score op regel %s: %s + %s (max is %s)' % (
+                                                    row_nr, score1, score2, self.max_score))
 
+                            if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
                                 if self.verbose:
-                                    self.stdout.write('[DEBUG] Voorronde: %s: %s, scores: %s %s, result: %s' % (
-                                                        rank, deelnemer, score1, score2, result))
+                                    self.stdout.write('[DEBUG] Voorronde: %s, scores: %s %s' % (
+                                                        deelnemer, score1, score2))
 
                                 do_report = False
                                 if dupe_check:
@@ -176,24 +162,27 @@ class Command(BaseCommand):
                                     self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s)' % (
                                                         deelnemer.pk, deelnemer))
                                 else:
-                                    deelnemer.result_rank = rank
                                     deelnemer.result_score_1 = score1
                                     deelnemer.result_score_2 = score2
 
                         if not self.dryrun:
-                            deelnemer.save(update_fields=['result_rank', 'result_score_1', 'result_score_2'])
+                            deelnemer.save(update_fields=['result_score_1', 'result_score_2'])
 
                         self.deelnemers[lid_nr] = [deelnemer]
+                        self.rk_deelnemers.append(deelnemer)
             else:
                 nix_count += 1
         # while
 
+    def _report_no_shows(self):
         # zet deelnemers die niet meegedaan hebben op een hoog rank nummer
+        max_deelnemers = 24
         for deelnemers in self.deelnemers.values():
             for deelnemer in deelnemers:
-                if deelnemer.kampioenschap.pk == deelkamp_pk and deelnemer.indiv_klasse.pk == klasse_pk:
-                    if deelnemer.result_rank in (0, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE):
-                        if deelnemer.deelname != DEELNAME_NEE:
+                if deelnemer.kampioenschap.pk == self.deelkamp_pk and deelnemer.indiv_klasse.pk == self.klasse_pk:
+                    totaal = deelnemer.result_score_1 + deelnemer.result_score_2
+                    if deelnemer.result_rank in (0, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE) or totaal == 0:
+                        if deelnemer.deelname != DEELNAME_NEE and deelnemer.rank < max_deelnemers:
                             # noteer: we weten niet welke reserves opgeroepen waren
                             # noteer: nog geen oplossing voor reserves die toch niet mee kunnen doen
                             self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
@@ -202,16 +191,50 @@ class Command(BaseCommand):
                             deelnemer.result_rank = KAMP_RANK_RESERVE
                         if not self.dryrun:
                             deelnemer.save(update_fields=['result_rank'])
-                    else:
-                        self.rk_deelnemers.append(deelnemer)
             # for
         # for
 
-    def _importeer_finales(self, ws):
+    def _get_lid_nr(self, ws, col_str, row_str):
+        lid_nr_str = ws[col_str + row_str].value
+        if lid_nr_str:
+            try:
+                lid_nr = int(lid_nr_str[1:1 + 6])  # [123456] Naam
+            except ValueError:
+                pass
+            else:
+                return lid_nr
+
+        if lid_nr_str != 'BYE':
+            self.stdout.write('[WARNING] Geen valide bondsnummer op regel %s in %s' % (row_str, repr(lid_nr_str)))
+        return None
+
+    def _importeer_finales(self, ws, aantal_finalisten):
         """ Zoek uit wie er in de finale zaten """
 
         if len(self.rk_deelnemers) == 0:
             return
+
+        rows_16 = ('8', '10', '14', '16', '20', '22', '26', '28', '32', '34', '38', '40', '44', '46', '50', '52')
+        rows_8 = ('11', '13', '23', '25', '35', '37', '47', '49')
+        rows_4 = ('17', '19', '41', '43')
+        rows_f12 = ('25', '27')
+        rows_f34 = ('33', '35')
+
+        col_16 = 'B'
+        col_8 = 'H'
+        col_4 = 'N'
+        col_f = 'T'
+        col_r = 'X'
+
+        if aantal_finalisten == 8:
+            col_8 = 'B'
+            col_4 = 'H'
+            col_f = 'N'
+            col_r = 'R'
+        elif aantal_finalisten == 4:
+            col_4 = 'B'
+            col_f = 'H'
+            col_r = 'L'
 
         final_16 = list()
         final_8 = list()
@@ -220,75 +243,60 @@ class Command(BaseCommand):
         goud = 0
         brons = 0
 
-        for row in (5, 7, 9, 11, 13, 15, 17, 19, 24, 26, 28, 30, 32, 34, 36, 38):
-            lid_nr_str = ws['B%s' % row].value
-            if lid_nr_str:
-                try:
-                    lid_nr = int(lid_nr_str)
-                except ValueError:
-                    pass
-                else:
+        if aantal_finalisten == 16:
+            # 1/8 finales (final 16)
+            for row_str in rows_16:
+                lid_nr = self._get_lid_nr(ws, col_16, row_str)
+                if lid_nr:
                     final_16.append(lid_nr)
-        # for
+            # for
 
-        for row in (6, 10, 14, 18, 25, 29, 33, 37):
-            lid_nr_str = ws['K%s' % row].value
-            if lid_nr_str:
-                try:
-                    lid_nr = int(lid_nr_str)
-                except ValueError:
-                    pass
-                else:
+        if aantal_finalisten >= 8:
+            # 1/4 finales (final 8)
+            for row_str in rows_8:
+                lid_nr = self._get_lid_nr(ws, col_8, row_str)
+                if lid_nr:
                     final_8.append(lid_nr)
+            # for
+
+        # 1/2 finales (final 4)
+        for row_str in rows_4:
+            lid_nr = self._get_lid_nr(ws, col_4, row_str)
+            if lid_nr:
+                final_4.append(lid_nr)
         # for
 
-        for row in (8, 16, 27, 35):
-            lid_nr_str = ws['T%s' % row].value
-            if lid_nr_str:
-                try:
-                    lid_nr = int(lid_nr_str)
-                except ValueError:
-                    pass
-                else:
-                    final_4.append(lid_nr)
+        # gouden finale (final 2)
+        for row_str in rows_f12:
+            lid_nr = self._get_lid_nr(ws, col_f, row_str)
+            if lid_nr:
+                final_2.append(lid_nr)
+
+                # heeft deze sporter goud?
+                result = ws[col_r + row_str].value
+                if result == 'Goud':
+                    goud = lid_nr
+
         # for
 
-        for row in (12, 31):
-            lid_nr_str = ws['AC%s' % row].value
-            if lid_nr_str:
-                try:
-                    lid_nr = int(lid_nr_str)
-                except ValueError:
-                    pass
-                else:
-                    final_2.append(lid_nr)
-        # for
-
-        lid_nr_str = ws['AC22'].value
-        if lid_nr_str:
-            try:
-                lid_nr = int(lid_nr_str)
-            except ValueError:
-                pass
-            else:
-                goud = lid_nr
-
-        lid_nr_str = ws['T22'].value
-        if lid_nr_str:
-            if lid_nr_str == 'nvt':
-                # bewust niet geschoten --> 3e en 4e plek krijgen beide rank=3
-                self.stdout.write('[INFO] Geen bronzen finale geschoten')
-                brons = -1
-            else:
-                try:
-                    lid_nr = int(lid_nr_str)
-                except ValueError:
-                    pass
-                else:
+        # bronzen finale (plek 3, 4)
+        for row_str in rows_f34:
+            lid_nr = self._get_lid_nr(ws, col_f, row_str)
+            if lid_nr:
+                # heeft deze sporter brons?
+                result = ws[col_r + row_str].value
+                if result == 'Brons':
                     brons = lid_nr
 
+        # for
+
+        # if lid_nr_str == 'nvt':
+        #     # bewust niet geschoten --> 3e en 4e plek krijgen beide rank=3
+        #     self.stdout.write('[INFO] Geen bronzen finale geschoten')
+        #     brons = -1
+
         if self.verbose:
-            self.stdout.write('[DEBUG] Aantal rk deelnemers: %s' % len(self.rk_deelnemers))
+            self.stdout.write('[DEBUG] Aantal RK deelnemers: %s' % len(self.rk_deelnemers))
 
         if goud == 0:
             self.stderr.write('[ERROR] Kan winnaar van gouden finale niet vaststellen')
@@ -299,12 +307,12 @@ class Command(BaseCommand):
             return
 
         if self.verbose:
-            print('final_16: %s' % repr(final_16))
-            print('final_8: %s' % repr(final_8))
-            print('final_4: %s' % repr(final_4))
-            print('final_2: %s' % repr(final_2))
-            print('goud: %s' % repr(goud))
-            print('brons: %s' % repr(brons))
+            self.stdout.write('[DEBUG] final_16: %s' % repr(final_16))
+            self.stdout.write('[DEBUG] final_8: %s' % repr(final_8))
+            self.stdout.write('[DEBUG] final_4: %s' % repr(final_4))
+            self.stdout.write('[DEBUG] final_2: %s' % repr(final_2))
+            self.stdout.write('[DEBUG] brons: %s' % repr(brons))
+            self.stdout.write('[DEBUG] goud: %s' % repr(goud))
 
         for lid_nr in final_2:
             final_4.remove(lid_nr)
@@ -442,12 +450,39 @@ class Command(BaseCommand):
                 deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
+    def _vind_finales_blad(self, prg):
+        ws = None
+        max_finalisten = 0
+
+        for blad_naam, col in (("Finales 16", "X"), ("Finales 8", "R"), ("Finales 4", "L")):
+            ws = prg[blad_naam]
+            labels = list()
+            for row in ("25", "27", "33", "35"):
+                label = ws[col + row].value
+                if label:
+                    labels.append(label)
+            # for
+            # print('[DEBUG] blad_naam: %s, labels: %s' % (repr(blad_naam), repr(labels)))
+            if len(labels) > 1:
+                self.stdout.write('[INFO] Finale blad: %s' % repr(blad_naam))
+                break
+            ws = None
+        # for
+
+        if ws:
+            if blad_naam.endswith("16"):
+                max_finalisten = 16
+            elif blad_naam.endswith("8"):
+                max_finalisten = 8
+            else:
+                max_finalisten = 4
+
+        return ws, max_finalisten
+
     def handle(self, *args, **options):
 
         self.dryrun = options['dryrun']
         self.verbose = options['verbose']
-
-        self._bepaal_deel()
 
         # open de kopie, zodat we die aan kunnen passen
         fname = options['bestand']
@@ -465,27 +500,28 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_voorronde))
             return
 
-        try:
-            ws_finale = prg[self.blad_finales]
-        except KeyError:        # pragma: no cover
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_finales))
+        ws_finale, max_finalisten = self._vind_finales_blad(prg)
+        if not ws_finale:
+            self.stderr.write('[ERROR] Kan finales blad niet vinden')
             return
 
         self._deelnemers_ophalen()
         self._importeer_resultaten(ws_voorronde)
-        self._importeer_finales(ws_finale)
+        self._importeer_finales(ws_finale, max_finalisten)
+        self._report_no_shows()
 
         # toon het resultaat
-        unsorted = list()
-        for deelnemer in self.rk_deelnemers:
-            msg = 'Volgorde=%s, Rank=%s, Q-scores=%s, %s, deelnemer=%s' % (
-                    deelnemer.result_volgorde, deelnemer.result_rank,
-                    deelnemer.result_score_1, deelnemer.result_score_2, deelnemer)
-            tup = (deelnemer.result_volgorde, msg)
-            unsorted.append(tup)
-        # for
-        unsorted.sort()
-        for _, msg in unsorted:
-            self.stdout.write(msg)
+        if self.verbose > 0:
+            unsorted = list()
+            for deelnemer in self.rk_deelnemers:
+                msg = 'Volgorde=%s, Rank=%s, Q-scores=%s, %s, deelnemer=%s' % (
+                        deelnemer.result_volgorde, deelnemer.result_rank,
+                        deelnemer.result_score_1, deelnemer.result_score_2, deelnemer)
+                tup = (deelnemer.result_volgorde, msg)
+                unsorted.append(tup)
+            # for
+            unsorted.sort()
+            for _, msg in unsorted:
+                self.stdout.write(msg)
 
 # end of file

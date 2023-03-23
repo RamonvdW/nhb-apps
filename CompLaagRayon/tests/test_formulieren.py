@@ -110,13 +110,13 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         bad_path = '/tmp/CompLaagRayon/files/'
         os.makedirs(bad_path, exist_ok=True)
 
-        self.xlsm_fpath_18_indiv = bad_path + 'template-excel-rk-indoor-indiv.xlsm'
-        self.xlsm_fpath_18_teams = bad_path + 'template-excel-rk-indoor-teams.xlsm'
-        self.xlsm_fpath_25_indiv = bad_path + 'template-excel-rk-25m1pijl-indiv.xlsm'
-        self.xlsm_fpath_25_teams = bad_path + 'template-excel-rk-25m1pijl-teams.xlsm'
+        self.xlsx_fpath_18_indiv = bad_path + 'template-excel-rk-indoor-indiv.xlsx'
+        self.xlsx_fpath_18_teams = bad_path + 'template-excel-rk-indoor-teams.xlsx'
+        self.xlsx_fpath_25_indiv = bad_path + 'template-excel-rk-25m1pijl-indiv.xlsx'
+        self.xlsx_fpath_25_teams = bad_path + 'template-excel-rk-25m1pijl-teams.xlsx'
 
-        for fpath in (self.xlsm_fpath_18_indiv, self.xlsm_fpath_18_teams,
-                      self.xlsm_fpath_25_indiv, self.xlsm_fpath_25_teams):
+        for fpath in (self.xlsx_fpath_18_indiv, self.xlsx_fpath_18_teams,
+                      self.xlsx_fpath_25_indiv, self.xlsx_fpath_25_teams):
             try:
                 os.remove(fpath)
             except FileNotFoundError:
@@ -125,8 +125,8 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     @staticmethod
     def _make_bad_file(fpath):
-        with zipfile.ZipFile(fpath, 'w') as xlsm:
-            xlsm.writestr('hello.txt', 'Hello World')
+        with zipfile.ZipFile(fpath, 'w') as xlsx:
+            xlsx.writestr('hello.txt', 'Hello World')
 
     def test_get_forms(self):
         url = self.url_forms % self.match.pk
@@ -219,14 +219,14 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         # normaal
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsm(resp)
+        self.assert200_is_bestand_xlsx(resp)
 
         # zonder locatie
         self.match.locatie = None
         self.match.save(update_fields=['locatie'])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsm(resp)
+        self.assert200_is_bestand_xlsx(resp)
 
         # niet bestaand RK programma
         with override_settings(INSTALL_PATH='/tmp'):
@@ -234,7 +234,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
-        self._make_bad_file(self.xlsm_fpath_18_indiv)
+        self._make_bad_file(self.xlsx_fpath_18_indiv)
         with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
@@ -284,7 +284,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsm(resp)
+        self.assert200_is_bestand_xlsx(resp)
 
     def test_download_teams(self):
         klasse = self.testdata.comp18_klassen_teams['R2'][1]     # Recurve A met 2 teams
@@ -302,14 +302,14 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         # normaal
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsm(resp)
+        self.assert200_is_bestand_xlsx(resp)
 
         # zonder locatie
         self.match.locatie = None
         self.match.save(update_fields=['locatie'])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsm(resp)
+        self.assert200_is_bestand_xlsx(resp)
 
         # niet bestaand RK programma
         with override_settings(INSTALL_PATH='/tmp'):
@@ -317,7 +317,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
-        self._make_bad_file(self.xlsm_fpath_18_teams)
+        self._make_bad_file(self.xlsx_fpath_18_teams)
         with override_settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
@@ -354,7 +354,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         url = self.url_forms_download_teams % (self.match.pk, klasse.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsm(resp)
+        self.assert200_is_bestand_xlsx(resp)
 
     def test_bad(self):
         url = self.url_forms % self.match.pk
@@ -395,7 +395,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         url = self.url_forms_download_indiv % (self.match.pk, klasse.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert200_is_bestand_xlsm(resp)
+        self.assert200_is_bestand_xlsx(resp)
 
 
 # end of file

@@ -28,7 +28,7 @@ import os
 
 TEMPLATE_DOWNLOAD_RK_FORMULIER = 'complaagrayon/hwl-download-rk-formulier.dtl'
 
-CONTENT_TYPE_XLSM = 'application/vnd.ms-excel.sheet.macroEnabled.12'
+CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
 class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
@@ -329,7 +329,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+            prg = openpyxl.load_workbook(tmp_file)
         except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan RK programma niet openen')
 
@@ -447,7 +447,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # for
 
         # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type=CONTENT_TYPE_XLSM)
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 
@@ -525,9 +525,9 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         fname += '.xlsm'
 
         if comp.afstand == '18':
-            excel_name = 'template-excel-rk-indoor-teams.xlsm'
+            excel_name = 'template-excel-rk-indoor-teams.xlsx'
         else:
-            excel_name = 'template-excel-rk-25m1pijl-teams.xlsm'
+            excel_name = 'template-excel-rk-25m1pijl-teams.xlsx'
 
         # make een kopie van het RK programma in een tijdelijk bestand
         fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
@@ -540,7 +540,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+            prg = openpyxl.load_workbook(tmp_file)
         except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan RK programma niet openen')
 
@@ -771,7 +771,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         ws['B' + row].alignment = copy(f_align)
 
         # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type=CONTENT_TYPE_XLSM)
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 
