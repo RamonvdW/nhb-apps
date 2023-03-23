@@ -455,7 +455,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                  .exclude(deelname=DEELNAME_NEE)
                  .select_related('vereniging')
                  .prefetch_related('gekoppelde_leden')
-                 .order_by('-aanvangsgemiddelde'))      # sterkste team bovenaan
+                 .order_by('volgorde'))
 
         ver_nrs = list()
 
