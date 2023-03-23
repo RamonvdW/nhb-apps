@@ -7,8 +7,8 @@
 from django.core.management.base import BaseCommand
 from Competitie.definities import (DEEL_BK,
                                    DEELNAME_NEE, DEELNAME_JA,
-                                   KAMP_RANK_UNKNOWN, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
-from Competitie.models import Competitie, KampioenschapSporterBoog
+                                   KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
+from Competitie.models import KampioenschapSporterBoog
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
@@ -19,11 +19,9 @@ class Command(BaseCommand):
     help = "Importeer uitslag BK Indoor Individueel"
 
     blad_voorronde = 'Voorronde'
-    blad_finales = 'Finale'
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.deel = DEEL_BK
         self.max_score = 300
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
         self.bk_deelnemers = list()     # [KampioenschapSporterBoog, ...]
@@ -38,17 +36,11 @@ class Command(BaseCommand):
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
 
-    def _bepaal_deel(self):
-        """ bepaal of we de RK of BK gaan importeren """
-        comp = Competitie.objects.filter(afstand='18').order_by('begin_jaar')[0]    # pak de oudeste
-        if comp.rk_teams_afgesloten:
-            self.deel = DEEL_BK
-
     def _deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .filter(kampioenschap__competitie__afstand='18',
-                                  kampioenschap__deel=self.deel,
+                                  kampioenschap__deel=DEEL_BK,
                                   volgorde__lte=48)
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
@@ -459,9 +451,7 @@ class Command(BaseCommand):
                 deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
-    @staticmethod
-    def _vind_finales_blad(prg):
-        ws = None
+    def _vind_finales_blad(self, prg):
         max_finalisten = 0
 
         for blad_naam, col in (("Finales 16", "X"), ("Finales 8", "R"), ("Finales 4", "L")):
@@ -472,9 +462,10 @@ class Command(BaseCommand):
                 if label:
                     labels.append(label)
             # for
-            # print('[DEBUG] blad_naam: %s, labels: %s' % (repr(blad_naam), repr(labels)))
+
+            # self.stdout.write('[DEBUG] blad_naam: %s, labels: %s' % (repr(blad_naam), repr(labels)))
             if len(labels) > 1:
-                print('[INFO] Finale blad: %s' % repr(blad_naam))
+                self.stdout.write('[INFO] Finale blad: %s' % repr(blad_naam))
                 break
             ws = None
         # for
@@ -494,8 +485,6 @@ class Command(BaseCommand):
         self.dryrun = options['dryrun']
         self.verbose = options['verbose']
 
-        self._bepaal_deel()
-
         # open de kopie, zodat we die aan kunnen passen
         fname = options['bestand']
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
@@ -514,7 +503,7 @@ class Command(BaseCommand):
 
         ws_finale, max_finalisten = self._vind_finales_blad(prg)
         if not ws_finale:
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(self.blad_finales))
+            self.stderr.write('[ERROR] Kan finales blad niet vinden')
             return
 
         self._deelnemers_ophalen()
