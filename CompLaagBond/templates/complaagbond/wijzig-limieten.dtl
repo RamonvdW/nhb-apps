@@ -103,9 +103,13 @@
                                     <td>
                                         <select name="{{ wkl.sel }}" onchange="gewijzigd()">
                                             <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
+                                            <option value="11"{%if wkl.limiet == 11 %} selected{% endif %}>11 teams</option>
                                             <option value="10"{%if wkl.limiet == 10 %} selected{% endif %}>10 teams</option>
+                                            <option value="9"{%if wkl.limiet == 9 %} selected{% endif %}>9 teams</option>
                                             <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 teams</option>
+                                            <option value="7"{%if wkl.limiet == 7 %} selected{% endif %}>7 teams</option>
                                             <option value="6"{%if wkl.limiet == 6 %} selected{% endif %}>6 teams</option>
+                                            <option value="5"{%if wkl.limiet == 5 %} selected{% endif %}>5 teams</option>
                                             <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 teams</option>
                                         </select>
                                     </td>

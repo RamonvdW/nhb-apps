@@ -789,7 +789,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
                 except ValueError:
                     pass
                 else:
-                    if pk2keuze_team[ckl.pk] not in (12, 10, 8, 6, 4):
+                    if pk2keuze_team[ckl.pk] not in (12, 11, 10, 9, 8, 7, 6, 5, 4):
                         raise Http404('Geen valide keuze voor team')
         # for
 
