@@ -174,7 +174,9 @@
                     <!-- label -->
                     <td class="hide-on-small-only">
                         {% if not team.heeft_uitslag %}
-                            {% if team.is_reserve %}
+                            {% if team.niet_deelgenomen %}
+                                <i>Afgemeld</i>
+                            {% elif team.is_reserve %}
                                 <i>Reserve</i>
                             {% else %}
                                 <span>{{ team.rk_kampioen_label }}</span>

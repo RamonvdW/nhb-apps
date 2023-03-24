@@ -401,7 +401,6 @@ class UitslagenBKTeamsView(TemplateView):
 
             if team.deelname == DEELNAME_NEE:
                 team.niet_deelgenomen = True            # toont team in grijs
-                team.team_naam += " [AFGEMELD]"
                 team.rank = ''
                 klasse_teams_afgemeld.append(team)
             else:
@@ -457,9 +456,6 @@ class UitslagenBKTeamsView(TemplateView):
                     klasse_teams_done.append(team)
                 else:
                     # nog geen uitslag beschikbaar
-                    # TODO: geen rank invullen na de cut
-                    rank += 1
-                    team.rank = rank
                     klasse_teams_plan.append(team)
                     if team.rank > limiet:
                         team.is_reserve = True
@@ -472,6 +468,7 @@ class UitslagenBKTeamsView(TemplateView):
                 plan_team.niet_deelgenomen = True
             # for
             teller = klasse_teams_done[0]
+
         elif len(klasse_teams_plan) > 0:
             # er is geen uitslag, maar misschien hebben teams vrijstelling
             if deelkamp_bk.is_afgesloten:
@@ -480,6 +477,7 @@ class UitslagenBKTeamsView(TemplateView):
                     plan_team.niet_deelgenomen = True
                 # for
             teller = klasse_teams_plan[0]
+
         else:
             teller = None
 

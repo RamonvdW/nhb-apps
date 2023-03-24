@@ -959,8 +959,15 @@ class KampioenschapTeam(models.Model):
     # kan dit team deelnemen, of niet?
     deelname = models.CharField(max_length=1, choices=DEELNAME_CHOICES, default=DEELNAME_ONBEKEND)
 
+    # expliciete controle of dit team een reserve is of deelnemer mag worden
+    is_reserve = models.BooleanField(default=False)
+
     # kampioenen hebben een label
     rk_kampioen_label = models.CharField(max_length=50, default='', blank=True)
+
+    # de berekende team sterkte
+    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
+    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # Positie van dit team in de lijst zoals vastgesteld aan het begin van het BK
     # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt het team zich af.
@@ -971,6 +978,14 @@ class KampioenschapTeam(models.Model):
     # deelname positie van het team in de meest up-to-date lijst
     # de eerste N (tot de limiet/cut, standaard 8) zijn deelnemers; daarna reserve teams
     rank = models.PositiveSmallIntegerField(default=0)      # afmeldingen hebben rank 0
+
+    # de klasse waarin dit team ingedeeld is
+    # dit is preliminair tijdens het inschrijven van de teams tijdens de regiocompetitie
+    # wordt op None gezet tijdens het doorzetten van de RK deelnemers (fase G)
+    # wordt ingevuld na het vaststellen van de RK/BK klassengrenzen (einde fase K)
+    team_klasse = models.ForeignKey(CompetitieTeamKlasse,
+                                    on_delete=models.CASCADE,
+                                    blank=True, null=True)
 
     # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
     tijdelijke_leden = models.ManyToManyField(RegiocompetitieSporterBoog,
@@ -986,18 +1001,6 @@ class KampioenschapTeam(models.Model):
     feitelijke_leden = models.ManyToManyField(KampioenschapSporterBoog,
                                               related_name='kampioenschapteam_feitelijke_leden',
                                               blank=True)   # mag leeg zijn
-
-    # de berekende team sterkte
-    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
-    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
-
-    # de klasse waarin dit team ingedeeld is
-    # dit is preliminair tijdens het inschrijven van de teams tijdens de regiocompetitie
-    # wordt op None gezet tijdens het doorzetten van de RK deelnemers (fase G)
-    # wordt ingevuld na het vaststellen van de RK/BK klassengrenzen (einde fase K)
-    team_klasse = models.ForeignKey(CompetitieTeamKlasse,
-                                    on_delete=models.CASCADE,
-                                    blank=True, null=True)
 
     # kampioenschap uitslag: score en ranking
     # volgorde wordt gebruikt om binnen plek 5 en 9 de volgorde vast te houden
