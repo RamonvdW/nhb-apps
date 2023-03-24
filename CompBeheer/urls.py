@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import views_bb, views_bko, view_overzicht, view_wijzig_datums
+from CompBeheer import views_bb, views_bko, view_stats, view_overzicht, view_wijzig_datums
 
 app_name = 'CompBeheer'
 
@@ -31,7 +31,7 @@ urlpatterns = [
          name='bb-seizoen-afsluiten'),
 
     path('statistiek/',
-         views_bb.CompetitieStatistiekView.as_view(),
+         view_stats.CompetitieStatistiekView.as_view(),
          name='statistiek'),
 
     path('<comp_pk>/klassengrenzen-vaststellen/',
