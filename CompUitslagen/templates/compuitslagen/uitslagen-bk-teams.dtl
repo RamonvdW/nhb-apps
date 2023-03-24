@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    {% if comp.rk_is_afgelast %}
+    {% if comp.bk_is_afgelast %}
         <div class="row">
             <div class="col s12 m8 offset-m2">
                 <div class="nhb-rood white-text z-depth-3 center" style="padding:10px">
@@ -123,12 +123,12 @@
                         <td colspan="8" class="center">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.match %}
-                                {% if comp.rk_is_afgelast %}<s>{% endif %}
+                                {% if comp.bk_is_afgelast %}<s>{% endif %}
                                 <span>{{ team.match.datum_wanneer }} om {{ team.match.tijd_begin_wedstrijd }} bij {{ team.match.vereniging }}</span>
                                 {% if team.match.locatie %}
                                     <span> ({{ team.match.adres_str }})</span>
                                 {% endif %}
-                                {% if comp.rk_is_afgelast %}</s>{% endif %}
+                                {% if comp.bk_is_afgelast %}</s>{% endif %}
                             {% endif %}
                         </td>
                     </tr>
