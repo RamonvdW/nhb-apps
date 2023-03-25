@@ -89,22 +89,28 @@ class CompetitieKiesView(TemplateView):
             eerdere_comp[comp.afstand] = True
         # for
 
-        if rol_nu == Rollen.ROL_BB:
-            context['toon_management'] = True
-
-            # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
-            if begin_jaar is not None:
-                context['nieuwe_seizoen'] = "%s/%s" % (begin_jaar, begin_jaar+1)
-                context['url_seizoen_opstarten'] = reverse('CompBeheer:instellingen-volgende-competitie')
-
-            if seizoen_afsluiten > 0:
-                context['url_seizoen_afsluiten'] = reverse('CompBeheer:bb-seizoen-afsluiten')
-
-            context['url_statistiek'] = reverse('CompBeheer:statistiek')
-
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
-            context['toon_beheerders'] = True
+            context['toon_rol'] = True
             context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+            if rol_nu == Rollen.ROL_BB:
+                context['toon_management'] = True
+
+                # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
+                if begin_jaar is not None:
+                    context['nieuwe_seizoen'] = "%s/%s" % (begin_jaar, begin_jaar+1)
+                    context['url_seizoen_opstarten'] = reverse('CompBeheer:instellingen-volgende-competitie')
+
+                if seizoen_afsluiten > 0:
+                    context['url_seizoen_afsluiten'] = reverse('CompBeheer:bb-seizoen-afsluiten')
+
+            context['toon_beheerders_algemeen'] = (rol_nu == Rollen.ROL_HWL)
+
+            if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+                context['toon_management'] = True
+                context['url_statistiek'] = reverse('CompBeheer:statistiek')
+            else:
+                context['toon_management'] = False
 
         context['kruimels'] = (
             (None, 'Bondscompetities'),

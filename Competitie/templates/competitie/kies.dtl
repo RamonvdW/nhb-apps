@@ -17,7 +17,7 @@
         </div>
 
         <div class="col s12">
-            {% if toon_beheerders %}
+            {% if toon_rol %}
                 <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
             {% endif %}
         </div>
@@ -90,8 +90,10 @@
                     {% include 'plein/card.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
                 {% endif %}
 
-                {% include 'plein/card.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
+                {% url 'Functie:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
 
+                {% include 'plein/card.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
             </div>
         </div>
 
@@ -110,7 +112,7 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- toon en koppel beheerders -->
-            {% if toon_beheerders %}
+            {% if toon_beheerders_algemeen %}
                 {% url 'Functie:overzicht' as card_url %}
                 {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
             {% endif %}

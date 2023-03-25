@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from Competitie.definities import DEELNAME_NEE
 
 
 def zet_is_reserve(apps, _):
