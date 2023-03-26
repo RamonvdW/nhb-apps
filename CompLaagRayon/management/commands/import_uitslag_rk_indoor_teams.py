@@ -14,13 +14,12 @@ import zipfile
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag team kampioenschap Indoor"
+    help = "Importeer uitslag RK Indoor Teams"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
         self.dryrun = True
         self.verbose = False
-        self.deel = "?"
         self.deelnemers = dict()            # [lid_nr] = [KampioenschapSchutterBoog, ...]
         self.teams_cache = list()           # [KampioenschapTeam, ...]
         self.team_lid_nrs = dict()          # [team.pk] = [lid_nr, ...]
@@ -34,15 +33,11 @@ class Command(BaseCommand):
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
 
-    def _bepaal_laag(self):
-        # TODO: aan de hand van de competitie fase bepalen of dit een RK of BK uitslag moet zijn
-        self.deel = DEEL_RK
-
     def _deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .filter(kampioenschap__competitie__afstand='18',
-                                  kampioenschap__deel=self.deel)
+                                  kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
@@ -69,7 +64,7 @@ class Command(BaseCommand):
         for team in (KampioenschapTeam
                      .objects
                      .filter(kampioenschap__competitie__afstand='18',
-                             kampioenschap__deel=self.deel)
+                             kampioenschap__deel=DEEL_RK)
                      .select_related('kampioenschap',
                                      'kampioenschap__nhb_rayon',
                                      'vereniging',
@@ -460,7 +455,6 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
             return
 
-        self._bepaal_laag()
         self._deelnemers_ophalen()
         self._teams_ophalen()
 
