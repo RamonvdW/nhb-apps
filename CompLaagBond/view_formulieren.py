@@ -453,6 +453,7 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                  .filter(kampioenschap=deelkamp_bk,
                          team_klasse=team_klasse.pk)
                  .exclude(deelname=DEELNAME_NEE)
+                 .exclude(is_reserve=True)
                  .select_related('vereniging')
                  .prefetch_related('gekoppelde_leden')
                  .order_by('volgorde'))
