@@ -327,7 +327,7 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class GebruikteKlassenFilter(admin.SimpleListFilter):
+class TeamKlassenFilter(admin.SimpleListFilter):
 
     title = "Team Wedstrijdklasse"
 
@@ -335,22 +335,33 @@ class GebruikteKlassenFilter(admin.SimpleListFilter):
 
     default_value = None
 
+    def __init__(self, request, params, model, model_admin):
+        # print('init: q=%s' % list(request.GET.items()))
+        self.limit_comp = request.GET.get('kampioenschap__competitie__id__exact')
+        super().__init__(request, params, model, model_admin)
+
     def lookups(self, request, model_admin):                    # pragma: no cover
         """ Return list of tuples for the sidebar """
-        return [
-            ('leeg', 'Geen klasse'),
-            ('regio', 'Regio klasse'),
-            ('rk_bk', 'RK/BK klasse')
-        ]
+        lst = [('leeg', 'Geen klasse')]
+
+        for team_klasse in (CompetitieTeamKlasse
+                            .objects
+                            .filter(competitie=self.limit_comp,
+                                    is_voor_teams_rk_bk=True)
+                            .order_by('volgorde')):
+            tup = (team_klasse.volgorde, team_klasse.beschrijving)
+            lst.append(tup)
+        # for
+
+        return lst
 
     def queryset(self, request, queryset):      # pragma: no cover
         selection = self.value()
-        if selection == 'leeg':
-            queryset = queryset.filter(team_klasse=None)
-        elif selection == 'regio':
-            queryset = queryset.filter(team_klasse__is_voor_teams_rk_bk=False)
-        elif selection == 'rk_bk':
-            queryset = queryset.filter(team_klasse__is_voor_teams_rk_bk=True)
+        if selection:
+            if selection == 'leeg':
+                queryset = queryset.filter(team_klasse=None)
+            else:
+                queryset = queryset.filter(team_klasse__volgorde=selection)
         return queryset
 
 
@@ -413,7 +424,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                    'team_type',
                    'deelname',
                    'vereniging__regio__rayon',
-                   GebruikteKlassenFilter,
+                   TeamKlassenFilter,
                    IncompleetTeamFilter)
 
     list_select_related = ('kampioenschap',
