@@ -18,15 +18,12 @@ class Command(BaseCommand):
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
+        self.dryrun = True
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
-        parser.add_argument('blad', type=str,
-                            help='Naam van het blad met resultaten')
-        parser.add_argument('kolommen', type=str, nargs='+',
-                            help='Kolom letters: bondsnummer, score1, score2, #10, #9, #8')
 
     def deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
@@ -45,40 +42,13 @@ class Command(BaseCommand):
                 self.deelnemers[lid_nr] = [deelnemer]
         # for
 
-    def handle(self, *args, **options):
-
-        dryrun = options['dryrun']
-
-        # open de kopie, zodat we die aan kunnen passen
-        fname = options['bestand']
-        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
-        try:
-            prg = openpyxl.load_workbook(fname,
-                                         data_only=True)        # do not evaluate formulas; use last calculated values
-        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
-            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
-            return
-
-        blad = options['blad']
-        try:
-            ws = prg[blad]
-        except KeyError:
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
-
-        cols = options['kolommen']
-        if len(cols) != 6:
-            self.stderr.write('[ERROR] Vereiste kolommen: lid_nr, score1, score2, tienen, negens, achten')
-            return
-
-        col_lid_nr = cols[0]
-        col_score1 = cols[1]
-        col_score2 = cols[2]
-        col_10s = cols[3]
-        col_9s = cols[4]
-        col_8s = cols[5]
-
-        self.deelnemers_ophalen()
+    def lees_uitslagen(self, ws):
+        col_lid_nr = 'D'
+        col_score1 = 'J'
+        col_score2 = 'K'
+        col_10s = 'M'
+        col_9s = 'N'
+        col_8s = 'O'
 
         klasse_pks = list()
         deelkamp_pks = list()
@@ -205,7 +175,7 @@ class Command(BaseCommand):
                                     deelnemer.result_score_2 = score2
                                     deelnemer.result_counts = counts_str
 
-                        if not dryrun:
+                        if not self.dryrun:
                             deelnemer.save(update_fields=['result_rank',
                                                           'result_score_1', 'result_score_2',
                                                           'result_counts'])
@@ -226,8 +196,32 @@ class Command(BaseCommand):
                                 deelnemer.result_rank = KAMP_RANK_NO_SHOW
                             else:
                                 deelnemer.result_rank = KAMP_RANK_RESERVE
-                            deelnemer.save(update_fields=['result_rank'])
+
+                            if not self.dryrun:
+                                deelnemer.save(update_fields=['result_rank'])
             # for
         # for
+
+    def handle(self, *args, **options):
+
+        self.dryrun = options['dryrun']
+
+        fname = options['bestand']
+        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
+        try:
+            prg = openpyxl.load_workbook(fname,
+                                         data_only=True)        # do not evaluate formulas; use last calculated values
+        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
+            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
+            return
+
+        try:
+            ws = prg['Wedstrijd']
+        except KeyError:                # pragma: no cover
+            self.stderr.write('[ERROR] Kan blad "Wedstrijd" niet vinden')
+            return
+
+        self.deelnemers_ophalen()
+        self.lees_uitslagen(ws)
 
 # end of file

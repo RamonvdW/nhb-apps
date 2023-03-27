@@ -65,11 +65,11 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
 
     def test_25m(self):
         # file NOK
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', 'bestand')
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_teams', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
         # dry-run
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.test_file_25m, '--dryrun')
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_teams', self.test_file_25m, '--dryrun')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
 
@@ -83,7 +83,7 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         # self.assertTrue('[WARNING] Geen scores voor sporter 301946 op regel 13' in f2.getvalue())
 
         # echte import
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_25m1pijl', self.test_file_25m)
+        f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_teams', self.test_file_25m)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -97,14 +97,14 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         # self.assertEqual(team2.result_rank, 2)
 
     def test_18m(self):
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', 'bestand')
+        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', self.test_file1_18m, '--dryrun', '--verbose')
+        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file1_18m, '--dryrun', '--verbose')
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 4 teams' gehaald" in f2.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_teamkamp_indoor', self.test_file2_18m)
+        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file2_18m)
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 8 teams' gehaald" in f2.getvalue())
         # print('f1:', f1.getvalue())
