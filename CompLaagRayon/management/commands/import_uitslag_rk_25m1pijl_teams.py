@@ -148,7 +148,7 @@ class Command(BaseCommand):
         blad = "Deelnemers en Scores"
         try:
             ws = prg[blad]
-        except KeyError:
+        except KeyError:            # pragma: no cover
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
             return
 
@@ -164,7 +164,7 @@ class Command(BaseCommand):
         self._teams_ophalen()
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
-        row_nr = 8
+        row_nr = 9 - 1
         nix_count = 0
         team_klasse = None
         kamp_teams = list()
@@ -189,7 +189,7 @@ class Command(BaseCommand):
             except ValueError:
                 pass
 
-            self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (row, ver_nr, repr(ver_naam), repr(team_naam)))
+            # self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (row, ver_nr, repr(ver_naam), repr(team_naam)))
 
             if ver_nr < 0:
                 continue
@@ -197,14 +197,11 @@ class Command(BaseCommand):
             # zoek het team erbij
             kamp_team = self._get_team(team_naam, ver_nr, row_nr, team_klasse)
             if kamp_team is None:
+                self.stdout.write('[WARNING] Team %s op regel %s niet herkend voor klasse %s' % (repr(team_naam), row, team_klasse))
                 continue
 
             if team_klasse is None:
                 team_klasse = kamp_team.team_klasse
-            else:
-                if team_klasse != kamp_team.team_klasse:
-                    self.stderr.write('[ERROR] Inconsistente team klasse op regel %s: %s (eerdere teams: %s)' % (row_nr, kamp_team.team_klasse, team_klasse))
-                    continue
 
             ver_lid_nrs = self.ver_lid_nrs[ver_nr]
             team_lid_nrs = self.team_lid_nrs[kamp_team.pk]
@@ -307,6 +304,7 @@ class Command(BaseCommand):
             rank += 1
             kamp_team = tup[-1]
             kamp_team.result_rank = rank
+            # self.stdout.write("%s (%s) %s" % (kamp_team.result_rank, kamp_team.result_teamscore, kamp_team))
             if not dryrun:
                 kamp_team.save(update_fields=['result_rank', 'result_teamscore'])
         # for
