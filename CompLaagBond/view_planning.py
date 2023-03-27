@@ -584,6 +584,18 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         match.save()
 
+        # wedstrijdklassen
+        goede_wkl_indiv_pks = list(CompetitieIndivKlasse
+                                   .objects
+                                   .filter(competitie=deelkamp.competitie,
+                                           is_voor_rk_bk=True)      # verwijder regio-only klassen
+                                   .values_list('pk', flat=True))
+        goede_wkl_team_pks = list(CompetitieTeamKlasse
+                                  .objects
+                                  .filter(competitie=deelkamp.competitie,
+                                          is_voor_teams_rk_bk=True)
+                                  .values_list('pk', flat=True))
+
         gekozen_indiv_klassen = list()
         gekozen_team_klassen = list()
 
@@ -594,7 +606,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
-                    gekozen_indiv_klassen.append(pk)
+                    # filter slechte pk's om verder een database error te voorkomen
+                    if pk in goede_wkl_indiv_pks:
+                        gekozen_indiv_klassen.append(pk)
 
             if key[:9] == "wkl_team_":
                 try:
@@ -602,7 +616,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
-                    gekozen_team_klassen.append(pk)
+                    # filter slechte pk's om verder een database error te voorkomen
+                    if pk in goede_wkl_team_pks:
+                        gekozen_team_klassen.append(pk)
         # for
 
         for obj in match.indiv_klassen.all():

@@ -249,6 +249,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.deelkamp_bk_18.rk_bk_matches.add(self.match)
 
         url = self.url_wijzig_wedstrijd % self.match.pk
+        url_redir_expected = self.url_planning % self.deelkamp_bk_18.pk
+
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -274,16 +276,47 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(url, {'weekdag': '20', 'aanvang': '10:00', 'nhbver_pk': '1', 'loc_pk': '1'})
         self.assert404(resp, 'Geen valide datum')
 
-        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00', 'nhbver_pk': 'geen', 'loc_pk': '1'})
-        self.assert_is_redirect(resp, self.url_planning % self.deelkamp_bk_18.pk)
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00',
+                                      'nhbver_pk': 'geen', 'loc_pk': '1',
+                                      'wkl_indiv_#': 1, 'wkl_team_#': 1})
+        self.assert_is_redirect(resp, url_redir_expected)
 
-        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00', 'nhbver_pk': '99999', 'loc_pk': '1'})
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00',
+                                      'nhbver_pk': '99999', 'loc_pk': '1'})
         self.assert404(resp, 'Vereniging niet gevonden')
 
-        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00', 'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '1'})
+        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
+                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '1'})
         self.assert404(resp, 'Locatie niet gevonden')
 
-        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00', 'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': ''})
+        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
+                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '',
+                                      'wkl_indiv_999999': 1, 'wkl_team_999999': 1})
+        self.assert_is_redirect(resp, url_redir_expected)
+
+        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
+                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '',
+                                      'wkl_indiv_%s' % self.klasse_indiv_r0.pk: '1',
+                                      'wkl_team_%s' % self.klasse_team_c0.pk: '1'})
+        self.assert_is_redirect(resp, url_redir_expected)
+
+        # nog een keer dezelfde wedstrijdklassen zetten
+        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
+                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '',
+                                      'wkl_indiv_%s' % self.klasse_indiv_r0.pk: '1',
+                                      'wkl_team_%s' % self.klasse_team_c0.pk: '1'})
+        self.assert_is_redirect(resp, url_redir_expected)
+
+        # doe een get met de wedstrijdklassen gekoppeld
+        # resp = self.client.get(url)
+        # self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # self.assert_html_ok(resp)
+        # self.assert_template_used(resp, ('complaagbond/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+        # wedstrijdklassen weer verwijderen
+        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
+                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': ''})
+        self.assert_is_redirect(resp, url_redir_expected)
 
         # verkeerde deelcomp
         resp = self.client.get(self.url_wijzig_wedstrijd % 999999)
