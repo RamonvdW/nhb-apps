@@ -1,0 +1,202 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}BK teams{% endblock %}
+
+{% block pagina %}
+
+    {% if url_wijzig %}
+        <script type="application/javascript">
+            function wijzig(team_pk, status) {
+
+                // voer een POST uit met de gekozen status wijziging
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = "{{ url_wijzig }}";
+
+                let inp = document.createElement('input');
+                inp.type = "hidden";
+                inp.name = "csrfmiddlewaretoken";
+                inp.value = getCookie('csrftoken');
+                form.appendChild(inp);
+
+                inp = document.createElement('input');
+                inp.type = "hidden";
+                inp.name = "team_pk";
+                inp.value = team_pk;
+                form.appendChild(inp);
+
+                inp = document.createElement('input');
+                inp.type = "hidden";
+                inp.name = "status";
+                inp.value = status;
+                form.appendChild(inp);
+
+                form.style.display = 'hidden';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        </script>
+    {% endif %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">BK teams</h3>
+            <p>Status van de teams voor het BK van de {{ deelkamp.competitie }}</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <table class="white">
+                <tr>
+                    <td colspan="3" class="center">Deelname-status voor de teams</td>
+                </tr>
+
+                <tr>
+                    <th><!--icon--></th>
+                    <th>Status</th>
+                    <th class="center">Aantal</th>
+                </tr>
+
+                <tr>
+                    <td class="center"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                    <td class="green-text">Deelname aangemeld</td>
+                    <td class="center">{{ aantal_aangemeld }}</td>
+                </tr>
+
+                <tr>
+                    <td class="center"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                    <td class="nhb-blauw-text">Onbekend</td>
+                    <td class="center">{{ aantal_onbekend }}</td>
+                </tr>
+
+                <tr>
+                    <td class="center"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                    <td class="grey-text">Afgemeld</td>
+                    <td class="center">{{ aantal_afgemeld }}</td>
+                </tr>
+
+                {% if aantal_attentie %}
+                    <tr>
+                        <td class="center"><i class="red-text in-table-icon material-icons-round">warning</i></td>
+                        <td class="red-text">Attentie</td>
+                        <td class="center">{{ aantal_attentie }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Teams</h4>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <table class="white" id="table1">
+
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="3" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                        </td>
+                        <td colspan="3"></td>
+                    </tr>
+
+                    <tr>
+                        <th data-filter="on">Klasse</th>
+                        <th data-filter="on">Vereniging</th>
+                        <th data-filter="on">Team</th>
+                        <th>#</th>
+                        <th>Status</th>
+                        <th><!-- knop --></th>
+                    </tr>
+                </thead>
+
+                {% for team in teams %}
+                    <tr>
+                        <td>
+                            <span class="hide-on-small-only">{{ team.klasse_str }}</span>
+                            <span class="hide-on-med-and-up">{{ team.klasse_kort }}</span>
+                        </td>
+                        <td>
+                            <span class="hide-on-med-and-down">{{ team.ver_str }}</span>
+                            <span class="hide-on-large-and-up">{{ team.ver_nr }}</span>
+                        </td>
+                        <td>{{ team.team_naam }}</td>
+                        <td>{{ team.volgorde }}</td>
+                        <td>{{ team.status_str }}</td>
+                        <td>
+                            {% if url_wijzig %}
+                                <a class="btn-nhb-rood modal-trigger" href="#wijzig_{{ team.pk }}">Wijzig</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% if url_wijzig %}
+        {% for team in teams %}
+
+            <div class="modal" id="wijzig_{{ team.pk }}">
+                <div class="modal-content center">
+                    <h5>Team status aanpassen?</h5>
+                    <p>Kies welke wijziging je wilt maken voor team <b>{{ team.team_naam }}</b> van <b>{{ team.ver_str }}</b>.</p>
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+
+                        {% if team.wijzig_toch_ja %}
+                            <div style="display:inline-block; margin-right:30px">
+                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'toch_ja')">Toch deelnemen</button>
+                            </div>
+                        {% endif %}
+
+                        {% if team.wijzig_afmelden %}
+                            <div style="display:inline-block; margin-right:30px">
+                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'afmelden')">Afmelden</button>
+                            </div>
+                        {% endif %}
+
+                        {% if team.wijzig_beschikbaar %}
+                            <div style="display:inline-block; margin-right:30px">
+                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'beschikbaar')">Beschikbaar</button>
+                            </div>
+                        {% endif %}
+
+                        {% if team.wijzig_deelnemer %}
+                            <div style="display:inline-block; margin-right:30px">
+                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'maak_deelnemer')">Maak deelnemer</button>
+                            </div>
+                        {% endif %}
+
+                        <div style="display:inline-block">
+                            <a href="#" class="btn-nhb-blauw modal-close">Niets wijzigen</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        {% endfor %}
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-bk-teams" %}
+
+{% endblock %}

@@ -44,6 +44,17 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                         url=url)
             kaartjes_indiv.append(kaartje)
 
+        # BK teams aanmelden/afmelden
+        if 'N' <= comp.fase_teams <= 'O':
+            url = reverse('CompLaagBond:bk-teams', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+            kaartje = SimpleNamespace(
+                        prio=5,
+                        titel="BK teams",
+                        icoon="rule",
+                        tekst="Aanmelden / afmelden teams voor de BK.",
+                        url=url)
+            kaartjes_teams.append(kaartje)
+
         # BK limieten (individueel en teams)
         if 'L' <= comp.fase_indiv <= 'O' or 'L' <= comp.fase_teams <= 'O':
             url = reverse('CompLaagBond:wijzig-limieten', kwargs={'deelkamp_pk': deelkamp_bk.pk})
