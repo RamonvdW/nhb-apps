@@ -27,12 +27,18 @@ class Command(BaseCommand):
         self.kamp_lid_nrs = list()          # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
         self.deelnemende_teams = dict()     # [team naam] = KampioenschapTeam
         self.team_klasse = None
+        self.toegestane_bogen = list()
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('--verbose', action='store_true')
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
+
+    def _zet_team_klasse(self, klasse):
+        self.team_klasse = klasse
+        self.toegestane_bogen = list(klasse.boog_typen.values_list('afkorting', flat=True))
+        # self.stdout.write('[DEBUG] toegestane bogen: %s' % repr(self.toegestane_bogen))
 
     def _deelnemers_ophalen(self):
         # alle RK (!) sporters mogen deelnemer aan een BK teams
@@ -82,7 +88,8 @@ class Command(BaseCommand):
     def _sort_op_gemiddelde(self, lid_nrs):
         gem = list()
         for lid_nr in lid_nrs:
-            deelnemer_all = self.deelnemers[lid_nr]
+            deelnemer_all = [deelnemer for deelnemer in self.deelnemers[lid_nr] if deelnemer.sporterboog.boogtype.afkorting in self.toegestane_bogen]
+
             if len(deelnemer_all) == 1:
                 deelnemer = deelnemer_all[0]
             else:
@@ -110,8 +117,7 @@ class Command(BaseCommand):
         return deelnemer
 
     def _get_team(self, team_naam, ver_nr, row_nr):
-        if self.verbose:
-            self.stdout.write('[DEBUG] get_team: team_klasse=%s' % repr(self.team_klasse))
+        #self.stdout.write('[DEBUG] get_team: team_klasse=%s' % repr(self.team_klasse))
             
         up_naam = team_naam.upper()
         sel_teams = list()
@@ -194,7 +200,7 @@ class Command(BaseCommand):
                 continue
 
             if self.team_klasse is None:
-                self.team_klasse = kamp_team.team_klasse
+                self._zet_team_klasse(kamp_team.team_klasse)
             else:
                 if self.team_klasse != kamp_team.team_klasse:
                     self.stderr.write('[ERROR] Inconsistente team klasse op regel %s: %s (eerdere teams: %s)' % (
@@ -369,23 +375,23 @@ class Command(BaseCommand):
         """ Lees de uitslag van het blad 'Finales 8 teams' """
 
         final_8 = list()
-        for row_nr in (12, 14, 16, 18, 20, 22, 24, 26):
+        for row_nr in (12, 14, 18, 20, 24, 26, 30, 32):
             team_naam = ws['B' + str(row_nr)].value
             if team_naam in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam = ''
             if team_naam:
                 if team_naam in self.deelnemende_teams.keys():
                     final_8.append(team_naam)
-                else:
+                elif team_naam != 'BYE':
                     self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
         # for
         # self.stdout.write('final_8: %s' % repr(final_8))
 
         # gouden finale
-        team_naam_1 = ws['Q18'].value
+        team_naam_1 = ws['T19'].value
         if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_1 = ''
-        team_naam_2 = ws['Q20'].value
+        team_naam_2 = ws['T21'].value
         if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_2 = ''
-        if ws['V18'].value == '2e':
+        if ws['Z19'].value == '2e':
             goud = team_naam_2
             zilver = team_naam_1
         else:
@@ -393,14 +399,14 @@ class Command(BaseCommand):
             zilver = team_naam_2
 
         # bronzen finale
-        team_naam_1 = ws['Q30'].value
+        team_naam_1 = ws['T31'].value
         if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_1 = ''
-        team_naam_2 = ws['Q32'].value
+        team_naam_2 = ws['T33'].value
         if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_2 = ''
-        if ws['V30'].value == '3e':
+        if ws['Z31'].value == '3e':
             brons = team_naam_1
             vierde = team_naam_2
-        elif ws['V30'].value == '4e':
+        elif ws['Z31'].value == '4e':
             brons = team_naam_2
             vierde = team_naam_1
         else:
@@ -490,7 +496,7 @@ class Command(BaseCommand):
                     self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
                     return
 
-                winnaar = ws['V18'].value
+                winnaar = ws['Z19'].value
             else:
                 winnaar = None
 
