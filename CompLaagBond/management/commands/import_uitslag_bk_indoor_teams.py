@@ -163,7 +163,7 @@ class Command(BaseCommand):
         col_score2 = 'I'
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
-        row_nr = 8
+        row_nr = 9 - 1
         nix_count = 0
         kamp_teams = list()
         while nix_count < 10:
@@ -191,7 +191,7 @@ class Command(BaseCommand):
                 self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (
                                     row, ver_nr, repr(ver_naam), repr(team_naam)))
 
-            if ver_nr < 0:
+            if ver_nr < 0 or team_naam is None:
                 continue
 
             # zoek het team erbij
