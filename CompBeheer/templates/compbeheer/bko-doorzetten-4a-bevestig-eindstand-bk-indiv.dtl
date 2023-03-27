@@ -36,6 +36,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-bevestig-eindstand-bk-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-4a" %}
 
 {% endblock %}

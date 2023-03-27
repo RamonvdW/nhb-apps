@@ -82,6 +82,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-klassengrenzen-vaststellen-rk-bk-teams" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-1b" %}
 
 {% endblock %}

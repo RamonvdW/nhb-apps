@@ -78,6 +78,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-naar-bk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-3a" %}
 
 {% endblock %}

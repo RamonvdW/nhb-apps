@@ -43,6 +43,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-rk-naar-bk-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-2a" %}
 
 {% endblock %}
