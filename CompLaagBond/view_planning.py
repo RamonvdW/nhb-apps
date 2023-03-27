@@ -224,10 +224,6 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
             in de BK planning, om een nieuwe wedstrijd toe te voegen.
         """
-        # alleen de BKO mag de planning uitbreiden
-        if self.rol_nu != Rollen.ROL_BKO:
-            raise Http404('Niet de beheerder')
-
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
             deelkamp = (Kampioenschap
@@ -237,6 +233,10 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                              deel=DEEL_BK))
         except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
+
+        # alleen de BKO mag de planning uitbreiden
+        if self.rol_nu != Rollen.ROL_BKO or deelkamp.competitie.afstand != self.functie_nu.comp_type:
+            raise Http404('Niet de beheerder')
 
         match = CompetitieMatch(
                     competitie=deelkamp.competitie,

@@ -175,9 +175,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='01:01')
         self.match.save()
-
-        # for lp in range(8):
-        #     KampioenschapSporterBoog().save()
+        # add to Kampioenschap.rk_bk_matches ?
 
     def test_anon(self):
         self.client.logout()
@@ -198,19 +196,22 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        # verkeerde BKO
-        url = self.url_planning % self.deelkamp_bk_25.pk
-        resp = self.client.get(url)
-        self.assert404(resp, 'Niet de beheerder')
-
         url = self.url_planning % self.deelkamp_bk_18.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
-        # probeer als BB
-        self.e2e_wisselnaarrol_bb()
+        # maak een nieuwe wedstrijd aan
+        CompetitieMatch.objects.all().delete()
+        resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        self.assertTrue(1, CompetitieMatch.objects.count())
+        match = CompetitieMatch.objects.all()[0]
+        self.assert_is_redirect(resp, self.url_wijzig_wedstrijd % match.pk)
+
+        # get met deze nieuwe wedstrijd
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -223,8 +224,89 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.get(self.url_planning % 999999)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
+        resp = self.client.post(self.url_planning % 999999)
+        self.assert404(resp, 'Kampioenschap niet gevonden')
+
+        # verkeerde BKO
+        url = self.url_planning % self.deelkamp_bk_25.pk
+        resp = self.client.get(url)
+        self.assert404(resp, 'Niet de beheerder')
+
+        resp = self.client.post(url)
+        self.assert404(resp, 'Niet de beheerder')
+
+        # probeer als BB
+        self.e2e_wisselnaarrol_bb()
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+
     def test_wijzig_wedstrijd(self):
-        pass
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        self.deelkamp_bk_18.rk_bk_matches.add(self.match)
+
+        url = self.url_wijzig_wedstrijd % self.match.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+        # probeer te wijzigen
+        resp = self.client.post(url)
+        self.assert404(resp, 'Incompleet verzoek')
+
+        resp = self.client.post(url, {'weekdag': 'x', 'aanvang': '10:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        self.assert404(resp, 'Geen valide verzoek')
+
+        resp = self.client.post(url, {'weekdag': '-1', 'aanvang': '10:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        self.assert404(resp, 'Geen valide verzoek')
+
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '24:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        self.assert404(resp, 'Geen valide verzoek')
+
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:60', 'nhbver_pk': '1', 'loc_pk': '1'})
+        self.assert404(resp, 'Geen valide tijdstip')
+
+        # standaard duurt fase P 7 dagen
+        resp = self.client.post(url, {'weekdag': '20', 'aanvang': '10:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        self.assert404(resp, 'Geen valide datum')
+
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00', 'nhbver_pk': 'geen', 'loc_pk': '1'})
+        self.assert_is_redirect(resp, self.url_planning % self.deelkamp_bk_18.pk)
+
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00', 'nhbver_pk': '99999', 'loc_pk': '1'})
+        self.assert404(resp, 'Vereniging niet gevonden')
+
+        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00', 'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '1'})
+        self.assert404(resp, 'Locatie niet gevonden')
+
+        resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00', 'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': ''})
+
+        # verkeerde deelcomp
+        resp = self.client.get(self.url_wijzig_wedstrijd % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        resp = self.client.post(self.url_wijzig_wedstrijd % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        # verkeerde BKO
+        self.e2e_wissel_naar_functie(self.functie_bko_25)
+        resp = self.client.get(url)
+        self.assert404(resp, 'Niet de beheerder')
+
+        resp = self.client.post(url)
+        self.assert404(resp, 'Niet de beheerder')
+
+        # geen BK match
+        self.deelkamp_bk_18.rk_bk_matches.clear()
+        resp = self.client.get(url)
+        self.assert404(resp, 'Geen BK wedstrijd')
+
+        resp = self.client.post(url)
+        self.assert404(resp, 'Geen BK wedstrijd')
 
     def test_limieten(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
