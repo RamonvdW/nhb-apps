@@ -118,8 +118,8 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 4 teams' gehaald" in f2.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file2_18m)
-        print('\nf1:', f1.getvalue())
-        print('\nf2:', f2.getvalue())
+        # print('\nf1:', f1.getvalue())
+        # print('\nf2:', f2.getvalue())
         self.assertTrue("[ERROR] Kan team 'rk-4122-' van vereniging 4122 op regel 33 niet kiezen uit" in f1.getvalue())
         self.assertTrue("[ERROR] Kan team 'rk-4122-' van vereniging 4122 op regel 33 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 301948 is niet van vereniging 4122" in f1.getvalue())
