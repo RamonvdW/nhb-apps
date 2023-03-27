@@ -117,7 +117,8 @@ class Command(BaseCommand):
         return deelnemer
 
     def _get_team(self, team_naam, ver_nr, row_nr):
-        #self.stdout.write('[DEBUG] get_team: team_klasse=%s' % repr(self.team_klasse))
+        if self.verbose:
+            self.stdout.write('[DEBUG] get_team: team_klasse=%s' % repr(self.team_klasse))
             
         up_naam = team_naam.upper()
         sel_teams = list()

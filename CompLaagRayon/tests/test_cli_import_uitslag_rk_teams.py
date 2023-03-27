@@ -18,8 +18,8 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
     url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     test_file_25m = 'CompLaagRayon/management/testfiles/test_rk-25m1pijl-teams.xlsx'
-    test_file1_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor_teams_4.xlsm'
-    test_file2_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor_teams_8.xlsm'
+    test_file1_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor-teams_4.xlsx'
+    test_file2_18m = 'CompLaagRayon/management/testfiles/test_rk-indoor-teams_8.xlsx'
 
     testdata = None
     rayon_nr = 3
@@ -44,6 +44,12 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
             data.maak_rk_teams(18, ver_nr, per_team, limit_teamtypen=['R2'])
         # for
 
+        # maak nog een paar teams aan in
+        regio_nr = cls.regio_nr + 3        # is deelbaar door 4 --> krijgt hogere scores --> ERE klasse
+        ver_nr = data.regio_ver_nrs[regio_nr][1]
+        data.maak_rk_deelnemers(18, ver_nr, regio_nr, limit_boogtypen=['R', 'BB'])
+        data.maak_rk_teams(18, ver_nr, 4, limit_teamtypen=['R2'])
+
     def setUp(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
@@ -64,11 +70,12 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         zet_competitie_fase_rk_wedstrijden(self.testdata.comp18)
         zet_competitie_fase_rk_wedstrijden(self.testdata.comp25)
 
-        # for team in self.testdata.comp25_kampioenschapteams:
+        # for team in self.testdata.comp18_kampioenschapteams:
         #     team = KampioenschapTeam.objects.get(pk=team.pk)
-        #     print('25m1p team: %s, klasse: %s' % (team, team.team_klasse))
+        #     print('Indoor team: %s, klasse: %s' % (team, team.team_klasse))
         #     for lid in team.gekoppelde_leden.all():
         #         print('  lid: %s, gem: %s' % (lid, lid.gemiddelde))
+        # # for
 
     def test_25m(self):
         # file NOK
@@ -105,13 +112,28 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file1_18m, '--dryrun', '--verbose')
+        # print('\nf1:', f1.getvalue())
+        # print('\nf2:', f2.getvalue())
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 4 teams' gehaald" in f2.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file2_18m)
-        self.assertFalse('[ERROR]' in f1.getvalue())
+        print('\nf1:', f1.getvalue())
+        print('\nf2:', f2.getvalue())
+        self.assertTrue("[ERROR] Kan team 'rk-4122-' van vereniging 4122 op regel 33 niet kiezen uit" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan team 'rk-4122-' van vereniging 4122 op regel 33 niet vinden" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 301948 is niet van vereniging 4122" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 123456 is niet gekwalificeerd voor dit kampioenschap!" in f1.getvalue())
+        self.assertTrue("[ERROR] Probleem met de scores op regel 16" in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 8 teams' gehaald" in f2.getvalue())
-        # print('f1:', f1.getvalue())
-        # print('f2:', f2.getvalue())
+        self.assertTrue("[WARNING] Aangepaste team naam: 'rk-4122-5-R2' --> 'Aangepast rk-4122-5-R2'" in f2.getvalue())
+        self.assertTrue("[WARNING] Team 4122 van vereniging rk-4122-3-R2 heeft niet meegedaan (geen scores)" in f2.getvalue())
+
+        team1 = KampioenschapTeam.objects.get(team_naam='rk-4122-5-R2', kampioenschap__competitie__afstand=18)
+        team2 = KampioenschapTeam.objects.get(team_naam='rk-4121-7-R2', kampioenschap__competitie__afstand=18)
+        self.assertEqual(team1.result_rank, 2)              # een van de sporters heeft het hoogste resultaat
+        self.assertEqual(team2.result_rank, 3)
+        self.assertEqual(team1.result_teamscore, 1174)
+        self.assertEqual(team2.result_teamscore, 909)
 
 # end of file
