@@ -77,6 +77,12 @@ then
     echo "ARGS without --clean: $ARGS"
 fi
 
+echo "[INFO] Provided  arguments: $ARGS"
+# convert a path to a test file into a test case
+ARGS=${ARGS//\//.}    # replace all (//) occurences of / with .
+ARGS=${ARGS/.py/}   # string .py at the end
+echo "[INFO] Converted arguments: $ARGS"
+
 FOCUS=""
 FOCUS_SPECIFIC_TEST=0
 if [ -z "$ARGS" ]
