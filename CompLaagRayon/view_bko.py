@@ -58,7 +58,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                     .objects
                     .exclude(is_afgesloten=True)
                     .get(pk=comp_pk))
-        except (ValueError, Kampioenschap.DoesNotExist):
+        except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         # controleer dat de juiste BKO aan de knoppen zit
@@ -149,7 +149,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                     .objects
                     .exclude(is_afgesloten=True)
                     .get(pk=comp_pk))
-        except (ValueError, Kampioenschap.DoesNotExist):
+        except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         # controleer dat de juiste BKO aan de knoppen zit
@@ -172,7 +172,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                                          'sporterboog__sporter__bij_vereniging__regio__rayon',
                                          'indiv_klasse')
                          .get(pk=deelnemer_pk))
-        except (ValueError, RegiocompetitieSporterBoog.DoesNotExist):
+        except (KeyError, ValueError, RegiocompetitieSporterBoog.DoesNotExist):
             raise Http404('Sporter niet gevonden')
 
         sporterboog = deelnemer.sporterboog
