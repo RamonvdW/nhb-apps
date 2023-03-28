@@ -1156,7 +1156,7 @@ class Command(BaseCommand):
         # verwijder alle deelnemers van een voorgaande run
         KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk).delete()
 
-        # TODO: verwijder dit zodra het kaartje gemaakt i
+        # TODO: verwijder dit zodra het kaartje gemaakt is
         # maak een vertaal tabel voor de individuele klassen voor seizoen 2022/2023
         # 1410 TR jeugd kl1  --> 1401 TR kl 2
         # 1210 C Onder21 kl1 --> 1200 C kl 1

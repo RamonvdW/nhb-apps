@@ -136,10 +136,10 @@ class Command(BaseCommand):
                 # self.stdout.write('[DEBUG] cached team: %s' % repr(team))
                 if team.vereniging.ver_nr == ver_nr:
                     if team.team_naam.upper() in up_naam:
+                        self.stdout.write('[WARNING] Aangepast team naam: %s --> %s' % (
+                                            repr(team.team_naam), repr(team_naam)))
                         if self.team_klasse is None or team.team_klasse == self.team_klasse:
                             sel_teams.append(team)
-                            self.stdout.write('[WARNING] Aangepast team naam: %s --> %s' % (
-                                                repr(team.team_naam), repr(team_naam)))
             # for
 
         kamp_team = None
@@ -341,6 +341,8 @@ class Command(BaseCommand):
             self.stdout.write('[DEBUG] vierde: %s' % repr(vierde))
             self.stdout.write('[DEBUG] vijfden: %s' % repr(vijfden))
 
+        finale_team_pks = list()
+
         rank = 1
         for team_naam in (goud, zilver, brons, vierde):
             if isinstance(team_naam, list):
@@ -351,6 +353,7 @@ class Command(BaseCommand):
                     kamp_team.result_volgorde = volgorde
                     if not self.dryrun:
                         kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
+                    finale_team_pks.append(kamp_team.pk)
                     volgorde += 1
                 # for
                 rank += 1  # skip 4
@@ -360,16 +363,35 @@ class Command(BaseCommand):
                 kamp_team.result_volgorde = rank
                 if not self.dryrun:
                     kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
+                finale_team_pks.append(kamp_team.pk)
             rank += 1
         # for
 
-        # de rest is 5e
+        # de rest (van de 8 finalisten) is 5e
         # result_volgorde is al gezet, gebaseerd op aflopende scores
+        min_rank = 5
         for team_naam in vijfden:
             kamp_team = self.deelnemende_teams[team_naam]
             kamp_team.result_rank = 5
+            finale_team_pks.append(kamp_team.pk)
+            min_rank += 1
             if not self.dryrun:
                 kamp_team.save(update_fields=['result_rank'])
+        # for
+
+        # controleer dat alle overige teams geen hoge rank hebben
+        # dit kan gebeuren na een shoot-off waarbij 1 team buiten de final viel, maar toevallig een lage rank heeft
+        for team in self.deelnemende_teams.values():
+            if team.pk not in finale_team_pks:
+                if team.result_rank < min_rank:
+                    diff = min_rank - team.result_rank
+                    self.stdout.write('[WARNING] Correctie rank team %s: rank %s -> %s, volgorde %s -> %s' % (
+                                        team.team_naam,
+                                        team.result_rank, team.result_rank + diff,
+                                        team.result_volgorde, team.result_volgorde + diff))
+                    team.result_rank += diff
+                    team.result_volgorde += diff
+                    team.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
     def _importeer_finales_8(self, ws):

@@ -450,14 +450,15 @@ class UitslagenBKTeamsView(TemplateView):
                     lid_nrs = list()
                     for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
                         deelnemer.result_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
-                        if deelnemer.result_totaal < 10:
-                            deelnemer.result_totaal = '-'
                         deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                         lid_nr = deelnemer.sporterboog.sporter.lid_nr
                         if lid_nr not in originele_lid_nrs:
                             deelnemer.is_invaller = True
                         tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
                         deelnemers.append(tup)
+
+                        if deelnemer.result_totaal < 10:
+                            deelnemer.result_totaal = '-'       # moet na gebruik in tup, ivm sort() verderop
 
                         lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
                     # for
@@ -482,22 +483,31 @@ class UitslagenBKTeamsView(TemplateView):
         # for
 
         if len(klasse_teams_done) > 0:
-            # er is uitslag, dus deze teams hebben niet meegedaan
+            # er is uitslag, dus overige teams hebben niet meegedaan
             for plan_team in klasse_teams_plan:
                 plan_team.rank = ''
                 plan_team.niet_deelgenomen = True
+                plan_team.heeft_uitslag = True
+            # for
+            for afgemeld_team in klasse_teams_afgemeld:
+                afgemeld_team.rank = ''
+                afgemeld_team.niet_deelgenomen = True
+                afgemeld_team.heeft_uitslag = True
             # for
             teller = klasse_teams_done[0]
 
         elif len(klasse_teams_plan) > 0:
             # er is geen uitslag, maar misschien hebben teams vrijstelling
+            teller = klasse_teams_plan[0]
             if deelkamp_bk.is_afgesloten:
                 for plan_team in klasse_teams_plan:
                     plan_team.rank = ''
                     plan_team.niet_deelgenomen = True
                 # for
-            teller = klasse_teams_plan[0]
-
+                for afgemeld_team in klasse_teams_afgemeld:
+                    afgemeld_team.rank = ''
+                    afgemeld_team.niet_deelgenomen = True
+                # for
         else:
             teller = None
 

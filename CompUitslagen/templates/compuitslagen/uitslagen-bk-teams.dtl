@@ -89,7 +89,7 @@
     </div>
 
     <!-- uitleg over tijdstippen -->
-    {% if not comp.bk_is_afgelast and comp.fase_teams >= 'N' %}
+    {% if not comp.bk_is_afgelast and comp.fase_teams >= 'N' and comp.fase_teams <= 'P'%}
 
         <div class="row">
             <div style="padding:10px">
