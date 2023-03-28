@@ -25,21 +25,19 @@
                 {% for obj in kandidaten %}
                     {% if obj.break_klasse %}
 
-                        <thead>
-                            <tr>
-                                <td colspan="5" class="center">
-                                    <h5>{{ obj.indiv_klasse.beschrijving }}</h5>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Sporter</th>
-                                <th>Vereniging</th>
-                                <th class="center hide-on-small-only">Regio (Rayon)</th>
-                                <th class="center hide-on-small-only">Competitie<wbr>leeftijd</th>
-                                <th class="center">Gemiddelde</th>
-                                <th><!-- toevoegen knop --></th>
-                            </tr>
-                        </thead>
+                        <tr>
+                            <td colspan="6" class="center">
+                                <h5>{{ obj.indiv_klasse.beschrijving }}</h5>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Sporter</th>
+                            <th>Vereniging</th>
+                            <th class="center hide-on-small-only">Regio (Rayon)</th>
+                            <th class="center hide-on-small-only">Competitie<wbr>leeftijd</th>
+                            <th class="center">Gemiddelde</th>
+                            <th><!-- toevoegen knop --></th>
+                        </tr>
 
                     {% endif %}
 
