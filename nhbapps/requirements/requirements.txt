@@ -18,9 +18,9 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.11.0
     # via google-api-python-client
-google-api-python-client==2.80.0
+google-api-python-client==2.82.0
     # via -r requirements.in
-google-auth==2.16.2
+google-auth==2.16.3
     # via
     #   -r requirements.in
     #   google-api-core
@@ -28,9 +28,9 @@ google-auth==2.16.2
     #   google-auth-httplib2
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-googleapis-common-protos==1.58.0
+googleapis-common-protos==1.59.0
     # via google-api-core
-httplib2==0.21.0
+httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -40,11 +40,11 @@ mollie-api-python==2.13.0
     # via -r requirements.in
 oauthlib==3.2.2
     # via requests-oauthlib
-openpyxl==3.1.1
+openpyxl==3.1.2
     # via -r requirements.in
 pillow==9.4.0
     # via -r requirements.in
-protobuf==4.22.0
+protobuf==4.22.1
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -83,7 +83,7 @@ typing-extensions==4.5.0
     # via qrcode
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.26.14
+urllib3==1.26.15
     # via
     #   mollie-api-python
     #   requests
