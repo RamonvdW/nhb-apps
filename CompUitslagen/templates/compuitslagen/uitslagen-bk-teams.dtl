@@ -29,11 +29,11 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslagen BK teams</h3>
-            <p>{% if comp.fase_teams > 'P' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de bonds<wbr>kampioenschappen teams</p>
+            <p>{% if comp.fase > 'P' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de bonds<wbr>kampioenschappen teams</p>
         </div>
     </div>
 
-    {% if comp.rk_is_afgelast %}
+    {% if comp.bk_is_afgelast %}
         <div class="row">
             <div class="col s12 m8 offset-m2">
                 <div class="nhb-rood white-text z-depth-3 center" style="padding:10px">
@@ -89,7 +89,7 @@
     </div>
 
     <!-- uitleg over tijdstippen -->
-    {% if not comp.bk_is_afgelast and comp.fase_teams >= 'N' %}
+    {% if not comp.bk_is_afgelast and comp.fase_teams >= 'N' and comp.fase_teams <= 'P'%}
 
         <div class="row">
             <div style="padding:10px">
@@ -123,12 +123,12 @@
                         <td colspan="8" class="center">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.match %}
-                                {% if comp.rk_is_afgelast %}<s>{% endif %}
+                                {% if comp.bk_is_afgelast %}<s>{% endif %}
                                 <span>{{ team.match.datum_wanneer }} om {{ team.match.tijd_begin_wedstrijd }} bij {{ team.match.vereniging }}</span>
                                 {% if team.match.locatie %}
                                     <span> ({{ team.match.adres_str }})</span>
                                 {% endif %}
-                                {% if comp.rk_is_afgelast %}</s>{% endif %}
+                                {% if comp.bk_is_afgelast %}</s>{% endif %}
                             {% endif %}
                         </td>
                     </tr>
@@ -141,7 +141,7 @@
                             <span class="hide-on-small-only">Vereniging</span>
                         </th>
                         <th>Team</th>
-                        <th></th>       <!-- label: Rayonkampioen -->
+                        <th class="hide-on-small-only"></th>       <!-- label -->
                         <th class="center hide-on-small-only">{% if not team.heeft_uitslag %}RK score{% endif %}</th>
                         <th class="right-align" style="padding-right:10px">BK scores</th>
                         <td rowspan="{{ team.aantal_regels }}" class="nhb-table-zijrand"></td>
@@ -162,19 +162,35 @@
                     <!-- team naam + team leden -->
                     <td>
                         {% if team.heeft_uitslag %}
-                            <b>{{ team.team_naam }}</b><br>
+                            {% if team.niet_deelgenomen %}{{ team.team_naam }}{% else %}<b>{{ team.team_naam }}</b>{% endif %}<br>
+
                             {% for deelnemer in team.deelnemers %}
                                 <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.naam_str }}{% if deelnemer.is_invaller %}&nbsp;**{% endif %}</span><br>
                             {% endfor %}
                         {% else %}
                             <span>{{ team.team_naam }}</span>
+                            {% if team.toon_team_leden %}
+                                <br>
+                                {% for team_lid in team.team_leden %}
+                                    <span style="padding-left:50px">{{ team_lid.sporter_str }} ({{ team_lid.gemiddelde }})</span><br>
+                                {% endfor %}
+                            {% endif %}
                         {% endif %}
                     </td>
 
                     <!-- label -->
                     <td class="hide-on-small-only">
-                        {% if not team.heeft_uitslag %}
-                            {% if team.is_reserve %}
+                        {% if team.heeft_uitslag %}
+                            {% if team.result_rank == 1 %}
+                                <span>Bondskampioen</span><br>
+                                {% for deelnemer in team.deelnemers %}
+                                    <br>
+                                {% endfor %}
+                            {% endif %}
+                        {% else %}
+                            {% if team.niet_deelgenomen %}
+                                <i>Afgemeld</i>
+                            {% elif team.is_reserve %}
                                 <i>Reserve</i>
                             {% else %}
                                 <span>{{ team.rk_kampioen_label }}</span>
@@ -201,17 +217,6 @@
                         {% endif %}
                     </td>
                 </tr>
-
-                {% if team.toon_team_leden %}
-                    <tr>
-                        <td></td>
-                        <td style="padding-left:50px">
-                            {% for team_lid in team.team_leden %}
-                                <span>{{ team_lid.sporter_str }} ({{ team_lid.gemiddelde }})</span><br>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                {% endif %}
 
             {% endfor %}
 
