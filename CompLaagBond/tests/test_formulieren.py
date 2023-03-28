@@ -95,7 +95,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         # koppel de wedstrijdklassen aan de match
         match_klassen = list()
         for klasse in self.testdata.comp18_klassen_indiv['R']:
-            if klasse.is_voor_rk_bk:
+            if klasse.is_ook_voor_rk_bk:
                 match_klassen.append(klasse)
         # for
         self.match.indiv_klassen.add(*match_klassen)

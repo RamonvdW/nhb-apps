@@ -70,7 +70,7 @@ class CompetitieAdmin(admin.ModelAdmin):
 
 class CompetitieIndivKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie', 'boogtype', 'is_voor_rk_bk')
+    list_filter = ('competitie', 'boogtype', 'is_ook_voor_rk_bk')
 
     list_select_related = ('competitie', 'boogtype')
 

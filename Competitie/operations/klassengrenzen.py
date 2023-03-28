@@ -449,7 +449,7 @@ class KlasseBepaler(object):
             dit is voor aspiranten en late-qualifiers (na score correctie of overschrijving naar andere vereniging)
         """
         for afkorting in self.boogtype2klassen.keys():
-            rk_only = [klasse for klasse in self.boogtype2klassen[afkorting] if klasse.is_voor_rk_bk]
+            rk_only = [klasse for klasse in self.boogtype2klassen[afkorting] if klasse.is_ook_voor_rk_bk]
             # print(afkorting, repr(rk_only))
             self.boogtype2klassen[afkorting] = rk_only
         # for

@@ -112,7 +112,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
 
                 is_asp_klasse = False
-                if not deelnemer.indiv_klasse.is_voor_rk_bk:
+                if not deelnemer.indiv_klasse.is_ook_voor_rk_bk:
                     # dit is een aspiranten klassen of een klasse onbekend
                     for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():       # pragma: no branch
                         if lkl.is_aspirant_klasse():                                # pragma: no branch

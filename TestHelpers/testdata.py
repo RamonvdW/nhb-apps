@@ -1257,7 +1257,7 @@ class TestData(object):
                 if afk in limit_boogtypen:
                     deelnemer_klasse = None
                     for klasse in reversed(klassen[afk]):                           # pragma: no branch
-                        if klasse.is_voor_rk_bk:
+                        if klasse.is_ook_voor_rk_bk:
                             for lkl in klasse.leeftijdsklassen.all():
                                 if lkl.leeftijd_is_compatible(leeftijd):
                                     deelnemer_klasse = klasse

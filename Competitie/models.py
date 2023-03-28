@@ -254,7 +254,7 @@ class CompetitieIndivKlasse(models.Model):
 
     # wedstrijdklasse wel/niet meenemen naar de RK/BK
     # staat op False voor aspiranten klassen en klassen 'onbekend'
-    is_voor_rk_bk = models.BooleanField(default=False)      # TODO: is_ook_voor_rk_bk
+    is_ook_voor_rk_bk = models.BooleanField(default=False)
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
@@ -268,7 +268,7 @@ class CompetitieIndivKlasse(models.Model):
 
     def __str__(self):
         msg = self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
-        if self.is_voor_rk_bk:
+        if self.is_ook_voor_rk_bk:
             msg += ' regio+RK'
         else:
             msg += ' regio'
