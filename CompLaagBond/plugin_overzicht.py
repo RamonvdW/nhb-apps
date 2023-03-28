@@ -33,6 +33,27 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                     url=url)
         kaartjes_algemeen.append(kaartje)
 
+        # BK kleine klassen samenvoegen
+        if comp.fase_indiv == 'N':
+            url = reverse('CompLaagBond:kleine-klassen-samenvoegen-indiv', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+            kaartje = SimpleNamespace(
+                        prio=5,
+                        titel="Kleine klassen",
+                        icoon="merge",
+                        tekst="Kleine wedstrijdklassen samenvoegen voor de Bondskampioenschappen.",
+                        url=url)
+            kaartjes_indiv.append(kaartje)
+
+        if comp.fase_teams == 'N':
+            url = reverse('CompLaagBond:bk-selectie', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+            kaartje = SimpleNamespace(
+                        prio=5,
+                        titel="Kleine klassen",
+                        icoon="merge",
+                        tekst="Kleine wedstrijdklassen samenvoegen voor de Bondskampioenschappen individueel.",
+                        url=url)
+            #kaartjes_teams.append(kaartje)
+
         # BK selectie (individueel)
         if 'N' <= comp.fase_indiv <= 'O':
             url = reverse('CompLaagBond:bk-selectie', kwargs={'deelkamp_pk': deelkamp_bk.pk})
@@ -40,7 +61,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
                         prio=5,
                         titel="BK selectie",
                         icoon="rule",
-                        tekst="Selectie van sporters voor de Bondskampioenschappen.",
+                        tekst="Selectie van sporters voor de Bondskampioenschappen teams.",
                         url=url)
             kaartjes_indiv.append(kaartje)
 

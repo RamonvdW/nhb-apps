@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagBond import view_planning, view_indiv, view_teams, view_formulieren
+from CompLaagBond import view_planning, view_indiv, view_teams, view_formulieren, view_kleine_klassen
 
 app_name = 'CompLaagBond'
 
@@ -13,6 +13,7 @@ urlpatterns = [
 
     # base url: bondscompetities/bk/
 
+    # BK planning
     path('planning/<deelkamp_pk>/limieten/',
          view_planning.WijzigLimietenView.as_view(),
          name='wijzig-limieten'),
@@ -29,6 +30,7 @@ urlpatterns = [
          view_planning.VerwijderWedstrijdView.as_view(),
          name='verwijder-wedstrijd'),
 
+
     # BKO: individueel
     path('selectie/<deelkamp_pk>/',
          view_indiv.LijstBkSelectieView.as_view(),
@@ -42,6 +44,14 @@ urlpatterns = [
          view_indiv.WijzigStatusBkDeelnemerView.as_view(),
          name='wijzig-status-bk-deelnemer'),
 
+    path('kleine-klassen-samenvoegen/<deelkamp_pk>/indiv/',
+         view_kleine_klassen.KleineKlassenIndivView.as_view(),
+         name='kleine-klassen-samenvoegen-indiv'),
+
+    path('verplaats-deelnemer/',
+         view_kleine_klassen.VerplaatsDeelnemerView.as_view(),
+         name='verplaats-deelnemer'),
+
     # BKO: teams
     path('teams/wijzig-status-bk-team/',
          view_teams.WijzigStatusBkTeamView.as_view(),
@@ -50,6 +60,7 @@ urlpatterns = [
     path('teams/<deelkamp_pk>/',
          view_teams.LijstBkTeamsView.as_view(),
          name='bk-teams'),
+
 
     # BKO: download formulieren
     path('formulieren/indiv/download/<match_pk>/<klasse_pk>/',

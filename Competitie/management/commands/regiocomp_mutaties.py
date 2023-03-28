@@ -19,8 +19,9 @@ from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, 
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN,
                                    MUTATIE_REGIO_TEAM_RONDE, MUTATIE_EXTRA_RK_DEELNEMER,
-                                   MUTATIE_DOORZETTEN_REGIO_NAAR_RK, MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK,
-                                   MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK)
+                                   MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
+                                   MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
+                                   MUTATIE_KLEINE_KLASSE_INDIV, MUTATIE_KLEINE_KLASSE_TEAM)
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTaken,
                                Regiocompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
@@ -1158,13 +1159,13 @@ class Command(BaseCommand):
 
         # TODO: verwijder dit zodra het kaartje gemaakt is
         # maak een vertaal tabel voor de individuele klassen voor seizoen 2022/2023
-        # 1410 TR jeugd kl1  --> 1401 TR kl 2
-        # 1210 C Onder21 kl1 --> 1200 C kl 1
-        # 1221 C Onder18 kl2 --> 1220 C Onder18 kl1
         temp_klassen_map = dict()
-        temp_klassen_map[1410] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1401)
-        temp_klassen_map[1210] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1200)
-        temp_klassen_map[1221] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1220)
+        # 1410 TR jeugd kl1  --> 1401 TR kl 2
+        # temp_klassen_map[1410] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1401)
+        # 1210 C Onder21 kl1 --> 1200 C kl 1
+        # temp_klassen_map[1210] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1200)
+        # 1221 C Onder18 kl2 --> 1220 C Onder18 kl1
+        # temp_klassen_map[1221] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1220)
 
         bulk = list()
         for kampioen in (KampioenschapSporterBoog
@@ -1265,6 +1266,13 @@ class Command(BaseCommand):
     def _verwerk_mutatie_extra_rk_deelnemer(self, deelnemer):
         # gebruik de methode van opnieuw aanmelden om deze sporter op de reserve-lijst te krijgen
         self._opnieuw_aanmelden_indiv(deelnemer)
+
+    def _verwerk_mutatie_klein_klassen_indiv(self, deelnemer, indiv_klasse):
+        """ verplaats deelnemer (KampioenschapSporterBoog) van zijn huidige klasse
+            naar de klasse indiv_klasse (CompetitieIndivKlasse)
+            en pas daarbij de volgorde en rank aan
+        """
+        return
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
