@@ -212,10 +212,6 @@ def rol_zet_sessionvars(account, request):
             # koppeling met Sporter, dus dit is een (potentiële) Schutter
             rollen_vast.append(Rollen.ROL_SPORTER)
             rol = Rollen.ROL_SPORTER
-        else:
-            if account.is_staff:
-                # admin maar geen NHB lid koppeling
-                rollen_vast.append(Rollen.ROL_NONE)
 
     request.session[SESSIONVAR_ROL_HUIDIGE] = rol
     request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None

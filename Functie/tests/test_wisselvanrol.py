@@ -218,7 +218,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager Competitiezaken
-        self.assertIn(self.url_activeer_rol % 'geen', urls)        # Gebruiker
         self.assertIn(self.url_accountwissel, urls)
 
         with self.assert_max_queries(20):

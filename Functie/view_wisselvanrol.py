@@ -129,13 +129,14 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 objs.append(tup)
 
             elif rol == Rollen.ROL_NONE:
-                # TODO: deze is niet nodig
-                obj = Functie(beschrijving='Gebruiker')
-                obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                obj.selected = (self.rol_nu == rol)
-                obj.pk = volgorde = 90001
-                tup = (volgorde, obj.pk, obj)
-                objs.append(tup)
+                # wisselen naar "geen rol" kan alleen door uit te loggen
+                pass
+                # obj = Functie(beschrijving='Gebruiker')
+                # obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
+                # obj.selected = (self.rol_nu == rol)
+                # obj.pk = volgorde = 90001
+                # tup = (volgorde, obj.pk, obj)
+                # objs.append(tup)
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
@@ -146,7 +147,6 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     hierarchy2[parent_tup] = [child_tup]
         # for
-        del rol, functie_pk
 
         # haal alle functies met 1 database query op
         for obj in (Functie

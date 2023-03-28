@@ -25,7 +25,7 @@ class Rollen(enum.IntEnum):
     ROL_MO = 40         # Manager Opleidingen
     ROL_MWW = 50        # Manager Webwinkel
     ROL_SUP = 90        # Support
-    ROL_NONE = 99       # geen rol (niet ingelogd)
+    ROL_NONE = 99       # geen rol (gebruik: niet ingelogd)
 
     """ LET OP!
         rol nummers worden opgeslagen in de sessie
