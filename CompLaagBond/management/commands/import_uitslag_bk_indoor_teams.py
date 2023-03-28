@@ -155,7 +155,14 @@ class Command(BaseCommand):
 
         return kamp_team
 
-    def _importeer_voorronde(self, ws):
+    def _importeer_voorronde(self, prg):
+        blad = 'Deelnemers en Scores'
+        try:
+            ws = prg[blad]
+        except KeyError:
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+            return
+
         col_ver_naam = 'D'
         col_team_naam = 'F'
         col_lid_nr = 'E'
@@ -308,11 +315,75 @@ class Command(BaseCommand):
                     deelnemer_totalen.sort(reverse=True)                        # hoogste eerst
                     kamp_team.result_teamscore = sum(deelnemer_totalen[:3])     # de 3 hoogste gebruiken
                     kamp_team.feitelijke_leden.set(feitelijke_deelnemers)
+                    if not self.dryrun:
+                        kamp_team.save(update_fields=['result_teamscore'])
 
                     deelnemer_totalen.insert(0, kamp_team.pk)                   # backup voor sorteren
                     deelnemer_totalen.insert(0, kamp_team.result_teamscore)     # resultaat vooraan
                     deelnemer_totalen.append(kamp_team)                         # team record laatst
                     kamp_teams.append(deelnemer_totalen)
+        # while
+
+
+    def _importeer_uitslag(self, prg):
+        """ Lees het blad Uitslag in om de correcte volgorde van de teams te krijgen
+            Hierop staat het resultaat van de shoot-off voor deelname aan de finale.
+        """
+        blad = 'Uitslag'
+        try:
+            ws = prg[blad]
+        except KeyError:
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
+            return
+
+        # TODO: kolommen vereniging en team zijn omgedraaid (ook in template en test files)
+        col_ver_naam = 'D'
+        col_team_naam = 'C'
+        col_resultaat = 'V'
+
+        kamp_teams = list()
+
+        # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
+        row_nr = 9 - 1
+        nix_count = 0
+        while nix_count < 5:
+            row_nr += 1
+            row = str(row_nr)
+
+            # vind een vereniging + team naam
+            ver_naam = ws[col_ver_naam + row].value
+            team_naam = ws[col_team_naam + row].value
+            resultaat = ws[col_resultaat + row].value
+
+            if ver_naam is None:
+                nix_count += 1
+                continue
+
+            if self.verbose:
+                self.stdout.write('[DEBUG] Uitslag: ver_naam=%s, team_naam=%s, resultaat=%s' % (repr(ver_naam), repr(team_naam), repr(resultaat)))
+
+            ver_nr = -1
+            try:
+                if ver_naam[0] == '[' and ver_naam[5:5+2] == '] ':
+                    ver_nr = int(ver_naam[1:1+4])
+            except ValueError:
+                pass
+
+            if ver_nr < 0:
+                continue
+
+            if team_naam is None:
+                continue
+
+            nix_count = 0
+
+            # zoek het team erbij
+            kamp_team = self._get_team(team_naam, ver_nr, row_nr)
+            if kamp_team is None:
+                continue
+
+            tup = (resultaat, kamp_team.pk, kamp_team)
+            kamp_teams.append(tup)
         # while
 
         kamp_teams.sort(reverse=True)               # hoogste eerste
@@ -323,7 +394,7 @@ class Command(BaseCommand):
             kamp_team.result_rank = rank
             kamp_team.result_volgorde = rank
             if not self.dryrun:
-                kamp_team.save(update_fields=['result_rank', 'result_volgorde', 'result_teamscore'])
+                kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
     def _zet_rank_en_volgorde(self, goud, zilver, brons, vierde, vijfden):
@@ -377,21 +448,6 @@ class Command(BaseCommand):
             min_rank += 1
             if not self.dryrun:
                 kamp_team.save(update_fields=['result_rank'])
-        # for
-
-        # controleer dat alle overige teams geen hoge rank hebben
-        # dit kan gebeuren na een shoot-off waarbij 1 team buiten de final viel, maar toevallig een lage rank heeft
-        for team in self.deelnemende_teams.values():
-            if team.pk not in finale_team_pks:
-                if team.result_rank < min_rank:
-                    diff = min_rank - team.result_rank
-                    self.stdout.write('[WARNING] Correctie rank team %s: rank %s -> %s, volgorde %s -> %s' % (
-                                        team.team_naam,
-                                        team.result_rank, team.result_rank + diff,
-                                        team.result_volgorde, team.result_volgorde + diff))
-                    team.result_rank += diff
-                    team.result_volgorde += diff
-                    team.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
     def _importeer_finales_8(self, ws):
@@ -496,17 +552,11 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
             return
 
-        blad = 'Deelnemers en Scores'
-        try:
-            ws = prg[blad]
-        except KeyError:
-            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
-            return
-
         self._deelnemers_ophalen()
         self._teams_ophalen()
 
-        self._importeer_voorronde(ws)
+        self._importeer_voorronde(prg)
+        self._importeer_uitslag(prg)
 
         if len(self.deelnemende_teams) == 0:
             self.stdout.write('[INFO] Geen deelnemende teams, dus geen kampioen')
