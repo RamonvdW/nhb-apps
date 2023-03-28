@@ -276,6 +276,7 @@ class UitslagenRegioTeamsView(TemplateView):
         for team in teamtypen:
             team.sel = team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
+                # validatie van urlconf argument: gevraagde teamtype bestaat echt
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
                 team.selected = True
@@ -285,8 +286,6 @@ class UitslagenRegioTeamsView(TemplateView):
                                             'team_type': team.afkorting.lower(),
                                             'regio_nr': gekozen_regio_nr})
         # for
-
-        # TODO: wanneer komt het voor dat teamtype niet bestaat? Template laat altijd regios/verenigingen zien!
 
         # regio filters
         if context['teamtype']:
