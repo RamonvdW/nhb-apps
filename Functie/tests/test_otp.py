@@ -279,10 +279,10 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'De gegevens worden niet geaccepteerd')
 
-        # juiste otp code + next url
+        # juiste otp code + next url zonder final slash
         code = get_otp_code(self.testdata.account_admin)
         with self.assert_max_queries(21):
-            resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/'})
+            resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records'})
         self.assertEqual(resp.status_code, 302)
         self.assert_is_redirect(resp, '/records/')
 
