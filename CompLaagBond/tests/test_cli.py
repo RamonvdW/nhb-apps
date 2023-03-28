@@ -43,7 +43,7 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
                                                           is_voor_teams_rk_bk=True).all()[0]
 
         indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=comp_25,
-                                                            is_voor_rk_bk=True).all()[0]
+                                                            is_ook_voor_rk_bk=True).all()[0]
 
         ver = NhbVereniging(
                     ver_nr=1234,
@@ -109,7 +109,7 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         comp_18 = Competitie.objects.get(afstand=18)
         deelkamp_bk = Kampioenschap.objects.get(competitie=comp_18, deel=DEEL_BK)
 
-        klasse = CompetitieIndivKlasse.objects.filter(competitie=comp_18, is_voor_rk_bk=True)[0]
+        klasse = CompetitieIndivKlasse.objects.filter(competitie=comp_18, is_ook_voor_rk_bk=True)[0]
 
         KampioenschapIndivKlasseLimiet(
             kampioenschap=deelkamp_bk,

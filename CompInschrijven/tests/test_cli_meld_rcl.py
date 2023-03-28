@@ -40,7 +40,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                                 .objects
                                 .filter(competitie=self.comp_18m,
                                         boogtype=self.boog_bb,
-                                        is_voor_rk_bk=False)
+                                        is_ook_voor_rk_bk=False)
                                 .all())[0]
 
         # maak een test vereniging

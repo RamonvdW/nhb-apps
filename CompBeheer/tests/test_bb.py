@@ -604,9 +604,9 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assertEqual(count1, count2)
 
         # coverage
-        obj = CompetitieIndivKlasse.objects.filter(is_voor_rk_bk=False)[0]
+        obj = CompetitieIndivKlasse.objects.filter(is_ook_voor_rk_bk=False)[0]
         self.assertTrue(str(obj) != "")
-        obj = CompetitieIndivKlasse.objects.filter(is_voor_rk_bk=True)[0]
+        obj = CompetitieIndivKlasse.objects.filter(is_ook_voor_rk_bk=True)[0]
         self.assertTrue(str(obj) != "")
         obj = CompetitieTeamKlasse.objects.filter(is_voor_teams_rk_bk=False)[0]
         self.assertTrue(str(obj) != "")

@@ -35,7 +35,7 @@ class Command(BaseCommand):
             # check elke klasse voor een uitslag
             for wkl in (CompetitieIndivKlasse
                         .objects
-                        .filter(is_voor_rk_bk=True,
+                        .filter(is_ook_voor_rk_bk=True,
                                 competitie=deelkamp.competitie)
                         .order_by('volgorde')):
 

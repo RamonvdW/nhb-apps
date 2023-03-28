@@ -176,17 +176,17 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         self.klasse_r = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
                                                              is_onbekend=False,
-                                                             is_voor_rk_bk=True,
+                                                             is_ook_voor_rk_bk=True,
                                                              volgorde=1100,           # Recurve klasse 1
                                                              boogtype__afkorting='R')[0]
         self.klasse_c = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
                                                              is_onbekend=False,
-                                                             is_voor_rk_bk=True,
+                                                             is_ook_voor_rk_bk=True,
                                                              volgorde=1201,           # Compound klasse 2
                                                              boogtype__afkorting='C')[0]
         self.klasse_ib = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
                                                               is_onbekend=False,
-                                                              is_voor_rk_bk=True,
+                                                              is_ook_voor_rk_bk=True,
                                                               volgorde=1400,          # TR klasse 1
                                                               boogtype__afkorting='TR')[0]
 

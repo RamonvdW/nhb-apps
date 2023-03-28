@@ -102,7 +102,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
 
         # maak een RK match aan
-        indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, is_voor_rk_bk=True)[0]
+        indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, is_ook_voor_rk_bk=True)[0]
 
         match = CompetitieMatch(
                     competitie=self.testdata.comp18,

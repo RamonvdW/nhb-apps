@@ -151,7 +151,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
 
-        qset = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, boogtype__afkorting='R', is_voor_rk_bk=True)
+        qset = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, boogtype__afkorting='R', is_ook_voor_rk_bk=True)
         self.klasse_indiv_r0 = qset[0]
         self.klasse_indiv_r1 = qset[1]
 

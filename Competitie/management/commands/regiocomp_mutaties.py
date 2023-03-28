@@ -872,7 +872,7 @@ class Command(BaseCommand):
                                       'sporterboog__sporter__bij_vereniging__regio__rayon')
                       .filter(regiocompetitie__in=pks,
                               aantal_scores__gte=competitie.aantal_scores_voor_rk_deelname,
-                              indiv_klasse__is_voor_rk_bk=True)         # skip aspiranten
+                              indiv_klasse__is_ook_voor_rk_bk=True)     # skip aspiranten
                       .order_by('indiv_klasse__volgorde',               # groepeer per klasse
                                 '-gemiddelde'))                         # aflopend gemiddelde
 

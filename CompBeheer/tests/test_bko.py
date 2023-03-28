@@ -180,11 +180,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         klasse_r = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='R',
                                                         is_onbekend=False,
-                                                        is_voor_rk_bk=True)[0]
+                                                        is_ook_voor_rk_bk=True)[0]
 
         klasse_c = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='C',
                                                         is_onbekend=False,
-                                                        is_voor_rk_bk=True)[0]
+                                                        is_ook_voor_rk_bk=True)[0]
 
         # recurve, lid 1
         RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_101,

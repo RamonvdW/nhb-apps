@@ -204,7 +204,7 @@ def _maak_competitieklassen(comp):
                             volgorde=indiv.volgorde,
                             beschrijving=indiv.beschrijving,
                             boogtype=indiv.boogtype,
-                            is_voor_rk_bk=not indiv.niet_voor_rk_bk,
+                            is_ook_voor_rk_bk=not indiv.niet_voor_rk_bk,
                             is_onbekend=indiv.is_onbekend,
                             is_aspirant_klasse=indiv.is_aspirant_klasse,
                             min_ag=AG_NUL)

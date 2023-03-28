@@ -134,7 +134,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         for wkl in (CompetitieIndivKlasse
                     .objects
                     .filter(competitie=deelkamp.competitie,
-                            is_voor_rk_bk=True)):             # verwijder regio-only klassen
+                            is_ook_voor_rk_bk=True)):             # verwijder regio-only klassen
             niet_gebruikt[100000 + wkl.pk] = wkl.beschrijving
         # for
 
@@ -335,7 +335,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         wkl_indiv = (CompetitieIndivKlasse
                      .objects
                      .filter(competitie=deelkamp.competitie,
-                             is_voor_rk_bk=True)      # verwijder regio-only klassen
+                             is_ook_voor_rk_bk=True)      # verwijder regio-only klassen
                      .select_related('boogtype')
                      .order_by('volgorde')
                      .all())
@@ -703,7 +703,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
                                             .objects
                                             .filter(competitie=deelkamp.competitie,
-                                                    is_voor_rk_bk=True)
+                                                    is_ook_voor_rk_bk=True)
                                             .select_related('boogtype')
                                             .order_by('volgorde'))
 
@@ -790,7 +790,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         for ckl in (CompetitieIndivKlasse
                     .objects
                     .filter(competitie=comp,
-                            is_voor_rk_bk=True)):
+                            is_ook_voor_rk_bk=True)):
 
             sel = 'isel_%s' % ckl.pk
             keuze = request.POST.get(sel, None)

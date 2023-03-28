@@ -131,7 +131,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         for wkl in (CompetitieIndivKlasse
                     .objects
                     .filter(competitie=deelkamp.competitie,
-                            is_voor_rk_bk=True)):             # verwijder regio-only klassen
+                            is_ook_voor_rk_bk=True)):             # verwijder regio-only klassen
             niet_gebruikt[100000 + wkl.pk] = wkl.beschrijving
         # for
 
@@ -310,7 +310,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         wkl_indiv = (CompetitieIndivKlasse
                      .objects
                      .filter(competitie=deelkamp.competitie,
-                             is_voor_rk_bk=True)      # verwijder regio-only klassen
+                             is_ook_voor_rk_bk=True)      # verwijder regio-only klassen
                      .select_related('boogtype')
                      .order_by('volgorde')
                      .all())
@@ -588,7 +588,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         goede_wkl_indiv_pks = list(CompetitieIndivKlasse
                                    .objects
                                    .filter(competitie=deelkamp.competitie,
-                                           is_voor_rk_bk=True)      # verwijder regio-only klassen
+                                           is_ook_voor_rk_bk=True)      # verwijder regio-only klassen
                                    .values_list('pk', flat=True))
         goede_wkl_team_pks = list(CompetitieTeamKlasse
                                   .objects
@@ -689,7 +689,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
                                             .objects
                                             .filter(competitie=deelkamp.competitie,
-                                                    is_voor_rk_bk=True)
+                                                    is_ook_voor_rk_bk=True)
                                             .select_related('boogtype')
                                             .order_by('volgorde'))
 
@@ -776,7 +776,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         for ckl in (CompetitieIndivKlasse
                     .objects
                     .filter(competitie=comp,
-                            is_voor_rk_bk=True)):
+                            is_ook_voor_rk_bk=True)):
 
             sel = 'isel_%s' % ckl.pk
             keuze = request.POST.get(sel, None)

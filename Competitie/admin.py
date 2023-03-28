@@ -526,7 +526,7 @@ class RkBkIndivKlasseFilter(admin.SimpleListFilter):
         """ Return list of tuples for the sidebar """
         return [(klasse.volgorde, klasse.beschrijving) for klasse in (CompetitieIndivKlasse
                                                                       .objects
-                                                                      .filter(is_voor_rk_bk=True)
+                                                                      .filter(is_ook_voor_rk_bk=True)
                                                                       .distinct('volgorde')
                                                                       .order_by('volgorde'))]
 
