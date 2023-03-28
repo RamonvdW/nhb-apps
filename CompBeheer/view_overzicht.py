@@ -45,7 +45,6 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
-        context['toon_functies'] = self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)       # TODO: waarom niet voor RCL?
 
         try:
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
