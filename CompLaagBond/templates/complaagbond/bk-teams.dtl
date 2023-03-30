@@ -86,8 +86,8 @@
 
                 {% if aantal_attentie %}
                     <tr>
-                        <td class="center"><i class="red-text in-table-icon material-icons-round">warning</i></td>
-                        <td class="red-text">Attentie</td>
+                        <td class="center"><i class="nhb-rood-text in-table-icon material-icons-round">warning</i></td>
+                        <td class="nhb-rood-text">Attentie</td>
                         <td class="center">{{ aantal_attentie }}</td>
                     </tr>
                 {% endif %}

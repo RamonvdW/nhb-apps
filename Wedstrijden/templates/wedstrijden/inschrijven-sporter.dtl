@@ -166,8 +166,8 @@
 
                     <tr>
                         <th>Lid bij vereniging</th>
-                        <td>{% if geselecteerd.sporter.bij_vereniging %}<span>{{ geselecteerd.sporter.bij_vereniging }}</span>{% else %}<i class="red-text">Geen</i>{% endif %}
-                            {% if geselecteerd.block_ver %}<span class="red-text"> (geen wedstrijden)</span>{% endif %}
+                        <td>{% if geselecteerd.sporter.bij_vereniging %}<span>{{ geselecteerd.sporter.bij_vereniging }}</span>{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}
+                            {% if geselecteerd.block_ver %}<span class="nhb-rood-text"> (geen wedstrijden)</span>{% endif %}
                         </td>
                     </tr>
 
@@ -179,7 +179,7 @@
                     {% if uitleg_geslacht %}
                         <tr>
                             <th>Keuze voor mannen of vrouwen</th>
-                            <td class="red-text">Om in te kunnen schrijven op deze wedstrijd moet je kiezen<br>of je met de mannen of vrouwen meedoet.<br>Maak deze keuze op Mijn pagina, Voorkeuren.</td>
+                            <td class="nhb-rood-text">Om in te kunnen schrijven op deze wedstrijd moet je kiezen<br>of je met de mannen of vrouwen meedoet.<br>Maak deze keuze op Mijn pagina, Voorkeuren.</td>
                         </tr>
                     {% endif %}
 
@@ -190,7 +190,7 @@
 
                     <tr>
                         <th>Mogelijke leeftijdsklassen voor deze wedstrijd</th>
-                        <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="red-text">Geen</span>{% endfor %}</td>
+                        <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="nhb-rood-text">Geen</span>{% endfor %}</td>
                     </tr>
 
                     {% if ingeschreven_op_sessie %}

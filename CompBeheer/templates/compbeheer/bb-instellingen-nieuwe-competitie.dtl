@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2022 Ramon van der Winkel.
+                Copyright (c) 2019-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -43,8 +43,8 @@
                 {% for obj in indivklassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
-                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
-                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
                         <td>{{ obj.boogtype.beschrijving }}</td>
                         <td>
                             {% for lkl in obj.lkl_list %}
@@ -81,8 +81,8 @@
                 {% for obj in teamklassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
-                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
-                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="red-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
                         <td>
                             {% for boogtype in obj.boogtypen_list %}
                                 <span>{{ boogtype }}</span><br>

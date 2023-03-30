@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2022 Ramon van der Winkel.
+                Copyright (c) 2019-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -31,13 +31,13 @@
 
                             <td class="center">
                                 {% if obj.bevinding == "4" %}
-                                    <i class="material-icons-round red-text">thumb_down</i>
+                                    <i class="material-icons-round nhb-rood-text">thumb_down</i>
                                 {% elif obj.bevinding == "6" %}
                                     <i class="material-icons-round">thumbs_up_down</i>
                                 {% elif obj.bevinding == "8" %}
                                     <i class="material-icons-round green-text">thumb_up</i>
                                 {% else %}
-                                    <span class="red-text">{{ obj.bevinding }}</span>
+                                    <span class="nhb-rood-text">{{ obj.bevinding }}</span>
                                 {% endif %}
                             </td>
 

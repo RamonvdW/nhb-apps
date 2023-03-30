@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -62,7 +62,7 @@
                 <div class="col s12">
                     <h4>Nog niet geplaatste teams</h4>
                     <p>De volgende teams zijn niet compleet en daarom niet geplaatst in een wedstrijdklasse.</p>
-                    <p class="red-text">Dit moet eerst opgelost worden: sporters koppelen of het team verwijderen.</p>
+                    <p class="nhb-rood-text">Dit moet eerst opgelost worden: sporters koppelen of het team verwijderen.</p>
                 </div>
             </div>
 
@@ -85,8 +85,8 @@
                                 <tr>
                                     <td>{{ team.vereniging }}</td>
                                     <td>{{ team.team_type.beschrijving }}</td>
-                                    <td class="center{% if team.aantal_sporters < 3 %} red-text"{% endif %}">{{ team.aantal_sporters }}</td>
-                                    <td>{% if team.poule %}{{ team.poule }}{% else %}<span class="red-text">Geen</span>{% endif %}</td>
+                                    <td class="center{% if team.aantal_sporters < 3 %} nhb-rood-text"{% endif %}">{{ team.aantal_sporters }}</td>
+                                    <td>{% if team.poule %}{{ team.poule }}{% else %}<span class="nhb-rood-text">Geen</span>{% endif %}</td>
                                     <td>{{ team.team_naam }}</td>
                                 </tr>
                             {% endif %}
@@ -123,7 +123,7 @@
                 {% if toon_som %}
                     <p>Het is niet nodig om wedstrijdpunten toe te kennen.</p>
                 {% else %}
-                    <p>Hieronder staan de team scores en voorgestelde wedstrijdpunten.<br>Eventuele scores <span class="red-text">in rood</span> geven aan dat deze uit minder dan 3 scores opgebouwd is.</p>
+                    <p>Hieronder staan de team scores en voorgestelde wedstrijdpunten.<br>Eventuele scores <span class="nhb-rood-text">in rood</span> geven aan dat deze uit minder dan 3 scores opgebouwd is.</p>
                 {% endif %}
 
             </div>
@@ -153,9 +153,9 @@
                                 <td>{{ regel.team1_str }}</td>
                                 <td>{% if regel.team2_is_bye %}<i class="grey-text">Bye</i>{% else %}{{ regel.team2_str }}{% endif %}</td>
                                 <td class="center">
-                                    <span{% if regel.team1_score_count < 3 %} class="red-text"{% endif %}>{{ regel.team1_score }}</span>
+                                    <span{% if regel.team1_score_count < 3 %} class="nhb-rood-text"{% endif %}>{{ regel.team1_score }}</span>
                                     <span> - </span>
-                                    <span{% if regel.team2_score_count < 3 %} class="red-text"{% endif %}>{{ regel.team2_score }}</span>
+                                    <span{% if regel.team2_score_count < 3 %} class="nhb-rood-text"{% endif %}>{{ regel.team2_score }}</span>
                                 </td>
                                 <td class="center">{{ regel.team1_wp }} - {{ regel.team2_wp }}</td>
                             </tr>
@@ -216,7 +216,7 @@
 
                     {% if is_redelijk %}
 
-                        <p><span class="red-text"><b>Let op: </b></span>Eventuele discussies over individuele scores moeten afgerond zijn. Na het afsluiten van deze ronde worden de teamscores{% if not toon_som %} en wedstrijdpunten{% endif %} bevroren.</p>
+                        <p><span class="nhb-rood-text"><b>Let op: </b></span>Eventuele discussies over individuele scores moeten afgerond zijn. Na het afsluiten van deze ronde worden de teamscores{% if not toon_som %} en wedstrijdpunten{% endif %} bevroren.</p>
 
                         <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
                             <button class="btn-nhb-rood">Ronde {{ deelcomp.huidige_team_ronde }} nu afsluiten</button>

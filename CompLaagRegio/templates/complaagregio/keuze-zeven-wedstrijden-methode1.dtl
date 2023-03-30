@@ -34,9 +34,9 @@
             const el = document.getElementById('submit')
             el.disabled = (count > 7)
             if (count > 7) {
-                el_aantal.classList.add('red-text')
+                el_aantal.classList.add('nhb-rood-text')
             } else {
-                el_aantal.classList.remove('red-text')
+                el_aantal.classList.remove('nhb-rood-text')
             }
         }
 

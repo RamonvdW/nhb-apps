@@ -73,7 +73,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_wissel_van_rol }}">
-                                <i class="material-icons-round red-text">people_alt</i>Wissel van rol</a>
+                                <i class="material-icons-round nhb-rood-text">people_alt</i>Wissel van rol</a>
                         </li>
                     {% endif %}
 
@@ -81,7 +81,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="material-icons-round red-text">build</i>Admin site</a>
+                                <i class="material-icons-round nhb-rood-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
 
@@ -89,7 +89,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_taken }}">
-                                <i class="material-icons-round red-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+                                <i class="material-icons-round nhb-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
                             </a>
                         </li>
                     {% endif %}
@@ -98,7 +98,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_profiel }}">
-                                <i class="material-icons-round red-text">portrait</i>Mijn pagina</a>
+                                <i class="material-icons-round nhb-rood-text">portrait</i>Mijn pagina</a>
                         </li>
                     {% endif %}
 
@@ -106,7 +106,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_uitloggen }}">
-                                <i class="material-icons-round red-text">logout</i>Uitloggen</a>
+                                <i class="material-icons-round nhb-rood-text">logout</i>Uitloggen</a>
                         </li>
                     {% endif %}
                 </ul>

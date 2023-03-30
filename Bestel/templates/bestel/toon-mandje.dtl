@@ -154,7 +154,7 @@
                         </table>
 
                         {% if bevat_fout %}
-                            <p class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
+                            <p class="center nhb-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
                         {% else %}
                             <div class="center" style="margin-top:30px">
                                 <form action="{{ url_bestellen }}" method="post">

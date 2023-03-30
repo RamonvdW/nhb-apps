@@ -13,7 +13,6 @@
     <script type="application/javascript">
         function alleen_medailles() {
             const tab = document.getElementById("medal-table");
-            console.log(tab);
             for(let row of tab.rows) {
                 if (row.dataset['medal'] === "0") {
                     row.style.display = "none";

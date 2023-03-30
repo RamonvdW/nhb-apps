@@ -76,7 +76,7 @@
                 {% if bestellingen %}
                     <p>{{ bestellingen|length }} bestellingen gevonden</p>
                 {% else %}
-                    <p class="red-text">Niets gevonden</p>
+                    <p class="nhb-rood-text">Niets gevonden</p>
                 {% endif %}
             {% else %}
                 <h4>Recente bestellingen</h4>
@@ -136,7 +136,7 @@
                                                 <span class="grey-text">Nieuw | Te betalen | Afgerond | Mislukt | </span>
                                                 <span>Geannuleerd</span>
                                             {% else %}
-                                                <i class="red-text">Onverwacht ({{ bestelling.status }})</i>
+                                                <i class="nhb-rood-text">Onverwacht ({{ bestelling.status }})</i>
                                             {% endif %}
                                         </td>
                                     </tr>

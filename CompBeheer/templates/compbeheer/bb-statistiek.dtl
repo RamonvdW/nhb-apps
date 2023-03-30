@@ -96,7 +96,7 @@
 
                 {% if aantal_18m_teams_niet_af > 0 or aantal_25m_teams_niet_af > 0%}
                     <tr>
-                        <th class="red-text">Aantal teams nog niet af</th>
+                        <th class="nhb-rood-text">Aantal teams nog niet af</th>
                         <td></td>
                         <td class="right-align">{{ aantal_18m_teams_niet_af }}</td>
                         <td class="right-align" style="padding-right:15px">{{ aantal_25m_teams_niet_af }}</td>

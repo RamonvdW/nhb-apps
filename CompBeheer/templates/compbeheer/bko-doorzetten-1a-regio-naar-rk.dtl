@@ -29,7 +29,7 @@
 &bull; De RKO's een seintje krijgen (via een taak) dat de deelnemerslijsten voor de RK's opgesteld zijn.<br>
 &bull; De nieuwste historische uitslag aangemaakt wordt waaruit de AG's voor een nieuwe competitie vastgesteld kunnen worden.</p>
 
-                <p class="red-text">Na deze actie moeten de HWL's geïnformeerd worden dat ze de RK teams weer compleet moeten maken.</p>
+                <p class="nhb-rood-text">Na deze actie moeten de HWL's geïnformeerd worden dat ze de RK teams weer compleet moeten maken.</p>
 
                 {% if url_doorzetten %}
 
@@ -52,7 +52,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Wacht</h4>
-                <p>De regiocompetitie kan op dit moment nog niet doorgezet worden.<br><span class="red-text">Wacht tot de tijdlijn fase G bereikt heeft.</span><br>In de tabel hieronder kan je zien op welke regio's we moeten wachten.</p>
+                <p>De regiocompetitie kan op dit moment nog niet doorgezet worden.<br><span class="nhb-rood-text">Wacht tot de tijdlijn fase G bereikt heeft.</span><br>In de tabel hieronder kan je zien op welke regio's we moeten wachten.</p>
             </div>
         </div>
 

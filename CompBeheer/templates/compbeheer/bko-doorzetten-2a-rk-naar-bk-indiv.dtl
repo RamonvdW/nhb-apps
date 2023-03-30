@@ -35,7 +35,7 @@
 
                 {% else %}
 
-                    <h4 class="red-text">Wacht</h4>
+                    <h4 class="nhb-rood-text">Wacht</h4>
                     <p>De rayonkampioenschappen kunnen op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase N bereikt heeft.</p>
 
                 {% endif %}

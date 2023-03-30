@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -70,7 +70,7 @@
                         <tr>
                             <td>{{ account.volledige_naam }}</td>
                             <td>{{ account.geo_beschrijving }}</td>
-                            <td class="nhb-red-text">{{ account.let_op }}</td>
+                            <td class="nhb-nhb-rood-text">{{ account.let_op }}</td>
                             <td class="center">
                                 <a class="btn-nhb-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
                                     <i class="material-icons-round left">delete</i>Verwijder</a>

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -107,7 +107,7 @@
                                 // intern probleem
                                 const el = document.getElementById('id_bericht')
                                 el.innerText = "Er is een probleem opgetreden met deze bestelling"
-                                el.classList.add('red-text')
+                                el.classList.add('nhb-rood-text')
 
                                 retry = false;      // stop trying
                             }
@@ -151,7 +151,7 @@
             } else {
                 const el = document.getElementById('id_bericht')
                 el.innerText = "Het is op dit moment niet mogelijk om te betalen. Probeer het later nog eens"
-                el.classList.add('red-text')
+                el.classList.add('nhb-rood-text')
             }
         }
 

@@ -79,7 +79,7 @@
                                                         </label>
                                                     </td>
                                                     <td>{{ team.team_naam }}</td>
-                                                    <td><i>Onbekend</i><span class="red-text">&nbsp;&nbsp;&nbsp;(team is niet compleet)</span></td>
+                                                    <td><i>Onbekend</i><span class="nhb-rood-text">&nbsp;&nbsp;&nbsp;(team is niet compleet)</span></td>
                                                 </tr>
                                             {% endif %}
                                         {% endfor %}

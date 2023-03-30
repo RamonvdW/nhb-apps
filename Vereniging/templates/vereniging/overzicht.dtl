@@ -63,12 +63,12 @@
                 {% comment %}
                 <tr>
                     <th>Telefoonnummer</th>
-                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
                 </tr>
 
                 <tr>
                     <th>KvK nummer</th>
-                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
                 </tr>
                 {% endcomment %}
 

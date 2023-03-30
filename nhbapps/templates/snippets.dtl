@@ -94,7 +94,7 @@
                         {% csrf_token %}
 
                         {% if foutmelding %}
-                            <p class="red-text">Fout: {{ foutmelding }}</p>
+                            <p class="nhb-rood-text">Fout: {{ foutmelding }}</p>
                             <p>&nbsp;</p>
                         {% endif %}
 

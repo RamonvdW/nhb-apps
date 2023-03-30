@@ -45,7 +45,7 @@
                         {% if week_actief %}
                             <span>{{ week_actief.week_nr }} ({{ week_actief.maandag|date:"l j F Y" }})</span>
                         {% else %}
-                            <i class="red-text">Ongeldige week</i>
+                            <i class="nhb-rood-text">Ongeldige week</i>
                         {% endif %}
                     </td>
                 </tr>
@@ -170,13 +170,13 @@
                             {% if wedstrijd.vereniging %}
                                 <span>{{ wedstrijd.vereniging }}</span>
                             {% else %}
-                                <i class="red-text">Vereniging onbekend</i>
+                                <i class="nhb-rood-text">Vereniging onbekend</i>
                             {% endif %}
                             <br>
                             {% if wedstrijd.locatie %}
                                 <span>Locatie: {{ wedstrijd.locatie.plaats }}</span>
                             {% else %}
-                                <i class="red-text">Locatie onbekend</i>
+                                <i class="nhb-rood-text">Locatie onbekend</i>
                             {% endif %}
                         </td>
 

@@ -122,7 +122,7 @@
                             {% if obj.locatie.baan_type == 'X' %}
                                 <!-- ga er vanuit dat nog niets ingevuld is -->
                                 {% if not obj.heeft_externe_locaties %}
-                                    <i class="material-icons-round red-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
+                                    <i class="material-icons-round nhb-rood-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
                                     <br>
                                 {% endif %}
                             {% else %}

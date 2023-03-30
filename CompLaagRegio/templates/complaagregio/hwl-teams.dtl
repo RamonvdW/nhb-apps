@@ -58,14 +58,14 @@
                         <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
                         <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
                         <td>{{ team.team_naam }}</td>
-                        <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
+                        <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} nhb-rood-text{% endif %}">{{ team.aantal }}</td>
 
                         {% if team.team_klasse %}
                             <td class="hide-on-small-only">{{ team.ag_str }}</td>
                             <td>{{ team.team_klasse.beschrijving }}</td>
                         {% else %}
                             <td class="hide-on-small-only"></td>
-                            <td><i class="red-text">team is niet compleet</i></td>
+                            <td><i class="nhb-rood-text">team is niet compleet</i></td>
                         {% endif %}
 
                         <td>
@@ -133,7 +133,7 @@
                         <td>{{ deelnemer.boog_str }}</td>
                         <td>{{ deelnemer.naam_str }}</td>
                         <td>{{ deelnemer.in_team_str }}</td>
-                        <td{% if deelnemer.rood_ag %} class="red-text"{% endif %}>{{ deelnemer.ag_str }}</td>
+                        <td{% if deelnemer.rood_ag %} class="nhb-rood-text"{% endif %}>{{ deelnemer.ag_str }}</td>
                         <td>
                             {% if deelnemer.url_wijzig_ag %}
                                 <a class="btn-nhb-rood" href="{{ deelnemer.url_wijzig_ag }}">

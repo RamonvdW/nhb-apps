@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -94,7 +94,7 @@
                                 <span>{{ beheerder }}</span>
                             {% empty %}
                                 {% if obj.wijzig_url %}
-                                    <i class="red-text">Nog niet gekoppeld</i>
+                                    <i class="nhb-rood-text">Nog niet gekoppeld</i>
                                 {% else %}
                                     <i class="grey-text">Nog niet gekoppeld</i>
                                 {% endif %}
@@ -112,7 +112,7 @@
                                 <code>{{ obj.bevestigde_email }}</code>
                             {% else %}
                                 {% if obj.email_url %}
-                                    <i class="red-text">Geen</i>
+                                    <i class="nhb-rood-text">Geen</i>
                                 {% else %}
                                     <i class="grey-text">Geen</i>
                                 {% endif %}

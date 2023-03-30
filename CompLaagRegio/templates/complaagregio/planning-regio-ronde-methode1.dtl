@@ -75,7 +75,7 @@
                                 {% if wedstrijd.vereniging %}
                                     <span>{{ wedstrijd.vereniging }}</span>
                                 {% else %}
-                                    <i class="red-text">Onbekend</i>
+                                    <i class="nhb-rood-text">Onbekend</i>
                                 {% endif %}
                             </td>
 

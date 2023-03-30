@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2022 Ramon van der Winkel.
+                Copyright (c) 2019-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -22,7 +22,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Wedstrijden World Archery</h4>
-            <p>Dit jaar bereik je de leeftijd <b class="red-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="red-text">{{ lkl_wa_dit_jaar }}</b></p>
+            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="nhb-rood-text">{{ lkl_wa_dit_jaar }}</b></p>
         </div>
     </div>
 
@@ -89,7 +89,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Wedstrijden IFAA</h4>
-            <p>Dit jaar bereik je de leeftijd <b class="red-text">{{ leeftijd }} jaar</b></p>
+            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b></p>
         </div>
     </div>
 
@@ -139,8 +139,8 @@
             <h4>Wedstrijden NHB</h4>
             <p>De NHB wedstrijdklassen zijn gebaseerd op World Archery, uitgebreid met extra klassen voor de jongsten en oudsten.</p>
             <p>Verder hebben NHB wedstrijden de optie tot gender-neutrale wedstrijdklassen.</p>
-            <p>Dit jaar bereik je de leeftijd <b class="red-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="red-text">{{ lkl_nhb_dit_jaar_1 }}</b>
-                {% if lkl_nhb_dit_jaar_2 %}<span> of </span><b class="red-text">{{ lkl_nhb_dit_jaar_2 }}</b>{% endif %}.</p>
+            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="nhb-rood-text">{{ lkl_nhb_dit_jaar_1 }}</b>
+                {% if lkl_nhb_dit_jaar_2 %}<span> of </span><b class="nhb-rood-text">{{ lkl_nhb_dit_jaar_2 }}</b>{% endif %}.</p>
         </div>
     </div>
 
@@ -207,7 +207,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Bondscompetitie</h4>
-            <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} schiet je de bondscompetitie als <b class="red-text">{{ lkl_comp.1.tekst }}</b></p>
+            <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} schiet je de bondscompetitie als <b class="nhb-rood-text">{{ lkl_comp.1.tekst }}</b></p>
         </div>
     </div>
 

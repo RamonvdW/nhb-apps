@@ -418,7 +418,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Record</h4>
-                <p class="red-text">Geen records gevonden voor deze filter combinatie.</p>
+                <p class="nhb-rood-text">Geen records gevonden voor deze filter combinatie.</p>
             </div>
         </div>
 
