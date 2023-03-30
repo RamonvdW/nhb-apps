@@ -10,7 +10,7 @@ from django.http import JsonResponse, Http404, UnreadablePostError
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV, MUTATIE_KLEINE_KLASSE_TEAM
+from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV
 from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
                                Kampioenschap, KampioenschapSporterBoog)
 from Functie.definities import Rollen

@@ -21,7 +21,7 @@ from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, 
                                    MUTATIE_REGIO_TEAM_RONDE, MUTATIE_EXTRA_RK_DEELNEMER,
                                    MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
-                                   MUTATIE_KLEINE_KLASSE_INDIV, MUTATIE_KLEINE_KLASSE_TEAM)
+                                   MUTATIE_KLEINE_KLASSE_INDIV)
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTaken,
                                Regiocompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
@@ -1272,7 +1272,17 @@ class Command(BaseCommand):
             naar de klasse indiv_klasse (CompetitieIndivKlasse)
             en pas daarbij de volgorde en rank aan
         """
-        return
+        if deelnemer.indiv_klasse != indiv_klasse:
+
+            self.stdout.write('[INFO] Verplaats deelnemer %s van kleine klasse %s naar klasse %s' % (
+                                deelnemer, deelnemer.indiv_klasse, indiv_klasse))
+
+            deelnemer.indiv_klasse = indiv_klasse
+            deelnemer.save(update_fields=['indiv_klasse'])
+
+            # stel de deelnemerslijst van de nieuwe klasse opnieuw op
+            deelkamp = deelnemer.kampioenschap
+            self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse)
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
@@ -1330,6 +1340,10 @@ class Command(BaseCommand):
         elif code == MUTATIE_EXTRA_RK_DEELNEMER:
             self.stdout.write('[INFO] Verwerk mutatie %s: extra RK deelnemer' % mutatie.pk)
             self._verwerk_mutatie_extra_rk_deelnemer(mutatie.deelnemer)
+
+        elif code == MUTATIE_KLEINE_KLASSE_INDIV:
+            self.stdout.write('[INFO] Verwerk mutatie %s: kleine klassen indiv' % mutatie.pk)
+            self._verwerk_mutatie_klein_klassen_indiv(mutatie.deelnemer, mutatie.indiv_klasse)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))
