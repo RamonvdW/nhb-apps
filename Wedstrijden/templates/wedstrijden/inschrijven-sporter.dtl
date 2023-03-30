@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -89,6 +89,13 @@
                     <th>Wedstrijd locatie</th>
                     <td>{{ wed.locatie.adres|linebreaksbr }}</td>
                 </tr>
+
+                {% if wed.begrenzing_str %}
+                    <tr>
+                        <th>Doelgroep</th>
+                        <td>{{ wed.begrenzing_str }}</td>
+                    </tr>
+                {% endif %}
 
                 <tr>
                     <th>Bijzonder<wbr>heden</th>
@@ -207,8 +214,11 @@
             <div class="col s12">
                 <h4>Kies een sessie</h4>
                 {% if not kan_aanmelden %}
-
-                    <p class="red-text">Je kan niet inschrijven op deze wedstrijd.<br>Dit kan komen door je leeftijd en/of de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
+                    {% if wed.begrenzing_str %}
+                        <p class="nhb-rood-text">Je kan niet inschrijven op deze wedstrijd.<br>De doelgroep voor de wedstrijd is: {{ wed.begrenzing_str }}.</p>
+                    {% else %}
+                        <p class="nhb-rood-text">Je kan niet inschrijven op deze wedstrijd.<br>Dit kan komen door je leeftijd en/of de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
+                    {% endif %}
 
                 {% else %}
                                          <!-- N = NHB -->

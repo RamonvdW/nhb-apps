@@ -25,7 +25,9 @@ from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                     INSCHRIJVING_STATUS_TO_STR,
                                     WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
-                                    WEDSTRIJD_WA_STATUS_TO_STR)
+                                    WEDSTRIJD_WA_STATUS_TO_STR,
+                                    WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
+                                    WEDSTRIJD_BEGRENZING_RAYON)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from datetime import timedelta
 
@@ -208,6 +210,23 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
             sessie_pk2inschrijving[sessie_pk] = [inschrijving]
     # for
 
+    compatible_doelgroep = True
+
+    if wedstrijd.begrenzing == WEDSTRIJD_BEGRENZING_VERENIGING:
+        if sporter.bij_vereniging != wedstrijd.organiserende_vereniging:
+            compatible_doelgroep = False
+
+    elif wedstrijd.begrenzing == WEDSTRIJD_BEGRENZING_REGIO:
+        if sporter.bij_vereniging.regio != wedstrijd.organiserende_vereniging.regio:
+            compatible_doelgroep = False
+
+    elif wedstrijd.begrenzing == WEDSTRIJD_BEGRENZING_RAYON:
+        if sporter.bij_vereniging.regio.rayon != wedstrijd.organiserende_vereniging.regio.rayon:
+            compatible_doelgroep = False
+
+    if not compatible_doelgroep:
+        wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
+
     unsorted_wedstrijdklassen = list()
     for sessie in sessies:
         sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
@@ -251,7 +270,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                 klasse.is_compat = True
         # for
 
-        if compatible_boog and compatible_leeftijd and compatible_geslacht:
+        if compatible_boog and compatible_leeftijd and compatible_geslacht and compatible_doelgroep:
             try:
                 inschrijvingen = sessie_pk2inschrijving[sessie.pk]
             except KeyError:
@@ -271,6 +290,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
         sessie.compatible_boog = compatible_boog
         sessie.compatible_leeftijd = compatible_leeftijd
         sessie.compatible_geslacht = compatible_geslacht
+        sessie.compatible_doelgroep = compatible_doelgroep
 
         sessie.prijs_euro_sporter = wedstrijd.bepaal_prijs_voor_sporter(sporter)
     # for

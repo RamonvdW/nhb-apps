@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -69,14 +69,37 @@
         </div>
     </div>
 
-    <!-- blauw balk met wit informatie veld -->
+    <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="white" style="padding:10px">
-                <p>Hieronder kan je een andere sporter zoeken op NHB bondsnummer.</p>
-                <p>Deze sporter kan je inschrijven door een wedstrijd sessie toe te voegen aan jouw winkelmandje en daarna de bestelling te voltooien.</p>
-                <p>Let op: dit werkt alleen als de sporter een account heeft en onder zijn voorkeuren een boog heeft ingesteld welke past bij deze wedstrijd.</p>
-            </div>
+            <table class="white">
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ wed.titel }}</td>
+                </tr>
+
+                <tr>
+                    <th>Organiserende vereniging</th>
+                    <td>{{ wed.organiserende_vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Wedstrijd locatie</th>
+                    <td>{{ wed.locatie.adres|linebreaksbr }}</td>
+                </tr>
+
+                {% if wed.begrenzing_str %}
+                    <tr>
+                        <th>Doelgroep</th>
+                        <td>{{ wed.begrenzing_str }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Bijzonder<wbr>heden</th>
+                    <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
@@ -85,6 +108,10 @@
     <div class="row center">
         <div class="col s12">
             <h4>Zoeken</h4>
+
+            <p>Hieronder kan je een sporter zoeken op NHB bondsnummer.</p>
+            <p>Deze sporter kan je inschrijven door een wedstrijd sessie toe te voegen aan jouw winkelmandje en daarna de bestelling te voltooien.</p>
+            <p>Let op: dit werkt alleen als de sporter een account heeft en onder zijn voorkeuren een boog heeft ingesteld welke past bij deze wedstrijd.</p>
         </div>
     </div>
 
@@ -231,7 +258,11 @@
                     {% endif %}
 
                     {% if not kan_aanmelden %}
-                        <p class="red-text">Deze sporter kan niet ingeschreven worden op deze wedstrijd.<br>Dit kan komen door de leeftijd, geslacht of de ingestelde bogen.</p>
+                        {% if wed.begrenzing_str %}
+                            <p class="nhb-rood-text">Deze sporter kan niet ingeschreven worden op deze wedstrijd.<br>De doelgroep voor de wedstrijd is: {{ wed.begrenzing_str }}.</p>
+                        {% else %}
+                            <p class="nhb-rood-text">Deze sporter kan niet ingeschreven worden op deze wedstrijd.<br>Dit kan komen door de leeftijd, geslacht of de ingestelde bogen.</p>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
