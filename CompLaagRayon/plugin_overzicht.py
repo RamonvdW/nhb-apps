@@ -109,7 +109,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                             icoon="rule",
                             tekst="Selectie van sporters voor de Rayonkampioenschappen.",
                             url=url)
-                kaartjes_algemeen.append(kaartje)
+                kaartjes_indiv.append(kaartje)
 
             # RK limieten (indiv & teams)
             if 'J' <= comp.fase_indiv <= 'L' or 'J' <= comp.fase_teams <= 'L':
