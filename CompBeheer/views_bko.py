@@ -563,6 +563,7 @@ class BevestigEindstandBKIndivView(DoorzettenBasisView):
     url_name = 'bko-bevestig-eindstand-bk-indiv'
 
     def doorzetten(self, account, comp):
+        # TODO: zet ook deelkamp.is_klaar_indiv = True
         comp.bk_indiv_afgesloten = True
         comp.save(update_fields=['bk_indiv_afgesloten'])
 
@@ -577,6 +578,7 @@ class BevestigEindstandBKTeamsView(DoorzettenBasisView):
     url_name = 'bko-bevestig-eindstand-bk-teams'
 
     def doorzetten(self, account, comp):
+        # TODO: zet ook deelkamp.is_klaar_teams = True
         comp.bk_teams_afgesloten = True
         comp.save(update_fields=['bk_teams_afgesloten'])
 

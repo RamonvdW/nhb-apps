@@ -1157,16 +1157,6 @@ class Command(BaseCommand):
         # verwijder alle deelnemers van een voorgaande run
         KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk).delete()
 
-        # TODO: verwijder dit zodra het kaartje gemaakt is
-        # maak een vertaal tabel voor de individuele klassen voor seizoen 2022/2023
-        temp_klassen_map = dict()
-        # 1410 TR jeugd kl1  --> 1401 TR kl 2
-        # temp_klassen_map[1410] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1401)
-        # 1210 C Onder21 kl1 --> 1200 C kl 1
-        # temp_klassen_map[1210] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1200)
-        # 1221 C Onder18 kl2 --> 1220 C Onder18 kl1
-        # temp_klassen_map[1221] = CompetitieIndivKlasse.objects.get(competitie=deelkamp_bk.competitie, volgorde=1220)
-
         bulk = list()
         for kampioen in (KampioenschapSporterBoog
                          .objects
@@ -1191,23 +1181,15 @@ class Command(BaseCommand):
 
             # print('kampioen:', kampioen.result_rank, som_scores, gemiddelde_scores, "%.3f" % gemiddelde, kampioen)
 
-            is_verplaatst = False
-            try:
-                indiv_klasse = temp_klassen_map[kampioen.indiv_klasse.volgorde]
-                is_verplaatst = True
-            except KeyError:
-                # behoud oude klasse
-                indiv_klasse = kampioen.indiv_klasse
-
             nieuw = KampioenschapSporterBoog(
                         kampioenschap=deelkamp_bk,
                         sporterboog=kampioen.sporterboog,
-                        indiv_klasse=indiv_klasse,
+                        indiv_klasse=kampioen.indiv_klasse,
                         bij_vereniging=kampioen.bij_vereniging,
                         gemiddelde=gemiddelde,
                         gemiddelde_scores=gemiddelde_scores)
 
-            if kampioen.result_rank == 1 and not is_verplaatst:
+            if kampioen.result_rank == 1:
                 nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.nhb_rayon.naam
                 nieuw.deelname = DEELNAME_JA
 

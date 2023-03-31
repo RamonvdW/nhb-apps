@@ -88,11 +88,15 @@ class CompetitieOverzichtView(TemplateView):
             tussen_eind = "Eindstand"
         context['text_rayon_indiv'] = tussen_eind + ' voor de rayonkampioenschappen individueel'
 
+        # TODO: tussenstand/eindstand zou bepaald moeten worden ahv Kampioenschap.is_klaar_indiv / is_klaar_teams
         tussen_eind = "Tussen" if comp.fase_teams <= 'N' else "Eind"
         context['text_rayon_teams'] = tussen_eind + 'stand voor de rayonkampioenschappen teams'
 
-        context['text_bond_indiv'] = 'Tussenstand voor de landelijke bondskampioenschappen'
-        context['text_bond_teams'] = 'Tussenstand voor de landelijke bondskampioenschappen teams'
+        tussen_eind = "Tussen" if comp.fase_indiv <= 'P' else "Eind"
+        context['text_bond_indiv'] = tussen_eind + 'stand voor de landelijke bondskampioenschappen individueel'
+
+        tussen_eind = "Tussen" if comp.fase_teams <= 'P' else "Eind"
+        context['text_bond_teams'] = tussen_eind + 'stand voor de landelijke bondskampioenschappen teams'
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
