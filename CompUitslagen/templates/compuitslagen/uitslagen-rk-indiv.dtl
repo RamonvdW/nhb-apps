@@ -222,8 +222,8 @@
                         {% else %}
                             <td></td>
                         {% endif %}
-                        <td colspan="2"><i class="grey-text">volgt later</i></td>       <!-- RK scores -->
-
+                        <td><i class="grey-text">volgt later</i></td>       <!-- RK scores -->
+                        <td>{% if forloop.last %}&nbsp;{% endif %}</td>
                     {% endif %}
                 </tr>
 
