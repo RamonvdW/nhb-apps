@@ -13,9 +13,7 @@
     <script type="application/javascript">
         function toevoegen(id)
         {
-            // console.log('toevoegen: id=', id)
             const el = document.getElementById(id)
-            // console.log('el=', el)
 
             // voer een POST uit om toe te voegen
             let form = document.createElement('form');
@@ -207,7 +205,7 @@
         </div>
     </div>
 
-    {% if kan_aanmelden %}
+    {% if not al_ingeschreven %}
 
         <!-- witruimte -->
         <div class="row center">
@@ -228,44 +226,46 @@
             </div>
         </div>
 
-        <div class="row-nhb-blauw">
-            <div class="col s12">
-                <table class="white">
-                    <tr>
-                        <th class="center">Wanneer</th>
-                        <th class="center">Nog beschikbaar</th>
-                        <th class="center">Wedstrijdklasse</th>
-                        <th class="center">Prijs</th>
-                        <th><!-- kolom voor de knoppen --></th>
-                    </tr>
+        {% if kan_aanmelden %}
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+                    <table class="white">
+                        <tr>
+                            <th class="center">Wanneer</th>
+                            <th class="center">Nog beschikbaar</th>
+                            <th class="center">Wedstrijdklasse</th>
+                            <th class="center">Prijs</th>
+                            <th><!-- kolom voor de knoppen --></th>
+                        </tr>
 
-                    {% for sessie in sessies %}
-                        {% for klasse in sessie.klassen %}
-                            {% if klasse.is_compat %}
-                                <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
-                                    <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
-                                    <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
-                                    <td class="center">{{ klasse.beschrijving }}</td>
-                                    <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
-                                    <td class="center">
-                                        {% if sessie.kan_aanmelden %}
-                                            <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
-                                                <i class="material-icons-round">add</i></button>
-                                        {% else %}
-                                            {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
-                                            {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
-                                            {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br>{% endif %}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endif %}
+                        {% for sessie in sessies %}
+                            {% for klasse in sessie.klassen %}
+                                {% if klasse.is_compat %}
+                                    <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
+                                        <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                                        <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                                        <td class="center">{{ klasse.beschrijving }}</td>
+                                        <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
+                                        <td class="center">
+                                            {% if sessie.kan_aanmelden %}
+                                                <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
+                                                    <i class="material-icons-round">add</i></button>
+                                            {% else %}
+                                                {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
+                                                {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
+                                                {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br>{% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
-                </table>
+                    </table>
+                </div>
             </div>
-        </div>
-
-    {% endif %}
+        {% endif %}     <!-- kan_aanmelden -->
+        
+    {% endif %}     <!-- al_ingeschreven -->
 
     {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-familie" %}
 

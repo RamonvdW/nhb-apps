@@ -309,7 +309,7 @@
 
         {% endif %}     <!-- al ingeschreven -->
 
-    {% endif %}
+    {% endif %}     <!-- geselecteerd -->
 
     {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-groepje" %}
 

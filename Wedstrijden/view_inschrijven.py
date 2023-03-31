@@ -121,7 +121,7 @@ class WedstrijdDetailsView(TemplateView):
         if wedstrijd.is_ter_info:
             context['toon_inschrijven'] = False
         else:
-            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or wedstrijd.extern_beheerd
+            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or (wedstrijd.extern_beheerd and wedstrijd.contact_website)
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -778,10 +778,11 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                         context['inschrijving'] = inschrijving
                         inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
                 # for
+
                 context['al_ingeschreven'] = al_ingeschreven
 
                 # toon ook de sessie als de sporter geen compatibele boog heeft
-                context['kan_aanmelden'] = not al_ingeschreven  # kan_aanmelden
+                context['kan_aanmelden'] = kan_aanmelden
 
                 # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
                 # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
