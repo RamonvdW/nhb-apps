@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,9 +9,10 @@ from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Competitie.models import DeelcompetitieRonde, RegioCompetitieSporterBoog, INSCHRIJF_METHODE_1, CompetitieMatch
+from Competitie.definities import INSCHRIJF_METHODE_1
+from Competitie.models import RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch
 from Plein.menu import menu_dynamics
 
 
@@ -37,17 +38,17 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(self.kwargs['deelnemer_pk'][:6])       # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSporterBoog
+            deelnemer = (RegiocompetitieSporterBoog
                          .objects
-                         .select_related('deelcompetitie',
-                                         'deelcompetitie__competitie')
+                         .select_related('regiocompetitie',
+                                         'regiocompetitie__competitie')
                          .get(pk=deelnemer_pk,
-                              deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegioCompetitieSporterBoog.DoesNotExist):
+                              regiocompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
+        except (ValueError, TypeError, RegiocompetitieSporterBoog.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         context['deelnemer'] = deelnemer
-        comp = deelnemer.deelcompetitie.competitie
+        comp = deelnemer.regiocompetitie.competitie
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
@@ -63,11 +64,11 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         # zoek alle dagdelen erbij
         pks = list()
-        for ronde in (DeelcompetitieRonde
+        for ronde in (RegiocompetitieRonde
                       .objects
-                      .select_related('deelcompetitie')
+                      .select_related('regiocompetitie')
                       .prefetch_related('matches')
-                      .filter(deelcompetitie=deelnemer.deelcompetitie)):
+                      .filter(regiocompetitie=deelnemer.regiocompetitie)):
             pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
 
@@ -87,7 +88,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         for cluster in (ver
                         .clusters
                         .prefetch_related('nhbvereniging_set')
-                        .filter(gebruik=deelnemer.deelcompetitie.competitie.afstand)
+                        .filter(gebruik=deelnemer.regiocompetitie.competitie.afstand)
                         .all()):
             ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
             for ver_nr in ver_nrs:
@@ -134,7 +135,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (url_overzicht, 'Beheer Vereniging'),
                 (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
-                (reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}),
+                (reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk}),
                     'Wie schiet waar?'),
                 (None, 'Aanpassen')
             )
@@ -150,13 +151,13 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])       # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSporterBoog
+            deelnemer = (RegiocompetitieSporterBoog
                          .objects
-                         .select_related('deelcompetitie',
-                                         'deelcompetitie__competitie')
+                         .select_related('regiocompetitie',
+                                         'regiocompetitie__competitie')
                          .get(pk=deelnemer_pk,
-                              deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegioCompetitieSporterBoog.DoesNotExist):
+                              regiocompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
+        except (ValueError, TypeError, RegiocompetitieSporterBoog.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
@@ -172,11 +173,11 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         # zoek alle wedstrijden erbij
         pks = list()
-        for ronde in (DeelcompetitieRonde
+        for ronde in (RegiocompetitieRonde
                       .objects
-                      .select_related('deelcompetitie')
+                      .select_related('regiocompetitie')
                       .prefetch_related('matches')
-                      .filter(deelcompetitie=deelnemer.deelcompetitie)):
+                      .filter(regiocompetitie=deelnemer.regiocompetitie)):
             pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
 
@@ -219,7 +220,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
             url = reverse('Sporter:profiel')
         else:
             url = reverse('CompLaagRegio:wie-schiet-waar',
-                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+                          kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
 
         return HttpResponseRedirect(url)
 

@@ -10,7 +10,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
-from Functie.models import Functie, Rollen, rol2url
+from Functie.definities import Rollen, rol2url
+from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
 from Functie.rol import (rol_mag_wisselen, rol_enum_pallet, rol_get_huidige, rol_get_huidige_functie,
                          rol_get_beschrijving, rol_evalueer_opnieuw)
@@ -128,13 +129,14 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 objs.append(tup)
 
             elif rol == Rollen.ROL_NONE:
-                # TODO: deze is niet nodig
-                obj = Functie(beschrijving='Gebruiker')
-                obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                obj.selected = (self.rol_nu == rol)
-                obj.pk = volgorde = 90001
-                tup = (volgorde, obj.pk, obj)
-                objs.append(tup)
+                # wisselen naar "geen rol" kan alleen door uit te loggen
+                pass
+                # obj = Functie(beschrijving='Gebruiker')
+                # obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
+                # obj.selected = (self.rol_nu == rol)
+                # obj.pk = volgorde = 90001
+                # tup = (volgorde, obj.pk, obj)
+                # objs.append(tup)
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
@@ -145,20 +147,27 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     hierarchy2[parent_tup] = [child_tup]
         # for
-        del rol, functie_pk
 
         # haal alle functies met 1 database query op
         for obj in (Functie
                     .objects
                     .filter(pk__in=pks)
-                    .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
-                    .only('beschrijving', 'rol',
-                          'nhb_ver__ver_nr', 'nhb_ver__naam',
-                          'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
+                    .select_related('nhb_ver',
+                                    'nhb_regio',
+                                    'nhb_rayon')
+                    .only('beschrijving',
+                          'rol',
+                          'nhb_ver__ver_nr',
+                          'nhb_ver__naam',
+                          'nhb_ver__plaats',
+                          'nhb_rayon__rayon_nr',
+                          'nhb_regio__regio_nr')):
 
             obj.ver_naam = ''
             if obj.nhb_ver and obj.rol != 'MWW':
-                obj.ver_naam = obj.nhb_ver.naam
+                if obj.nhb_ver.plaats == '':
+                    obj.nhb_ver.plaats = 'onbekend'
+                obj.ver_naam = '%s (%s)' % (obj.nhb_ver.naam, obj.nhb_ver.plaats)
 
             if self.functie_nu:
                 obj.selected = (obj.pk == self.functie_nu.pk)
@@ -201,9 +210,13 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                         .select_related('nhb_ver',
                                         'nhb_regio',
                                         'nhb_rayon')
-                        .only('beschrijving', 'rol',
-                              'nhb_ver__ver_nr', 'nhb_ver__naam',
-                              'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
+                        .only('beschrijving',
+                              'rol',
+                              'nhb_ver__ver_nr',
+                              'nhb_ver__naam',
+                              'nhb_ver__plaats',
+                              'nhb_rayon__rayon_nr',
+                              'nhb_regio__regio_nr')):
                 pk2func[obj.pk] = obj
             # for
 
@@ -227,11 +240,15 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                     else:
                         kort = 'WL'
 
-                    kort += ' %s' % functie.nhb_ver.ver_nr
+                    ver = functie.nhb_ver
+                    kort += ' %s' % ver.ver_nr
+
+                    if ver.plaats == '':
+                        ver.plaats = 'onbekend'
 
                     objs.append({'titel': functie.beschrijving,
                                  'kort': kort,
-                                 'ver_naam': functie.nhb_ver.naam,
+                                 'ver_naam': '%s (%s)' % (ver.naam, ver.plaats),
                                  'url': url,
                                  'volgorde': volgorde,
                                  'pk': functie.pk})
@@ -246,19 +263,16 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
                 if rol == Rollen.ROL_HWL:
                     func = pk2func[functie_pk]
-                    ver = func.nhb_ver
 
-                    func.beschrijving = 'HWL %s ' % ver.ver_nr
-                    func.selected = (ver.ver_nr == selected_hwl)
+                    ver = functie.nhb_ver
+                    if ver.plaats == '':
+                        ver.plaats = 'onbekend'
+
+                    func.beschrijving = 'HWL %s %s (%s)' % (ver.ver_nr, ver.naam, ver.plaats)
+                    func.selected = (functie.nhb_ver.ver_nr == selected_hwl)
                     func.url = url
 
-                    naam = ver.naam
-                    if len(naam) > 30:
-                        naam = naam[:30].strip()
-                        naam += '..'
-                    func.beschrijving += naam
-
-                    tup = (ver.ver_nr, func)
+                    tup = (functie.nhb_ver.ver_nr, func)
                     hwls.append(tup)
             # for
 

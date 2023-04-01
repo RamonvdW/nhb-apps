@@ -10,10 +10,12 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (DeelKampioenschap, DEEL_BK, KampioenschapIndivKlasseLimiet,
-                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE,
-                               CompetitieMutatie, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN)
-from Functie.models import Rollen
+from Competitie.definities import (DEEL_BK,
+                                   DEELNAME_JA, DEELNAME_NEE,
+                                   MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN)
+from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet,
+                               CompetitieMutatie)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
@@ -27,13 +29,15 @@ import csv
 TEMPLATE_COMPBOND_BK_SELECTIE = 'complaagbond/bk-selectie.dtl'
 TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER = 'complaagbond/wijzig-status-bk-deelnemer.dtl'
 
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
+
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
 class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de (kandidaat) schutters van en RK zien,
-        met mogelijkheid voor de RKO om deze te bevestigen.
+    """ Deze view laat de (kandidaat) deelnemers van en BK zien,
+        met mogelijkheid voor de BKO om deze te bevestigen.
     """
 
     # class variables shared by all instances
@@ -54,18 +58,14 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # er zijn 2 situaties:
-        # 1) regiocompetities zijn nog niet afgesloten --> verwijst naar pagina tussenstand rayon
-        # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
-
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_BK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste BKO aan de knoppen zit
@@ -77,8 +77,10 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        if not deelkamp.heeft_deelnemerslijst or comp.fase > 'Q':
-            raise Http404('Verkeerde fase')
+        if comp.fase_indiv not in ('N', 'O', 'P'):
+            raise Http404('Verkeerde competitie fase')
+
+        # TODO: wel inzichtelijk maar readonly maken tijdens fase P
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -183,7 +185,7 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'BK selectie')
         )
 
@@ -193,7 +195,7 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
 
 class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
-    """ Deze klasse wordt gebruikt om de RK selectie lijst
+    """ Deze klasse wordt gebruikt om de BK selectie lijst
         te downloaden als csv bestand
     """
 
@@ -201,12 +203,12 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_BK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         if not deelkamp.heeft_deelnemerslijst:
@@ -214,7 +216,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         # laat alleen de juiste BKO de lijst ophalen
         if self.functie_nu != deelkamp.functie:
-            raise PermissionDenied('Niet de beheerder')     # niet de juiste RKO
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste BKO
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -242,7 +244,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="bond_alle.csv"'
 
         response.write(BOM_UTF8)
@@ -307,7 +309,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
 class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de BKO de status van een RK selectie aanpassen """
+    """ Deze view laat de BKO de status van een BK selectie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPBOND_WIJZIG_STATUS_BK_DEELNEMER
@@ -344,12 +346,8 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'P':
+        if comp.fase_indiv not in ('N', 'O'):
             raise Http404('Mag nog niet wijzigen')
-
-        # fase Q = wedstrijden, maar dan willen we de BKO toch de status nog aan laten passen
-        if comp.fase > 'Q':
-            raise Http404('Mag niet meer wijzigen')
 
         sporter = deelnemer.sporterboog.sporter
         deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
@@ -366,7 +364,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagBond:bk-selectie', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'BK selectie'),
             (None, 'Wijzig sporter status')
         )
@@ -389,10 +387,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'P':
-            raise Http404('Mag nog niet wijzigen')
-
-        if comp.fase > 'Q':
+        if comp.fase_indiv not in ('N', 'O'):
             raise Http404('Mag niet meer wijzigen')
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]
@@ -403,17 +398,17 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Geen toegang tot deze competitie')
 
         account = request.user
-        door_str = "RKO %s" % account.volledige_naam()
+        door_str = "BKO %s" % account.volledige_naam()
 
         if bevestig == "1":
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Sporter moet lid zijn bij een vereniging')
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_AANMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN,
                                         deelnemer=deelnemer,
                                         door=door_str)
         elif afmelden == "1":
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_AFMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN,
                                         deelnemer=deelnemer,
                                         door=door_str)
         else:

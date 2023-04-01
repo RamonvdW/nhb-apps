@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -63,12 +63,12 @@
                 {% comment %}
                 <tr>
                     <th>Telefoonnummer</th>
-                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
                 </tr>
 
                 <tr>
                     <th>KvK nummer</th>
-                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
                 </tr>
                 {% endcomment %}
 
@@ -82,37 +82,41 @@
         </div>
     </div>
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Wedstrijden</h4>
+    {% if toon_wedstrijden %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Wedstrijden</h4>
+            </div>
         </div>
-    </div>
 
-    <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
-        <div class="col s12">
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
 
-            <!-- competitiewedstrijden -->
-            {% if toon_competities %}
-                {% url 'CompScores:wedstrijden' as card_url %}
-                {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
-            {% endif %}
+                <!-- competitiewedstrijden -->
+                {% if toon_competities %}
+                    {% url 'CompScores:wedstrijden' as card_url %}
+                    {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+                {% endif %}
 
-            <!-- scores invoeren -->
-            {% if heeft_wedstrijden %}
-                {% url 'CompScores:wedstrijden-scores' as card_url %}
-                {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
-            {% endif %}
+                <!-- scores invoeren -->
+                {% if heeft_wedstrijden %}
+                    {% url 'CompScores:wedstrijden-scores' as card_url %}
+                    {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
+                {% endif %}
 
-            <!-- wedstrijdkalender (alleen voor de HWL) -->
-            {% if toon_wedstrijdkalender %}
-                {% url 'Wedstrijden:vereniging' as card_url %}
-                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
-            {% endif %}
+                <!-- wedstrijdkalender (alleen voor de HWL) -->
+                {% if toon_wedstrijdkalender %}
+                    {% url 'Wedstrijden:vereniging' as card_url %}
+                    {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+                {% endif %}
 
+            </div>
         </div>
-    </div>
+
+    {% endif %}
 
     <!-- competities -->
     {% for kaartje in kaartjes %}
@@ -122,7 +126,7 @@
             <div class="row center" id="{{ kaartje.anker }}">
                 <div class="col s12">
                     <h4>{{ kaartje.heading }}</h4>
-                    <p>Competitie fase {{ kaartje.comp_fase }}</p>
+                    <p>{{ kaartje.comp_fase_indiv }}{% if kaartje.comp_fase_teams %}<br>{{ kaartje.comp_fase_teams }}{% endif %}</p>
                 </div>
             </div>
 

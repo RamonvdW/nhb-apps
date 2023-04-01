@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,13 +11,12 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_IFAA
-from Functie.models import Rollen
+from BasisTypen.definities import ORGANISATIE_IFAA
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import (Wedstrijd, WedstrijdSessie,
-                                WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN,
-                                WEDSTRIJD_STATUS_GEANNULEERD)
+from Wedstrijden.definities import WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN, WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 from types import SimpleNamespace
 import datetime
 

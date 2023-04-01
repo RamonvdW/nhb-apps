@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import RegioCompetitieSporterBoog
+from Competitie.models import RegiocompetitieSporterBoog
 from CompLaagRegio.view_medailles import bepaal_medailles
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -80,7 +80,7 @@ class TestCompLaagRegioMedailles(E2EHelpers, TestCase):
         prev_volgorde = None
         nr = 0
         aantal = 0
-        for deelnemer in RegioCompetitieSporterBoog.objects.filter(deelcompetitie__nhb_regio__regio_nr=111).select_related('indiv_klasse').order_by('indiv_klasse'):
+        for deelnemer in RegiocompetitieSporterBoog.objects.filter(regiocompetitie__nhb_regio__regio_nr=111).select_related('indiv_klasse').order_by('indiv_klasse'):
             if deelnemer.indiv_klasse.volgorde != prev_volgorde:
                 prev_volgorde = deelnemer.indiv_klasse.volgorde
                 nr += 1

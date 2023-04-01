@@ -6,9 +6,9 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, ORGANISATIE_WA
-from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieIndivKlasse
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tijdlijn import zet_competitie_fase_regio_wedstrijden
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
@@ -31,7 +31,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
 
         self.comp_18m = Competitie.objects.get(afstand='18')
 
-        self.deelcomp103_18m = (DeelCompetitie
+        self.deelcomp103_18m = (Regiocompetitie
                                 .objects
                                 .get(competitie=self.comp_18m,
                                      nhb_regio__regio_nr=103))
@@ -40,7 +40,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                                 .objects
                                 .filter(competitie=self.comp_18m,
                                         boogtype=self.boog_bb,
-                                        is_voor_rk_bk=False)
+                                        is_ook_voor_rk_bk=False)
                                 .all())[0]
 
         # maak een test vereniging
@@ -86,7 +86,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             self.assertTrue('[INFO] Vandaag is 2000-01-01; gisteren is 1999-12-31' in f2.getvalue())
 
             # juiste fase en tijdstip, maar geen nieuwe inschrijvingen
-            zet_competitie_fase(self.comp_18m, 'E')
+            zet_competitie_fase_regio_wedstrijden(self.comp_18m)
             f1, f2 = self.run_management_command('meld_rcl_nieuwe_inschrijvingen')
             self.assertEqual(f1.getvalue(), '')
             self.assertTrue("[INFO] Aantal nieuwe taken aangemaakt voor de RCL's: 0" in f2.getvalue())
@@ -96,8 +96,8 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             mock_timezone.return_value = dt
 
             # schrijf iemand gisteren in
-            deelnemer = RegioCompetitieSporterBoog(
-                            deelcompetitie=self.deelcomp103_18m,
+            deelnemer = RegiocompetitieSporterBoog(
+                            regiocompetitie=self.deelcomp103_18m,
                             sporterboog=self.sporterboog,
                             bij_vereniging=self.ver,
                             indiv_klasse=self.indiv_klasse_bb)

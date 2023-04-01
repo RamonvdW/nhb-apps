@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import forms
+from django.urls import resolve, Resolver404
 
 
 class ZoekBeheerdersForm(forms.Form):
@@ -57,8 +58,7 @@ class OTPControleForm(forms.Form):
                         required=False,
                         widget=forms.HiddenInput())
 
-    def is_valid(self):
-        valid = super(forms.Form, self).is_valid()
+    def _validate_otp_code(self, valid):
         if valid:
             otp_code = self.cleaned_data.get('otp_code')
             try:
@@ -69,9 +69,28 @@ class OTPControleForm(forms.Form):
             except ValueError:
                 self.add_error(None, 'Voer de vereiste code in')
                 valid = False
-        else:
-            self.add_error(None, 'De gegevens worden niet geaccepteerd')
+        return valid
 
+    def _validate_next_url(self, valid):
+        if valid:
+            next_url = self.cleaned_data.get('next_url')
+            if next_url:
+                if next_url[-1] != '/':
+                    next_url += '/'
+                try:
+                    resolve(next_url)
+                except Resolver404:
+                    # cancel this invalid URL
+                    valid = False
+        return valid
+
+    def is_valid(self):
+        valid = super(forms.Form, self).is_valid()
+        valid = self._validate_otp_code(valid)
+        valid = self._validate_next_url(valid)
+
+        if not valid:
+            self.add_error(None, 'De gegevens worden niet geaccepteerd')
         return valid
 
 

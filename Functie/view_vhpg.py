@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,8 @@ from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.rechten import account_rechten_eval_now
-from Functie.models import Rollen, VerklaringHanterenPersoonsgegevens
+from Functie.definities import Rollen
+from Functie.models import VerklaringHanterenPersoonsgegevens
 from Functie.operations import account_needs_vhpg
 from Functie.rol import rol_get_huidige
 from Functie.forms import AccepteerVHPGForm

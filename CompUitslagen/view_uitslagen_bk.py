@@ -4,13 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from Competitie.models import (Competitie, CompetitieMatch, DeelKampioenschap,
-                               KampioenschapSporterBoog, KampioenschapTeam,
+from django.views.generic import TemplateView
+from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN
+from Competitie.models import (Competitie, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               DEEL_BK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN)
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 import datetime
@@ -72,17 +72,17 @@ class UitslagenBKIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         try:
-            deelkamp_bk = (DeelKampioenschap
+            deelkamp_bk = (Kampioenschap
                            .objects
                            .select_related('competitie')
                            .get(deel=DEEL_BK,
                                 competitie__is_afgesloten=False,
                                 competitie__pk=comp_pk))
-        except DeelKampioenschap.DoesNotExist:
+        except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
-        if comp.fase == 'P':
-            context['bevestig_tot_datum'] = comp.bk_eerste_wedstrijd - datetime.timedelta(days=14)
+        if comp.fase_indiv == 'O':
+            context['bevestig_tot_datum'] = comp.begin_fase_P_indiv - datetime.timedelta(days=14)
 
         # haal de planning erbij: competitie klasse --> competitie match
         indiv2match = dict()    # [indiv_pk] = CompetitieMatch
@@ -265,13 +265,13 @@ class UitslagenBKTeamsView(TemplateView):
             raise Http404('Team type niet bekend')
 
         try:
-            deelkamp_bk = (DeelKampioenschap
+            deelkamp_bk = (Kampioenschap
                            .objects
                            .select_related('competitie')
                            .get(deel=DEEL_BK,
                                 competitie__is_afgesloten=False,
                                 competitie__pk=comp_pk))
-        except DeelKampioenschap.DoesNotExist:
+        except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
         # als de gebruiker ingelogd is, laat dan de voor de teams van zijn vereniging zien wie er in de teams zitten

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -86,7 +86,7 @@
                         <td>[{{ wed.organiserende_vereniging.ver_nr }}]<span class="hide-on-med-and-down"> {{ wed.organiserende_vereniging.naam }}</span></td>
                         <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="nhb-blauw-text">Nog niet ingevuld</i>{% endif %}</td>
                         <td>{{ wed.disc_str }}</td>
-                        <td{% if wed.status_val_op %} class="red-text"{% endif %}>{{ wed.status_str }}</td>
+                        <td{% if wed.status_val_op %} class="nhb-rood-text"{% endif %}>{{ wed.status_str }}</td>
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                 <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">

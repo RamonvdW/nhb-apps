@@ -8,11 +8,14 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, AG_NUL,
-                               RegiocompetitieTeam, RegioCompetitieSporterBoog, RegiocompetitieRondeTeam)
-from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
+from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
+from Competitie.tijdlijn import (zet_test_datum, zet_competitie_fases,
+                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven)
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
+from Score.definities import AG_NUL
 from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -33,6 +36,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
     url_team_invallers = '/bondscompetities/regio/teams-vereniging/%s/invallers/'               # deelcomp_pk
     url_team_invallers_koppelen = '/bondscompetities/regio/teams-vereniging/invallers-koppelen/%s/'  # ronde_team_pk
     url_rcl_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'                           # deelcomp_pk
+    url_overzicht_beheer = '/bondscompetities/beheer/%s/'                                       # comp_pk
 
     testdata = None
 
@@ -83,7 +87,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100001 = sporter
 
-        jaar = timezone.now().year
+        zet_test_datum('2019-09-01')
+        jaar = 2019
 
         # maak een aspirant aan
         sporter = Sporter()
@@ -227,15 +232,15 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
-        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c(startjaar=2019)
 
-        self.deelcomp18_regio111 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
-                                                              competitie__afstand=18)
+        self.deelcomp18_regio111 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+                                                               competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
-        self.deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                                              nhb_regio=self.regio_111)
+        self.deelcomp25_regio111 = Regiocompetitie.objects.get(competitie=self.comp_25,
+                                                               nhb_regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -306,10 +311,10 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
             # print('aantal ingeschreven deelnemers:', RegioCompetitieSporterBoog.objects.count())
 
-            for obj in (RegioCompetitieSporterBoog
+            for obj in (RegiocompetitieSporterBoog
                         .objects
                         .select_related('sporterboog__sporter')
-                        .filter(deelcompetitie__competitie=self.comp_18)
+                        .filter(regiocompetitie__competitie=self.comp_18)
                         .all()):
                 nr = obj.sporterboog.sporter.lid_nr
                 if nr == 100002:
@@ -318,6 +323,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                     self.deelnemer_100003_18 = obj
                 elif nr == 100004:
                     self.deelnemer_100004_18 = obj
+                    self.assertTrue(obj.inschrijf_voorkeur_team)
                 elif nr == 100012:
                     self.deelnemer_100012_18 = obj
                 elif nr == 100013:  # pragma: no branch
@@ -332,10 +338,10 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                                        'lid_100012_boogtype_1': 'on',    # 1=R
                                        'wil_in_team': 'ja!'})
 
-            for obj in (RegioCompetitieSporterBoog
+            for obj in (RegiocompetitieSporterBoog
                         .objects
                         .select_related('sporterboog__sporter')
-                        .filter(deelcompetitie__competitie=self.comp_25)
+                        .filter(regiocompetitie__competitie=self.comp_25)
                         .all()):
                 nr = obj.sporterboog.sporter.lid_nr
                 if nr == 100002:
@@ -395,8 +401,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0))
         self.assert404(resp, 'Team niet gevonden')
 
-        # zet de competitie naar > fase E
-        zet_competitie_fase(self.comp_18, 'F')
+        # zet de competitie naar > fase F
+        zet_competitie_fases(self.comp_18, 'G', 'G')
 
         resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assert404(resp, 'Competitie is niet in de juiste fase')
@@ -410,8 +416,9 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
-        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
+        now = timezone.now()
+        self.deelcomp18_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=1)
         self.deelcomp18_regio111.save()
 
         self._create_deelnemers()
@@ -436,7 +443,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
         self.nhbver1 = NhbVereniging.objects.get(pk=self.nhbver1.pk)
 
-        self.assertEqual(team.deelcompetitie.pk, self.deelcomp18_regio111.pk)
+        self.assertEqual(team.regiocompetitie.pk, self.deelcomp18_regio111.pk)
         self.assertEqual(team.vereniging, self.nhbver1)
         self.assertEqual(team.volg_nr, 1)
         self.assertEqual(team.team_type.afkorting, 'R2')
@@ -513,7 +520,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         # team = RegiocompetitieTeam.objects.all()[0]
 
         # voorbij einddatum aanmaken / wijzigen teams
-        self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
+        now = timezone.now()
+        self.deelcomp18_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=1)
         self.deelcomp18_regio111.save()
 
         resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
@@ -541,7 +549,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Mag niet (meer) wijzigen')
 
         # herstel de datum en verwijder het team
-        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_teamvorming
+        now = timezone.now()
+        self.deelcomp18_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=1)
         self.deelcomp18_regio111.save()
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
@@ -575,8 +584,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
-        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
+        self.deelcomp18_regio111.begin_fase_D = self.deelcomp18_regio111.competitie.begin_fase_F
         self.deelcomp18_regio111.save()
 
         self._create_deelnemers()
@@ -596,14 +605,15 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
-        zet_competitie_fase(self.comp_25, 'B')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
+        zet_competitie_fase_regio_inschrijven(self.comp_25)
         self._create_deelnemers(do_25=True)
 
-        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        now = timezone.now()
+        self.deelcomp18_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=1)
         self.deelcomp18_regio111.save()
 
-        self.deelcomp25_regio111.einde_teams_aanmaken = self.deelcomp25_regio111.competitie.einde_aanmeldingen
+        self.deelcomp25_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=1)
         self.deelcomp25_regio111.save()
 
         # maak een 18m team aan
@@ -619,8 +629,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(2, RegiocompetitieTeam.objects.count())
 
-        team_18 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp18_regio111)[0]
-        team_25 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp25_regio111)[0]
+        team_18 = RegiocompetitieTeam.objects.filter(regiocompetitie=self.deelcomp18_regio111)[0]
+        team_25 = RegiocompetitieTeam.objects.filter(regiocompetitie=self.deelcomp25_regio111)[0]
 
         # haal de koppel pagina op
         with self.assert_max_queries(20):
@@ -651,7 +661,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(None, team_18.team_klasse)
 
         # koppel nog meer leden
-        deelnemer = RegioCompetitieSporterBoog.objects.get(pk=self.deelnemer_100012_18.pk)
+        deelnemer = RegiocompetitieSporterBoog.objects.get(pk=self.deelnemer_100012_18.pk)
         deelnemer.ag_voor_team = 6.500
         deelnemer.save()
 
@@ -717,7 +727,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Team is niet van jouw vereniging')
 
         # koppel-scherm na uiterste datum wijzigen
-        self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
+        self.deelcomp18_regio111.begin_fase_D -= datetime.timedelta(days=5)
         self.deelcomp18_regio111.save()
         url = self.url_koppelen % team_18.pk
         with self.assert_max_queries(20):
@@ -735,10 +745,11 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
         self._create_deelnemers()
 
-        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        now = timezone.now()
+        self.deelcomp18_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=1)
         self.deelcomp18_regio111.save()
 
         # maak een team aan
@@ -821,8 +832,9 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maak een team aan
-        zet_competitie_fase(self.comp_18, 'B')
-        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
+        now = timezone.now()
+        self.deelcomp18_regio111.begin_fase_D = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=1)
         self.deelcomp18_regio111.save()
 
         self._create_deelnemers()
@@ -849,6 +861,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                                      'deelnemer_%s' % self.deelnemer_100003_18.pk: 1,       # BB
                                      'deelnemer_%s' % self.deelnemer_100004_18.pk: 1})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assertEqual(3, team.leden.count())
 
         # maak nog een team aan
         with self.assert_max_queries(20):
@@ -875,7 +888,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie is niet in de juiste fase')
 
         # zet de competitie door naar de wedstrijd fase
-        zet_competitie_fase(self.comp_18, 'E')
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
         # verkeerde ronde nummer
         with self.assert_max_queries(20):
@@ -891,7 +904,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         url = self.url_rcl_volgende_ronde % self.deelcomp18_regio111.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.comp_18.pk)
+        self.assert_is_redirect(resp, self.url_overzicht_beheer % self.comp_18.pk)
 
         self.verwerk_regiocomp_mutaties()
         self.assertEqual(2, RegiocompetitieRondeTeam.objects.count())

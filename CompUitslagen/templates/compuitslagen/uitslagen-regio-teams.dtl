@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -29,7 +29,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslagen regiocompetitie teams</h3>
-            <p>{% if comp.alle_regiocompetities_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetities teams.</p>
+            <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetities teams.</p>
         </div>
     </div>
 
@@ -123,7 +123,7 @@
                         <li>
                             <label class="black-text" for="id_{{ ver.sel }}">
                                 <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
-                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
+                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }} ({{ ver.plaats }})</span>
                             </label>
                         </li>
                     {% endfor %}

@@ -9,12 +9,14 @@ from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Functie, Rollen
+from Functie.definities import Rollen
+from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Vereniging.models import Secretaris
-from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
+from Wedstrijden.definities import BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
+from Wedstrijden.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
 from Vereniging.forms import AccommodatieDetailsForm
 

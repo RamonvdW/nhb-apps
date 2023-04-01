@@ -117,7 +117,7 @@
 
         <div class="row">
             <div style="padding:10px">
-                <p class="center red-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen</p>
+                <p class="center nhb-rood-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen</p>
                 <p class="center">Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben</p>
             </div>
         </div>
@@ -137,7 +137,7 @@
 
 
     <!-- uitleg over tijdstippen -->
-    {% if not comp.rk_is_afgelast and comp.fase <= 'L' %}
+    {% if not comp.rk_is_afgelast and comp.fase_indiv >= 'J' and comp.fase_indiv <= 'L' %}
         {% if not regiocomp_nog_actief %}
             <div class="row">
                 <div style="padding:10px">
@@ -222,8 +222,8 @@
                         {% else %}
                             <td></td>
                         {% endif %}
-                        <td colspan="2"><i class="grey-text">volgt later</i></td>       <!-- RK scores -->
-
+                        <td><i class="grey-text">volgt later</i></td>       <!-- RK scores -->
+                        <td>{% if forloop.last %}&nbsp;{% endif %}</td>
                     {% endif %}
                 </tr>
 

@@ -1,0 +1,87 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK Teams{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Teams klassengrenzen vaststellen</h3>
+            <p>voor de RK/BK teams wedstrijdklassen van de <b>{{ comp.beschrijving }}</b>.</p>
+            <p>Dit is een eenmalig actie <span class="nhb-rood-text">welke ook de open inschrijving voor RK teams afsluit.</span></p>
+        </div>
+    </div>
+
+
+    {% if niet_compleet_team %}
+
+        <!-- blauw balk met wit informatie veld -->
+        <div class="row-nhb-blauw">
+            <div class="col s10 offset-s1 m12 xl8 offset-xl2 white">
+                <p>Deze actie kan niet uitgevoerd worden zolang er teams zijn zonder team sterkte (door te weinig gekoppelde sporters).</p>
+
+                <p>
+                    <a class="btn-nhb-rood" href="{{ url_terug }}">Terug</a>
+                </p>
+            </div>
+        </div>
+
+    {% else %}
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-nhb-blauw">
+            <div class="col s12 white left-align">
+                <p>Dit is het automatisch berekende voorstel voor de klassengrenzen:</p>
+
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Team type</th>
+                            <th>Totaal teams</th>
+                            <th>Team wedstrijdklasse</th>
+                            <th>Aantal teams</th>
+                            <th>Klassengrens</th>
+                        </tr>
+                    </thead>
+
+                    {% for rows, teamtype, count, klassen in grenzen %}
+                        <tr>
+                            <td rowspan="{{ rows }}">{{ teamtype }}</td>
+                            <td rowspan="{{ rows }}">{{ count }}</td>
+                        </tr>
+
+                        {% for klasse, count, min_ag, grens_str in klassen %}
+                            <tr>
+                                <td>{{ klasse }}</td>
+                                <td>{{ count }}</td>
+                                <td>{% if grens_str == "" %}<i class="grey-text">n.v.t.</i>{% else %}{{ grens_str }}{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+
+                    {% endfor %}
+
+                    <tr>
+                        <td colspan="5" class="center">
+                            <form method="post" action="{{ url_vaststellen }}">
+                                {% csrf_token %}
+                                <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel deze teams klassengrenzen vast">
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-bko-doorzetten-1b" %}
+
+{% endblock %}

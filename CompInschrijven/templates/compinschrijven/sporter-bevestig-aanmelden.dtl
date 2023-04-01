@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -20,9 +20,9 @@
             const el = document.getElementById('submit')
             el.disabled = (count > 7)
             if (count > 7) {
-                el_aantal.classList.add('red-text')
+                el_aantal.classList.add('nhb-rood-text')
             } else {
-                el_aantal.classList.remove('red-text')
+                el_aantal.classList.remove('nhb-rood-text')
             }
         }
 

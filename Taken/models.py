@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from django.utils import timezone
 from Account.models import Account
-from Competitie.models import DeelCompetitie
 from Functie.models import Functie
 import datetime
 

@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import Competitie, CompetitieMatch, DeelKampioenschap, DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -217,7 +218,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager Competitiezaken
-        self.assertIn(self.url_activeer_rol % 'geen', urls)        # Gebruiker
         self.assertIn(self.url_accountwissel, urls)
 
         with self.assert_max_queries(20):
@@ -767,18 +767,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         comp = Competitie(
                     beschrijving='test',
                     afstand='18',
-                    begin_jaar='2000',
-                    uiterste_datum_lid='2000-01-01',
-                    begin_aanmeldingen='2000-10-10',
-                    einde_aanmeldingen='2000-10-10',
-                    einde_teamvorming='2000-10-10',
-                    eerste_wedstrijd='2000-10-10',
-                    laatst_mogelijke_wedstrijd='2000-10-10',
-                    datum_klassengrenzen_rk_bk_teams='2000-10-10',
-                    rk_eerste_wedstrijd='2000-10-10',
-                    rk_laatste_wedstrijd='2000-10-10',
-                    bk_eerste_wedstrijd='2000-10-10',
-                    bk_laatste_wedstrijd='2000-10-10')
+                    begin_jaar='2000')
         comp.save()
 
         match = CompetitieMatch(
@@ -789,7 +778,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelkamp = DeelKampioenschap(
+        deelkamp = Kampioenschap(
                         competitie=comp,
                         deel=DEEL_BK,
                         functie=self.functie_bko)
@@ -805,18 +794,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         comp = Competitie(
                     beschrijving='test',
                     afstand='18',
-                    begin_jaar='2000',
-                    uiterste_datum_lid='2000-01-01',
-                    begin_aanmeldingen='2000-10-10',
-                    einde_aanmeldingen='2000-10-10',
-                    einde_teamvorming='2000-10-10',
-                    eerste_wedstrijd='2000-10-10',
-                    laatst_mogelijke_wedstrijd='2000-10-10',
-                    datum_klassengrenzen_rk_bk_teams='2000-10-10',
-                    rk_eerste_wedstrijd='2000-10-10',
-                    rk_laatste_wedstrijd='2000-10-10',
-                    bk_eerste_wedstrijd='2000-10-10',
-                    bk_laatste_wedstrijd='2000-10-10')
+                    begin_jaar='2000')
         comp.save()
 
         match = CompetitieMatch(
@@ -827,7 +805,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
                     tijd_begin_wedstrijd='10:00')
         match.save()
 
-        deelkamp = DeelKampioenschap(
+        deelkamp = Kampioenschap(
                         competitie=comp,
                         deel=DEEL_RK,
                         nhb_rayon=self.functie_rko.nhb_rayon,
@@ -848,7 +826,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         resp = self.client.post(self.url_activeer_functie_hwl, {'ver_nr': 9999})
-        self.assert404(resp, 'Foute parameter (vereniging)')
+        self.assert_is_redirect(resp, self.url_wissel_van_rol)
 
         resp = self.client.post(self.url_activeer_functie_hwl, {'ver_nr': self.ver1000.ver_nr})
         self.assert_is_redirect(resp, '/vereniging/')

@@ -1,0 +1,142 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Kleine klassen{% endblock %}
+
+{% block pagina %}
+
+    <script type="application/javascript">
+
+        function verplaats(ref) {
+            // regel met de knoppen niet meer laten zien
+            const ref_tr = ref.parentNode.parentNode;
+            ref_tr.style.display = 'none';
+
+            // gebruik een POST om het verzoek door te zetten
+            const obj = { deelnemer: ref.dataset['deelnemer'],
+                          klasse: ref.dataset['klasse'] };
+            const data = JSON.stringify(obj)
+
+            const xhr = new XMLHttpRequest()
+            xhr.open("POST", "{{ url_verplaats }}", true)     // true = async
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+            xhr.send(data)
+        }
+
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Kleine klassen</h3>
+            <p>Wedstrijdklassen voor de Bondskampioenschappen van de <b>{{ deelkamp.competitie }}</b>.</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <table class="white">
+                <tr>
+                    <th>Wedstrijdklassen</th>
+                    <th class="center">Minimaal gemiddelde</th>
+                    <th class="center">Aantal deelnemers</th>
+                </tr>
+
+                {% for klasse in klassen %}
+                    <tr{% if klasse.is_klein %} class="nhb-rood-text"{% endif %}>
+                        <td>{{ klasse.beschrijving }}</td>
+                        <td class="center">{{ klasse.min_ag }}</td>
+                        <td class="center">{{ klasse.aantal_deelnemers }}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>De kleine klassen</h4>
+            {% if aantal_kleine_klassen == 0 %}
+                <p>Er zijn geen kleine klassen (meer)</p>
+            {% else %}
+                <p>Er zijn nog {{ aantal_kleine_klassen }} kleine klassen</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <table class="white">
+
+                {% for obj in deelnemers %}
+
+                    {% if obj.break_klasse %}
+                        {% if not forloop.first %}
+                            <tr>
+                                <td colspan="4" class="nhb-table-onderrand" style="height:50px"></td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <td colspan="4" class="center">
+                                <h5>{{ obj.klasse_str }}</h5>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"></td>
+                            <td>
+                                <p>Alternatieve klassen:</p>
+                                <p>
+                                    {% for klasse in obj.alt_klassen %}
+                                        <span>{{ klasse.letter }}: {{ klasse.beschrijving }} ({{ klasse.min_ag }})</span><br>
+                                    {% endfor %}
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Sporter</th>
+                            <th>Vereniging</th>
+                            <th class="hide-on-small-only center">Gemiddelde</th>
+                            <th>Verplaats naar</th>
+                        </tr>
+
+                    {% endif %}
+
+                    <tr>
+                        <td>{{ obj.naam_str }}</td>
+
+                        {% if obj.bij_vereniging %}
+                            <td>[{{ obj.bij_vereniging.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
+                        {% else %}
+                            <td><!-- geen vereniging --></td>
+                        {% endif %}
+
+                        <td class="hide-on-small-only center">{{ obj.gemiddelde }}</td>
+
+                        <td>
+                            {% for letter, deelnemer_pk, klasse_pk in obj.wijzig_knoppen %}
+                                <button class="btn-nhb-rood" onclick="verplaats(this)" style="margin-right:5px" data-deelnemer="{{ deelnemer_pk }}" data-klasse="{{ klasse_pk }}">{{ letter }}</button>
+                            {% endfor %}
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagbond-kleine-klassen-indiv" %}
+
+{% endblock %}

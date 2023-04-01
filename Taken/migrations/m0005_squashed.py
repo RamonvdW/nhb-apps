@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,9 +11,6 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Taken', 'm0003_squashed'),
-                ('Taken', 'm0004_toegekend_aan_functie')]
-
     # dit is de eerste
     initial = True
 
@@ -21,7 +18,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0023_squashed'),
         ('Competitie', 'm0078_squashed'),
-        ('Functie', 'm0013_telefoon_en_rol_mo'),
+        ('Functie', 'm0015_squashed'),
     ]
 
     # migratie functies

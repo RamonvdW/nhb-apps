@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Instellingen Team<wbr>competitie</h3>
-            {% if readonly_na_fase_D %}
+            {% if readonly_blok_2 %}
                 <p>Hieronder kan je de gemaakte keuzes maken voor jouw regiocompetitie inzien. Wijzigen is niet meer mogelijk.</p>
             {% else %}
                 <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie.</p>
@@ -57,7 +57,7 @@
     <!-- blauwe balk met informatie label : info -->
     <div class="row-nhb-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
-            {% if not readonly_na_fase_D %}
+            {% if not readonly_blok_2 %}
                 <div class="white z-depth-3" style="padding:30px">
                     <form method="post" action="{{ url_opslaan }}">
                         {% csrf_token %}
@@ -67,7 +67,7 @@
                             <tr>
                                 <th>Regio organiseert team<wbr>competitie</th>
                                 <td>
-                                    {% if readonly_na_fase_A %}
+                                    {% if readonly_blok_1 %}
                                         <span>{% if deelcomp.regio_organiseert_teamcompetitie %}Ja{% else %}Nee{% endif %}</span>
                                     {% else %}
                                         <ul id="id_teams">
@@ -91,7 +91,7 @@
                             <tr>
                                 <th>Team samen<wbr>stellingen</th>
                                 <td>
-                                    {% if readonly_na_fase_A %}
+                                    {% if readonly_blok_1 %}
                                         {% for opt in opt_team_alloc %}
                                             {% if opt.actief %}
                                                 <span>{{ opt.beschrijving }}</span>
@@ -114,11 +114,11 @@
 
                             <tr>
                                 <th>Teams aanmaken toestaan tot en met</th>
-                                <td>{% if readonly_na_fase_D %}
-                                        <span>{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}</span>
+                                <td>{% if readonly_blok_2 %}
+                                        <span>{{ deelcomp.begin_fase_D|date:'Y-m-d' }}</span>
                                     {% else %}
                                         <input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)"{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %}>
-                                        <input type="hidden" name="einde_teams_aanmaken" id="datum1_out" value="{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}">
+                                        <input type="hidden" name="begin_fase_D" id="datum1_out" value="{{ deelcomp.begin_fase_D|date:'Y-m-d' }}">
                                     {% endif %}
                                 </td>
                             </tr>
@@ -126,7 +126,7 @@
                             <tr>
                                 <th>Wedstrijd<wbr>punten model</th>
                                 <td>
-                                    {% if readonly_na_fase_D %}
+                                    {% if readonly_blok_2 %}
                                         {% for opt in opt_team_punten %}
                                             {% if opt.actief %}
                                                 <span>{{ opt.beschrijving }}</span>
@@ -148,7 +148,7 @@
                             </tr>
                         </table>
 
-            {% if not readonly_na_fase_D %}
+            {% if not readonly_blok_2 %}
                         <p>
                             <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
                                 <i class="material-icons-round left">check</i>Opslaan</button>
@@ -159,19 +159,19 @@
         </div>
     </div>
 
-    {% if not readonly_na_fase_D %}
+    {% if not readonly_blok_2 %}
 
         <!-- initialisatie van de datum pickers -->
         <script type="application/javascript">
             document.addEventListener('DOMContentLoaded', function() {
                 const el = document.querySelector('#datum1');
-                let minDate = new Date("{{ deelcomp.competitie.begin_aanmeldingen|date:'Y-m-d' }}")
-                let maxDate = new Date("{{ deelcomp.competitie.eerste_wedstrijd|date:'Y-m-d' }}")
+                let minDate = new Date("{{ deelcomp.competitie.begin_fase_C|date:'Y-m-d' }}")
+                let maxDate = new Date("{{ deelcomp.competitie.begin_fase_F|date:'Y-m-d' }}")
                 maxDate.setDate(maxDate.getDate() - 1)      // get/setDate = day of month!!
                 const competitieJaren = [{{  deelcomp.competitie.begin_jaar }}, {{ deelcomp.competitie.begin_jaar }} + 1]
 
                 M.Datepicker.init(el, {
-                    defaultDate: new Date("{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}"),
+                    defaultDate: new Date("{{ deelcomp.begin_fase_D|date:'Y-m-d' }}"),
                     setDefaultDate: true,
                     minDate: minDate, maxDate: maxDate,
                     yearRange: competitieJaren

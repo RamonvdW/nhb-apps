@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -61,7 +61,7 @@
                 {% url 'Kalender:landing-page' as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
-                <!-- TODO: toon opleidingen -->
+                <!-- FUTURE: toon opleidingen -->
 
                 <!-- webwinkel -->
                 {% url 'Webwinkel:overzicht' as card_url %}
@@ -154,7 +154,7 @@
                         </table>
 
                         {% if bevat_fout %}
-                            <p class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
+                            <p class="center nhb-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
                         {% else %}
                             <div class="center" style="margin-top:30px">
                                 <form action="{{ url_bestellen }}" method="post">

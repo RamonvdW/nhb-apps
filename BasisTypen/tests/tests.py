@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import (BoogType, TeamType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                               TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse, KalenderWedstrijdklasse,
-                               ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA)
+from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
+from BasisTypen.models import (BoogType, TeamType, LeeftijdsKlasse,
+                               TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
+                               KalenderWedstrijdklasse)
 from BasisTypen.admin import BasisTypenTemplateCompetitieIndivKlasseAdmin
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen, get_organisatie_klassen
 

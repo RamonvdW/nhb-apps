@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, DeelCompetitie
+from Competitie.models import Competitie, Regiocompetitie
 
 
 class Command(BaseCommand):
     help = "Sluit alle regiocompetities van een specifieke competitie"
 
     def _sluit_regios(self, comp, regio_van, regio_tot):
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('nhb_regio')
                          .filter(competitie=comp,
@@ -58,8 +58,8 @@ class Command(BaseCommand):
 
         comp = comps[0]
         comp.bepaal_fase()
-        if comp.fase < 'F' or comp.fase > 'G':
-            self.stderr.write('[ERROR] Competitie in fase %s is niet ondersteund' % comp.fase)
+        if comp.fase_indiv < 'F' or comp.fase_indiv > 'G':
+            self.stderr.write('[ERROR] Competitie in fase_indiv %s is niet ondersteund' % comp.fase_indiv)
             return
 
         self._sluit_regios(comp, regio_van, regio_tot)

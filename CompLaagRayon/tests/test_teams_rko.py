@@ -6,9 +6,9 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import Competitie, KampioenschapTeam, DeelKampioenschap, DEEL_RK
-from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.definities import DEEL_RK
+from Competitie.models import KampioenschapTeam, Kampioenschap
+from Competitie.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -17,12 +17,11 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, RK Teams functie """
 
-    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # deelkamp_pk
-    url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset
-    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                       # comp_pk
-    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'                           # deelkamp_pk
+    url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'                    # comp_pk, subset
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     regio_nr = 101
     ver_nr = 0      # wordt in setupTestData ingevuld
@@ -46,7 +45,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.deelkamp_rk1 = DeelKampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
+        self.deelkamp_rk1 = Kampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
 
     def test_rk_teams_alle(self):
         # BB en BKO mogen deze pagina ophalen
@@ -112,7 +111,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     def test_rko_teams(self):
         self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr)
-        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr)
+        self.testdata.maak_rk_teams(25, self.ver_nr)
 
         url = self.url_rko_teams % self.testdata.deelkamp25_rk[1].pk        # rayon 1
 
@@ -137,13 +136,13 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
 
         # stel de RK/BK klassegrenzen vast
-        zet_competitie_fase(self.testdata.comp25, 'J')
+        zet_competitie_fase_rk_prep(self.testdata.comp25)
         resp = self.client.post(self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)
 
         # verpruts de klasse van 1 team
         team = KampioenschapTeam.objects.get(pk=self.testdata.comp25_kampioenschapteams[0].pk)
-        for klasse in self.testdata.comp25_klassen_team['R2']:          # pragma: no branch
+        for klasse in self.testdata.comp25_klassen_teams['R2']:         # pragma: no branch
             if not klasse.is_voor_teams_rk_bk:                          # pragma: no branch
                 team.team_klasse = klasse
                 team.save(update_fields=['team_klasse'])

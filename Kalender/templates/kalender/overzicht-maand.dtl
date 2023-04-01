@@ -74,7 +74,7 @@
                                 <span>{{ wed.inschrijven_voor }}</span>
                                 {% if wed.kan_inschrijven %}
                                     {% if wed.inschrijven_let_op %}
-                                        <br><span class="red-text">(nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                                        <br><span class="nhb-rood-text">(nog maar {{ wed.inschrijven_dagen }} dagen)</span>
                                     {% endif %}
                                 {% else %}
                                     <br><span class="nhb-blauw-text">(gesloten)</span>

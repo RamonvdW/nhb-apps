@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2022 Ramon van der Winkel.
+                Copyright (c) 2019-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -75,6 +75,30 @@
 
         </div>
     </div>
+
+    {% for ander in andere_records %}
+
+        {% if forloop.first %}
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Eervolle vermeldingen</h4>
+                </div>
+            </div>
+
+            <!-- blauwe balk -->
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+        {% endif %}
+
+        {% include 'plein/card.dtl' with title=ander.titel text=ander.tekst icon=ander.icoon url=ander.url extern_open=True %}
+
+        {% if forloop.last %}
+                </div>
+            </div>
+        {% endif %}
+
+    {% endfor %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="records-overzicht" %}
 

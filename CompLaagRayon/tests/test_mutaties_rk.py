@@ -7,12 +7,15 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
+from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTEN,
+                                   MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
+                                   MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN,
+                                   DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
-                               MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
-                               KampioenschapSporterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
-from Competitie.tests.test_helpers import zet_competitie_fase
+                               CompetitieMutatie, KampioenschapSporterBoog)
+from Competitie.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                 zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden)
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -51,7 +54,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         cls.testdata.maak_label_regiokampioenen(25, cls.regio_nr_begin, cls.regio_nr_einde)
 
         # zet de competitie in fase J
-        zet_competitie_fase(cls.testdata.comp18, 'J')
+        zet_competitie_fase_rk_prep(cls.testdata.comp18)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -756,9 +759,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.cut) != '')
 
-        temp = KampioenschapTeamKlasseLimiet(kampioenschap=self.deelkamp_rk)
-        self.assertTrue(str(temp) != '')
-        temp.team_klasse = CompetitieTeamKlasse.objects.all()[0]
+        team_klasse = CompetitieTeamKlasse.objects.all()[0]
+        temp = KampioenschapTeamKlasseLimiet(kampioenschap=self.deelkamp_rk,
+                                             team_klasse=team_klasse)
         self.assertTrue(str(temp) != '')
 
         # verplaats de cut naar 8
@@ -873,10 +876,10 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         mutatie.mutatie = MUTATIE_INITIEEL
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.mutatie = MUTATIE_CUT
+        mutatie.mutatie = MUTATIE_KAMP_CUT
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.mutatie = MUTATIE_AFMELDEN
+        mutatie.mutatie = MUTATIE_KAMP_AFMELDEN
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         mutatie.is_verwerkt = True
@@ -889,14 +892,14 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           door='Tester').save()
 
         # mutatie nieuw record van 24 wordt niet opgeslagen
-        CompetitieMutatie(mutatie=MUTATIE_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
                           kampioenschap=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
                           cut_nieuw=24,  # verwijder oude record
                           door='Tester').save()
 
-        CompetitieMutatie(mutatie=MUTATIE_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
                           kampioenschap=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=23,
@@ -904,7 +907,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
                           door='Tester').save()
 
         # mutatie die geen wijziging is
-        CompetitieMutatie(mutatie=MUTATIE_CUT,
+        CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
                           kampioenschap=self.deelkamp_rk,
                           indiv_klasse=self.klasse,
                           cut_oud=24,
@@ -964,29 +967,29 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_status % 999999)
         self.assert404(resp, 'Deelnemer niet gevonden')
 
-        # fase E
+        # fase F
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
-        zet_competitie_fase(comp, 'E')
+        zet_competitie_fase_regio_wedstrijden(comp)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
-        self.assert404(resp, 'Pagina kan nog niet gebruikt worden')
+        self.assert404(resp, 'Pagina kan niet gebruikt worden')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag nog niet wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag nog niet wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
-        # fase P
-        zet_competitie_fase(comp, 'P')
+        # fase O (oproepen reserves)
+        zet_competitie_fases(comp, 'O', 'O')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
-        self.assert404(resp, 'Pagina kan niet meer gebruikt worden')
+        self.assert404(resp, 'Pagina kan niet gebruikt worden')
 
         # tijdens fase K en L mag de pagina gebruikt worden
-        zet_competitie_fase(comp, 'K')
+        zet_competitie_fases(comp, 'K', 'K')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -1013,25 +1016,25 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.verwerk_regiocomp_mutaties()
 
-        zet_competitie_fase(comp, 'L')
+        zet_competitie_fase_rk_wedstrijden(comp)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
-        zet_competitie_fase(comp, 'M')
+        zet_competitie_fases(comp, 'N', 'N')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_hwl)
-        self.assert404(resp, 'Pagina kan niet meer gebruikt worden')
+        self.assert404(resp, 'Pagina kan niet gebruikt worden')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag niet meer wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_status % deelnemer_pks[1])
-        self.assert404(resp, 'Mag niet meer wijzigen')
+        self.assert404(resp, 'Mag niet wijzigen')
 
         # sporter van andere vereniging
         andere_ver = self.ver_nrs[0]

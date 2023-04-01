@@ -10,16 +10,16 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import GESLACHT2STR
+from BasisTypen.definities import GESLACHT2STR
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje)
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterVoorkeuren, get_sporter_voorkeuren
-from Wedstrijden.models import (Wedstrijd, WedstrijdInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
-                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.definities import (INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD,
+                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
@@ -28,6 +28,8 @@ import csv
 TEMPLATE_WEDSTRIJDEN_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
 TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS = 'wedstrijden/aanmelding-details.dtl'
 
+CONTENT_TYPE_TSV = 'text/tab-separated-values; charset=UTF-8'
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 # TODO: HWL moet sporter kunnen verplaatsen naar een andere sessie
 
@@ -215,7 +217,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
                                   'wanneer',
                                   'status'))
 
-        response = HttpResponse(content_type='text/tab-separated-values; charset=UTF-8')
+        response = HttpResponse(content_type=CONTENT_TYPE_TSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.txt"'
 
         # Ianseo supports a tab-separate file with specific column order, without headers
@@ -323,7 +325,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                                   'wanneer',
                                   'status'))
 
-        response = HttpResponse(content_type='text/csv; charset=UTF-8')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
 
         response.write(BOM_UTF8)

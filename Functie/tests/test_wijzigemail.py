@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie, Functie
 from Mailer.models import MailQueue
@@ -30,15 +31,15 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         regio_101 = NhbRegio.objects.get(regio_nr=101)
         regio_105 = NhbRegio.objects.get(regio_nr=105)
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
 
-        deel1 = DeelKampioenschap.objects.filter(deel=DEEL_BK)[0]
+        deel1 = Kampioenschap.objects.filter(deel=DEEL_BK)[0]
         self.functie_bko1 = deel1.functie
-        self.functie_bko2 = DeelKampioenschap.objects.filter(deel=DEEL_BK).exclude(pk=deel1.pk)[0].functie
-        self.functie_rko1 = DeelKampioenschap.objects.filter(deel=DEEL_RK, competitie=deel1.competitie, nhb_rayon=rayon_1)[0].functie
-        self.functie_rcl101 = DeelCompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_101)[0].functie
-        self.functie_rcl105 = DeelCompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_105)[0].functie
+        self.functie_bko2 = Kampioenschap.objects.filter(deel=DEEL_BK).exclude(pk=deel1.pk)[0].functie
+        self.functie_rko1 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=deel1.competitie, nhb_rayon=rayon_1)[0].functie
+        self.functie_rcl101 = Regiocompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_101)[0].functie
+        self.functie_rcl105 = Regiocompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_105)[0].functie
 
         # maak een test vereniging
         ver = NhbVereniging()

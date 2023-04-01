@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import views_bb, views_bko
+from CompBeheer import views_bb, views_bko, view_stats, view_overzicht, view_wijzig_datums
 
 app_name = 'CompBeheer'
 
 urlpatterns = [
 
-    # base url: bondscompetities/manage/
+    # base url: bondscompetities/beheer/
 
     # BB schermen
     path('instellingen-volgende-competitie/',
@@ -30,31 +30,57 @@ urlpatterns = [
          views_bb.SeizoenAfsluitenView.as_view(),
          name='bb-seizoen-afsluiten'),
 
+    path('statistiek/',
+         view_stats.CompetitieStatistiekView.as_view(),
+         name='statistiek'),
+
     path('<comp_pk>/klassengrenzen-vaststellen/',
          views_bb.KlassengrenzenVaststellenView.as_view(),
          name='klassengrenzen-vaststellen'),
 
     path('<comp_pk>/wijzig-datums/',
-         views_bb.WijzigDatumsView.as_view(),
+         view_wijzig_datums.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
 
 
     # BKO schermen
-    path('<comp_pk>/doorzetten-rk/',
-         views_bko.DoorzettenNaarRKView.as_view(),
-         name='bko-doorzetten-naar-rk'),
+    path('<comp_pk>/doorzetten/regio-naar-rk/',
+         views_bko.DoorzettenRegioNaarRKView.as_view(),
+         name='bko-doorzetten-regio-naar-rk'),
 
-    path('<comp_pk>/doorzetten-bk/',
-         views_bko.DoorzettenNaarBKView.as_view(),
-         name='bko-doorzetten-naar-bk'),
+    path('<comp_pk>/doorzetten/rk-indiv-naar-bk/',
+         views_bko.DoorzettenIndivRKNaarBKView.as_view(),
+         name='bko-rk-indiv-doorzetten-naar-bk'),
 
-    path('<comp_pk>/doorzetten-voorbij-bk/',
-         views_bko.DoorzettenVoorbijBKView.as_view(),
-         name='bko-doorzetten-voorbij-bk'),
+    path('<comp_pk>/doorzetten/rk-teams-naar-bk/',
+         views_bko.DoorzettenTeamsRKNaarBKView.as_view(),
+         name='bko-rk-teams-doorzetten-naar-bk'),
 
-    path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',
-         views_bko.KlassengrenzenTeamsVaststellenView.as_view(),
+    path('<comp_pk>/doorzetten/bk-indiv-kleine-klassen-zijn-samengevoegd/',
+         views_bko.KleineBKKlassenZijnSamengevoegdIndivView.as_view(),
+         name='bko-bk-indiv-kleine-klassen'),
+
+    path('<comp_pk>/doorzetten/bk-teams-kleine-klassen-zijn-samengevoegd/',
+         views_bko.KleineBKKlassenZijnSamengevoegdTeamsView.as_view(),
+         name='bko-bk-teams-kleine-klassen'),
+
+    path('<comp_pk>/doorzetten/bk-indiv-eindstand-bevestigen/',
+         views_bko.BevestigEindstandBKIndivView.as_view(),
+         name='bko-bevestig-eindstand-bk-indiv'),
+
+    path('<comp_pk>/doorzetten/bk-teams-eindstand-bevestigen/',
+         views_bko.BevestigEindstandBKTeamsView.as_view(),
+         name='bko-bevestig-eindstand-bk-teams'),
+
+    path('<comp_pk>/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/',
+         views_bko.KlassengrenzenVaststellenRkBkTeamsView.as_view(),
          name='klassengrenzen-vaststellen-rk-bk-teams'),
+
+
+    # landing page voor beheerders
+    path('<comp_pk>/',
+         view_overzicht.CompetitieBeheerView.as_view(),
+         name='overzicht')
 ]
 
 # end of file

@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelKampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
+from Competitie.models import Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
 
 
 class Command(BaseCommand):
-    help = "Importeer uitslag kampioenschap"
+    help = "Controleer rank, volgorde en gemiddelde in RK deelnemerslijst"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -52,7 +52,7 @@ class Command(BaseCommand):
         rayon_nr = options['rayon']
         self.verbose = options['verbose']
 
-        kampioenschap = DeelKampioenschap.objects.get(competitie__afstand=afstand, nhb_rayon__rayon_nr=rayon_nr)
+        kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, nhb_rayon__rayon_nr=rayon_nr)
 
         klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
         for limiet in KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=kampioenschap):

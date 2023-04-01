@@ -10,10 +10,10 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                               TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
-                               Competitie, DeelCompetitie)
-from Functie.models import Rollen
+from Competitie.definities import (INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, TEAM_PUNTEN,
+                                   TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES)
+from Competitie.models import Competitie, Regiocompetitie
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
@@ -26,7 +26,7 @@ TEMPLATE_COMPREGIO_INSTELLINGEN_REGIO_GLOBAAL = 'complaagregio/rcl-instellingen-
 
 class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view kan de RCL instellingen voor de regiocompetitie aanpassen """
+    """ Deze view kan de RCL instellingen voor de regio teamcompetitie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_RCL_INSTELLINGEN
@@ -49,13 +49,13 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         try:
             regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(competitie=comp_pk,
                              nhb_regio__regio_nr=regio_nr))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+        except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -63,14 +63,16 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase > 'F':
+        if deelcomp.competitie.fase_teams > 'F':
             raise Http404('Verkeerde competitie fase')
 
-        if deelcomp.competitie.fase > 'A':
-            context['readonly_na_fase_A'] = True
+        # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
+        if deelcomp.competitie.fase_teams > 'B':
+            context['readonly_blok_1'] = True
 
-            if deelcomp.competitie.fase > 'D':
-                context['readonly_na_fase_D'] = True
+            # in fase C mag nog aangepast worden: de deadline voor het aanmaken van de teams + WP model keuze
+            if deelcomp.competitie.fase_teams > 'C':
+                context['readonly_blok_2'] = True
 
         context['deelcomp'] = deelcomp
 
@@ -116,7 +118,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Instellingen teams'),
         )
 
@@ -129,12 +131,12 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         try:
             regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp_pk,
                              nhb_regio__regio_nr=regio_nr))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+        except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
@@ -142,14 +144,16 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase > 'D':
-            # niet meer te wijzigen
+        if deelcomp.competitie.fase_teams > 'C':
+            # niets meer te wijzigen
             raise Http404('Verkeerde competitie fase')
 
-        readonly_partly = (deelcomp.competitie.fase >= 'B')
+        # in fase A+B mag de teamcompetitie nog aan/uit gezet worden + keuze vast/vsg
+        readonly_blok_1 = (deelcomp.competitie.fase_teams > 'B')
+
         updated = list()
 
-        if not readonly_partly:
+        if not readonly_blok_1:
             # deze velden worden alleen doorgegeven als ze te wijzigen zijn
             teams = request.POST.get('teams', '?')[:3]  # ja/nee
             alloc = request.POST.get('team_alloc', '?')[:4]  # vast/vsg
@@ -170,7 +174,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                 deelcomp.regio_team_punten_model = punten
                 updated.append('regio_team_punten_model')
 
-            einde_s = request.POST.get('einde_teams_aanmaken', '')[:10]       # yyyy-mm-dd
+            einde_s = request.POST.get('begin_fase_D', '')[:10]       # yyyy-mm-dd
             if einde_s:
                 try:
                     einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
@@ -179,14 +183,14 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                 else:
                     einde_p = einde_p.date()
                     comp = deelcomp.competitie
-                    if einde_p < comp.begin_aanmeldingen or einde_p >= comp.eerste_wedstrijd:
+                    if einde_p < comp.begin_fase_C or einde_p >= comp.begin_fase_F:
                         raise Http404('Datum buiten toegestane reeks')
-                    deelcomp.einde_teams_aanmaken = einde_p
-                    updated.append('einde_teams_aanmaken')
+                    deelcomp.begin_fase_D = einde_p
+                    updated.append('begin_fase_D')
 
         deelcomp.save(update_fields=updated)
 
-        url = reverse('Competitie:overzicht',
+        url = reverse('CompBeheer:overzicht',
                       kwargs={'comp_pk': deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
 
@@ -219,7 +223,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        deelcomps = (DeelCompetitie
+        deelcomps = (Regiocompetitie
                      .objects
                      .select_related('competitie',
                                      'nhb_regio',
@@ -259,7 +263,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelcomp.teamcomp_str = 'Ja'
 
-                deelcomp.einde_teams_aanmaken_str = localize(deelcomp.einde_teams_aanmaken)
+                deelcomp.begin_fase_D_str = localize(deelcomp.begin_fase_D)
 
                 if deelcomp.regio_heeft_vaste_teams:
                     deelcomp.team_type_str = 'Vast'
@@ -270,18 +274,18 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.puntenmodel_str = punten2str[deelcomp.regio_team_punten_model]
             else:
                 deelcomp.teamcomp_str = 'Nee'
-                deelcomp.einde_teams_aanmaken_str = '-'
+                deelcomp.begin_fase_D_str = '-'
                 deelcomp.team_type_str = '-'
                 deelcomp.short_puntenmodel_str = '-'
                 deelcomp.puntenmodel_str = '-'
 
-            if self.rol_nu == Rollen.ROL_RKO and deelcomp.nhb_regio.rayon == self.functie_nu.nhb_rayon:
-                deelcomp.highlight = True
+            if self.rol_nu == Rollen.ROL_RKO and deelcomp.nhb_regio.rayon != self.functie_nu.nhb_rayon:
+                deelcomp.lowlight = True
         # for
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Regio keuzes overzicht')
         )

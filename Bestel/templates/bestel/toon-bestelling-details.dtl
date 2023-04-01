@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -111,7 +111,7 @@
                     <!-- afrekenen -->
                     {% if bevat_fout %}
                         <tr>
-                            <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                            <td colspan="3" class="center nhb-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
                         </tr>
                     {% else %}
                         {% if url_afrekenen %}

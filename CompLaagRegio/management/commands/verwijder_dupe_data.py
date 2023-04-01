@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # verwijder de probleem data: dubbele sporterboog en te veel scores
 
 from django.core.management.base import BaseCommand
-from Competitie.models import RegioCompetitieSporterBoog
-from Score.models import Score, SCORE_TYPE_SCORE
+from Competitie.models import RegiocompetitieSporterBoog
+from Score.definities import SCORE_TYPE_SCORE
+from Score.models import Score
 
 
 class Command(BaseCommand):
@@ -27,12 +28,12 @@ class Command(BaseCommand):
         gevonden = list()
         dupes = dict()
 
-        for obj in (RegioCompetitieSporterBoog
+        for obj in (RegiocompetitieSporterBoog
                     .objects
-                    .select_related('deelcompetitie__competitie',
+                    .select_related('regiocompetitie__competitie',
                                     'sporterboog')
                     .all()):
-            tup = (obj.deelcompetitie.competitie.pk, obj.sporterboog.pk)
+            tup = (obj.regiocompetitie.competitie.pk, obj.sporterboog.pk)
             if tup not in gevonden:
                 gevonden.append(tup)
             else:
@@ -43,7 +44,7 @@ class Command(BaseCommand):
         uitleggen = False
 
         for obj in dupes.values():
-            self.stdout.write('Verwijder alle data voor deelnemer %s in %s' % (obj.sporterboog, obj.deelcompetitie.competitie))
+            self.stdout.write('Verwijder alle data voor deelnemer %s in %s' % (obj.sporterboog, obj.regiocompetitie.competitie))
 
             # verwijder alle scores, niet-AG
             # dit zijn er typisch veel te veel
@@ -55,7 +56,7 @@ class Command(BaseCommand):
                 uitleggen = True
 
             # verwijder alle dubbele deelnemers
-            deelnemers = RegioCompetitieSporterBoog.objects.filter(deelcompetitie__competitie=obj.deelcompetitie.competitie, sporterboog=obj.sporterboog)
+            deelnemers = RegiocompetitieSporterBoog.objects.filter(regiocompetitie__competitie=obj.regiocompetitie.competitie, sporterboog=obj.sporterboog)
             self.stdout.write('   %s deelnemers' % deelnemers.count())
             if do_commit:
                 deelnemers.delete()

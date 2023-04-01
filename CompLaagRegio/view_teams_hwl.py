@@ -12,13 +12,14 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie,
-                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
+from Competitie.models import (CompetitieTeamKlasse, Regiocompetitie,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM
+from Score.definities import AG_NUL, AG_DOEL_TEAM
+from Score.models import AanvangsgemiddeldeHist
 from Score.operations import score_teams_ag_opslaan
 import datetime
 
@@ -46,7 +47,7 @@ def bepaal_team_sterkte_en_klasse(team):
         ag = sum(ags[:3])
 
         # bepaal de wedstrijdklasse
-        comp = team.deelcompetitie.competitie
+        comp = team.regiocompetitie.competitie
         for klasse in (CompetitieTeamKlasse
                        .objects
                        .filter(competitie=comp,
@@ -86,27 +87,28 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
-    def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
+    def _get_deelcomp(self, deelcomp_pk) -> Regiocompetitie:
 
-        # haal de gevraagde deelcompetitie op
+        # haal de gevraagde regiocompetitie op
         try:
             deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
                              nhb_regio=self.functie_nu.nhb_ver.regio))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+        except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'E':
+
+        if comp.fase_teams > 'F':
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
 
-        self.readonly = (comp.fase > 'C')
+        self.readonly = comp.fase_teams > 'C'
 
         if self.rol_nu == Rollen.ROL_WL:
             self.readonly = True
@@ -117,20 +119,21 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
+        context['readonly'] = self.readonly
+
         now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                  month=deelcomp.einde_teams_aanmaken.month,
-                                  day=deelcomp.einde_teams_aanmaken.day,
+        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                  month=deelcomp.begin_fase_D.month,
+                                  day=deelcomp.begin_fase_D.day,
                                   hour=0,
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
         mag_wijzigen = (now < einde) and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
-        context['readonly'] = self.readonly
 
         if deelcomp.competitie.afstand == '18':
             aantal_pijlen = 30
@@ -141,7 +144,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                  .objects
                  .select_related('vereniging',
                                  'team_type')
-                 .filter(deelcompetitie=deelcomp,
+                 .filter(regiocompetitie=deelcomp,
                          vereniging=self.functie_nu.nhb_ver)
                  .annotate(leden_count=Count('leden'))
                  .order_by('volg_nr'))
@@ -166,13 +169,13 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             context['url_nieuw_team'] = reverse('CompLaagRegio:teams-regio',
                                                 kwargs={'deelcomp_pk': deelcomp.pk})
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'sporterboog__boogtype')
                       .prefetch_related('regiocompetitieteam_set')
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(regiocompetitie=deelcomp,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               inschrijf_voorkeur_team=True)
                       .order_by('sporterboog__boogtype__volgorde',
@@ -221,13 +224,13 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         ver = self.functie_nu.nhb_ver
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
         now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                  month=deelcomp.einde_teams_aanmaken.month,
-                                  day=deelcomp.einde_teams_aanmaken.day,
+        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                  month=deelcomp.begin_fase_D.month,
+                                  day=deelcomp.begin_fase_D.day,
                                   hour=0,
                                   minute=0,
                                   second=0)
@@ -238,7 +241,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # nieuw team aanmaken
         volg_nrs = (RegiocompetitieTeam
                     .objects
-                    .filter(deelcompetitie=deelcomp,
+                    .filter(regiocompetitie=deelcomp,
                             vereniging=ver)
                     .values_list('volg_nr', flat=True))
         volg_nrs = list(volg_nrs)
@@ -260,7 +263,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         naam_str = "%s-%s" % (ver.ver_nr, next_nr)
 
         RegiocompetitieTeam(
-                    deelcompetitie=deelcomp,
+                    regiocompetitie=deelcomp,
                     vereniging=ver,
                     volg_nr=next_nr,
                     team_type=team_type,
@@ -293,8 +296,8 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL)
 
-    def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
-        # haal de gevraagde deelcompetitie op
+    def _get_deelcomp(self, deelcomp_pk) -> Regiocompetitie:
+        # haal de gevraagde regiocompetitie op
 
         if self.rol_nu == Rollen.ROL_HWL:
             regio = self.functie_nu.nhb_ver.regio
@@ -304,21 +307,21 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=regio))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+        except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if comp.fase > 'D':
-            # staat niet meer open voor instellen regiocompetitie teams
+        if comp.fase_teams > 'D':
+            # mag niet meer wijzigen
             raise Http404('Competitie is niet in de juiste fase')
 
         return deelcomp
@@ -330,14 +333,14 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RCL:
             raise Http404('Verkeerde rol')
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
         ver = self.functie_nu.nhb_ver
 
         now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                  month=deelcomp.einde_teams_aanmaken.month,
-                                  day=deelcomp.einde_teams_aanmaken.day,
+        einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                  month=deelcomp.begin_fase_D.month,
+                                  day=deelcomp.begin_fase_D.day,
                                   hour=0,
                                   minute=0,
                                   second=0)
@@ -349,7 +352,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             team = (RegiocompetitieTeam
                     .objects
                     .get(pk=team_pk,
-                         deelcompetitie=deelcomp,
+                         regiocompetitie=deelcomp,
                          vereniging=ver))
         except (KeyError, ValueError, RegiocompetitieTeam.DoesNotExist):
             raise Http404('Team niet gevonden of niet van jouw vereniging')
@@ -382,7 +385,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         else:
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
                 (None, 'Teams'),    # TODO: details invullen
                 (None, 'Wijzig team')
             )
@@ -392,24 +395,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
-
-        if self.rol_nu == Rollen.ROL_HWL:
-            ver = self.functie_nu.nhb_ver
-
-            now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                      month=deelcomp.einde_teams_aanmaken.month,
-                                      day=deelcomp.einde_teams_aanmaken.day,
-                                      hour=0,
-                                      minute=0,
-                                      second=0)
-            einde = timezone.make_aware(einde)
-            mag_wijzigen = (now <= einde)
-            if not mag_wijzigen:
-                raise Http404('Mag niet (meer) wijzigen')
-        else:
-            # RCL
-            ver = None      # wordt later ingevuld
 
         try:
             team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
@@ -421,9 +406,27 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                     .objects
                     .select_related('team_type')
                     .get(pk=team_pk,
-                         deelcompetitie=deelcomp))
+                         regiocompetitie=deelcomp))
         except RegiocompetitieTeam.DoesNotExist:
             raise Http404('Team niet gevonden')
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            ver = self.functie_nu.nhb_ver
+
+            now = timezone.now()
+            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                      month=deelcomp.begin_fase_D.month,
+                                      day=deelcomp.begin_fase_D.day,
+                                      hour=0,
+                                      minute=0,
+                                      second=0)
+            einde = timezone.make_aware(einde)
+            mag_wijzigen = (now <= einde)
+            if not mag_wijzigen:
+                raise Http404('Mag niet (meer) wijzigen')
+        else:
+            # RCL
+            ver = None      # wordt later ingevuld
 
         if self.rol_nu == Rollen.ROL_HWL:
             if team.vereniging != self.functie_nu.nhb_ver:
@@ -504,15 +507,15 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # haal de deelnemer op
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSporterBoog
+            deelnemer = (RegiocompetitieSporterBoog
                          .objects
                          .select_related('sporterboog',
                                          'sporterboog__sporter',
                                          'sporterboog__boogtype',
                                          'bij_vereniging',
-                                         'deelcompetitie__competitie')
+                                         'regiocompetitie__competitie')
                          .get(pk=deelnemer_pk))
-        except (ValueError, RegioCompetitieSporterBoog.DoesNotExist):
+        except (ValueError, RegiocompetitieSporterBoog.DoesNotExist):
             raise Http404('Sporter niet gevonden')
 
         context['deelnemer'] = deelnemer
@@ -531,7 +534,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         ag_hist = (AanvangsgemiddeldeHist
                    .objects
                    .filter(ag__sporterboog=deelnemer.sporterboog,
-                           ag__afstand_meter=deelnemer.deelcompetitie.competitie.afstand,
+                           ag__afstand_meter=deelnemer.regiocompetitie.competitie.afstand,
                            ag__doel=AG_DOEL_TEAM)
                    .order_by('-when'))
         for obj in ag_hist:
@@ -540,17 +543,17 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # for
         context['ag_hist'] = ag_hist
 
-        comp = deelnemer.deelcompetitie.competitie
+        comp = deelnemer.regiocompetitie.competitie
         comp.bepaal_fase()
 
-        if comp.fase < 'E':
+        if comp.fase_teams < 'F':
             context['url_opslaan'] = reverse('CompLaagRegio:wijzig-ag',
                                              kwargs={'deelnemer_pk': deelnemer.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}),
+                (reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk}),
                     'Teams Regio %s' % comp.beschrijving.replace(' competitie', '')),
                 (None, 'Wijzig AG')
             )
@@ -558,11 +561,11 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             # RCL
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                  comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-ag-controle',
                          kwargs={'comp_pk': comp.pk,
-                                 'regio_nr': deelnemer.deelcompetitie.nhb_regio.regio_nr}),
+                                 'regio_nr': deelnemer.regiocompetitie.nhb_regio.regio_nr}),
                  'AG controle'),
                 (None, 'Wijzig AG')
             )
@@ -576,14 +579,14 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # haal de deelnemer op
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSporterBoog
+            deelnemer = (RegiocompetitieSporterBoog
                          .objects
-                         .select_related('deelcompetitie',
-                                         'deelcompetitie__competitie',
+                         .select_related('regiocompetitie',
+                                         'regiocompetitie__competitie',
                                          'sporterboog',
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk))
-        except (ValueError, RegioCompetitieSporterBoog.DoesNotExist):
+        except (ValueError, RegiocompetitieSporterBoog.DoesNotExist):
             raise Http404('Sporter niet gevonden')
 
         # controleer dat deze deelnemer bekeken en gewijzigd mag worden
@@ -602,7 +605,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
             score_teams_ag_opslaan(
                     deelnemer.sporterboog,
-                    deelnemer.deelcompetitie.competitie.afstand,
+                    deelnemer.regiocompetitie.competitie.afstand,
                     nieuw_ag,
                     request.user,
                     "Nieuw handmatig AG voor teams")
@@ -620,11 +623,11 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_HWL:
             url = reverse('CompLaagRegio:teams-regio',
-                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+                          kwargs={'deelcomp_pk': deelnemer.regiocompetitie.pk})
         else:
             url = reverse('CompLaagRegio:regio-ag-controle',
-                          kwargs={'comp_pk': deelnemer.deelcompetitie.competitie.pk,
-                                  'regio_nr': deelnemer.deelcompetitie.nhb_regio.regio_nr})
+                          kwargs={'comp_pk': deelnemer.regiocompetitie.competitie.pk,
+                                  'regio_nr': deelnemer.regiocompetitie.nhb_regio.regio_nr})
 
         return HttpResponseRedirect(url)
 
@@ -656,7 +659,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
-                    .select_related('deelcompetitie',
+                    .select_related('regiocompetitie',
                                     'team_type')
                     .prefetch_related('team_type__boog_typen')
                     .get(pk=team_pk))
@@ -673,17 +676,17 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         context['team'] = team
 
-        context['deelcomp'] = deelcomp = team.deelcompetitie
+        context['deelcomp'] = deelcomp = team.regiocompetitie
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['readonly'] = readonly = (comp.fase > 'D')
+            context['readonly'] = readonly = (comp.fase_teams > 'D')
             now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                      month=deelcomp.einde_teams_aanmaken.month,
-                                      day=deelcomp.einde_teams_aanmaken.day,
+            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                      month=deelcomp.begin_fase_D.month,
+                                      day=deelcomp.begin_fase_D.day,
                                       hour=0,
                                       minute=0,
                                       second=0)
@@ -691,7 +694,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = (now <= einde) and not readonly
         else:
             # RCL
-            context['readonly'] = (comp.fase > 'D')
+            context['readonly'] = (comp.fase_teams > 'D')       # TODO: de RCL langer rechten geven?
             mag_wijzigen = True
 
         context['mag_wijzigen'] = mag_wijzigen
@@ -710,9 +713,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         if mag_wijzigen:
             pks = team.leden.values_list('pk', flat=True)
 
-            deelnemers = (RegioCompetitieSporterBoog
+            deelnemers = (RegiocompetitieSporterBoog
                           .objects
-                          .filter(deelcompetitie=deelcomp,
+                          .filter(regiocompetitie=deelcomp,
                                   inschrijf_voorkeur_team=True,
                                   bij_vereniging=ver,
                                   sporterboog__boogtype__in=boog_pks)
@@ -769,7 +772,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
-                    .select_related('deelcompetitie',
+                    .select_related('regiocompetitie',
                                     'team_type')
                     .prefetch_related('team_type__boog_typen')
                     .get(pk=team_pk))
@@ -783,17 +786,17 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         else:
             ver = team.vereniging
 
-        deelcomp = team.deelcompetitie
+        deelcomp = team.regiocompetitie
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
         if self.rol_nu == Rollen.ROL_HWL:
-            readonly = (comp.fase > 'D')
+            readonly = (comp.fase_teams > 'D')
             now = timezone.now()
-            einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                      month=deelcomp.einde_teams_aanmaken.month,
-                                      day=deelcomp.einde_teams_aanmaken.day,
+            einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
+                                      month=deelcomp.begin_fase_D.month,
+                                      day=deelcomp.begin_fase_D.day,
                                       hour=0,
                                       minute=0,
                                       second=0)
@@ -801,7 +804,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = (now <= einde) and not readonly
         else:
             # RCL
-            readonly = (comp.fase > 'D')
+            readonly = (comp.fase_teams > 'D')
             mag_wijzigen = not readonly
 
         if not mag_wijzigen:
@@ -812,10 +815,10 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         bezet_pks = team.leden.values_list('pk', flat=True)
 
         # leden die nog niet in een team zitten
-        ok1_pks = (RegioCompetitieSporterBoog
+        ok1_pks = (RegiocompetitieSporterBoog
                    .objects
                    .exclude(pk__in=bezet_pks)
-                   .filter(deelcompetitie=team.deelcompetitie,
+                   .filter(regiocompetitie=team.regiocompetitie,
                            inschrijf_voorkeur_team=True,
                            ag_voor_team__gte=1.0,
                            bij_vereniging=ver,
@@ -831,7 +834,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         for key in request.POST.keys():
             if key.startswith('deelnemer_'):
                 try:
-                    pk = int(key[10:])
+                    pk = int(key[10:10+7])      # afkappen voor de veiligheid
                 except ValueError:
                     pass
                 else:
@@ -872,25 +875,24 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
-    def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
+    def _get_deelcomp(self, deelcomp_pk) -> Regiocompetitie:
 
-        # haal de gevraagde deelcompetitie op
+        # haal de gevraagde regiocompetitie op
         try:
             deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=self.functie_nu.nhb_ver.regio))
-        except (ValueError, DeelCompetitie.DoesNotExist):
+        except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase not in ('E', 'F'):
-            # staat niet meer open voor instellen regiocompetitie teams
+        if comp.fase_teams != 'F':
             raise Http404('Competitie is niet in de juiste fase')
 
         if self.rol_nu == Rollen.ROL_WL:
@@ -902,19 +904,19 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
         if not (1 <= deelcomp.huidige_team_ronde <= 7):
             raise Http404('Competitie ronde klopt niet')
 
-        context['readonly'] = self.readonly
+        context['readonly'] = self.readonly     # voor WL
 
         teams = (RegiocompetitieTeam
                  .objects
                  .select_related('vereniging',
                                  'team_type')
-                 .filter(deelcompetitie=deelcomp,
+                 .filter(regiocompetitie=deelcomp,
                          vereniging=self.functie_nu.nhb_ver)
                  .order_by('volg_nr'))
         team_pks = [team.pk for team in teams]
@@ -948,13 +950,13 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         # for
         context['teams'] = teams
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'sporterboog__boogtype')
                       .prefetch_related('regiocompetitieteam_set')
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(regiocompetitie=deelcomp,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               inschrijf_voorkeur_team=True)
                       .order_by('sporterboog__boogtype__volgorde',
@@ -1021,7 +1023,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             ronde_team = (RegiocompetitieRondeTeam
                           .objects
                           .select_related('team',
-                                          'team__deelcompetitie',
+                                          'team__regiocompetitie',
                                           'team__team_type')
                           .prefetch_related('team__team_type__boog_typen')
                           .get(pk=ronde_team_pk,
@@ -1031,7 +1033,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         team = ronde_team.team
         context['team'] = team
-        context['deelcomp'] = deelcomp = team.deelcompetitie
+        context['deelcomp'] = deelcomp = team.regiocompetitie
         context['logboek'] = ronde_team.logboek
 
         # TODO: check competitie fase (E of F)
@@ -1068,9 +1070,9 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         ronde_team_nu_afkorting = ronde_team_nu.team.team_type.afkorting
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(regiocompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               sporterboog__boogtype__in=boog_pks)
@@ -1189,7 +1191,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             raise Http404('Team ronde niet gevonden of niet van jouw vereniging')
 
         team = ronde_team.team
-        deelcomp = team.deelcompetitie
+        deelcomp = team.regiocompetitie
 
         # TODO: check competitie fase
 
@@ -1226,9 +1228,9 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         max_gem.sort(reverse=True)      # hoogste eerst
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(regiocompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               sporterboog__boogtype__in=boog_pks,
@@ -1277,7 +1279,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         ronde_team.logboek += '\n\n[%s] Selectie is aangepast door %s:\n' % (now_str, wie_str)
 
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter')
                           .filter(pk__in=sel_pks)):

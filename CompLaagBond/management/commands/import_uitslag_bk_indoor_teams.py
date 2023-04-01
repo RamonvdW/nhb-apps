@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DEEL_RK, DEEL_BK, KampioenschapSporterBoog, KampioenschapTeam
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from openpyxl.utils.exceptions import InvalidFileException
 from decimal import Decimal
 import openpyxl
@@ -344,6 +345,13 @@ class Command(BaseCommand):
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
         row_nr = 9 - 1
+
+        # check de header
+        header = ws['B' + str(row_nr)].value
+        if header != 'Baan':
+            self.stderr.write('[ERROR] Blad is niet in orde: cell B8 bevat niet "Baan" maar %s' % repr(header))
+            raise ValueError('Uitslag B8')
+
         nix_count = 0
         while nix_count < 5:
             row_nr += 1
@@ -588,16 +596,22 @@ class Command(BaseCommand):
                     self.stderr.write('[ERROR] Kan juiste finale blad niet bepalen (geen WINNAAR)')
                     return
 
-                self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
+                self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
                 self._importeer_finales_4(ws)
             else:
-                self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
+                self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
                 self._importeer_finales_8(ws)
 
             result = list()
+            gebruikte_volgorde = list()
             for team_naam, team in self.deelnemende_teams.items():
                 tup = (team.result_rank, team.result_volgorde, team_naam, team.result_teamscore)
                 result.append(tup)
+
+                if team.result_volgorde in gebruikte_volgorde:
+                    self.stderr.write('[ERROR] Dubbel gebruikte team.result_volgorde: %s' % team.result_volgorde)
+                else:
+                    gebruikte_volgorde.append(team.result_volgorde)
             # for
             result.sort()
             self.stdout.write('Resultaat:')

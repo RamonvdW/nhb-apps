@@ -10,11 +10,13 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import AG_NUL, Competitie, CompetitieTeamKlasse, KampioenschapTeam, DeelKampioenschap, DEEL_RK
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK
+from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
+from Score.definities import AG_NUL
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'complaagrayon/rko-teams.dtl'
 
@@ -52,7 +54,7 @@ class RayonTeamsTemplateView(TemplateView):
             context['comp'] = comp
             comp.bepaal_fase()
 
-            open_inschrijving = comp.fase <= 'G'
+            open_inschrijving = comp.fase_teams <= 'G'
 
             subset = kwargs['subset'][:10]      # afkappen voor de veiligheid
             if subset == 'auto':
@@ -61,7 +63,7 @@ class RayonTeamsTemplateView(TemplateView):
             if subset == 'alle':
                 # alle rayons
                 context['rayon'] = 'Alle'
-                deelkamp_pks = (DeelKampioenschap
+                deelkamp_pks = (Kampioenschap
                                 .objects
                                 .filter(competitie=comp,
                                         deel=DEEL_RK)
@@ -74,7 +76,7 @@ class RayonTeamsTemplateView(TemplateView):
                 except (ValueError, NhbRayon.DoesNotExist):
                     raise Http404('Selectie wordt niet ondersteund')
 
-                deelkamp_pks = (DeelKampioenschap
+                deelkamp_pks = (Kampioenschap
                                 .objects
                                 .filter(competitie=comp,
                                         nhb_rayon=context['rayon'])
@@ -102,12 +104,12 @@ class RayonTeamsTemplateView(TemplateView):
             # RKO mode
             try:
                 deelkamp_pk = int(kwargs['deelkamp_pk'][:6])    # afkappen voor de veiligheid
-                deelkamp = (DeelKampioenschap
+                deelkamp = (Kampioenschap
                             .objects
                             .select_related('competitie')
                             .get(pk=deelkamp_pk,
                                  deel=DEEL_RK))
-            except (ValueError, DeelKampioenschap.DoesNotExist):
+            except (ValueError, Kampioenschap.DoesNotExist):
                 raise Http404('Kampioenschap niet gevonden')
 
             if deelkamp.functie != self.functie_nu:
@@ -119,7 +121,7 @@ class RayonTeamsTemplateView(TemplateView):
             context['comp'] = comp = deelkamp.competitie
             comp.bepaal_fase()
 
-            open_inschrijving = comp.fase <= 'G'
+            open_inschrijving = comp.fase_teams <= 'G'
 
             context['rayon'] = self.functie_nu.nhb_rayon
 
@@ -222,9 +224,11 @@ class RayonTeamsTemplateView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase <= 'K' and self.rol_nu == Rollen.ROL_RKO:
+            if comp.fase_teams <= 'K' and self.rol_nu == Rollen.ROL_RKO:
                 team.url_aanpassen = reverse('CompLaagRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': team.pk})
+
+            # TODO: url_verwijder (zie template)
 
             totaal_teams += 1
 
@@ -238,7 +242,7 @@ class RayonTeamsTemplateView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'RK Teams')
         )
 

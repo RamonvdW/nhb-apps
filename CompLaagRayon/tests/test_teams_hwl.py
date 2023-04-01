@@ -8,9 +8,11 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse,
-                               RegioCompetitieSporterBoog, KampioenschapTeam, DeelKampioenschap, DEEL_RK)
-from Competitie.tests.test_helpers import zet_competitie_fase, maak_competities_en_zet_fase_b
+from Competitie.definities import DEEL_RK
+from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
+                               RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
+from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_regio_wedstrijden
+from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan
@@ -223,15 +225,15 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
-        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
-        self.deelcomp18_regio111 = DeelCompetitie.objects.get(nhb_regio=self.regio_111,
-                                                              competitie__afstand=18)
+        self.deelcomp18_regio111 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+                                                               competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
-        self.deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                                              nhb_regio=self.regio_111)
+        self.deelcomp25_regio111 = Regiocompetitie.objects.get(competitie=self.comp_25,
+                                                               nhb_regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -301,10 +303,10 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         # print('aantal ingeschreven deelnemers:', RegioCompetitieSporterBoog.objects.count())
 
-        for obj in (RegioCompetitieSporterBoog
+        for obj in (RegiocompetitieSporterBoog
                     .objects
                     .select_related('sporterboog__sporter')
-                    .filter(deelcompetitie__competitie=self.comp_18)
+                    .filter(regiocompetitie__competitie=self.comp_18)
                     .all()):
             nr = obj.sporterboog.sporter.lid_nr
             if nr == 100002:
@@ -329,7 +331,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        deelkamp_rk3 = (DeelKampioenschap
+        deelkamp_rk3 = (Kampioenschap
                         .objects
                         .get(competitie=self.comp_18,
                              deel=DEEL_RK,
@@ -340,8 +342,9 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_rk_teams % deelkamp_rk3.pk)
             self.assert404(resp, 'Competitie is niet in de juiste fase 1')
 
-        # zet competitie in fase E
-        zet_competitie_fase(self.comp_18, 'E')
+        # zet competitie in fase F
+        zet_test_datum('')
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
         # competitie in de verkeerde fase
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=30):
@@ -428,14 +431,14 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Kampioenschap niet gevonden')
 
         # repeat voor de 25m
-        deelkamp_rk3 = (DeelKampioenschap
+        deelkamp_rk3 = (Kampioenschap
                         .objects
                         .get(competitie=self.comp_25,
                              deel=DEEL_RK,
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
         # zet competitie in fase E
-        zet_competitie_fase(self.comp_25, 'E')
+        zet_competitie_fase_regio_wedstrijden(self.comp_25)
 
         # verplaats het openingstijdstip
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
@@ -454,14 +457,14 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         self._create_deelnemers()
 
-        deelkamp_rk3 = (DeelKampioenschap
+        deelkamp_rk3 = (Kampioenschap
                         .objects
                         .get(competitie=self.comp_18,
                              deel=DEEL_RK,
                              nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
-        # zet competitie in fase E (nodig om een team aan te maken)
-        zet_competitie_fase(self.comp_18, 'E')
+        # zet competitie in fase F (nodig om een team aan te maken)
+        zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
         with override_settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
             # maak een team aan
@@ -493,14 +496,14 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Team niet gevonden')
 
             # herhaal voor 25m1p
-            deelkamp_rk3 = (DeelKampioenschap
+            deelkamp_rk3 = (Kampioenschap
                             .objects
                             .get(competitie=self.comp_25,
                                  deel=DEEL_RK,
                                  nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
             # zet competitie in fase E (nodig om een team aan te maken)
-            zet_competitie_fase(self.comp_25, 'E')
+            zet_competitie_fase_regio_wedstrijden(self.comp_25)
 
             # maak een team aan
             team.delete()

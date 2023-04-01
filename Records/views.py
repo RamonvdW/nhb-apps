@@ -11,7 +11,8 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
-from Records.models import IndivRecord
+from Records.definities import disc2str, gesl2str, makl2str, lcat2str
+from Records.models import IndivRecord, AnderRecord
 from Records.forms import ZoekForm
 from Sporter.models import Sporter
 
@@ -26,27 +27,6 @@ DISCIPLINE_TO_ICON = {
     '18': static('plein/badge_nhb_indoor.png'),
     '25': static('plein/badge_nhb_25m1p.png')
 }
-
-# vertaling van velden naar urlconf elementen en terug
-disc2str = {'OD': 'Outdoor',
-            '18': 'Indoor',
-            '25': '25m 1pijl'}
-
-gesl2str = {'M': 'Mannen',
-            'V': 'Vrouwen'}
-
-makl2str = {'R': 'Recurve',
-            'C': 'Compound',
-            'BB': 'Barebow',
-            'IB': 'Instinctive bow',
-            'TR': 'Traditional',
-            'LB': 'Longbow'}
-
-lcat2str = {'M': 'Masters (50+)',
-            'S': 'Senioren',
-            'J': 'Junioren (t/m 20 jaar)',
-            'C': 'Cadetten (t/m 17 jaar)',
-            'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
 
 
 class RecordsOverzichtView(ListView):
@@ -103,6 +83,8 @@ class RecordsOverzichtView(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['andere_records'] = AnderRecord.objects.order_by('pk')
 
         context['kruimels'] = (
             (None, 'Records'),

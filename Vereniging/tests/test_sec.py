@@ -7,8 +7,8 @@
 from django.test import TestCase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import Competitie, CompetitieIndivKlasse, RegioCompetitieSporterBoog
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
+from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Sporter.models import Sporter, SporterBoog
@@ -257,7 +257,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -288,7 +288,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -304,7 +304,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # probeer iemand in te schrijven
-        self.assertEqual(RegioCompetitieSporterBoog.objects.count(), 0)
+        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB

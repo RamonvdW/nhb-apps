@@ -9,10 +9,10 @@ from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (DeelCompetitie, KampioenschapIndivKlasseLimiet,
-                               DeelKampioenschap, DEEL_RK,
-                               KampioenschapSporterBoog, DEELNAME_JA, DEELNAME_NEE)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import (Regiocompetitie,
+                               Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
@@ -22,6 +22,8 @@ import csv
 
 
 TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/rko-rk-selectie.dtl'
+
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
@@ -47,7 +49,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_regio_status(competitie):
         # deelnemers komen uit de 4 regio's van het rayon
-        regio_deelcomps = (DeelCompetitie
+        regio_deelcomps = (Regiocompetitie
                            .objects
                            .filter(competitie=competitie)
                            .select_related('nhb_regio',
@@ -79,13 +81,13 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         # controleer dat de juiste RKO aan de knoppen zit
@@ -102,7 +104,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         if not deelkamp.heeft_deelnemerslijst:
             # situatie 1)
-            context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+            context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                                kwargs={'comp_pk': deelkamp.competitie.pk,
                                                        'comp_boog': 'r',
                                                        'rayon_nr': deelkamp.nhb_rayon.rayon_nr})
@@ -212,7 +214,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'RK selectie')
         )
 
@@ -230,13 +232,13 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
 
         try:
             deelkamp_pk = int(kwargs['deelkamp_pk'][:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         if not deelkamp.heeft_deelnemerslijst:
@@ -272,7 +274,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
             wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelkamp.nhb_rayon.rayon_nr
 
         response.write(BOM_UTF8)

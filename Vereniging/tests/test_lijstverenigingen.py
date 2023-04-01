@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import DeelCompetitie, DeelKampioenschap, DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
@@ -75,12 +76,12 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.account_hwl = self._prep_beheerder_lid('HWL')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
 
-        self.functie_bko = DeelKampioenschap.objects.filter(deel=DEEL_BK)[0].functie
-        self.functie_rko = DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2)[0].functie
-        self.functie_rcl = DeelCompetitie.objects.filter(nhb_regio=self.regio_101)[0].functie
+        self.functie_bko = Kampioenschap.objects.filter(deel=DEEL_BK)[0].functie
+        self.functie_rko = Kampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2)[0].functie
+        self.functie_rcl = Regiocompetitie.objects.filter(nhb_regio=self.regio_101)[0].functie
 
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)

@@ -9,10 +9,12 @@
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
 from Account.models import AccountSessions
-from Competitie.models import DeelKampioenschap, DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.models import Kampioenschap
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
-from Functie.models import Functie, Rollen, rol2url, url2rol
+from Functie.definities import Rollen, rol2url, url2rol
+from Functie.models import Functie
 from Functie.operations import account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
 from typing import Tuple
@@ -210,10 +212,6 @@ def rol_zet_sessionvars(account, request):
             # koppeling met Sporter, dus dit is een (potentiële) Schutter
             rollen_vast.append(Rollen.ROL_SPORTER)
             rol = Rollen.ROL_SPORTER
-        else:
-            if account.is_staff:
-                # admin maar geen NHB lid koppeling
-                rollen_vast.append(Rollen.ROL_NONE)
 
     request.session[SESSIONVAR_ROL_HUIDIGE] = rol
     request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
@@ -257,12 +255,13 @@ def rol_get_huidige(request):
         van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
         een rol uit de groep Rollen.ROL_xxx
     """
-    try:
-        rol = request.session[SESSIONVAR_ROL_HUIDIGE]
-        if not request.user.is_authenticated and rol != Rollen.ROL_NONE:
-            my_logger.warning('{rol_get_huidige} sessie zegt rol=%s voor anon user' % rol)
-    except KeyError:
-        rol = Rollen.ROL_NONE
+    rol = Rollen.ROL_NONE
+    if request.user.is_authenticated:
+        try:
+            rol = request.session[SESSIONVAR_ROL_HUIDIGE]
+        except KeyError:
+            pass
+
     return rol
 
 
@@ -273,32 +272,41 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     """
     rol = rol_get_huidige(request)
     functie = None
-    try:
-        functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
-        if not request.user.is_authenticated:
-            my_logger.warning('{rol_get_huidige_functie} sessie zegt functie_pk=%s voor anon user' % functie_pk)
-    except KeyError:
-        # geen functie opgeslagen
-        # of geen pk-like nummer
-        pass
-    else:
-        if functie_pk:      # filter None
-            try:
-                functie_pk = int(functie_pk)
-            except ValueError:
-                # slecht getal
-                pass
-            else:
+    if request.user.is_authenticated:
+        try:
+            functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
+        except KeyError:
+            # geen functie opgeslagen
+            # of geen pk-like nummer
+            pass
+        else:
+            if functie_pk:      # filter None
                 try:
+                    functie_pk = int(functie_pk)
                     functie = (Functie
                                .objects
                                .select_related('nhb_rayon',
                                                'nhb_regio', 'nhb_regio__rayon',
                                                'nhb_ver', 'nhb_ver__regio')
                                .get(pk=functie_pk))
-                except Functie.DoesNotExist:
-                    # niet bestaande pk
+                except (ValueError, Functie.DoesNotExist):
+                    # slecht getal of geen bestaande functie
                     pass
+                else:
+                    bad = ((functie.rol == 'HWL' and rol != Rollen.ROL_HWL) or
+                           (functie.rol == 'SEC' and rol != Rollen.ROL_SEC) or
+                           (functie.rol == 'WL'  and rol != Rollen.ROL_WL)  or
+                           (functie.rol == 'RKO' and rol != Rollen.ROL_RKO) or
+                           (functie.rol == 'BKO' and rol != Rollen.ROL_BKO) or
+                           (functie.rol == 'RCL' and rol != Rollen.ROL_RCL) or
+                           (functie.rol == 'MWZ' and rol != Rollen.ROL_MWZ) or
+                           (functie.rol == 'MWW' and rol != Rollen.ROL_MWW))
+
+                    if bad:
+                        # afwijkende combinatie
+                        my_logger.warning(
+                            '{rol_get_huidige_functie} sessie zegt functie_pk=%s met rol=%s terwijl rol=%s' % (
+                                functie_pk, repr(functie.rol), repr(rol)))
 
     return rol, functie
 
@@ -460,7 +468,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de BK's
-            qset = (DeelKampioenschap
+            qset = (Kampioenschap
                     .objects
                     .filter(competitie__afstand=functie_in.comp_type,
                             deel=DEEL_BK)
@@ -488,7 +496,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # for
 
             # expandeer naar de HWL van verenigingen gekozen voor de RKs
-            qset = (DeelKampioenschap
+            qset = (Kampioenschap
                     .objects
                     .filter(competitie__afstand=functie_in.comp_type,
                             deel=DEEL_RK,

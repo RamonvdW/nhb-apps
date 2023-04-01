@@ -8,12 +8,13 @@ from django.contrib import admin
 from django.db.models import F
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from BasisTypen.models import TeamType
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, DEEL_RK, DEEL_BK,
+from Competitie.definities import DEEL_BK, DEEL_RK
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
-                               CompetitieMatch, RegioCompetitieSporterBoog, KampioenschapSporterBoog,
+                               CompetitieMatch, RegiocompetitieSporterBoog, KampioenschapSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                               KampioenschapTeam, CompetitieMutatie, DeelKampioenschap)
+                               KampioenschapTeam, CompetitieMutatie, Kampioenschap)
 
 
 class CreateOnlyAdmin(admin.ModelAdmin):
@@ -33,14 +34,14 @@ class CreateOnlyAdmin(admin.ModelAdmin):
         return readonly_fields
 
 
-class DeelCompetitieAdmin(CreateOnlyAdmin):
+class RegiocompetitieAdmin(CreateOnlyAdmin):
 
     list_filter = ('competitie', 'nhb_regio')
 
     list_select_related = ('competitie', 'nhb_regio')
 
 
-class DeelKampioenschapAdmin(CreateOnlyAdmin):
+class KampioenschapAdmin(CreateOnlyAdmin):
 
     list_filter = ('competitie', 'deel')
 
@@ -49,13 +50,13 @@ class DeelKampioenschapAdmin(CreateOnlyAdmin):
     filter_horizontal = ('rk_bk_matches',)
 
 
-class DeelcompetitieRondeAdmin(CreateOnlyAdmin):
+class RegiocompetitieRondeAdmin(CreateOnlyAdmin):
 
-    list_filter = ('deelcompetitie__is_afgesloten', 'deelcompetitie__nhb_regio')
+    list_filter = ('regiocompetitie__is_afgesloten', 'regiocompetitie__nhb_regio')
 
-    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio')
+    list_select_related = ('regiocompetitie', 'regiocompetitie__nhb_regio')
 
-    readonly_fields = ('deelcompetitie', 'cluster')
+    readonly_fields = ('regiocompetitie', 'cluster')
 
     filter_horizontal = ('matches',)
 
@@ -69,7 +70,7 @@ class CompetitieAdmin(admin.ModelAdmin):
 
 class CompetitieIndivKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie', 'boogtype', 'is_voor_rk_bk')
+    list_filter = ('competitie', 'boogtype', 'is_ook_voor_rk_bk')
 
     list_select_related = ('competitie', 'boogtype')
 
@@ -109,7 +110,7 @@ class TeamAGListFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'Ontbreekt':
-            queryset = queryset.filter(deelcompetitie__regio_organiseert_teamcompetitie=True,
+            queryset = queryset.filter(regiocompetitie__regio_organiseert_teamcompetitie=True,
                                        inschrijf_voorkeur_team=True,
                                        ag_voor_team_mag_aangepast_worden=True,
                                        ag_voor_team__lte="0.1")
@@ -136,11 +137,11 @@ class ZelfstandigIngeschrevenListFilter(admin.SimpleListFilter):
         return queryset
 
 
-class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
+class RegiocompetitieSporterBoogAdmin(CreateOnlyAdmin):
 
     fieldsets = (
         ('Wie',
-            {'fields': ('deelcompetitie',
+            {'fields': ('regiocompetitie',
                         'bij_vereniging',
                         'sporterboog',
                         'competitieleeftijd')
@@ -171,7 +172,7 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('inschrijf_gekozen_matches',)
 
-    createonly_fields = ('deelcompetitie',
+    createonly_fields = ('regiocompetitie',
                          'sporterboog',
                          'bij_vereniging')
 
@@ -182,8 +183,8 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
     search_fields = ('sporterboog__sporter__unaccented_naam',
                      'sporterboog__sporter__lid_nr')
 
-    list_filter = ('deelcompetitie__competitie',
-                   'deelcompetitie__nhb_regio',
+    list_filter = ('regiocompetitie__competitie',
+                   'regiocompetitie__nhb_regio',
                    ZelfstandigIngeschrevenListFilter,
                    TeamAGListFilter,
                    'sporterboog__boogtype',
@@ -191,9 +192,9 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
                    ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
                    'sporterboog__sporter__bij_vereniging')
 
-    list_select_related = ('deelcompetitie',
-                           'deelcompetitie__nhb_regio',
-                           'deelcompetitie__competitie',
+    list_select_related = ('regiocompetitie',
+                           'regiocompetitie__nhb_regio',
+                           'regiocompetitie__competitie',
                            'sporterboog',
                            'sporterboog__sporter',
                            'sporterboog__boogtype')
@@ -204,7 +205,7 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
 
     @staticmethod
     def competitieleeftijd(obj):     # pragma: no cover
-        comp = obj.deelcompetitie.competitie
+        comp = obj.regiocompetitie.competitie
         msg = "%s jaar (seizoen %s/%s)" % (
                 obj.sporterboog.sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar) + 1,
                 comp.begin_jaar,
@@ -220,10 +221,10 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
         if db_field.name == 'indiv_klasse' and self.obj:
             kwargs['queryset'] = (CompetitieIndivKlasse
                                   .objects
-                                  .filter(competitie=self.obj.deelcompetitie.competitie)
+                                  .filter(competitie=self.obj.regiocompetitie.competitie)
                                   .order_by('volgorde'))
-        elif db_field.name == 'deelcompetitie':
-            kwargs['queryset'] = (DeelCompetitie
+        elif db_field.name == 'regiocompetitie':
+            kwargs['queryset'] = (Regiocompetitie
                                   .objects
                                   .select_related('competitie',
                                                   'nhb_regio')
@@ -235,10 +236,10 @@ class RegioCompetitieSporterBoogAdmin(CreateOnlyAdmin):
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'inschrijf_gekozen_matches' and self.obj:
             pks = list()
-            for ronde in (DeelcompetitieRonde
+            for ronde in (RegiocompetitieRonde
                           .objects
                           .prefetch_related('matches')
-                          .filter(deelcompetitie=self.obj.deelcompetitie)):
+                          .filter(regiocompetitie=self.obj.regiocompetitie)):
                 # sta alle matches in de regio toe, dus alle clusters
                 pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
@@ -274,13 +275,13 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('leden',)
 
-    list_filter = ('deelcompetitie__competitie',
+    list_filter = ('regiocompetitie__competitie',
                    'vereniging__regio',
                    TeamTypeFilter)
 
-    list_select_related = ('deelcompetitie',
-                           'deelcompetitie__nhb_regio',
-                           'deelcompetitie__competitie',
+    list_select_related = ('regiocompetitie',
+                           'regiocompetitie__nhb_regio',
+                           'regiocompetitie__competitie',
                            'vereniging',
                            'team_klasse')
 
@@ -297,12 +298,12 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         if db_field.name == 'team_klasse' and self.obj:
             kwargs['queryset'] = (CompetitieTeamKlasse
                                   .objects
-                                  .filter(competitie=self.obj.deelcompetitie.competitie,
+                                  .filter(competitie=self.obj.regiocompetitie.competitie,
                                           is_voor_teams_rk_bk=False)
                                   .order_by('volgorde'))
 
-        elif db_field.name == 'deelcompetitie':
-            kwargs['queryset'] = (DeelCompetitie
+        elif db_field.name == 'regiocompetitie':
+            kwargs['queryset'] = (Regiocompetitie
                                   .objects
                                   .select_related('competitie',
                                                   'nhb_regio')
@@ -314,9 +315,9 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'leden' and self.obj:
             # alleen leden van de juiste vereniging laten kiezen
-            kwargs['queryset'] = (RegioCompetitieSporterBoog
+            kwargs['queryset'] = (RegiocompetitieSporterBoog
                                   .objects
-                                  .filter(deelcompetitie=self.obj.deelcompetitie,
+                                  .filter(regiocompetitie=self.obj.regiocompetitie,
                                           bij_vereniging=self.obj.vereniging,
                                           inschrijf_voorkeur_team=True)
                                   .select_related('sporterboog',
@@ -326,7 +327,7 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class GebruikteKlassenFilter(admin.SimpleListFilter):
+class TeamKlassenFilter(admin.SimpleListFilter):
 
     title = "Team Wedstrijdklasse"
 
@@ -334,22 +335,33 @@ class GebruikteKlassenFilter(admin.SimpleListFilter):
 
     default_value = None
 
+    def __init__(self, request, params, model, model_admin):
+        # print('init: q=%s' % list(request.GET.items()))
+        self.limit_comp = request.GET.get('kampioenschap__competitie__id__exact')
+        super().__init__(request, params, model, model_admin)
+
     def lookups(self, request, model_admin):                    # pragma: no cover
         """ Return list of tuples for the sidebar """
-        return [
-            ('leeg', 'Geen klasse'),
-            ('regio', 'Regio klasse'),
-            ('rk_bk', 'RK/BK klasse')
-        ]
+        lst = [('leeg', 'Geen klasse')]
+
+        for team_klasse in (CompetitieTeamKlasse
+                            .objects
+                            .filter(competitie=self.limit_comp,
+                                    is_voor_teams_rk_bk=True)
+                            .order_by('volgorde')):
+            tup = (team_klasse.volgorde, team_klasse.beschrijving)
+            lst.append(tup)
+        # for
+
+        return lst
 
     def queryset(self, request, queryset):      # pragma: no cover
         selection = self.value()
-        if selection == 'leeg':
-            queryset = queryset.filter(team_klasse=None)
-        elif selection == 'regio':
-            queryset = queryset.filter(team_klasse__is_voor_teams_rk_bk=False)
-        elif selection == 'rk_bk':
-            queryset = queryset.filter(team_klasse__is_voor_teams_rk_bk=True)
+        if selection:
+            if selection == 'leeg':
+                queryset = queryset.filter(team_klasse=None)
+            else:
+                queryset = queryset.filter(team_klasse__volgorde=selection)
         return queryset
 
 
@@ -371,9 +383,9 @@ class IncompleetTeamFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         selection = self.value()
         if selection == 'incompleet':
-            queryset = queryset.filter(aanvangsgemiddelde__lte=0.0001)
+            queryset = queryset.filter(aanvangsgemiddelde__lt=1)
         elif selection == 'compleet':
-            queryset = queryset.filter(aanvangsgemiddelde__gt=0)
+            queryset = queryset.filter(aanvangsgemiddelde__gte=1)
         return queryset
 
 
@@ -381,7 +393,7 @@ class KampioenschapTypeFilter(admin.SimpleListFilter):
 
     title = "Soort kampioenschap"
 
-    parameter_name = 'incompleet'
+    parameter_name = 'rk_bk_type'
 
     default_value = None
 
@@ -409,9 +421,10 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     list_filter = ('kampioenschap__competitie',
                    KampioenschapTypeFilter,
-                   'vereniging__regio__rayon',
                    'team_type',
-                   GebruikteKlassenFilter,
+                   'deelname',
+                   'vereniging__regio__rayon',
+                   TeamKlassenFilter,
                    IncompleetTeamFilter)
 
     list_select_related = ('kampioenschap',
@@ -445,19 +458,19 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
             # alleen leden van de juiste vereniging en boogtype laten kiezen
             if self.obj:
                 # Edit
-                kwargs['queryset'] = (RegioCompetitieSporterBoog
+                kwargs['queryset'] = (RegiocompetitieSporterBoog
                                       .objects
                                       .select_related('sporterboog',
                                                       'sporterboog__sporter',
                                                       'sporterboog__boogtype',
                                                       'bij_vereniging')
-                                      .filter(deelcompetitie__competitie=self.competitie,
+                                      .filter(regiocompetitie__competitie=self.competitie,
                                               bij_vereniging=self.obj.vereniging,
                                               sporterboog__boogtype__pk__in=self.boog_pks)
                                       .order_by('sporterboog__sporter__lid_nr'))
             else:
                 # Add
-                kwargs['queryset'] = RegioCompetitieSporterBoog.objects.none()
+                kwargs['queryset'] = RegiocompetitieSporterBoog.objects.none()
 
         elif db_field.name in ('gekoppelde_leden', 'feitelijke_leden'):
             if self.obj:
@@ -469,6 +482,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                                                       'sporterboog__boogtype',
                                                       'kampioenschap__nhb_rayon')
                                       .filter(kampioenschap__competitie=self.competitie,
+                                              kampioenschap__deel=DEEL_RK,      # RK gekwalificeerde sporters koppelen, voor zowel RK als BK
                                               bij_vereniging=self.obj.vereniging,
                                               sporterboog__boogtype__pk__in=self.boog_pks)
                                       .order_by('sporterboog__sporter__lid_nr'))
@@ -480,7 +494,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'kampioenschap':
-            kwargs['queryset'] = (DeelKampioenschap
+            kwargs['queryset'] = (Kampioenschap
                                   .objects
                                   .select_related('competitie',
                                                   'nhb_rayon')
@@ -498,6 +512,29 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                 kwargs['queryset'] = CompetitieTeamKlasse.objects.none()
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class RkBkIndivKlasseFilter(admin.SimpleListFilter):
+
+    title = "Indiv Klasse (RK/BK)"
+
+    parameter_name = 'indiv_klasse_rk_bk'
+
+    default_value = None
+
+    def lookups(self, request, model_admin):                    # pragma: no cover
+        """ Return list of tuples for the sidebar """
+        return [(klasse.volgorde, klasse.beschrijving) for klasse in (CompetitieIndivKlasse
+                                                                      .objects
+                                                                      .filter(is_ook_voor_rk_bk=True)
+                                                                      .distinct('volgorde')
+                                                                      .order_by('volgorde'))]
+
+    def queryset(self, request, queryset):
+        selection = self.value()
+        if selection:
+            queryset = queryset.filter(indiv_klasse__volgorde=selection)
+        return queryset
 
 
 class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
@@ -553,8 +590,11 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                    'kampioenschap__nhb_rayon',
                    'deelname',
                    'sporterboog__boogtype',
+                   RkBkIndivKlasseFilter,
                    ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
                    'sporterboog__sporter__bij_vereniging')
+
+    ordering = ['volgorde']
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -598,14 +638,14 @@ class CompetitieMutatieAdmin(CreateOnlyAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
         if self.obj:
-            if db_field.name == 'deelcompetitie':
-                kwargs['queryset'] = (DeelCompetitie
+            if db_field.name == 'regiocompetitie':
+                kwargs['queryset'] = (Regiocompetitie
                                       .objects
                                       .select_related('nhb_regio')
                                       .filter(competitie=self.obj.competitie)
                                       .order_by('nhb_regio__regio_nr'))
             elif db_field.name == 'kampioenschap':
-                kwargs['queryset'] = (DeelKampioenschap
+                kwargs['queryset'] = (Kampioenschap
                                       .objects
                                       .select_related('nhb_rayon')
                                       .filter(competitie=self.obj.competitie)
@@ -622,7 +662,7 @@ class RondeTeamVerFilter(admin.SimpleListFilter):
 
     def __init__(self, request, params, model, model_admin):
         # print('init: q=%s' % list(request.GET.items()))
-        self.limit_comp = request.GET.get('team__deelcompetitie__competitie__id__exact')
+        self.limit_comp = request.GET.get('team__regiocompetitie__competitie__id__exact')
         self.limit_regio = request.GET.get('team__vereniging__regio__regio_nr__exact')
         self.limit_teamtype = request.GET.get('RondeTeamType')
         super().__init__(request, params, model, model_admin)
@@ -631,7 +671,7 @@ class RondeTeamVerFilter(admin.SimpleListFilter):
 
         teams = RegiocompetitieTeam.objects.select_related('vereniging')
         if self.limit_comp:
-            teams = teams.filter(deelcompetitie__competitie__id=self.limit_comp)
+            teams = teams.filter(regiocompetitie__competitie__id=self.limit_comp)
         if self.limit_regio:
             teams = teams.filter(vereniging__regio__regio_nr=self.limit_regio)
         if self.limit_teamtype:
@@ -675,7 +715,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
     readonly_fields = ('feitelijke_scores',)
 
-    list_filter = ('team__deelcompetitie__competitie',
+    list_filter = ('team__regiocompetitie__competitie',
                    'team__vereniging__regio',
                    RondeTeamTypeFilter,
                    'ronde_nr',
@@ -722,7 +762,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
         if obj:
             team = obj.team
-            self.deelcomp = team.deelcompetitie
+            self.deelcomp = team.regiocompetitie
             self.ver = team.vereniging
         else:
             self.deelcomp = self.ver = None
@@ -733,15 +773,15 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
         if db_field.name == 'team' and self.deelcomp:
             kwargs['queryset'] = (RegiocompetitieTeam
                                   .objects
-                                  .select_related('deelcompetitie',
+                                  .select_related('regiocompetitie',
                                                   'vereniging',
                                                   'team_type')
-                                  .filter(deelcompetitie=self.deelcomp)
+                                  .filter(regiocompetitie=self.deelcomp)
                                   .order_by('team_naam', 'pk'))
         else:
             kwargs['queryset'] = (RegiocompetitieTeam
                                   .objects
-                                  .select_related('deelcompetitie',
+                                  .select_related('regiocompetitie',
                                                   'vereniging',
                                                   'team_type')
                                   .order_by('team_naam',
@@ -753,9 +793,9 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
         if db_field.name in ('deelnemers_geselecteerd', 'deelnemers_feitelijk'):
             kwargs['widget'] = FilteredSelectMultiple(db_field.verbose_name, False)
             if self.deelcomp and self.ver:
-                kwargs['queryset'] = (RegioCompetitieSporterBoog
+                kwargs['queryset'] = (RegiocompetitieSporterBoog
                                       .objects
-                                      .filter(deelcompetitie=self.deelcomp,
+                                      .filter(regiocompetitie=self.deelcomp,
                                               bij_vereniging=self.ver,
                                               inschrijf_voorkeur_team=True)
                                       .select_related('sporterboog',
@@ -764,7 +804,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
                                                       'sporterboog__boogtype')
                                       .order_by('sporterboog__sporter__lid_nr'))
             else:
-                kwargs['queryset'] = (RegioCompetitieSporterBoog
+                kwargs['queryset'] = (RegiocompetitieSporterBoog
                                       .objects
                                       .filter(inschrijf_voorkeur_team=True)
                                       .select_related('sporterboog',
@@ -778,8 +818,8 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
 class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
 
-    list_filter = ('deelcompetitie__competitie',
-                   'deelcompetitie__nhb_regio')
+    list_filter = ('regiocompetitie__competitie',
+                   'regiocompetitie__nhb_regio')
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -787,7 +827,7 @@ class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
         if obj:
-            self.deelcomp = obj.deelcompetitie
+            self.deelcomp = obj.regiocompetitie
         else:
             self.deelcomp = None
 
@@ -799,7 +839,7 @@ class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
                 kwargs['widget'] = FilteredSelectMultiple(db_field.verbose_name, False)
                 kwargs['queryset'] = (RegiocompetitieTeam
                                       .objects
-                                      .filter(deelcompetitie=self.deelcomp))
+                                      .filter(regiocompetitie=self.deelcomp))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -864,14 +904,14 @@ admin.site.register(CompetitieTeamKlasse, CompetitieTeamKlasseAdmin)
 admin.site.register(CompetitieMatch, CompetitieMatchAdmin)
 admin.site.register(CompetitieMutatie, CompetitieMutatieAdmin)
 
-admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
-admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
-admin.site.register(RegioCompetitieSporterBoog, RegioCompetitieSporterBoogAdmin)
+admin.site.register(Regiocompetitie, RegiocompetitieAdmin)
+admin.site.register(RegiocompetitieRonde, RegiocompetitieRondeAdmin)
+admin.site.register(RegiocompetitieSporterBoog, RegiocompetitieSporterBoogAdmin)
 admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
 admin.site.register(RegiocompetitieTeamPoule, RegiocompetitieTeamPouleAdmin)
 admin.site.register(RegiocompetitieRondeTeam, RegiocompetitieRondeTeamAdmin)
 
-admin.site.register(DeelKampioenschap, DeelKampioenschapAdmin)
+admin.site.register(Kampioenschap, KampioenschapAdmin)
 admin.site.register(KampioenschapSporterBoog, KampioenschapSporterBoogAdmin)
 admin.site.register(KampioenschapTeam, KampioenschapTeamAdmin)
 admin.site.register(KampioenschapIndivKlasseLimiet, KampioenschapIndivKlasseLimietAdmin)

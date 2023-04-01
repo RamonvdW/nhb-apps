@@ -9,13 +9,14 @@ from django.http import HttpResponse, Http404
 from django.utils.formats import date_format
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
-                               BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
-                               BLAZOEN2STR, BLAZOEN2STR_COMPACT)
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
-                               RegioCompetitieSporterBoog, DAGDEEL2LABEL,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL)
-from Functie.models import Rollen
+from BasisTypen.definities import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
+                                   BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
+                                   BLAZOEN2STR, BLAZOEN2STR_COMPACT)
+from Competitie.definities import (DAGDELEN, DAGDEEL_AFKORTINGEN, DAGDEEL2LABEL,
+                                   INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
+from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde, CompetitieMatch,
+                               RegiocompetitieSporterBoog)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
@@ -28,6 +29,8 @@ import csv
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'compinschrijven/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE = 'compinschrijven/inschrijfmethode1-behoefte.dtl'
 TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE = 'compinschrijven/inschrijfmethode3-behoefte.dtl'
+
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 JA_NEE = {
     False: 'Nee',
@@ -139,20 +142,20 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
-        objs = (RegioCompetitieSporterBoog
+        objs = (RegiocompetitieSporterBoog
                 .objects
                 .select_related('indiv_klasse',
-                                'deelcompetitie',
-                                'deelcompetitie__nhb_regio',
+                                'regiocompetitie',
+                                'regiocompetitie__nhb_regio',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
-                .filter(deelcompetitie__competitie=comp)
+                .filter(regiocompetitie__competitie=comp)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -165,7 +168,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -197,7 +200,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -210,16 +213,16 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         context['inhoud'] = 'in ' + str(rayon)
 
-        objs = (RegioCompetitieSporterBoog
+        objs = (RegiocompetitieSporterBoog
                 .objects
                 .select_related('indiv_klasse',
-                                'deelcompetitie',
-                                'deelcompetitie__nhb_regio__rayon',
+                                'regiocompetitie',
+                                'regiocompetitie__nhb_regio__rayon',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
-                .filter(deelcompetitie__competitie=comp,
-                        deelcompetitie__nhb_regio__rayon=rayon)
+                .filter(regiocompetitie__competitie=comp,
+                        regiocompetitie__nhb_regio__rayon=rayon)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -231,7 +234,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -263,7 +266,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -281,22 +284,22 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context['inhoud'] = 'in ' + str(regio)
 
         try:
-            deelcomp = DeelCompetitie.objects.get(competitie=comp,
-                                                  nhb_regio=regio)
-        except DeelCompetitie.DoesNotExist:
+            deelcomp = Regiocompetitie.objects.get(competitie=comp,
+                                                   nhb_regio=regio)
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
 
-        objs = (RegioCompetitieSporterBoog
+        objs = (RegiocompetitieSporterBoog
                 .objects
                 .select_related('indiv_klasse',
-                                'deelcompetitie',
+                                'regiocompetitie',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__boogtype',
                                 'bij_vereniging')
-                .filter(deelcompetitie=deelcomp)
+                .filter(regiocompetitie=deelcomp)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -324,7 +327,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -344,7 +347,7 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
 
         regio = context['regio']
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-regio-%s.csv"' % regio.regio_nr
 
         response.write(BOM_UTF8)
@@ -578,7 +581,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -595,28 +598,28 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['regio'] = regio
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              nhb_regio=regio))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
             raise Http404('Verkeerde inschrijfmethode')
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('indiv_klasse',
-                                      'deelcompetitie',
+                                      'regiocompetitie',
                                       'bij_vereniging',
                                       'sporterboog',
                                       'sporterboog__boogtype',
                                       'sporterboog__sporter',
                                       'sporterboog__sporter__bij_vereniging')
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(regiocompetitie=deelcomp)
                       .order_by('indiv_klasse__volgorde',
                                 'ag_voor_indiv'))
 
@@ -630,7 +633,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
             (None, 'Benodigde dagdelen')
         )
@@ -656,7 +659,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -671,27 +674,27 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             raise Http404('Regio niet gevonden')
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              nhb_regio=regio))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
             raise Http404('Verkeerde inschrijfmethode')
 
-        objs = (RegioCompetitieSporterBoog
+        objs = (RegiocompetitieSporterBoog
                 .objects
                 .select_related('indiv_klasse',
-                                'deelcompetitie',
+                                'regiocompetitie',
                                 'bij_vereniging',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging')
-                .filter(deelcompetitie=deelcomp)
+                .filter(regiocompetitie=deelcomp)
                 .order_by('indiv_klasse__volgorde',
                           'ag_voor_indiv'))
 
@@ -705,7 +708,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         dagdelen = [DAGDEEL2LABEL[dagdeel][0] for dagdeel in context['dagdelen']]
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
         response.write(BOM_UTF8)
@@ -756,7 +759,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -773,13 +776,13 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context['regio'] = regio
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              nhb_regio=regio))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
@@ -796,9 +799,9 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                   .values_list('sporter__lid_nr', flat=True))
 
         match_pks = list()
-        for ronde in (DeelcompetitieRonde
+        for ronde in (RegiocompetitieRonde
                       .objects
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(regiocompetitie=deelcomp)
                       .prefetch_related('matches')):
             match_pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
@@ -827,7 +830,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                 blazoenen_dict[blazoen] = 0
             # for
 
-            for deelnemer in (RegioCompetitieSporterBoog
+            for deelnemer in (RegiocompetitieSporterBoog
                               .objects
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
@@ -858,7 +861,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
             (None, 'Gekozen wedstrijden')
         )
@@ -886,7 +889,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
-        if comp.fase < 'B' or comp.fase > 'E':
+        if not comp.is_open_voor_inschrijven():
             raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
@@ -901,13 +904,13 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             raise Http404('Regio niet gevonden')
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
                              nhb_regio=regio))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
@@ -922,7 +925,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="inschrijf-keuzes-%s.csv"' % regio.regio_nr
 
         response.write(BOM_UTF8)
@@ -934,9 +937,9 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         writer.writerow(['Nummer', 'Wedstrijd', 'Locatie', 'Blazoenen:'] + blazoen_headers)
 
         match_pks = list()
-        for ronde in (DeelcompetitieRonde
+        for ronde in (RegiocompetitieRonde
                       .objects
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(regiocompetitie=deelcomp)
                       .prefetch_related('matches')):
             match_pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
@@ -966,7 +969,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                 blazoenen_dict[blazoen] = 0
             # for
 
-            for deelnemer in (RegioCompetitieSporterBoog
+            for deelnemer in (RegiocompetitieSporterBoog
                               .objects
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
@@ -998,14 +1001,14 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         nummers = [str(nummer) for nummer in range(1, nr + 1)]
         writer.writerow(['Bondsnummer', 'Sporter', 'Vereniging', 'Wedstrijdklasse (individueel)'] + nummers)
 
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .prefetch_related('inschrijf_gekozen_matches')
                           .select_related('indiv_klasse',
                                           'bij_vereniging',
                                           'sporterboog',
                                           'sporterboog__sporter')
-                          .filter(deelcompetitie=deelcomp)
+                          .filter(regiocompetitie=deelcomp)
                           .order_by('bij_vereniging__ver_nr',
                                     'sporterboog__sporter__lid_nr')):
 

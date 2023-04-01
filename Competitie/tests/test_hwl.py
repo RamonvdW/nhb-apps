@@ -16,7 +16,7 @@ class TestCompetitieHWL(E2EHelpers, TestCase):
 
     """ tests voor de Competitie applicatie, functies voor de HWL """
 
-    test_after = ('BasisTypen', 'Functie', 'Competitie.tests.test_beheerders')
+    test_after = ('BasisTypen', 'Functie', 'Competitie.tests.test_tijdlijn')
 
     def setUp(self):
         """ eenmalige setup voor alle tests

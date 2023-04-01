@@ -58,6 +58,7 @@
 
     {% endif %}
 
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
@@ -72,7 +73,7 @@
     <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
             <!-- toon klassen -->
-            {% if comp.fase >= 'A2' %}
+            {% if comp.fase_indiv > 'A' %}
                 {% url 'Competitie:klassengrenzen-tonen' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
             {% endif %}
@@ -86,6 +87,34 @@
             {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
         </div>
     </div>
+
+
+    {% if url_beheer or url_tijdlijn%}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Beheer</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                {% if url_beheer %}
+                    {% include 'plein/card.dtl' with title="Beheer" text="Extra functies voor beheerders van de competitie." icon="store" url=url_beheer %}
+                {% endif %}
+
+                {% if url_tijdlijn %}
+                    {% include 'plein/card.dtl' with title="Tijdlijn" text="Toon de fases en planning van deze competitie" icon="schedule" url=url_tijdlijn %}
+                {% endif %}
+
+            </div>
+        </div>
+
+    {% endif %}
+
 
     {% include 'feedback/sidebar.dtl' with op_pagina="competitie-overzicht" %}
 

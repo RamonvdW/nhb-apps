@@ -9,7 +9,8 @@ from django.shortcuts import redirect
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.menu import get_url_voor_competitie
-from Functie.models import Rollen, Functie
+from Functie.definities import Rollen
+from Functie.models import Functie
 from Functie.rol import (rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
 from Overig.helpers import get_safe_from_ip
@@ -70,7 +71,9 @@ class ActiveerRolView(UserPassesTestMixin, View):
                 functie = Functie.objects.get(rol='HWL',
                                               nhb_ver__ver_nr=ver_nr)
             except (ValueError, TypeError, Functie.DoesNotExist):
-                raise Http404('Foute parameter (vereniging)')
+                # in plaats van een foutmelding, stuur door naar Wissel van Rol pagina
+                # raise Http404('Foute parameter (vereniging)')
+                return redirect('Functie:wissel-van-rol')
 
             my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
                             from_ip,

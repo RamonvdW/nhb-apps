@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,11 +8,12 @@
 
 from django.conf import settings
 from django.utils import timezone
-from BasisTypen.models import ORGANISATIE_IFAA
-from Wedstrijden.models import (WedstrijdKorting, WedstrijdInschrijving,
-                                WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
+from BasisTypen.definities import ORGANISATIE_IFAA
+from Wedstrijden.definities import (WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING,
                                 INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
                                 INSCHRIJVING_STATUS_TO_STR)
+from Wedstrijden.models import WedstrijdKorting, WedstrijdInschrijving
+
 from decimal import Decimal
 
 

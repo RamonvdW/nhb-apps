@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,8 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import GESLACHT_MAN, GESLACHT_ANDERS
-from Functie.models import Rollen
+from BasisTypen.definities import GESLACHT_MAN, GESLACHT_ANDERS
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,

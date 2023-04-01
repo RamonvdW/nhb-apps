@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from BasisTypen.models import GESLACHT_MAN, GESLACHT_VROUW
+from BasisTypen.definities import GESLACHT_MAN, GESLACHT_VROUW
 
 DISCIPLINE = [('OD', 'Outdoor'),
               ('18', 'Indoor'),
@@ -13,7 +13,7 @@ DISCIPLINE = [('OD', 'Outdoor'),
 GESLACHT = [(GESLACHT_MAN, 'Man'),
             (GESLACHT_VROUW, 'Vrouw')]
 
-# IB is in 2022 hernoemd naar TR. Records lopen dus door.
+# IB is in 2022 hernoemd naar TR
 MATERIAALKLASSEN = ('R', 'C', 'BB', 'LB', 'TR', 'IB')
 
 MATERIAALKLASSE = [('R', 'Recurve'),
@@ -23,14 +23,10 @@ MATERIAALKLASSE = [('R', 'Recurve'),
                    ('TR', 'Traditional'),
                    ('IB', 'Instinctive bow')]   # IB = legacy
 
-LEEFTIJDSCATEGORIE = [('M', 'Master'),
-                      # ('m', '50+'),
-                      ('S', 'Senior'),
-                      # ('s', '21+'),
-                      ('J', 'Junior'),
-                      # ('j', 'Onder 21'),
-                      ('C', 'Cadet'),
-                      # ('c', 'Onder 18'),
+LEEFTIJDSCATEGORIE = [('M', 'Master'),     # ('m', '50+'),
+                      ('S', 'Senior'),     # ('s', '21+'),
+                      ('J', 'Junior'),     # ('j', 'Onder 21'),
+                      ('C', 'Cadet'),      # ('c', 'Onder 18'),
                       ('U', 'Uniform (para)')]
 
 # vertaling van velden naar urlconf elementen en terug
@@ -38,33 +34,34 @@ disc2str = {'OD': 'Outdoor',
             '18': 'Indoor',
             '25': '25m 1pijl'}
 
-gesl2str = {'M': 'Mannen',
-            'V': 'Vrouwen'}
+gesl2str = {'M': 'Heren',
+            'V': 'Dames'}
 
+# er zijn nooit IB records geregistreerd, dus we tonen die gewoon niet meer
 makl2str = {'R': 'Recurve',
             'C': 'Compound',
             'BB': 'Barebow',
-            'IB': 'Instinctive bow',
+            # 'IB': 'Instinctive bow',
             'TR': 'Traditional',
             'LB': 'Longbow'}
 
-lcat2str = {'M': 'Masters (50+)',
-            'S': 'Senioren',
-            'J': 'Junioren (t/m 20 jaar)',
-            'C': 'Cadetten (t/m 17 jaar)',
+lcat2str = {'M': '50+ / Masters)',
+            'S': '21+ / Senioren',
+            'J': 'Onder 21 / Junioren',
+            'C': 'Onder 18 / Cadetten',
             'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
 
 disc2url = {'OD': 'outdoor',
             '18': 'indoor',
             '25': '25m1pijl'}
 
-gesl2url = {'M': 'mannen',
-            'V': 'vrouwen'}
+gesl2url = {'M': 'heren',
+            'V': 'dames'}
 
-lcat2short = {'M': 'Masters',
-              'S': 'Senioren',
-              'J': 'Junioren',
-              'C': 'Cadetten',
+lcat2short = {'M': '50+',
+              'S': '21+',
+              'J': 'Onder 21',
+              'C': 'Onder 18',
               'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
 
 verb2str = {True: 'Ja',
@@ -73,14 +70,13 @@ verb2str = {True: 'Ja',
 makl2url = {'R': 'recurve',
             'C': 'compound',
             'BB': 'barebow',
-            'IB': 'instinctive-bow',
             'TR': 'traditional',
             'LB': 'longbow'}
 
-lcat2url = {'M': 'masters',
-            'S': 'senioren',
-            'J': 'junioren',
-            'C': 'cadetten',
+lcat2url = {'M': '50plus',
+            'S': '21plus',
+            'J': 'onder21',
+            'C': 'onder18',
             'U': 'gecombineerd'}
 
 verb2url = {True: 'ja',

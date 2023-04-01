@@ -14,7 +14,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
 
     """ tests voor de CompUitslagen applicatie, module Uitslagen """
 
-    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
     url_overzicht = '/bondscompetities/%s/'
     url_uitslagen_ver = '/bondscompetities/uitslagen/%s/%s/vereniging/'                             # comp_pk, comp_boog

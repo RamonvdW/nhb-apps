@@ -7,14 +7,14 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
-                               Competitie, DeelCompetitie,
+from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES
+from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSporterBoog)
+                               RegiocompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
@@ -65,9 +65,8 @@ class UitslagenRegioIndivView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV
     url_name = 'CompUitslagen:uitslagen-regio-indiv-n'
-    order_gemiddelde = '-gemiddelde'
 
-    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
+    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog):
         """ filter optie voor de regio """
 
         # boogtype filters
@@ -86,7 +85,6 @@ class UitslagenRegioIndivView(TemplateView):
 
             boogtype.zoom_url = reverse(self.url_name,
                                         kwargs={'comp_pk': comp.pk,
-                                                'zes_scores': zes_scores,
                                                 'comp_boog': boogtype.afkorting.lower(),
                                                 'regio_nr': gekozen_regio_nr})
         # for
@@ -114,7 +112,6 @@ class UitslagenRegioIndivView(TemplateView):
 
                 regio.zoom_url = reverse(self.url_name,
                                          kwargs={'comp_pk': comp.pk,
-                                                 'zes_scores': zes_scores,
                                                  'comp_boog': comp_boog,
                                                  'regio_nr': regio.regio_nr})
             # for
@@ -137,20 +134,28 @@ class UitslagenRegioIndivView(TemplateView):
 
             context['ver_filters'] = vers
 
-        context['zes_scores_checked'] = (zes_scores == 'zes')
-        if zes_scores == 'alle':
-            zes_scores_next = 'zes'
-        else:
-            zes_scores_next = 'alle'
-        context['zes_scores_next'] = reverse(self.url_name,
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'zes_scores': zes_scores_next,
-                                                     'comp_boog': comp_boog,
-                                                     'regio_nr': gekozen_regio_nr})
-
     @staticmethod
-    def filter_zes_scores(deelnemers):
-        return deelnemers.filter(aantal_scores__gte=6)
+    def _lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str):
+        rank = 0
+        aantal = 0
+        is_first = True
+        prev_obj = None
+        for obj in objs1 + objs2:
+            aantal += 1
+            if prev_obj is None or prev_obj.gemiddelde != obj.gemiddelde:
+                rank = aantal
+            prev_obj = obj
+
+            obj.rank = rank
+            objs.append(obj)
+
+            if is_first:
+                obj.break_klasse = True
+                obj.is_eerste_groep = is_eerste_groep
+                obj.klasse_str = klasse_str
+                obj.aantal_in_groep = 2 + len(objs1) + len(objs2)
+                is_first = False
+        # for
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -166,10 +171,6 @@ class UitslagenRegioIndivView(TemplateView):
 
         comp.bepaal_fase()
         context['comp'] = comp
-
-        zes_scores = kwargs['zes_scores']
-        if zes_scores not in ('alle', 'zes'):
-            zes_scores = 'alle'
 
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor de veiligheid
 
@@ -188,64 +189,68 @@ class UitslagenRegioIndivView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
 
-        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog, zes_scores)
+        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog)
 
         boogtype = context['comp_boog']
         if not boogtype:
             raise Http404('Boogtype niet bekend')
 
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(regiocompetitie=deelcomp)
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
                                       'indiv_klasse__boogtype')
                       .filter(indiv_klasse__boogtype=boogtype)
-                      .order_by('indiv_klasse__volgorde', self.order_gemiddelde))
+                      .order_by('indiv_klasse__volgorde',
+                                '-gemiddelde',
+                                'pk'))      # consistente volgorde bij gelijk resultaat
 
-        if zes_scores == 'zes':
-            deelnemers = self.filter_zes_scores(deelnemers)
-
-        klasse = -1
-        rank = 0
         objs = list()
-        deelnemer_count = None
+        objs1 = list()      # primary lijst (genoeg scores)
+        objs2 = list()      # secundaire lijst (te weinig scores)
+        klasse = -1
+        klasse_str = None
+        is_eerste_groep = True
         for deelnemer in deelnemers:
 
-            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
-            if deelnemer.break_klasse:
-                deelnemer_count = deelnemer
-                deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
-                deelnemer.is_eerste_groep = (klasse == -1)
-                deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
-                rank = 0
-            klasse = deelnemer.indiv_klasse.volgorde
+            if klasse != deelnemer.indiv_klasse.volgorde:
+                self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
+                is_eerste_groep = False
+                objs1 = list()
+                objs2 = list()
+                klasse_str = deelnemer.indiv_klasse.beschrijving
+                klasse = deelnemer.indiv_klasse.volgorde
 
-            rank += 1
             sporter = deelnemer.sporterboog.sporter
-            deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
             # in plaats van allemaal 0,000 willen we het AG tonen tijdens de inschrijffase
-            if comp.fase < 'E':
+            if comp.fase_indiv < 'F':
                 deelnemer.gemiddelde = deelnemer.ag_voor_indiv
 
-            deelnemer_count.aantal_in_groep += 1
-            objs.append(deelnemer)
+            # zet sporters met te weinig scores in een secundair lijst die volgt op de primaire lijst
+            if True and deelcomp.is_afgesloten and deelnemer.aantal_scores < comp.aantal_scores_voor_rk_deelname:
+                # eindstand en te weinig scores
+                objs2.append(deelnemer)
+            else:
+                objs1.append(deelnemer)
         # for
+
+        self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
 
         context['deelnemers'] = objs
         context['heeft_deelnemers'] = (len(objs) > 0)
@@ -277,6 +282,7 @@ class UitslagenRegioTeamsView(TemplateView):
         for team in teamtypen:
             team.sel = team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
+                # validatie van urlconf argument: gevraagde teamtype bestaat echt
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
                 team.selected = True
@@ -286,8 +292,6 @@ class UitslagenRegioTeamsView(TemplateView):
                                             'team_type': team.afkorting.lower(),
                                             'regio_nr': gekozen_regio_nr})
         # for
-
-        # TODO: wanneer komt het voor dat teamtype niet bestaat? Template laat altijd regios/verenigingen zien!
 
         # regio filters
         if context['teamtype']:
@@ -323,7 +327,7 @@ class UitslagenRegioTeamsView(TemplateView):
             vers = list()
             for team in (RegiocompetitieTeam
                          .objects
-                         .filter(deelcompetitie__competitie=comp,
+                         .filter(regiocompetitie__competitie=comp,
                                  vereniging__regio__regio_nr=gekozen_regio_nr)
                          .select_related('vereniging')
                          .order_by('vereniging__ver_nr')):
@@ -375,20 +379,20 @@ class UitslagenRegioTeamsView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
-        except DeelCompetitie.DoesNotExist:
+        except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'F':
+        if comp.fase_teams > 'F':
             deelcomp.huidige_team_ronde = 8     # voorkomt kleurmarkering ronde 7 als actieve ronde
 
         context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
@@ -403,7 +407,7 @@ class UitslagenRegioTeamsView(TemplateView):
         poules = (RegiocompetitieTeamPoule
                   .objects
                   .prefetch_related('teams')
-                  .filter(deelcompetitie=deelcomp))
+                  .filter(regiocompetitie=deelcomp))
 
         team_pk2poule = dict()                      # [team.pk] = poule
         poule_pk2laagste_klasse_volgorde = dict()   # [team.pk] = team_klasse.volgorde
@@ -432,7 +436,7 @@ class UitslagenRegioTeamsView(TemplateView):
         teams = (RegiocompetitieTeam
                  .objects
                  .exclude(team_klasse=None)
-                 .filter(deelcompetitie=deelcomp,
+                 .filter(regiocompetitie=deelcomp,
                          team_type=context['teamtype'])
                  .select_related('vereniging',
                                  'team_klasse')

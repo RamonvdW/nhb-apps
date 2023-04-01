@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import Competitie, CompetitieMatch, CompetitieIndivKlasse, KampioenschapIndivKlasseLimiet
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -16,15 +16,14 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
     """ tests voor de CompUitslagen applicatie, module Uitslagen RK """
 
-    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_beheerders')
+    test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'                    # comp_pk, comp_boog
-    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
-    url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rayon-teams/'                    # comp_pk, team_type
-    url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
-
-    url_doorzetten_rk = '/bondscompetities/beheer/%s/doorzetten-rk/'                                              # comp_pk
-    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/rk-bk-teams-klassengrenzen/vaststellen/'  # comp_pk
+    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rk-individueel/'                    # comp_pk, comp_boog
+    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rk-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
+    url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rk-teams/'                    # comp_pk, team_type
+    url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rk-teams/%s/'               # comp_pk, team_type, rayon_nr
+    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'       # comp_pk
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     regio_nr = 101
     ver_nr = 0      # wordt in setupTestData ingevuld
@@ -41,7 +40,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         cls.ver_nr = ver_nr = data.regio_ver_nrs[cls.regio_nr][2]
         data.maak_bondscompetities()
         data.maak_inschrijvingen_regiocompetitie(18, ver_nr=ver_nr)     # tijdelijke RK deelnemerslijst
-        #data.maak_inschrijvingen_regiocompetitie(25, ver_nr=ver_nr)
+        # data.maak_inschrijvingen_regiocompetitie(25, ver_nr=ver_nr)
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
         s2 = timezone.now()
         d = s2 - s1
@@ -103,7 +102,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
 
         # maak een RK match aan
-        indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, is_voor_rk_bk=True)[0]
+        indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, is_ook_voor_rk_bk=True)[0]
 
         match = CompetitieMatch(
                     competitie=self.testdata.comp18,
@@ -126,16 +125,16 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         # als BKO: doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
-        zet_competitie_fase(self.testdata.comp18, 'G')
+        zet_competitie_fases(self.testdata.comp18, 'G', 'G')
 
-        url = self.url_doorzetten_rk % self.testdata.comp18.pk
+        url = self.url_doorzetten_regio_naar_rk % self.testdata.comp18.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
         self.verwerk_regiocomp_mutaties()
 
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
+        self.assertEqual(comp.fase_indiv, 'J')
 
         # ophalen in fase J geeft "bevestig tot datum"
         url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
@@ -152,7 +151,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
         comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'K')
+        self.assertEqual(comp.fase_teams, 'K')
 
         url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
         with self.assert_max_queries(20):
@@ -234,16 +233,16 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
-        zet_competitie_fase(self.testdata.comp25, 'G')
+        zet_competitie_fases(self.testdata.comp25, 'G', 'G')
 
-        url = self.url_doorzetten_rk % self.testdata.comp25.pk
+        url = self.url_doorzetten_regio_naar_rk % self.testdata.comp25.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
         self.verwerk_regiocomp_mutaties()
 
         comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'J')
+        self.assertEqual(comp.fase_teams, 'J')
 
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
         resp = self.client.post(url)

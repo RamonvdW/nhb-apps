@@ -9,7 +9,7 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
@@ -25,9 +25,10 @@ RESULTS_PER_PAGE = 100
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive", "Longbow")
 
-
 MINIMALE_LEEFTIJD_JEUGD_INTERLAND = 13      # alles jonger wordt niet getoond
 MAXIMALE_LEEFTIJD_JEUGD_INTERLAND = 20      # boven deze leeftijd Senior
+
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 class InterlandView(UserPassesTestMixin, TemplateView):
@@ -161,7 +162,7 @@ class InterlandAlsBestandView(InterlandView):
         if indivs is None:
             raise Http404('Geen sporters gevonden')
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="interland.csv"'
 
         response.write(BOM_UTF8)

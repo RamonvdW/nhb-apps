@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# zodra er nieuwe ScoreHist records zijn, de tussenstand bijwerken voor deelcompetities die niet afgesloten zijn
+# zodra er nieuwe ScoreHist records zijn, de tussenstand bijwerken voor regiocompetities die niet afgesloten zijn
 # voor zowel individueel als team score aspecten
 
 from django.core.management.base import BaseCommand
 from django.db.models import F, Q
 from django.db.utils import DataError, OperationalError, IntegrityError
 from Competitie.models import (CompetitieTaken,
-                               Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
+                               Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieRonde,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Score.definities import SCORE_WAARDE_VERWIJDERD
+from Score.models import ScoreHist
 import traceback
 import datetime
 import time
@@ -41,14 +42,14 @@ class Command(BaseCommand):
         parser.add_argument('--quick', action='store_true')     # for testing
 
     def _verwerk_overstappers_regio(self, regio_comp_pks):
-        objs = (RegioCompetitieSporterBoog
+        objs = (RegiocompetitieSporterBoog
                 .objects
                 .select_related('bij_vereniging',
                                 'bij_vereniging__regio',
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging',
                                 'sporterboog__sporter__bij_vereniging__regio')
-                .filter(deelcompetitie__competitie__pk__in=regio_comp_pks)
+                .filter(regiocompetitie__competitie__pk__in=regio_comp_pks)
                 .filter((~Q(bij_vereniging=F('sporterboog__sporter__bij_vereniging')) |     # bevat geen uitstappers
                          Q(sporterboog__sporter__bij_vereniging=None))))                    # bevat de uitstappers
         for obj in objs:
@@ -59,17 +60,17 @@ class Command(BaseCommand):
                                   obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
                                   sporter.bij_vereniging.regio.regio_nr, sporter.bij_vereniging))
 
-                # overschrijven naar andere deelcompetitie
+                # overschrijven naar andere regiocompetitie
                 if obj.bij_vereniging.regio != sporter.bij_vereniging.regio:
-                    obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
-                                                                    nhb_regio=sporter.bij_vereniging.regio)
+                    obj.regiocompetitie = Regiocompetitie.objects.get(competitie=obj.regiocompetitie.competitie,
+                                                                     nhb_regio=sporter.bij_vereniging.regio)
                 obj.bij_vereniging = sporter.bij_vereniging
                 obj.save()
         # for
 
     def _verwerk_overstappers(self):
         """ Deze functie verwerkt schutters die overgestapt zijn naar een andere vereniging
-            Deze worden overgeschreven naar een andere deelcompetitie (regio/RK/BK).
+            Deze worden overgeschreven naar een andere regiocompetitie (regio/RK/BK).
         """
 
         # 1. Sporter.bij_vereniging komt overeen met informatie uit CRM
@@ -86,7 +87,7 @@ class Command(BaseCommand):
         # rk_comp_pks = list()
         for comp in Competitie.objects.filter(is_afgesloten=False):
             comp.bepaal_fase()
-            if comp.fase <= 'F':
+            if comp.fase_indiv <= 'F':
                 # in fase van de regiocompetitie
                 regio_comp_pks.append(comp.pk)
         # for
@@ -163,18 +164,18 @@ class Command(BaseCommand):
         self.taken.save(update_fields=['hoogste_scorehist'])
         self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
-        # een deelcompetitie heeft ingeschreven schuttersboog (RegioCompetitieSporterBoog);
-        # een deelcompetitie bestaat uit rondes (RegioCompetitieRonde);
+        # een regiocompetitie heeft ingeschreven schuttersboog (RegioCompetitieSporterBoog);
+        # een regiocompetitie bestaat uit rondes (RegioCompetitieRonde);
         # elke ronde bevat een plan met wedstrijden;
         # wedstrijden hebben een datum;
         # wedstrijden hebben een uitslag met scores;
         # scores refereren aan een sporterboog;
         # schutters kunnen in een wedstrijd buiten hun ingeschreven rayon geschoten hebben
         rondes = list()
-        for ronde in (DeelcompetitieRonde
+        for ronde in (RegiocompetitieRonde
                       .objects
-                      .select_related('deelcompetitie')
-                      .filter(deelcompetitie__is_afgesloten=False)
+                      .select_related('regiocompetitie')
+                      .filter(regiocompetitie__is_afgesloten=False)
                       .all()):
 
             week_nr = ronde.week_nr
@@ -258,7 +259,7 @@ class Command(BaseCommand):
 
     def _update_regiocompetitieschuttersboog(self):
         count = 0
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .exclude(is_afgesloten=True)
                          .select_related('competitie')
@@ -275,9 +276,9 @@ class Command(BaseCommand):
                 max_score = 250
                 comp_afstand = 25
 
-            for deelnemer in (RegioCompetitieSporterBoog
+            for deelnemer in (RegiocompetitieSporterBoog
                               .objects
-                              .filter(deelcompetitie=deelcomp)
+                              .filter(regiocompetitie=deelcomp)
                               .select_related('sporterboog')
                               .prefetch_related('scores')
                               .all()):
@@ -357,13 +358,13 @@ class Command(BaseCommand):
     def _update_team_scores():
         """ Update alle team scores aan de hand van wie er in de teams zitten en de door de RCL geselecteerde scores
         """
-        for deelcomp in DeelCompetitie.objects.filter(is_afgesloten=False):
+        for deelcomp in Regiocompetitie.objects.filter(is_afgesloten=False):
             ronde_nr = deelcomp.huidige_team_ronde
             if 1 <= ronde_nr <= 7:
-                # pak alle teams in deze deelcompetitie erbij
-                teams = RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp).values_list('pk', flat=True)
+                # pak alle teams in deze regiocompetitie erbij
+                teams = RegiocompetitieTeam.objects.filter(regiocompetitie=deelcomp).values_list('pk', flat=True)
 
-                # doorloop alle ronde-teams voor de huidige ronde van de deelcompetitie
+                # doorloop alle ronde-teams voor de huidige ronde van de regiocompetitie
                 for ronde_team in (RegiocompetitieRondeTeam
                                    .objects
                                    .prefetch_related('scores_feitelijk')

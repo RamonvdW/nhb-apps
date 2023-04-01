@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,13 +11,15 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import RegiocompetitieTeam, CompetitieMatch
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from codecs import BOM_UTF8
 import csv
 
 TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'complaagregio/waarschijnlijke-deelnemers-regio.dtl'
+
+CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
@@ -61,8 +63,8 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             match.beschrijving1 = msg
             match.beschrijving2 = ''
 
-        ronde = match.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
-        deelcomp = ronde.deelcompetitie
+        ronde = match.regiocompetitieronde_set.select_related('regiocompetitie', 'regiocompetitie__competitie').all()[0]
+        deelcomp = ronde.regiocompetitie
         comp = deelcomp.competitie
         afstand = comp.afstand
 
@@ -73,7 +75,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         team_pk2naam = dict()
         team_pk2naam[0] = '-'
-        for team in RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp):
+        for team in RegiocompetitieTeam.objects.filter(regiocompetitie=deelcomp):
             team_pk2naam[team.pk] = team.maak_team_naam_kort()
         # for
 
@@ -144,16 +146,16 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        rondes = match.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()
+        rondes = match.regiocompetitieronde_set.select_related('regiocompetitie', 'regiocompetitie__competitie').all()
         if len(rondes) == 0:
             raise Http404('Verkeerde competitie')
         ronde = rondes[0]
-        deelcomp = ronde.deelcompetitie
+        deelcomp = ronde.regiocompetitie
         afstand = deelcomp.competitie.afstand
 
         team_pk2naam = dict()
         team_pk2naam[0] = '-'
-        for team in RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp):
+        for team in RegiocompetitieTeam.objects.filter(regiocompetitie=deelcomp):
             team_pk2naam[team.pk] = team.maak_team_naam_kort()
         # for
 
@@ -161,7 +163,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
 
         sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, match)
 
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type=CONTENT_TYPE_CSV)
         response['Content-Disposition'] = 'attachment; filename="waarschijnlijke-deelnemers-%s.csv"' % match.pk
 
         response.write(BOM_UTF8)

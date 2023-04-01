@@ -82,7 +82,7 @@
                         {% elif inschrijving.status == 'A' %}
                             <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Afgemeld</span>
                         {% else %}
-                            <span class="red-text"><i>Onbekend!</i></span>
+                            <span class="nhb-rood-text"><i>Onbekend!</i></span>
                         {% endif %}
                     </td>
                 </tr>

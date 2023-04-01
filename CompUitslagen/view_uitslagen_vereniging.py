@@ -7,10 +7,11 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from NhbStructuur.models import NhbVereniging
-from Competitie.models import (TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSporterBoog)
+from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
+from Competitie.models import (Competitie, Regiocompetitie,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
 from Functie.rol import rol_get_huidige_functie
+from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
@@ -85,26 +86,26 @@ class UitslagenVerenigingIndivView(TemplateView):
             regio_nr = 101
 
         try:
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
-        except DeelCompetitie.DoesNotExist:     # pragma: no cover
+        except Regiocompetitie.DoesNotExist:     # pragma: no cover
             raise Http404('Competitie niet gevonden')
 
         return deelcomp
 
     @staticmethod
     def _get_deelnemers(deelcomp, boogtype, ver_nr):
-        deelnemers = (RegioCompetitieSporterBoog
+        deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'indiv_klasse',
                                       'indiv_klasse__boogtype')
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(regiocompetitie=deelcomp,
                               bij_vereniging__ver_nr=ver_nr,
                               indiv_klasse__boogtype=boogtype)
                       .order_by('-gemiddelde'))
@@ -163,7 +164,6 @@ class UitslagenVerenigingIndivView(TemplateView):
         regio_nr = ver.regio.regio_nr
         context['url_terug'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
-                                               'zes_scores': 'alle',
                                                'comp_boog': comp_boog,
                                                'regio_nr': regio_nr})
 
@@ -253,7 +253,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
                                                'team_type': teamtype.afkorting.lower(),
                                                'regio_nr': regio_nr})
 
-        context['deelcomp'] = deelcomp = DeelCompetitie.objects.get(competitie=comp, nhb_regio=ver.regio)
+        context['deelcomp'] = deelcomp = Regiocompetitie.objects.get(competitie=comp, nhb_regio=ver.regio)
 
         context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
 
@@ -261,7 +261,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         teams = (RegiocompetitieTeam
                  .objects
                  .exclude(team_klasse=None)
-                 .filter(deelcompetitie=deelcomp,
+                 .filter(regiocompetitie=deelcomp,
                          team_type=context['teamtype'],
                          vereniging=ver)
                  .order_by('team_klasse__volgorde'))
@@ -384,7 +384,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # for
 
         pk2deelnemer = dict()
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog',
                                           'sporterboog__sporter')

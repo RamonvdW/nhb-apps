@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelKampioenschap, CompetitieMatch, DEEL_BK, DEEL_RK
+from Competitie.definities import DEEL_BK, DEEL_RK
+from Competitie.models import Kampioenschap, CompetitieMatch
 from NhbStructuur.models import NhbVereniging
 
 
@@ -30,7 +31,7 @@ class Command(BaseCommand):
 
         match_pks = list()
         if deel:
-            for deelkamp in DeelKampioenschap.objects.filter(deel=deel).prefetch_related('rk_bk_matches'):
+            for deelkamp in Kampioenschap.objects.filter(deel=deel).prefetch_related('rk_bk_matches'):
                 if deelkamp.rk_bk_matches.count() == 0:
                     self.stdout.write('[WARNING] Geen rk_bk_matches voor %s' % deelkamp)
 

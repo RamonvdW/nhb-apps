@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,8 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.models import CompetitieMatch
-from Score.models import Score, ScoreHist, SCORE_TYPE_GEEN
+from Score.definities import SCORE_TYPE_GEEN
+from Score.models import Score, ScoreHist
 from Sporter.models import SporterBoog
 
 """
@@ -106,8 +107,8 @@ class Command(BaseCommand):
     def _verwijder_orphan_matches(self):
         orphan_pks = list()
         for match in CompetitieMatch.objects.all():
-            in_plans1 = match.deelkampioenschap_set.all()
-            in_plans2 = match.deelcompetitieronde_set.all()
+            in_plans1 = match.kampioenschap_set.all()
+            in_plans2 = match.regiocompetitieronde_set.all()
             count = in_plans1.count() + in_plans2.count()
             if count == 0:
                 orphan_pks.append(match.pk)
@@ -115,7 +116,7 @@ class Command(BaseCommand):
 
         if len(orphan_pks):
             self._use_commit()
-            self.stdout.write('%s wedstrijden (CompetitieMatch) niet in een deelcompetitie of ronde' % len(orphan_pks))
+            self.stdout.write('%s wedstrijden (CompetitieMatch) niet in een regiocompetitie of ronde' % len(orphan_pks))
 
             orphans = CompetitieMatch.objects.filter(pk__in=orphan_pks)
             if self._do_save:

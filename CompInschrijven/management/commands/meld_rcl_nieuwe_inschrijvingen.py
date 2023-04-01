@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, RegioCompetitieSporterBoog
+from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.models import Functie
 from Taken.operations import check_taak_bestaat, maak_taak
 from datetime import timedelta
@@ -32,7 +32,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Vandaag is %s; gisteren is %s' % (now_date, gisteren_date))
 
         afstand_regio2deelcomp = dict()     # [(afstand_str, regio_nr)] = DeelCompetitie
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie',
                                          'nhb_regio')):
@@ -40,8 +40,7 @@ class Command(BaseCommand):
             # alleen nieuwe aanmeldingen rapporteren als de open inschrijving gesloten is
             # en de competitie nog in de actieve wedstrijden periode is waarin mensen zich in kunnen schrijven
             comp = deelcomp.competitie
-            comp.bepaal_fase()
-            if 'B' < comp.fase <= 'E':
+            if comp.is_open_voor_inschrijven():
                 tup = (deelcomp.competitie.afstand, deelcomp.nhb_regio.regio_nr)
                 afstand_regio2deelcomp[tup] = deelcomp
         # for
@@ -63,9 +62,9 @@ class Command(BaseCommand):
                 # competitie is niet meer in de juiste fase
                 pass
             else:
-                qset = (RegioCompetitieSporterBoog
+                qset = (RegiocompetitieSporterBoog
                         .objects
-                        .filter(deelcompetitie=deelcomp,
+                        .filter(regiocompetitie=deelcomp,
                                 wanneer_aangemeld=gisteren_date)
                         .select_related('sporterboog__sporter',
                                         'sporterboog__sporter__bij_vereniging',

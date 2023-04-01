@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from django.db.models.query_utils import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import TemplateView
 from django.urls import reverse
+from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING,
+                               BESTELLING_STATUS_MISLUKT)
 from Bestel.forms import ZoekAccountForm
-from Bestel.models import Bestelling, BESTELLING_STATUS2STR
-from Functie.models import Rollen
+from Bestel.models import Bestelling
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
-
+import datetime
 
 TEMPLATE_BESTEL_ACTIVITEIT = 'bestel/activiteit.dtl'
 
@@ -72,16 +75,28 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                         Q(producten__wedstrijd_inschrijving__sporterboog__sporter__lid_nr=nr))
                                 .order_by('-bestel_nr'))            # nieuwste eerst
             except ValueError:
-                bestellingen = (Bestelling
-                                .objects
-                                .select_related('account',
-                                                'ontvanger',
-                                                'ontvanger__vereniging')
-                                .filter(Q(account__unaccented_naam__icontains=zoekterm) |
-                                        Q(ontvanger__vereniging__naam__icontains=zoekterm) |
-                                        Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm) |
-                                        Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm))
-                                .order_by('-bestel_nr'))            # nieuwste eerst
+                if zoekterm == "**":
+                    bestellingen = (Bestelling
+                                    .objects
+                                    .select_related('account',
+                                                    'ontvanger',
+                                                    'ontvanger__vereniging')
+                                    .filter(status__in=(BESTELLING_STATUS_NIEUW,
+                                                        BESTELLING_STATUS_WACHT_OP_BETALING,
+                                                        BESTELLING_STATUS_MISLUKT))
+                                    .order_by('-bestel_nr'))            # nieuwste eerst
+                    context['zoekt_status'] = True
+                else:
+                    bestellingen = (Bestelling
+                                    .objects
+                                    .select_related('account',
+                                                    'ontvanger',
+                                                    'ontvanger__vereniging')
+                                    .filter(Q(account__unaccented_naam__icontains=zoekterm) |
+                                            Q(ontvanger__vereniging__naam__icontains=zoekterm) |
+                                            Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm) |
+                                            Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm))
+                                    .order_by('-bestel_nr'))            # nieuwste eerst
         else:
             # toon de 50 nieuwste bestellingen
             context['nieuwste'] = True
@@ -91,6 +106,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                             'ontvanger',
                                             'ontvanger__vereniging')
                             .order_by('-bestel_nr'))                # nieuwste eerst
+
+        bestellingen = bestellingen.distinct('bestel_nr')       # verwijder dupes
 
         context['bestellingen'] = list(bestellingen[:50])
         for bestelling in context['bestellingen']:
@@ -111,23 +128,41 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                          'webwinkel_keuze__koper')
                                          .all())
 
+            aantal_wedstrijd = 0
+            aantal_webwinkel = 0
+            laatste_wedstrijd_beschrijving = ''
+
             for product in bestelling.prods_list:
 
                 if product.wedstrijd_inschrijving:
+                    aantal_wedstrijd += 1
                     inschrijving = product.wedstrijd_inschrijving
                     product.beschrijving_str1 = 'Wedstrijd bij %s' % inschrijving.wedstrijd.organiserende_vereniging.ver_nr_en_naam()
                     product.beschrijving_str2 = 'voor %s (%s)' % (
                         inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam(),
                         inschrijving.sporterboog.boogtype.beschrijving)
                     product.beschrijving_str3 = inschrijving.wedstrijd.titel
+                    laatste_wedstrijd_beschrijving = product.beschrijving_str1
 
                 elif product.webwinkel_keuze:
+                    aantal_webwinkel += 1
                     keuze = product.webwinkel_keuze
                     product.beschrijving_str2 = keuze.product.omslag_titel
 
                 else:
                     product.geen_beschrijving = True
             # for
+
+            beschrijvingen = list()
+            if aantal_webwinkel:
+                beschrijvingen.append('%sx webwinkel' % aantal_webwinkel)
+            if aantal_wedstrijd:
+                beschrijvingen.append('%sx %s' % (aantal_wedstrijd, laatste_wedstrijd_beschrijving))
+
+            if len(beschrijvingen):
+                bestelling.beschrijving_kort = " + ".join(beschrijvingen)
+            else:
+                bestelling.beschrijving_kort = '?'
 
             bestelling.trans_list = list(bestelling
                                          .transacties
@@ -148,6 +183,18 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (None, 'Bestellingen en Betalingen'),
             )
+
+        now = timezone.now()
+
+        context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
+
+        begin_maand = datetime.datetime(day=1, month=now.month, year=now.year)
+        begin_maand = timezone.make_aware(begin_maand)
+
+        qset = Bestelling.objects.filter(aangemaakt__gte=begin_maand)
+
+        context['aantal_bestellingen'] = qset.count()
+        context['aantal_verkopers'] = qset.distinct('ontvanger').count()
 
         menu_dynamics(self.request, context)
         return context

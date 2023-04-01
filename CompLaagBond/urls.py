@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompLaagBond import view_planning, view_indiv
+from CompLaagBond import view_planning, view_indiv, view_teams, view_formulieren, view_kleine_klassen
 
 app_name = 'CompLaagBond'
 
@@ -13,13 +13,14 @@ urlpatterns = [
 
     # base url: bondscompetities/bk/
 
-    path('<deelkamp_pk>/planning/',
-         view_planning.PlanningView.as_view(),
-         name='planning'),
-
-    path('<deelkamp_pk>/limieten/',
+    # BK planning
+    path('planning/<deelkamp_pk>/limieten/',
          view_planning.WijzigLimietenView.as_view(),
          name='wijzig-limieten'),
+
+    path('planning/<deelkamp_pk>/',
+         view_planning.PlanningView.as_view(),
+         name='planning'),
 
     path('planning/wedstrijd/wijzig/<match_pk>/',
          view_planning.WijzigWedstrijdView.as_view(),
@@ -28,6 +29,7 @@ urlpatterns = [
     path('planning/wedstrijd/verwijder/<match_pk>/',
          view_planning.VerwijderWedstrijdView.as_view(),
          name='verwijder-wedstrijd'),
+
 
     # BKO: individueel
     path('selectie/<deelkamp_pk>/',
@@ -42,6 +44,40 @@ urlpatterns = [
          view_indiv.WijzigStatusBkDeelnemerView.as_view(),
          name='wijzig-status-bk-deelnemer'),
 
+    path('kleine-klassen-samenvoegen/<deelkamp_pk>/indiv/',
+         view_kleine_klassen.KleineKlassenIndivView.as_view(),
+         name='kleine-klassen-samenvoegen-indiv'),
+
+    path('verplaats-deelnemer/',
+         view_kleine_klassen.VerplaatsDeelnemerView.as_view(),
+         name='verplaats-deelnemer'),
+
+    # BKO: teams
+    path('teams/wijzig-status-bk-team/',
+         view_teams.WijzigStatusBkTeamView.as_view(),
+         name='bk-teams-wijzig-status'),
+
+    path('teams/<deelkamp_pk>/',
+         view_teams.LijstBkTeamsView.as_view(),
+         name='bk-teams'),
+
+
+    # BKO: download formulieren
+    path('formulieren/indiv/download/<match_pk>/<klasse_pk>/',
+         view_formulieren.FormulierBkIndivAlsBestandView.as_view(),
+         name='formulier-indiv-als-bestand'),
+
+    path('formulieren/indiv/<deelkamp_pk>/',
+         view_formulieren.DownloadBkIndivFormulierenView.as_view(),
+         name='formulier-indiv-lijst'),
+
+    path('formulieren/teams/download/<match_pk>/<klasse_pk>/',
+         view_formulieren.FormulierBkTeamsAlsBestandView.as_view(),
+         name='formulier-teams-als-bestand'),
+
+    path('formulieren/teams/<deelkamp_pk>/',
+         view_formulieren.DownloadBkTeamsFormulierenView.as_view(),
+         name='formulier-teams-lijst'),
 ]
 
 # end of file

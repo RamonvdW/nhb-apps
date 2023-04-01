@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,6 +15,12 @@ LOG="/tmp/test_out.txt"
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
 
+if [ -z "$VIRTUAL_ENV" ]
+then
+    echo "[ERROR] Virtual environment not activated"
+    exit 1
+fi
+
 [ -e "$LOG" ] && rm "$LOG"
 touch "$LOG"
 
@@ -28,10 +34,7 @@ PYCOV="-m coverage run --append --branch"       # --pylib
 
 export PYTHONDONTWRITEBYTECODE=1
 
-#OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
-# show all saml2 and djangosaml2idp source files
-#OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
-OMIT=""
+OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 
 # kill the http simulator if still running in the background
 # -f check entire commandline program name is python and does not match
@@ -74,12 +77,19 @@ then
     echo "ARGS without --clean: $ARGS"
 fi
 
+echo "[INFO] Provided  arguments: $ARGS"
+# convert a path to a test file into a test case
+ARGS=${ARGS//\//.}    # replace all (//) occurences of / with .
+ARGS=${ARGS/.py/}   # string .py at the end
+echo "[INFO] Converted arguments: $ARGS"
+
 FOCUS=""
 FOCUS_SPECIFIC_TEST=0
 if [ -z "$ARGS" ]
 then
     # no args = test all = remove database
     KEEP_DB=0
+    COV_INCLUDE=""
 else
     # convert Function.testfile.TestCase.test_functie into "Function"
     # also works for just "Function"
@@ -98,10 +108,10 @@ else
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
     [ ! -z "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
-    #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 fi
 
 # echo "[DEBUG] FOCUS=$FOCUS, FOCUS_SPECIFIC_TEST=$FOCUS_SPECIFIC_TEST"
+# echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 
 if [ $KEEP_DB -eq 0 ]
 then
@@ -244,8 +254,9 @@ then
             COVERAGE_RED=1
         fi
     else
-        python3 -m coverage report --precision=$PRECISION --include=$COV_INCLUDE
-        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered --include=$COV_INCLUDE &>>"$LOG"
+        [ ! -z "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
+        python3 -m coverage report --precision=$PRECISION $COV_INCLUDE $OMIT
+        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"

@@ -11,18 +11,17 @@ from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.utils.formats import date_format
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import GESLACHT_ANDERS
-from Functie.models import Rollen
+from BasisTypen.definities import GESLACHT_ANDERS
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Opleidingen.models import OpleidingDiploma
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, Speelsterkte, get_sporter_voorkeuren
+from Sporter.models import Sporter, get_sporter_voorkeuren
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_nhb,
                                       bereken_leeftijdsklasse_ifaa)
 from PIL import Image, ImageFont, ImageDraw
 from PIL.TiffImagePlugin import ImageFileDirectory_v2
-# from PIL.PngImagePlugin import PngInfo
 import io
 import datetime
 import base64

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -17,7 +17,7 @@
             <p>Wedstrijden bij vereniging <b>{{ ver }}</b></p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
             {% if geen_locatie %}
-                <p class="red-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>
+                <p class="nhb-rood-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>
             {% endif %}
         </div>
     </div>
@@ -43,7 +43,7 @@
                             <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
                             <td>{{ wed.status_str }}</td>
                             <td>{{ wed.disc_str }}</td>
-                            <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="red-text">Nog niet ingevuld</i>{% endif %}</td>
+                            <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="nhb-rood-text">Nog niet ingevuld</i>{% endif %}</td>
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                     <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">

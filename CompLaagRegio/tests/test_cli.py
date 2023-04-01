@@ -6,12 +6,13 @@
 
 from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, DeelCompetitie,
-                               RegioCompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
+                               RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, ScoreHist, Score, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
+from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
+from Score.models import Aanvangsgemiddelde, ScoreHist, Score
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -31,28 +32,15 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         teamtype_r = TeamType.objects.get(afkorting='R2')
 
-        datum = datetime.date(year=2000, month=1, day=1)
-
         comp = Competitie(
                     beschrijving='Test',
                     afstand='18',
-                    begin_jaar=2000,
-                    uiterste_datum_lid=datum,
-                    begin_aanmeldingen=datum,
-                    einde_aanmeldingen=datum,
-                    einde_teamvorming=datum,
-                    eerste_wedstrijd=datum,
-                    laatst_mogelijke_wedstrijd=datum,
-                    datum_klassengrenzen_rk_bk_teams=datum,
-                    rk_eerste_wedstrijd=datum,
-                    rk_laatste_wedstrijd=datum,
-                    bk_eerste_wedstrijd=datum,
-                    bk_laatste_wedstrijd=datum)
+                    begin_jaar=2000)
         comp.save()
-        self.comp = comp
+        self.comp = Competitie.objects.get(pk=comp.pk)
 
         dummy_functie = Functie.objects.filter(rol='RCL', nhb_regio__regio_nr=111)[0]
-        deelcomp = DeelCompetitie(
+        deelcomp = Regiocompetitie(
                             competitie=comp,
                             nhb_regio=regio_111,
                             functie=dummy_functie)
@@ -139,8 +127,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         sporterboog_bb.save()
         self.sporterboog_bb = sporterboog_bb
 
-        deelnemer_r = RegioCompetitieSporterBoog(
-                            deelcompetitie=deelcomp,
+        deelnemer_r = RegiocompetitieSporterBoog(
+                            regiocompetitie=deelcomp,
                             sporterboog=sporterboog_r,
                             bij_vereniging=ver,
                             indiv_klasse=klasse_r1,
@@ -148,8 +136,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         deelnemer_r.save()
         self.deelnemer_r = deelnemer_r
 
-        deelnemer_tr = RegioCompetitieSporterBoog(
-                            deelcompetitie=deelcomp,
+        deelnemer_tr = RegiocompetitieSporterBoog(
+                            regiocompetitie=deelcomp,
                             sporterboog=sporterboog_tr,
                             bij_vereniging=ver,
                             indiv_klasse=klasse_tr,
@@ -167,7 +155,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         team_klasse_r.boog_typen.add(boog_r)
 
         team = RegiocompetitieTeam(
-                            deelcompetitie=deelcomp,
+                            regiocompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=teamtype_r,
@@ -178,7 +166,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.team1 = team
 
         team = RegiocompetitieTeam(
-                            deelcompetitie=deelcomp,
+                            regiocompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=teamtype_r,
@@ -239,7 +227,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'R', '18')
         self.assertTrue('[ERROR] Kan de competitie niet vinden' in f1.getvalue())
 
-        zet_competitie_fase(self.comp, 'C')
+        zet_competitie_fase_regio_inschrijven(self.comp)
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '999999', 'R', '18')
         self.assertTrue('[ERROR] Sporter 999999 niet gevonden' in f1.getvalue())
@@ -361,10 +349,10 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('regios_afsluiten', '18', '101', '102')
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue('[ERROR] Competitie in fase_indiv A is niet ondersteund' in f1.getvalue())
 
-        self.assertTrue('[ERROR] Competitie in fase A is niet ondersteund' in f1.getvalue())
-
-        zet_competitie_fase(self.comp, 'F')
+        zet_competitie_fases(self.comp, 'G', 'G')
 
         # geen aangemaakte regios
         with self.assert_max_queries(20):
@@ -389,7 +377,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('fix_bad_ag', '18')
         self.assertTrue('[ERROR] Competitie is in de verkeerde fase' in f1.getvalue())
 
-        zet_competitie_fase(self.comp, 'B')
+        zet_competitie_fase_regio_inschrijven(self.comp)
 
         with self.assert_max_queries(20):
             self.run_management_command('fix_bad_ag', '18')
@@ -460,8 +448,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(f2.getvalue() == '')
 
         # maak een echte dupe aan
-        dupe = RegioCompetitieSporterBoog(
-                    deelcompetitie=self.deelnemer_r.deelcompetitie,
+        dupe = RegiocompetitieSporterBoog(
+                    regiocompetitie=self.deelnemer_r.regiocompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
                     indiv_klasse=self.deelnemer_r.indiv_klasse)
@@ -473,8 +461,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue('Gebruik --commit om' in f1.getvalue())
 
         # maak nog een dupe aan, voor extra coverage
-        dupe = RegioCompetitieSporterBoog(
-                    deelcompetitie=self.deelnemer_r.deelcompetitie,
+        dupe = RegiocompetitieSporterBoog(
+                    regiocompetitie=self.deelnemer_r.regiocompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
                     indiv_klasse=self.deelnemer_r.indiv_klasse)

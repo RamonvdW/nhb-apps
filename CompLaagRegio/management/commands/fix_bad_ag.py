@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, RegioCompetitieSporterBoog, AG_NUL
+from Competitie.models import Competitie, RegiocompetitieSporterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterVoorkeuren
 
 
@@ -32,9 +33,9 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Gekozen competitie: %s' % comp)
 
         comp.bepaal_fase()
-        self.stdout.write('[INFO] Fase: %s' % comp.fase)
+        self.stdout.write('[INFO] Competitie fase_teams: %s' % comp.fase_teams)
 
-        if not ('B' <= comp.fase <= 'E'):
+        if not comp.is_open_voor_inschrijven():
             self.stderr.write('[ERROR] Competitie is in de verkeerde fase')
             return
 
@@ -73,12 +74,12 @@ class Command(BaseCommand):
             sporter_pk2wedstrijdgeslacht[voorkeuren.sporter.pk] = wedstrijdgeslacht
         # for
 
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
                           .select_related('sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')
-                          .filter(deelcompetitie__competitie=comp)):
+                          .filter(regiocompetitie__competitie=comp)):
 
             try:
                 ag_indiv = sporterboog_pk2ag_indiv[deelnemer.sporterboog.pk]

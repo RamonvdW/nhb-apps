@@ -29,7 +29,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslag BK individueel</h3>
-            <p>{% if comp.fase > 'R' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele bondskampioenschappen</p>
+            <p>{% if comp.fase_indiv > 'P' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele bondskampioenschappen</p>
         </div>
     </div>
 
@@ -95,7 +95,7 @@
 
         <div class="row">
             <div style="padding:10px">
-                <p class="center red-text">De rayonkampioenschappen zijn nog niet afgesloten</p>
+                <p class="center nhb-rood-text">De rayonkampioenschappen zijn nog niet afgesloten</p>
                 <p class="center">Sporters worden in de lijst opgenomen als ze aan het RK deelgenomen hebben</p>
             </div>
         </div>
@@ -118,7 +118,7 @@
         {% endif %}
 
         <!-- uitleg over tijdstippen -->
-        {% if not comp.bk_is_afgelast and comp.fase <= 'Q' %}
+        {% if not comp.bk_is_afgelast and comp.fase_indiv >= 'N' and comp.fase_indiv <= 'P' %}
             <div class="row">
                 <div style="padding:10px">
                     <div class="col s12 center">
@@ -142,12 +142,12 @@
                         <td colspan="{% if obj.toon_uitslag %}8{% else %}7{% endif %}" class="center">
                             <h5>{{ obj.klasse_str }}</h5>
                             {% if obj.match %}
-                                {% if comp.rk_is_afgelast %}<s>{% endif %}
+                                {% if comp.bk_is_afgelast %}<s>{% endif %}
                                 <span>{{ obj.match.datum_wanneer }} om {{ obj.match.tijd_begin_wedstrijd }} bij {{ obj.match.vereniging }}</span>
                                 {% if obj.match.locatie %}
                                     <span> ({{ obj.match.adres_str }})</span>
                                 {% endif %}
-                                {% if comp.rk_is_afgelast %}</s>{% endif %}
+                                {% if comp.bk_is_afgelast %}</s>{% endif %}
                             {% endif %}
                         </td>
                     </tr>

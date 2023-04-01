@@ -7,9 +7,10 @@
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import (Competitie, CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet,
-                               DEEL_RK, DEEL_BK, DEELNAME_NEE, DEELNAME_JA,
-                               DeelKampioenschap, KampioenschapTeam, KampioenschapSporterBoog)
+from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, DEELNAME_JA
+from Competitie.models import (Competitie, CompetitieTeamKlasse,
+                               Kampioenschap, KampioenschapTeam,
+                               KampioenschapTeamKlasseLimiet)
 
 
 class Command(BaseCommand):
@@ -135,7 +136,7 @@ class Command(BaseCommand):
             aantal_pijlen = 2.0 * 25
 
         # zoek het BK erbij
-        deelkamp_bk = DeelKampioenschap.objects.select_related('competitie').get(deel=DEEL_BK, competitie=comp)
+        deelkamp_bk = Kampioenschap.objects.select_related('competitie').get(deel=DEEL_BK, competitie=comp)
 
         # verwijder de al aangemaakte teams
         qset = KampioenschapTeam.objects.filter(kampioenschap=deelkamp_bk).all()

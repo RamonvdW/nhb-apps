@@ -14,18 +14,21 @@ from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_IFAA, KalenderWedstrijdklasse
+from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
-from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
-                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
-                                INSCHRIJVING_STATUS_TO_STR,
-                                WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR)
+from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
+                                    INSCHRIJVING_STATUS_TO_STR,
+                                    WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,
+                                    WEDSTRIJD_WA_STATUS_TO_STR,
+                                    WEDSTRIJD_BEGRENZING_VERENIGING, WEDSTRIJD_BEGRENZING_REGIO,
+                                    WEDSTRIJD_BEGRENZING_RAYON)
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from datetime import timedelta
 
 
@@ -118,7 +121,7 @@ class WedstrijdDetailsView(TemplateView):
         if wedstrijd.is_ter_info:
             context['toon_inschrijven'] = False
         else:
-            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or wedstrijd.extern_beheerd
+            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or (wedstrijd.extern_beheerd and wedstrijd.contact_website)
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -207,6 +210,23 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
             sessie_pk2inschrijving[sessie_pk] = [inschrijving]
     # for
 
+    compatible_doelgroep = True
+
+    if wedstrijd.begrenzing == WEDSTRIJD_BEGRENZING_VERENIGING:
+        if sporter.bij_vereniging != wedstrijd.organiserende_vereniging:
+            compatible_doelgroep = False
+
+    elif wedstrijd.begrenzing == WEDSTRIJD_BEGRENZING_REGIO:
+        if sporter.bij_vereniging.regio != wedstrijd.organiserende_vereniging.regio:
+            compatible_doelgroep = False
+
+    elif wedstrijd.begrenzing == WEDSTRIJD_BEGRENZING_RAYON:
+        if sporter.bij_vereniging.regio.rayon != wedstrijd.organiserende_vereniging.regio.rayon:
+            compatible_doelgroep = False
+
+    if not compatible_doelgroep:
+        wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
+
     unsorted_wedstrijdklassen = list()
     for sessie in sessies:
         sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
@@ -250,7 +270,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                 klasse.is_compat = True
         # for
 
-        if compatible_boog and compatible_leeftijd and compatible_geslacht:
+        if compatible_boog and compatible_leeftijd and compatible_geslacht and compatible_doelgroep:
             try:
                 inschrijvingen = sessie_pk2inschrijving[sessie.pk]
             except KeyError:
@@ -270,6 +290,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
         sessie.compatible_boog = compatible_boog
         sessie.compatible_leeftijd = compatible_leeftijd
         sessie.compatible_geslacht = compatible_geslacht
+        sessie.compatible_doelgroep = compatible_doelgroep
 
         sessie.prijs_euro_sporter = wedstrijd.bepaal_prijs_voor_sporter(sporter)
     # for
@@ -757,10 +778,11 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                         context['inschrijving'] = inschrijving
                         inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
                 # for
+
                 context['al_ingeschreven'] = al_ingeschreven
 
                 # toon ook de sessie als de sporter geen compatibele boog heeft
-                context['kan_aanmelden'] = not al_ingeschreven  # kan_aanmelden
+                context['kan_aanmelden'] = kan_aanmelden
 
                 # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
                 # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden

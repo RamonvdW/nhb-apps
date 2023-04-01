@@ -213,49 +213,75 @@ class E2EHelpers(TestCase):
         if rol_nu != rol_verwacht:
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
-    def e2e_dump_resp(self, resp):                        # pragma: no cover
-        print("\ne2e_dump_resp:\nstatus code:", resp.status_code)
-        print(repr(resp))
+    def _interpreteer_resp(self, resp):
+        long_msg = list()
+        long_msg.append("status code: %s" % resp.status_code)
+        long_msg.append(repr(resp))
+
         is_attachment = False
         if resp.status_code == 302:
-            print("redirect to url:", resp.url)
-        else:
-            try:
-                header = resp['Content-Disposition']
-            except KeyError:
-                pass
-            else:
-                is_attachment = header.startswith('attachment; filename')
+            msg = "redirect to url: %s" % resp.url
+            long_msg.append(msg)
+            return msg, long_msg
 
-            if not is_attachment:
-                print('templates used:')
-                for templ in resp.templates:
-                    print('   %s' % repr(templ.name))
-                # for
-
-        if is_attachment:
-            print('content is an attachment: %s...' % str(resp.content)[:20])
+        try:
+            header = resp['Content-Disposition']
+        except KeyError:
+            pass
         else:
-            content = str(resp.content)
-            content = self._remove_debug_toolbar(content)
-            if len(content) < 50:
-                print("very short content:", content)
-            else:
-                is_404 = resp.status_code == 404
-                if not is_404:
-                    is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
-                    if is_404:
-                        pos = content.find('<meta path="')
-                        if pos < 0:
-                            # geen page-not-found maar fout-in-pagina
-                            is_404 = False
-                        else:
-                            sub = content[pos+12:pos+300]
-                            pos = sub.find('"')
-                            print('404 pagina niet gevonden: %s' % sub[:pos])
-                if not is_404:
-                    soup = BeautifulSoup(content, features="html.parser")
-                    print(soup.prettify())
+            is_attachment = header.startswith('attachment; filename')
+
+            if is_attachment:
+                msg = 'content is an attachment: %s...' % str(resp.content)[:20]
+                long_msg.append(msg)
+                return msg, long_msg
+
+        content = str(resp.content)
+        content = self._remove_debug_toolbar(content)
+        if len(content) < 50:
+            msg = "very short content: %s" % content
+            long_msg.append(msg)
+            return msg, long_msg
+
+        is_404 = resp.status_code == 404
+        if not is_404:
+            is_404 = any(['plein/fout_404.dtl' in templ.name for templ in resp.templates])
+
+        if is_404:
+            pos = content.find('<meta path="')
+            if pos > 0:
+                # pagina bestaat echt niet
+                sub = content[pos+12:pos+300]
+                pos = sub.find('"')
+                msg = '404 pagina niet gevonden: %s' % sub[:pos]
+                long_msg.append(msg)
+                return msg, long_msg
+
+            # zoek de expliciete foutmelding
+            pos = content.find('<code>')
+            if pos > 0:
+                sub = content[pos + 6:]
+                pos = sub.find('</code>')
+                msg = '404 met melding %s' % repr(sub[:pos])
+                long_msg.append(msg)
+                return msg, long_msg
+
+        if not is_attachment:
+            long_msg.append('templates used:')
+            for templ in resp.templates:
+                long_msg.append('   %s' % repr(templ.name))
+            # for
+
+        soup = BeautifulSoup(content, features="html.parser")
+        long_msg.append(soup.prettify())
+
+        return '', long_msg
+
+    def e2e_dump_resp(self, resp):                        # pragma: no cover
+        short_msg, long_msg = self._interpreteer_resp(resp)
+        print("\ne2e_dump_resp:")
+        print("\n".join(long_msg))
+        return
 
     def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)
@@ -661,17 +687,6 @@ class E2EHelpers(TestCase):
                 # for
                 self.fail(msg=msg)
 
-    def assert_is_bestand(self, response):
-        # check the headers that make this a download
-        # print("response: ", repr([(a,b) for a,b in response.items()]))
-        content_type_header = response['Content-Type']
-        self.assertEqual(content_type_header, 'text/csv')
-        content_disposition_header = response['Content-Disposition']
-        self.assertTrue(content_disposition_header.startswith('attachment; filename='))
-
-        # ensure the file is not empty
-        self.assertTrue(len(str(response.content)) > 30)
-
     @staticmethod
     def _get_templates_not_used(resp, template_names):
         """ returns True when any of the templates have not been used """
@@ -696,10 +711,15 @@ class E2EHelpers(TestCase):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         lst = self._get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
-            self.e2e_dump_resp(resp)
-            msg = "Following templates should have been used: %s\n" % repr(lst)
-            msg += "Actually used: %s" % repr([t.name for t in resp.templates])
-            self.assertTrue(False, msg=msg)
+            short_msg, long_msg = self._interpreteer_resp(resp)
+            if short_msg:
+                msg = short_msg + " in plaats van de juiste templates"
+            else:
+                print("\n".join(long_msg))
+                msg = "Following templates should have been used: %s\n" % repr(lst)
+                msg += "Actually used: %s" % repr([t.name for t in resp.templates])
+                msg += "\n" + short_msg
+            self.fail(msg=msg)
 
     def e2e_assert_logged_in(self):
         resp = self.client.get('/account/logout/', follow=False)
@@ -748,11 +768,13 @@ class E2EHelpers(TestCase):
                 self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
-        if resp.status_code != 302:  # pragma: no cover
+        if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
-            msg = "status_code: %s != 302" % resp.status_code
             if resp.status_code == 200:
-                self.e2e_dump_resp(resp)
+                short_msg, _ = self._interpreteer_resp(resp)
+                msg = "no redirect but " + short_msg
+            else:
+                msg = "status_code: %s != 302" % resp.status_code
                 msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
             self.fail(msg=msg)
         pos = expected_url.find('##')
@@ -771,6 +793,17 @@ class E2EHelpers(TestCase):
             self.fail(msg=msg)
 
         self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
+
+    def assert_is_redirect_login(self, resp):
+        if resp.status_code != 302:                     # pragma: no cover
+            # geef een iets uitgebreider antwoord
+            msg = "status_code: %s != 302" % resp.status_code
+            if resp.status_code == 200:
+                self.e2e_dump_resp(resp)
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
+
+        self.assertTrue(resp.url.startswith, '/account/login/')
 
     @staticmethod
     def _find_statement(query, start):                  # pragma: no cover
@@ -929,14 +962,32 @@ class E2EHelpers(TestCase):
                 pagina = pagina[:pos]
             self.fail(msg='404 pagina, maar geen expected_msg! Inhoud pagina: %s' % repr(pagina))
 
-    def assert200_file(self, resp):
+    def _assert_bestand(self, resp, expected_content_type):
         if resp.status_code != 200:                                 # pragma: no cover
             self.e2e_dump_resp(resp)
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
 
-        header = resp['Content-Disposition']
-        if not header.startswith('attachment; filename'):           # pragma: no cover
-            self.fail(msg="Response is geen file attachment")
+        # check the headers that make this a download
+        # print("response: ", repr([(a,b) for a,b in response.items()]))
+        content_type_header = resp['Content-Type']
+        self.assertEqual(expected_content_type, content_type_header)
+        content_disposition_header = resp['Content-Disposition']
+        self.assertTrue(content_disposition_header.startswith('attachment; filename='))
+
+        # ensure the file is not empty
+        self.assertTrue(len(str(resp.content)) > 30)
+
+    def assert200_is_bestand_csv(self, resp):
+        self._assert_bestand(resp, 'text/csv; charset=UTF-8')
+
+    def assert200_is_bestand_tsv(self, resp):
+        self._assert_bestand(resp, 'text/tab-separated-values; charset=UTF-8')
+
+    def assert200_is_bestand_xlsx(self, resp):
+        self._assert_bestand(resp, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    def assert200_is_bestand_xlsm(self, resp):
+        self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
 
     def run_management_command(self, *args, report_exit_code=True):
         """ Helper om code duplicate te verminderen en bij een SystemExit toch de traceback (in stderr) te tonen """
@@ -974,6 +1025,8 @@ class E2EHelpers(TestCase):
                 if line.startswith('[WARNING] '):                               # pragma: no cover
                     print(line)
             # for
+
+        return f1, f2
 
     def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False, fail_on_error=True):
         # vraag de achtergrondtaak om de mutaties te verwerken

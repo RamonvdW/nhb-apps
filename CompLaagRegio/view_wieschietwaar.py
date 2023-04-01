@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,11 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
-from Functie.models import Rollen
+from Competitie.definities import INSCHRIJF_METHODE_1
+from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog, CompetitieMatch
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetitieSporterBoog, CompetitieMatch
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPREGIO_WIESCHIETWAAR = 'complaagregio/wieschietwaar-methode1.dtl'
@@ -44,25 +45,25 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
+            deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk,
                              inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, DeelCompetitie.DoesNotExist):
+        except (ValueError, TypeError, Regiocompetitie.DoesNotExist):
             raise Http404('Geen valide competitie')
 
         context['deelcomp'] = deelcomp
 
         context['nhb_ver'] = self.functie_nu.nhb_ver
 
-        objs = (RegioCompetitieSporterBoog
+        objs = (RegiocompetitieSporterBoog
                 .objects
                 .select_related('sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__boogtype')
                 .prefetch_related('inschrijf_gekozen_matches')
-                .filter(deelcompetitie=deelcomp,
+                .filter(regiocompetitie=deelcomp,
                         bij_vereniging=self.functie_nu.nhb_ver)
                 .order_by('sporterboog__sporter__voornaam',
                           'sporterboog__sporter__achternaam'))

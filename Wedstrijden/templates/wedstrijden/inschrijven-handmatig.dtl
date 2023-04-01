@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -189,7 +189,7 @@
 
                     <tr>
                         <th>Lid bij vereniging</th>
-                        <td>{% if geselecteerd.sporter.bij_vereniging %}{{ geselecteerd.sporter.bij_vereniging }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                        <td>{% if geselecteerd.sporter.bij_vereniging %}{{ geselecteerd.sporter.bij_vereniging }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
                     </tr>
 
                     <tr>
@@ -213,7 +213,7 @@
                     {% else %}
                         <tr>
                             <th>Mogelijke leeftijdsklassen voor deze wedstrijd</th>
-                            <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="red-text">Geen match</span>{% endfor %}</td>
+                            <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="nhb-rood-text">Geen match</span>{% endfor %}</td>
                         </tr>
                     {% endif %}
 
@@ -233,11 +233,11 @@
                     {% endif %}
 
                     {% if uitleg_geslacht %}
-                        <p class="red-text">Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen.</p>
+                        <p class="nhb-rood-text">Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen.</p>
                     {% endif %}
 
                     {% if not kan_aanmelden %}
-                        <p class="red-text">Deze sporter kan niet ingeschreven worden op deze wedstrijd.<br>Dit kan komen door de leeftijd, geslacht of de ingestelde bogen.</p>
+                        <p class="nhb-rood-text">Deze sporter kan niet ingeschreven worden op deze wedstrijd.<br>Dit kan komen door de leeftijd, geslacht of de ingestelde bogen.</p>
                     {% endif %}
                 </div>
             </div>

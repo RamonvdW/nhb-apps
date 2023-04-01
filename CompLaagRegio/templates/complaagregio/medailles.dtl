@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,11 +10,22 @@
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function alleen_medailles() {
+            const tab = document.getElementById("medal-table");
+            for(let row of tab.rows) {
+                if (row.dataset['medal'] === "0") {
+                    row.style.display = "none";
+                }
+            }
+        }
+    </script>
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslagen regiocompetitie</h3>
-            <p>{% if comp.alle_regiocompetities_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de individuele regiocompetities.</p>
+            <p>{% if comp.regiocompetitie_is_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de individuele regiocompetities.</p>
         </div>
     </div>
 
@@ -46,7 +57,7 @@
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            <table class="white">
+            <table class="white" id="medal-table">
 
                 {% for obj in deelnemers %}
                     {% if obj.break_klasse %}
@@ -69,7 +80,7 @@
                         </tr>
                     {% endif %}
 
-                    <tr>
+                    <tr data-medal="{% if obj.toon_goud or obj.toon_zilver or obj.toon_brons %}1{% else %}0{% endif %}">
                         <td class="center">
                             {% if obj.toon_goud %}<i class="material-icons-round" style="color:#d6c372;font-size:30px">looks_one</i>{% endif %}
                             {% if obj.toon_zilver %}<i class="material-icons-round" style="color:#bec7c7;font-size:30px">looks_two</i>{% endif %}
@@ -85,6 +96,10 @@
             </table>
         </div>
     </div>
+
+    <p>
+        <button class="btn-nhb-blauw" style="margin-left:10px" onclick="alleen_medailles()">Alleen medaillisten tonen</button>
+    </p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-medailles" %}
 

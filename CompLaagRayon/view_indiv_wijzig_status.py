@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,9 +10,9 @@ from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (KampioenschapSporterBoog, CompetitieMutatie,
-                               MUTATIE_AFMELDEN, MUTATIE_AANMELDEN)
-from Functie.models import Rollen
+from Competitie.definities import MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN
+from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
@@ -66,12 +66,8 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'J':
-            raise Http404('Mag nog niet wijzigen')
-
-        # fase L = wedstrijden, maar dan willen we de RKO toch de status nog aan laten passen
-        if comp.fase > 'L':
-            raise Http404('Mag niet meer wijzigen')
+        if comp.fase_indiv not in ('J', 'K'):
+            raise Http404('Mag niet wijzigen')
 
         sporter = deelnemer.sporterboog.sporter
         deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
@@ -89,7 +85,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RKO:
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRayon:lijst-rk', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'RK selectie'),
                 (None, 'Wijzig sporter status')
             )
@@ -121,11 +117,8 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase < 'J':
-            raise Http404('Mag nog niet wijzigen')
-
-        if comp.fase > 'L':
-            raise Http404('Mag niet meer wijzigen')
+        if comp.fase_indiv not in ('J', 'K'):
+            raise Http404('Mag niet wijzigen')
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]
         afmelden = str(request.POST.get('afmelden', ''))[:2]
@@ -144,11 +137,11 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Sporter moet lid zijn bij een vereniging')
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_AANMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AANMELDEN,
                                         deelnemer=deelnemer,
                                         door=door_str)
         elif afmelden == "1":
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_AFMELDEN,
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_AFMELDEN,
                                         deelnemer=deelnemer,
                                         door=door_str)
         else:

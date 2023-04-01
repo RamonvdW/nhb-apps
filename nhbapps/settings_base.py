@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-02-28'
+SITE_VERSIE = '2023-04-01'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -68,6 +68,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
 ]
 
+
+# SecurityMiddleware
+# SessionMiddleware
+# AuthenticationMiddleware
+# CommonMiddleware
+# CsrfViewMiddleware: verifies POST belongs to GET
+# MessageMiddleware: message storage between requests, typically for form feedback
+# XFrameOptionsMiddleware
+
+# AuthenticationMiddleware must be after SessionMiddleware
+#        MessageMiddleware must be after SessionMiddleware
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)

@@ -367,7 +367,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_login_al_ingelogd(self):
-        self.testdata.account_admin.sporter_set.all().delete()      # TODO: waarom moet dit?
+        self.testdata.account_admin.sporter_set.all().delete()      # corner case
         self.e2e_login(self.testdata.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter

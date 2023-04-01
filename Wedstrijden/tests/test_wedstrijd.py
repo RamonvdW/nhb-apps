@@ -10,7 +10,8 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie
 import datetime
 
 
@@ -639,7 +640,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.boogtypen.count(), 1)                # alleen R
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 2)         # alleen de in de sessies gebruikte klassen
 
-        # corner-case: uniseks + gender-specifieke klasse actief
+        # corner-case: gemengd + gender-specifieke klasse actief
         wkl = KalenderWedstrijdklasse.objects.get(volgorde=110)
         wedstrijd.wedstrijdklassen.add(wkl)
         sessie2.wedstrijdklassen.add(wkl)         # nu 3 klassen

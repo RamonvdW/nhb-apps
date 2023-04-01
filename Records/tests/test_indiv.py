@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils.dateparse import parse_date
-from Records.models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
+from Records.definities import LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
+from Records.models import IndivRecord
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -161,6 +162,23 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         rec.max_score = 1000
         rec.save()
 
+        # Record 50
+        rec = IndivRecord()
+        rec.volg_nr = 50
+        rec.discipline = DISCIPLINE[0][0]   # OD
+        rec.soort_record = 'Ander soort record'
+        rec.geslacht = GESLACHT[0][0]   # M
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # S
+        rec.materiaalklasse = MATERIAALKLASSE[4][0]     # TR
+        rec.sporter = sporter
+        rec.naam = 'Traditionele Schutter'
+        rec.datum = parse_date('2022-08-27')
+        rec.plaats = 'Papendal'
+        rec.land = 'Nederland'
+        rec.score = 999
+        rec.max_score = 1000
+        rec.save()
+
     def test_all(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_indiv_all)
@@ -168,9 +186,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('records/records_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_indiv_all)
-
-        url = self.url_indiv % ('mannen', 'outdoor', 'masters', 'recurve', 'ja', 'nvt', 46)
+        url = self.url_indiv % ('heren', 'outdoor', '50plus', 'recurve', 'ja', 'nvt', 46)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -178,7 +194,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # para dwingt disc!=25 en lcat=U af
-        url = self.url_indiv % ('mannen', '25m1pijl', 'senioren', 'recurve', 'ja', 'open', 0)
+        url = self.url_indiv % ('heren', '25m1pijl', '21plus', 'recurve', 'ja', 'open', 0)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -186,7 +202,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # gewoon een goede para
-        url = self.url_indiv % ('vrouwen', 'indoor', 'gecombineerd', 'recurve', 'ja', 'open', 0)
+        url = self.url_indiv % ('dames', 'indoor', 'gecombineerd', 'recurve', 'ja', 'open', 0)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -194,12 +210,21 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # niet-para dwingt lcat!=U
-        url = self.url_indiv % ('mannen', 'outdoor', 'gecombineerd', 'recurve', 'ja', 'nvt', 0)
+        url = self.url_indiv % ('heren', 'outdoor', 'gecombineerd', 'recurve', 'ja', 'nvt', 0)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
+        url = self.url_indiv % ('heren', 'outdoor', '21plus', 'traditional', 'ja', 'nvt', 0)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('records/records_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Traditionele Schutter')
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_indiv_all)
 
 # end of file

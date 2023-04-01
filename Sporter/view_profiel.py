@@ -12,15 +12,17 @@ from django.utils.formats import localize
 from django.db.models import Q
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
-from Competitie.models import (Competitie, DeelCompetitie,
-                               RegioCompetitieSporterBoog, KampioenschapSporterBoog,
-                               INSCHRIJF_METHODE_1, DEELNAME_NEE, DEEL_RK)
-from Functie.models import Functie, Rollen
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, KampioenschapSporterBoog
+from Functie.definities import Rollen
+from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
-from Records.models import IndivRecord, MATERIAALKLASSE
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_TEAM, AG_DOEL_INDIV
+from Records.definities import MATERIAALKLASSE
+from Records.models import IndivRecord
+from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
 import logging
 import copy
@@ -118,17 +120,18 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 # fase B of later
                 comp.inschrijven = 'De inschrijving is gesloten'
 
-                if comp.alle_rks_afgesloten:
+                if comp.rk_indiv_afgesloten and comp.rk_teams_afgesloten:
                     comp.fase_str = 'Bondskampioenschappen'
-                elif comp.alle_regiocompetities_afgesloten:
+                elif comp.regiocompetitie_is_afgesloten:
                     comp.fase_str = 'Rayonkampioenschappen'
                 else:
                     comp.fase_str = 'Regiocompetitie'
 
-                    if comp.fase < 'C':
-                        comp.inschrijven = 'De inschrijving is open tot %s' % localize(comp.einde_aanmeldingen)
-                    elif comp.fase < 'F':
-                        comp.inschrijven = 'Aanmelden kan nog tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
+                    if comp.fase_indiv == 'C':
+                        comp.inschrijven = 'De inschrijving is open tot %s' % localize(comp.begin_fase_F)
+                    elif comp.fase_indiv <= 'F':
+                        # tijdens de hele wedstrijden fase kan er aangemeld worden
+                        comp.inschrijven = 'Aanmelden kan nog tot %s' % localize(comp.einde_fase_F)
 
                 comps.append(comp)
         # for
@@ -161,9 +164,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         gebruik_knoppen = False
 
         # zoek alle inschrijvingen van deze sporter erbij
-        inschrijvingen = list(RegioCompetitieSporterBoog
+        inschrijvingen = list(RegiocompetitieSporterBoog
                               .objects
-                              .select_related('deelcompetitie',
+                              .select_related('regiocompetitie',
                                               'sporterboog')
                               .filter(sporterboog__sporter=sporter))
 
@@ -183,16 +186,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         comp_pks = [comp.pk for comp in comps]
 
-        # zoek deelcompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
+        # zoek regiocompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
         regio = sporter.bij_vereniging.regio
-        for deelcompetitie in (DeelCompetitie
-                               .objects
-                               .select_related('competitie')
-                               .exclude(competitie__is_afgesloten=True)
-                               .filter(competitie__pk__in=comp_pks,
-                                       nhb_regio=regio)
-                               .order_by('competitie__afstand')):
-            comp = deelcompetitie.competitie
+        for deelcomp in (Regiocompetitie
+                         .objects
+                         .select_related('competitie')
+                         .exclude(competitie__is_afgesloten=True)
+                         .filter(competitie__pk__in=comp_pks,
+                                 nhb_regio=regio)
+                         .order_by('competitie__afstand')):
+            comp = deelcomp.competitie
             comp.bepaal_fase()
 
             comp_boog_afk = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
@@ -200,7 +203,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             # doorloop elk boogtype waar de sporter informatie/wedstrijden voorkeur voor heeft
             for afk in boog_afkorting_wedstrijd:
                 if afk in comp_boog_afk:
-                    obj = copy.copy(deelcompetitie)
+                    obj = copy.copy(deelcomp)
                     objs.append(obj)
 
                     obj.boog_afkorting = afk
@@ -211,23 +214,23 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     # zoek uit of de sporter al ingeschreven is
                     sporterboog = boogafk2sporterboog[afk]
                     for inschrijving in inschrijvingen:
-                        if inschrijving.sporterboog == sporterboog and inschrijving.deelcompetitie == obj:
+                        if inschrijving.sporterboog == sporterboog and inschrijving.regiocompetitie == obj:
                             obj.is_ingeschreven = True
                             obj.afgemeld_voorkeur_rk = not inschrijving.inschrijf_voorkeur_rk_bk
                             inschrijvingen.remove(inschrijving)
-                            if comp.fase <= 'B':
+                            if comp.fase_indiv <= 'C':
                                 obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                                            kwargs={'deelnemer_pk': inschrijving.pk})
                                 gebruik_knoppen = True
 
-                            if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
+                            if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase_indiv <= 'F':
                                 obj.url_schietmomenten = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
                                                                  kwargs={'deelnemer_pk': inschrijving.pk})
                                 gebruik_knoppen = True
                             break
                     # for
 
-                    if 'B' <= comp.fase < 'F':
+                    if 'C' <= comp.fase_indiv <= 'F':
                         # niet ingeschreven?
                         if not obj.is_ingeschreven:
                             obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
@@ -235,10 +238,10 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                                                 'deelcomp_pk': obj.pk})
                             gebruik_knoppen = True
 
-                    elif 'J' <= comp.fase <= 'N':
+                    elif 'J' <= comp.fase_indiv <= 'N':
                         # zoek de inschrijving voor het RK erbij
                         for kampioen in kampioenen:
-                            if (kampioen.kampioenschap.competitie == deelcompetitie.competitie and
+                            if (kampioen.kampioenschap.competitie == deelcomp.competitie and
                                     kampioen.kampioenschap.deel == DEEL_RK and
                                     kampioen.sporterboog == sporterboog):
 
@@ -246,13 +249,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                 obj.rk_inschrijving = kampioen
 
                                 if kampioen.deelname != DEELNAME_NEE:
-                                    obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+                                    obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                                                     kwargs={'comp_pk': kampioen.kampioenschap.competitie.pk,
                                                                             'comp_boog': afk.lower(),
                                                                             'rayon_nr': kampioen.kampioenschap.nhb_rayon.rayon_nr})
                         # for
 
-                    elif 'P' <= comp.fase < 'R':
+                    elif 'O' <= comp.fase_indiv < 'P':
                         # FUTURE: zelfde logica voor het BK
                         pass
             # for
@@ -262,7 +265,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # zodat er afgemeld kan worden
         for inschrijving in inschrijvingen:
             afk = inschrijving.sporterboog.boogtype.afkorting
-            obj = inschrijving.deelcompetitie
+            obj = inschrijving.regiocompetitie
             objs.append(obj)
 
             obj.is_ingeschreven = True
@@ -271,7 +274,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             comp = obj.competitie
             comp.bepaal_fase()
-            if comp.fase <= 'B':
+            if comp.fase_indiv <= 'C':
                 obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                            kwargs={'deelnemer_pk': inschrijving.pk})
                 gebruik_knoppen = True
@@ -413,16 +416,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     def _find_scores(sporter):
         scores = list()
 
-        for deelnemer in (RegioCompetitieSporterBoog
+        for deelnemer in (RegiocompetitieSporterBoog
                           .objects
-                          .select_related('deelcompetitie',
-                                          'deelcompetitie__competitie',
+                          .select_related('regiocompetitie',
+                                          'regiocompetitie__competitie',
                                           'sporterboog',
                                           'sporterboog__boogtype')
                           .filter(sporterboog__sporter=sporter)
-                          .order_by('deelcompetitie__competitie__afstand')):
+                          .order_by('regiocompetitie__competitie__afstand')):
 
-            comp = deelnemer.deelcompetitie.competitie
+            comp = deelnemer.regiocompetitie.competitie
 
             if comp.afstand == '18':
                 deelnemer.competitie_str = "18m Indoor"

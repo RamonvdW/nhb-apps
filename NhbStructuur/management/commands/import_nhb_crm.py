@@ -24,7 +24,8 @@ from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Speelsterkte
 from Vereniging.models import Secretaris
-from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
+from Wedstrijden.definities import BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
+from Wedstrijden.models import WedstrijdLocatie
 import traceback
 import datetime
 import logging
@@ -810,7 +811,7 @@ class Command(BaseCommand):
                         else:
                             # nog niet gekoppeld
                             if maak_account_vereniging_secretaris(obj, account):
-                                self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie en heeft krijgt een e-mail" % (
+                                self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie en krijgt een e-mail" % (
                                                         sporter.lid_nr, obj.ver_nr))
                                 sec_account_pks.append(account.pk)
                             else:

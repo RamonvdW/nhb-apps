@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging
@@ -65,7 +65,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
-            # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
+            # het rayonnummer is verkrijgbaar via de regiocompetitie van de functie
             return (NhbVereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
@@ -106,7 +106,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         # toon de lijst van verenigingen in de regio
         if self.rol_nu == Rollen.ROL_RCL:
-            # het regionummer is verkrijgbaar via de deelcompetitie van de functie
+            # het regionummer is verkrijgbaar via de regiocompetitie van de functie
             objs = (NhbVereniging
                     .objects
                     .filter(regio=self.functie_nu.nhb_regio)

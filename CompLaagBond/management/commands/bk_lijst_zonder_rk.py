@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -219,7 +219,7 @@ class Command(BaseCommand):
         for klasse in (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=self.comp)
-                       .exclude(is_voor_rk_bk=False)        # aspiranten en klasse onbekend
+                       .exclude(is_ook_voor_rk_bk=False)        # aspiranten en klasse onbekend
                        .order_by('volgorde')):
 
             self.stdout.write('[INFO] Individuele klasse: %s' % klasse)

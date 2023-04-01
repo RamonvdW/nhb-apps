@@ -8,9 +8,10 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.models import Bestelling, BESTELLING_STATUS_AFGEROND
+from Bestel.definities import BESTELLING_STATUS_AFGEROND
+from Bestel.models import Bestelling
 from Bestel.operations.mutaties import bestel_overboeking_ontvangen
-from Functie.models import Rollen
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from decimal import Decimal, InvalidOperation
@@ -95,7 +96,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         actie = request.POST.get('actie', '')[:5]
         bedrag = request.POST.get('bedrag', '')[:20].strip()
-        kenmerk = request.POST.get('kenmerk', '')[:20].strip()
+        kenmerk = request.POST.get('kenmerk', '')[:10].strip()
 
         # controleer het kenmerk
         bestelling = None
@@ -106,7 +107,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
             context['kenmerk'] = ''
             context['fout_kenmerk'] = 'Bestelnummer wordt niet herkend'
         else:
-            context['kenmerk'] = '%s' % bestelling.bestel_nr
+            context['kenmerk'] = '%07d' % bestelling.bestel_nr      # %07d restores to 7 digits with prefix zeros
 
         # controleer het bedrag
         try:

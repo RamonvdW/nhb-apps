@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,9 +10,9 @@ from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
+from Wedstrijden.definities import WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI
 from Wedstrijden.models import (WedstrijdLocatie, KalenderWedstrijdklasse, Wedstrijd, WedstrijdSessie,
-                                WedstrijdInschrijving, WedstrijdKorting,
-                                WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
+                                WedstrijdInschrijving, WedstrijdKorting)
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 

@@ -132,7 +132,7 @@
                                     {% if deelcomp.boog_niet_meer %}
                                         {% if deelcomp.is_ingeschreven %}
                                             {% if deelcomp.url_afmelden %}
-                                                <span class="red-text">Je bent nog ingeschreven</span>
+                                                <span class="nhb-rood-text">Je bent nog ingeschreven</span>
                                             {% else %}
                                                 <span>Je bent ingeschreven (afmelden kan niet meer)</span>
                                             {% endif %}
@@ -189,7 +189,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        {% elif deelcomp.competitie.fase < 'B' %}
+                                        {% elif deelcomp.competitie.fase_indiv < 'C' %}
                                             <span>Inschrijven kan nog niet</span>
                                         {% endif %}
                                     {% endif %}

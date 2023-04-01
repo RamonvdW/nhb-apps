@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -37,7 +37,7 @@
                     <tr>
                         <td>{{ bestelling.aangemaakt }}</td>
                         <td class="center">{{ bestelling.mh_bestel_nr }}</td>
-                        <td class="center{% if bestelling.status_aandacht %} red-text{% endif %}">{{ bestelling.status_str }}</td>
+                        <td class="center{% if bestelling.status_aandacht %} nhb-rood-text{% endif %}">{{ bestelling.status_str }}</td>
                         <td>{% for regel in bestelling.beschrijving %}{{ regel }}<br>{% endfor %}</td>
                         <td class="center">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                         <td class="center">

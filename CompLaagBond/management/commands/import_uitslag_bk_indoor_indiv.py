@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import (DEEL_BK,
-                               DEELNAME_NEE, DEELNAME_JA,
-                               KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE,
-                               KampioenschapSporterBoog)
+from Competitie.definities import (DEEL_BK,
+                                   DEELNAME_NEE, DEELNAME_JA,
+                                   KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE)
+from Competitie.models import KampioenschapSporterBoog
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
@@ -63,6 +63,13 @@ class Command(BaseCommand):
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
         row_nr = 9 - 1
+
+        # check de header
+        header = ws['D7'].value
+        if header != 'Bondsnr':
+            self.stderr.write('[ERROR] Blad is niet in orde: cell D7 bevat niet "Bondsnr" maar %s' % repr(header))
+            raise ValueError('Uitslag D7')
+
         nix_count = 0
         while nix_count < 10:
             row_nr += 1

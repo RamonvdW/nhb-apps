@@ -1,27 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.utils import timezone
-from django.utils.formats import date_format
 from Account.models import Account
+from Opleidingen.definities import OPLEIDING_STATUS_CHOICES, OPLEIDING_STATUS_VOORBEREID
 from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie
 from decimal import Decimal
-
-
-OPLEIDING_STATUS_VOORBEREID = 'V'
-OPLEIDING_STATUS_INSCHRIJVEN = 'I'
-OPLEIDING_STATUS_GEANNULEERD = 'A'
-
-OPLEIDING_STATUS_CHOICES = (
-    (OPLEIDING_STATUS_VOORBEREID, ''),
-    (OPLEIDING_STATUS_INSCHRIJVEN, ''),
-    (OPLEIDING_STATUS_GEANNULEERD, ''),
-)
 
 
 class OpleidingDiploma(models.Model):

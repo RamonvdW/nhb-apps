@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_ALLE)
-from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
+from BasisTypen.definities import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                                   GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_ALLE)
+from Competitie.models import CompetitieIndivKlasse, CompetitieTeamKlasse
+from Score.definities import AG_NUL, AG_LAAGSTE_NIET_NUL, AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter
 from decimal import Decimal
 import datetime
@@ -409,6 +410,7 @@ class KlasseBepaler(object):
     def __init__(self, comp):
         self.competitie = comp
         self.boogtype2klassen = dict()      # [boogtype.afkorting] = [CompetitieIndivKlasse, ...]
+        self.rk_mode = False
         self.lkl_cache_mannen = dict()      # [CompetitieIndivKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache_vrouwen = dict()     # [CompetitieIndivKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache_neutraal = dict()    # [CompetitieIndivKlasse.pk] = [lkl, lkl, ...]
@@ -442,6 +444,18 @@ class KlasseBepaler(object):
             # for
         # for
 
+    def begrens_to_rk(self):
+        """ begrens de mogelijke klassen tot het RK, zodat regio deelnemers in een RK klasse geplaatst kunnen worden.
+            dit is voor aspiranten en late-qualifiers (na score correctie of overschrijving naar andere vereniging)
+        """
+        for afkorting in self.boogtype2klassen.keys():
+            rk_only = [klasse for klasse in self.boogtype2klassen[afkorting] if klasse.is_ook_voor_rk_bk]
+            # print(afkorting, repr(rk_only))
+            self.boogtype2klassen[afkorting] = rk_only
+        # for
+
+        self.rk_mode = True
+
     def bepaal_klasse_deelnemer(self, deelnemer, wedstrijdgeslacht):
         """ deze functie zet deelnemer klasse aan de hand van de sporterboog
 
@@ -451,7 +465,10 @@ class KlasseBepaler(object):
                 GESLACHT_ANDERS: past op leeftijdsklasse GESLACHT_ALLE
         """
 
-        ag = deelnemer.ag_voor_indiv
+        if self.rk_mode:
+            ag = deelnemer.gemiddelde
+        else:
+            ag = deelnemer.ag_voor_indiv
         sporterboog = deelnemer.sporterboog
         sporter = sporterboog.sporter
         age = sporter.bereken_wedstrijdleeftijd_wa(self.competitie.begin_jaar + 1)

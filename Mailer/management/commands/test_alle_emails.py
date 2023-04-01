@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,8 @@ from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.view_login import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
-from Bestel.models import Bestelling, BestelProduct, BESTELLING_STATUS_WACHT_OP_BETALING
+from Bestel.definities import BESTELLING_STATUS_WACHT_OP_BETALING
+from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
@@ -24,10 +25,8 @@ from Mailer.operations import mailer_email_is_valide
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
-from Wedstrijden.models import (Wedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                WedstrijdSessie,
-                                WedstrijdInschrijving, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                WedstrijdLocatie)
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_RESERVERING_BESTELD
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdLocatie
 from decimal import Decimal
 
 

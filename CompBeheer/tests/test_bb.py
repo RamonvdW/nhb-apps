@@ -5,17 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
 from BasisTypen.models import BoogType
+from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN
+from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie)
+from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
+from Competitie.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
 from Functie.operations import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Competitie.models import (Competitie, DeelCompetitie, DeelKampioenschap,
-                               CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMutatie,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN)
-from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
-from Competitie.tests.test_helpers import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -29,13 +28,14 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
     url_kies = '/bondscompetities/'
     url_overzicht = '/bondscompetities/%s/'
+    url_overzicht_beheer = '/bondscompetities/beheer/%s/'
     url_aanmaken = '/bondscompetities/beheer/aanmaken/'
     url_instellingen = '/bondscompetities/beheer/instellingen-volgende-competitie/'
-    url_wijzigdatums = '/bondscompetities/beheer/%s/wijzig-datums/'                             # comp_pk
     url_ag_vaststellen_afstand = '/bondscompetities/beheer/ag-vaststellen/%s/'                  # afstand
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
     url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen-tonen/'                     # comp_pk
     url_seizoen_afsluiten = '/bondscompetities/beheer/seizoen-afsluiten/'
+    url_statistiek = '/bondscompetities/beheer/statistiek/'
 
     testdata = None
 
@@ -331,6 +331,9 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         resp = self.client.get(self.url_seizoen_afsluiten)
         self.assert403(resp)
 
+        resp = self.client.get(self.url_statistiek)
+        self.assert403(resp)
+
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
@@ -356,7 +359,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # gebruik een post om de competitie aan te laten maken
         # geen parameters nodig
         self.assertEqual(Competitie.objects.count(), 0)
-        self.assertEqual(DeelCompetitie.objects.count(), 0)
+        self.assertEqual(Regiocompetitie.objects.count(), 0)
         self.assertEqual(0, CompetitieMutatie.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmaken, {'snel': 1})
@@ -384,15 +387,15 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_kies)
 
         self.assertEqual(Competitie.objects.count(), 2)
-        self.assertEqual(DeelCompetitie.objects.count(), 2*16)
-        self.assertEqual(DeelKampioenschap.objects.count(), 2*5)
+        self.assertEqual(Regiocompetitie.objects.count(), 2 * 16)
+        self.assertEqual(Kampioenschap.objects.count(), 2 * 5)
 
     def test_regio_settings_overnemen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(DeelCompetitie.objects.count(), 0)
+        self.assertEqual(Regiocompetitie.objects.count(), 0)
 
         # maak een competitie aan
         competities_aanmaken(jaar=2019)
@@ -401,20 +404,20 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         dagdelen_105_25 = "%s,%s,%s" % (DAGDEEL_AFKORTINGEN[3], DAGDEEL_AFKORTINGEN[4], DAGDEEL_AFKORTINGEN[0])
 
         # pas regio-instellingen aan
-        deelcomp = DeelCompetitie.objects.get(
+        deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=18,
                                 nhb_regio__regio_nr=101)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
-        deelcomp = DeelCompetitie.objects.get(
+        deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=18,
                                 nhb_regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = dagdelen_105_18
         deelcomp.save()
 
-        deelcomp = DeelCompetitie.objects.get(
+        deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=25,
                                 nhb_regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
@@ -426,7 +429,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         competities_aanmaken(jaar=2020)
 
         # controleer dat de settings overgenomen zijn
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie', 'nhb_regio')
                          .filter(nhb_regio__regio_nr=101)):
@@ -436,7 +439,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_2)
         # for
 
-        for deelcomp in (DeelCompetitie
+        for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie', 'nhb_regio')
                          .filter(nhb_regio__regio_nr=105)):
@@ -479,7 +482,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # controleer dat het "ag vaststellen" kaartje er is
         # om te beginnen zonder "voor het laatst gedaan"
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp.pk)
+            resp = self.client.get(self.url_overzicht_beheer % comp.pk)
         urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen_afstand % comp.afstand in urls)
         self.assertNotContains(resp, "laatst gedaan op")
@@ -517,7 +520,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # dit keer met de "voor het laatst gedaan" notitie
         comp = Competitie.objects.get(afstand=18, is_afgesloten=False)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % comp.pk)
+            resp = self.client.get(self.url_overzicht_beheer % comp.pk)
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_ag_vaststellen_afstand % 18 in urls)
         self.assertContains(resp, "laatst gedaan op")
@@ -601,9 +604,9 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assertEqual(count1, count2)
 
         # coverage
-        obj = CompetitieIndivKlasse.objects.filter(is_voor_rk_bk=False)[0]
+        obj = CompetitieIndivKlasse.objects.filter(is_ook_voor_rk_bk=False)[0]
         self.assertTrue(str(obj) != "")
-        obj = CompetitieIndivKlasse.objects.filter(is_voor_rk_bk=True)[0]
+        obj = CompetitieIndivKlasse.objects.filter(is_ook_voor_rk_bk=True)[0]
         self.assertTrue(str(obj) != "")
         obj = CompetitieTeamKlasse.objects.filter(is_voor_teams_rk_bk=False)[0]
         self.assertTrue(str(obj) != "")
@@ -657,7 +660,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)        # redirect = success
 
         # kies pagina ophalen als BB, dan worden alle competities getoond
-        zet_competitie_fase(comp_18, 'B')
+        zet_competitie_fase_regio_prep(comp_18)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)
@@ -690,90 +693,6 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.assertNotContains(resp, ' zijn nog niet vastgesteld')
         self.assertNotContains(resp, 'De klassengrenzen voor de ')
 
-    def test_wijzig_datums(self):
-
-        expected_month, expected_day = 12, 31
-        expected_year = 2019
-
-        # creëer een competitie met deelcompetities
-        competities_aanmaken(jaar=expected_year)
-        # nu in fase A
-
-        comp = Competitie.objects.all()[0]
-
-        now = timezone.now()
-        if now.month == expected_month and now.day == expected_day:     # pragma: no cover
-            # avoid testcase from failing one day per year
-            expected_month, expected_day = 1, 1
-            expected_year += 1
-
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.begin_aanmeldingen)
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.einde_aanmeldingen)
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=expected_year, month=expected_month, day=expected_day), comp.eerste_wedstrijd)
-
-        # niet BB
-        url = self.url_wijzigdatums % comp.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-        # wordt BB
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        # get
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-wijzig-datums.dtl', 'plein/site_layout.dtl'))
-
-        # post
-        with self.assert_max_queries(21):
-            resp = self.client.post(url, {'datum1': '2019-08-09',
-                                          'datum2': '2019-09-10',
-                                          'datum3': '2019-10-11',
-                                          'datum4': '2019-11-12',
-                                          'datum5': '2019-11-12',
-                                          'datum6': '2020-02-01',
-                                          'datum7': '2019-02-12',
-                                          'datum8': '2020-05-01',
-                                          'datum9': '2020-05-12',
-                                          'datum10': '2020-06-12',
-                                          })
-        self.assert_is_redirect(resp, self.url_overzicht % comp.pk)
-
-        # controleer dat de nieuwe datums opgeslagen zijn
-        comp = Competitie.objects.get(pk=comp.pk)
-        self.assertEqual(datetime.date(year=2019, month=8, day=9), comp.begin_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=9, day=10), comp.einde_aanmeldingen)
-        self.assertEqual(datetime.date(year=2019, month=10, day=11), comp.einde_teamvorming)
-        self.assertEqual(datetime.date(year=2019, month=11, day=12), comp.eerste_wedstrijd)
-
-        # check corner cases
-
-        # alle datums verplicht
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assert404(resp, 'Verplichte parameter ontbreekt')
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'datum1': 'null',
-                                          'datum2': 'hallo',
-                                          'datum3': '0',
-                                          'datum4': '2019-13-42'})
-        self.assert404(resp, 'Geen valide datum')
-
-        # foute comp_pk bij get
-        url = self.url_wijzigdatums % 999999
-        resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
-
-        # foute comp_pk bij post
-        resp = self.client.post(url)
-        self.assert404(resp, 'Competitie niet gevonden')
-
     def test_seizoen_afsluiten(self):
         # moet BB zijn
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -790,7 +709,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_seizoen_afsluiten)
-        self.assert404(resp, 'Alle competities nog niet in fase S')
+        self.assert404(resp, 'Alle competities nog niet in fase Q')
 
         # maak een HistComp aan die straks doorgezet gaat worden
         hist = HistCompetitie(
@@ -803,9 +722,9 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        # fase S: alle BK's afgesloten
-        zet_competitie_fase(self.comp_18, 'S')
-        zet_competitie_fase(self.comp_25, 'S')
+        # fase Q: alle BK's afgesloten
+        zet_competitie_fase_afsluiten(self.comp_18)
+        zet_competitie_fase_afsluiten(self.comp_25)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_seizoen_afsluiten)
@@ -828,6 +747,27 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_seizoen_afsluiten)
         self.assert404(resp, 'Geen competitie gevonden')
+
+    def test_statistiek(self):
+        # moet BB zijn
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wisselnaarrol_bb()
+
+        # maak een competitie van het volgende seizoen aan
+        competities_aanmaken(jaar=2019)
+
+        for comp in Competitie.objects.all():
+            comp.klassengrenzen_vastgesteld = True
+            comp.save(update_fields=['klassengrenzen_vastgesteld'])
+        # for
+
+        # TODO: controleer dat het "kies" scherm het kaartje statistiek bevat
+
+        resp = self.client.get(self.url_statistiek)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/bb-statistiek.dtl', 'plein/site_layout.dtl'))
+
 
 # TODO: gebruik assert_other_http_commands_not_supported
 

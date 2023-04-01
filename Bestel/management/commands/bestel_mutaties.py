@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,21 +11,18 @@
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from django.utils.timezone import get_default_timezone
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db.models import Count
 from django.db import transaction
-from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
-from Bestel.models import (BestelProduct, BestelMandje,
-                           Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
-                           BESTELLING_STATUS2STR,
-                           BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
-                           BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
-                           BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER,
-                           BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
-                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
-                           BESTEL_MUTATIE_ANNULEER)
+from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
+                               BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
+                               BESTELLING_STATUS2STR, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
+                               BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
+                               BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER,
+                               BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
+                               BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
+                               BESTEL_MUTATIE_ANNULEER)
+from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelHoogsteBestelNr, BestelMutatie
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
@@ -33,12 +30,13 @@ from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortinge
 from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugin_verwijder_reservering,
                                       webwinkel_plugin_bepaal_kortingen, webwinkel_plugin_bepaal_verzendkosten_mandje,
                                       webwinkel_plugin_bepaal_verzendkosten_bestelling)
+from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
-from Wedstrijden.models import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
-                                WEDSTRIJD_KORTING_COMBI)
+from Wedstrijden.definities import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
+                                    WEDSTRIJD_KORTING_COMBI)
 from mollie.api.client import Client, RequestSetupError
 from types import SimpleNamespace
 from decimal import Decimal

@@ -54,7 +54,7 @@
                     <p>
                         <span>De status van deelname voor deze sporter is: </span>
                         {% if not deelnemer.bij_vereniging %}
-                            <span class="red-text">ATTENTIE</span>
+                            <span class="nhb-rood-text">ATTENTIE</span>
                         {% elif deelnemer.deelname == 'N' %}
                             <span class="grey-text">AFGEMELD</span>
                         {% elif deelnemer.deelname == 'J' %}
@@ -67,7 +67,7 @@
                     {% if not deelnemer.bij_vereniging %}
 
                         <p>
-                            <span class="red-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het BK.</span>
+                            <span class="nhb-rood-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het BK.</span>
                             <br>
                             <br>
                             <span>Laat het bondsbureau uitzoeken of dit een niet-afgeronde overschrijving is.</span>

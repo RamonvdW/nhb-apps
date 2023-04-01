@@ -140,4 +140,15 @@ class BesteIndivRecords(models.Model):
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Beste individuele records"
 
+
+class AnderRecord(models.Model):
+
+    # vrij-formaat rapport met een referentie naar een nieuwsbericht
+
+    titel = models.CharField(max_length=30)
+    icoon = models.CharField(max_length=20)
+    tekst = models.CharField(max_length=100)
+    url = models.CharField(max_length=100)
+
+
 # end of file

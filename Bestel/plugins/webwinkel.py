@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@
 
 from django.conf import settings
 from django.utils.formats import localize
-from Webwinkel.models import KEUZE_STATUS_GEANNULEERD
+from Webwinkel.definities import KEUZE_STATUS_GEANNULEERD
 from decimal import Decimal
 
 

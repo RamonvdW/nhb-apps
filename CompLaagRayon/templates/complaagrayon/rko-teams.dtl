@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -83,7 +83,7 @@
             <p>Aantal: {{ totaal_teams }}</p>
 
             {% if not toon_klassen %}
-                <p class="red-text">De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld</p>
+                <p class="nhb-rood-text">De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld</p>
             {% endif %}
         </div>
     </div>
@@ -107,9 +107,9 @@
                         <tr>
                             <td colspan="7" class="center">
                                 {% if toon_klassen %}
-                                    <h5 class="red-text">Nog niet geplaatste teams</h5>
+                                    <h5 class="nhb-rood-text">Nog niet geplaatste teams</h5>
                                 {% endif %}
-                                <span>Vraag de HWL's om <span class="red-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
+                                <span>Vraag de HWL's om <span class="nhb-rood-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
                             </td>
                         </tr>
                         <tr>
@@ -127,13 +127,13 @@
                         <td class="center">{{ team.vereniging.regio.regio_nr }}</td>
                         <td>{{ team.vereniging }}</td>
                         <td>{{ team.team_naam }}</td>
-                        <td class="center{% if team.sporter_count < 3 %} red-text{% endif %}">{{ team.sporter_count }}</td>
-                        <td class="center{% if team.ag_str == "000,0" %} red-text{% endif %}">{{ team.ag_str }}</td>
+                        <td class="center{% if team.sporter_count < 3 %} nhb-rood-text{% endif %}">{{ team.sporter_count }}</td>
+                        <td class="center{% if team.ag_str == "000,0" %} nhb-rood-text{% endif %}">{{ team.ag_str }}</td>
                         <td>{{ team.team_type.beschrijving }}</td>
                         <td class="center">
                             {% if team.url_aanpassen %}
                                 <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
-                                    <i class="material-icons-round">edit</i></a>
+                                    <i class="material-icons-round">group</i></a>
                             {% endif %}
                             {% if team.url_verwijder %}
                                 <span>&nbsp;&nbsp;</span>

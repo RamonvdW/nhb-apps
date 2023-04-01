@@ -6,11 +6,10 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
-                               INSCHRIJF_METHODE_1,
-                               DeelKampioenschap, DEEL_RK, DEEL_BK)
+from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, CompetitieMatch, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -23,7 +22,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     """ tests voor de CompInschrijven applicatie, inschrijfmethode 1 """
 
-    test_after = ('Competitie.tests.test_beheerders',)
+    test_after = ('Competitie.tests.test_tijdlijn',)
 
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                                         # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'        # ronde_pk
@@ -88,30 +87,30 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.account_rcl = self._prep_beheerder_lid('RCL')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
-        # creëer een competitie met deelcompetities
+        # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
         # nu in fase A
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_BK).all():
+        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_BK).all():
             deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelkamp in DeelKampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in DeelCompetitie.objects.filter(nhb_regio=self.regio_101).all():
+        for deelcomp in Regiocompetitie.objects.filter(nhb_regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
-        self.deelcomp = DeelCompetitie.objects.filter(competitie=self.comp_18,
-                                                      nhb_regio=self.regio_101)[0]
+        self.deelcomp = Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                       nhb_regio=self.regio_101)[0]
 
-        self.functie_rcl101_18 = DeelCompetitie.objects.get(competitie=self.comp_18,
-                                                            nhb_regio=self.regio_101).functie
+        self.functie_rcl101_18 = Regiocompetitie.objects.get(competitie=self.comp_18,
+                                                             nhb_regio=self.regio_101).functie
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
@@ -148,7 +147,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
         # zet de datum voor inschrijven op vandaag
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            zet_competitie_fase(comp, 'B')
+            zet_competitie_fase_regio_inschrijven(comp)
         # for
 
     def _maak_wedstrijden(self):
@@ -163,7 +162,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
-        ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp)[0].pk
+        ronde_pk = RegiocompetitieRonde.objects.filter(regiocompetitie=self.deelcomp)[0].pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
 
         # maak 5 wedstrijden aan
@@ -361,9 +360,9 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # landelijk
-        zet_competitie_fase(comp, 'C')
+        zet_competitie_fase_regio_inschrijven(comp)
         comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'C')
+        self.assertEqual(comp.fase_indiv, 'C')
 
         # als HWL is deze pagina niet beschikbaar
         url = self.url_behoefte1 % (999999, 101)
@@ -373,8 +372,8 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 nhb_regio=self.regio_101).functie
+        functie_rcl = Regiocompetitie.objects.get(competitie=comp,
+                                                  nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)

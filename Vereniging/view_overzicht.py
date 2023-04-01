@@ -4,44 +4,23 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, DeelKampioenschap,
-                               INSCHRIJF_METHODE_1, DEEL_RK)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
+from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde, Kampioenschap
+from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
-from Wedstrijden.models import BAAN_TYPE_EXTERN
+from Wedstrijden.definities import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
-import datetime
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
-
-# korte beschrijving van de competitie fase voor de HWL
-comp_fase_kort = {
-    'A': 'opstarten',
-    'B': 'inschrijven',
-    'C': 'inschrijven teams',
-    'D': 'voorbereiding regiocompetitie',
-    'E': 'wedstrijden regio',
-    'F': 'vaststellen uitslag regio',
-    'G': 'afsluiten regiocompetitie',
-    'J': 'voorbereiding RK',
-    'K': 'voorbereiding RK',
-    'L': 'wedstrijden RK',
-    'M': 'uitslagen RK overnemen',
-    'N': 'afsluiten RK',
-    'P': 'voorbereiding BK',
-    'Q': 'wedstrijden BK',
-    'R': 'uitslagen BK overnemen',
-    'S': 'afsluiten competitie',
-}
 
 
 class OverzichtView(UserPassesTestMixin, TemplateView):
@@ -71,6 +50,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['clusters'] = ver.clusters.all()
 
+        context['toon_wedstrijden'] = self.rol_nu != Rollen.ROL_SEC
+
         if self.functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
                                                           kwargs={'vereniging_pk': ver.pk})
@@ -99,32 +80,34 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                          .order_by('afstand',
                                    'begin_jaar'))
 
-                deelcomps = (DeelCompetitie
+                deelcomps = (Regiocompetitie
                              .objects
                              .filter(competitie__is_afgesloten=False,
                                      nhb_regio=ver.regio)
                              .select_related('competitie'))
 
-                deelkamps_rk = (DeelKampioenschap
+                deelkamps_rk = (Kampioenschap
                                 .objects
                                 .filter(deel=DEEL_RK,
                                         competitie__is_afgesloten=False,
                                         nhb_rayon=ver.regio.rayon)
                                 .select_related('competitie'))
 
-                if (DeelcompetitieRonde
+                if (RegiocompetitieRonde
                     .objects
-                    .filter(deelcompetitie__is_afgesloten=False,
+                    .filter(regiocompetitie__is_afgesloten=False,
                             matches__vereniging=ver)).count() > 0:
                     # er zijn wedstrijden voor deze vereniging
                     context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden
+        # 0 - tijdlijn
         # 1 - aanmelden
         # 2 - teams regio aanmelden / aanpassen
         # 3 - teams rk
         # 4 - ingeschreven
         # 5 - wie schiet waar (voor inschrijfmethode 1)
+        # 6 - uitslagen
         context['kaartjes'] = kaartjes = list()
         prev_jaar = 0
         prev_afstand = 0
@@ -148,14 +131,22 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
                 kaartje.anker = 'competitie_%s' % comp.pk
-                kaartje.comp_fase = "%s (%s)" % (comp.fase, comp_fase_kort[comp.fase])
+                kaartje.comp_fase_indiv, kaartje.comp_fase_teams = maak_comp_fase_beschrijvingen(comp)
                 kaartjes.append(kaartje)
 
                 prev_jaar = begin_jaar
                 prev_afstand = comp.afstand
 
+            # 0 - tijdlijn
+            kaartje = SimpleNamespace()
+            kaartje.titel = "Tijdlijn"
+            kaartje.tekst = 'Toon de fases en planning van de %s.' % comp.beschrijving
+            kaartje.icon = 'schedule'
+            kaartje.url = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
+            kaartjes.append(kaartje)
+
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
-            if comp.fase < 'F' and self.rol_nu != Rollen.ROL_WL:
+            if comp.fase_indiv < 'F' and self.rol_nu != Rollen.ROL_WL:
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
@@ -164,13 +155,13 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     kaartje.img = static('plein/badge_nhb_indoor.png')
                 else:
                     kaartje.img = static('plein/badge_nhb_25m1p.png')
-                if comp.fase < 'B':
-                    kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                if comp.fase_indiv < 'C':
+                    kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                 kaartjes.append(kaartje)
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
-                    if deelcomp.regio_organiseert_teamcompetitie and 'E' <= comp.fase <= 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
+                    if deelcomp.regio_organiseert_teamcompetitie and comp.fase_teams == 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
                         # team invallers opgeven
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
@@ -180,14 +171,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartjes.append(kaartje)
                     else:
                         # 2 - teams aanmaken
-                        if deelcomp.regio_organiseert_teamcompetitie and comp.fase <= 'E':
+                        if deelcomp.regio_organiseert_teamcompetitie and comp.fase_teams == 'C':
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'
                             kaartje.url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
-                            if comp.fase < 'B':
-                                kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                            if comp.fase_indiv < 'C':
+                                kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                             kaartjes.append(kaartje)
             # for
             del deelcomp
@@ -196,34 +187,47 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             for deelkamp_rk in deelkamps_rk:
                 if deelkamp_rk.competitie == comp:
                     if deelkamp_rk.heeft_deelnemerslijst:
-                        if 'J' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
-                            # RK voorbereidende fase
-                            kaartje = SimpleNamespace()
-                            kaartje.titel = "Deelnemers RK"
-                            kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
-                            kaartje.url = reverse('CompLaagRayon:lijst-rk-ver',
-                                                  kwargs={'deelkamp_pk': deelkamp_rk.pk})
-                            kaartje.icon = 'rule'
-                            kaartjes.append(kaartje)
+                        if self.rol_nu != Rollen.ROL_WL:
+                            if 'J' <= comp.fase_indiv <= 'K':
+                                # RK voorbereidende fase
+                                kaartje = SimpleNamespace()
+                                kaartje.titel = "Deelnemers RK"
+                                kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
+                                kaartje.url = reverse('CompLaagRayon:lijst-rk-ver',
+                                                      kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                                kaartje.icon = 'rule'
+                                kaartjes.append(kaartje)
 
-                    if 'E' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
-                        kaartje = SimpleNamespace()
-                        kaartje.titel = "Teams RK"
-                        kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
-                        kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
-                        kaartje.icon = 'api'
-                        # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
-                        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
-                        if datetime.date.today() < vanaf:
-                            kaartje.beschikbaar_vanaf = localize(vanaf)
-                        kaartjes.append(kaartje)
+                    if self.rol_nu != Rollen.ROL_WL:
+                        is_open, vanaf_datum = is_open_voor_inschrijven_rk_teams(comp)
+                        if is_open or vanaf_datum:
+                            kaartje = SimpleNamespace()
+                            kaartje.titel = "Teams RK"
+                            kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
+                            kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                            kaartje.icon = 'api'
+                            # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
+                            if vanaf_datum:
+                                kaartje.beschikbaar_vanaf = localize(vanaf_datum)
+                            kaartjes.append(kaartje)
+                        else:
+                            if 'J' <= comp.fase_indiv <= 'K':
+                                # RK voorbereidende fase
+                                kaartje = SimpleNamespace()
+                                kaartje.titel = "Teams RK"
+                                kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen inzien."
+                                kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                                kaartje.icon = 'api'
+                                kaartjes.append(kaartje)
+
+
             # for
             del deelkamp_rk
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
                     # 4 - ingeschreven
-                    if 'B' <= comp.fase <= 'F':         # vanaf RK fase niet meer tonen
+                    if 'C' <= comp.fase_indiv <= 'G':         # vanaf RK fase niet meer tonen
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Ingeschreven"
                         kaartje.tekst = "Overzicht ingeschreven leden."
@@ -235,17 +239,25 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartjes.append(kaartje)
 
                     # 5 - wie schiet waar
-                    if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1 and 'B' <= comp.fase <= 'F':
+                    if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1 and 'C' <= comp.fase_indiv <= 'F':
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
                         kaartje.tekst = 'Overzicht gekozen wedstrijden.'
                         kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
-                        # if comp.fase < 'B':
-                        #     kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                        # if comp.fase_indiv < 'C':
+                        #     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                         kaartjes.append(kaartje)
             # for
 
+            if comp.fase_indiv >= 'C':
+                # 5 - uitslagen
+                kaartje = SimpleNamespace(
+                                titel="Uitslagenlijsten",
+                                tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
+                                icon='scoreboard',
+                                url=reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}))
+                kaartjes.append(kaartje)
         # for
 
         if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):

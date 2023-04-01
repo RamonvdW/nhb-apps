@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie, MUTATIE_INITIEEL,
+from Competitie.definities import MUTATIE_INITIEEL
+from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
-from Competitie.tests.test_helpers import zet_competitie_fase
+from Competitie.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -31,8 +32,8 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         ver_nr = data.regio_ver_nrs[cls.regio_nr][0]
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
 
-        # zet de competities in fase L
-        zet_competitie_fase(data.comp18, 'J')
+        # zet de competities in fase J
+        zet_competitie_fase_rk_prep(data.comp18)
 
         klasse = (CompetitieIndivKlasse
                   .objects
@@ -102,8 +103,18 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         self.assertTrue('Geen deelnemers gevonden' in f2.getvalue())
 
     def test_recalc(self):
-
         f1, f2 = self.run_management_command('recalc_rkteam_sterkte')
+        _ = (f1, f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+    def test_check_rk_uitslagen(self):
+        f1, f2 = self.run_management_command('check_rk_uitslagen', '18')
+        _ = (f1, f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+        f1, f2 = self.run_management_command('check_rk_uitslagen', '25', '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

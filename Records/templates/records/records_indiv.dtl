@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2022 Ramon van der Winkel.
+                Copyright (c) 2019-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -167,7 +167,7 @@
 
     <div class="row-nhb-blauw" style="padding-top:15px">
 
-        <!-- Geslacht -->
+        <!-- filter: geslacht -->
         <div class="col s6 l3">
             <div class="white left-align" style="padding:10px">
                 <p><b>Geslacht:</b></p>
@@ -183,6 +183,26 @@
                 </ul>
                 <p style="margin-left:35px">
                     <a class="btn-nhb-rood" onclick="keuze_gemaakt('geslacht')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: discipline -->
+        <div class="col s6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Discipline:</b></p>
+                <ul id="id_discipline">
+                    {% for obj in disc_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ obj.sel }}">
+                                <input class="with-gap" type="radio" name="discipline" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
+                                <span>{{ obj.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('discipline')">Activeer</a>
                 </p>
             </div>
         </div>
@@ -210,6 +230,7 @@
                 {% endif %}
             </div>
         </div>
+
     </div>
 
 
@@ -397,7 +418,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Record</h4>
-                <p class="red-text">Geen records gevonden voor deze filter combinatie.</p>
+                <p class="nhb-rood-text">Geen records gevonden voor deze filter combinatie.</p>
             </div>
         </div>
 

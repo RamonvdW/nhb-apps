@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
+from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WEDSTRIJD_DISCIPLINE_3D
+from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_3D
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 
 

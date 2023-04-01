@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.definities import AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 
 
 def _score_ag_opslaan(ag_doel, sporterboog, afstand, gemiddelde, door_account, notitie):

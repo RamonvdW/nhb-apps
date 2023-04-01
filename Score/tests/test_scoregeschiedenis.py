@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Score.models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
+from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
+from Score.models import Score, ScoreHist, Uitslag
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -28,9 +28,6 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         uur_00 = datetime.time(hour=0)
         uur_19 = datetime.time(hour=19)
 
-        now = timezone.now()
-        einde_jaar = datetime.date(year=now.year, month=12, day=31)
-
         uitslag18 = Uitslag(max_score=300,
                             afstand=18)
         uitslag18.save()
@@ -40,18 +37,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         uitslag25.save()
 
         comp = Competitie(
-                    begin_jaar=2000,
-                    uiterste_datum_lid=datetime.date(year=2000, month=1, day=1),
-                    begin_aanmeldingen=einde_jaar,
-                    einde_aanmeldingen=einde_jaar,
-                    einde_teamvorming=einde_jaar,
-                    eerste_wedstrijd=einde_jaar,
-                    laatst_mogelijke_wedstrijd=einde_jaar,
-                    datum_klassengrenzen_rk_bk_teams=einde_jaar,
-                    rk_eerste_wedstrijd=einde_jaar,
-                    rk_laatste_wedstrijd=einde_jaar,
-                    bk_eerste_wedstrijd=einde_jaar,
-                    bk_laatste_wedstrijd=einde_jaar)
+                    begin_jaar=2000)
         comp.save()
 
         CompetitieMatch(competitie=comp,

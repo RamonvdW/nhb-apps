@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,6 @@ EXCLUDE+="|plein/card"
 EXCLUDE+="|plein/ga-naar-live-server.dtl"
 EXCLUDE+="|plein/andere-sites-van-de-nhb.dtl"
 EXCLUDE+="|logboek/common"
-EXCLUDE+="|competitie/tijdlijn"
 EXCLUDE+="|competitie/menu.dtl"
 EXCLUDE+="|site_layout.dtl"
 EXCLUDE+="|site_layout_minimaal.dtl"

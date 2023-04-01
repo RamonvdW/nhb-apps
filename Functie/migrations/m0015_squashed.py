@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -77,17 +77,13 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Functie', 'm0012_squashed'),
-                ('Functie', 'm0013_telefoon_en_rol_mo'),
-                ('Functie', 'm0014_taken_en_rollen_mwz_sup')]
-
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0023_squashed'),
-        ('NhbStructuur', 'm0029_squashed'),
+        ('NhbStructuur', 'm0031_squashed'),
     ]
 
     # migratie functies

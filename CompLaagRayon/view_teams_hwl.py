@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,11 +11,12 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, DeelKampioenschap, DEEL_RK,
-                               RegioCompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK
+from Competitie.models import Kampioenschap, RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Score.definities import AG_NUL
 import datetime
 
 
@@ -87,11 +88,11 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_HWL
 
-    def _get_deelkamp_rk(self, deelkamp_pk) -> DeelKampioenschap:
-        # haal de gevraagde deelkampioenschap op
+    def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
+        # haal de gevraagde kampioenschap op
         try:
             deelkamp_pk = int(deelkamp_pk[:6])  # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
+            deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
                                         'nhb_rayon')
@@ -99,21 +100,21 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
                              is_afgesloten=False,
                              deel=DEEL_RK,
                              nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        if not ('E' <= comp.fase <= 'K'):
+        if not ('F' <= comp.fase_teams <= 'K'):
             # staat niet meer open voor instellen RK teams
             raise Http404('Competitie is niet in de juiste fase 1')
 
-        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
+        vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
         if datetime.date.today() < vanaf:
             raise Http404('Competitie is niet in de juiste fase 2')
 
-        deelkamp.open_inschrijving = comp.fase <= 'G'       # regio vs RK fase
+        deelkamp.open_inschrijving = comp.fase_teams < 'J'       # regio vs RK fase
 
         deelkamp.datum_einde_knutselen_teams_rk_bk = comp.datum_klassengrenzen_rk_bk_teams
 
@@ -171,7 +172,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         context['ver'] = self.functie_nu.nhb_ver
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelkamp'] = deelkamp = self._get_deelkamp_rk(kwargs['deelkamp_pk'])
 
         context['rk_bk_klassen_vastgesteld'] = is_vastgesteld = deelkamp.competitie.klassengrenzen_vastgesteld_rk_bk
@@ -214,29 +215,29 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
 
-    def _get_deelkamp_rk(self, deelkamp_pk) -> DeelKampioenschap:
-        # haal de gevraagde deelkampioenschap op
+    def _get_deelkamp_rk(self, deelkamp_pk) -> Kampioenschap:
+        # haal de gevraagde kampioenschap op
         try:
             deelkamp_pk = int(deelkamp_pk[:6])     # afkappen voor de veiligheid
-            deelkamp = (DeelKampioenschap
-                           .objects
-                           .select_related('competitie',
-                                           'nhb_rayon')
-                           .get(pk=deelkamp_pk,
-                                is_afgesloten=False,
-                                deel=DEEL_RK,
-                                nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
-        except (ValueError, DeelKampioenschap.DoesNotExist):
+            deelkamp = (Kampioenschap
+                        .objects
+                        .select_related('competitie',
+                                        'nhb_rayon')
+                        .get(pk=deelkamp_pk,
+                             is_afgesloten=False,
+                             deel=DEEL_RK,
+                             nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
+        except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        if not ('E' <= comp.fase <= 'J'):
+        if not ('F' <= comp.fase_teams <= 'J'):
             # staat niet meer open voor instellen RK teams
             raise Http404('Competitie is niet in de juiste fase 1')
 
-        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
+        vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
         if datetime.date.today() < vanaf:
             raise Http404('Competitie is niet in de juiste fase 2')
 
@@ -246,7 +247,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         deelkamp = self._get_deelkamp_rk(kwargs['deelkamp_pk'])
         ver = self.functie_nu.nhb_ver
         comp = deelkamp.competitie
@@ -447,9 +448,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         comp.bepaal_fase()
 
-        context['alleen_bekijken'] = alleen_bekijken = (comp.fase >= 'K')
+        context['alleen_bekijken'] = alleen_bekijken = (comp.fase_teams > 'J')
 
-        if not ('E' <= comp.fase <= 'L'):       # vanaf fase K kunnen invallers gekoppeld worden
+        if not ('F' <= comp.fase_teams <= 'L'):
             raise Http404('Competitie is niet in de juiste fase')
 
         boog_typen = rk_team.team_type.boog_typen.all()
@@ -463,7 +464,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         ag_str = "%05.1f" % (rk_team.aanvangsgemiddelde * aantal_pijlen)
         rk_team.ag_str = ag_str.replace('.', ',')
 
-        if comp.fase <= 'G':
+        if comp.fase_teams <= 'G':
             # alle leden van de vereniging die meedoen aan de regiocompetitie mogen gekozen worden
 
             context['onder_voorbehoud'] = True
@@ -477,9 +478,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                          .prefetch_related('tijdelijke_leden')
                          .values_list('tijdelijke_leden__pk', flat=True))
 
-            deelnemers = (RegioCompetitieSporterBoog
+            deelnemers = (RegiocompetitieSporterBoog
                           .objects
-                          .filter(deelcompetitie__competitie=comp,
+                          .filter(regiocompetitie__competitie=comp,
                                   # inschrijf_voorkeur_team=True,
                                   bij_vereniging=ver,
                                   sporterboog__boogtype__in=boog_pks)
@@ -551,12 +552,19 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % comp.pk
-        context['kruimels'] = (
-            (url_overzicht, 'Beheer Vereniging'),
-            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp.pk}), 'Teams RK'),
-            (None, 'Koppel teamleden')
-        )
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            context['kruimels'] = (
+                (url_overzicht, 'Beheer Vereniging'),
+                (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp.pk}), 'Teams RK'),
+                (None, 'Koppel teamleden'))
+        else:
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompLaagRayon:rayon-teams', kwargs={'deelkamp_pk': deelkamp.pk}), 'RK teams'),
+                (None, 'Koppel teamleden'))
 
         menu_dynamics(self.request, context)
         return context
@@ -587,10 +595,10 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         comp = deelkamp.competitie
         comp.bepaal_fase()
-        if not ('E' <= comp.fase <= 'J'):
+        if not ('E' <= comp.fase_teams <= 'J'):
             raise Http404('Competitie is niet in de juiste fase')
 
-        open_inschrijving = comp.fase <= 'G'        # regio vs RK fase
+        open_inschrijving = comp.fase_teams <= 'G'        # regio vs RK fase
 
         # toegestane boogtypen en schutters
         boog_pks = rk_team.team_type.boog_typen.values_list('pk', flat=True)
@@ -604,9 +612,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                          .prefetch_related('tijdelijke_leden')
                          .values_list('tijdelijke_leden__pk', flat=True))
 
-            ok_pks = (RegioCompetitieSporterBoog
+            ok_pks = (RegiocompetitieSporterBoog
                       .objects
-                      .filter(deelcompetitie__competitie=comp,
+                      .filter(regiocompetitie__competitie=comp,
                               bij_vereniging=ver,
                               sporterboog__boogtype__in=boog_pks)
                       .values_list('pk', flat=True))

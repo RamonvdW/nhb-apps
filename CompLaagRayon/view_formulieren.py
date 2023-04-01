@@ -10,10 +10,10 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, KampioenschapIndivKlasseLimiet, DEEL_RK,
-                               KampioenschapSporterBoog, KampioenschapTeam, DEELNAME_NEE, DEELNAME2STR,
-                               CompetitieMatch)
-from Functie.models import Rollen
+from Competitie.definities import DEEL_RK, DEELNAME_NEE, DEELNAME2STR
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, KampioenschapIndivKlasseLimiet,
+                               KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
@@ -27,6 +27,8 @@ import os
 
 
 TEMPLATE_DOWNLOAD_RK_FORMULIER = 'complaagrayon/hwl-download-rk-formulier.dtl'
+
+CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
 class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
@@ -65,7 +67,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
         deelkamp = deelkamps[0]
@@ -271,7 +273,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
 
@@ -306,16 +308,16 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # for
 
         if comp.afstand == '18':
-            excel_name = 'template-excel-rk-indoor-indiv.xlsm'
+            excel_name = 'template-excel-rk-indoor-indiv.xlsx'
             ws_name = 'Voorronde'
         else:
-            excel_name = 'template-excel-rk-25m1pijl-indiv.xlsm'
+            excel_name = 'template-excel-rk-25m1pijl-indiv.xlsx'
             ws_name = 'Wedstrijd'
 
         # bepaal de naam van het terug te geven bestand
         fname = "rk-programma_individueel-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
-        fname += '.xlsm'
+        fname += '.xlsx'
 
         # make een kopie van het RK programma in een tijdelijk bestand
         fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
@@ -327,30 +329,31 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+            prg = openpyxl.load_workbook(tmp_file)
         except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan RK programma niet openen')
 
         # maak wijzigingen in het RK programma
         ws = prg[ws_name]
 
-        ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.nhb_rayon.rayon_nr, klasse.beschrijving)
+        ws['C2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.nhb_rayon.rayon_nr, klasse.beschrijving)
 
-        ws['D5'] = match.vereniging.naam     # organisatie
-        ws['F5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
+        ws['D3'] = match.vereniging.naam     # organisatie
+        ws['J3'] = "Datum: " + match.datum_wanneer.strftime('%Y-%m-%d')
+
         if match.locatie:
-            ws['H5'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['H3'] = match.locatie.adres       # adres van de wedstrijdlocatie
         else:
-            ws['H5'] = 'Onbekend'
+            ws['H3'] = 'Onbekend'
 
-        ws['A32'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        ws['A33'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
-        i_font = ws['I7'].font
+        d_align = ws['D7'].alignment        # bondsnummer
+        g_align = ws['G7'].alignment        # regio nummer
+
+        i_font = ws['I7'].font              # gemiddelde (getal met 3 decimalen)
         i_align = ws['I7'].alignment
         i_format = ws['I7'].number_format
-
-        d_align = ws['D7'].alignment
-        g_align = ws['G7'].alignment
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -366,8 +369,8 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         baan_letter = 'A'
         deelnemer_nr = 0
 
-        row1_nr = 6
-        row2_nr = 35
+        row1_nr = 7 - 1
+        row2_nr = 37 - 1
         for deelnemer in deelnemers:
 
             para_notities = ''
@@ -399,7 +402,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             else:
                 row2_nr += 1
                 row = str(row2_nr)
-                ws['D' + row].alignment = copy(d_align)
+                ws['D' + row].alignment = copy(d_align)     # bondsnummer
                 ws['G' + row].alignment = copy(g_align)
                 ws['I' + row].alignment = copy(i_align)
                 ws['I' + row].font = copy(i_font)
@@ -427,17 +430,24 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             # regio
             ws['G' + row] = ver.regio.regio_nr
 
-            ws['H' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
-
             # gemiddelde
             ws['I' + row] = deelnemer.gemiddelde
 
+            # deelname
+            ws['T' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
+
+            # notities
+            if deelnemer.kampioen_label:
+                if para_notities != '':
+                    para_notities += '\n'
+                para_notities += deelnemer.kampioen_label
+
             if para_notities:
-                ws['R' + row] = para_notities
+                ws['U' + row] = para_notities
         # for
 
         # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 
@@ -483,7 +493,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelkamps = match.deelkampioenschap_set.filter(deel=DEEL_RK)
+        deelkamps = match.kampioenschap_set.filter(deel=DEEL_RK)
         if len(deelkamps) == 0:
             raise Http404('Geen kampioenschap')
 
@@ -512,12 +522,12 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         # bepaal de naam van het terug te geven bestand
         fname = "rk-programma_teams-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
-        fname += '.xlsm'
+        fname += '.xlsx'
 
         if comp.afstand == '18':
-            excel_name = 'template-excel-rk-indoor-teams.xlsm'
+            excel_name = 'template-excel-rk-indoor-teams.xlsx'
         else:
-            excel_name = 'template-excel-rk-25m1pijl-teams.xlsm'
+            excel_name = 'template-excel-rk-25m1pijl-teams.xlsx'
 
         # make een kopie van het RK programma in een tijdelijk bestand
         fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
@@ -530,7 +540,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+            prg = openpyxl.load_workbook(tmp_file)
         except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan RK programma niet openen')
 
@@ -761,7 +771,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         ws['B' + row].alignment = copy(f_align)
 
         # geef het aangepaste RK programma aan de client
-        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
         response['Content-Disposition'] = 'attachment; filename="%s"' % fname
         prg.save(response)
 
