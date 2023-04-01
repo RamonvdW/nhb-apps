@@ -210,6 +210,17 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             if vanaf_datum:
                                 kaartje.beschikbaar_vanaf = localize(vanaf_datum)
                             kaartjes.append(kaartje)
+                        else:
+                            if 'J' <= comp.fase_indiv <= 'K':
+                                # RK voorbereidende fase
+                                kaartje = SimpleNamespace()
+                                kaartje.titel = "Teams RK"
+                                kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen inzien."
+                                kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                                kaartje.icon = 'api'
+                                kaartjes.append(kaartje)
+
+
             # for
             del deelkamp_rk
 
