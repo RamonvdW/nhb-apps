@@ -71,7 +71,9 @@ class ActiveerRolView(UserPassesTestMixin, View):
                 functie = Functie.objects.get(rol='HWL',
                                               nhb_ver__ver_nr=ver_nr)
             except (ValueError, TypeError, Functie.DoesNotExist):
-                raise Http404('Foute parameter (vereniging)')
+                # in plaats van een foutmelding, stuur door naar Wissel van Rol pagina
+                # raise Http404('Foute parameter (vereniging)')
+                return redirect('Functie:wissel-van-rol')
 
             my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
                             from_ip,
