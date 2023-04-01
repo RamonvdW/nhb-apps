@@ -522,7 +522,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         # bepaal de naam van het terug te geven bestand
         fname = "rk-programma_teams-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
-        fname += '.xlsm'
+        fname += '.xlsx'
 
         if comp.afstand == '18':
             excel_name = 'template-excel-rk-indoor-teams.xlsx'
