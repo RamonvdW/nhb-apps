@@ -63,6 +63,13 @@ class Command(BaseCommand):
 
         # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
         row_nr = 9 - 1
+
+        # check de header
+        header = ws['D7'].value
+        if header != 'Bondsnr':
+            self.stderr.write('[ERROR] Blad is niet in orde: cell D7 bevat niet "Bondsnr" maar %s' % repr(header))
+            raise ValueError('Uitslag D7')
+
         nix_count = 0
         while nix_count < 10:
             row_nr += 1

@@ -281,6 +281,10 @@ def zet_competitie_fase_bk_prep(comp):
     zet_competitie_fases(comp, 'O', 'O')
 
 
+def zet_competitie_fase_bk_wedstrijden(comp):
+    zet_competitie_fases(comp, 'P', 'P')
+
+
 def zet_competitie_fase_afsluiten(comp):
     zet_competitie_fases(comp, 'Q', 'Q')
 

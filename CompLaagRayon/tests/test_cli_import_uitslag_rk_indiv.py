@@ -25,14 +25,14 @@ class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
-        cls.testdata.maak_clubs_en_sporters()
-        cls.testdata.maak_bondscompetities()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts()
+        data.maak_clubs_en_sporters()
+        data.maak_bondscompetities()
 
         ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][0]
-        cls.testdata.maak_rk_deelnemers(25, ver_nr, cls.regio_nr)
-        cls.testdata.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
+        data.maak_rk_deelnemers(25, ver_nr, cls.regio_nr)
+        data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
 
         # meld een paar deelnemers af
         for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand='25',
@@ -50,15 +50,15 @@ class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
         # geef een sporter alvast een rank
         deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
                                                          sporterboog__sporter__lid_nr=301842)
-        deelnemer.result_rank = 5;
+        deelnemer.result_rank = 5
         deelnemer.save(update_fields=['result_rank'])
 
         ver_nr = cls.testdata.regio_ver_nrs[116][0]
         cls.testdata.maak_rk_deelnemers(25, ver_nr, 101)                # ander rayon
 
         # zet de competities in fase L
-        zet_competitie_fase_rk_wedstrijden(cls.testdata.comp18)
-        zet_competitie_fase_rk_wedstrijden(cls.testdata.comp25)
+        zet_competitie_fase_rk_wedstrijden(data.comp18)
+        zet_competitie_fase_rk_wedstrijden(data.comp25)
 
         # prev_klasse = None
         # for deelnemer in KampioenschapSporterBoog.objects.filter(kampioenschap__competitie__afstand=18).prefetch_related('indiv_klasse').order_by('indiv_klasse__volgorde'):
