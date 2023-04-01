@@ -826,7 +826,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         resp = self.client.post(self.url_activeer_functie_hwl, {'ver_nr': 9999})
-        self.assert404(resp, 'Foute parameter (vereniging)')
+        self.assert_is_redirect(resp, self.url_wissel_van_rol)
 
         resp = self.client.post(self.url_activeer_functie_hwl, {'ver_nr': self.ver1000.ver_nr})
         self.assert_is_redirect(resp, '/vereniging/')
