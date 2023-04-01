@@ -228,6 +228,8 @@ class RayonTeamsTemplateView(TemplateView):
                 team.url_aanpassen = reverse('CompLaagRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': team.pk})
 
+            # TODO: url_verwijder (zie template)
+
             totaal_teams += 1
 
             team.break_before = is_eerste

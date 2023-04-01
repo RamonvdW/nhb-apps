@@ -552,12 +552,19 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
         url_overzicht = reverse('Vereniging:overzicht')
         anker = '#competitie_%s' % comp.pk
-        context['kruimels'] = (
-            (url_overzicht, 'Beheer Vereniging'),
-            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp.pk}), 'Teams RK'),
-            (None, 'Koppel teamleden')
-        )
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            context['kruimels'] = (
+                (url_overzicht, 'Beheer Vereniging'),
+                (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp.pk}), 'Teams RK'),
+                (None, 'Koppel teamleden'))
+        else:
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompLaagRayon:rayon-teams', kwargs={'deelkamp_pk': deelkamp.pk}), 'RK teams'),
+                (None, 'Koppel teamleden'))
 
         menu_dynamics(self.request, context)
         return context
