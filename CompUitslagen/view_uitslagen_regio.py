@@ -137,9 +137,15 @@ class UitslagenRegioIndivView(TemplateView):
     @staticmethod
     def _lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str):
         rank = 0
+        aantal = 0
         is_first = True
+        prev_obj = None
         for obj in objs1 + objs2:
-            rank += 1
+            aantal += 1
+            if prev_obj is None or prev_obj.gemiddelde != obj.gemiddelde:
+                rank = aantal
+            prev_obj = obj
+
             obj.rank = rank
             objs.append(obj)
 
@@ -149,7 +155,6 @@ class UitslagenRegioIndivView(TemplateView):
                 obj.klasse_str = klasse_str
                 obj.aantal_in_groep = 2 + len(objs1) + len(objs2)
                 is_first = False
-
         # for
 
     def get_context_data(self, **kwargs):
@@ -210,7 +215,8 @@ class UitslagenRegioIndivView(TemplateView):
                                       'indiv_klasse__boogtype')
                       .filter(indiv_klasse__boogtype=boogtype)
                       .order_by('indiv_klasse__volgorde',
-                                '-gemiddelde'))
+                                '-gemiddelde',
+                                'pk'))      # consistente volgorde bij gelijk resultaat
 
         objs = list()
         objs1 = list()      # primary lijst (genoeg scores)
