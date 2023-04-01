@@ -96,7 +96,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         actie = request.POST.get('actie', '')[:5]
         bedrag = request.POST.get('bedrag', '')[:20].strip()
-        kenmerk = request.POST.get('kenmerk', '')[:20].strip()
+        kenmerk = request.POST.get('kenmerk', '')[:10].strip()
 
         # controleer het kenmerk
         bestelling = None
@@ -107,7 +107,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
             context['kenmerk'] = ''
             context['fout_kenmerk'] = 'Bestelnummer wordt niet herkend'
         else:
-            context['kenmerk'] = '%s' % bestelling.bestel_nr
+            context['kenmerk'] = '%07d' % bestelling.bestel_nr      # %07d restores to 7 digits with prefix zeros
 
         # controleer het bedrag
         try:

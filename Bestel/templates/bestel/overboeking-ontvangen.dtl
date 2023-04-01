@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -39,7 +39,7 @@
                                 <th>Bestelnummer</th>
                                 <td>
                                     <span style="font-size:16px">MH-</span>
-                                    <input style="width:80%" type="text" name="kenmerk" value="{{ kenmerk }}" pattern="\s*\d{7}" placeholder="1000999">
+                                    <input style="width:80%" type="text" name="kenmerk" value="{{ kenmerk }}" pattern="\s*[0-9]{7}" placeholder="1000999">
                                     {% if fout_kenmerk %}<br><span class="nhb-rood-text">{{ fout_kenmerk }}</span>{% endif %}
                                 </td>
                             </tr>
