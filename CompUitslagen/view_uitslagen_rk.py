@@ -522,19 +522,6 @@ class UitslagenRayonTeamsView(TemplateView):
             team.toon_team_leden = False
             aantal_regels += 1
 
-            if team.ver_nr == toon_team_leden_van_ver_nr:
-                # TODO: optioneel maken: nodig om te weten wie naar deze wedstrijd moeten, maar niet nodig in eindstand
-                team.toon_team_leden = True
-                team.team_leden = list()
-                for deelnemer in (team
-                                  .gekoppelde_leden
-                                  .select_related('sporterboog__sporter')
-                                  .order_by('-gemiddelde')):                      # hoogste eerst
-                    team.team_leden.append(deelnemer)
-                    deelnemer.sporter_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
-                # for
-                aantal_regels += 1
-
             if team.result_rank > 0:
                 team.rank = team.result_rank
                 if team.result_teamscore < 10:
@@ -574,10 +561,21 @@ class UitslagenRayonTeamsView(TemplateView):
                 klasse_teams_done.append(team)
             else:
                 # nog geen uitslag beschikbaar
-                # TODO: geen rank invullen na de cut
                 rank += 1
                 team.rank = rank
                 klasse_teams_plan.append(team)
+
+                if team.ver_nr == toon_team_leden_van_ver_nr:
+                    team.toon_team_leden = True
+                    team.team_leden = list()
+                    for deelnemer in (team
+                                      .gekoppelde_leden
+                                      .select_related('sporterboog__sporter')
+                                      .order_by('-gemiddelde')):                      # hoogste eerst
+                        team.team_leden.append(deelnemer)
+                        deelnemer.sporter_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
+                    # for
+                    aantal_regels += 1
         # for
 
         if len(klasse_teams_done) > 0:
