@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,12 +11,16 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Records', 'm0011_squashed'),
+                ('Records', 'm0012_traditional'),
+                ('Records', 'm0013_ander_record')]
+
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Sporter', 'm0013_squashed'),
+        ('Sporter', 'm0021_squashed'),
     ]
 
     # migratie functies
@@ -30,7 +34,7 @@ class Migration(migrations.Migration):
                 ('soort_record', models.CharField(max_length=40)),
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], max_length=1)),
                 ('leeftijdscategorie', models.CharField(choices=[('M', 'Master'), ('S', 'Senior'), ('J', 'Junior'), ('C', 'Cadet'), ('U', 'Uniform (para)')], max_length=1)),
-                ('materiaalklasse', models.CharField(choices=[('R', 'Recurve'), ('C', 'Compound'), ('BB', 'Barebow'), ('LB', 'Longbow'), ('IB', 'Instinctive bow')], max_length=2)),
+                ('materiaalklasse', models.CharField(choices=[('R', 'Recurve'), ('C', 'Compound'), ('BB', 'Barebow'), ('LB', 'Longbow'), ('TR', 'Traditional'), ('IB', 'Instinctive bow')], max_length=2)),
                 ('para_klasse', models.CharField(blank=True, max_length=20)),
                 ('naam', models.CharField(max_length=50)),
                 ('datum', models.DateField()),
@@ -55,16 +59,11 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('volgorde', models.PositiveIntegerField(default=0)),
-                ('discipline',
-                 models.CharField(choices=[('OD', 'Outdoor'), ('18', 'Indoor'), ('25', '25m 1pijl')], max_length=2)),
+                ('discipline', models.CharField(choices=[('OD', 'Outdoor'), ('18', 'Indoor'), ('25', '25m 1pijl')], max_length=2)),
                 ('soort_record', models.CharField(max_length=40)),
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], max_length=1)),
-                ('leeftijdscategorie', models.CharField(
-                    choices=[('M', 'Master'), ('S', 'Senior'), ('J', 'Junior'), ('C', 'Cadet'),
-                             ('U', 'Uniform (para)')], max_length=1)),
-                ('materiaalklasse', models.CharField(
-                    choices=[('R', 'Recurve'), ('C', 'Compound'), ('BB', 'Barebow'), ('LB', 'Longbow'),
-                             ('IB', 'Instinctive bow')], max_length=2)),
+                ('leeftijdscategorie', models.CharField(choices=[('M', 'Master'), ('S', 'Senior'), ('J', 'Junior'), ('C', 'Cadet'), ('U', 'Uniform (para)')], max_length=1)),
+                ('materiaalklasse', models.CharField(choices=[('R', 'Recurve'), ('C', 'Compound'), ('BB', 'Barebow'), ('LB', 'Longbow'), ('TR', 'Traditional'), ('IB', 'Instinctive bow')], max_length=2)),
                 ('para_klasse', models.CharField(blank=True, max_length=20)),
                 ('beste', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Records.indivrecord')),
             ],
@@ -72,6 +71,16 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Beste individuele records',
                 'verbose_name_plural': 'Beste individuele records',
             },
+        ),
+        migrations.CreateModel(
+            name='AnderRecord',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('titel', models.CharField(max_length=30)),
+                ('icoon', models.CharField(max_length=20)),
+                ('tekst', models.CharField(max_length=100)),
+                ('url', models.CharField(max_length=100)),
+            ],
         ),
     ]
 

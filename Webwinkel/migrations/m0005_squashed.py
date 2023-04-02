@@ -12,11 +12,6 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Webwinkel', 'm0001_initial'),
-                ('Webwinkel', 'm0002_keuze'),
-                ('Webwinkel', 'm0003_verzendkosten'),
-                ('Webwinkel', 'm0004_annuleer')]
-
     # dit is de eerste
     initial = True
 
