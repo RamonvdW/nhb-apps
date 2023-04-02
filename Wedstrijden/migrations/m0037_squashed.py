@@ -12,24 +12,16 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Wedstrijden', 'm0031_squashed'),
-                ('Wedstrijden', 'm0032_niet_tonen'),
-                ('Wedstrijden', 'm0033_cleanup'),
-                ('Wedstrijden', 'm0034_verkoopvoorwaarden'),
-                ('Wedstrijden', 'm0035_uitvoerende_ver'),
-                ('Wedstrijden', 'm0036_ter_info')]
-
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0023_squashed'),
-        ('Score', 'm0019_squashed'),
-        ('NhbStructuur', 'm0030_bondsbureau'),
-        ('BasisTypen', 'm0049_squashed'),
-        ('Sporter', 'm0013_squashed'),
+        ('BasisTypen', 'm0052_squashed'),
         ('NhbStructuur', 'm0031_squashed'),
+        ('Score', 'm0019_squashed'),
+        ('Sporter', 'm0021_squashed'),
     ]
 
     operations = [

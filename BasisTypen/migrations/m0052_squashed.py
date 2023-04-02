@@ -678,10 +678,6 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('BasisTypen', 'm0049_squashed'),
-                ('BasisTypen', 'm0050_gemengd'),
-                ('BasisTypen', 'm0051_comp_klassen')]
-
     # dit is de eerste
     initial = True
 

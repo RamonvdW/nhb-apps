@@ -25,11 +25,6 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Bestel', 'm0015_squashed'),
-                ('Bestel', 'm0016_webwinkel'),
-                ('Bestel', 'm0017_kosten'),
-                ('Bestel', 'm0018_annuleer')]
-
     # dit is de eerste
     initial = True
 
@@ -37,8 +32,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0023_squashed'),
         ('Betaal', 'm0011_squashed'),
-        ('Webwinkel', 'm0002_keuze'),
-        ('Wedstrijden', 'm0031_squashed'),
+        ('Webwinkel', 'm0005_squashed'),
+        ('Wedstrijden', 'm0037_squashed'),
     ]
 
     # migratie functies
