@@ -8,6 +8,7 @@ from django.db import migrations, models
 
 
 ADMINISTRATIEVE_REGIO = 100
+VER_NR = 1368
 
 
 def init_functies_bondscompetitie_2019(apps, _):
@@ -67,15 +68,22 @@ def init_functies_extra(apps, _):
 
     # haal de klassen op die van toepassing zijn op het moment van migratie
     functie_klas = apps.get_model('Functie', 'Functie')
+    ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
+
+    ver = ver_klas.objects.get(ver_nr=VER_NR)
 
     functie_klas(rol='MO', beschrijving='Manager Opleidingen').save()
     functie_klas(rol='MWZ', beschrijving='Manager Wedstrijdzaken').save()
     functie_klas(rol='SUP', beschrijving='Support').save()
+    functie_klas(rol='MWW', beschrijving='Manager Webwinkel', nhb_ver=ver).save()
 
 
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('Functie', 'm0015_squashed'),
+                ('Functie', 'm0016_rol_mww')]
 
     # dit is de eerste
     initial = True
