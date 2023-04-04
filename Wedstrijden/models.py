@@ -374,8 +374,8 @@ class WedstrijdInschrijving(models.Model):
         """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
 
         titel = self.wedstrijd.titel
-        if len(titel) > 30:
-            titel = titel[:28] + '..'
+        if len(titel) > 60:
+            titel = titel[:58] + '..'
 
         return "%s - %s" % (self.sporterboog.sporter.lid_nr, titel)
 
