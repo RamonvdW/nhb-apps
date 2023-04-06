@@ -50,8 +50,6 @@
             <!-- dialoog venster -->
             <div style="margin:50px 30px 30px 30px" class="left-align">
                 <form action="{{ zoek_url }}" method="get">
-                    {% csrf_token %}
-
                     <!-- form field -->
                     <div class="input-field">
                         {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
