@@ -171,11 +171,11 @@ class E2EHelpers(TestCase):
     WISSEL_VAN_ROL_EXPECTED_URL = {
         'SEC': '/vereniging/',
         'HWL': '/vereniging/',
-        'WL' : '/vereniging/',
+        'WL':  '/vereniging/',
         'BKO': '/bondscompetities/##',
         'RKO': '/bondscompetities/##',
         'RCL': '/bondscompetities/##',
-        'MO' : '/opleidingen/manager/',
+        'MO':  '/opleidingen/manager/',
         'SUP': '/feedback/inzicht/',
         'MWW': '/webwinkel/manager/',
         'MWZ': '/functie/wissel-van-rol/',      # '/kalender/'
@@ -627,6 +627,54 @@ class E2EHelpers(TestCase):
             context = context[:pos+30]
             self.fail(msg='Bug in template %s: %s\nContext: %s' % (repr(dtl), msg, context))
 
+    def _assert_form_csrf(self, html, dtl):
+        """ controleer het type formulier en controleer juist gebruik van het csrf token """
+        pos_method = html.find('method=')
+        method = html[pos_method+7:pos_method+7+10]
+        is_post = "POST" in method.upper()
+
+        pos_csrf = html.find('csrfmiddlewaretoken')
+        if is_post:
+            if pos_csrf < 0:
+                self.fail(msg='Bug in template %s: missing csrf token inside form with method=post' % repr(dtl))
+        else:
+            if pos_csrf >= 0:
+                self.fail(msg='Bug in template %s: found csrf token inside form not using method=post' % repr(dtl))
+
+    def _assert_no_csrf(self, html, dtl):
+        """ controleer geen oneigenlijk gebruik van het csrf_token """
+        pos_csrf = html.find('csrfmiddlewaretoken')
+        if pos_csrf >= 0:
+            self.fail('Bug in template %s: found csrf token usage outside form' % repr(dtl))
+
+    def _assert_no_csrf_except_in_script(self, html, dtl):
+        # skip usage inside scripts
+        pos_script = html.find('<script')
+        while pos_script >= 0:
+            self._assert_no_csrf(html[:pos_script], dtl)
+            html = html[pos_script:]
+            pos_script = html.find('</script')
+            html = html[pos_script+8:]
+        # while
+        self._assert_no_csrf(html, dtl)
+
+    def _assert_csrf_token_usage(self, html, dtl):
+        """ controleer het gebruik van csrf token """
+        pos_form = html.find('<form')
+        while pos_form >= 0:
+            # controleer het hele formulier
+            self._assert_no_csrf_except_in_script(html[:pos_form], dtl)
+            html = html[pos_form:]
+
+            form_end = html.find('</form>')
+            self._assert_form_csrf(html[:form_end], dtl)
+
+            html = html[form_end+7:]
+            pos_form = html.find('<form')
+        # while
+
+        self._assert_no_csrf_except_in_script(html, dtl)
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
         html = response.content.decode('utf-8')
@@ -647,6 +695,7 @@ class E2EHelpers(TestCase):
         self._assert_no_div_in_p(html, dtl)
         self._assert_no_col_white(html, dtl)
         self._assert_inputs(html, dtl)
+        self._assert_csrf_token_usage(html, dtl)
 
         self._assert_template_bug(html, dtl)
 

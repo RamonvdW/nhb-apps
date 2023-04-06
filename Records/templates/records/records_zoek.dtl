@@ -33,8 +33,6 @@
                 </div>
 
                 <form action="{{ records_zoek_url }}" method="get">
-                    {% csrf_token %}
-
                     <!-- form field -->
                     <div class="input-field">
                         {{ form.zoekterm.label_tag }} {{ form.zoekterm }}
