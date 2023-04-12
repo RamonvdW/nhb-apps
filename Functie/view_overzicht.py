@@ -43,14 +43,16 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
                 nr = 1
             elif obj.rol == "HWL":
                 nr = 2
-            else:
-                # obj.rol == "WL":
+            elif obj.rol == "WL":
                 nr = 3
-            tup = (nr, obj)
+            else:
+                # obj.rol == MWZ, MWW, etc.
+                nr = 4
+            tup = (nr, obj.pk, obj)
             lst.append(tup)
         # for
         lst.sort()
-        return [obj for _, obj in lst]
+        return [obj for _, _, obj in lst]
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
