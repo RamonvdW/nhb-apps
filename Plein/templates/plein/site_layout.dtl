@@ -23,14 +23,15 @@
 <html lang="nl">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
         <title>{% block title %}{% endblock %}</title>
-        <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-128.css' %}">
+
+        {% include 'plein/site_layout_fonts.dtl' %}
+
+        <link rel="stylesheet" href="{% static 'materialize-new-129.css' %}">
+
+        {% include 'plein/site_layout_icons.dtl' %}
+
         {% block extraheader %}{% endblock %}
     </head>
 

@@ -1,0 +1,25 @@
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze file levert de fav-icons voor in de html "head" van elke pagina
+    Wordt gebruikt vanuit site_layout.dtl en site_layout_minimaal.dtl
+
+{% endcomment %}
+
+{% load static %}
+
+<!-- also supported in root -->
+<link rel="icon" type="image/x-icon" href="{% static 'plein/favicon.ico' %}">
+
+<!-- also supported in root -->
+<link rel="apple-touch-icon" href="{% static 'plein/apple-touch-icon.png' %}">
+
+<!-- TODO: nog nodig? -->
+<link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+
+<!-- end of file -->
