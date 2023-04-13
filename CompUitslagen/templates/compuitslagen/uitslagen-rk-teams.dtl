@@ -171,11 +171,17 @@
                 {% endif %}
 
                 <tr{% if team.niet_deelgenomen %} class="grey-text"{% endif %}>
+
+                    <!-- rank -->
                     <td class="center">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
+
+                    <!-- vereniging -->
                     <td>
                         <span class="hide-on-med-and-up">{{ team.ver_nr }}</span>
                         <span class="hide-on-small-only">{{ team.ver_str }}</span>
                     </td>
+
+                    <!-- team naam + team leden -->
                     <td>
                         {% if team.heeft_uitslag %}
                             <b>{{ team.team_naam }}</b><br>
@@ -186,6 +192,8 @@
                             <span>{{ team.team_naam }}</span>
                         {% endif %}
                     </td>
+
+                    <!-- label -->
                     <td class="center hide-on-small-only">
                         <span><b>{{ team.ag_str }}</b></span>
                         {% if team.heeft_uitslag %}
