@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK
+from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -190,6 +190,21 @@ class RayonTeamsTemplateView(TemplateView):
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
+
+            if team.deelname == DEELNAME_NEE:
+                team.status_str = 'Afgemeld'
+                # aantal_afgemeld += 1
+
+            elif team.deelname == DEELNAME_JA:
+                team.status_str = 'Aangemeld'
+                # aantal_aangemeld += 1
+
+            else:
+                team.status_str = 'Onbekend'
+                # aantal_onbekend += 1
+
+            if team.is_reserve:
+                team.status_str += ', Reserve'
 
             totaal_teams += 1
 
