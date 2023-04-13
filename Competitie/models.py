@@ -1010,7 +1010,11 @@ class KampioenschapTeam(models.Model):
     result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
 
     def __str__(self):
-        return "%s: %s" % (self.vereniging, self.team_naam)
+        return "%s: %s (deelname=%s, rank=%s, volgorde=%s)" % (self.vereniging,
+                                                               self.team_naam,
+                                                               self.deelname,
+                                                               self.rank,
+                                                               self.volgorde)
 
 
 class CompetitieMutatie(models.Model):
