@@ -126,7 +126,6 @@ class E2EHelpers(TestCase):
         account = self.e2e_create_account('admin', 'admin@test.com', 'Admin', accepteer_vhpg)
         # zet de benodigde vlaggen om admin te worden
         account.is_staff = True
-        account.is_superuser = True
         account.save()
         return account
 

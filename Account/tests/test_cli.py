@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,7 +24,7 @@ class TestAccountCli(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
+        usermodel.objects.create_user('admin', 'admin@test.com', 'wachtwoord')
         self.account_admin = Account.objects.get(username='admin')
         self.account_normaal = Account.objects.get(username='normaal')
 
@@ -75,7 +75,6 @@ class TestAccountCli(E2EHelpers, TestCase):
         self.assertEqual(obj.email, '')
         self.assertTrue(obj.is_active)
         self.assertFalse(obj.is_staff)
-        self.assertFalse(obj.is_superuser)
 
         mail = AccountEmail.objects.get(account=obj)
         self.assertTrue(mail.email_is_bevestigd)

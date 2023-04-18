@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,8 +26,7 @@ class Command(BaseCommand):
             self.stderr.write("%s" % str(exc))
         else:
             account.is_staff = True
-            account.is_superuser = True
-            account.save()
+            account.save(update_fields=['is_staff'])
 
             # schrijf in het logboek
             schrijf_in_logboek(account=None,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,14 +25,14 @@ class Account(AbstractUser):
     # (inherited) password
     # (inherited) date_joined
     # (inherited) last_login
-    # (inherited) is_active     - may log in
-    # (inherited) is_staff      - admin site access
-    # (inherited) is_superuser  - all permissions
+    # (inherited) is_active  - may log in
+    # (inherited) is_staff   - admin site access
     # (inherited) first_name
     # (inherited) last_name
-    # (inherited, not used) email
-    # (inherited) user_permissions: ManyToMany
-    # (inherited) groups: ManyToMany
+    # (inherited) email            (not used)
+    # (inherited) user_permissions (not used)
+    # (inherited) is_superuser     (not used)
+    # (inherited) groups           (not used)
 
     # om in te zoeken: volledige naam zonder leestekens
     unaccented_naam = models.CharField(max_length=200, default='', blank=True)
@@ -52,11 +52,12 @@ class Account(AbstractUser):
                                     blank=True, null=True,
                                     help_text="Login niet mogelijk tot")
 
-    # rollen / functies
+    # speciale vlag om dit account alle rechten te geven
     is_BB = models.BooleanField(
                         default=False,
                         help_text="Manager Competitiezaken")
 
+    # TODO: verwijder (wordt niet gebruikt)
     is_Observer = models.BooleanField(
                         default=False,
                         help_text="Alleen observeren")

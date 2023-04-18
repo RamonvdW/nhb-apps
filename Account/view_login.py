@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -79,7 +79,7 @@ def account_check_nieuwe_email(request, from_ip, account):
 account_add_plugin_login(30, account_check_nieuwe_email, True)
 
 
-def account_check_geblokkeerd(request, from_ip, account):
+def account_check_email_is_bevestigd(request, from_ip, account):
     """ voorkom login op een account totdat het e-mailadres bevestigd is """
 
     if account.accountemail_set.count() < 1:
@@ -105,7 +105,7 @@ def account_check_geblokkeerd(request, from_ip, account):
     return None
 
 
-account_add_plugin_login(40, account_check_geblokkeerd, True)
+account_add_plugin_login(40, account_check_email_is_bevestigd, True)
 
 
 def receive_bevestiging_accountemail(request, obj):
@@ -285,8 +285,8 @@ class LoginView(TemplateView):
 
         # FUTURE: ongewenste kennis over OTP en Functies --> dit door een plug-in laten doen
         if account.otp_is_actief:
-            # 2FA check altijd aanbieden aan IT en BB rollen
-            if account.is_staff or account.is_superuser or account.is_BB:
+            # 2FA check altijd aanbieden aan account met BB rol of admin access
+            if account.is_staff or account.is_BB:
                 return HttpResponseRedirect(reverse('Functie:otp-controle'))
 
             # alleen 2FA check aanbieden als er ook functies aan gekoppeld zijn
@@ -323,7 +323,10 @@ class LoginView(TemplateView):
                 form.add_error(None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
         # still here --> re-render with error message
-        context = {'form': form}
+        context = {
+            'form': form,
+            'verberg_login_knop': True,
+        }
 
         if account and account.verkeerd_wachtwoord_teller > 0:
             context['show_wachtwoord_vergeten'] = True
