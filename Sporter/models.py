@@ -61,7 +61,7 @@ def validate_sinds_datum(datum):
 
 class Sporter(models.Model):
 
-    """ Tabel om details van een lid bij te houden """
+    """ Tabel om details van een lid bij te houden, zoals overgenomen uit het CRM """
 
     # het unieke lidmaatschapsnummer
     lid_nr = models.PositiveIntegerField(primary_key=True)
