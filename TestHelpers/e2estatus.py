@@ -14,6 +14,8 @@ consistent_email_templates = list()
 # these templates are included by other templates
 included_templates = (
     'plein/site_layout.dtl',
+    'plein/site_layout_fonts.dtl',
+    'plein/site_layout_favicons.dtl',
     'plein/site_layout_minimaal.dtl',
     'plein/card.dtl',
     'plein/card_logo.dtl',

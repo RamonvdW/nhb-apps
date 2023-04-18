@@ -31,7 +31,7 @@
 
         <link rel="stylesheet" href="{% static 'materialize-new-129.css' %}">
 
-        {% include 'plein/site_layout_icons.dtl' %}
+        {% include 'plein/site_layout_favicons.dtl' %}
 
         {% block extra_header %}{% endblock %}
     </head>
