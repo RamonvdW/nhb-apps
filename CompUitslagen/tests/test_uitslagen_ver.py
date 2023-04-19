@@ -22,8 +22,8 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
     url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
 
     regio_nr = 101
-    ver_nr = 0      # wordt in setupTestData ingevuld
-    club_naam = ''  # wordt in setupTestData ingevuld
+    ver_nr = 0      # wordt in setUpTestData ingevuld
+    club_naam = ''  # wordt in setUpTestData ingevuld
 
     testdata = None
 

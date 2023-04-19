@@ -21,7 +21,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
     url_uitslagen_bond_teams = '/bondscompetities/uitslagen/%s/%s/bk-teams/'           # comp_pk, team_type
 
     regio_nr = 101
-    ver_nr = 0      # wordt in setupTestData ingevuld
+    ver_nr = 0      # wordt in setUpTestData ingevuld
 
     testdata = None
 

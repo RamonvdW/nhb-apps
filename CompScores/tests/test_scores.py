@@ -39,7 +39,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     url_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'     # comp_pk
 
-    ver_nr = 0      # wordt in setupTestData ingevuld
+    ver_nr = 0      # wordt in setUpTestData ingevuld
 
     testdata = None
 
