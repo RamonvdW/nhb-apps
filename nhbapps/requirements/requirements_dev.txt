@@ -24,7 +24,7 @@ charset-normalizer==3.1.0
     #   requests
 coverage==7.2.3
     # via -r requirements_dev.in
-django==4.0.10
+django==4.2
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -93,7 +93,7 @@ protobuf==4.22.3
     #   -r requirements.txt
     #   google-api-core
     #   googleapis-common-protos
-psycopg2-binary==2.9.6
+psycopg==3.1.8
     # via -r requirements.txt
 pyasn1==0.4.8
     # via
@@ -149,6 +149,7 @@ sqlparse==0.4.4
 typing-extensions==4.5.0
     # via
     #   -r requirements.txt
+    #   psycopg
     #   qrcode
 uritemplate==4.1.1
     # via

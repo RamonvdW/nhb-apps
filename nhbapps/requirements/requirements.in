@@ -6,8 +6,7 @@
 Django
 
 # PostgreSQL database access
-# building has a ton of preconditions, so use binary version
-psycopg2-binary
+psycopg
 
 # 2FA support
 pyotp

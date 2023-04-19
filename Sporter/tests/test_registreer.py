@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -90,7 +90,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
+        self.assertFormError(resp.context['form'], None, 'Niet alle velden zijn ingevuld')
 
     def test_invalid_fields(self):
         with self.assert_max_queries(20):
@@ -101,7 +101,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'De gegevens worden niet geaccepteerd')
+        self.assertFormError(resp.context['form'], None, 'De gegevens worden niet geaccepteerd')
 
     def test_bad_lid_nr(self):
         with self.assert_max_queries(20):
@@ -113,7 +113,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Onbekend NHB nummer')
+        self.assertFormError(resp.context['form'], None, 'Onbekend NHB nummer')
 
     def test_non_existing_nr(self):
         with self.assert_max_queries(20):
@@ -125,7 +125,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Onbekend NHB nummer')
+        self.assertFormError(resp.context['form'], None, 'Onbekend NHB nummer')
 
     def test_geen_email(self):
         # vul de sec in
@@ -177,10 +177,9 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None, 'De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
     def test_registreer(self):
-
         # maak een andere sporter secretaris van de vereniging
         sec = Secretaris(vereniging=self.nhbver)
         sec.save()
@@ -265,7 +264,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Account bestaat al')
+        self.assertFormError(resp.context['form'], None, 'Account bestaat al')
 
     def test_zwak_wachtwoord(self):
         # te kort
@@ -413,7 +412,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+        self.assertFormError(resp.context['form'], None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
 
     def test_sec(self):
         # lid dat zich registreert, is secretaris van een vereniging
@@ -459,7 +458,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+        self.assertFormError(resp.context['form'], None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
 
 
 # end of file

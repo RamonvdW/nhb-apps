@@ -12,7 +12,7 @@ certifi==2022.12.7
     # via requests
 charset-normalizer==3.1.0
     # via requests
-django==4.0.10
+django==4.2
     # via -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
@@ -48,7 +48,7 @@ protobuf==4.22.3
     # via
     #   google-api-core
     #   googleapis-common-protos
-psycopg2-binary==2.9.6
+psycopg==3.1.8
     # via -r requirements.in
 pyasn1==0.4.8
     # via
@@ -80,7 +80,9 @@ six==1.16.0
 sqlparse==0.4.4
     # via django
 typing-extensions==4.5.0
-    # via qrcode
+    # via
+    #   psycopg
+    #   qrcode
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==1.26.15

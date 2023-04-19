@@ -69,7 +69,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
     def test_inlog_form_niet_compleet(self):
         # test inlog via het inlog formulier, met niet complete parameters
@@ -78,7 +78,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
+        self.assertFormError(resp.context['form'], None, 'Niet alle velden zijn ingevuld')
 
     def test_inlog_form_invalid_input(self):
         # coverage voor is_valid functie van het formulier door valid==False
@@ -93,7 +93,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
         self.account_normaal = Account.objects.get(username='normaal')
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 1)
 
@@ -208,7 +208,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
+        self.assertFormError(resp.context['form'], None, 'Niet alle velden zijn ingevuld')
 
     def test_inlog_form_post_next_good(self):
         # controleer dat de next parameter gebruikt wordt
