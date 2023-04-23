@@ -19,9 +19,11 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
         self.dryrun = True
+        self.verbose = False
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('--verbose', action='store_true')
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
 
@@ -57,7 +59,7 @@ class Command(BaseCommand):
         row_nr = 0
         nix_count = 0
         klasse_pk = None
-        rank = 0
+        rank_doorlopend = rank = 0
         prev_totaal = 999
         prev_counts_str = ""
         while nix_count < 10:
@@ -123,7 +125,8 @@ class Command(BaseCommand):
                         except (TypeError, ValueError):
                             # if deelnemer.deelname != DEELNAME_NEE:      # afgemeld?
                             if score1 is None and score2 is None:
-                                self.stdout.write('[WARNING] Regel %s wordt overgeslagen (geen scores)' % row)
+                                if self.verbose:
+                                    self.stdout.write('[WARNING] Regel %s wordt overgeslagen (geen scores)' % row)
                             else:
                                 self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (row, repr(score1), repr(score2)))
                         else:
@@ -146,17 +149,19 @@ class Command(BaseCommand):
 
                             totaal = score1 + score2
                             if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
+                                rank_doorlopend += 1
                                 if totaal == prev_totaal and counts_str == prev_counts_str:
                                     # zelfde score, zelf rank
                                     pass
                                 elif totaal > prev_totaal:
                                     self.stderr.write('[ERROR] Score is niet aflopend op regel %s' % row)
                                 else:
-                                    rank += 1
+                                    rank = rank_doorlopend
                                 prev_totaal = totaal
                                 prev_counts_str = counts_str
 
-                                self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
+                                if self.verbose:
+                                    self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
 
                                 do_report = False
                                 if dupe_check:
@@ -192,7 +197,8 @@ class Command(BaseCommand):
                             if deelnemer.deelname != DEELNAME_NEE:
                                 # noteer: we weten niet welke reserves opgeroepen waren
                                 # noteer: nog geen oplossing voor reserves die toch niet mee kunnen doen
-                                self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
+                                if self.verbose:
+                                    self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
                                 deelnemer.result_rank = KAMP_RANK_NO_SHOW
                             else:
                                 deelnemer.result_rank = KAMP_RANK_RESERVE
@@ -205,6 +211,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         self.dryrun = options['dryrun']
+        self.verbose = options['verbose']
 
         fname = options['bestand']
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))

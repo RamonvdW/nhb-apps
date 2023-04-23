@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -68,7 +68,7 @@
 
         {% for obj in wedstrijden %}
             <tr>
-                <td>{{ obj.datum_wanneer|date:"l j F Y" }}<br class="hide-on-extra-large-only">om {{ obj.tijd_begin_wedstrijd }}</td>
+                <td>{{ obj.datum_wanneer|date:"l j F Y" }}<br class="hide-on-extra-large-only"> om {{ obj.tijd_begin_wedstrijd }}</td>
                 <td class="hide-on-med-and-down">{{ obj.vereniging }}</td>
                 <td>{{ obj.beschrijving }}</td>
                 <!-- knop om uitslagen te zien / in te voeren -->
