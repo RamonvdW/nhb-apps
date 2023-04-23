@@ -246,7 +246,7 @@
 
 
                {% if wed.extern_beheerd and wed.contact_website %}
-                   {% include 'plein/card.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze website gaat via de website van de organisatie" url=wed.contact_website %}
+                   {% include 'plein/card.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze wedstrijd gaat via de website van de organisatie" url=wed.contact_website %}
                 {% endif %}
 
             </div>
