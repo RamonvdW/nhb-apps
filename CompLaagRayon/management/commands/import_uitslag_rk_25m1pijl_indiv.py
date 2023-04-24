@@ -18,6 +18,7 @@ class Command(BaseCommand):
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSporterBoog, ...]
+        self.klasse_pk = None
         self.dryrun = True
         self.verbose = False
 
@@ -44,6 +45,64 @@ class Command(BaseCommand):
                 self.deelnemers[lid_nr] = [deelnemer]
         # for
 
+    def bepaal_klasse(self, ws):
+        col_lid_nr = 'D'
+
+        pk2klasse = dict()
+
+        # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
+        # bepaal welke klasse dit is
+        row_nr = 0
+        nix_count = 0
+        klasse_pk2count = dict()        # [klasse.pk] = aantal
+        while nix_count < 10:
+            row_nr += 1
+            row = str(row_nr)
+
+            lid_nr_str = ws[col_lid_nr + row].value
+            if lid_nr_str:
+                nix_count = 0
+                try:
+                    lid_nr = int(lid_nr_str)
+                except ValueError:
+                    pass
+                else:
+                    try:
+                        deelnemers = self.deelnemers[lid_nr]
+                    except KeyError:
+                        self.stderr.write('[ERROR] Geen RK deelnemer op regel %s: %s' % (row, lid_nr))
+                    else:
+                        for kandidaat in deelnemers:
+                            if kandidaat.deelname != DEELNAME_NEE:
+                                klasse_pk = kandidaat.indiv_klasse.pk
+                                try:
+                                    klasse_pk2count[klasse_pk] += 1
+                                except KeyError:
+                                    klasse_pk2count[klasse_pk] = 1
+                                    pk2klasse[klasse_pk] = kandidaat.indiv_klasse
+                        # for
+            else:
+                nix_count += 1
+        # while
+
+        self.klasse_pk = None
+        beste = 0
+        for klasse_pk, aantal in klasse_pk2count.items():
+            if aantal > beste:
+                beste = aantal
+                self.klasse_pk = klasse_pk
+        # for
+
+        if self.klasse_pk:
+            klasse = pk2klasse[self.klasse_pk]
+            self.stdout.write('[INFO] Klasse: %s' % klasse)
+        else:
+            self.stderr.write('[ERROR] Kan niet bepalen welke klasse dit is!')
+            self.stderr.write('[DEBUG] klasse_pk2count:')
+            for klasse_pk, aantal in klasse_pk2count.items():
+                self.stderr.write('[DEBUG]  %s: %s' % (klasse_pk, aantal))
+            # for
+
     def lees_uitslagen(self, ws):
         col_lid_nr = 'D'
         col_score1 = 'J'
@@ -52,13 +111,12 @@ class Command(BaseCommand):
         col_9s = 'N'
         col_8s = 'O'
 
-        klasse_pks = list()
-        deelkamp_pks = list()
+        # houd bij welke klassen er langs komen, voor het melden van no-shows
+        deelkamp_pk = None
 
-        # doorloop alle regels van het excel blad en ga op zoek naar bondsnummers
+        # doorloop het blad opnieuw en koppel de scores aan de sporters (in de bepaalde klasse)
         row_nr = 0
         nix_count = 0
-        klasse_pk = None
         rank_doorlopend = rank = 0
         prev_totaal = 999
         prev_counts_str = ""
@@ -83,17 +141,10 @@ class Command(BaseCommand):
                             deelnemer = deelnemers[0]
                         else:
                             deelnemer = None
-                            if klasse_pk:
-                                for kandidaat in deelnemers:
-                                    if kandidaat.indiv_klasse.pk == klasse_pk:
-                                        deelnemer = kandidaat
-                                # for
-                            if deelnemer is None:
-                                # probeer het nog een keer, maar kijk nu ook naar afgemeld status
-                                for kandidaat in deelnemers:
-                                    if kandidaat.deelname != DEELNAME_NEE:
-                                        deelnemer = kandidaat
-                                # for
+                            for kandidaat in deelnemers:
+                                if kandidaat.indiv_klasse.pk == self.klasse_pk:
+                                    deelnemer = kandidaat
+                            # for
                         if deelnemer is None:
                             self.stderr.write('[ERROR] Kan deelnemer niet bepalen voor regel %s. Keuze uit %s' % (row, repr(deelnemers)))
                             continue    # met de while
@@ -102,16 +153,10 @@ class Command(BaseCommand):
                         if deelnemer.result_rank > 0:
                             dupe_check = True
 
-                        if klasse_pk != deelnemer.indiv_klasse.pk:
-                            self.stdout.write('[INFO] Klasse: %s' % deelnemer.indiv_klasse)
-                            klasse_pk = deelnemer.indiv_klasse.pk
-                            rank = 0
-                            prev_totaal = 999
-                            if klasse_pk not in klasse_pks:                             # pragma: no branch
-                                klasse_pks.append(klasse_pk)
-                                deelcomp_pk = deelnemer.kampioenschap.pk
-                                if deelcomp_pk not in deelkamp_pks:                     # pragma: no branch
-                                    deelkamp_pks.append(deelnemer.kampioenschap.pk)
+                        if deelnemer.indiv_klasse.pk != self.klasse_pk:
+                            self.stderr.write('[INFO] Verkeerde klasse: %s' % deelnemer.indiv_klasse)
+                        else:
+                            deelkamp_pk = deelnemer.kampioenschap.pk
 
                         score1 = ws[col_score1 + row].value
                         score2 = ws[col_score2 + row].value
@@ -130,22 +175,33 @@ class Command(BaseCommand):
                             else:
                                 self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (row, repr(score1), repr(score2)))
                         else:
+                            if score1 > 250 or score2 > 250:
+                                self.stderr.write('[ERROR] Te hoge scores op regel %s: %s en %s' % (row, score1, score2))
+
                             counts = list()
                             try:
                                 if c10:
                                     c10 = int(c10)
                                     counts.append('%sx10' % c10)
+                                else:
+                                    c10 = 0
                                 if c9:
                                     c9 = int(c9)
                                     counts.append('%sx9' % c9)
+                                else:
+                                    c9 = 0
                                 if c8:
                                     c8 = int(c8)
                                     counts.append('%sx8' % c8)
+                                else:
+                                    c8 = 0
                             except (TypeError, ValueError) as err:
                                 self.stderr.write('[ERROR] Probleem met 10/9/8 count op regel %s: %s' % (row, str(err)))
                                 counts_str = ''
                             else:
                                 counts_str = ", ".join(counts)
+                                if c10 + c9 + c8 > (2 * 25):
+                                    self.stderr.write('[ERROR] Te veel 10/9/8-en op regel %s: %s / %s / %s' % (row, c10, c9, c8))
 
                             totaal = score1 + score2
                             if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
@@ -191,20 +247,19 @@ class Command(BaseCommand):
         # zet deelnemers die niet meegedaan hebben op een hoog rank nummer
         for deelnemers in self.deelnemers.values():
             for deelnemer in deelnemers:
-                if deelnemer.kampioenschap.pk in deelkamp_pks:
-                    if deelnemer.indiv_klasse.pk in klasse_pks:
-                        if deelnemer.result_rank in (0, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE):
-                            if deelnemer.deelname != DEELNAME_NEE:
-                                # noteer: we weten niet welke reserves opgeroepen waren
-                                # noteer: nog geen oplossing voor reserves die toch niet mee kunnen doen
-                                if self.verbose:
-                                    self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
-                                deelnemer.result_rank = KAMP_RANK_NO_SHOW
-                            else:
-                                deelnemer.result_rank = KAMP_RANK_RESERVE
+                if deelnemer.kampioenschap.pk == deelkamp_pk and deelnemer.indiv_klasse.pk == self.klasse_pk:
+                    if deelnemer.result_rank in (0, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE):
+                        if deelnemer.deelname != DEELNAME_NEE:
+                            # noteer: we weten niet welke reserves opgeroepen waren
+                            # noteer: nog geen oplossing voor reserves die toch niet mee kunnen doen
+                            if self.verbose:
+                                self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
+                            deelnemer.result_rank = KAMP_RANK_NO_SHOW
+                        else:
+                            deelnemer.result_rank = KAMP_RANK_RESERVE
 
-                            if not self.dryrun:
-                                deelnemer.save(update_fields=['result_rank'])
+                        if not self.dryrun:
+                            deelnemer.save(update_fields=['result_rank'])
             # for
         # for
 
@@ -229,6 +284,8 @@ class Command(BaseCommand):
             return
 
         self.deelnemers_ophalen()
-        self.lees_uitslagen(ws)
+        self.bepaal_klasse(ws)
+        if self.klasse_pk:
+            self.lees_uitslagen(ws)
 
 # end of file
