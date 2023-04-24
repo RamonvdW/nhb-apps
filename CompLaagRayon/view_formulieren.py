@@ -550,14 +550,13 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws = prg['Deelnemers en Scores']
 
-        ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelkamp.nhb_rayon.rayon_nr, comp.beschrijving)
-        ws['B4'] = 'Klasse: ' + klasse_str
-        ws['D3'] = match.datum_wanneer.strftime('%Y-%m-%d')
-        ws['E3'] = match.vereniging.naam     # organisatie
+        ws['B2'] = 'RK Teams Rayon %s, %s, Klasse: %s' % (deelkamp.nhb_rayon.rayon_nr, comp.beschrijving, klasse_str)
+        ws['B4'] = match.vereniging.naam     # organisatie
         if match.locatie:
-            ws['H3'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['F4'] = match.locatie.adres       # adres van de wedstrijdlocatie
         else:
-            ws['H3'] = 'Onbekend'
+            ws['F4'] = 'Onbekend'
+        ws['H4'] = match.datum_wanneer.strftime('%Y-%m-%d')
 
         teams = (KampioenschapTeam
                  .objects
