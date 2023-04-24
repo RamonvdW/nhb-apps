@@ -18,6 +18,8 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
+        self.dryrun = True
+        self.verbose = False
         self.deelnemers = dict()        # [lid_nr] = [KampioenschapSchutterBoog, ...]
         self.teams_cache = list()       # [KampioenschapTeam, ...]
         self.team_lid_nrs = dict()      # [team.pk] = [lid_nr, ...]
@@ -27,6 +29,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('--verbose', action='store_true')
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
 
@@ -133,7 +136,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        dryrun = options['dryrun']
+        self.dryrun = options['dryrun']
+        self.verbose = options['verbose']
 
         # open de kopie, zodat we die aan kunnen passen
         fname = options['bestand']
@@ -283,7 +287,7 @@ class Command(BaseCommand):
                 deelnemer_totalen = list()
 
                 for deelnemer in feitelijke_deelnemers:
-                    if not dryrun:
+                    if not self.dryrun:
                         # uitgestelde save actie
                         deelnemer.save(update_fields=['result_teamscore_1', 'result_teamscore_2'])
                     deelnemer_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
@@ -304,8 +308,9 @@ class Command(BaseCommand):
             rank += 1
             kamp_team = tup[-1]
             kamp_team.result_rank = rank
-            # self.stdout.write("%s (%s) %s" % (kamp_team.result_rank, kamp_team.result_teamscore, kamp_team))
-            if not dryrun:
+            if self.verbose:
+                self.stdout.write("%s (%s) %s" % (kamp_team.result_rank, kamp_team.result_teamscore, kamp_team))
+            if not self.dryrun:
                 kamp_team.save(update_fields=['result_rank', 'result_teamscore'])
         # for
 
