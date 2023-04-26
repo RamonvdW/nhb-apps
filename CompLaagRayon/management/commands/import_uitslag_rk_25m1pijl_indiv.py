@@ -216,6 +216,10 @@ class Command(BaseCommand):
                                 prev_totaal = totaal
                                 prev_counts_str = counts_str
 
+                                # telling moet alleen worden gebruik voor plaats 1/2/3
+                                if rank > 3:
+                                    counts_str = ''
+
                                 if self.verbose:
                                     self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
 
