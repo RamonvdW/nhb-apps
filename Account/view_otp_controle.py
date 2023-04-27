@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from Account.forms import OTPControleForm
 from Account.otp import otp_controleer_code
+from Functie.rol import rol_bepaal_beschikbare_rollen
 from Plein.menu import menu_dynamics
 
 TEMPLATE_OTP_CONTROLE = 'account/otp-controle.dtl'
@@ -71,6 +72,11 @@ class OTPControleView(TemplateView):
             otp_code = form.cleaned_data.get('otp_code')
             if otp_controleer_code(request, account, otp_code):
                 # controle is gelukt (is ook al gelogd)
+
+                # propageer het succes zodat de gebruiker meteen aan de slag kan
+                rol_bepaal_beschikbare_rollen(request, account)
+
+                # volg een eventuele pagina waar de gebruik al heen wilde
                 next_url = form.cleaned_data.get('next_url')
                 if not next_url:
                     next_url = reverse('Functie:wissel-van-rol')

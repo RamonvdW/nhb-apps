@@ -6,7 +6,6 @@
 
 account_plugins_login_gate = list()   # [tup, tup, ..] with tup = (prio, func, skip_for_login_as)
 account_plugins_post_login = list()   # [tup, tup, ..] with tup = (prio, func)
-account_plugins_eval_rights = list()  # [func, func, ..]
 
 
 def account_add_plugin_login_gate(prio, func, skip_for_login_as):
@@ -36,21 +35,6 @@ def account_add_plugin_login_gate(prio, func, skip_for_login_as):
     account_plugins_login_gate.sort(key=lambda x: x[0])
 
 
-def account_add_plugin_bepaal_rechten(func):
-    """
-        plugins zijn functies die aangeroepen worden om de rechten van de gebruiker
-        te evalueren en de resultaten te cachen in sessie variabelen.
-
-        deze plugins worden aangeroepen na:
-        - login gelukt
-        - OTP controle gelukt
-
-        declaratie van de post-login plugin functie:
-            def plugin(request, account):
-    """
-    account_plugins_eval_rights.append(func)
-
-
 def account_add_plugin_post_login_redirect(prio, func):
     """
         redirect plugins zijn functies die helpen om de gebruiker na inlog
@@ -72,15 +56,6 @@ def account_add_plugin_post_login_redirect(prio, func):
     tup = (prio, func)
     account_plugins_post_login.append(tup)
     account_plugins_post_login.sort(key=lambda x: x[0])
-
-
-def account_rechten_eval_now(request, account):
-    """ opnieuw de rechten van de gebruiker evalueren,
-        na login, OTP controle of VHPG controle
-    """
-    for func in account_plugins_eval_rights:
-        func(request, account)
-    # for
 
 
 # end of file

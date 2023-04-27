@@ -57,7 +57,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         resp = self.e2e_login_no_check(self.account_normaal)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/login-geblokkeerd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/login-geblokkeerd-geen-vereniging.dtl', 'plein/site_layout.dtl'))
 
     def test_inactief_bb(self):
         # inlog als BB met inactief nhblid moet gewoon werken

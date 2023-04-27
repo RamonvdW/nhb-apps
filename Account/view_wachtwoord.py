@@ -15,6 +15,7 @@ from Account.models import Account
 from Account.operations import account_test_wachtwoord_sterkte
 from Account.otp import otp_zet_control_niet_gelukt
 from Account.view_login import account_plugins_login_gate
+from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
@@ -160,6 +161,9 @@ def receive_wachtwoord_vergeten(request, account):
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Wachtwoord",
                        activiteit="Automatische inlog op account %s vanaf IP %s" % (repr(account.get_account_full_name()), from_ip))
+
+    # zorg dat de rollen goed ingesteld staan
+    rol_bepaal_beschikbare_rollen(request, account)
 
     return reverse('Account:nieuw-wachtwoord')
 

@@ -7,7 +7,6 @@
 from django.conf import settings
 from django.utils import timezone
 from Account.models import AccountSessions
-from Account.plugin_manager import account_rechten_eval_now
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.operations import mailer_queue_email, render_email_template
@@ -39,8 +38,6 @@ def otp_zet_control_niet_gelukt(request):
     AccountSessions.objects.get_or_create(account=account,
                                           session_id=request.session.session_key)   # session_id = primary key
 
-    account_rechten_eval_now(request, account)
-
 
 def otp_zet_controle_gelukt(request):
     """ Deze functie wordt aangeroepen vanuit de OTPControleView en OTPKoppelenView om een sessie variabele
@@ -51,8 +48,6 @@ def otp_zet_controle_gelukt(request):
     account.save(update_fields=['otp_controle_gelukt_op'])
 
     request.session[SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT] = True
-
-    account_rechten_eval_now(request, account)
 
 
 def otp_is_controle_gelukt(request):
@@ -101,7 +96,6 @@ def otp_koppel_met_code(request, account, code):
         account.save()
         my_logger.info('%s 2FA koppeling gelukt voor account %s' % (from_ip, account.username))
 
-        # propageer het succes zodat de gebruiker meteen aan de slag kan
         otp_zet_controle_gelukt(request)
         return True
 

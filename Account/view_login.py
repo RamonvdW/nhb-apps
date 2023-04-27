@@ -16,6 +16,7 @@ from Account.models import Account
 from Account.operations import account_email_bevestiging_ontvangen, account_check_gewijzigde_email
 from Account.otp import otp_zet_control_niet_gelukt
 from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login, account_add_plugin_login_gate
+from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, render_email_template
 from Overig.helpers import get_safe_from_ip
@@ -29,7 +30,7 @@ import logging
 TEMPLATE_LOGIN = 'account/login.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'account/email-bevestigd.dtl'
 TEMPLATE_AANGEMAAKT = 'account/email_aangemaakt.dtl'
-TEMPLATE_GEBLOKKEERD = 'account/login-geblokkeerd.dtl'
+TEMPLATE_GEBLOKKEERD = 'account/login-geblokkeerd-tot.dtl'
 TEMPLATE_EMAIL_BEVESTIG_NIEUWE = 'account/email-bevestig-nieuwe.dtl'
 TEMPLATE_EMAIL_BEVESTIG_HUIDIGE = 'account/email-bevestig-huidige.dtl'
 
@@ -273,6 +274,7 @@ class LoginView(TemplateView):
 
         # de OTP control is nog niet uitgevoerd
         otp_zet_control_niet_gelukt(self.request)
+        rol_bepaal_beschikbare_rollen(self.request, account)
 
         return True, None
 

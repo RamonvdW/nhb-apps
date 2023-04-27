@@ -109,7 +109,7 @@ class E2EHelpers(TestCase):
         return lst[0]
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
-        """ Maak een Account met AccountEmail aan in de database van de website """
+        """ Maak een Account aan in de database van de website """
         account = account_create(username, voornaam, '', self.WACHTWOORD, email, True)
 
         # zet OTP actief (een test kan deze altijd weer uit zetten)
@@ -149,7 +149,7 @@ class E2EHelpers(TestCase):
     def e2e_login_and_pass_otp(self, account, wachtwoord=None):
         self.e2e_login(account, wachtwoord)
         # door de login is een cookie opgeslagen met het csrf token
-        resp = self.client.post('/functie/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
+        resp = self.client.post('/account/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
         self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     def _wissel_naar_rol(self, rol, expected_redirect):

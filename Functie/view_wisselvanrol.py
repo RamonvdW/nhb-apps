@@ -13,7 +13,7 @@ from Functie.definities import Rollen, rol2url
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
 from Functie.rol import (rol_mag_wisselen, rol_enum_pallet, rol_get_huidige, rol_get_huidige_functie,
-                         rol_get_beschrijving, rol_evalueer_opnieuw)
+                         rol_get_beschrijving, rol_bepaal_beschikbare_rollen_opnieuw)
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
@@ -48,7 +48,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             return False
 
         # evalueer opnieuw welke rechten de gebruiker heeft
-        rol_evalueer_opnieuw(self.request)
+        rol_bepaal_beschikbare_rollen_opnieuw(self.request)
 
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 

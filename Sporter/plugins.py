@@ -11,7 +11,7 @@ from Plein.menu import menu_dynamics
 import logging
 
 
-TEMPLATE_NHBSTRUCTUUR_IS_INACTIEF = 'sporter/login-geblokkeerd.dtl'
+TEMPLATE_SPORTER_LOGIN_GEBLOKKEERD = 'sporter/login-geblokkeerd-geen-vereniging.dtl'
 
 my_logger = logging.getLogger('NHBApps.Sporter')
 
@@ -41,7 +41,7 @@ def sporter_login_plugin(request, from_ip, account):
 
                 context = {'account': account, 'verberg_login_knop': True}
                 menu_dynamics(request, context)
-                return render(request, TEMPLATE_NHBSTRUCTUUR_IS_INACTIEF, context)
+                return render(request, TEMPLATE_SPORTER_LOGIN_GEBLOKKEERD, context)
 
         updated = list()
 

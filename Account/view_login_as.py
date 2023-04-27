@@ -16,6 +16,7 @@ from Account.forms import ZoekAccountForm, KiesAccountForm
 from Account.models import Account
 from Account.otp import otp_zet_controle_gelukt, otp_zet_control_niet_gelukt
 from Account.view_login import account_plugins_login_gate
+from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
@@ -71,6 +72,9 @@ def receiver_account_wissel(request, account):
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Inloggen",
                        activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username), from_ip))
+
+    # zorg dat de rollen meteen beschikbaar zijn
+    rol_bepaal_beschikbare_rollen(request, account)
 
     return reverse('Plein:plein')
 

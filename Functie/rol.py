@@ -7,7 +7,6 @@
 """ Ondersteuning voor de rollen binnen de NHB applicaties """
 
 from django.contrib.sessions.backends.db import SessionStore
-from Account.plugin_manager import account_add_plugin_bepaal_rechten
 from Account.otp import otp_is_controle_gelukt
 from Account.models import AccountSessions
 from Competitie.definities import DEEL_RK, DEEL_BK
@@ -29,409 +28,6 @@ SESSIONVAR_ROL_MAG_WISSELEN = 'gebruiker_rol_mag_wisselen'
 SESSIONVAR_ROL_HUIDIGE = 'gebruiker_rol_huidige'
 SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
-
-
-# plugin administratie
-rol_expandeer_functies = list()
-
-
-def rol_zet_plugins(expandeer_functie):
-    rol_expandeer_functies.append(expandeer_functie)
-
-
-def rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, rol, functie_pk):
-    """ Deze functie roept alle geregistreerde expandeer functies aan
-        om de afgeleide rollen van een functie te krijgen.
-    """
-    nwe_functies = list()
-
-    # WL is eindstation, dus geen tijd aan spenderen
-    if rol != Rollen.ROL_WL:
-        functie = functie_cache[functie_pk].obj
-        parent_tup = (rol, functie_pk)
-        for func in rol_expandeer_functies:
-            for nwe_tup in func(functie_cache, nhbver_cache, rol, functie):
-                tup = (nwe_tup, parent_tup)
-                nwe_functies.append(tup)
-            # for
-        # for
-
-        # print("rol_bepaal_hulp_rechten:")
-        # print("   in: rol=%s, functie_pk=%s" % (rol, functie_pk))
-        # if len(nwe_functies):
-        #     for tup in nwe_functies:
-        #         print("  out: %s" % repr(tup))
-        # else:
-        #     print("  out: []")
-
-    return nwe_functies
-
-
-def rol_zet_sessionvars(account, request):
-    """ zet een paar session variabelen die gebruikt worden om de rol te beheren
-        deze functie wordt aangeroepen vanuit de Account.LoginView
-
-        session variables
-            gebruiker_rol_mag_wisselen: gebruik van de Plein.WisselVanRolView
-    """
-    rollen_vast = list()            # list of rol
-    rollen_functies = list()        # list of tuple(rol, functie_pk)
-
-    # lees de functie tabel eenmalig in en kopieer alle informatie
-    # om verdere queries te voorkomen
-    functie_cache = dict()
-    functie_rcl = dict()        # [regio nummer] = (functie_pk, functie_pk)
-
-    for obj in (Functie
-                .objects
-                .select_related('nhb_rayon',
-                                'nhb_regio',
-                                'nhb_regio__rayon',
-                                'nhb_ver',
-                                'nhb_ver__regio')
-                .only('rol', 'comp_type',
-                      'nhb_regio__regio_nr',
-                      'nhb_rayon__rayon_nr',
-                      'nhb_regio__rayon__rayon_nr',
-                      'nhb_ver__ver_nr',
-                      'nhb_ver__regio__regio_nr')):
-        func = SimpleNamespace()
-        func.pk = obj.pk
-        func.obj = obj
-        func.rol = obj.rol
-        func.koppel_aan_bb = False
-        if func.rol == "BKO":
-            func.comp_type = obj.comp_type
-        elif func.rol == "RKO":
-            func.rayon_nr = obj.nhb_rayon.rayon_nr
-            func.comp_type = obj.comp_type
-        elif func.rol == "RCL":
-            func.regio_nr = obj.nhb_regio.regio_nr
-            func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
-            func.comp_type = obj.comp_type
-            try:
-                functie_rcl[func.regio_nr].append(func.pk)
-            except KeyError:
-                functie_rcl[func.regio_nr] = [func.pk]
-        elif func.rol in ("HWL", "WL", "SEC"):
-            func.ver_nr = obj.nhb_ver.ver_nr
-            if func.rol == 'HWL' and obj.nhb_ver.regio.regio_nr == 100:
-                func.koppel_aan_bb = True
-        functie_cache[obj.pk] = func
-    # for
-
-    nhbver_cache = dict()          # wordt gevuld als er behoefte is
-
-    if account.is_authenticated:        # pragma: no branch
-        show_vhpg, _ = account_needs_vhpg(account)
-        if otp_is_controle_gelukt(request) and not show_vhpg:
-            if account.is_staff or account.is_BB:
-                rollen_vast.append(Rollen.ROL_BB)
-
-                for func in rol_expandeer_functies:
-                    parent_tup = (Rollen.ROL_BB, None)
-                    for nwe_tup in func(functie_cache, nhbver_cache, Rollen.ROL_BB, None):
-                        tup = (nwe_tup, parent_tup)
-                        rollen_functies.append(tup)
-                    # for
-                # for
-
-            # analyseer de gekoppelde functies van dit account
-            parent_tup = (None, None)
-            for functie in account.functie_set.only('rol').all():
-                rol = None
-                if functie.rol == "BKO":
-                    rol = Rollen.ROL_BKO
-                elif functie.rol == "RKO":
-                    rol = Rollen.ROL_RKO
-                elif functie.rol == "RCL":
-                    rol = Rollen.ROL_RCL
-                elif functie.rol == "HWL":
-                    rol = Rollen.ROL_HWL
-                elif functie.rol == "WL":
-                    rol = Rollen.ROL_WL
-                elif functie.rol == "SEC":
-                    rol = Rollen.ROL_SEC
-                elif functie.rol == "MO":
-                    rol = Rollen.ROL_MO
-                elif functie.rol == "MWZ":
-                    rol = Rollen.ROL_MWZ
-                elif functie.rol == "MWW":
-                    rol = Rollen.ROL_MWW
-                elif functie.rol == "SUP":
-                    rol = Rollen.ROL_SUP
-
-                if rol:
-                    child_tup = (rol, functie.pk)
-                    tup = (child_tup, parent_tup)
-                    rollen_functies.append(tup)
-
-                    if rol == Rollen.ROL_RCL:
-                        # zoek de andere RCL functie van deze regio erbij
-                        func = functie_cache[functie.pk]
-                        rcl_pks = functie_rcl[func.regio_nr]
-                        for pk in rcl_pks:
-                            if pk != functie.pk:
-                                buur_tup = (rol, pk)
-                                tup = (buur_tup, child_tup)
-                                rollen_functies.append(tup)
-                        # for
-            # for
-
-            # probeer elke rol nog verder te expanderen
-            te_doorzoeken = rollen_functies[:]
-            while len(te_doorzoeken) > 0:
-                next_doorzoeken = list()
-                for child_tup, parent_tup in te_doorzoeken:
-                    # print("\n" + "expanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
-                    nwe_functies = rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, *child_tup)
-
-                    # voorkom dupes (zoals expliciete koppeling en erven van een rol)
-                    for nwe_tup in nwe_functies:
-                        if nwe_tup not in rollen_functies:
-                            rollen_functies.append(nwe_tup)
-                            next_doorzoeken.append(nwe_tup)
-                    # for
-                # for
-                te_doorzoeken = next_doorzoeken
-            # while
-
-        # if user is otp verified
-    # if user is authenticated
-
-    if len(rollen_vast) + len(rollen_functies) > 0:
-        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = True
-    elif account_needs_otp(account):
-        # waarschijnlijk komen er meer rollen beschikbaar na de OTP controle
-        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = True
-    else:
-        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = False
-
-    rol = Rollen.ROL_NONE
-    if account.is_authenticated:        # pragma: no branch
-        if account.sporter_set.count():
-            # koppeling met Sporter, dus dit is een (potentiële) Schutter
-            rollen_vast.append(Rollen.ROL_SPORTER)
-            rol = Rollen.ROL_SPORTER
-
-    request.session[SESSIONVAR_ROL_HUIDIGE] = rol
-    request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
-    request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(rol)
-
-    request.session[SESSIONVAR_ROL_PALLET_VAST] = rollen_vast
-    request.session[SESSIONVAR_ROL_PALLET_FUNCTIES] = rollen_functies
-
-
-def rol_plugin_rechten(request, account):
-    """ Deze functie wordt aangeroepen vanuit diverse punten in Account.views
-        om de [mogelijk gewijzigde] rechten te laten evalueren en onthouden in session variabelen.
-
-        Geen return value
-    """
-    rol_zet_sessionvars(account, request)
-
-
-def rol_enum_pallet(request):
-    """ Doorloop over de mogelijke rollen in het pallet van deze gebruiker
-        elke yield geeft twee tuples (Rollen.ROL_xx, Group) van het de rol en zijn 'ouder', waar de rol uit ontstaan is
-        waarbij elk veld None is indien het niet van toepassing is.
-    """
-    try:
-        rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
-        rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
-    except KeyError:
-        pass
-    else:
-        for rol in rollen_vast:
-            yield (rol, None), (None, None)
-        # for
-        # let op: session heeft de tuples omgezet in een lijst!
-        for child_tup, parent_tup in rollen_functies:
-            yield tuple(child_tup), tuple(parent_tup)
-        # for
-
-
-def rol_get_huidige(request):
-    """ Deze functie wordt gebruikt door het menusysteem om te kijken welke optionele delen
-        van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
-        een rol uit de groep Rollen.ROL_xxx
-    """
-    rol = Rollen.ROL_NONE
-    if request.user.is_authenticated:
-        try:
-            rol = request.session[SESSIONVAR_ROL_HUIDIGE]
-        except KeyError:
-            pass
-
-    return rol
-
-
-def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
-    """ Deze functie wordt gebruikt door het menusysteem om te kijken welke optionele delen
-        van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
-        een rol uit de groep Rollen.ROL_xxx
-    """
-    rol = rol_get_huidige(request)
-    functie = None
-    if request.user.is_authenticated:
-        try:
-            functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
-        except KeyError:
-            # geen functie opgeslagen
-            # of geen pk-like nummer
-            pass
-        else:
-            if functie_pk:      # filter None
-                try:
-                    functie_pk = int(functie_pk)
-                    functie = (Functie
-                               .objects
-                               .select_related('nhb_rayon',
-                                               'nhb_regio', 'nhb_regio__rayon',
-                                               'nhb_ver', 'nhb_ver__regio')
-                               .get(pk=functie_pk))
-                except (ValueError, Functie.DoesNotExist):
-                    # slecht getal of geen bestaande functie
-                    pass
-                else:
-                    bad = ((functie.rol == 'HWL' and rol != Rollen.ROL_HWL) or
-                           (functie.rol == 'SEC' and rol != Rollen.ROL_SEC) or
-                           (functie.rol == 'WL'  and rol != Rollen.ROL_WL)  or
-                           (functie.rol == 'RKO' and rol != Rollen.ROL_RKO) or
-                           (functie.rol == 'BKO' and rol != Rollen.ROL_BKO) or
-                           (functie.rol == 'RCL' and rol != Rollen.ROL_RCL) or
-                           (functie.rol == 'MWZ' and rol != Rollen.ROL_MWZ) or
-                           (functie.rol == 'MWW' and rol != Rollen.ROL_MWW))
-
-                    if bad:
-                        # afwijkende combinatie
-                        my_logger.warning(
-                            '{rol_get_huidige_functie} sessie zegt functie_pk=%s met rol=%s terwijl rol=%s' % (
-                                functie_pk, repr(functie.rol), repr(rol)))
-
-    return rol, functie
-
-
-def rol_get_beschrijving(request):
-    try:
-        return request.session[SESSIONVAR_ROL_BESCHRIJVING]
-    except KeyError:
-        return "?"
-
-
-def rol_bepaal_beschrijving(rol, functie_pk=None):
-    if functie_pk:
-        functie = Functie.objects.only('beschrijving').get(pk=functie_pk)
-        functie_naam = functie.beschrijving
-    else:
-        functie_naam = ""
-
-    if rol == Rollen.ROL_BB:
-        beschr = 'Manager Competitiezaken'
-    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                 Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC,
-                 Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_MWW,
-                 Rollen.ROL_SUP):
-        beschr = functie_naam
-    elif rol == Rollen.ROL_SPORTER:
-        beschr = 'Sporter'
-    else:   # ook rol == None
-        # dit komt alleen voor als account geen lid is maar wel OTP mag koppelen (is_staff of is_BB)
-        beschr = 'Gebruiker'
-    return beschr
-
-
-def rol_mag_wisselen(request):
-    """ Geeft True terug als deze gebruiker de wissel-van-rol getoond moet worden """
-    try:
-        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
-    except KeyError:
-        return False
-
-    if check == "nieuw":
-        # dit wordt gebruikt om nieuwe beheerders het wissel-van-rol menu te laten krijgen
-        rol_zet_sessionvars(request.user, request)
-        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
-
-    return check
-
-
-def rol_activeer_rol(request, rol_url):
-    """ Activeer een andere rol, als dit toegestaan is
-        geen foutmelding of exceptions als het niet mag.
-    """
-    try:
-        nwe_rol = url2rol[rol_url]
-    except KeyError:
-        # onbekende rol
-        from_ip = get_safe_from_ip(request)
-        my_logger.error('%s ROL verzoek activeer onbekende rol %s' % (from_ip, repr(rol_url)))
-    else:
-        try:
-            rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
-        except KeyError:
-            pass
-        else:
-            # kijk of dit een toegestane rol is
-            if nwe_rol == Rollen.ROL_NONE or nwe_rol in rollen_vast:
-                request.session[SESSIONVAR_ROL_HUIDIGE] = nwe_rol
-                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
-                request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
-            else:
-                from_ip = get_safe_from_ip(request)
-                my_logger.error('%s ROL verzoek activeer niet toegekende rol %s' % (from_ip, repr(rol_url)))
-
-    # not recognized --> no change
-
-
-def rol_activeer_functie(request, functie):
-    """ Activeer een andere rol gebaseerd op een Functie
-        geen foutmelding of exceptions als het niet mag.
-    """
-
-    try:
-        rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
-    except KeyError:
-        pass
-    else:
-        # controleer dat de gebruiker deze functie mag aannemen
-        # (is al eerder vastgesteld en opgeslagen in de sessie)
-        for child_tup, parent_tup in rollen_functies:
-            mag_rol, mag_functie_pk = child_tup
-            if mag_functie_pk == functie.pk:
-                # volledig correcte wissel - sla alles nu op
-                request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
-                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
-                request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
-                return
-        # for
-
-        # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
-        account = request.user
-        if account.is_authenticated:                            # pragma: no branch
-            if otp_is_controle_gelukt(request):         # pragma: no branch
-                if account.is_staff or account.is_BB:
-                    # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
-                    if functie.rol == 'SEC':                    # pragma: no branch
-                        request.session[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_SEC
-                        request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = functie.pk
-                        request.session[SESSIONVAR_ROL_BESCHRIJVING] = functie.beschrijving
-                        return
-
-    # not recognized --> no change
-
-
-def rol_evalueer_opnieuw(request):
-    """ Deze functie kan gebruik worden als de beschikbare keuzes veranderd zijn,
-        zoals na het aanmaken van een nieuwe competitie.
-        Hierdoor hoeft de gebruiker niet opnieuw in te loggen om deze mogelijkheden te krijgen.
-    """
-    rol, functie = rol_get_huidige_functie(request)
-    rol_zet_sessionvars(request.user, request)
-    if functie:
-        rol_activeer_functie(request, functie)
-    else:
-        rol_activeer_rol(request, rol2url[rol])
 
 
 def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
@@ -562,11 +158,394 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     yield Rollen.ROL_WL, obj.pk
 
 
-# registreer de interne rol-expansie functie
-rol_zet_plugins(functie_expandeer_rol)
+def rol_bepaal_hulp_rollen(functie_cache, nhbver_cache, rol, functie_pk):
+    """ Deze functie roept alle geregistreerde expandeer functies aan
+        om de afgeleide rollen van een functie te krijgen.
+    """
+    nwe_functies = list()
 
-# registreer de rechten plugin
-account_add_plugin_bepaal_rechten(rol_plugin_rechten)
+    # WL is eindstation, dus geen tijd aan spenderen
+    if rol != Rollen.ROL_WL:
+        functie = functie_cache[functie_pk].obj
+        parent_tup = (rol, functie_pk)
+        for nwe_tup in functie_expandeer_rol(functie_cache, nhbver_cache, rol, functie):
+            tup = (nwe_tup, parent_tup)
+            nwe_functies.append(tup)
+        # for
+
+        # print("rol_bepaal_hulp_rechten:")
+        # print("   in: rol=%s, functie_pk=%s" % (rol, functie_pk))
+        # if len(nwe_functies):
+        #     for tup in nwe_functies:
+        #         print("  out: %s" % repr(tup))
+        # else:
+        #     print("  out: []")
+
+    return nwe_functies
+
+
+def rol_zet_sessionvars(account, request):
+    """ zet een paar session variabelen die gebruikt worden om de rol te beheren
+        deze functie wordt aangeroepen vanuit de Account.LoginView
+
+        session variables
+            gebruiker_rol_mag_wisselen: gebruik van de Plein.WisselVanRolView
+    """
+    rollen_vast = list()            # list of rol
+    rollen_functies = list()        # list of tuple(rol, functie_pk)
+
+    # lees de functie tabel eenmalig in en kopieer alle informatie
+    # om verdere queries te voorkomen
+    functie_cache = dict()
+    functie_rcl = dict()        # [regio nummer] = (functie_pk, functie_pk)
+
+    for obj in (Functie
+                .objects
+                .select_related('nhb_rayon',
+                                'nhb_regio',
+                                'nhb_regio__rayon',
+                                'nhb_ver',
+                                'nhb_ver__regio')
+                .only('rol', 'comp_type',
+                      'nhb_regio__regio_nr',
+                      'nhb_rayon__rayon_nr',
+                      'nhb_regio__rayon__rayon_nr',
+                      'nhb_ver__ver_nr',
+                      'nhb_ver__regio__regio_nr')):
+        func = SimpleNamespace()
+        func.pk = obj.pk
+        func.obj = obj
+        func.rol = obj.rol
+        func.koppel_aan_bb = False
+        if func.rol == "BKO":
+            func.comp_type = obj.comp_type
+        elif func.rol == "RKO":
+            func.rayon_nr = obj.nhb_rayon.rayon_nr
+            func.comp_type = obj.comp_type
+        elif func.rol == "RCL":
+            func.regio_nr = obj.nhb_regio.regio_nr
+            func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
+            func.comp_type = obj.comp_type
+            try:
+                functie_rcl[func.regio_nr].append(func.pk)
+            except KeyError:
+                functie_rcl[func.regio_nr] = [func.pk]
+        elif func.rol in ("HWL", "WL", "SEC"):
+            func.ver_nr = obj.nhb_ver.ver_nr
+            if func.rol == 'HWL' and obj.nhb_ver.regio.regio_nr == 100:
+                func.koppel_aan_bb = True
+        functie_cache[obj.pk] = func
+    # for
+
+    nhbver_cache = dict()          # wordt gevuld als er behoefte is
+
+    if account.is_authenticated:        # pragma: no branch
+        show_vhpg, _ = account_needs_vhpg(account)
+        if otp_is_controle_gelukt(request) and not show_vhpg:
+            if account.is_staff or account.is_BB:
+                rollen_vast.append(Rollen.ROL_BB)
+                parent_tup = (Rollen.ROL_BB, None)
+                for nwe_tup in functie_expandeer_rol(functie_cache, nhbver_cache, Rollen.ROL_BB, None):
+                    tup = (nwe_tup, parent_tup)
+                    rollen_functies.append(tup)
+                # for
+
+            # analyseer de gekoppelde functies van dit account
+            parent_tup = (None, None)
+            for functie in account.functie_set.only('rol').all():
+                rol = None
+                if functie.rol == "BKO":
+                    rol = Rollen.ROL_BKO
+                elif functie.rol == "RKO":
+                    rol = Rollen.ROL_RKO
+                elif functie.rol == "RCL":
+                    rol = Rollen.ROL_RCL
+                elif functie.rol == "HWL":
+                    rol = Rollen.ROL_HWL
+                elif functie.rol == "WL":
+                    rol = Rollen.ROL_WL
+                elif functie.rol == "SEC":
+                    rol = Rollen.ROL_SEC
+                elif functie.rol == "MO":
+                    rol = Rollen.ROL_MO
+                elif functie.rol == "MWZ":
+                    rol = Rollen.ROL_MWZ
+                elif functie.rol == "MWW":
+                    rol = Rollen.ROL_MWW
+                elif functie.rol == "SUP":
+                    rol = Rollen.ROL_SUP
+
+                if rol:
+                    child_tup = (rol, functie.pk)
+                    tup = (child_tup, parent_tup)
+                    rollen_functies.append(tup)
+
+                    if rol == Rollen.ROL_RCL:
+                        # zoek de andere RCL functie van deze regio erbij
+                        func = functie_cache[functie.pk]
+                        rcl_pks = functie_rcl[func.regio_nr]
+                        for pk in rcl_pks:
+                            if pk != functie.pk:
+                                buur_tup = (rol, pk)
+                                tup = (buur_tup, child_tup)
+                                rollen_functies.append(tup)
+                        # for
+            # for
+
+            # probeer elke rol nog verder te expanderen
+            te_doorzoeken = rollen_functies[:]
+            while len(te_doorzoeken) > 0:
+                next_doorzoeken = list()
+                for child_tup, parent_tup in te_doorzoeken:
+                    # print("\n" + "expanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
+                    nwe_functies = rol_bepaal_hulp_rollen(functie_cache, nhbver_cache, *child_tup)
+
+                    # voorkom dupes (zoals expliciete koppeling en erven van een rol)
+                    for nwe_tup in nwe_functies:
+                        if nwe_tup not in rollen_functies:
+                            rollen_functies.append(nwe_tup)
+                            next_doorzoeken.append(nwe_tup)
+                    # for
+                # for
+                te_doorzoeken = next_doorzoeken
+            # while
+
+        # if user is otp verified
+    # if user is authenticated
+
+    if len(rollen_vast) + len(rollen_functies) > 0:
+        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = True
+    elif account_needs_otp(account):
+        # waarschijnlijk komen er meer rollen beschikbaar na de OTP controle
+        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = True
+    else:
+        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = False
+
+    rol = Rollen.ROL_NONE
+    if account.is_authenticated:        # pragma: no branch
+        if account.sporter_set.count():
+            # koppeling met Sporter, dus dit is een (potentiële) Schutter
+            rollen_vast.append(Rollen.ROL_SPORTER)
+            rol = Rollen.ROL_SPORTER
+
+    request.session[SESSIONVAR_ROL_HUIDIGE] = rol
+    request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
+    request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(rol)
+
+    request.session[SESSIONVAR_ROL_PALLET_VAST] = rollen_vast
+    request.session[SESSIONVAR_ROL_PALLET_FUNCTIES] = rollen_functies
+
+
+def rol_enum_pallet(request):
+    """ Doorloop over de mogelijke rollen in het pallet van deze gebruiker
+        elke yield geeft twee tuples (Rollen.ROL_xx, Group) van het de rol en zijn 'ouder', waar de rol uit ontstaan is
+        waarbij elk veld None is indien het niet van toepassing is.
+    """
+    try:
+        rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
+        rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
+    except KeyError:
+        pass
+    else:
+        for rol in rollen_vast:
+            yield (rol, None), (None, None)
+        # for
+        # let op: session heeft de tuples omgezet in een lijst!
+        for child_tup, parent_tup in rollen_functies:
+            yield tuple(child_tup), tuple(parent_tup)
+        # for
+
+
+def rol_get_huidige(request):
+    """ Deze functie wordt gebruikt door het menusysteem om te kijken welke optionele delen
+        van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
+        een rol uit de groep Rollen.ROL_xxx
+    """
+    rol = Rollen.ROL_NONE
+    if request.user.is_authenticated:
+        try:
+            rol = request.session[SESSIONVAR_ROL_HUIDIGE]
+        except KeyError:
+            pass
+
+    return rol
+
+
+def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
+    """ Deze functie wordt gebruikt door het menusysteem om te kijken welke optionele delen
+        van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
+        een rol uit de groep Rollen.ROL_xxx
+    """
+    rol = rol_get_huidige(request)
+    functie = None
+    if request.user.is_authenticated:
+        try:
+            functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
+        except KeyError:
+            # geen functie opgeslagen
+            # of geen pk-like nummer
+            pass
+        else:
+            if functie_pk:      # filter None
+                try:
+                    functie_pk = int(functie_pk)
+                    functie = (Functie
+                               .objects
+                               .select_related('nhb_rayon',
+                                               'nhb_regio', 'nhb_regio__rayon',
+                                               'nhb_ver', 'nhb_ver__regio')
+                               .get(pk=functie_pk))
+                except (ValueError, Functie.DoesNotExist):
+                    # slecht getal of geen bestaande functie
+                    pass
+                else:
+                    bad = ((functie.rol == 'HWL' and rol != Rollen.ROL_HWL) or
+                           (functie.rol == 'SEC' and rol != Rollen.ROL_SEC) or
+                           (functie.rol == 'RKO' and rol != Rollen.ROL_RKO) or
+                           (functie.rol == 'BKO' and rol != Rollen.ROL_BKO) or
+                           (functie.rol == 'RCL' and rol != Rollen.ROL_RCL) or
+                           (functie.rol == 'MWZ' and rol != Rollen.ROL_MWZ) or
+                           (functie.rol == 'MWW' and rol != Rollen.ROL_MWW) or
+                           (functie.rol == 'WL' and rol != Rollen.ROL_WL))
+
+                    if bad:
+                        # afwijkende combinatie
+                        my_logger.warning(
+                            '{rol_get_huidige_functie} sessie zegt functie_pk=%s met rol=%s terwijl rol=%s' % (
+                                functie_pk, repr(functie.rol), repr(rol)))
+
+    return rol, functie
+
+
+def rol_get_beschrijving(request):
+    try:
+        return request.session[SESSIONVAR_ROL_BESCHRIJVING]
+    except KeyError:
+        return "?"
+
+
+def rol_bepaal_beschrijving(rol, functie_pk=None):
+    if functie_pk:
+        functie = Functie.objects.only('beschrijving').get(pk=functie_pk)
+        functie_naam = functie.beschrijving
+    else:
+        functie_naam = ""
+
+    if rol == Rollen.ROL_BB:
+        beschr = 'Manager Competitiezaken'
+    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                 Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC,
+                 Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_MWW,
+                 Rollen.ROL_SUP):
+        beschr = functie_naam
+    elif rol == Rollen.ROL_SPORTER:
+        beschr = 'Sporter'
+    else:   # ook rol == None
+        # dit komt alleen voor als account geen lid is maar wel OTP mag koppelen (is_staff of is_BB)
+        beschr = 'Gebruiker'
+    return beschr
+
+
+def rol_mag_wisselen(request):
+    """ Geeft True terug als deze gebruiker de wissel-van-rol getoond moet worden """
+    try:
+        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
+    except KeyError:
+        return False
+
+    if check == "nieuw":
+        # dit wordt gebruikt om nieuwe beheerders het wissel-van-rol menu te laten krijgen
+        rol_zet_sessionvars(request.user, request)
+        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
+
+    return check
+
+
+def rol_activeer_rol(request, rol_url):
+    """ Activeer een andere rol, als dit toegestaan is
+        geen foutmelding of exceptions als het niet mag.
+    """
+    try:
+        nwe_rol = url2rol[rol_url]
+    except KeyError:
+        # onbekende rol
+        from_ip = get_safe_from_ip(request)
+        my_logger.error('%s ROL verzoek activeer onbekende rol %s' % (from_ip, repr(rol_url)))
+    else:
+        try:
+            rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
+        except KeyError:
+            pass
+        else:
+            # kijk of dit een toegestane rol is
+            if nwe_rol == Rollen.ROL_NONE or nwe_rol in rollen_vast:
+                request.session[SESSIONVAR_ROL_HUIDIGE] = nwe_rol
+                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
+                request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
+            else:
+                from_ip = get_safe_from_ip(request)
+                my_logger.error('%s ROL verzoek activeer niet toegekende rol %s' % (from_ip, repr(rol_url)))
+
+    # not recognized --> no change
+
+
+def rol_activeer_functie(request, functie):
+    """ Activeer een andere rol gebaseerd op een Functie
+        geen foutmelding of exceptions als het niet mag.
+    """
+
+    try:
+        rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
+    except KeyError:
+        pass
+    else:
+        # controleer dat de gebruiker deze functie mag aannemen
+        # (is al eerder vastgesteld en opgeslagen in de sessie)
+        for child_tup, parent_tup in rollen_functies:
+            mag_rol, mag_functie_pk = child_tup
+            if mag_functie_pk == functie.pk:
+                # volledig correcte wissel - sla alles nu op
+                request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
+                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
+                request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
+                return
+        # for
+
+        # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
+        account = request.user
+        if account.is_authenticated:                            # pragma: no branch
+            if otp_is_controle_gelukt(request):         # pragma: no branch
+                if account.is_staff or account.is_BB:
+                    # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
+                    if functie.rol == 'SEC':                    # pragma: no branch
+                        request.session[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_SEC
+                        request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = functie.pk
+                        request.session[SESSIONVAR_ROL_BESCHRIJVING] = functie.beschrijving
+                        return
+
+    # not recognized --> no change
+
+
+def rol_bepaal_beschikbare_rollen(request, account):
+    """ Deze functie wordt aangeroepen vanuit diverse punten in Account en Functie om de
+        [mogelijk gewijzigde] rollen te laten evalueren en onthouden in session variabelen.
+
+        Geen return value
+    """
+    rol_zet_sessionvars(account, request)
+
+
+def rol_bepaal_beschikbare_rollen_opnieuw(request):
+    """ Deze functie kan gebruik worden als de beschikbare keuzes veranderd zijn,
+        zoals na het aanmaken van een nieuwe competitie.
+        Hierdoor hoeft de gebruiker niet opnieuw in te loggen om deze mogelijkheden te krijgen.
+    """
+    rol, functie = rol_get_huidige_functie(request)
+    rol_zet_sessionvars(request.user, request)
+    if functie:
+        rol_activeer_functie(request, functie)
+    else:
+        rol_activeer_rol(request, rol2url[rol])
 
 
 def rol_activeer_wissel_van_rol_menu_voor_account(account):

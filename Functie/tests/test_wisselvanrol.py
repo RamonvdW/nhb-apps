@@ -115,8 +115,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls = [url for url in urls if url.startswith('/functie/otp-koppelen-stap1/')]
-        self.assertEqual(urls, ['/functie/otp-koppelen-stap1/'])
+        urls = [url for url in urls if url.startswith('/account/otp-koppelen-stap1/')]
+        self.assertEqual(urls, ['/account/otp-koppelen-stap1/'])
 
         self.account_admin.otp_is_actief = True
         self.account_admin.save()

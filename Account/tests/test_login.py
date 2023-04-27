@@ -101,7 +101,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-geblokkeerd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-geblokkeerd-tot.dtl', 'plein/site_layout.dtl'))
         template_names = [templ.name for templ in resp.templates]
         self.assertFalse('account/login.dtl' in template_names)
 
@@ -123,7 +123,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/login-geblokkeerd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/login-geblokkeerd-tot.dtl', 'plein/site_layout.dtl'))
         self.account_normaal = Account.objects.get(username='normaal')
         should_block_until = timezone.now() + datetime.timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS-1)
         self.assertTrue(self.account_normaal.is_geblokkeerd_tot > should_block_until)

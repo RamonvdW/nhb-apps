@@ -36,8 +36,8 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts()
 
     def setUp(self):
         """ initialisatie van de test case """

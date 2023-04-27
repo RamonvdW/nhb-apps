@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.forms import OTPControleForm
 from Account.maak_qrcode import qrcode_get
 from Account.otp import otp_prepare_koppelen, otp_koppel_met_code
-from Functie.rol import rol_evalueer_opnieuw, rol_get_huidige_functie, rol_mag_wisselen
+from Functie.rol import rol_bepaal_beschikbare_rollen, rol_bepaal_beschikbare_rollen_opnieuw, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 
 
@@ -36,7 +36,7 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
         # evalueer opnieuw welke rechten de gebruiker heeft
-        rol_evalueer_opnieuw(self.request)
+        rol_bepaal_beschikbare_rollen_opnieuw(self.request)
 
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
@@ -115,13 +115,17 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Controleer knop.
         """
-
         account = request.user
 
         form = OTPControleForm(request.POST)
         if form.is_valid():
             otp_code = form.cleaned_data.get('otp_code')
             if otp_koppel_met_code(request, account, otp_code):
+                # gelukt
+
+                # propageer het succes zodat de gebruiker meteen aan de slag kan
+                rol_bepaal_beschikbare_rollen(request, account)
+
                 # geef de succes pagina
                 context = dict()
                 menu_dynamics(request, context)
