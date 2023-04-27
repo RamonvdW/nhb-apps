@@ -30,7 +30,7 @@ from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
 TEMPLATE_KOPPEL_BEHEERDERS = 'functie/koppel-beheerders.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/email-wijzigen.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/email-bevestig.dtl'
-TEMPLATE_EMAIL_BEVESTIGD = 'functie/email-email-bevestigd.dtl'
+TEMPLATE_EMAIL_BEVESTIGD = 'functie/email-bevestigd.dtl'
 
 
 def mag_beheerder_wijzigen_of_403(request, functie):
