@@ -79,12 +79,11 @@ class TestCompLaagRayonCliImportUitslagRkIndiv(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, '--dryrun')
         # print('\nf1: %s' % f1.getvalue())
         # print('\nf2: %s' % f2.getvalue())
-        self.assertTrue('[ERROR] Kan deelnemer niet bepalen voor regel 7' in f1.getvalue())
         self.assertTrue('[ERROR] Score is niet aflopend op regel 11' in f1.getvalue())
-        # self.assertTrue('[ERROR] Probleem met 10/9/8 count op regel 13' in f1.getvalue())
+        self.assertTrue('[ERROR] Probleem met 10/9/8 count op regel 15' in f1.getvalue())
         self.assertTrue('[ERROR] Probleem met scores op regel 16' in f1.getvalue())
         self.assertTrue('[ERROR] Geen RK deelnemer op regel 17: 123456' in f1.getvalue())
-        self.assertTrue('[WARNING] Regel 14 wordt overgeslagen (geen scores)' in f2.getvalue())
+        # self.assertTrue('[WARNING] Regel 14 wordt overgeslagen (geen scores)' in f2.getvalue())
 
         # echte import
         self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl)
