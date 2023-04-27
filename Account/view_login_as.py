@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
-from Account.models import Account, AccountEmail
+from Account.models import Account
 from Account.rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
 from Account.view_login import account_plugins_login
 from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
@@ -31,14 +31,12 @@ TEMPLATE_LOGIN_AS_GO = 'account/login-as-go.dtl'
 my_logger = logging.getLogger('NHBApps.Account')
 
 
-def receiver_account_wissel(request, obj):
+def receiver_account_wissel(request, account):
     """ Met deze functie kan een geautoriseerd persoon tijdelijk inloggen op de site
         als een andere gebruiker.
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
     """
-    account = obj.account
-
     old_last_login = account.last_login
 
     # integratie met de authenticatie laag van Django
@@ -160,24 +158,23 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         account_pk = form.cleaned_data.get('selecteer')
 
         try:
-            accountemail = AccountEmail.objects.get(account__pk=account_pk)
-        except AccountEmail.DoesNotExist:
+            account = Account.objects.get(pk=account_pk)
+        except Account.DoesNotExist:
             raise Http404('Account heeft geen e-mail')
 
         # prevent upgrade
-        if accountemail.account.is_staff:
+        if account.is_staff:
             raise PermissionDenied()
 
-        context = dict()
-        context['account'] = accountemail.account
+        context = {'account': account}
 
         # schrijf de intentie in het logboek
         schrijf_in_logboek(account=self.request.user,
                            gebruikte_functie="Inloggen",
-                           activiteit="Wissel naar account %s" % repr(accountemail.account.username))
+                           activiteit="Wissel naar account %s" % repr(account.username))
 
         # maak een tijdelijke URL aan waarmee de inlog gedaan kan worden
-        url = maak_tijdelijke_url_accountwissel(accountemail, naar_account=accountemail.account.username)
+        url = maak_tijdelijke_url_accountwissel(account, naar_account=account.username)
         context['login_as_url'] = url
 
         context['kruimels'] = (

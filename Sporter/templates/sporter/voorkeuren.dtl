@@ -263,7 +263,7 @@
 
                     {% endif %}     <!-- bogen -->
 
-                    {% if email %}
+                    {% if account %}
                         <tr>
                             <td colspan="2">
                                 <h5>Voorkeuren ontvangen e-mails</h5>
@@ -273,7 +273,7 @@
                         <tr>
                             <td colspan="2">
                                 <label>
-                                    <input type="checkbox" class="filled-in" name="optout_nieuwe_taak"{% if email.optout_nieuwe_taak %} checked{% endif %} onchange="gewijzigd()">
+                                    <input type="checkbox" class="filled-in" name="optout_nieuwe_taak"{% if account.optout_nieuwe_taak %} checked{% endif %} onchange="gewijzigd()">
                                     <span class="black-text">Stuur e-mail zodra er een nieuwe taak voor mij is aangemaakt</span>
                                 </label>
                             </td>
@@ -282,7 +282,7 @@
                         <tr>
                             <td colspan="2">
                                 <label>
-                                    <input type="checkbox" class="filled-in" name="optout_herinnering_taken"{% if email.optout_herinnering_taken %} checked{% endif %} onchange="gewijzigd()">
+                                    <input type="checkbox" class="filled-in" name="optout_herinnering_taken"{% if account.optout_herinnering_taken %} checked{% endif %} onchange="gewijzigd()">
                                     <span class="black-text">Stuur e-mail om te herinneren aan taken (maximaal &eacute;&eacute;n e-mail per week)</span>
                                 </label>
                             </td>

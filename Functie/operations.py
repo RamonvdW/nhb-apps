@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,9 +53,8 @@ def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschr
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD)
 
-    email = account.accountemail_set.all()[0]
-    if email.email_is_bevestigd:
-        if mailer_queue_email(email.bevestigde_email,                       # pragma: no branch
+    if account.email_is_bevestigd:
+        if mailer_queue_email(account.bevestigde_email,                       # pragma: no branch
                               'Wijziging rollen op ' + settings.NAAM_SITE,
                               mail_body):
             # het is gelukt een mail klaar te zetten

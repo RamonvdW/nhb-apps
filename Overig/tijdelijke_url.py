@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -73,16 +73,17 @@ def _maak_url_code(**kwargs):
     return uuid5(uuid_namespace, repr(kwargs)).hex
 
 
-def maak_tijdelijke_url_account_email(accountemail, **kwargs):
+def maak_tijdelijke_url_account_email(account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
         account e-mail te bevestigen.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
         url_code en waar deze voor bedoeld is.
         De volledige url wordt terug gegeven.
     """
-    url_code = _maak_url_code(**kwargs, pk=accountemail.pk)
+    # TODO: we geven 7 dagen om de mail te bevestigen, maar onvolledige accounts worden na 3 dagen al opgeruimd
+    url_code = _maak_url_code(**kwargs, pk=account.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_BEVESTIG_ACCOUNT_EMAIL, geldig_dagen=7, accountemail=accountemail)
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_ACCOUNT_EMAIL, geldig_dagen=7, account=account)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
@@ -96,23 +97,23 @@ def maak_tijdelijke_url_functie_email(functie):
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_url_accountwissel(accountemail, **kwargs):
+def maak_tijdelijke_url_accountwissel(account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om eenmalig
         in te loggen als het gekozen account.
     """
-    url_code = _maak_url_code(**kwargs, pk=accountemail.pk)
+    url_code = _maak_url_code(**kwargs, pk=account.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_ACCOUNT_WISSEL, geldig_seconden=60, accountemail=accountemail)
+    func(url_code, dispatch_to=RECEIVER_ACCOUNT_WISSEL, geldig_seconden=60, account=account)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_url_wachtwoord_vergeten(accountemail, **kwargs):
+def maak_tijdelijke_url_wachtwoord_vergeten(account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden als het
         account wachtwoord vergeten is.
     """
-    url_code = _maak_url_code(**kwargs, pk=accountemail.pk)
+    url_code = _maak_url_code(**kwargs, pk=account.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_WACHTWOORD_VERGETEN, geldig_dagen=7, accountemail=accountemail)
+    func(url_code, dispatch_to=RECEIVER_WACHTWOORD_VERGETEN, geldig_dagen=7, account=account)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
@@ -127,9 +128,9 @@ def do_dispatch(request, obj):
     if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL,
                            RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
                            RECEIVER_WACHTWOORD_VERGETEN):
-        # referentie = AccountEmail
+        # referentie = Account
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
-        redirect = func(request, obj.hoortbij_accountemail)
+        redirect = func(request, obj.hoortbij_account)
 
     elif obj.dispatch_to == RECEIVER_BEVESTIG_FUNCTIE_EMAIL:
         # referentie = Functie

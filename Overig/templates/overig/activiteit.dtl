@@ -223,15 +223,15 @@
                 </thead>
 
                 <tbody>
-                    {% for obj in nieuwe_accounts %}
+                    {% for account in nieuwe_accounts %}
                         <tr>
-                            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
-                            <td>{{ obj.account.username }}</td>
-                            <td>{{ obj.account.volledige_naam }}</td>
-                            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                            <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
-                            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ account.date_joined|date:"j b H:i" }}</td>
+                            <td>{{ account.username }}</td>
+                            <td>{{ account.volledige_naam }}</td>
+                            <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ account.last_login|date:"j b H:i" }}</td>
+                            <td>{{ account.laatste_inlog_poging|date:"j b H:i" }}</td>
+                            <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -270,14 +270,14 @@
                     </tr>
                 </thead>
 
-                {% for obj in recente_activiteit %}
+                {% for account in recente_activiteit %}
                     <tr>
-                        <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                        <td>{{ obj.account.username }}</td>
-                        <td>{{ obj.account.volledige_naam }}</td>
-                        <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+                        <td>{{ account.last_login|date:"j b H:i" }}</td>
+                        <td>{{ account.username }}</td>
+                        <td>{{ account.volledige_naam }}</td>
+                        <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                        <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                        <td>{{ account.date_joined|date:"j b H:i" }}</td>
                     </tr>
                 {% endfor %}
             </table>
@@ -318,15 +318,15 @@
                 </thead>
 
                 <tbody>
-                    {% for obj in inlog_pogingen %}
+                    {% for account in inlog_pogingen %}
                         <tr>
-                            <td>{{ obj.account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
-                            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                            <td>{{ obj.account.username }}</td>
-                            <td>{{ obj.account.volledige_naam }}</td>
-                            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+                            <td>{{ account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
+                            <td>{{ account.last_login|date:"j b H:i" }}</td>
+                            <td>{{ account.username }}</td>
+                            <td>{{ account.volledige_naam }}</td>
+                            <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ account.date_joined|date:"j b H:i" }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

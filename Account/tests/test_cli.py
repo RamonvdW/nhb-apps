@@ -9,7 +9,7 @@ from django.core import management
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from Account.models import Account, AccountEmail
+from Account.models import Account
 from Logboek.models import LogboekRegel
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -69,20 +69,16 @@ class TestAccountCli(E2EHelpers, TestCase):
             management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@nhb.test', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
         self.assertEqual(f2.getvalue(), "Aanmaken van account 'nieuwelogin' is gelukt\n")
-        obj = Account.objects.get(username='nieuwelogin')
-        self.assertEqual(obj.username, 'nieuwelogin')
-        self.assertEqual(obj.first_name, 'Voornaam')
-        self.assertEqual(obj.email, '')
-        self.assertTrue(obj.is_active)
-        self.assertFalse(obj.is_staff)
 
-        mail = AccountEmail.objects.get(account=obj)
-        self.assertTrue(mail.email_is_bevestigd)
-        self.assertEqual(mail.bevestigde_email, 'nieuw@nhb.test')
-        self.assertEqual(mail.nieuwe_email, '')
-
-        # coverage voor AccountEmail.__str__()
-        self.assertEqual(str(mail), "E-mail voor account 'nieuwelogin' (nieuw@nhb.test)")
+        account = Account.objects.get(username='nieuwelogin')
+        self.assertEqual(account.username, 'nieuwelogin')
+        self.assertEqual(account.first_name, 'Voornaam')
+        self.assertEqual(account.email, '')
+        self.assertTrue(account.is_active)
+        self.assertFalse(account.is_staff)
+        self.assertTrue(account.email_is_bevestigd)
+        self.assertEqual(account.bevestigde_email, 'nieuw@nhb.test')
+        self.assertEqual(account.nieuwe_email, '')
 
         # exception cases
         f1 = io.StringIO()

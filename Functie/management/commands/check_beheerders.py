@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -61,7 +61,6 @@ class Command(BaseCommand):
                         .filter(account__otp_is_actief=True)
                         .exclude(account__is_BB=True)
                         .exclude(account__is_staff=True)
-                        .exclude(account__is_superuser=True)
                         .prefetch_related('account__functie_set')
                         .order_by('lid_nr')):
 

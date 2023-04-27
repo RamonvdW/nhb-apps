@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Account.models import Account
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Functie.operations import maak_functie
@@ -60,7 +61,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = ver
         sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter.email = sporter.account.bevestigde_email
         sporter.save()
         self.sporter1 = sporter
 
@@ -453,35 +454,35 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # check de defaults
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertFalse(email.optout_nieuwe_taak)
-        self.assertFalse(email.optout_herinnering_taken)
+        account = self.account_hwl
+        self.assertFalse(account.optout_nieuwe_taak)
+        self.assertFalse(account.optout_herinnering_taken)
 
         # wijzig zonder opt-out te doen
         with self.assert_max_queries(25):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertFalse(email.optout_nieuwe_taak)
-        self.assertFalse(email.optout_herinnering_taken)
+        account = Account.objects.get(pk=account.pk)
+        self.assertFalse(account.optout_nieuwe_taak)
+        self.assertFalse(account.optout_herinnering_taken)
 
         # wijzig met opt-out
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'optout_nieuwe_taak': 'ja'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertTrue(email.optout_nieuwe_taak)
-        self.assertFalse(email.optout_herinnering_taken)
+        account = Account.objects.get(pk=account.pk)
+        self.assertTrue(account.optout_nieuwe_taak)
+        self.assertFalse(account.optout_herinnering_taken)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'optout_herinnering_taken': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertFalse(email.optout_nieuwe_taak)
-        self.assertTrue(email.optout_herinnering_taken)
+        account = Account.objects.get(pk=account.pk)
+        self.assertFalse(account.optout_nieuwe_taak)
+        self.assertTrue(account.optout_herinnering_taken)
 
     def test_geslacht_anders(self):
 

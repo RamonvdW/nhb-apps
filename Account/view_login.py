@@ -12,10 +12,10 @@ from django.contrib.auth import authenticate, login
 from django.views.generic import TemplateView
 from django.utils import timezone
 from Account.forms import LoginForm
-from Account.models import Account, AccountEmail
+from Account.models import Account
 from Account.operations import account_email_bevestiging_ontvangen, account_check_gewijzigde_email
 from Account.rechten import account_rechten_login_gelukt
-from Account.views import account_plugins_login, account_add_plugin_login
+from Account.plugins import account_plugins_login, account_add_plugin_login
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, render_email_template
 from Overig.helpers import get_safe_from_ip
@@ -82,13 +82,7 @@ account_add_plugin_login(30, account_check_nieuwe_email, True)
 def account_check_email_is_bevestigd(request, from_ip, account):
     """ voorkom login op een account totdat het e-mailadres bevestigd is """
 
-    if account.accountemail_set.count() < 1:
-        # onverwacht geen email bij dit account
-        return None     # inloggen mag gewoon
-
-    email = account.accountemail_set.all()[0]
-
-    if not email.email_is_bevestigd:
+    if not account.email_is_bevestigd:
         schrijf_in_logboek(account, 'Inloggen',
                            'Mislukte inlog vanaf IP %s voor account %s met onbevestigde email' % (
                                from_ip, repr(account.username)))
@@ -97,7 +91,7 @@ def account_check_email_is_bevestigd(request, from_ip, account):
                                from_ip, repr(account.username)))
 
         # FUTURE: knop maken om na X uur een nieuwe mail te kunnen krijgen
-        context = {'partial_email': mailer_obfuscate_email(email.nieuwe_email)}
+        context = {'partial_email': mailer_obfuscate_email(account.nieuwe_email)}
         menu_dynamics(request, context)
         return render(request, TEMPLATE_BEVESTIG_EMAIL, context)
 
@@ -108,17 +102,16 @@ def account_check_email_is_bevestigd(request, from_ip, account):
 account_add_plugin_login(40, account_check_email_is_bevestigd, True)
 
 
-def receive_bevestiging_accountemail(request, obj):
+def receive_bevestiging_account_email(request, account):
     """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
         om een email adres te bevestigen, zowel de eerste keer als wijziging van email.
-            obj is een AccountEmail object.
+            account is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
     """
-    account_email_bevestiging_ontvangen(obj)
+    account_email_bevestiging_ontvangen(account)
 
     # schrijf in het logboek
     from_ip = get_safe_from_ip(request)
-    account = obj.account
 
     msg = "Bevestigd vanaf IP %s voor account %s" % (from_ip, account.get_account_full_name())
     schrijf_in_logboek(account=account,
@@ -135,7 +128,7 @@ def receive_bevestiging_accountemail(request, obj):
     return render(request, TEMPLATE_BEVESTIGD, context)
 
 
-set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_accountemail)
+set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_account_email)
 
 
 class LoginView(TemplateView):
@@ -164,23 +157,19 @@ class LoginView(TemplateView):
             # account met deze username bestaat niet
             # sta ook toe dat met het e-mailadres ingelogd wordt
             try:
-                email = AccountEmail.objects.get(bevestigde_email__iexact=login_naam)   # iexact = case insensitive volledige match
-            except AccountEmail.DoesNotExist:
+                account = Account.objects.get(bevestigde_email__iexact=login_naam)   # iexact = case insensitive volledige match
+            except Account.DoesNotExist:
                 # email is ook niet bekend
                 # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
                 # my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
                 # schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
-                pass
-            except AccountEmail.MultipleObjectsReturned:
+                account = None
+            except Account.MultipleObjectsReturned:
                 # kan niet kiezen tussen verschillende accounts
                 # werkt dus niet als het email hergebruikt is voor meerdere accounts
                 form.add_error(None,
                                'Inloggen met e-mail is niet mogelijk. Probeer het nog eens.')
                 account = None
-            else:
-                # email gevonden
-                # pak het account erbij
-                account = email.account
 
         if account:
             # blokkeer inlog als het account geblokkeerd is door te veel wachtwoord pogingen
@@ -221,18 +210,20 @@ class LoginView(TemplateView):
 
             # onthoudt hoe vaak dit verkeerd gegaan is
             account.verkeerd_wachtwoord_teller += 1
-            account.save()
+            account.save(update_fields=['laatste_inlog_poging', 'verkeerd_wachtwoord_teller'])
 
             # bij te veel pogingen, blokkeer het account
             if account.verkeerd_wachtwoord_teller >= settings.AUTH_BAD_PASSWORD_LIMIT:
                 account.is_geblokkeerd_tot = (timezone.now()
                                               + timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS))
                 account.verkeerd_wachtwoord_teller = 0  # daarna weer volle mogelijkheden
-                account.save()
+                account.save(update_fields=['is_geblokkeerd_tot', 'verkeerd_wachtwoord_teller'])
+
                 schrijf_in_logboek(account, 'Inlog geblokkeerd',
                                    'Account %s wordt geblokkeerd tot %s' % (
                                        repr(login_naam),
                                        account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
+
                 context = {'account': account}
                 menu_dynamics(self.request, context)
                 return render(self.request, TEMPLATE_GEBLOKKEERD, context)

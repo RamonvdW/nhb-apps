@@ -57,11 +57,6 @@ class Account(AbstractUser):
                         default=False,
                         help_text="Manager Competitiezaken")
 
-    # TODO: verwijder (wordt niet gebruikt)
-    is_Observer = models.BooleanField(
-                        default=False,
-                        help_text="Alleen observeren")
-
     # TOTP ondersteuning
     otp_code = models.CharField(
                         max_length=32,          # 32-char base32 encoded secret
@@ -73,6 +68,16 @@ class Account(AbstractUser):
                         help_text="Is OTP verificatie gelukt")
 
     otp_controle_gelukt_op = models.DateTimeField(blank=True, null=True)
+
+    # e-mail
+    email_is_bevestigd = models.BooleanField(default=False)     # == mag inloggen
+    bevestigde_email = models.EmailField(blank=True)
+    nieuwe_email = models.EmailField(blank=True)
+
+    # taken
+    optout_nieuwe_taak = models.BooleanField(default=False)
+    optout_herinnering_taken = models.BooleanField(default=False)
+    laatste_email_over_taken = models.DateTimeField(blank=True, null=True)
 
     REQUIRED_FIELDS = ['password']
 
@@ -109,55 +114,11 @@ class Account(AbstractUser):
         """
         return "%s (%s)" % (self.volledige_naam(), self.username)
 
-    def get_email(self):
-        """ helper om de email van de gebruiker te krijgen voor djangosaml2idp
-            zodat deze doorgegeven kan worden aan een Service Provider zoals de Wiki server
-            in settings.py staat de referentie naar deze methode naam
-        """
-        if self.accountemail_set.count() == 1:
-            email = self.accountemail_set.all()[0].bevestigde_email
-        else:
-            email = ""
-        return email
-
     def __str__(self):
         """ geef een korte beschrijving van dit account
             wordt gebruikt in de drop-down lijsten en autocomplete_fields van de admin interface
         """
         return self.get_account_full_name()
-
-
-class AccountEmail(models.Model):
-    """ definitie van een e-mail adres (en de status daarvan) voor een account """
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-
-    # e-mail
-    email_is_bevestigd = models.BooleanField(default=False)     # == mag inloggen
-    bevestigde_email = models.EmailField(blank=True)
-    nieuwe_email = models.EmailField(blank=True)
-
-    # taken
-    optout_nieuwe_taak = models.BooleanField(default=False)
-    optout_herinnering_taken = models.BooleanField(default=False)
-    laatste_email_over_taken = models.DateTimeField(blank=True, null=True)
-
-    # functie koppeling
-    optout_functie_koppeling = models.BooleanField(default=False)
-
-    # klachten
-    optout_reactie_klacht = models.BooleanField(default=False)
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "E-mail voor account '%s' (%s)" % (self.account.username,
-                                                  self.bevestigde_email)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "AccountEmail"
-        verbose_name_plural = "AccountEmails"
-
-    objects = models.Manager()      # for the editor only
 
 
 class AccountSessions(models.Model):
@@ -202,16 +163,15 @@ def accounts_opschonen(stdout):
     # zoek gebruikers die een account aangemaakt hebben,
     # maar de mail niet binnen 3 dagen bevestigen
     # door deze te verwijderen kan de registratie opnieuw doorlopen worden
-    for obj in (AccountEmail
+    for obj in (Account
                 .objects
-                .select_related('account')
                 .filter(email_is_bevestigd=False,
                         bevestigde_email='',
-                        account__last_login=None,
-                        account__date_joined__lt=wat_ouder)):
+                        last_login=None,
+                        date_joined__lt=wat_ouder)):
 
-        stdout.write('[INFO] Verwijder onvoltooid account %s' % obj.account)
-        obj.account.delete()
+        stdout.write('[INFO] Verwijder onvoltooid account %s' % obj)
+        obj.delete()
     # for
 
 

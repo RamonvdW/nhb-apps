@@ -12,7 +12,7 @@ from django.utils.formats import date_format
 from django.db.models import F, Count
 from django.utils import timezone
 from django.urls import reverse
-from Account.models import Account, AccountEmail, AccountSessions
+from Account.models import Account, AccountSessions
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol_get_huidige
@@ -58,13 +58,12 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nieuwe_accounts'] = (AccountEmail
+        context['nieuwe_accounts'] = (Account
                                       .objects
-                                      .select_related('account')
                                       .all()
-                                      .order_by('-account__date_joined')[:50])
+                                      .order_by('-date_joined')[:50])
 
-        nieuwste = context['nieuwe_accounts'][0].account    # kost losse database access
+        nieuwste = context['nieuwe_accounts'][0]
         jaar = nieuwste.date_joined.year
         maand = nieuwste.date_joined.month
         deze_maand = make_aware(datetime.datetime(year=jaar, month=maand, day=1))
@@ -80,18 +79,16 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         context['aantal_actieve_gebruikers'] = self.tel_actieve_gebruikers()
 
-        context['recente_activiteit'] = (AccountEmail
+        context['recente_activiteit'] = (Account
                                          .objects
-                                         .filter(account__last_login__isnull=False)
-                                         .select_related('account')
-                                         .order_by('-account__last_login')[:50])
+                                         .filter(last_login__isnull=False)
+                                         .order_by('-last_login')[:50])
 
-        context['inlog_pogingen'] = (AccountEmail
+        context['inlog_pogingen'] = (Account
                                      .objects
-                                     .select_related('account')
-                                     .filter(account__laatste_inlog_poging__isnull=False)
-                                     .filter(account__last_login__lt=F('account__laatste_inlog_poging'))
-                                     .order_by('-account__laatste_inlog_poging')[:50])
+                                     .filter(laatste_inlog_poging__isnull=False)
+                                     .filter(last_login__lt=F('laatste_inlog_poging'))
+                                     .order_by('-laatste_inlog_poging')[:50])
 
         # hulp nodig
         now = timezone.now()
@@ -99,8 +96,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         for functie in (Functie
                         .objects
                         .prefetch_related('accounts',
-                                          'accounts__vhpg',
-                                          'accounts__accountemail_set')
+                                          'accounts__vhpg')
                         .annotate(aantal=Count('accounts'))
                         .filter(aantal__gt=0)):
 
@@ -193,8 +189,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 account = sporter.account
                 sporter.inlog_naam_str = account.username
 
-                email = account.accountemail_set.all()[0]
-                if email.email_is_bevestigd:
+                if account.email_is_bevestigd:
                     sporter.email_is_bevestigd_str = 'Ja'
                 else:
                     sporter.email_is_bevestigd_str = 'Nee'

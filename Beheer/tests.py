@@ -14,7 +14,6 @@ from TestHelpers.e2ehelpers import E2EHelpers
 #  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
 BEHEER_PAGINAS = (
     '/beheer/Account/account/',
-    '/beheer/Account/accountemail/',
     '/beheer/Account/accountverzoekenteller/',
     '/beheer/BasisTypen/boogtype/',
     '/beheer/BasisTypen/kalenderwedstrijdklasse/',

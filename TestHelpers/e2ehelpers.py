@@ -110,13 +110,12 @@ class E2EHelpers(TestCase):
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account met AccountEmail aan in de database van de website """
-        account_create(username, voornaam, '', self.WACHTWOORD, email, True)
-        account = Account.objects.get(username=username)
+        account = account_create(username, voornaam, '', self.WACHTWOORD, email, True)
 
         # zet OTP actief (een test kan deze altijd weer uit zetten)
         account.otp_code = "whatever"
         account.otp_is_actief = True
-        account.save()
+        account.save(update_fields=['otp_code', 'otp_is_actief'])
 
         if accepteer_vhpg:
             self.e2e_account_accepteert_vhpg(account)

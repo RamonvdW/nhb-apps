@@ -140,7 +140,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                 icoon="edit",
                                 tekst="Scores invoeren en aanpassen voor %s voor deze competitie." % regiocomp.nhb_regio.naam,
                                 url=url)
-                    kaartjes_teams.append(kaartje)
+                    kaartjes_indiv.append(kaartje)
 
                 if comp.fase_teams >= 'C' and regiocomp.regio_organiseert_teamcompetitie:
 

@@ -45,7 +45,7 @@ class Command(BaseCommand):
         try:
             account = Account.objects.get(username=lid_nr)
         except Account.DoesNotExist:
-            account, _ = account_create(lid_nr, voornaam, achternaam, password, email, True)
+            account = account_create(lid_nr, voornaam, achternaam, password, email, True)
 
         self.stdout.write('[INFO] Maak sporter %s' % lid_nr)
 

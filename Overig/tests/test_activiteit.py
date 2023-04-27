@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -36,13 +36,14 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Norma de Schutter')
         self.account_100002 = self.e2e_create_account('100002', 'nhb100002@test.com', 'Pilla de Schutter')
 
-        self.account_100001.last_login = timezone.now() - datetime.timedelta(days=1)
-        self.account_100001.otp_controle_gelukt_op = self.account_100001.last_login + datetime.timedelta(seconds=30)
-        self.account_100001.save(update_fields=['last_login', 'otp_controle_gelukt_op'])
+        account = self.account_100001
+        account.otp_controle_gelukt_op = account.last_login = timezone.now() - datetime.timedelta(days=1)
+        account.otp_controle_gelukt_op += datetime.timedelta(seconds=30)
+        account.save(update_fields=['last_login', 'otp_controle_gelukt_op'])
 
-        email = self.account_100002.accountemail_set.all()[0]
-        email.email_is_bevestigd = True
-        email.save(update_fields=['email_is_bevestigd'])
+        account = self.account_100002
+        account.email_is_bevestigd = True
+        account.save(update_fields=['email_is_bevestigd'])
 
         # maak een test vereniging
         self.nhbver1 = NhbVereniging(
@@ -150,16 +151,16 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # maak wat wijzigingen
-        email = self.account_100001.accountemail_set.all()[0]
-        email.email_is_bevestigd = False
-        email.save()
+        account = self.account_100001
+        account.email_is_bevestigd = False
+        account.save(update_fields=['email_is_bevestigd'])
 
         self.e2e_account_accepteert_vhpg(self.account_100001)
 
-        self.account_100001 = Account.objects.get(pk=self.account_100001.pk)
-        self.account_100001.otp_is_actief = False
-        self.account_100001.last_login -= datetime.timedelta(days=720)
-        self.account_100001.save(update_fields=['otp_is_actief', 'last_login'])
+        account = self.account_100001 = Account.objects.get(pk=self.account_100001.pk)
+        account.otp_is_actief = False
+        account.last_login -= datetime.timedelta(days=720)
+        account.save(update_fields=['otp_is_actief', 'last_login'])
 
         # zoek op nhb nummer  --> geen functies, dus geen 2FA nodig
         with self.assert_max_queries(20):

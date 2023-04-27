@@ -132,7 +132,6 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
     """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
 
     account = bestelling.account
-    email = account.accountemail_set.all()[0]
 
     producten = _beschrijf_bestelling(bestelling)
 
@@ -155,7 +154,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
 
-    mailer_queue_email(email.bevestigde_email,
+    mailer_queue_email(account.bevestigde_email,
                        'Bestelling op MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 
@@ -164,7 +163,6 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
     """ Stuur een e-mail om de betaalde bestelling te bevestigen """
 
     account = bestelling.account
-    email = account.accountemail_set.all()[0]
 
     producten = _beschrijf_bestelling(bestelling)
 
@@ -184,7 +182,7 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BETALING)
 
-    mailer_queue_email(email.bevestigde_email,
+    mailer_queue_email(account.bevestigde_email,
                        'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 

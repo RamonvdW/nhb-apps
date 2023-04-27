@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from Account.models import AccountEmail
+from Account.models import Account
 from Account.operations import account_test_wachtwoord_sterkte
 from Account.rechten import account_rechten_login_gelukt
 from Account.view_login import account_plugins_login
@@ -33,21 +33,21 @@ EMAIL_TEMPLATE_WACHTWOORD_VERGETEN = 'email_account/wachtwoord-vergeten.dtl'
 my_logger = logging.getLogger('NHBApps.Account')
 
 
-def account_stuur_email_wachtwoord_vergeten(accountemail, **kwargs):
+def account_stuur_email_wachtwoord_vergeten(account, **kwargs):
     """ Stuur een mail naar het adres om te vragen om een bevestiging.
         Gebruik een tijdelijke URL die, na het volgen, weer in deze module uit komt.
     """
 
     # maak de url aan om het e-mailadres te bevestigen
     context = {
-        'url': maak_tijdelijke_url_wachtwoord_vergeten(accountemail, **kwargs),
+        'url': maak_tijdelijke_url_wachtwoord_vergeten(account, **kwargs),
         'naam_site': settings.NAAM_SITE,
         'contact_email': settings.EMAIL_BONDSBUREAU,
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_WACHTWOORD_VERGETEN)
 
-    mailer_queue_email(accountemail.bevestigde_email,
+    mailer_queue_email(account.bevestigde_email,
                        'Wachtwoord vergeten',
                        mail_body,
                        enforce_whitelist=False)
@@ -78,7 +78,6 @@ class WachtwoordVergetenView(TemplateView):
     def post(self, request, *args, **kwargs):
 
         from_ip = get_safe_from_ip(request)
-        account_email = None
         context = super().get_context_data(**kwargs)
         context['foutmelding'] = ''
 
@@ -86,17 +85,19 @@ class WachtwoordVergetenView(TemplateView):
         if not mailer_email_is_valide(email):
             context['foutmelding'] = 'Voer een valide e-mailadres in van een bestaand account'
 
+        account = None
         if not context['foutmelding']:
             username = request.POST.get('lid_nr', '')[:10]  # afkappen voor extra veiligheid
 
             # zoek een account met deze email
+            # TODO: dit werkt dus niet als er een nieuw e-mail adres bevestigd moet worden
             try:
-                account_email = (AccountEmail
-                                 .objects
-                                 .get(bevestigde_email__iexact=email,  # iexact = case insensitive volledige match
-                                      account__username=username))
+                account = (Account
+                           .objects
+                           .get(bevestigde_email__iexact=email,  # iexact = case insensitive volledige match
+                                username=username))
 
-            except AccountEmail.DoesNotExist:
+            except Account.DoesNotExist:
                 # email is niet bekend en past niet bij de inlog naam
                 context['foutmelding'] = 'Voer het e-mailadres en NHB nummer in van een bestaand account'
                 # (niet te veel wijzer maken over de combi NHB nummer en e-mailadres)
@@ -105,19 +106,19 @@ class WachtwoordVergetenView(TemplateView):
 
         menu_dynamics(self.request, context)
 
-        if not context['foutmelding'] and account_email is not None:
-            # we hebben nu het account waar we een de e-mail voor moeten sturen
+        if account and not context['foutmelding']:
+            # success: stuur nu een e-mail naar het account
 
             schrijf_in_logboek(account=None,
                                gebruikte_functie="Wachtwoord",
                                activiteit="Stuur e-mail naar adres %s voor account %s, verzocht vanaf IP %s." % (
-                                           repr(account_email.bevestigde_email),
-                                           repr(account_email.account.get_account_full_name()),
+                                           repr(account.bevestigde_email),
+                                           repr(account.get_account_full_name()),
                                            from_ip))
 
-            account_stuur_email_wachtwoord_vergeten(account_email,
+            account_stuur_email_wachtwoord_vergeten(account,
                                                     wachtwoord='vergeten',
-                                                    email=account_email.bevestigde_email)
+                                                    email=account.bevestigde_email)
             httpresp = render(request, TEMPLATE_EMAIL, context)
         else:
             httpresp = render(request, self.template_name, context)
@@ -125,17 +126,15 @@ class WachtwoordVergetenView(TemplateView):
         return httpresp
 
 
-def receive_wachtwoord_vergeten(request, obj):
+def receive_wachtwoord_vergeten(request, account):
     """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
         voor een vergeten wachtwoord.
-            obj is een AccountEmail object.
+            account is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
 
         We loggen automatisch in op het account waar de link bij hoort
         en sturen dan door naar de wijzig-wachtwoord pagina
     """
-    account = obj.account
-
     # integratie met de authenticatie laag van Django
     login(request, account)
 

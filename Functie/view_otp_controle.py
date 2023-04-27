@@ -36,8 +36,7 @@ def functie_stuur_email_otp_losgekoppeld(account):
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_OTP_IS_LOSGEKOPPELD)
 
-    email = account.accountemail_set.all()[0]
-    mailer_queue_email(email.bevestigde_email,
+    mailer_queue_email(account.bevestigde_email,
                        'Tweede factor losgekoppeld op ' + settings.NAAM_SITE,
                        mail_body)
 

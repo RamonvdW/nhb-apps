@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.http import HttpResponseRedirect
-from Account.models import AccountEmail
 from Functie.models import Functie
 from Overig.models import save_tijdelijke_url, SiteTijdelijkeUrl
 from Overig.tijdelijke_url import (tijdelijkeurl_dispatcher, set_tijdelijke_url_receiver,
@@ -36,10 +35,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
-        email, created_new = AccountEmail.objects.get_or_create(account=self.account_normaal)
-        email.nieuwe_email = "hoi@gmail.not"
-        email.save()
-        self.email_normaal = email
+        self.account_normaal.nieuwe_email = "hoi@gmail.not"
+        self.account_normaal.save(update_fields=['nieuwe_email'])
 
     def tearDown(self):
         tijdelijkeurl_dispatcher.test_restore()
@@ -52,11 +49,10 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
 
     def test_verlopen(self):
-        save_tijdelijke_url('code1', 'iets_anders', geldig_dagen=-1)
-        obj = save_tijdelijke_url('code1', 'bevestig_email', geldig_dagen=1)
+        obj = save_tijdelijke_url('code1', 'iets_anders', geldig_dagen=-1)
+        self.assertTrue(str(obj) != '')
 
-        # extra coverage
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        obj = save_tijdelijke_url('code1', 'bevestig_email', geldig_dagen=1)
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
@@ -100,12 +96,12 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_setup_dispatcher(self):
-        set_tijdelijke_url_receiver("mytopic", "123")
-        self.assertEqual(tijdelijkeurl_dispatcher.get_receiver("mytopic"), "123")
+        set_tijdelijke_url_receiver("my topic", "123")
+        self.assertEqual(tijdelijkeurl_dispatcher.get_receiver("my topic"), "123")
 
-    def _my_receiver_func_email(self, request, hoortbij_accountemail):
+    def _my_receiver_func_email(self, request, hoortbij_account):
         # self.assertEqual(request, "request")
-        self.assertEqual(hoortbij_accountemail, self.email_normaal)
+        self.assertEqual(hoortbij_account, self.account_normaal)
         self.callback_count += 1
         url = "/feedback/bedankt/"
         if self.callback_count == 1:
@@ -118,7 +114,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
     def test_account_email(self):
         set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, self._my_receiver_func_email)
 
-        url = maak_tijdelijke_url_account_email(self.email_normaal, test="een")
+        url = maak_tijdelijke_url_account_email(self.account_normaal, test="een")
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 1
 
@@ -150,7 +146,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
     def test_account_wissel(self):
         set_tijdelijke_url_receiver(RECEIVER_ACCOUNT_WISSEL, self._my_receiver_func_email)
 
-        url = maak_tijdelijke_url_accountwissel(self.email_normaal, test="twee")
+        url = maak_tijdelijke_url_accountwissel(self.account_normaal, test="twee")
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
 
@@ -181,7 +177,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
     def test_wachtwoord_vergeten(self):
         set_tijdelijke_url_receiver(RECEIVER_WACHTWOORD_VERGETEN, self._my_receiver_func_email)
-        url = maak_tijdelijke_url_wachtwoord_vergeten(self.email_normaal, test="drie")
+        url = maak_tijdelijke_url_wachtwoord_vergeten(self.account_normaal, test="drie")
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
 

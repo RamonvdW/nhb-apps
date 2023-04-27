@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.test import TestCase
 from django.http import HttpResponseRedirect
 from Overig.models import SiteTijdelijkeUrl
-from Account.views import account_add_plugin_login
+from Account.plugins import account_add_plugin_login
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -24,8 +24,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts()
 
     def _login_plugin(self, request, from_ip, account):
         if self._login_plugin_mode == 1:

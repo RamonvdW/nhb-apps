@@ -35,9 +35,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_metmail = self.e2e_create_account('metmail', 'metmail@test.com', 'MetMail')
 
-        self.email_normaal = self.account_normaal.accountemail_set.all()[0]
-        self.email_metmail = self.account_metmail.accountemail_set.all()[0]
-
     def test_inlog_form_get(self):
         # test ophalen van het inlog formulier
         with self.assert_max_queries(20):
@@ -49,7 +46,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_form_post(self):
         # test inlog via het inlog formulier
         self.account_normaal.verkeerd_wachtwoord_teller = 3
-        self.account_normaal.save()
+        self.account_normaal.save(update_fields=['verkeerd_wachtwoord_teller'])
         with self.assert_max_queries(27):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
@@ -99,7 +96,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_is_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=1)
-        self.account_normaal.save()
+        self.account_normaal.save(update_fields=['is_geblokkeerd_tot'])
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -110,7 +107,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_was_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=-1)
-        self.account_normaal.save()
+        self.account_normaal.save(update_fields=['is_geblokkeerd_tot'])
         with self.assert_max_queries(26):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
@@ -121,7 +118,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_wordt_geblokkeerd(self):
         # te vaak een verkeerd wachtwoord
         self.account_normaal.verkeerd_wachtwoord_teller = settings.AUTH_BAD_PASSWORD_LIMIT - 1
-        self.account_normaal.save()
+        self.account_normaal.save(update_fields=['verkeerd_wachtwoord_teller'])
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -134,11 +131,12 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_email_nog_niet_bevestigd(self):
         # verander de status van de bevestiging van het e-mailadres
-        self.email_normaal.email_is_bevestigd = False
-        self.email_normaal.nieuwe_email = 'normaal@test.com'
-        self.email_normaal.save()
+        account = self.account_normaal
+        account.email_is_bevestigd = False
+        account.nieuwe_email = 'normaal@test.com'
+        account.save(update_fields=['email_is_bevestigd', 'nieuwe_email'])
 
-        url = maak_tijdelijke_url_account_email(self.email_normaal, test="hallo")
+        url = maak_tijdelijke_url_account_email(account, test="hallo")
         code = url.split('/')[-2]
 
         with self.assert_max_queries(20):
@@ -157,11 +155,12 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_foutieve_email_nog_niet_bevestigd(self):
         # verander de status van de bevestiging van het e-mailadres
-        self.email_normaal.email_is_bevestigd = False
-        self.email_normaal.nieuwe_email = 'normaal@test.com'
-        self.email_normaal.save()
+        account = self.account_normaal
+        account.email_is_bevestigd = False
+        account.nieuwe_email = 'normaal@test.com'
+        account.save(update_fields=['email_is_bevestigd', 'nieuwe_email'])
 
-        url = maak_tijdelijke_url_account_email(self.email_normaal, test="hallo")
+        url = maak_tijdelijke_url_account_email(account, test="hallo")
         code = url.split('/')[-2]
 
         with self.assert_max_queries(20):
@@ -174,10 +173,10 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
         # we komen er niet in
         # simuleer wijziging e-mailadres
-        self.email_normaal.nieuwe_email = 'meer_normaal@test.com'
-        self.email_normaal.save()
+        account.nieuwe_email = 'meer_normaal@test.com'
+        account.save(update_fields=['nieuwe_email'])
 
-        url = maak_tijdelijke_url_account_email(self.email_normaal, test="hallo")
+        url = maak_tijdelijke_url_account_email(account, test="hallo")
         code = url.split('/')[-2]
 
         # probeer opnieuw in te loggen
@@ -307,8 +306,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # test inlog via het inlog formulier, met een email adres dat niet eenduidig is
 
         # geef een tweede account dezelfde email
-        self.email_normaal.bevestigde_email = self.email_metmail.bevestigde_email
-        self.email_normaal.save()
+        self.account_normaal.bevestigde_email = self.account_metmail.bevestigde_email
+        self.account_normaal.save(update_fields=['bevestigde_email'])
 
         # probeer in te loggen met email
         # check de foutmelding
@@ -322,8 +321,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_nieuwe_email(self):
         # zet het nieuwe email klaar
-        self.email_metmail.nieuwe_email = 'zometmail@test.com'
-        self.email_metmail.save()
+        self.account_metmail.nieuwe_email = 'zometmail@test.com'
+        self.account_metmail.save(update_fields=['nieuwe_email'])
 
         # test inlog via het inlog formulier, met een email adres
         with self.assert_max_queries(20):
@@ -337,8 +336,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_nieuwe_email_zelfde(self):
         # zet het nieuwe email klaar
-        self.email_metmail.nieuwe_email = self.email_metmail.bevestigde_email
-        self.email_metmail.save()
+        self.account_metmail.nieuwe_email = self.account_metmail.bevestigde_email
+        self.account_metmail.save(update_fields=['nieuwe_email'])
 
         # test inlog via het inlog formulier, met een email adres
         with self.assert_max_queries(28):

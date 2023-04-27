@@ -8,7 +8,6 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
-from Account.models import AccountEmail
 from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Mailer.models import MailQueue
@@ -454,10 +453,9 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter.save()
 
         # corner-case: nog geen bevestigde emailadres
-        # account = Sporter.objects.get(lid_nr=100001)
-        email = AccountEmail.objects.get(account=sporter.account)
-        email.email_is_bevestigd = False
-        email.save(update_fields=['email_is_bevestigd'])
+        account = sporter.account
+        account.email_is_bevestigd = False
+        account.save(update_fields=['email_is_bevestigd'])
 
         with self.assert_max_queries(34):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
@@ -469,8 +467,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(functie.accounts.count(), 1)
 
         # koppelen aan functie SEC na bevestigen e-mailadres
-        email.email_is_bevestigd = True
-        email.save(update_fields=['email_is_bevestigd'])
+        account.email_is_bevestigd = True
+        account.save(update_fields=['email_is_bevestigd'])
 
         with self.assert_max_queries(34):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,

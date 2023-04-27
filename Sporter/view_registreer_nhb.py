@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from Account.operations import AccountCreateError, account_create
-from Account.views import account_vraag_email_bevestiging
+from Account.operations import AccountCreateError, account_create, account_vraag_email_bevestiging
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
@@ -60,7 +59,7 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
         raise SporterInactief()
 
     # maak het account aan
-    account, accountmail = account_create(lid_nr_str, sporter.voornaam, sporter.achternaam, nieuw_wachtwoord, sporter.email, False)
+    account = account_create(lid_nr_str, sporter.voornaam, sporter.achternaam, nieuw_wachtwoord, sporter.email, False)
 
     # koppelen sporter en account
     sporter.account = account
@@ -68,7 +67,7 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
 
     # bij de volgende CRM import wordt dit account gekoppeld aan de SEC functie en wordt een e-mail gestuurd met instructies
 
-    account_vraag_email_bevestiging(accountmail, nhb_nummer=lid_nr_str, email=email)
+    account_vraag_email_bevestiging(account, nhb_nummer=lid_nr_str, email=email)
 
 
 class RegistreerNhbNummerView(TemplateView):

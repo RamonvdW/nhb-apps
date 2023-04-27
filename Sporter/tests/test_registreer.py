@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Account.models import Account, AccountEmail
+from Account.models import Account
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Overig.models import SiteTijdelijkeUrl
@@ -218,8 +218,8 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         objs = SiteTijdelijkeUrl.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
         self.assertTrue(len(objs) > 0)
         obj = objs[0]
-        self.assertEqual(obj.hoortbij_accountemail.nieuwe_email, 'rdetester@gmail.not')
-        self.assertFalse(obj.hoortbij_accountemail.email_is_bevestigd)
+        self.assertEqual(obj.hoortbij_account.nieuwe_email, 'rdetester@gmail.not')
+        self.assertFalse(obj.hoortbij_account.email_is_bevestigd)
         url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -234,9 +234,8 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
 
         account = Account.objects.get(username='100001')
-        email = AccountEmail.objects.get(account=account)
-        self.assertTrue(email.email_is_bevestigd)
-        self.assertEqual(account.get_email(), 'rdetester@gmail.not')
+        self.assertTrue(account.email_is_bevestigd)
+        self.assertEqual(account.bevestigde_email, 'rdetester@gmail.not')
 
         # tijdens inlog wordt de volledige naam overgenomen
         self.e2e_login(account)
@@ -425,7 +424,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         functie = Functie.objects.get(rol='SEC', nhb_ver=self.nhbver)
         self.assertEqual(functie.accounts.count(), 0)
 
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post('/sporter/registreer/',
                                     {'nhb_nummer': '100001',
                                      'email': 'rdetester@gmail.not',

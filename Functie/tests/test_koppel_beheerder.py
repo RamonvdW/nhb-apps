@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -302,9 +302,9 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertContains(resp, "BKO ")
 
         # variant: nog geen bevestigde email
-        email = self.account_beh2.accountemail_set.all()[0]
-        email.email_is_bevestigd = False
-        email.save(update_fields=['email_is_bevestigd'])
+        account = self.account_beh2
+        account.email_is_bevestigd = False
+        account.save(update_fields=['email_is_bevestigd'])
 
         LogboekRegel.objects.all().delete()
 

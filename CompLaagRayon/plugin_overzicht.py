@@ -63,8 +63,8 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         url=url)
             kaartjes_teams.append(kaartje)
 
-        # inschreven RK teams (open inschrijving RK teams tijdens fase F)
-        if 'J' <= comp.fase_teams <= 'K':
+        # extra RK deelnemer
+        if 'J' <= comp.fase_indiv <= 'K':
             url = reverse('CompLaagRayon:rayon-extra-deelnemer', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
                         prio=5,

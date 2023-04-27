@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
-
-from django.conf import settings
-from Mailer.operations import mailer_queue_email
-from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 
 """
     login plugins zijn functies die kijken of een account in mag loggen
@@ -37,28 +33,6 @@ def account_add_plugin_login(prio, func, skip_for_login_as):
     tup = (prio, func, skip_for_login_as)
     account_plugins_login.append(tup)
     account_plugins_login.sort(key=lambda x: x[0])
-
-
-def account_vraag_email_bevestiging(accountmail, **kwargs):
-    """ Stuur een mail naar het adres om te vragen om een bevestiging.
-        Gebruik een tijdelijke URL die, na het volgen, weer in deze module uit komt.
-    """
-
-    # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_url_account_email(accountmail, **kwargs)
-
-    text_body = ("Hallo!\n\n"
-                 + "Je hebt een account aangemaakt op " + settings.NAAM_SITE + ".\n"
-                 + "Klik op onderstaande link om dit te bevestigen.\n\n"
-                 + url + "\n\n"
-                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
-                 + "Veel plezier met de site!\n"
-                 + "Het bondsbureau\n")
-
-    mailer_queue_email(accountmail.nieuwe_email,
-                       'Aanmaken account voltooien',
-                       text_body,
-                       enforce_whitelist=False)     # deze mails altijd doorlaten
 
 
 # end of file

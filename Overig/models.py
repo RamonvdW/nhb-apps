@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
-from Account.models import AccountEmail
+from Account.models import Account
 from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
 from Overig.tijdelijke_url import set_tijdelijke_url_saver
@@ -32,8 +32,8 @@ class SiteTijdelijkeUrl(models.Model):
     dispatch_to = models.CharField(max_length=20, default="")
 
     # extra velden voor de dispatcher
-    hoortbij_accountemail = models.ForeignKey(
-                                AccountEmail,
+    hoortbij_account = models.ForeignKey(
+                                Account,
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)        # optional
 
@@ -55,8 +55,8 @@ class SiteTijdelijkeUrl(models.Model):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         msg = "(%s) bruikbaar tot %s; voor %s" % (self.pk, self.geldig_tot, self.dispatch_to)
         hoort_bij = list()
-        if self.hoortbij_accountemail:
-            hoort_bij. append('accountemail: %s' % self.hoortbij_accountemail)
+        if self.hoortbij_account:
+            hoort_bij. append('account: %s' % self.hoortbij_account)
         if self.hoortbij_functie:
             hoort_bij.append('functie: %s' % self.hoortbij_functie)
         if self.hoortbij_kampioenschap:
@@ -65,18 +65,24 @@ class SiteTijdelijkeUrl(models.Model):
         return msg
 
 
-def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, accountemail=None, functie=None):
-    obj = SiteTijdelijkeUrl()
-    obj.url_code = url_code
-    obj.aangemaakt_op = timezone.now()
+def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, account=None, functie=None):
+
     if geldig_seconden > 0:
-        obj.geldig_tot = obj.aangemaakt_op + timedelta(seconds=geldig_seconden)
+        delta = timedelta(seconds=geldig_seconden)
     else:
-        obj.geldig_tot = obj.aangemaakt_op + timedelta(days=geldig_dagen)
-    obj.dispatch_to = dispatch_to
-    obj.hoortbij_accountemail = accountemail
-    obj.hoortbij_functie = functie
+        delta = timedelta(days=geldig_dagen)
+
+    now = timezone.now()
+
+    obj = SiteTijdelijkeUrl(
+            url_code=url_code,
+            aangemaakt_op=now,
+            geldig_tot=now + delta,
+            dispatch_to=dispatch_to,
+            hoortbij_account=account,
+            hoortbij_functie=functie)
     obj.save()
+
     return obj
 
 

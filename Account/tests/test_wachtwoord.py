@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,7 +21,6 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.email_normaal = self.account_normaal.accountemail_set.all()[0]
 
     def test_wijzig_anon(self):
         # niet ingelogd
@@ -111,7 +110,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
         obj = SiteTijdelijkeUrl.objects.all()[0]
 
-        self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
+        self.assertEqual(obj.hoortbij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):
@@ -161,8 +160,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # raak het pad in receive_wachtwoord_vergeten waarbij plugin blokkeert
 
         # zet de blokkade
-        self.email_normaal.email_is_bevestigd = False
-        self.email_normaal.save()
+        self.account_normaal.email_is_bevestigd = False
+        self.account_normaal.save(update_fields=['email_is_bevestigd'])
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
@@ -210,7 +209,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
         obj = SiteTijdelijkeUrl.objects.all()[0]
 
-        self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
+        self.assertEqual(obj.hoortbij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):

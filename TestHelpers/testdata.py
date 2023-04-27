@@ -9,7 +9,7 @@
 from django.test import Client
 from django.core import management
 from django.utils import timezone
-from Account.models import Account, AccountEmail
+from Account.models import Account
 from Account.operations import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
@@ -359,7 +359,6 @@ class TestData(object):
         email = 'staff@test.com'
         self.account_admin = self._create_account('admin', email, 'Admin')
         self.account_admin.is_staff = True
-        self.account_admin.is_superuser = True
         self.account_admin.save()
 
         Sporter(
@@ -404,15 +403,14 @@ class TestData(object):
 
     def _create_account(self, username, email, voornaam):
         """
-            Maak een Account met AccountEmail aan in de database van de website
+            Maak een Account aan in de database van de website
         """
-        account_create(username, voornaam, '', self.WACHTWOORD, email, email_is_bevestigd=True)
-        account = Account.objects.get(username=username)
+        account = account_create(username, voornaam, '', self.WACHTWOORD, email, email_is_bevestigd=True)
 
         # zet OTP actief (een test kan deze altijd weer uit zetten)
         account.otp_code = "whatever"
         account.otp_is_actief = True
-        account.save()
+        account.save(update_fields=['otp_code', 'otp_is_actief'])
 
         return account
 
@@ -533,47 +531,20 @@ class TestData(object):
                     account = Account(
                                 username=str(lid_nr),
                                 otp_code=self.OTP_CODE,
-                                otp_is_actief=True)
+                                otp_is_actief=True,
+                                email_is_bevestigd=True,
+                                bevestigde_email='lid%s@testdata.zz' % lid_nr)
                     account.set_password(self.WACHTWOORD)
                     bulk.append(account)
 
                     if len(bulk) > 100:                                        # pragma: no branch
                         Account.objects.bulk_create(bulk)
-
-                        # maak e-mails aan
-                        bulk2 = list()
-                        for account in bulk:
-                            # let op: e-mailadres moet overeenkomen met het Sporter.email
-                            email = AccountEmail(
-                                        account=account,
-                                        email_is_bevestigd=True,
-                                        bevestigde_email='lid%s@testdata.zz' % account.username)
-                            bulk2.append(email)
-                        # for
-
-                        AccountEmail.objects.bulk_create(bulk2)
-                        del bulk2
-
                         bulk = list()
             # for
         # for
 
         if len(bulk) > 0:                           # pragma: no branch
             Account.objects.bulk_create(bulk)
-
-            # maak e-mails aan
-            bulk2 = list()
-            for account in bulk:
-                email = AccountEmail(
-                            account=account,
-                            email_is_bevestigd=True,
-                            bevestigde_email='lid%s@testdata.zz' % account.username)
-                bulk2.append(email)
-            # for
-
-            AccountEmail.objects.bulk_create(bulk2)
-            del bulk2
-
         del bulk
 
         # cache de aangemaakte accounts
@@ -1610,7 +1581,6 @@ class TestData(object):
         score2 = 150
         klasse_pk2rank = dict()     # [indiv_klasse.pk] = rank
 
-        pks = [deelnemer.pk for deelnemer in deelnemers]
         for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .filter(kampioenschap__competitie__afstand=afstand)):

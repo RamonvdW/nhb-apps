@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Account.models import AccountEmail
+from Account.models import Account
 from Feedback.models import Feedback
 
 
@@ -69,9 +69,9 @@ class FeedbackAdmin(admin.ModelAdmin):
         pos = obj.gebruiker.find('(')
         if pos > 0:
             username = obj.gebruiker[pos+1:-1]
-            email = AccountEmail.objects.get(account__username=username)
-            if email.email_is_bevestigd:
-                return email.bevestigde_email
+            account = Account.objects.get(username=username)
+            if account.email_is_bevestigd:
+                return account.bevestigde_email
 
         return "?"
 
