@@ -24,9 +24,10 @@ from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijde
 import logging
 
 
-TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
-TEMPLATE_EMAIL = 'account/email_wachtwoord-vergeten.dtl'
-TEMPLATE_NIEUW_WACHTWOORD = 'account/nieuw-wachtwoord.dtl'
+TEMPLATE_WW_VERGETEN = 'account/wachtwoord-vergeten.dtl'
+TEMPLATE_WW_VERGETEN_EMAIL = 'account/wachtwoord-vergeten-email.dtl'
+TEMPLATE_WW_WIJZIGEN = 'account/wachtwoord-wijzigen.dtl'
+
 EMAIL_TEMPLATE_WACHTWOORD_VERGETEN = 'email_account/wachtwoord-vergeten.dtl'
 
 my_logger = logging.getLogger('NHBApps.Account')
@@ -60,7 +61,7 @@ class WachtwoordVergetenView(TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_VERGETEN
+    template_name = TEMPLATE_WW_VERGETEN
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -118,7 +119,7 @@ class WachtwoordVergetenView(TemplateView):
             account_stuur_email_wachtwoord_vergeten(account,
                                                     wachtwoord='vergeten',
                                                     email=account.bevestigde_email)
-            httpresp = render(request, TEMPLATE_EMAIL, context)
+            httpresp = render(request, TEMPLATE_WW_VERGETEN_EMAIL, context)
         else:
             httpresp = render(request, self.template_name, context)
 
@@ -172,7 +173,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_NIEUW_WACHTWOORD
+    template_name = TEMPLATE_WW_WIJZIGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 

@@ -144,14 +144,14 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email-bevestig-huidige.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'no####l@test.com')
 
         self.e2e_login(self.testdata.account_admin)
         url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
-        self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_foutieve_email_nog_niet_bevestigd(self):
         # verander de status van de bevestiging van het e-mailadres
@@ -168,7 +168,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email-bevestig-huidige.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'no####l@test.com')
 
         # we komen er niet in
@@ -185,7 +185,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/nieuwe-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email-bevestig-nieuwe.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'me#########l@test.com')
 
         # er moet nu een mail in de MailQueue staan met een single-use url
@@ -198,7 +198,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
-        self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_partial_fields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
@@ -331,7 +331,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar de nieuwe-email pagina
-        self.assert_template_used(resp, ('account/nieuwe-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email-bevestig-nieuwe.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'zo#')
 
     def test_login_nieuwe_email_zelfde(self):

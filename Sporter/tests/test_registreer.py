@@ -194,7 +194,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/registreer-aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat het email adres obfuscated is
         self.assertNotContains(resp, 'rdetester@gmail.not')
@@ -231,7 +231,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
         account = Account.objects.get(username='100001')
         self.assertTrue(account.email_is_bevestigd)
@@ -251,7 +251,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/registreer-aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # tweede poging
         with self.assert_max_queries(20):
@@ -432,7 +432,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/registreer-aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         self.sporter_100001 = Sporter.objects.get(pk=self.sporter_100001.pk)   # refresh
 

@@ -23,17 +23,22 @@ import logging
 
 TEMPLATE_REGISTREER = 'sporter/registreer-nhb-account.dtl'
 TEMPLATE_REGISTREER_GEEN_EMAIL = 'sporter/registreer-geen-email.dtl'
+TEMPLATE_REGISTREER_AANGEMAAKT = 'sporter/registreer-aangemaakt.dtl'
 
 my_logger = logging.getLogger('NHBApps.Sporter')
 
 
 def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
     """ Maak een nieuw account aan voor een NHB lid
-        raises AccountError als:
+        raises AccountCreateError als:
+            - het lidnummer niet valide is
+            - het lidnummer niet bekend is in het CRM
+            - het ingevoerde emailadres niet overeen komt
             - er al een account bestaat
-            - het nhb nummer niet valide is
-            - het email adres niet bekend is bij de nhb
-            - het email adres niet overeen komt.
+        raises SporterGeenEmail als:
+            - voor lidnummer geen e-mail bekend is
+        raises SporterInactief als:
+            - de sporter niet lid is bij een vereniging
         geeft de url terug die in de email verstuurd moet worden
     """
     # zoek het e-mailadres van dit NHB lid erbij
@@ -81,6 +86,20 @@ class RegistreerNhbNummerView(TemplateView):
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
         form = RegistreerForm(request.POST)
+
+        # still here --> re-render with error message
+        context = {
+            'form': form,
+            'sec_email': '',
+            'sec_naam': '',
+            'email_bb': settings.EMAIL_BONDSBUREAU,
+            'verberg_login_knop': True,
+            'kruimels': (
+                (None, 'Account aanmaken'),
+            ),
+        }
+        menu_dynamics(request, context)
+
         if form.is_valid():
             nhb_nummer = form.cleaned_data.get('nhb_nummer')
             email = form.cleaned_data.get('email')
@@ -95,9 +114,6 @@ class RegistreerNhbNummerView(TemplateView):
                 my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (geen email)' % (from_ip, repr(nhb_nummer)))
 
                 # redirect naar een pagina met een uitgebreider duidelijk bericht
-                context = {'sec_email': '',
-                           'sec_naam': '',
-                           'email_bb': settings.EMAIL_BONDSBUREAU}
                 ver = exc.sporter.bij_vereniging
                 if ver:
                     try:
@@ -123,14 +139,19 @@ class RegistreerNhbNummerView(TemplateView):
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
                 my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
+
             except SporterInactief:
                 # lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
+                form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+
+                # schrijf in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
-                form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
                 my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (inactief)' % (from_ip, repr(nhb_nummer)))
+
                 # FUTURE: redirect naar een pagina met een uitgebreider duidelijk bericht
+
             else:
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
@@ -138,17 +159,11 @@ class RegistreerNhbNummerView(TemplateView):
                                    activiteit="Account aangemaakt voor NHB nummer %s vanaf IP %s" % (repr(nhb_nummer), from_ip))
                 my_logger.info('%s REGISTREER account aangemaakt voor NHB nummer %s' % (from_ip, repr(nhb_nummer)))
 
-                request.session['login_naam'] = nhb_nummer
-                request.session['partial_email'] = mailer_obfuscate_email(email)
-                return HttpResponseRedirect(reverse('Account:aangemaakt'))
+                context['login_naam'] = nhb_nummer
+                context['partial_email'] = mailer_obfuscate_email(email)
+                return render(request, TEMPLATE_REGISTREER_AANGEMAAKT, context)
 
-        # still here --> re-render with error message
-        context = {'form': form, 'verberg_login_knop': True}
-
-        context['kruimels'] = (
-            (None, 'Account aanmaken'),
-        )
-        menu_dynamics(request, context)
+        # opnieuw
         return render(request, TEMPLATE_REGISTREER, context)
 
     def get(self, request, *args, **kwargs):

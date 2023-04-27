@@ -26,13 +26,6 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_metmail = self.e2e_create_account('metmail', 'metmail@test.com', 'MetMail')
 
-    def test_aangemaakt_direct(self):
-        # test rechtstreeks de 'aangemaakt' pagina ophalen, zonder registratie stappen
-        # hierbij ontbreekt er een sessie variabele --> exceptie en redirect naar het plein
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_aangemaakt)
-        self.assert403(resp)
-
     def test_account_helpers(self):
         account = self.account_normaal
         account.first_name = "Normale"

@@ -26,7 +26,7 @@
 
 """
 
-account_plugins_login = list()      # [tup, tup, ..] with tup = (prio, func)
+account_plugins_login = list()      # [tup, tup, ..] with tup = (prio, func, skip_for_login_as)
 
 
 def account_add_plugin_login(prio, func, skip_for_login_as):

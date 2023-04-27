@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse, resolve, Resolver404
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.views.generic import TemplateView
 from django.utils import timezone
 from Account.forms import LoginForm
@@ -27,11 +27,12 @@ import logging
 
 
 TEMPLATE_LOGIN = 'account/login.dtl'
-TEMPLATE_BEVESTIGD = 'account/bevestigd.dtl'
+TEMPLATE_EMAIL_BEVESTIGD = 'account/email-bevestigd.dtl'
 TEMPLATE_AANGEMAAKT = 'account/email_aangemaakt.dtl'
 TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
-TEMPLATE_NIEUWEEMAIL = 'account/nieuwe-email.dtl'
-TEMPLATE_BEVESTIG_EMAIL = 'account/bevestig-email.dtl'
+TEMPLATE_EMAIL_BEVESTIG_NIEUWE = 'account/email-bevestig-nieuwe.dtl'
+TEMPLATE_EMAIL_BEVESTIG_HUIDIGE = 'account/email-bevestig-huidige.dtl'
+
 EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_account/bevestig-toegang-email.dtl'
 
 my_logger = logging.getLogger('NHBApps.Account')
@@ -70,13 +71,13 @@ def account_check_nieuwe_email(request, from_ip, account):
 
         context = {'partial_email': mailer_obfuscate_email(mailadres)}
         menu_dynamics(request, context)
-        return render(request, TEMPLATE_NIEUWEEMAIL, context)
+        return render(request, TEMPLATE_EMAIL_BEVESTIG_NIEUWE, context)
 
     # geen wijziging van e-mailadres - gewoon doorgaan
     return None
 
 
-# skip=True om te voorkomen dat we een e-mail sturen door de login-as
+# skip_for_login_as=True om te voorkomen dat we een e-mail sturen door de login-as
 account_add_plugin_login(30, account_check_nieuwe_email, True)
 
 
@@ -94,12 +95,13 @@ def account_check_email_is_bevestigd(request, from_ip, account):
         # FUTURE: knop maken om na X uur een nieuwe mail te kunnen krijgen
         context = {'partial_email': mailer_obfuscate_email(account.nieuwe_email)}
         menu_dynamics(request, context)
-        return render(request, TEMPLATE_BEVESTIG_EMAIL, context)
+        return render(request, TEMPLATE_EMAIL_BEVESTIG_HUIDIGE, context)
 
     # we wachten niet op bevestiging email - ga gewoon door
     return None
 
 
+# skip_for_login_as=True om te voorkomen dat gaan blokkeren op een onbevestigde e-mail
 account_add_plugin_login(40, account_check_email_is_bevestigd, True)
 
 
@@ -126,7 +128,7 @@ def receive_bevestiging_account_email(request, account):
     context['verberg_login_knop'] = True
 
     menu_dynamics(request, context)
-    return render(request, TEMPLATE_BEVESTIGD, context)
+    return render(request, TEMPLATE_EMAIL_BEVESTIGD, context)
 
 
 set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_account_email)
@@ -189,7 +191,6 @@ class LoginView(TemplateView):
         return None, account
 
     def _probeer_login(self, form, account):
-
         """ Kijk of het wachtwoord goed is en het account niet geblokkeerd is """
 
         from_ip = get_safe_from_ip(self.request)
@@ -241,6 +242,11 @@ class LoginView(TemplateView):
             if httpresp:
                 # plugin has decided that the user may not login
                 # and has generated/rendered an HttpResponse
+
+                # integratie met de authenticatie laag van Django
+                # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
+                logout(self.request)
+
                 return httpresp
         # for
 

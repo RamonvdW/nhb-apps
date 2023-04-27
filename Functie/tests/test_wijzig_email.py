@@ -68,13 +68,13 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/wijzig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/email-wijzigen.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/email-bevestig.dtl', 'plein/site_layout.dtl'))
 
     def _check_niet_wijzigbaar(self, functie):
         url = self.url_wijzig_email % functie.pk
@@ -131,7 +131,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/email-email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
     def test_bko1(self):
         # log in en wissel naar BKO 1
@@ -274,7 +274,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
             resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/email-bevestig.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
 
@@ -298,7 +298,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
             resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/email-bevestig.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(TijdelijkeCode.objects.count(), 2)
 
@@ -321,7 +321,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/email-email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
 
@@ -340,7 +340,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/email-email-bevestigd.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(TijdelijkeCode.objects.count(), 0)
 

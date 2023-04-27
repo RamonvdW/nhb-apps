@@ -324,7 +324,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
 
         nieuw_ww = 'GratisNieuwGheim'
 
@@ -333,14 +333,14 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Huidige wachtwoord komt niet overeen')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
 
         # wijzig het wachtwoord

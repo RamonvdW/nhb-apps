@@ -1,29 +1,27 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}E-mail bevestigen{% endblock %}
+{% block title %}E-mail nog niet bevestigd{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Nieuwe e-mail bevestigen</h3>
+            <h3 class="page-banner">E-mail nog niet bevestigd</h3>
         </div>
     </div>
 
-    <!-- blauw balk -->
+    <!-- blauw balk met wit informatie vlak -->
     <div class="row-nhb-blauw">
         <div class="col s12">
             <div class="white center" style="padding:10px">
-                <p>We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB.</p>
-
-                <p>We hebben een e-mail gestuurd naar <b><code>{{ partial_email }}</code></b> om zeker te zijn dat we je kunnen bereiken.</p>
+                <p>We hebben eerder een e-mail gestuurd naar <b><code>{{ partial_email }}</code></b> om zeker te zijn dat we je kunnen bereiken.</p>
 
                 <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
 
@@ -32,6 +30,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="account-nieuwe-email" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-email-bevestig-huidige" %}
 
 {% endblock %}
