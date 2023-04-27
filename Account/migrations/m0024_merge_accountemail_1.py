@@ -12,7 +12,7 @@ def kopieer_email_instellingen(apps, _):
 
     email_klas = apps.get_model('Account', 'AccountEmail')
 
-    for email in email_klas.objects.select_related('account').all():
+    for email in email_klas.objects.select_related('account').all():        # pragma: no cover
         account = email.account
 
         account.email_is_bevestigd = email.email_is_bevestigd
