@@ -14,8 +14,8 @@ from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
 from Account.models import Account
-from Account.rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
-from Account.view_login import account_plugins_login
+from Account.otp import otp_zet_controle_gelukt, otp_zet_control_niet_gelukt
+from Account.view_login import account_plugins_login_gate
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
@@ -44,7 +44,7 @@ def receiver_account_wissel(request, account):
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog met account %s' % (from_ip, repr(account.username)))
 
-    for _, func, skip in account_plugins_login:
+    for _, func, skip in account_plugins_login_gate:
         if not skip:
             httpresp = func(request, from_ip, account)
             if httpresp:
@@ -55,9 +55,9 @@ def receiver_account_wissel(request, account):
 
     if account.otp_is_actief:
         # fake de OTP passage
-        account_rechten_otp_controle_gelukt(request)
+        otp_zet_controle_gelukt(request)
     else:
-        account_rechten_login_gelukt(request)
+        otp_zet_control_niet_gelukt(request)
 
     # herstel de last_login van de echte gebruiker
     account.last_login = old_last_login

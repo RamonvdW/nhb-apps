@@ -4,15 +4,17 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.urls import reverse
+from django.http import HttpResponseRedirect, Http404
+from django.utils import timezone
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.timezone import make_aware, get_default_timezone
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.utils.formats import date_format
 from django.db.models import F, Count
-from django.utils import timezone
-from django.urls import reverse
 from Account.models import Account, AccountSessions
+from Account.otp import otp_loskoppelen, otp_stuur_email_losgekoppeld
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol_get_huidige
@@ -20,7 +22,6 @@ from Overig.forms import ZoekAccountForm
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 import datetime
-
 
 TEMPLATE_ACTIVITEIT = 'overig/activiteit.dtl'
 
@@ -234,7 +235,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                                 kwargs={'lid_nr': sporter.lid_nr})
         # for
 
-        context['url_reset_tweede_factor'] = reverse('Functie:otp-loskoppelen')
+        context['url_reset_tweede_factor'] = reverse('Overig:otp-loskoppelen')
 
         # toon sessies
         if not context:     # aka "never without complains"     # pragma: no cover
@@ -289,6 +290,43 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
+
+
+class OTPLoskoppelenView(UserPassesTestMixin, View):
+
+    """ Deze view levert een POST-functie om de tweede factor los te kunnen koppelen
+        voor een gekozen gebruiken. Dit kan alleen de BB.
+    """
+
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        url = reverse('Overig:activiteit')
+
+        if request.POST.get("reset_tweede_factor", None):
+            inlog_naam = request.POST.get("inlog_naam", '')[:6]     # afkappen voor de veiligheid
+
+            try:
+                account = Account.objects.get(username=inlog_naam)
+            except Account.DoesNotExist:
+                raise Http404('Niet gevonden')
+
+            url += '?zoekterm=%s' % account.username
+
+            # doe het feitelijke loskoppelen + in logboek schrijven
+            is_losgekoppeld = otp_loskoppelen(request, account)
+
+            if is_losgekoppeld:
+                otp_stuur_email_losgekoppeld(account)
+
+        return HttpResponseRedirect(url)
 
 
 # end of file

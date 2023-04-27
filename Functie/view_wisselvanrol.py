@@ -8,8 +8,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.otp import account_otp_is_gekoppeld
-from Account.rechten import account_rechten_is_otp_verified
+from Account.otp import otp_is_controle_gelukt
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
@@ -337,11 +336,11 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             context['url_admin_site'] = reverse('admin:index')
             context['url_login_as'] = reverse('Account:account-wissel')
 
-        if not account_otp_is_gekoppeld(self.account):
+        if not self.account.otp_is_actief:
             context['show_otp_koppelen'] = True
         else:
             # tweede factor is al gekoppeld, maar misschien nog niet gecontroleerd
-            context['show_otp_controle'] = not account_rechten_is_otp_verified(self.request)
+            context['show_otp_controle'] = not otp_is_controle_gelukt(self.request)
 
         # zoek de rollen (eigen + helpen)
         context['eigen_rollen'], hierarchy = self._get_functies_eigen()

@@ -12,7 +12,7 @@ class SporterConfig(AppConfig):
 
     def ready(self):
         # laat de plugin zich registeren
-        import Sporter.login_plugin
+        import Sporter.plugins
 
 
 # end of file

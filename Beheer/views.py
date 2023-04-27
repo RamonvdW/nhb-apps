@@ -8,7 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.admin.sites import AdminSite
-from Account.rechten import account_rechten_is_otp_verified
+from Account.otp import otp_is_controle_gelukt
 from collections import OrderedDict
 
 # aanpassingen van de ingebouwde Admin site
@@ -44,7 +44,7 @@ class BeheerAdminSite(AdminSite):
         # send the 2FA page otherwise
         if request.user.is_active and request.user.is_staff and request.user.is_authenticated:
             # well, login is not needed
-            if account_rechten_is_otp_verified(request):
+            if otp_is_controle_gelukt(request):
                 # what are we doing here?
                 if next_url:
                     return HttpResponseRedirect(next_url)
@@ -53,7 +53,7 @@ class BeheerAdminSite(AdminSite):
                 return HttpResponseRedirect(reverse('Plein:plein'))
 
             # send to 2FA page
-            url = reverse('Functie:otp-controle')
+            url = reverse('Account:otp-controle')
         else:
             # send to login page
             url = reverse('Account:login')

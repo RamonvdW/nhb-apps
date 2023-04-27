@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.rechten import account_rechten_eval_now
+from Account.plugin_manager import account_rechten_eval_now
 from Functie.definities import Rollen
 from Functie.models import VerklaringHanterenPersoonsgegevens
 from Functie.operations import account_needs_vhpg
@@ -118,7 +118,10 @@ class VhpgAcceptatieView(TemplateView):
             account = request.user
             account_vhpg_is_geaccepteerd(account)
             schrijf_in_logboek(account, 'Rollen', 'VHPG geaccepteerd')
+
+            # als de VHPG (weer) geaccepteerd is, dan komen de rechten beschikbaar
             account_rechten_eval_now(request, account)
+
             return HttpResponseRedirect(reverse('Functie:wissel-van-rol'))
 
         # checkbox is verplicht --> nog een keer

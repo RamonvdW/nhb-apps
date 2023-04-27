@@ -7,7 +7,8 @@
 """ Ondersteuning voor de rollen binnen de NHB applicaties """
 
 from django.contrib.sessions.backends.db import SessionStore
-from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
+from Account.plugin_manager import account_add_plugin_bepaal_rechten
+from Account.otp import otp_is_controle_gelukt
 from Account.models import AccountSessions
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Kampioenschap
@@ -123,7 +124,7 @@ def rol_zet_sessionvars(account, request):
 
     if account.is_authenticated:        # pragma: no branch
         show_vhpg, _ = account_needs_vhpg(account)
-        if account_rechten_is_otp_verified(request) and not show_vhpg:
+        if otp_is_controle_gelukt(request) and not show_vhpg:
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
 
@@ -408,7 +409,7 @@ def rol_activeer_functie(request, functie):
         # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
         account = request.user
         if account.is_authenticated:                            # pragma: no branch
-            if account_rechten_is_otp_verified(request):        # pragma: no branch
+            if otp_is_controle_gelukt(request):         # pragma: no branch
                 if account.is_staff or account.is_BB:
                     # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
                     if functie.rol == 'SEC':                    # pragma: no branch
@@ -565,7 +566,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
 rol_zet_plugins(functie_expandeer_rol)
 
 # registreer de rechten plugin
-account_add_plugin_rechten(rol_plugin_rechten)
+account_add_plugin_bepaal_rechten(rol_plugin_rechten)
 
 
 def rol_activeer_wissel_van_rol_menu_voor_account(account):

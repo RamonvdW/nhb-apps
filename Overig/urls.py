@@ -16,6 +16,10 @@ urlpatterns = [
          view_activiteit.ActiviteitView.as_view(),
          name='activiteit'),
 
+    path('otp-loskoppelen/',
+         view_activiteit.OTPLoskoppelenView.as_view(),
+         name='otp-loskoppelen'),
+
     # oude interface, voor backwards compatibility
     # TODO: verwijder in v20 of later
     path('url/<code>/',

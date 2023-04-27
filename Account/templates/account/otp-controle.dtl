@@ -24,7 +24,7 @@
 
             <!-- dialoog venster -->
             <div style="margin:50px 30px 30px 30px">
-                <form action="{% url 'Functie:otp-controle' %}" method="post">
+                <form action="{% url 'Account:otp-controle' %}" method="post">
                     {{ form.next_url }}
                     {% csrf_token %}
 

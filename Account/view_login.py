@@ -14,8 +14,8 @@ from django.utils import timezone
 from Account.forms import LoginForm
 from Account.models import Account
 from Account.operations import account_email_bevestiging_ontvangen, account_check_gewijzigde_email
-from Account.rechten import account_rechten_login_gelukt
-from Account.plugins import account_plugins_login, account_add_plugin_login
+from Account.otp import otp_zet_control_niet_gelukt
+from Account.plugin_manager import account_plugins_login_gate, account_plugins_post_login, account_add_plugin_login_gate
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, render_email_template
 from Overig.helpers import get_safe_from_ip
@@ -29,7 +29,7 @@ import logging
 TEMPLATE_LOGIN = 'account/login.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'account/email-bevestigd.dtl'
 TEMPLATE_AANGEMAAKT = 'account/email_aangemaakt.dtl'
-TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
+TEMPLATE_GEBLOKKEERD = 'account/login-geblokkeerd.dtl'
 TEMPLATE_EMAIL_BEVESTIG_NIEUWE = 'account/email-bevestig-nieuwe.dtl'
 TEMPLATE_EMAIL_BEVESTIG_HUIDIGE = 'account/email-bevestig-huidige.dtl'
 
@@ -78,7 +78,7 @@ def account_check_nieuwe_email(request, from_ip, account):
 
 
 # skip_for_login_as=True om te voorkomen dat we een e-mail sturen door de login-as
-account_add_plugin_login(30, account_check_nieuwe_email, True)
+account_add_plugin_login_gate(30, account_check_nieuwe_email, True)
 
 
 def account_check_email_is_bevestigd(request, from_ip, account):
@@ -102,7 +102,7 @@ def account_check_email_is_bevestigd(request, from_ip, account):
 
 
 # skip_for_login_as=True om te voorkomen dat gaan blokkeren op een onbevestigde e-mail
-account_add_plugin_login(40, account_check_email_is_bevestigd, True)
+account_add_plugin_login_gate(40, account_check_email_is_bevestigd, True)
 
 
 def receive_bevestiging_account_email(request, account):
@@ -166,13 +166,12 @@ class LoginView(TemplateView):
                 # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
                 # my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
                 # schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
-                account = None
+                pass
             except Account.MultipleObjectsReturned:
                 # kan niet kiezen tussen verschillende accounts
                 # werkt dus niet als het email hergebruikt is voor meerdere accounts
                 form.add_error(None,
                                'Inloggen met e-mail is niet mogelijk. Probeer het nog eens.')
-                account = None
 
         if account:
             # blokkeer inlog als het account geblokkeerd is door te veel wachtwoord pogingen
@@ -186,17 +185,22 @@ class LoginView(TemplateView):
                         '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
                     context = {'account': account}
                     menu_dynamics(self.request, context)
-                    return render(self.request, TEMPLATE_GEBLOKKEERD, context), None
+                    httpresp = render(self.request, TEMPLATE_GEBLOKKEERD, context)
+                    return httpresp, None
 
         return None, account
 
     def _probeer_login(self, form, account):
-        """ Kijk of het wachtwoord goed is en het account niet geblokkeerd is """
+        """ Kijk of het wachtwoord goed is en het account niet geblokkeerd is
+
+            Returns:
+                Login success: True ro False
+                HttpResponse: pre-rendered page, or None
+        """
 
         from_ip = get_safe_from_ip(self.request)
         login_naam = form.cleaned_data.get('login_naam')
         wachtwoord = form.cleaned_data.get('wachtwoord')
-        next_url = form.cleaned_data.get('next')
 
         # controleer het wachtwoord
         account2 = authenticate(username=account.username, password=wachtwoord)
@@ -229,16 +233,17 @@ class LoginView(TemplateView):
 
                 context = {'account': account}
                 menu_dynamics(self.request, context)
-                return render(self.request, TEMPLATE_GEBLOKKEERD, context)
+                httpresp = render(self.request, TEMPLATE_GEBLOKKEERD, context)
+                return False, httpresp
 
             # wachtwoord klopt niet, doe opnieuw
-            return None
+            return False, None
 
         # wachtwoord is goed
         account = account2
 
         # kijk of er een reden is om gebruik van het account te weren
-        for _, func, _ in account_plugins_login:
+        for _, func, _ in account_plugins_login_gate:
             httpresp = func(self.request, from_ip, account)
             if httpresp:
                 # plugin has decided that the user may not login
@@ -248,7 +253,7 @@ class LoginView(TemplateView):
                 # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
                 logout(self.request)
 
-                return httpresp
+                return False, httpresp
         # for
 
         # integratie met de authenticatie laag van Django
@@ -258,42 +263,36 @@ class LoginView(TemplateView):
 
         if account.verkeerd_wachtwoord_teller > 0:
             account.verkeerd_wachtwoord_teller = 0
-            account.save()
+            account.save(update_fields=['verkeerd_wachtwoord_teller'])
 
-        # Aangemeld blijven checkbox
+        # aangemeld blijven checkbox
         if not form.cleaned_data.get('aangemeld_blijven', False):
             # gebruiker wil NIET aangemeld blijven
             # zorg dat de session-cookie snel verloopt
             self.request.session.set_expiry(0)
 
-        account_rechten_login_gelukt(self.request)
+        # de OTP control is nog niet uitgevoerd
+        otp_zet_control_niet_gelukt(self.request)
 
+        return True, None
+
+    def _get_redirect(self, form, account):
         # voer de automatische redirect uit, indien gevraagd
+        next_url = form.cleaned_data.get('next')
         if next_url:
-            # reject niet bestaande urls
-            # resolve zoekt de view die de url af kan handelen
-            if next_url[-1] != '/':
-                next_url += '/'
-            try:
-                resolve(next_url)
-            except Resolver404:
-                pass
-            else:
-                # is valide url
-                return HttpResponseRedirect(next_url)
+            # validation is gedaan in forms.py
+            return next_url
 
-        # FUTURE: ongewenste kennis over OTP en Functies --> dit door een plug-in laten doen
-        if account.otp_is_actief:
-            # 2FA check altijd aanbieden aan account met BB rol of admin access
-            if account.is_staff or account.is_BB:
-                return HttpResponseRedirect(reverse('Functie:otp-controle'))
+        # roep de redirect plugins aan
+        for _, func in account_plugins_post_login:
+            url = func(self.request, account)
+            if url:
+                return url
+        # for
 
-            # alleen 2FA check aanbieden als er ook functies aan gekoppeld zijn
-            # dit voorkomt 2FA check voor ex-managers
-            if account.functie_set.count() > 0:
-                return HttpResponseRedirect(reverse('Functie:otp-controle'))
-
-        return HttpResponseRedirect(reverse('Plein:plein'))
+        # default: ga naar het Plein
+        url = reverse('Plein:plein')
+        return url
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
@@ -305,17 +304,23 @@ class LoginView(TemplateView):
 
         if form.is_valid():
 
-            response, account = self._zoek_account(form)
-            if response:
+            httpresp, account = self._zoek_account(form)
+            if httpresp:
                 # account is geblokkeerd
-                return response
+                return httpresp
 
             if account:
                 # account bestaat
-                response = self._probeer_login(form, account)
-                if response:
-                    # inlog gelukt of eruit geknikkerd met foutmelding
-                    return response
+                login_success, httpresp = self._probeer_login(form, account)
+
+                if login_success:
+                    # login gelukt
+                    url = self._get_redirect(form, account)
+                    return HttpResponseRedirect(url)
+
+                if httpresp:
+                    # geknikkerd met foutmelding
+                    return httpresp
 
             # gebruiker mag het nog een keer proberen
             if len(form.errors) == 0:

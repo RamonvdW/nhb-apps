@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Account import view_login, view_login_as, view_logout, view_wachtwoord
+from Account import view_login, view_login_as, view_logout, view_wachtwoord, view_otp_controle, view_otp_koppelen
 
 app_name = 'Account'
 
@@ -29,6 +29,22 @@ urlpatterns = [
     path('account-wissel/',
          view_login_as.LoginAsZoekView.as_view(),
          name='account-wissel'),
+
+    path('otp-koppelen-stap1/',
+         view_otp_koppelen.OTPKoppelenStap1View.as_view(),
+         name="otp-koppelen-stap1"),
+
+    path('otp-koppelen-stap2/',
+         view_otp_koppelen.OTPKoppelenStap2View.as_view(),
+         name="otp-koppelen-stap2"),
+
+    path('otp-koppelen-stap3/',
+         view_otp_koppelen.OTPKoppelenStap3View.as_view(),
+         name="otp-koppelen-stap3"),
+
+    path('otp-controle/',
+         view_otp_controle.OTPControleView.as_view(),
+         name="otp-controle"),
 ]
 
 # end of file

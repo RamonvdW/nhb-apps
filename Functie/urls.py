@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Functie import (view_overzicht, view_otp_controle, view_otp_koppelen, view_vhpg, view_koppel_beheerder,
-                     view_wisselvanrol, view_activeer_rol)
+from Functie import view_overzicht, view_vhpg, view_koppel_beheerder, view_wisselvanrol, view_activeer_rol
 
 app_name = 'Functie'
 
@@ -36,28 +35,6 @@ urlpatterns = [
     path('overzicht/alle-lid-nrs/sec-hwl/',
          view_overzicht.OverzichtEmailsSecHwlView.as_view(),
          name='sec-hwl-lid_nrs'),
-
-
-    path('otp-koppelen-stap1/',
-         view_otp_koppelen.OTPKoppelenStap1View.as_view(),
-         name="otp-koppelen-stap1"),
-
-    path('otp-koppelen-stap2/',
-         view_otp_koppelen.OTPKoppelenStap2View.as_view(),
-         name="otp-koppelen-stap2"),
-
-    path('otp-koppelen-stap3/',
-         view_otp_koppelen.OTPKoppelenStap3View.as_view(),
-         name="otp-koppelen-stap3"),
-
-
-    path('otp-controle/',
-         view_otp_controle.OTPControleView.as_view(),
-         name="otp-controle"),
-
-    path('otp-loskoppelen/',
-         view_otp_controle.OTPLoskoppelenView.as_view(),
-         name='otp-loskoppelen'),
 
 
     path('activeer-functie/<str:functie_pk>/',

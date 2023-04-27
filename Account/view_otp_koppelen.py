@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,18 +9,18 @@ from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, account_otp_is_gekoppeld
-from Functie.forms import OTPControleForm
-from Functie.maak_qrcode import qrcode_get
+from Account.forms import OTPControleForm
+from Account.maak_qrcode import qrcode_get
+from Account.otp import otp_prepare_koppelen, otp_koppel_met_code
 from Functie.rol import rol_evalueer_opnieuw, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 
 
-TEMPLATE_OTP_GEKOPPELD = 'functie/otp-koppelen-gelukt.dtl'
-TEMPLATE_OTP_KOPPELEN = 'functie/otp-koppelen-stap2-scan-qr-code.dtl'
-TEMPLATE_OTP_KOPPELEN_STAP1 = 'functie/otp-koppelen-stap1-uitleg.dtl'
-TEMPLATE_OTP_KOPPELEN_STAP2 = 'functie/otp-koppelen-stap2-scan-qr-code.dtl'
-TEMPLATE_OTP_KOPPELEN_STAP3 = 'functie/otp-koppelen-stap3-code-invoeren.dtl'
+TEMPLATE_OTP_KOPPELEN = 'account/otp-koppelen-stap2-scan-qr-code.dtl'
+TEMPLATE_OTP_KOPPELEN_STAP1 = 'account/otp-koppelen-stap1-uitleg.dtl'
+TEMPLATE_OTP_KOPPELEN_STAP2 = 'account/otp-koppelen-stap2-scan-qr-code.dtl'
+TEMPLATE_OTP_KOPPELEN_STAP3 = 'account/otp-koppelen-stap3-code-invoeren.dtl'
+TEMPLATE_OTP_GEKOPPELD = 'account/otp-koppelen-gelukt.dtl'
 
 
 class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
@@ -48,7 +48,9 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
         if not request.user.is_authenticated:
             return redirect('Plein:plein')
 
-        if account_otp_is_gekoppeld(request.user):
+        account = request.user
+        if account.otp_is_actief:
+            # OTP is al actief, dus niet nodig om te koppelen
             return redirect('Plein:plein')
 
         return super().dispatch(request, *args, **kwargs)
@@ -62,7 +64,7 @@ class OTPKoppelenStap1View(OTPKoppelenStapView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
+        context['url_stap_2'] = reverse('Account:otp-koppelen-stap2')
 
         menu_dynamics(self.request, context)
         return context
@@ -76,13 +78,13 @@ class OTPKoppelenStap2View(OTPKoppelenStapView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['url_stap_1'] = reverse('Functie:otp-koppelen-stap1')
-        context['url_stap_3'] = reverse('Functie:otp-koppelen-stap3')
+        context['url_stap_1'] = reverse('Account:otp-koppelen-stap1')
+        context['url_stap_3'] = reverse('Account:otp-koppelen-stap3')
 
         account = self.request.user
 
         # haal de QR code op (en alles wat daar voor nodig is)
-        account_otp_prepare_koppelen(account)
+        otp_prepare_koppelen(account)
         context['qrcode'] = qrcode_get(account)
 
         tmp = account.otp_code.lower()
@@ -100,8 +102,8 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
-        context['url_controleer'] = reverse('Functie:otp-koppelen-stap3')
+        context['url_stap_2'] = reverse('Account:otp-koppelen-stap2')
+        context['url_controleer'] = reverse('Account:otp-koppelen-stap3')
 
         context['form'] = OTPControleForm()
         context['now'] = timezone.now()
@@ -119,7 +121,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         form = OTPControleForm(request.POST)
         if form.is_valid():
             otp_code = form.cleaned_data.get('otp_code')
-            if account_otp_koppel(request, account, otp_code):
+            if otp_koppel_met_code(request, account, otp_code):
                 # geef de succes pagina
                 context = dict()
                 menu_dynamics(request, context)
@@ -132,8 +134,8 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         # still here --> re-render with error message
         context = dict()
 
-        context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
-        context['url_controleer'] = reverse('Functie:otp-koppelen-stap3')
+        context['url_stap_2'] = reverse('Account:otp-koppelen-stap2')
+        context['url_controleer'] = reverse('Account:otp-koppelen-stap3')
 
         context['form'] = form
         context['now'] = timezone.now()

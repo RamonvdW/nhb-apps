@@ -13,8 +13,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Account.models import Account
 from Account.operations import account_test_wachtwoord_sterkte
-from Account.rechten import account_rechten_login_gelukt
-from Account.view_login import account_plugins_login
+from Account.otp import otp_zet_control_niet_gelukt
+from Account.view_login import account_plugins_login_gate
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
@@ -141,14 +141,14 @@ def receive_wachtwoord_vergeten(request, account):
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (from_ip, repr(account.username)))
 
-    for _, func, _ in account_plugins_login:
+    for _, func, _ in account_plugins_login_gate:
         httpresp = func(request, from_ip, account)
         if httpresp:
             # plugin has decided that the user may not login
             # and has generated/rendered an HttpResponse that we cannot handle here
             return httpresp
 
-    account_rechten_login_gelukt(request)
+    otp_zet_control_niet_gelukt(request)
 
     # gebruiker mag NIET aangemeld blijven
     # zorg dat de session-cookie snel verloopt

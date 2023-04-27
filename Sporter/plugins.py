@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
-from Account.plugins import account_add_plugin_login
+from Account.plugin_manager import account_add_plugin_login_gate
 from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
 import logging
 
 
-TEMPLATE_NHBSTRUCTUUR_IS_INACTIEF = 'sporter/inlog-geblokkeerd.dtl'
+TEMPLATE_NHBSTRUCTUUR_IS_INACTIEF = 'sporter/login-geblokkeerd.dtl'
 
 my_logger = logging.getLogger('NHBApps.Sporter')
 
@@ -69,7 +69,7 @@ def sporter_login_plugin(request, from_ip, account):
 
 
 # registreer de plugin
-account_add_plugin_login(20, sporter_login_plugin, False)
+account_add_plugin_login_gate(20, sporter_login_plugin, False)
 
 
 # end of file

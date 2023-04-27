@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import forms
-from django.urls import resolve, Resolver404
 
 
 class ZoekBeheerdersForm(forms.Form):
@@ -42,56 +41,6 @@ class AccepteerVHPGForm(forms.Form):
                         initial=False,
                         required=True,     # checkbox must be crossed in
                         error_messages=my_errors)
-
-
-class OTPControleForm(forms.Form):
-    """ Dit formulier wordt gebruikt om de OTP code te ontvangen van de gebruiker """
-
-    otp_code = forms.CharField(
-                        label='Code',
-                        min_length=6,
-                        max_length=6,
-                        required=True,
-                        widget=forms.TextInput(attrs={'autofocus': True, 'autocomplete': 'off'}))
-
-    next_url = forms.CharField(
-                        required=False,
-                        widget=forms.HiddenInput())
-
-    def _validate_otp_code(self, valid):
-        if valid:
-            otp_code = self.cleaned_data.get('otp_code')
-            try:
-                code = int(otp_code)
-                # prevent negative numbers
-                if code < 0 or code > 999999:
-                    raise ValueError()
-            except ValueError:
-                self.add_error(None, 'Voer de vereiste code in')
-                valid = False
-        return valid
-
-    def _validate_next_url(self, valid):
-        if valid:
-            next_url = self.cleaned_data.get('next_url')
-            if next_url:
-                if next_url[-1] != '/':
-                    next_url += '/'
-                try:
-                    resolve(next_url)
-                except Resolver404:
-                    # cancel this invalid URL
-                    valid = False
-        return valid
-
-    def is_valid(self):
-        valid = super(forms.Form, self).is_valid()
-        valid = self._validate_otp_code(valid)
-        valid = self._validate_next_url(valid)
-
-        if not valid:
-            self.add_error(None, 'De gegevens worden niet geaccepteerd')
-        return valid
 
 
 class WijzigEmailForm(forms.Form):

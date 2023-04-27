@@ -7,7 +7,7 @@
 from django.utils import timezone
 from django.test import TestCase
 from django.http import HttpResponseRedirect
-from Account.plugins import account_add_plugin_login
+from Account.plugin_manager import account_add_plugin_login_gate
 from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -38,7 +38,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
 
         self._login_plugin_mode = 0
-        account_add_plugin_login(10, self._login_plugin, False)
+        account_add_plugin_login_gate(10, self._login_plugin, False)
 
     def tearDown(self):
         self._login_plugin_mode = 0
