@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-def sitetijdelijkeurl_overnemen(apps, _):
+def sitetijdelijkeurl_overnemen(apps, _):                               # pragma: no cover
     """ neem de data over van de tabel in de Overig application """
 
     oud_klas = apps.get_model('Overig', 'SiteTijdelijkeUrl')

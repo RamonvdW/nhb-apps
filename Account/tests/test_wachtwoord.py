@@ -16,7 +16,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
     url_vergeten = '/account/wachtwoord-vergeten/'
     url_wijzig = '/account/nieuw-wachtwoord/'
-    url_tijdelijk = '/overig/url/%s/'       # url_code
+    url_tijdelijk = '/tijdelijke-codes/%s/'       # code
 
     def setUp(self):
         """ initialisatie van de test case """

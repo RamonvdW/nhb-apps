@@ -22,7 +22,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
 
     test_after = ('Account',)
 
-    url_tijdelijk = '/overig/url/%s/'
+    url_tijdelijk = '/tijdelijke-codes/%s/'
 
     testdata = None
 

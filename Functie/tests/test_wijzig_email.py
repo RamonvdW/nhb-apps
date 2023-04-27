@@ -22,6 +22,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
     test_after = ('Functie.tests.test_otp', 'Functie.tests.test_wisselvanrol')
 
     url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
+    url_code_prefix = '/tijdelijke-codes/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -85,6 +86,11 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
             resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
         self.assert403(resp)
 
+    def _get_tijdelijke_code_url_from_mail_text(self, mail_text):
+        pos = mail_text.find(self.url_code_prefix)
+        url = mail_text[pos:pos+len(self.url_code_prefix)+32+1]    # 32 = lengte van code
+        return url
+
     def test_get_anon(self):
         url = self.url_wijzig_email % self.functie_rko1.pk
         with self.assert_max_queries(20):
@@ -114,9 +120,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         # volg de tijdelijke URL in de email
         mail = MailQueue.objects.all()[0]
-        text = mail.mail_text
-        pos = text.find('/overig/url/')     # 12 lang
-        url = text[pos:pos+12+32+1]        # 32 = code
+        url = self._get_tijdelijke_code_url_from_mail_text(mail.mail_text)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -287,9 +291,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         # haal de 1e tijdelijke url op
         mail = MailQueue.objects.order_by('-toegevoegd_op')[0]
-        text = mail.mail_text
-        pos = text.find('/overig/url/')     # 12 = deze url lengte
-        url1 = text[pos:pos+12+32+1]         # 32 = code
+        url1 = self._get_tijdelijke_code_url_from_mail_text(mail.mail_text)
 
         # tweede invoer
         with self.assert_max_queries(20):
@@ -307,9 +309,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         # haal de 2e tijdelijke url op
         mail = MailQueue.objects.order_by('-toegevoegd_op')[0]
-        text = mail.mail_text
-        pos = text.find('/overig/url/')     # 12 = deze url lengte
-        url2 = text[pos:pos+12+32+1]         # 32 = code
+        url2 = self._get_tijdelijke_code_url_from_mail_text(mail.mail_text)
 
         # volg de 1e url
         with self.assert_max_queries(20):

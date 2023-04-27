@@ -21,6 +21,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
     test_after = ('Account.tests.test_login.',)
 
     url_wissel = '/account/account-wissel/'
+    url_code_prefix = '/tijdelijke-codes/'
 
     @classmethod
     def setUpTestData(cls):
@@ -91,9 +92,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
         # volg de tijdelijke url om ingelogd te raken
         self.e2e_logout()
@@ -134,9 +135,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
         # volg de tijdelijke url om ingelogd te raken
         with self.assert_max_queries(20):
@@ -176,9 +177,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
         # volg de tijdelijke url om ingelogd te raken
         with self.assert_max_queries(20):
@@ -250,9 +251,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
         obj = TijdelijkeCode.objects.all()[0]
         obj.geldig_tot = timezone.now() - datetime.timedelta(seconds=1)
@@ -262,6 +263,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('overig/code-fout.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'plein/site_layout.dtl'))
 
 # end of file
