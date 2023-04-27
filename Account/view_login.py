@@ -202,7 +202,8 @@ class LoginView(TemplateView):
         account2 = authenticate(username=account.username, password=wachtwoord)
         if not account2:
             # authenticatie is niet gelukt
-            # reden kan zijn: verkeerd wachtwoord of is_active=False
+            # reden kan zijn: verkeerd wachtwoord
+            #  (of: is_active=False, maar: gebruiken we niet)
 
             # onthoudt precies wanneer dit was
             account.laatste_inlog_poging = timezone.now()

@@ -105,8 +105,10 @@ class RegistreerNhbNummerView(TemplateView):
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
             from_ip = get_safe_from_ip(request)
+
             try:
                 sporter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord)
+
             except SporterGeenEmail as exc:
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
