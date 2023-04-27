@@ -7,27 +7,31 @@
 from django.test import TestCase
 from django.http import HttpResponseRedirect
 from Functie.models import Functie
-from Overig.models import save_tijdelijke_url, SiteTijdelijkeUrl
-from Overig.tijdelijke_url import (tijdelijkeurl_dispatcher, set_tijdelijke_url_receiver,
-                                   RECEIVER_BEVESTIG_ACCOUNT_EMAIL, maak_tijdelijke_url_account_email,
-                                   RECEIVER_ACCOUNT_WISSEL, maak_tijdelijke_url_accountwissel,
-                                   RECEIVER_WACHTWOORD_VERGETEN, maak_tijdelijke_url_wachtwoord_vergeten,
-                                   RECEIVER_BEVESTIG_FUNCTIE_EMAIL, maak_tijdelijke_url_functie_email)
+from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_ACCOUNT_WISSEL,
+                                        RECEIVER_WACHTWOORD_VERGETEN, RECEIVER_BEVESTIG_FUNCTIE_EMAIL)
+from TijdelijkeCodes.models import TijdelijkeCode, save_tijdelijke_code
+from TijdelijkeCodes.operations import (tijdelijkeurl_dispatcher, set_tijdelijke_codes_receiver,
+                                        maak_tijdelijke_code_account_email,
+                                        maak_tijdelijke_code_accountwissel,
+                                        maak_tijdelijke_code_wachtwoord_vergeten,
+                                        maak_tijdelijke_code_functie_email)
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from datetime import timedelta
 
 
-class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
+class TestTijdelijkeCodes(E2EHelpers, TestCase):
 
-    """ tests voor de Overig applicatie, module Tijdelijke Urls """
+    """ tests voor de TijdelijkeCodes applicatie """
 
     testdata = None
+    url_code_prefix = '/tijdelijke-codes/'
+    url_code = '/tijdelijke-codes/%s/'
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -43,27 +47,27 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
     def test_nonexist(self):
         with self.assert_max_queries(20):
-            resp = self.client.get('/overig/url/test/')
+            resp = self.client.get(self.url_code % 'test')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'plein/site_layout.dtl'))
 
     def test_verlopen(self):
-        obj = save_tijdelijke_url('code1', 'iets_anders', geldig_dagen=-1)
+        obj = save_tijdelijke_code('code1', 'iets_anders', geldig_dagen=-1)
         self.assertTrue(str(obj) != '')
 
-        obj = save_tijdelijke_url('code1', 'bevestig_email', geldig_dagen=1)
+        obj = save_tijdelijke_code('code1', 'bevestig_email', geldig_dagen=1)
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
-            resp = self.client.get('/overig/url/code1/')
+            resp = self.client.get(self.url_code % 'code1')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         self.assertEqual(1, len(urls))
-        self.assertTrue('/overig/url/' in urls[0])
+        self.assertTrue(self.url_code_prefix in urls[0])
         url = urls[0]
 
         # pas de datum aan zodat deze verlopen is tijdens de POST
@@ -76,18 +80,18 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_bad_dispatch_to(self):
-        save_tijdelijke_url('code3', 'onbekend', geldig_dagen=1)
+        save_tijdelijke_code('code3', 'onbekend', geldig_dagen=1)
 
         with self.assert_max_queries(20):
-            resp = self.client.get('/overig/url/code3/')
+            resp = self.client.get(self.url_code % 'code3')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(1, len(urls))
-        self.assertTrue('/overig/url/' in urls[0])
+        self.assertTrue(self.url_code_prefix in urls[0])
 
         # volg de 'ga door' knop
         url = urls[0]
@@ -96,7 +100,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_setup_dispatcher(self):
-        set_tijdelijke_url_receiver("my topic", "123")
+        set_tijdelijke_codes_receiver("my topic", "123")
         self.assertEqual(tijdelijkeurl_dispatcher.get_receiver("my topic"), "123")
 
     def _my_receiver_func_email(self, request, hoortbij_account):
@@ -112,26 +116,26 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
             return HttpResponseRedirect(url)
 
     def test_account_email(self):
-        set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, self._my_receiver_func_email)
+        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, self._my_receiver_func_email)
 
-        url = maak_tijdelijke_url_account_email(self.account_normaal, test="een")
-        self.assertTrue("/overig/url/" in url)
+        url = maak_tijdelijke_code_account_email(self.account_normaal, test="een")
+        self.assertTrue(self.url_code_prefix in url)
         self.callback_count = 1
 
         # extra coverage
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        obj = TijdelijkeCode.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(1, len(urls))
-        self.assertTrue('/overig/url/' in urls[0])
+        self.assertTrue(self.url_code_prefix in urls[0])
         self.assertEqual(self.callback_count, 1)
 
         # volg de 'ga door' knop
@@ -144,26 +148,26 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
     def test_account_wissel(self):
-        set_tijdelijke_url_receiver(RECEIVER_ACCOUNT_WISSEL, self._my_receiver_func_email)
+        set_tijdelijke_codes_receiver(RECEIVER_ACCOUNT_WISSEL, self._my_receiver_func_email)
 
-        url = maak_tijdelijke_url_accountwissel(self.account_normaal, test="twee")
-        self.assertTrue("/overig/url/" in url)
+        url = maak_tijdelijke_code_accountwissel(self.account_normaal, test="twee")
+        self.assertTrue(self.url_code_prefix in url)
         self.callback_count = 0
 
         # extra coverage
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        obj = TijdelijkeCode.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(1, len(urls))
-        self.assertTrue('/overig/url/' in urls[0])
+        self.assertTrue(self.url_code_prefix in urls[0])
         self.assertEqual(self.callback_count, 0)
 
         # volg de 'ga door' knop
@@ -176,25 +180,25 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
     def test_wachtwoord_vergeten(self):
-        set_tijdelijke_url_receiver(RECEIVER_WACHTWOORD_VERGETEN, self._my_receiver_func_email)
-        url = maak_tijdelijke_url_wachtwoord_vergeten(self.account_normaal, test="drie")
-        self.assertTrue("/overig/url/" in url)
+        set_tijdelijke_codes_receiver(RECEIVER_WACHTWOORD_VERGETEN, self._my_receiver_func_email)
+        url = maak_tijdelijke_code_wachtwoord_vergeten(self.account_normaal, test="drie")
+        self.assertTrue(self.url_code_prefix in url)
         self.callback_count = 0
 
         # extra coverage
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        obj = TijdelijkeCode.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(1, len(urls))
-        self.assertTrue('/overig/url/' in urls[0])
+        self.assertTrue(self.url_code_prefix in urls[0])
         self.assertEqual(self.callback_count, 0)
 
         # volg de 'ga door' knop
@@ -213,28 +217,28 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         return url
 
     def test_functie_email(self):
-        set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_FUNCTIE_EMAIL, self._my_receiver_func_functie)
+        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_FUNCTIE_EMAIL, self._my_receiver_func_functie)
 
         functie = Functie.objects.filter(rol='BKO').all()[0]
-        url = maak_tijdelijke_url_functie_email(functie)
-        self.assertTrue("/overig/url/" in url)
+        url = maak_tijdelijke_code_functie_email(functie)
+        self.assertTrue(self.url_code_prefix in url)
         self.callback_count = 0
 
         # extra coverage
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        obj = TijdelijkeCode.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(1, len(urls))
         url = urls[0]
-        self.assertTrue('/overig/url/' in url)
+        self.assertTrue(self.url_code_prefix in url)
         self.assertEqual(self.callback_count, 0)
 
         # volg de 'ga door' knop
@@ -245,8 +249,15 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
         self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
-    def test_other_http(self):
-        self.e2e_assert_other_http_commands_not_supported('/overig/url/0/')
+        self.e2e_assert_other_http_commands_not_supported(self.url_code % '0')
+
+    # TODO verwijder in v20 of later
+    def test_oude_url(self):
+        # tijdelijke ondersteuning van de oude url
+        code = 123456
+        url = '/overig/url/%s/' % code
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, self.url_code % code)
 
 
 # FUTURE: tijdelijke URL horende bij kampioenschap

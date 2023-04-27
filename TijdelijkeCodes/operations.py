@@ -6,22 +6,18 @@
 
 from django.urls import reverse
 from django.conf import settings
+from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_BEVESTIG_FUNCTIE_EMAIL,
+                                        RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN,
+                                        RECEIVER_KAMPIOENSCHAP_JA, RECEIVER_KAMPIOENSCHAP_NEE)
 from uuid import uuid5, NAMESPACE_URL
 
-uuid_namespace = uuid5(NAMESPACE_URL, 'Overig.Models.SiteUrls')
 
-# limiet: 20 tekens                12345678901234567890
-RECEIVER_BEVESTIG_ACCOUNT_EMAIL = 'account_email'
-RECEIVER_BEVESTIG_FUNCTIE_EMAIL = 'functie_email'
-RECEIVER_ACCOUNT_WISSEL = 'account_wissel'
-RECEIVER_WACHTWOORD_VERGETEN = 'wachtwoord_vergeten'     # 19 lang
-RECEIVER_KAMPIOENSCHAP_JA = 'kampioenschap_ja'
-RECEIVER_KAMPIOENSCHAP_NEE = 'kampioenschap_nee'
+uuid_namespace = uuid5(NAMESPACE_URL, 'TijdelijkeCodes.Models.TijdelijkeUrl')
 
 
-class TijdelijkeUrlDispatcher(object):
+class TijdelijkeCodesDispatcher(object):
 
-    """ de dispatcher voorkomt circulaire dependencies tussen models """
+    """ de dispatcher voorkomt circulaire dependencies tussen modellen en applicaties """
 
     def __init__(self):
         self._dispatcher = dict()       # [entry] = func
@@ -48,32 +44,32 @@ class TijdelijkeUrlDispatcher(object):
         return self._saver
 
 
-tijdelijkeurl_dispatcher = TijdelijkeUrlDispatcher()
+tijdelijkeurl_dispatcher = TijdelijkeCodesDispatcher()
 
 
-def set_tijdelijke_url_receiver(topic, func):
-    """ gebruikers van de tijdelijke url service kunnen hier hun ontvanger functie
+def set_tijdelijke_codes_receiver(topic, func):
+    """ gebruikers van de tijdelijke codes service kunnen hier hun ontvanger functie
         registreren die aangeroepen wordt als de url gebruikt wordt
         De functie moet 2 argument accepteren:
-            een request object en
-            het object waar de url op van toepassing is
+            een django 'request' object en
+            het object waar de url op van toepassing is (typisch account of functie)
         De functie moet de url terug geven voor een http-redirect
     """
     tijdelijkeurl_dispatcher.set_receiver(topic, func)
 
 
-def set_tijdelijke_url_saver(func):
+def set_tijdelijke_code_saver(func):
     """ intern gebruik door Overig.models om de url-saver functie te registreren """
     tijdelijkeurl_dispatcher.set_saver(func)
 
 
-def _maak_url_code(**kwargs):
+def _maak_unieke_code(**kwargs):
     """ Bereken een unieke code die we kunnen gebruiken in een URL
     """
     return uuid5(uuid_namespace, repr(kwargs)).hex
 
 
-def maak_tijdelijke_url_account_email(account, **kwargs):
+def maak_tijdelijke_code_account_email(account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
         account e-mail te bevestigen.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
@@ -81,40 +77,40 @@ def maak_tijdelijke_url_account_email(account, **kwargs):
         De volledige url wordt terug gegeven.
     """
     # TODO: we geven 7 dagen om de mail te bevestigen, maar onvolledige accounts worden na 3 dagen al opgeruimd
-    url_code = _maak_url_code(**kwargs, pk=account.pk)
+    url_code = _maak_unieke_code(**kwargs, pk=account.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_BEVESTIG_ACCOUNT_EMAIL, geldig_dagen=7, account=account)
-    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_url_functie_email(functie):
+def maak_tijdelijke_code_functie_email(functie):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
         functie e-mail te bevestigen.
     """
-    url_code = _maak_url_code(pk=functie.pk, email=functie.nieuwe_email)
+    url_code = _maak_unieke_code(pk=functie.pk, email=functie.nieuwe_email)
     func = tijdelijkeurl_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_BEVESTIG_FUNCTIE_EMAIL, geldig_dagen=7, functie=functie)
-    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_url_accountwissel(account, **kwargs):
+def maak_tijdelijke_code_accountwissel(account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om eenmalig
         in te loggen als het gekozen account.
     """
-    url_code = _maak_url_code(**kwargs, pk=account.pk)
+    url_code = _maak_unieke_code(**kwargs, pk=account.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_ACCOUNT_WISSEL, geldig_seconden=60, account=account)
-    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_url_wachtwoord_vergeten(account, **kwargs):
+def maak_tijdelijke_code_wachtwoord_vergeten(account, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden als het
         account wachtwoord vergeten is.
     """
-    url_code = _maak_url_code(**kwargs, pk=account.pk)
+    url_code = _maak_unieke_code(**kwargs, pk=account.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_WACHTWOORD_VERGETEN, geldig_dagen=7, account=account)
-    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
 def do_dispatch(request, obj):
@@ -156,7 +152,7 @@ def beschrijving_activiteit(obj):
 
     if obj.dispatch_to in (RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
                            RECEIVER_BEVESTIG_FUNCTIE_EMAIL):
-        return "bevestig toegang tot e-mail"
+        return "een e-mailadres te bevestigen"
 
     if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:
         return "een nieuw wachtwoord in te stellen"

@@ -11,7 +11,7 @@ from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie, Functie
 from Mailer.models import MailQueue
-from Overig.models import SiteTijdelijkeUrl
+from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -263,7 +263,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         url = self.url_wijzig_email % self.functie_rcl105.pk
 
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
+        self.assertEqual(TijdelijkeCode.objects.count(), 0)
 
         # eerste invoer
         with self.assert_max_queries(8):
@@ -272,7 +272,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
+        self.assertEqual(TijdelijkeCode.objects.count(), 1)
 
         # controleer dat het nieuwe e-mailadres gezet is
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)
@@ -298,7 +298,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 2)
+        self.assertEqual(TijdelijkeCode.objects.count(), 2)
 
         # controleer dat het nieuwe e-mailadres gezet is
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)
@@ -323,7 +323,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
+        self.assertEqual(TijdelijkeCode.objects.count(), 1)
 
         # controleer dat het laatste nieuwe e-mailadres gezet is
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)
@@ -342,7 +342,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
+        self.assertEqual(TijdelijkeCode.objects.count(), 0)
 
         # controleer dat het laatste nieuwe e-mailadres gezet is
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)

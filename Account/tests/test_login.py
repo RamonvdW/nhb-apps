@@ -11,9 +11,9 @@ from django.conf import settings
 from Account.models import Account
 from Account.forms import LoginForm
 from Mailer.models import MailQueue
-from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from TijdelijkeCodes.operations import maak_tijdelijke_code_account_email
 import datetime
 
 
@@ -136,7 +136,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         account.nieuwe_email = 'normaal@test.com'
         account.save(update_fields=['email_is_bevestigd', 'nieuwe_email'])
 
-        url = maak_tijdelijke_url_account_email(account, test="hallo")
+        url = maak_tijdelijke_code_account_email(account, test="hallo")
         code = url.split('/')[-2]
 
         with self.assert_max_queries(20):
@@ -148,7 +148,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertContains(resp, 'no####l@test.com')
 
         self.e2e_login(self.testdata.account_admin)
-        url = reverse('Overig:tijdelijke-url', kwargs={'code': code})
+        url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
@@ -160,7 +160,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         account.nieuwe_email = 'normaal@test.com'
         account.save(update_fields=['email_is_bevestigd', 'nieuwe_email'])
 
-        url = maak_tijdelijke_url_account_email(account, test="hallo")
+        url = maak_tijdelijke_code_account_email(account, test="hallo")
         code = url.split('/')[-2]
 
         with self.assert_max_queries(20):
@@ -176,7 +176,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         account.nieuwe_email = 'meer_normaal@test.com'
         account.save(update_fields=['nieuwe_email'])
 
-        url = maak_tijdelijke_url_account_email(account, test="hallo")
+        url = maak_tijdelijke_code_account_email(account, test="hallo")
         code = url.split('/')[-2]
 
         # probeer opnieuw in te loggen
@@ -195,7 +195,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail)
 
         self.e2e_login(self.testdata.account_admin)
-        url = reverse('Overig:tijdelijke-url', kwargs={'code': code})
+        url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))

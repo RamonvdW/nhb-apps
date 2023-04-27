@@ -18,10 +18,9 @@ from Account.view_login import account_plugins_login
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
-from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
-                                   RECEIVER_WACHTWOORD_VERGETEN,
-                                   maak_tijdelijke_url_wachtwoord_vergeten)
 from Plein.menu import menu_dynamics
+from TijdelijkeCodes.definities import RECEIVER_WACHTWOORD_VERGETEN
+from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_wachtwoord_vergeten
 import logging
 
 
@@ -40,7 +39,7 @@ def account_stuur_email_wachtwoord_vergeten(account, **kwargs):
 
     # maak de url aan om het e-mailadres te bevestigen
     context = {
-        'url': maak_tijdelijke_url_wachtwoord_vergeten(account, **kwargs),
+        'url': maak_tijdelijke_code_wachtwoord_vergeten(account, **kwargs),
         'naam_site': settings.NAAM_SITE,
         'contact_email': settings.EMAIL_BONDSBUREAU,
     }
@@ -164,7 +163,7 @@ def receive_wachtwoord_vergeten(request, account):
     return reverse('Account:nieuw-wachtwoord')
 
 
-set_tijdelijke_url_receiver(RECEIVER_WACHTWOORD_VERGETEN, receive_wachtwoord_vergeten)
+set_tijdelijke_codes_receiver(RECEIVER_WACHTWOORD_VERGETEN, receive_wachtwoord_vergeten)
 
 
 class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):

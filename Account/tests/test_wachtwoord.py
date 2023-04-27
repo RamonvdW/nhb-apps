@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Overig.models import SiteTijdelijkeUrl
 from Mailer.models import MailQueue
+from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -91,7 +91,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(MailQueue.objects.count(), 0)
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
+        self.assertEqual(TijdelijkeCode.objects.count(), 0)
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
@@ -107,8 +107,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        self.assertEqual(TijdelijkeCode.objects.count(), 1)
+        obj = TijdelijkeCode.objects.all()[0]
 
         self.assertEqual(obj.hoortbij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code
@@ -171,8 +171,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        self.assertEqual(TijdelijkeCode.objects.count(), 1)
+        obj = TijdelijkeCode.objects.all()[0]
         url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
             resp = self.client.post(url)
@@ -194,7 +194,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(MailQueue.objects.count(), 0)
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
+        self.assertEqual(TijdelijkeCode.objects.count(), 0)
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
@@ -206,8 +206,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
-        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        self.assertEqual(TijdelijkeCode.objects.count(), 1)
+        obj = TijdelijkeCode.objects.all()[0]
 
         self.assertEqual(obj.hoortbij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code

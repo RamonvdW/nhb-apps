@@ -12,9 +12,9 @@ from Feedback.operations import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_queue_email
-from Overig.models import save_tijdelijke_url
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
+from TijdelijkeCodes.models import save_tijdelijke_code
 import datetime
 import io
 
@@ -51,8 +51,8 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         mail.toegevoegd_op -= datetime.timedelta(days=92)
         mail.save()
 
-        # maak een tijdelijke url aan
-        save_tijdelijke_url('code', 'test', geldig_dagen=-8)
+        # maak een tijdelijke code aan
+        save_tijdelijke_code('code', 'test', geldig_dagen=-8)
 
         # maak een oude, afgehandelde site feedback aan
         store_feedback('mij', 'rol', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')

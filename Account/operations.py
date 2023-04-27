@@ -8,7 +8,7 @@ from django.conf import settings
 from Mailer.operations import mailer_queue_email
 from Account.models import Account, AccountVerzoekenTeller
 from Overig.helpers import maak_unaccented
-from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
+from TijdelijkeCodes.operations import maak_tijdelijke_code_account_email
 from Mailer.operations import mailer_email_is_valide
 import time
 
@@ -138,7 +138,7 @@ def account_check_gewijzigde_email(account):
             # maak de url aan om het e-mailadres te bevestigen
             # extra parameters are just to make the url unique
             mailadres = account.nieuwe_email
-            url = maak_tijdelijke_url_account_email(account, username=account.username, email=mailadres)
+            url = maak_tijdelijke_code_account_email(account, username=account.username, email=mailadres)
             return url, mailadres
 
     # geen gewijzigde email
@@ -151,7 +151,7 @@ def account_vraag_email_bevestiging(account, **kwargs):
     """
 
     # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_url_account_email(account, **kwargs)
+    url = maak_tijdelijke_code_account_email(account, **kwargs)
 
     text_body = ("Hallo!\n\n"
                  + "Je hebt een account aangemaakt op " + settings.NAAM_SITE + ".\n"

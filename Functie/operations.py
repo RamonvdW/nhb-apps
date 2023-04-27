@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Mailer.operations import mailer_queue_email, render_email_template
-from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
+from TijdelijkeCodes.operations import maak_tijdelijke_code_functie_email
 import datetime
 
 
@@ -69,7 +69,7 @@ def functie_vraag_email_bevestiging(functie):
     """
 
     # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_url_functie_email(functie)
+    url = maak_tijdelijke_code_functie_email(functie)
 
     context = {
         'url': url,

@@ -16,12 +16,11 @@ from Account.forms import ZoekAccountForm, KiesAccountForm
 from Account.models import Account
 from Account.rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
 from Account.view_login import account_plugins_login
-from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
-                                   RECEIVER_ACCOUNT_WISSEL,
-                                   maak_tijdelijke_url_accountwissel)
-from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
+from Plein.menu import menu_dynamics
+from TijdelijkeCodes.definities import RECEIVER_ACCOUNT_WISSEL
+from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_accountwissel
 import logging
 
 
@@ -76,7 +75,7 @@ def receiver_account_wissel(request, account):
     return reverse('Plein:plein')
 
 
-set_tijdelijke_url_receiver(RECEIVER_ACCOUNT_WISSEL, receiver_account_wissel)
+set_tijdelijke_codes_receiver(RECEIVER_ACCOUNT_WISSEL, receiver_account_wissel)
 
 
 class LoginAsZoekView(UserPassesTestMixin, ListView):
@@ -174,7 +173,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
                            activiteit="Wissel naar account %s" % repr(account.username))
 
         # maak een tijdelijke URL aan waarmee de inlog gedaan kan worden
-        url = maak_tijdelijke_url_accountwissel(account, naar_account=account.username)
+        url = maak_tijdelijke_code_accountwissel(account, naar_account=account.username)
         context['login_as_url'] = url
 
         context['kruimels'] = (

@@ -8,7 +8,7 @@ from django.test import TestCase
 from Account.models import Account
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Overig.models import SiteTijdelijkeUrl
+from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Sporter.models import Sporter
@@ -215,7 +215,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
 
         # volg de link om de email te bevestigen
         # (dit test een stukje functionaliteit aangeboden door Account)
-        objs = SiteTijdelijkeUrl.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
+        objs = TijdelijkeCode.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
         self.assertTrue(len(objs) > 0)
         obj = objs[0]
         self.assertEqual(obj.hoortbij_account.nieuwe_email, 'rdetester@gmail.not')

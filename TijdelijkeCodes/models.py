@@ -10,11 +10,11 @@ from datetime import timedelta
 from Account.models import Account
 from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
-from Overig.tijdelijke_url import set_tijdelijke_url_saver
+from TijdelijkeCodes.operations import set_tijdelijke_code_saver
 import datetime
 
 
-class SiteTijdelijkeUrl(models.Model):
+class TijdelijkeCode(models.Model):
     """ Database tabel waarin de URLs staan die we naar buiten toe beschikbaar maken """
 
     # de code die in de url gebruikt kan worden
@@ -65,7 +65,7 @@ class SiteTijdelijkeUrl(models.Model):
         return msg
 
 
-def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, account=None, functie=None):
+def save_tijdelijke_code(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, account=None, functie=None):
 
     if geldig_seconden > 0:
         delta = timedelta(seconds=geldig_seconden)
@@ -74,7 +74,10 @@ def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0
 
     now = timezone.now()
 
-    obj = SiteTijdelijkeUrl(
+    # TODO: voorkom dubbele records voor dezelfde url_code
+    # (voorbeeld: na elke inlog wordt code gebruikt voor bevestigen email)
+
+    obj = TijdelijkeCode(
             url_code=url_code,
             aangemaakt_op=now,
             geldig_tot=now + delta,
@@ -86,10 +89,10 @@ def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0
     return obj
 
 
-set_tijdelijke_url_saver(save_tijdelijke_url)
+set_tijdelijke_code_saver(save_tijdelijke_code)
 
 
-def overig_opschonen(stdout):
+def tijdelijke_url_opschonen(stdout):
     """ deze functie wordt typisch 1x per dag aangeroepen om de database
         tabellen van deze applicatie op te kunnen schonen.
 
@@ -100,7 +103,7 @@ def overig_opschonen(stdout):
     now = timezone.now()
     max_age = now - datetime.timedelta(days=7)
 
-    for obj in (SiteTijdelijkeUrl
+    for obj in (TijdelijkeCode
                 .objects
                 .filter(geldig_tot__lt=max_age)):
 

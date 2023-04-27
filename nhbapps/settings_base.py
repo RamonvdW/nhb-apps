@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'Score.apps.ScoreConfig',
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',
+    'TijdelijkeCodes.apps.TijdelijkeCodesConfig',
     'Vereniging.apps.VerenigingConfig',
     'Webwinkel.apps.WebwinkelConfig',
     'Wedstrijden.apps.WedstrijdenConfig',

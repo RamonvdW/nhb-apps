@@ -7,8 +7,8 @@
 from django.utils import timezone
 from django.test import TestCase
 from django.http import HttpResponseRedirect
-from Overig.models import SiteTijdelijkeUrl
 from Account.plugins import account_add_plugin_login
+from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -240,7 +240,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # wis het tijdelijke urls geheugen zodat we makkelijk het nieuwe record kunnen vinden
-        SiteTijdelijkeUrl.objects.all().delete()
+        TijdelijkeCode.objects.all().delete()
 
         # selecteer de andere schutter
         with self.assert_max_queries(20):
@@ -254,7 +254,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # hak het https deel eraf
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        obj = TijdelijkeCode.objects.all()[0]
         obj.geldig_tot = timezone.now() - datetime.timedelta(seconds=1)
         obj.save()
 
@@ -262,6 +262,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('overig/code-fout.dtl', 'plein/site_layout.dtl'))
 
 # end of file

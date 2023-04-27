@@ -19,7 +19,8 @@ from Account.plugins import account_plugins_login, account_add_plugin_login
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, render_email_template
 from Overig.helpers import get_safe_from_ip
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_ACCOUNT_EMAIL
+from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_ACCOUNT_EMAIL
+from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
 from Plein.menu import menu_dynamics
 from datetime import timedelta
 import logging
@@ -128,7 +129,7 @@ def receive_bevestiging_account_email(request, account):
     return render(request, TEMPLATE_BEVESTIGD, context)
 
 
-set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_account_email)
+set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_account_email)
 
 
 class LoginView(TemplateView):

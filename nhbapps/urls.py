@@ -47,6 +47,7 @@ urlpatterns = [
     path('sporter/bondspas/',               include('Bondspas.urls')),
     path('score/',                          include('Score.urls')),
     path('taken/',                          include('Taken.urls')),
+    path('tijdelijke-codes/',               include('TijdelijkeCodes.urls')),
     path('vereniging/',                     include('Vereniging.urls')),
     path('webwinkel/',                      include('Webwinkel.urls')),
     path('wedstrijden/',                    include('Wedstrijden.urls')),
