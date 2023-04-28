@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import GESLACHT_ALLE
-from Competitie.definities import MUTATIE_EXTRA_RK_DEELNEMER, DEEL_RK, DEELNAME_JA
+from Competitie.definities import MUTATIE_EXTRA_RK_DEELNEMER, DEEL_RK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, CompetitieMutatie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
 from Competitie.operations import KlasseBepaler
@@ -24,6 +24,7 @@ import time
 
 
 TEMPLATE_COMPRAYON_EXTRA_DEELNEMER = 'complaagrayon/bko-extra-deelnemer.dtl'
+TEMPLATE_COMPRAYON_BLANCO_RESULTAAT = 'complaagrayon/bko-blanco-resultaat.dtl'
 
 competitie_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
@@ -118,7 +119,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                     vorige_indiv_klasse = deelnemer.indiv_klasse
                     try:
                         bepaler.bepaal_klasse_deelnemer(deelnemer, wedstrijdgeslacht)
-                    except LookupError as exc:
+                    except LookupError:
                         # geen klasse gevonden --> kan niet meedoen aan het RK
                         pass
                     else:
@@ -194,7 +195,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
         bepaler.begrens_to_rk()
         try:
             bepaler.bepaal_klasse_deelnemer(deelnemer, GESLACHT_ALLE)
-        except LookupError as exc:
+        except LookupError:
             # geen klasse gevonden --> kan niet meedoen aan het RK
             raise Http404('Geen klasse')
 
@@ -239,6 +240,143 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                 # while
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
+        return HttpResponseRedirect(url)
+
+
+class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view laat de BKO een extra deelnemer toevoegen vanuit de regiocompetitie,
+        bijvoorbeeld een aspirant of na correctie score van een sporter (toch nog gekwalificeerd).
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPRAYON_BLANCO_RESULTAAT
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_BKO
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp = (Competitie
+                    .objects
+                    .exclude(is_afgesloten=True)
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        # controleer dat de juiste BKO aan de knoppen zit
+        if self.functie_nu.comp_type != comp.afstand:
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste BKO
+
+        # check competitie fase
+        comp.bepaal_fase()
+        if comp.fase_indiv != 'L':
+            raise Http404('Verkeerde fase')
+
+        context['comp'] = comp
+
+        # zoek kandidaten zonder resultaat
+        context['kandidaten'] = kandidaten = list()
+        prev_klasse = None
+        for deelnemer in (KampioenschapSporterBoog
+                          .objects
+                          .filter(kampioenschap__competitie=comp,
+                                  result_rank=0)
+                          .exclude(deelname=DEELNAME_NEE)
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter',
+                                          'sporterboog__sporter__bij_vereniging',
+                                          'sporterboog__sporter__bij_vereniging__regio',
+                                          'sporterboog__sporter__bij_vereniging__regio__rayon',
+                                          'indiv_klasse')
+                          .order_by('kampioenschap__nhb_rayon',
+                                    'indiv_klasse__volgorde',
+                                    'volgorde')):
+
+            if prev_klasse != deelnemer.indiv_klasse:
+                prev_klasse = deelnemer.indiv_klasse
+                deelnemer.break_klasse = True
+
+            sporter = deelnemer.sporterboog.sporter
+            deelnemer.lid_nr_naam = sporter.lid_nr_en_volledige_naam()
+            deelnemer.competitie_leeftijd = sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
+
+            ver = sporter.bij_vereniging
+            if ver:
+                deelnemer.ver = ver
+                deelnemer.regio_nr = ver.regio.regio_nr
+                deelnemer.rayon_nr = ver.regio.rayon.rayon_nr
+                deelnemer.url = reverse('CompLaagRayon:geef-deelnemer-blanco-resultaat',
+                                        kwargs={'comp_pk': comp.pk, 'deelnemer_pk': deelnemer.pk})
+            else:
+                deelnemer.geen_ver = True
+
+            kandidaten.append(deelnemer)
+        # for
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Extra deelnemer')
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp = (Competitie
+                    .objects
+                    .exclude(is_afgesloten=True)
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        # controleer dat de juiste BKO aan de knoppen zit
+        if self.functie_nu.comp_type != comp.afstand:
+            raise PermissionDenied('Niet de beheerder')     # niet de juiste BKO
+
+        # check competitie fase
+        comp.bepaal_fase()
+        if comp.fase_indiv != 'L':
+            raise Http404('Verkeerde fase')
+
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer = (KampioenschapSporterBoog
+                         .objects
+                         .exclude(deelname=DEELNAME_NEE)
+                         .get(pk=deelnemer_pk,
+                              result_rank=0))
+        except (KeyError, ValueError, KampioenschapSporterBoog.DoesNotExist):
+            raise Http404('Deelnemer niet gevonden')
+
+        sporterboog = deelnemer.sporterboog
+        ver = sporterboog.sporter.bij_vereniging
+        if not ver:
+            raise Http404('Geen vereniging')
+
+        deelnemer.result_rank = KAMP_RANK_BLANCO
+        deelnemer.save(update_fields=['result_rank'])
+
+        account = request.user
+        schrijf_in_logboek(account, 'Competitie', 'Blanco score voor RK deelnemer %s van %s' % (deelnemer, comp))
+
+        url = reverse('CompLaagRayon:geef-blanco-resultaat', kwargs={'comp_pk': comp.pk})
         return HttpResponseRedirect(url)
 
 # end of file

@@ -1,0 +1,94 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Blanco resultaat{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Blanco resultaat</h3>
+            <p>Onderstaande sporters zonder RK score kunnen een blanco resultaat krijgen,<br>waardoor ze doorstromen naar de Bondskampioenschappen van de <b>{{ comp }}</b>.</p>
+            <p>Let op: Sporters die afgemeld zijn worden niet getoond.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 xl10 offset-xl1">
+            <table class="white">
+                {% for obj in kandidaten %}
+                    {% if obj.break_klasse %}
+
+                        <tr>
+                            <td colspan="6" class="center">
+                                <h5>{{ obj.indiv_klasse.beschrijving }}</h5>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Sporter</th>
+                            <th>Vereniging</th>
+                            <th class="center hide-on-small-only">Rayon</th>
+                            <th><!-- toevoegen knop --></th>
+                        </tr>
+
+                    {% endif %}
+
+                    <tr>
+                        <td>{{ obj.lid_nr_naam }}</td>
+                        <td>
+                            {% if obj.geen_ver %}
+                                <span class="nhb-rood-text">Geen vereniging</span>
+                            {% else %}
+                                <span>{{ obj.ver }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="center hide-on-small-only">{% if obj.geen_ver %}<span class="nhb-rood-text">-</span>{% else %}{{ obj.regio_nr }} (Rayon {{ obj.rayon_nr}}){% endif %}</td>
+                        <td class="right-align">
+                            {% if obj.url %}
+                                <a class="btn-nhb-rood modal-trigger" href="#bevestig_{{ obj.pk }}">
+                                    <i class="material-icons-round">done</i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% for obj in kandidaten %}
+        {% if obj.url %}
+            <div class="modal" id="bevestig_{{ obj.pk }}">
+                <div class="modal-content center">
+                    <h5>Sporter blanco resultaat geven?</h5>
+                    <p>Wil je <b>{{ obj.lid_nr_naam }}</b> een blanco RK resultaat geven?</p>
+                    <p>Sporter kan daarmee doorstromen naar de Bondskampioenschappen</p>
+
+                    <form method="post" action="{{ obj.url }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="toevoegen" value="1">
+
+                        <div class="modal-footer" style="text-align:center; display:block">
+                            <div style="display:inline-block; width:50%">
+                                <button class="btn-nhb-rood" type="submit">Ja</button>
+                            </div>
+                            <div style="display:inline-block; width:50%">
+                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-bko-blanco-resultaat" %}
+
+{% endblock %}
