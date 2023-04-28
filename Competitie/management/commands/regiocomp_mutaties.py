@@ -15,7 +15,7 @@ from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from BasisTypen.definities import ORGANISATIE_NHB
 from BasisTypen.operations import get_organisatie_teamtypen
-from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
+from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_BLANCO,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_INITIEEL, MUTATIE_KAMP_CUT, MUTATIE_KAMP_AANMELDEN, MUTATIE_KAMP_AFMELDEN,
                                    MUTATIE_REGIO_TEAM_RONDE, MUTATIE_EXTRA_RK_DEELNEMER,
@@ -1162,7 +1162,7 @@ class Command(BaseCommand):
                          .objects
                          .filter(kampioenschap__competitie=comp,
                                  kampioenschap__deel=DEEL_RK,
-                                 result_rank__lt=100)
+                                 result_rank__lte=KAMP_RANK_BLANCO)
                          .exclude(deelname=DEELNAME_NEE)
                          .exclude(result_rank=0)
                          .select_related('kampioenschap',
