@@ -36,7 +36,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=10,
                         titel="Blanco resultaat",
-                        icoon="check_circle",
+                        icoon="fast_forward",
                         tekst="Sporters die niet hebben kunnen schieten een blanco resultaat geven",
                         url=url)
             kaartjes_indiv.append(kaartje)
