@@ -5,8 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from Mailer.operations import mailer_queue_email
+from Mailer.operations import mailer_queue_email, render_email_template
 from TijdelijkeCodes.operations import maak_tijdelijke_code_account_email
+
+
+EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_account/bevestig-toegang-email.dtl'
 
 
 def account_check_gewijzigde_email(account):
@@ -58,6 +61,23 @@ def account_vraag_email_bevestiging(account, **kwargs):
                        'Aanmaken account voltooien',
                        text_body,
                        enforce_whitelist=False)     # deze mails altijd doorlaten
+
+
+def account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url):
+    """ Stuur een mail om toegang tot het (gewijzigde) e-mailadres te bevestigen """
+
+    context = {
+        'naam_site': settings.NAAM_SITE,
+        'url': ack_url,
+        'contact_email': settings.EMAIL_BONDSBUREAU
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL)
+
+    mailer_queue_email(mailadres,
+                       'Email adres bevestigen',
+                       mail_body,
+                       enforce_whitelist=False)
 
 
 def account_email_bevestiging_ontvangen(account):

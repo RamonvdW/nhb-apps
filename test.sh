@@ -67,6 +67,16 @@ then
     ARGS=${ARGS/--force/}
 fi
 
+FORCE_FULL_COV=0
+if [[ "$ARGS" =~ "--fullcov" ]]
+then
+    echo "[INFO] Forcing full coverage report"
+    FORCE_FULL_COV=1
+    # remove from ARGS used to decide focus
+    # will still be given to ./manage.py where --force has no effect
+    ARGS=${ARGS/--fullcov/}
+fi
+
 KEEP_DB=1
 if [[ "$ARGS" =~ "--clean" ]]
 then
@@ -242,7 +252,7 @@ then
     # delete old coverage report
     rm -rf "$REPORT_DIR" &>>"$LOG"
 
-    if [ -z "$FOCUS" ]
+    if [ -z "$FOCUS" -o $FORCE_FULL_COV -ne 0 ]
     then
         python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
         res=$?

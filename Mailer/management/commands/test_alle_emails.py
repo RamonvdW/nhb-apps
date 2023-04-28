@@ -10,8 +10,9 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Account.models import Account
+from Account.operations.otp import otp_stuur_email_losgekoppeld
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
-from Account.view_login import account_stuur_email_bevestig_nieuwe_email
+from Account.operations.email import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
 from Bestel.definities import BESTELLING_STATUS_WACHT_OP_BETALING
@@ -19,7 +20,6 @@ from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
-from Functie.view_otp_controle import functie_stuur_email_otp_losgekoppeld
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
 from NhbStructuur.models import NhbVereniging, NhbRegio
@@ -345,7 +345,7 @@ class Command(BaseCommand):
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Functie - OTP losgekoppeld')
-        functie_stuur_email_otp_losgekoppeld(self.account)
+        otp_stuur_email_losgekoppeld(self.account)
         self._check_mail_gemaakt()
 
     def _test_taken(self):

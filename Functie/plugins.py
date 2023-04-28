@@ -9,7 +9,7 @@ from Account.plugin_manager import account_add_plugin_post_login_redirect
 
 
 def functie_post_login_redirect_plugin(request, account):
-    """ Deze functie wordt aangeroepen vanuit de Account login view
+    """ Deze plugin functie wordt aangeroepen vanuit de Account login view
         (de koppeling wordt gelegd in Functie.apps.ready)
 
         We sturende gebruiker naar de 2FA pagina, indien van toepassing

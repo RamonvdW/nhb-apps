@@ -6,7 +6,9 @@
 
 from django.conf import settings
 from django.shortcuts import render
-from Account.operations.email import account_check_gewijzigde_email, account_email_bevestiging_ontvangen
+from Account.operations.email import (account_check_gewijzigde_email,
+                                      account_email_bevestiging_ontvangen,
+                                      account_stuur_email_bevestig_nieuwe_email)
 from Account.plugin_manager import account_add_plugin_login_gate
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, render_email_template
@@ -21,26 +23,7 @@ TEMPLATE_EMAIL_BEVESTIG_NIEUWE = 'account/email-bevestig-nieuwe.dtl'
 TEMPLATE_EMAIL_BEVESTIG_HUIDIGE = 'account/email-bevestig-huidige.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'account/email-bevestigd.dtl'
 
-EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_account/bevestig-toegang-email.dtl'
-
 my_logger = logging.getLogger('NHBApps.Account')
-
-
-def account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url):
-    """ Stuur een mail om toegang tot het (gewijzigde) e-mailadres te bevestigen """
-
-    context = {
-        'naam_site': settings.NAAM_SITE,
-        'url': ack_url,
-        'contact_email': settings.EMAIL_BONDSBUREAU
-    }
-
-    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL)
-
-    mailer_queue_email(mailadres,
-                       'Email adres bevestigen',
-                       mail_body,
-                       enforce_whitelist=False)
 
 
 def account_check_nieuwe_email(request, from_ip, account):
