@@ -12,8 +12,8 @@ from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Account.models import Account
-from Account.operations import account_test_wachtwoord_sterkte
-from Account.otp import otp_zet_control_niet_gelukt
+from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
+from Account.operations.otp import otp_zet_control_niet_gelukt
 from Account.view_login import account_plugins_login_gate
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek

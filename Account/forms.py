@@ -33,9 +33,32 @@ class LoginForm(forms.Form):
                         initial=False,
                         required=False)     # avoids form validation failure when not checked
 
-    next = forms.CharField(
+    next_url = forms.CharField(
                         required=False,
                         widget=forms.HiddenInput())
+
+    def _validate_inlog_velden(self, valid):
+        if valid:
+            login_naam = self.cleaned_data.get("login_naam")
+            wachtwoord = self.cleaned_data.get("wachtwoord")
+            # print("cleaned_data: %s" % repr(self.cleaned_data))
+            if login_naam == "" or wachtwoord == "":
+                self.add_error(None, 'Niet alle velden zijn ingevuld')
+                valid = False
+        return valid
+
+    # def _validate_next_url(self, valid):
+    #     if valid:
+    #         next_url = self.cleaned_data.get('next_url')
+    #         if next_url:
+    #             if next_url[-1] != '/':
+    #                 next_url += '/'
+    #             try:
+    #                 resolve(next_url)
+    #             except Resolver404:
+    #                 # cancel this invalid URL
+    #                 valid = False
+    #     return valid
 
     def is_valid(self):
         """
@@ -46,16 +69,11 @@ class LoginForm(forms.Form):
             die door login.dtl in het formulier getoond worden aan de gebruiker.
         """
         valid = super(forms.Form, self).is_valid()
-        if valid:
-            login_naam = self.cleaned_data.get("login_naam")
-            wachtwoord = self.cleaned_data.get("wachtwoord")
-            # print("cleaned_data: %s" % repr(self.cleaned_data))
-            if login_naam == "" or wachtwoord == "":
-                self.add_error(None, 'Niet alle velden zijn ingevuld')
-                valid = False
+        valid = self._validate_inlog_velden(valid)
 
-            # 'next' is checked when used, not here
-
+        # controle wordt gedaan bij gebruik
+        # en stuurt naar plein voor onbekende urls
+        # valid = self._validate_next_url(valid)
         return valid
 
 

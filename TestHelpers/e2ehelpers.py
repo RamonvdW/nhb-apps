@@ -9,8 +9,7 @@ from django.core import management
 from django.conf import settings
 from django.test import TestCase, Client, override_settings
 from django.db import connection
-from Account.models import Account
-from Account.operations import account_create
+from Account.operations.aanmaken import account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from Mailer.models import MailQueue
 from TestHelpers.e2estatus import validated_templates, included_templates, consistent_email_templates
@@ -273,7 +272,7 @@ class E2EHelpers(TestCase):
         soup = BeautifulSoup(content, features="html.parser")
         long_msg.append(soup.prettify())
 
-        return '', long_msg
+        return "?? (long msg follows):\n" + "\n".join(long_msg), long_msg
 
     def e2e_dump_resp(self, resp):                        # pragma: no cover
         short_msg, long_msg = self._interpreteer_resp(resp)
@@ -815,6 +814,9 @@ class E2EHelpers(TestCase):
                 self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
+        if isinstance(resp, str):
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
+
         if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
             if resp.status_code == 200:

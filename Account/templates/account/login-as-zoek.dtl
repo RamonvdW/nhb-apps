@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -22,25 +22,25 @@
         function do_selecteer(id)
         {
             // voer een POST uit om toe te voegen
-            const form = document.createElement('form')
-            form.setAttribute('method', 'post')
-            form.setAttribute('action', '{{ url }}')
+            const form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', '{{ url }}');
 
-            let inp = document.createElement('input')
-            inp.type = "hidden"
-            inp.name = "selecteer"
-            inp.value = id.getAttribute("data-pk")
-            form.appendChild(inp)
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "selecteer";
+            inp.value = id.getAttribute("data-pk");
+            form.appendChild(inp);
 
-            inp = document.createElement('input')
-            inp.type = "hidden"
-            inp.name = "csrfmiddlewaretoken"
-            inp.value = getCookie('csrftoken')
-            form.appendChild(inp)
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
 
-            form.style.display = 'hidden'
-            document.body.appendChild(form)
-            form.submit()
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 

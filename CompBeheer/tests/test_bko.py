@@ -50,7 +50,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         s1 = timezone.now()
         print('%s: populating testdata start' % cls.__name__)
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
         cls.testdata.maak_clubs_en_sporters()
         cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
         cls.testdata.maak_bondscompetities()

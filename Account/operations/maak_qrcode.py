@@ -16,7 +16,7 @@ import qrcode
 import pyotp
 import io
 
-my_logger = logging.getLogger('NHBApps.Functie')
+my_logger = logging.getLogger('NHBApps.Account')
 
 
 # the QR code versie bepaalt het aantal data plekken in de code
@@ -68,7 +68,7 @@ def qrcode_get(account):
                                issuer_name=settings.OTP_ISSUER_NAME)
 
     if len(uri) > 150:
-        my_logger.error('Functie.qrcode: te lange uri (%s): %s' % (len(uri), repr(uri)))
+        my_logger.error('Account.operations.maak_qrcode: te lange uri (%s): %s' % (len(uri), repr(uri)))
 
     stream = io.BytesIO()
     make_qr_code_image(uri).save(stream, kind="SVG")

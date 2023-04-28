@@ -123,7 +123,7 @@ class TestBeheer(E2EHelpers, TestCase):
         # redirect naar wissel-van-rol pagina
         with self.assert_max_queries(20):
             resp = self.client.get('/beheer/', follow=True)
-        self.assertEqual(resp.redirect_chain[-1], ('/functie/otp-controle/?next=/beheer/', 302))
+        self.assertEqual(resp.redirect_chain[-1], ('/account/otp-controle/?next=/beheer/', 302))
 
         self.e2e_assert_other_http_commands_not_supported('/beheer/')
 

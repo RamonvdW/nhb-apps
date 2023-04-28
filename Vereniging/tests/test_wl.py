@@ -33,7 +33,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ eenmalige setup voor alle tests

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.admin.sites import AdminSite
-from Account.otp import otp_is_controle_gelukt
+from Account.operations.otp import otp_is_controle_gelukt
 from collections import OrderedDict
 
 # aanpassingen van de ingebouwde Admin site
@@ -73,7 +73,7 @@ class BeheerAdminSite(AdminSite):
         return (request.user.is_active
                 and request.user.is_staff
                 and request.user.is_authenticated
-                and account_rechten_is_otp_verified(request))
+                and otp_is_controle_gelukt(request))
 
     # overrides django/contrib/admin/sites.py:AdminSite:get_app_list
     def get_app_list(self, request, app_label=None):

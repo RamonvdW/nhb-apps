@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from Account.forms import OTPControleForm
-from Account.otp import otp_controleer_code
+from Account.operations.otp import otp_controleer_code
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Plein.menu import menu_dynamics
 

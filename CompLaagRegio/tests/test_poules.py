@@ -37,7 +37,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr

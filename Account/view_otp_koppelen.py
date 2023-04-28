@@ -10,8 +10,8 @@ from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.forms import OTPControleForm
-from Account.maak_qrcode import qrcode_get
-from Account.otp import otp_prepare_koppelen, otp_koppel_met_code
+from Account.operations.maak_qrcode import qrcode_get
+from Account.operations.otp import otp_prepare_koppelen, otp_koppel_met_code
 from Functie.rol import rol_bepaal_beschikbare_rollen, rol_bepaal_beschikbare_rollen_opnieuw, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 

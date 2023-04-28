@@ -10,5 +10,9 @@ from django.apps import AppConfig
 class AccountConfig(AppConfig):
     name = 'Account'
 
+    def ready(self):
+        # laat de plugin zich registeren
+        import Account.plugins
+
 
 # end of file

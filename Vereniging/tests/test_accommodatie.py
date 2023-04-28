@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,7 +34,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ eenmalige setup voor alle tests

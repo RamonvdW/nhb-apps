@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Account.models import Account
 from Functie.operations import maak_functie
+from Mailer.models import MailQueue
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -17,18 +18,19 @@ import datetime
 
 class TestOverigActiviteit(E2EHelpers, TestCase):
 
-    """ tests voor de Overig applicatie; module Account Activiteit """
+    """ tests voor de Overig applicatie; module Activiteit """
 
     test_after = ('Account.tests.test_login',)
 
     url_activiteit = '/overig/activiteit/'
+    url_loskoppelen = '/overig/otp-loskoppelen/'
 
     testdata = None
 
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -77,6 +79,9 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit)
+        self.assert403(resp)
+
+        resp = self.client.post(self.url_loskoppelen)
         self.assert403(resp)
 
     def test_normaal(self):
@@ -303,5 +308,57 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
+    def test_loskoppelen(self):
+        self.testdata.account_admin.otp_is_actief = True
+        self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
+        self.testdata.account_admin.save()
+
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        # loskoppelen via POST
+
+        # bad input: geen parameters
+        resp = self.client.post(self.url_loskoppelen, {})
+        self.assert_is_redirect(resp, '/overig/activiteit/')
+
+        # bad input: geen login parameter
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: niet bestaande login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': 'Jantje'})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: rare tekens in login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': '###'})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: geen login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': ''})
+        self.assert404(resp, 'Niet gevonden')
+
+        # echt loskoppelen
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': self.testdata.account_admin.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
+
+        # controleer losgekoppeld
+        account = Account.objects.get(username=self.testdata.account_admin.username)
+        self.assertFalse(account.otp_is_actief)
+
+        # er moet nu een mail in de MailQueue staan met een single-use url
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
+
+        # al losgekoppeld
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': self.testdata.account_admin.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
 
 # end of file

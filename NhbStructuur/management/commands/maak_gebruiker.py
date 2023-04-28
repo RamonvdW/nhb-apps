@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from Account.models import Account
-from Account.operations import account_create
+from Account.operations.aanmaken import account_create
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -19,7 +19,7 @@ from random import random
 
 
 class Command(BaseCommand):
-    help = "Maak een Account aan"
+    help = "Voeg een sporter lid toe en maak een account aan"
 
     def add_arguments(self, parser):
         parser.add_argument('ver_nr', nargs=1)

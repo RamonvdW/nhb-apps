@@ -26,7 +26,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
 
     def _login_plugin(self, request, from_ip, account):
         if self._login_plugin_mode == 1:

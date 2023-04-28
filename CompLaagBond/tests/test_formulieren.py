@@ -36,7 +36,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         s1 = timezone.now()
 
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities()
 

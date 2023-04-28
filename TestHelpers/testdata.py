@@ -10,7 +10,7 @@ from django.test import Client
 from django.core import management
 from django.utils import timezone
 from Account.models import Account
-from Account.operations import account_create
+from Account.operations.aanmaken import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
                                    MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
@@ -60,7 +60,7 @@ class TestData(object):
 
     url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'  # comp_pk
     url_account_login = '/account/login/'
-    url_check_otp = '/functie/otp-controle/'
+    url_check_otp = '/account/otp-controle/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_wissel_van_rol = '/functie/wissel-van-rol/'
     url_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'   # deelcomp_pk
@@ -330,7 +330,7 @@ class TestData(object):
 
         self._verwerk_regiocomp_mutaties()
 
-    def maak_accounts(self):
+    def maak_accounts_admin_en_bb(self):
         """
             Maak de standaard accounts aan die voor de meeste testen nodig zijn:
                 account_admin:  met IT beheer rechten

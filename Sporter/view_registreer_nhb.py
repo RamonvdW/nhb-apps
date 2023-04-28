@@ -5,11 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from Account.operations import AccountCreateError, account_create, account_vraag_email_bevestiging
+from Account.operations.aanmaken import AccountCreateError, account_create
+from Account.operations.email import account_vraag_email_bevestiging
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email

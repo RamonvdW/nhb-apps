@@ -29,7 +29,7 @@ class TestCompLaagRayonBko(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()       # maakt account_beheerders, die nodig is voor BKO
         cls.ver_nr = data.regio_ver_nrs[cls.regio_nr][0]
         data.maak_bondscompetities()

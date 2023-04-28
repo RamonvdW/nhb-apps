@@ -7,7 +7,7 @@
 """ Ondersteuning voor de rollen binnen de NHB applicaties """
 
 from django.contrib.sessions.backends.db import SessionStore
-from Account.otp import otp_is_controle_gelukt
+from Account.operations.otp import otp_is_controle_gelukt
 from Account.models import AccountSessions
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Kampioenschap

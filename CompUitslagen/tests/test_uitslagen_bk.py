@@ -30,7 +30,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
         cls.testdata.maak_clubs_en_sporters()
         cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
         cls.testdata.maak_bondscompetities()
