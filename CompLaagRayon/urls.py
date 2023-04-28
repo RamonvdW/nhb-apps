@@ -94,6 +94,7 @@ urlpatterns = [
          view_formulieren.FormulierTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
 
+
     # BKO
     path('<comp_pk>/extra-deelnemer/',
          view_bko.ExtraDeelnemerView.as_view(),
@@ -102,6 +103,15 @@ urlpatterns = [
     path('<comp_pk>/extra-deelnemer/<deelnemer_pk>/toevoegen/',
          view_bko.ExtraDeelnemerView.as_view(),
          name='rayon-extra-deelnemer-toevoegen'),
+
+    path('<comp_pk>/blanco-resultaat/',
+         view_bko.GeefBlancoResultaatView.as_view(),
+         name='geef-blanco-resultaat'),
+
+    path('<comp_pk>/blanco-resultaat/<deelnemer_pk>/toevoegen/',
+         view_bko.GeefBlancoResultaatView.as_view(),
+         name='geef-deelnemer-blanco-resultaat'),
+
 ]
 
 # end of file

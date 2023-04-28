@@ -7,7 +7,8 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW
+from Competitie.definities import (DEEL_RK, DEELNAME_NEE,
+                                   KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
@@ -293,12 +294,17 @@ class UitslagenRayonIndivView(TemplateView):
                     deelnemer.scores_str_1 = "-"
                     deelnemer.scores_str_2 = ""
 
-                elif deelnemer.result_rank < 100:
+                elif deelnemer.result_rank == KAMP_RANK_BLANCO:
+                    deelnemer.scores_str_1 = '-'
+                    deelnemer.scores_str_2 = '(blanco)'
+                    deelnemer.geen_rank = True
+
+                elif deelnemer.result_rank < KAMP_RANK_BLANCO:
                     deelnemer.scores_str_1 = "%s (%s+%s)" % (deelnemer.result_score_1 + deelnemer.result_score_2,
                                                              deelnemer.result_score_1,
                                                              deelnemer.result_score_2)
                     deelnemer.scores_str_2 = deelnemer.result_counts        # 25m1pijl only
-                    deelnemer.geen_rank = (deelnemer.result_rank == KAMP_RANK_UNKNOWN)
+                    deelnemer.geen_rank = (deelnemer.result_rank == KAMP_RANK_UNKNOWN)      # unknown = 99
 
             curr_teller.aantal_regels += 1
         # for

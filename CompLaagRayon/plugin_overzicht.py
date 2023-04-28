@@ -30,6 +30,17 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                         url=url)
             kaartjes_teams.append(kaartje)
 
+        # blanco resultaat geven
+        if comp.fase_indiv == 'L':
+            url = reverse('CompLaagRayon:geef-blanco-resultaat', kwargs={'comp_pk': comp.pk})
+            kaartje = SimpleNamespace(
+                        prio=10,
+                        titel="Blanco resultaat",
+                        icoon="check_circle",
+                        tekst="Sporters die niet hebben kunnen schieten een blanco resultaat geven",
+                        url=url)
+            kaartjes_indiv.append(kaartje)
+
         # afsluiten RK individueel / doorzetten naar BK individueel
         if comp.fase_indiv == 'L':
             url = reverse('CompBeheer:bko-rk-indiv-doorzetten-naar-bk', kwargs={'comp_pk': comp.pk})
