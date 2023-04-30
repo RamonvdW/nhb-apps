@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
         return limiet
 
-    def _verwerk_mutatie_initieel_klasse_teams(self, deelkamp, team_klasse):
+    def _verwerk_mutatie_initieel_klasse_bk_teams(self, deelkamp, team_klasse):
         # Bepaal de top-X teams voor een klasse van een kampioenschap
         # De kampioenen aangevuld met de teams met hoogste gemiddelde
         # gesorteerde op gemiddelde
@@ -115,17 +115,6 @@ class Command(BaseCommand):
                     rank += 1
                     obj.rank = rank
                 obj.save(update_fields=['rank', 'volgorde'])
-        # for
-
-    def _verwerk_mutatie_initieel_deelkamp_teams(self, deelkamp):
-        # bepaal alle wedstrijdklassen aan de hand van de ingeschreven teams
-        for team in (KampioenschapTeam
-                     .objects
-                     .filter(kampioenschap=deelkamp)
-                     .distinct('team_klasse')):
-
-            # sorteer de lijst op gemiddelde en bepaalde volgorde
-            self._verwerk_mutatie_initieel_klasse_teams(deelkamp, team.team_klasse)
         # for
 
     def _maak_bk_teams(self, comp):
@@ -220,7 +209,14 @@ class Command(BaseCommand):
             # for
         # for
 
-        self._verwerk_mutatie_initieel_deelkamp_teams(deelkamp_bk)
+        # bepaal alle wedstrijdklassen aan de hand van de ingeschreven teams
+        for team in (KampioenschapTeam
+                     .objects
+                     .filter(kampioenschap=deelkamp_bk)
+                     .distinct('team_klasse')):
+            # sorteer de lijst op gemiddelde en bepaalde volgorde
+            self._verwerk_mutatie_initieel_klasse_bk_teams(deelkamp_bk, team.team_klasse)
+        # for
 
     def handle(self, *args, **options):
         afstand = options['afstand']
