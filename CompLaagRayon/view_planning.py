@@ -397,8 +397,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_dagen(deelcomp_rk, wedstrijd):
         opt_dagen = list()
-        when = deelcomp_rk.competitie.begin_fase_L_indiv
-        stop = deelcomp_rk.competitie.einde_fase_L_indiv
+        when = min(deelcomp_rk.competitie.begin_fase_L_indiv, deelcomp_rk.competitie.begin_fase_L_teams)
+        stop = max(deelcomp_rk.competitie.einde_fase_L_indiv, deelcomp_rk.competitie.einde_fase_L_teams)
         weekdag_nr = 0
         limit = 30
         while limit > 0 and when <= stop:
@@ -560,11 +560,13 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide verzoek')
 
         # weekdag is een offset ten opzicht van de eerste toegestane RK wedstrijddag
-        match.datum_wanneer = deelkamp.competitie.begin_fase_L_indiv + datetime.timedelta(days=weekdag)
+        begin = min(deelkamp.competitie.begin_fase_L_indiv, deelkamp.competitie.begin_fase_L_teams)
+        match.datum_wanneer = begin + datetime.timedelta(days=weekdag)
 
         # check dat datum_wanneer nu in de ingesteld RK periode valt
         if not (comp.begin_fase_L_indiv <= match.datum_wanneer <= comp.einde_fase_L_indiv):
-            raise Http404('Geen valide datum')
+            if not (comp.begin_fase_L_teams <= match.datum_wanneer <= comp.einde_fase_L_teams):
+                raise Http404('Geen valide datum')
 
         # vertaal aanvang naar een tijd
         uur = aanvang // 100
