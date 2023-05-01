@@ -24,14 +24,15 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         deelkamp_bk = Kampioenschap.objects.select_related('competitie').get(competitie=comp, deel=DEEL_BK)
 
         # Planning BK wedstrijden
-        url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp_bk.pk})
-        kaartje = SimpleNamespace(
-                    prio=3,
-                    titel="Planning",
-                    icoon="pending_actions",
-                    tekst="Landelijke planning voor deze competitie.",
-                    url=url)
-        kaartjes_algemeen.append(kaartje)
+        if not deelkamp_bk.is_afgesloten:
+            url = reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp_bk.pk})
+            kaartje = SimpleNamespace(
+                        prio=3,
+                        titel="Planning",
+                        icoon="pending_actions",
+                        tekst="Landelijke planning voor deze competitie.",
+                        url=url)
+            kaartjes_algemeen.append(kaartje)
 
         # BK kleine klassen samenvoegen
         if comp.fase_indiv == 'N':
