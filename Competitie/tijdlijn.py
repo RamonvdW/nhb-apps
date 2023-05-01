@@ -19,7 +19,7 @@ comp_fase_kort = {
     'J': 'voorbereiding RK',
     'K': 'voorbereiding RK',
     'L': 'wedstrijden RK',
-    'N': 'vaststellen uitslagen RK',
+    'N': 'kleine klassen samenvoegen BK',
     'O': 'voorbereiding BK',
     'P': 'wedstrijden BK',
     'Q': 'einde competitie',
