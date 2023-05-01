@@ -36,7 +36,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             kaartje = SimpleNamespace(
                         prio=10,
                         titel="Blanco resultaat",
-                        icoon="check_circle",
+                        icoon="fast_forward",
                         tekst="Sporters die niet hebben kunnen schieten een blanco resultaat geven",
                         url=url)
             kaartjes_indiv.append(kaartje)
@@ -102,14 +102,15 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             pass
         else:
             # Planning RK wedstrijden
-            url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp_rk.pk})
-            kaartje = SimpleNamespace(
-                        prio=3,
-                        titel="Planning %s" % deelkamp_rk.nhb_rayon.naam,
-                        icoon="pending_actions",
-                        tekst="Planning voor %s voor deze competitie." % deelkamp_rk.nhb_rayon.naam,
-                        url=url)
-            kaartjes_algemeen.append(kaartje)
+            if not deelkamp_rk.is_afgesloten:
+                url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                kaartje = SimpleNamespace(
+                            prio=3,
+                            titel="Planning %s" % deelkamp_rk.nhb_rayon.naam,
+                            icoon="pending_actions",
+                            tekst="Planning voor %s voor deze competitie." % deelkamp_rk.nhb_rayon.naam,
+                            url=url)
+                kaartjes_algemeen.append(kaartje)
 
             # RK selectie individueel
             if 'J' <= comp.fase_indiv <= 'L':

@@ -53,7 +53,7 @@
                         <td class="right-align">
                             {% if obj.url %}
                                 <a class="btn-nhb-rood modal-trigger" href="#bevestig_{{ obj.pk }}">
-                                    <i class="material-icons-round">done</i>
+                                    <i class="material-icons-round">fast_forward</i>
                                 </a>
                             {% endif %}
                         </td>
