@@ -81,6 +81,8 @@ class UitslagenBKIndivView(TemplateView):
         except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
+        context['deelkamp_bk'] = deelkamp_bk
+
         if comp.fase_indiv == 'O':
             context['bevestig_tot_datum'] = comp.begin_fase_P_indiv - datetime.timedelta(days=14)
 
@@ -273,6 +275,8 @@ class UitslagenBKTeamsView(TemplateView):
                                 competitie__pk=comp_pk))
         except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
+
+        context['deelkamp_bk'] = deelkamp_bk
 
         # als de gebruiker ingelogd is, laat dan de voor de teams van zijn vereniging zien wie er in de teams zitten
         toon_team_leden_van_ver_nr = None

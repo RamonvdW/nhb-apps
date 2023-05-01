@@ -29,7 +29,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslag BK individueel</h3>
-            <p>{% if comp.fase_indiv > 'P' %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele bondskampioenschappen</p>
+            <p>{% if deelkamp_bk.is_klaar_indiv %}Eindstand van{% else %}Deelnemerslijst voor{% endif %} de individuele bondskampioenschappen</p>
         </div>
     </div>
 
