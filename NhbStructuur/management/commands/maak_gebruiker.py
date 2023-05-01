@@ -19,7 +19,7 @@ from random import random
 
 
 class Command(BaseCommand):
-    help = "Maak een Account aan"
+    help = "Voeg een sporter lid toe en maak een account aan"
 
     def add_arguments(self, parser):
         parser.add_argument('ver_nr', nargs=1)
