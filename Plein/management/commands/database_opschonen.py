@@ -9,6 +9,7 @@
 
 from django.core.management.base import BaseCommand
 from Account.models import accounts_opschonen
+from Beheer.views import beheer_opschonen
 from Feedback.models import feedback_opschonen
 from Logboek.models import logboek_opschonen
 from Mailer.models import mailer_opschonen
@@ -22,6 +23,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         accounts_opschonen(self.stdout)
+        beheer_opschonen(self.stdout)
         feedback_opschonen(self.stdout)
         logboek_opschonen(self.stdout)
         mailer_opschonen(self.stdout)

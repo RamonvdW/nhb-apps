@@ -7,9 +7,13 @@
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.utils import timezone
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.sites import AdminSite
 from Account.operations.otp import otp_is_controle_gelukt
 from collections import OrderedDict
+import datetime
+
 
 # aanpassingen van de ingebouwde Admin site
 # hiermee
@@ -87,6 +91,20 @@ class BeheerAdminSite(AdminSite):
         app_list = [elem for elem in app_list if elem['app_label'] != 'auth']
 
         return app_list
+
+
+def beheer_opschonen(stdout):
+    """ verwijder Django admin log regels ouder dan 180 dagen """
+    now = timezone.now()
+    max_age = now - datetime.timedelta(days=180)
+
+    # verwijder oude django admin log entries
+    objs = LogEntry.objects.filter(action_time__lt=max_age)
+
+    count = objs.count()
+    if count > 0:
+        stdout.write('[INFO] Verwijder %s oude django admin log regels' % count)
+        objs.delete()
 
 
 # end of file
