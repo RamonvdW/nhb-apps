@@ -849,6 +849,8 @@ class Command(BaseCommand):
         if self._check_keys(data[0].keys(), EXPECTED_MEMBER_KEYS, OPTIONAL_MEMBER_KEYS, "member"):
             return
 
+        date_now = timezone.now().date()
+
         # houd bij welke leden lid_nrs in de database zitten
         # als deze niet meer voorkomen, dan zijn ze verwijderd
         lid_nrs = list(self._cache_sporter.keys())
@@ -1007,6 +1009,11 @@ class Command(BaseCommand):
                 self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapsdatum: %s' % (
                                         lid_nr, repr(member['member_from'])))
                 self._count_errors += 1
+            else:
+                if lid_sinds > date_now:
+                    lid_blocked = True
+                    self.stdout.write('[INFO] Lidmaatschap voor %s gaat pas in op datum: %s' % (
+                                            lid_nr, repr(member['member_from'])))
 
             lid_email = member['email']
             if not lid_email:
