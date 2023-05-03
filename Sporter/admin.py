@@ -47,7 +47,7 @@ class SporterAdmin(admin.ModelAdmin):
 
     ordering = ('lid_nr',)
 
-    search_fields = ('unaccented_naam', 'lid_nr')
+    search_fields = ('unaccented_naam', 'lid_nr', 'email')
 
     # filter mogelijkheid
     list_filter = ('geslacht', 'is_actief_lid', 'is_erelid', HeeftWaIdListFilter, HeeftAccountFilter, 'para_classificatie', 'bij_vereniging')
