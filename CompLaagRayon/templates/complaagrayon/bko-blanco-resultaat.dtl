@@ -58,6 +58,10 @@
                             {% endif %}
                         </td>
                     </tr>
+                {% empty %}
+                    <tr>
+                        <td class="center">Geen deelnemers zonder resultaat gevonden</td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>

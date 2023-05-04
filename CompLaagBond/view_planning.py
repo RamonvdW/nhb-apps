@@ -686,6 +686,17 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         if self.functie_nu != deelkamp.functie:
             raise Http404('Niet de beheerder')
 
+        comp = deelkamp.competitie
+        if comp.afstand == '25':
+            indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
+            teams_limieten = settings.COMPETITIE_25M_TEAMS_LIMIETEN
+        else:
+            indiv_limieten = settings.COMPETITIE_18M_INDIV_LIMIETEN
+            teams_limieten = settings.COMPETITIE_18M_TEAMS_LIMIETEN
+
+        context['indiv_limieten'] = indiv_limieten
+        context['teams_limieten'] = teams_limieten
+
         context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
                                             .objects
                                             .filter(competitie=deelkamp.competitie,
@@ -766,7 +777,12 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet de beheerder')
 
         comp = deelkamp.competitie
-        # TODO: check competitie fase
+        if comp.afstand == '25':
+            indiv_limieten = settings.COMPETITIE_25M_INDIV_LIMIETEN
+            teams_limieten = settings.COMPETITIE_25M_TEAMS_LIMIETEN
+        else:
+            indiv_limieten = settings.COMPETITIE_18M_INDIV_LIMIETEN
+            teams_limieten = settings.COMPETITIE_18M_TEAMS_LIMIETEN
 
         pk2ckl_indiv = dict()
         pk2ckl_team = dict()
@@ -787,8 +803,8 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
                 except ValueError:
                     pass
                 else:
-                    if pk2keuze_indiv[ckl.pk] not in (24, 20, 16, 12, 8, 4):
-                        raise Http404('Geen valide keuze voor indiv')
+                    if pk2keuze_indiv[ckl.pk] not in indiv_limieten:
+                        raise Http404('Geen valide keuze voor indiv limiet')
         # for
 
         for ckl in (CompetitieTeamKlasse
@@ -805,8 +821,8 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
                 except ValueError:
                     pass
                 else:
-                    if pk2keuze_team[ckl.pk] not in (12, 11, 10, 9, 8, 7, 6, 5, 4):
-                        raise Http404('Geen valide keuze voor team')
+                    if pk2keuze_team[ckl.pk] not in teams_limieten:
+                        raise Http404('Geen valide keuze voor teams limiet')
         # for
 
         wijzig_limiet_indiv = list()     # list of tup(indiv_klasse, nieuwe_limiet, oude_limiet)
