@@ -153,7 +153,7 @@
                 <tr{% if team.niet_deelgenomen %} class="grey-text"{% endif %}>
 
                     <!-- rank -->
-                    <td class="center">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
+                    <td class="center">{% if not team.niet_deelgenomen %}{{ team.rank }}{% endif %}</td>
 
                     <!-- vereniging -->
                     <td>
