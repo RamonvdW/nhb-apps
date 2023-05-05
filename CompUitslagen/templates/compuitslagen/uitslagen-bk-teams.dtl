@@ -101,13 +101,15 @@
 
     {% endif %}
 
-    <!-- witruimte -->
-    <div class="row center" style="margin-bottom:0">
-        <div class="col s12">
-            <h4>Ingeschreven teams</h4>
-            <p>Aantal teams: {{ bk_teams|length }}</p>
+    {% if not deelkamp_bk.is_klaar_teams %}
+        <!-- witruimte -->
+        <div class="row center" style="margin-bottom:0">
+            <div class="col s12">
+                <h4>Geplaatste teams</h4>
+                <p>Aantal teams: {{ bk_teams|length }}</p>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
     {% if not geen_teams %}
         <table class="white">
@@ -141,9 +143,9 @@
                             <span class="hide-on-small-only">Vereniging</span>
                         </th>
                         <th>Team</th>
-                        <th class="hide-on-small-only"></th>       <!-- label -->
-                        <th class="center hide-on-small-only">{% if not team.heeft_uitslag %}RK score{% endif %}</th>
+                        <th class="center hide-on-small-only">{% if not team.klasse_heeft_uitslag %}RK score{% endif %}</th>
                         <th class="right-align" style="padding-right:10px">BK scores</th>
+                        <th class="hide-on-small-only"></th>       <!-- label -->
                         <td rowspan="{{ team.aantal_regels }}" class="nhb-table-zijrand"></td>
                     </tr>
                 {% endif %}
@@ -161,31 +163,59 @@
 
                     <!-- team naam + team leden -->
                     <td>
-                        {% if team.heeft_uitslag %}
-                            {% if team.niet_deelgenomen %}{{ team.team_naam }}{% else %}<b>{{ team.team_naam }}</b>{% endif %}<br>
+                        {% if team.klasse_heeft_uitslag %}
+                            {% if team.niet_deelgenomen %}{{ team.team_naam }}{% else %}<b>{{ team.team_naam }}</b>{% endif %}
 
                             {% for deelnemer in team.deelnemers %}
-                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.naam_str }}{% if deelnemer.is_invaller %}&nbsp;**{% endif %}</span><br>
+                                <br>
+                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.naam_str }}{% if deelnemer.is_invaller %}&nbsp;**{% endif %}</span>
+                            {% empty %}
+                                {% if team.toon_team_leden %}
+                                    {% for team_lid in team.team_leden %}
+                                        <br>
+                                        <span>{{ team_lid.naam_str }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+
+                    <!-- RK score (alleen op deelnemerslijst) -->
+                    <td class="center hide-on-small-only">
+                        {% if not team.klasse_heeft_uitslag %}
+                            <span>{{ team.rk_score_str }}</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- BK score (uitslag) -->
+                    <td class="right-align" style="padding-right:10px">
+                        {% if team.klasse_heeft_uitslag %}
+                            <b>{{ team.bk_score_str }}</b>
+                            {% for deelnemer in team.deelnemers %}
+                                {% if deelnemer.is_uitvaller %}
+                                    <br>
+                                    <span class="grey-text">-</span>
+                                {% else %}
+                                    <br>
+                                    <span>{{ deelnemer.result_totaal }}</span>
+                                {% endif %}
+                            {% empty %}
+                                {% if team.toon_team_leden %}
+                                    {% for team_lid in team.team_leden %}
+                                        <br>
+                                    {% endfor %}
+                                {% endif %}
                             {% endfor %}
                         {% else %}
-                            <span>{{ team.team_naam }}</span>
-                            {% if team.toon_team_leden %}
-                                <br>
-                                {% for team_lid in team.team_leden %}
-                                    <span style="padding-left:50px">{{ team_lid.sporter_str }} ({{ team_lid.gemiddelde }})</span><br>
-                                {% endfor %}
-                            {% endif %}
+                            <i class="grey-text">{% if team.niet_deelgenomen %}-{% else %}komt later{% endif %}</i>
                         {% endif %}
                     </td>
 
                     <!-- label -->
-                    <td class="hide-on-small-only">
-                        {% if team.heeft_uitslag %}
+                    <td class="hide-on-small-only center">
+                        {% if team.klasse_heeft_uitslag %}
                             {% if team.result_rank == 1 %}
-                                <span>Bondskampioen</span><br>
-                                {% for deelnemer in team.deelnemers %}
-                                    <br>
-                                {% endfor %}
+                                <span>Bondskampioen</span>
                             {% endif %}
                         {% else %}
                             {% if team.niet_deelgenomen %}
@@ -198,24 +228,6 @@
                         {% endif %}
                     </td>
 
-                    <!-- RK score (alleen op deelnemerslijst) -->
-                    <td class="center hide-on-small-only">
-                        {% if not team.heeft_uitslag %}
-                            <span>{{ team.rk_score_str }}</span>
-                        {% endif %}
-                    </td>
-
-                    <!-- BK score (uitslag) -->
-                    <td class="right-align" style="padding-right:10px">
-                        {% if team.heeft_uitslag %}
-                            <b>{{ team.bk_score_str }}</b><br>
-                            {% for deelnemer in team.deelnemers %}
-                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.result_totaal }}</span><br>
-                            {% endfor %}
-                        {% else %}
-                            <i class="grey-text">{% if team.niet_deelgenomen %}-{% else %}komt later{% endif %}</i>
-                        {% endif %}
-                    </td>
                 </tr>
 
             {% endfor %}

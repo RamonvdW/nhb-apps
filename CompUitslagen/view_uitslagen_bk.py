@@ -7,12 +7,15 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
-from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN
+from Competitie.definities import (DEEL_RK, DEEL_BK,
+                                   DEELNAME_NEE,
+                                   KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN, KAMP_RANK_BLANCO)
 from Competitie.models import (Competitie, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from types import SimpleNamespace
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_BK_INDIV = 'compuitslagen/uitslagen-bk-indiv.dtl'
@@ -243,6 +246,50 @@ class UitslagenBKTeamsView(TemplateView):
                                             'team_type': team.afkorting.lower()})
         # for
 
+    @staticmethod
+    def _finalize_klasse(deelkamp_bk, done, plan, afgemeld):
+        if len(done) > 0:
+            teller = done[0]
+            # er is uitslag, dus overige teams hebben niet meegedaan
+            for plan_team in plan:
+                plan_team.rank = ''
+                plan_team.niet_deelgenomen = True
+                plan_team.klasse_heeft_uitslag = True
+            # for
+            for afgemeld_team in afgemeld:
+                afgemeld_team.rank = ''
+                afgemeld_team.niet_deelgenomen = True
+                afgemeld_team.klasse_heeft_uitslag = True
+            # for
+
+        elif len(plan) > 0:
+            # er is geen uitslag, maar misschien hebben teams vrijstelling
+            teller = plan[0]
+            if deelkamp_bk.is_afgesloten:
+                for plan_team in plan:
+                    plan_team.rank = ''
+                    plan_team.niet_deelgenomen = True
+                # for
+                for afgemeld_team in afgemeld:
+                    afgemeld_team.rank = ''
+                    afgemeld_team.niet_deelgenomen = True
+                # for
+
+        elif len(afgemeld) > 0:
+            # alle teams afgemeld
+            teller = afgemeld[0]
+            if deelkamp_bk.is_afgesloten:
+                for afgemeld_team in afgemeld:
+                    afgemeld_team.rank = ''
+                    afgemeld_team.niet_deelgenomen = True
+                    afgemeld_team.klasse_heeft_uitslag = True
+                # for
+
+        else:
+            teller = None
+
+        return teller
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -323,17 +370,16 @@ class UitslagenBKTeamsView(TemplateView):
             wkl2limiet[limiet.team_klasse.pk] = limiet.limiet
         # for
 
-        bk_teams = (KampioenschapTeam
-                    .objects
-                    .filter(kampioenschap=deelkamp_bk,
-                            team_klasse__team_type=teamtype)
-                    .select_related('team_klasse',
-                                    'vereniging')
-                    .prefetch_related('gekoppelde_leden',
-                                      'feitelijke_leden')
-                    .order_by('team_klasse__volgorde',      # klassen in de uitslag
-                              'result_rank',                # teams binnen elke klasse
-                              'volgorde'))                  # niet meegedaan
+        bk_cache = dict()      # [pk] = KampioenschapSporterBoog()
+        for deelnemer in (KampioenschapSporterBoog
+                          .objects
+                          .filter(kampioenschap__competitie=deelkamp_bk.competitie,
+                                  kampioenschap__deel=DEEL_RK)      # RK sporters in BK teams!
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter')):
+            deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
+            bk_cache[deelnemer.pk] = deelnemer
+        # for
 
         context['bk_teams'] = totaal_lijst = list()
 
@@ -342,48 +388,21 @@ class UitslagenBKTeamsView(TemplateView):
         klasse_teams_plan = list()
         klasse_teams_afgemeld = list()
         aantal_regels = 0
-        for team in bk_teams:
+        limiet = 0
+        for team in (KampioenschapTeam
+                     .objects
+                     .filter(kampioenschap=deelkamp_bk,
+                             team_klasse__team_type=teamtype)
+                     .select_related('team_klasse',
+                                     'vereniging')
+                     .prefetch_related('gekoppelde_leden',
+                                       'feitelijke_leden')
+                     .order_by('team_klasse__volgorde',      # klassen in de uitslag
+                               'result_rank',                # teams binnen elke klasse
+                               'volgorde')):                 # niet meegedaan
+
             if team.team_klasse != prev_klasse:
-                if len(klasse_teams_done) > 0:
-                    teller = klasse_teams_done[0]
-                    # er is uitslag, dus overige teams hebben niet meegedaan
-                    for plan_team in klasse_teams_plan:
-                        plan_team.rank = ''
-                        plan_team.niet_deelgenomen = True
-                        plan_team.heeft_uitslag = True
-                    # for
-                    for afgemeld_team in klasse_teams_afgemeld:
-                        afgemeld_team.rank = ''
-                        afgemeld_team.niet_deelgenomen = True
-                        afgemeld_team.heeft_uitslag = True
-                    # for
-
-                elif len(klasse_teams_plan) > 0:
-                    # er is geen uitslag, maar misschien hebben teams vrijstelling
-                    teller = klasse_teams_plan[0]
-                    if deelkamp_bk.is_afgesloten:
-                        for plan_team in klasse_teams_plan:
-                            plan_team.rank = ''
-                            plan_team.niet_deelgenomen = True
-                        # for
-                        for afgemeld_team in klasse_teams_afgemeld:
-                            afgemeld_team.rank = ''
-                            afgemeld_team.niet_deelgenomen = True
-                        # for
-
-                elif len(klasse_teams_afgemeld) > 0:
-                    # alle teams afgemeld
-                    teller = klasse_teams_afgemeld[0]
-                    if deelkamp_bk.is_afgesloten:
-                        for afgemeld_team in klasse_teams_afgemeld:
-                            afgemeld_team.rank = ''
-                            afgemeld_team.niet_deelgenomen = True
-                            afgemeld_team.heeft_uitslag = True
-                        # for
-
-                else:
-                    teller = None
-
+                teller = self._finalize_klasse(deelkamp_bk, klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld)
                 if teller:
                     teller.aantal_regels = aantal_regels
                     teller.break_klasse = True
@@ -415,106 +434,93 @@ class UitslagenBKTeamsView(TemplateView):
 
             team.ver_nr = team.vereniging.ver_nr
             team.ver_str = str(team.vereniging)
+            team.toon_team_leden = False
+
+            # teamsterkte vanuit de RK resultaten
             rk_score = round(team.aanvangsgemiddelde * aantal_pijlen)
             if rk_score < 10:
                 team.rk_score_str = '(blanco)'
             else:
                 team.rk_score_str = str(rk_score)
-            team.toon_team_leden = False
+
             team.bk_score_str = '-'
             aantal_regels += 1
 
-            if team.deelname == DEELNAME_NEE:
-                team.niet_deelgenomen = True            # toont team in grijs
-                team.rank = ''
-                klasse_teams_afgemeld.append(team)
-            else:
-                if team.ver_nr == toon_team_leden_van_ver_nr:
-                    team.toon_team_leden = True
-                    team.team_leden = list()
-                    for deelnemer in (team
-                                      .gekoppelde_leden
-                                      .select_related('sporterboog__sporter')
-                                      .order_by('-gemiddelde')):                      # hoogste eerst
-                        team.team_leden.append(deelnemer)
-                        deelnemer.sporter_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
-                    # for
-
-                if team.result_rank > 0:
-                    team.is_reserve = False
-                    team.rank = team.result_rank
-                    if team.result_teamscore < 10:
-                        team.bk_score_str = '(blanco)'
-                    else:
-                        team.bk_score_str = str(team.result_teamscore)
-                    team.heeft_uitslag = True
-
-                    originele_lid_nrs = list(team.gekoppelde_leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
-                    deelnemers = list()
-                    lid_nrs = list()
-                    for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
-                        deelnemer.result_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
-                        deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
-                        lid_nr = deelnemer.sporterboog.sporter.lid_nr
-                        if lid_nr not in originele_lid_nrs:
-                            deelnemer.is_invaller = True
-                        tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
-                        deelnemers.append(tup)
-
-                        if deelnemer.result_totaal < 10:
-                            deelnemer.result_totaal = '-'       # moet na gebruik in tup, ivm sort() verderop
-
-                        lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
-                    # for
-                    for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter'):
-                        if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
-                            deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
-                            deelnemer.is_uitvaller = True
-                            deelnemer.result_totaal = '-'
-                            tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
-                            deelnemers.append(tup)
-                    # for
-
-                    deelnemers.sort(reverse=True)       # hoogste eerst
-                    team.deelnemers = [deelnemer for _, _, deelnemer in deelnemers]
-
-                    klasse_teams_done.append(team)
+            if team.result_rank > 0:
+                team.is_reserve = False
+                team.rank = team.result_rank
+                if team.result_rank == KAMP_RANK_BLANCO:
+                    team.bk_score_str = '(blanco)'
                 else:
-                    # nog geen uitslag beschikbaar
+                    team.bk_score_str = str(team.result_teamscore)
+                team.klasse_heeft_uitslag = True
+
+                # de volgende statement worden aparte database queries
+                originele_pks = list(team.gekoppelde_leden.values_list('pk', flat=True))
+                feitelijke_pks = team.feitelijke_leden.values_list('pk', flat=True)
+
+                unsorted = list()
+                for pk in feitelijke_pks:
+                    deelnemer = bk_cache[pk]
+                    voor_uitslag = SimpleNamespace(
+                                        naam_str=deelnemer.naam_str,
+                                        is_uitvaller=False,
+                                        is_invaller=deelnemer.pk not in originele_pks,
+                                        result_totaal=deelnemer.result_bk_teamscore_1 + deelnemer.result_bk_teamscore_2)
+                    tup = (voor_uitslag.result_totaal, pk, voor_uitslag)
+                    unsorted.append(tup)
+                    if not voor_uitslag.is_invaller:
+                        originele_pks.remove(pk)
+                # for
+
+                # voeg de uitvallers toe
+                for pk in originele_pks:
+                    deelnemer = bk_cache[pk]
+                    voor_uitslag = SimpleNamespace(
+                                        naam_str=deelnemer.naam_str,
+                                        is_uitvaller=True,
+                                        is_invaller=False,
+                                        result_totaal=0)
+                    # gebruik gemiddelde zodat de uitvallers aan het einde van de lijst staan na sorteren
+                    tup = (deelnemer.gemiddelde, pk, voor_uitslag)
+                    unsorted.append(tup)
+                # for
+
+                unsorted.sort(reverse=True)       # hoogste eerst
+                team.deelnemers = list()
+                for _, _, voor_uitslag in unsorted:
+                    if voor_uitslag.result_totaal < 10:
+                        voor_uitslag.result_totaal = '-'
+                    team.deelnemers.append(voor_uitslag)
+                # for
+
+                klasse_teams_done.append(team)
+            else:
+                # nog geen uitslag beschikbaar
+                if team.deelname == DEELNAME_NEE:
+                    team.niet_deelgenomen = True  # toont team in grijs
+                    team.rank = ''
+                    klasse_teams_afgemeld.append(team)
+                else:
                     klasse_teams_plan.append(team)
                     if team.rank > limiet:
                         team.is_reserve = True
+
+                # laat vereniging weten wie waar naartoe moet
+                if team.ver_nr == toon_team_leden_van_ver_nr:
+                    team.toon_team_leden = True
+
+                    unsorted = list()
+                    for pk in team.gekoppelde_leden.values_list('pk', flat=True):
+                        deelnemer = bk_cache[pk]
+                        tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
+                        unsorted.append(tup)
+                    # for
+                    unsorted.sort(reverse=True)
+                    team.team_leden = [deelnemer for _, _, deelnemer in unsorted]
         # for
 
-        if len(klasse_teams_done) > 0:
-            # er is uitslag, dus overige teams hebben niet meegedaan
-            for plan_team in klasse_teams_plan:
-                plan_team.rank = ''
-                plan_team.niet_deelgenomen = True
-                plan_team.heeft_uitslag = True
-            # for
-            for afgemeld_team in klasse_teams_afgemeld:
-                afgemeld_team.rank = ''
-                afgemeld_team.niet_deelgenomen = True
-                afgemeld_team.heeft_uitslag = True
-            # for
-            teller = klasse_teams_done[0]
-
-        elif len(klasse_teams_plan) > 0:
-            # er is geen uitslag, maar misschien hebben teams vrijstelling
-            teller = klasse_teams_plan[0]
-            if deelkamp_bk.is_afgesloten:
-                for plan_team in klasse_teams_plan:
-                    plan_team.rank = ''
-                    plan_team.niet_deelgenomen = True
-                # for
-                for afgemeld_team in klasse_teams_afgemeld:
-                    afgemeld_team.rank = ''
-                    afgemeld_team.niet_deelgenomen = True
-                # for
-        else:
-            teller = None
-
+        teller = self._finalize_klasse(deelkamp_bk, klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld)
         if teller:
             teller.aantal_regels = aantal_regels
             teller.break_klasse = True
@@ -525,14 +531,13 @@ class UitslagenBKTeamsView(TemplateView):
                 except KeyError:
                     pass
             else:
-                teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+                teller.klasse_str = "Nog niet ingedeeld in een wedstrijdklasse"
 
         totaal_lijst.extend(klasse_teams_done)
         totaal_lijst.extend(klasse_teams_plan)
         totaal_lijst.extend(klasse_teams_afgemeld)
 
-        if bk_teams.count() == 0:
-            context['geen_teams'] = True
+        context['geen_teams'] = len(totaal_lijst) == 0
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

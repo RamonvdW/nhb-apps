@@ -22,8 +22,8 @@ PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 WEBWINKEL_FOTOS_DIR = 'data_test/webwinkel'
 
-# enable html validation using v.Nu (warning: triples test duration)
-# warning: increases test run duration significantly
+# enable html validation using the Nu Html Checker (v.Nu)
+# WARNING: increases test run duration significantly (triple!)
 #TEST_VALIDATE_HTML = True
 
 # end of file

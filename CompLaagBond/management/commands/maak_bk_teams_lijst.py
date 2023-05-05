@@ -13,6 +13,8 @@ from Competitie.models import (Competitie, CompetitieTeamKlasse,
                                KampioenschapTeamKlasseLimiet)
 
 
+# TODO: dit commando is obsolete: functionaliteit is geïntegreerd in regiocomp_mutaties
+
 class Command(BaseCommand):
     help = "Maak BK teams deelnemerslijst"
 
