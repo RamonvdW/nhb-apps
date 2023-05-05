@@ -407,6 +407,17 @@ class UitslagenRayonTeamsView(TemplateView):
                     afgemeld_team.rk_score_str = '-'
                     afgemeld_team.niet_deelgenomen = True
                 # for
+
+        elif len(afgemeld) > 0:
+            # alle teams afgemeld
+            teller = afgemeld[0]
+            if deelkamp.is_afgesloten:
+                for afgemeld_team in afgemeld:
+                    afgemeld_team.rank = ''
+                    afgemeld_team.rk_score_str = '-'
+                    afgemeld_team.niet_deelgenomen = True
+                # for
+
         else:
             teller = None
 
@@ -549,10 +560,11 @@ class UitslagenRayonTeamsView(TemplateView):
             aantal_regels += 1
 
             if team.result_rank > 0:
-                team.rank = team.result_rank
-                if team.result_teamscore < 10:
+                if team.result_rank == KAMP_RANK_BLANCO:
+                    team.geen_rank = True
                     team.rk_score_str = '(blanco)'
                 else:
+                    team.rank = team.result_rank
                     team.rk_score_str = str(team.result_teamscore)
                 team.klasse_heeft_uitslag = True
 
