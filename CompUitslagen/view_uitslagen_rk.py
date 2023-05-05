@@ -497,18 +497,6 @@ class UitslagenRayonTeamsView(TemplateView):
         else:
             aantal_pijlen = 25
 
-        rk_teams = (KampioenschapTeam
-                    .objects
-                    .filter(kampioenschap=deelkamp,
-                            team_type=teamtype)
-                    .select_related('team_klasse',
-                                    'vereniging')
-                    .prefetch_related('gekoppelde_leden',
-                                      'feitelijke_leden')
-                    .order_by('team_klasse__volgorde',
-                              'result_rank',
-                              '-aanvangsgemiddelde'))       # sterkste team eerst
-
         context['rk_teams'] = totaal_lijst = list()
 
         prev_klasse = ""
@@ -516,7 +504,17 @@ class UitslagenRayonTeamsView(TemplateView):
         klasse_teams_plan = list()
         klasse_teams_afgemeld = list()
         aantal_regels = 0
-        for team in rk_teams:
+        for team in (KampioenschapTeam
+                     .objects
+                     .filter(kampioenschap=deelkamp,
+                             team_type=teamtype)
+                     .select_related('team_klasse',
+                                     'vereniging')
+                     .prefetch_related('gekoppelde_leden',
+                                       'feitelijke_leden')
+                     .order_by('team_klasse__volgorde',
+                               'result_rank',
+                               '-aanvangsgemiddelde')):      # sterkste team eerst
 
             if team.team_klasse != prev_klasse:
                 teller = self._finalize_klasse(deelkamp, klasse_teams_done, klasse_teams_plan, klasse_teams_afgemeld)
@@ -593,6 +591,7 @@ class UitslagenRayonTeamsView(TemplateView):
                     team.niet_deelgenomen = True  # toont team in grijs
                     klasse_teams_afgemeld.append(team)
                 else:
+                    team.rank = len(klasse_teams_plan) + 1
                     klasse_teams_plan.append(team)
 
                 # toon teamleden waar ze heen moeten
@@ -625,7 +624,7 @@ class UitslagenRayonTeamsView(TemplateView):
         totaal_lijst.extend(klasse_teams_plan)
         totaal_lijst.extend(klasse_teams_afgemeld)
 
-        if rk_teams.count() == 0:
+        if len(totaal_lijst) == 0:
             context['geen_teams'] = True
 
         context['kruimels'] = (

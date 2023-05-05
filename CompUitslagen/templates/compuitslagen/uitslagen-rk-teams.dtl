@@ -175,7 +175,7 @@
                 <tr{% if team.niet_deelgenomen %} class="grey-text"{% endif %}>
 
                     <!-- rank -->
-                    <td class="center">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
+                    <td class="center">{% if not team.geen_rank %}{{ team.rank }}{% endif %}</td>
 
                     <!-- vereniging -->
                     <td>
@@ -186,45 +186,50 @@
                     <!-- team naam + team leden -->
                     <td>
                         {% if team.klasse_heeft_uitslag %}
-                            {% if team.niet_deelgenomen %}{{ team.team_naam }}{% else %}<b>{{ team.team_naam }}</b>{% endif %}
-
                             {% for deelnemer in team.deelnemers %}
+                                {% if forloop.first %}
+                                    <b>{{ team.team_naam }}</b>
+                                {% endif %}
                                 <br>
                                 <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.naam_str }}{% if deelnemer.is_invaller %}&nbsp;**{% endif %}</span>
                             {% empty %}
-                                {% if team.toon_team_leden %}
-                                    {% for team_lid in team.team_leden %}
-                                        <br>
-                                        <span>{{ team_lid.sporter_str }}</span>
-                                    {% endfor %}
-                                {% endif %}
+                                <span>{{ team.team_naam }}</span>
                             {% endfor %}
                         {% else %}
-                            <span>{{ team.team_naam }}</span>
                             {% if team.toon_team_leden %}
+                                <b>{{ team.team_naam }}</b>
                                 {% for team_lid in team.team_leden %}
                                     <br>
-                                    <span>{{ team_lid.sporter_str }}</span><br>
+                                    <span>{{ team_lid.sporter_str }}</span>
                                 {% endfor %}
+                            {% else %}
+                                <span>{{ team.team_naam }}</span>
                             {% endif %}
                         {% endif %}
                     </td>
 
                     <!-- team sterkte + deelnemer gemiddelden -->
                     <td class="center hide-on-small-only">
-                        <span><b>{{ team.ag_str }}</b></span>
                         {% if team.klasse_heeft_uitslag %}
                             {% for deelnemer in team.deelnemers %}
+                                {% if forloop.first %}
+                                    <span><b>{{ team.ag_str }}</b></span>
+                                {% endif %}
                                 <br>
                                 <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.gemiddelde }}</span>
                             {% empty %}
-                                {% if team.toon_team_leden %}
-                                    {% for team_lid in team.team_leden %}
-                                        <br>
-                                        <span>{{ team_lid.gemiddelde }}</span>
-                                    {% endfor %}
-                                {% endif %}
+                                <b>{{ team.ag_str }}</b>
                             {% endfor %}
+                        {% else %}
+                            {% if team.toon_team_leden %}
+                                <b>{{ team.ag_str }}</b>
+                                {% for team_lid in team.team_leden %}
+                                    <br>
+                                    <span>{{ team_lid.gemiddelde }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span>{{ team.ag_str }}</span>
+                            {% endif %}
                         {% endif %}
                     </td>
 
@@ -238,12 +243,6 @@
                                     <span class="grey-text">-</span>
                                 {% else %}
                                     <span>{{ deelnemer.result_totaal }}</span>
-                                {% endif %}
-                            {% empty %}
-                                {% if team.toon_team_leden %}
-                                    {% for team_lid in team.team_leden %}
-                                        <br>
-                                    {% endfor %}
                                 {% endif %}
                             {% endfor %}
                         {% else %}
