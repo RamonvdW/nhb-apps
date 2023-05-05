@@ -305,9 +305,14 @@ class Command(BaseCommand):
         kamp_teams.sort(reverse=True)               # hoogste eerste
         rank = 0
         for tup in kamp_teams:
-            rank += 1
             kamp_team = tup[-1]
-            kamp_team.result_rank = rank
+            if kamp_team.result_teamscore > 0:
+                rank += 1
+                kamp_team.result_rank = rank
+                kamp_team.result_volgorde = rank
+            else:
+                kamp_team.result_rank = 0
+                kamp_team.result_volgorde = 0
             if self.verbose:
                 self.stdout.write("%s (%s) %s" % (kamp_team.result_rank, kamp_team.result_teamscore, kamp_team))
             if not self.dryrun:

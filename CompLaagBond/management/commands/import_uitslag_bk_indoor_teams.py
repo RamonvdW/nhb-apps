@@ -395,10 +395,14 @@ class Command(BaseCommand):
         kamp_teams.sort(reverse=True)               # hoogste eerste
         rank = 0
         for tup in kamp_teams:
-            rank += 1
             kamp_team = tup[-1]
-            kamp_team.result_rank = rank
-            kamp_team.result_volgorde = rank
+            if kamp_team.result_teamscore > 0:
+                rank += 1
+                kamp_team.result_rank = rank
+                kamp_team.result_volgorde = rank
+            else:
+                kamp_team.result_rank = 0
+                kamp_team.result_volgorde = 0
             if not self.dryrun:
                 kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
         # for
