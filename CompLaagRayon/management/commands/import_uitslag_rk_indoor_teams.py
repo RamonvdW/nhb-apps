@@ -242,8 +242,8 @@ class Command(BaseCommand):
                             self.stdout.write('[WARNING] Geen scores voor sporter %s op regel %s' % (lid_nr, row_nr))
                         else:
                             deelnemer = self._get_deelnemer(lid_nr, lid_ag)
-                            deelnemer.result_teamscore_1 = score1
-                            deelnemer.result_teamscore_2 = score2
+                            deelnemer.result_rk_teamscore_1 = score1
+                            deelnemer.result_rk_teamscore_2 = score2
                             feitelijke_deelnemers.append(deelnemer)
                             gevonden_lid_nrs.append(lid_nr)
             # for
@@ -299,7 +299,7 @@ class Command(BaseCommand):
                         if not self.dryrun:
                             # uitgestelde save actie
                             deelnemer.save(update_fields=['result_teamscore_1', 'result_teamscore_2'])
-                        deelnemer_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
+                        deelnemer_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
                         deelnemer_totalen.append(deelnemer_totaal)
                     # for
 
@@ -525,14 +525,15 @@ class Command(BaseCommand):
                 self.stdout.write('[INFO] Uitslag wordt van blad %s gehaald' % repr(blad))
                 self._importeer_finales_8(ws)
 
-            result = list()
-            for team_naam, team in self.deelnemende_teams.items():
-                tup = (team.result_rank, team.result_volgorde, team_naam, team.result_teamscore)
-                result.append(tup)
-            # for
-            result.sort()
-            self.stdout.write('Resultaat:')
-            for rank, volgorde, naam, result_teamscore in result:
-                self.stdout.write('%s %s %s (score: %s)' % (rank, volgorde, naam, result_teamscore))
+            if self.verbose:
+                result = list()
+                for team_naam, team in self.deelnemende_teams.items():
+                    tup = (team.result_rank, team.result_volgorde, team_naam, team.result_teamscore)
+                    result.append(tup)
+                # for
+                result.sort()
+                self.stdout.write('Resultaat:')
+                for rank, volgorde, naam, result_teamscore in result:
+                    self.stdout.write('%s %s %s (score: %s)' % (rank, volgorde, naam, result_teamscore))
 
 # end of file

@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
+from HistComp.models import HistCompetitie, HistCompRegioIndiv, HistCompRegioTeam
 from HistComp.views import RESULTS_PER_PAGE
 from TestHelpers.e2ehelpers import E2EHelpers
-import io
 
 
 class TestHistComp(E2EHelpers, TestCase):
@@ -25,20 +23,20 @@ class TestHistComp(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2018/2019'
         obj.comp_type = '18'
-        obj.boog_str = 'Compound'
+        obj.beschrijving = 'Compound'
         obj.is_team = False
         obj.save()
 
         obj.pk = None
-        obj.boog_str = 'Special Type'
+        obj.beschrijving = 'Special Type'
         obj.save()
 
         obj.pk = None
-        obj.boog_str = 'Recurve'
+        obj.beschrijving = 'Recurve'
         obj.save()
         self.indiv_histcomp_pk = obj.pk
 
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = obj
         rec.rank = 1
         rec.sporter_lid_nr = 123456
@@ -58,7 +56,7 @@ class TestHistComp(E2EHelpers, TestCase):
         rec.save()
         self.indiv_rec_pk = rec.pk
 
-        HistCompetitieTeam(
+        HistCompRegioTeam(
             histcompetitie=obj,
             subklasse="test",
             rank=1,
@@ -79,13 +77,13 @@ class TestHistComp(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2017/2018'
         obj.comp_type = '18'
-        obj.boog_str = 'Too old'
+        obj.beschrijving = 'Too old'
         obj.is_team = False
         obj.save()
 
     def _add_many_records(self, pages):
         # paginator laat 100 entries per pagina zien, dus voeg er 100 toe
-        rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
+        rec = HistCompRegioIndiv.objects.get(pk=self.indiv_rec_pk)
         while pages > 0:
             pages -= 1
             for lp in range(RESULTS_PER_PAGE):
@@ -102,12 +100,12 @@ class TestHistComp(E2EHelpers, TestCase):
         obj.clean()                         # run model validator
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
-        obj = HistCompetitieIndividueel.objects.all()[0]
+        obj = HistCompRegioIndiv.objects.all()[0]
         obj.clean_fields()                  # run field validators
         obj.clean()                         # run model validator
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
-        obj = HistCompetitieTeam.objects.all()[0]
+        obj = HistCompRegioTeam.objects.all()[0]
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
     def test_view_allejaren(self):
@@ -199,7 +197,7 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_view_indiv_few_filter(self):
-        rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
+        rec = HistCompRegioIndiv.objects.get(pk=self.indiv_rec_pk)
         rec.sporter_naam = "Dhr Blazoengatenmaker"
         rec.save()
         url = self.url_hist_indiv % self.indiv_histcomp_pk
@@ -230,7 +228,7 @@ class TestHistComp(E2EHelpers, TestCase):
     def test_view_indiv_many_filter(self):
         self._add_many_records(2)  # 20*100 = +200 records --> paginering actief
 
-        rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
+        rec = HistCompRegioIndiv.objects.get(pk=self.indiv_rec_pk)
         url = self.url_hist_indiv % self.indiv_histcomp_pk
 
         # filter on a string

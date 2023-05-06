@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from HistComp.forms import FilterForm
 from Plein.menu import menu_dynamics
 from urllib.parse import quote_plus
@@ -48,11 +48,11 @@ class HistCompTop(TemplateView):
             # neem de data van het nieuwste seizoen
             context['seizoen'] = seizoen = qset[0].seizoen
 
-            qset = HistCompetitie.objects.filter(seizoen=seizoen, is_team=False).distinct('comp_type', 'boog_str')
+            qset = HistCompetitie.objects.filter(seizoen=seizoen, is_team=False).distinct('comp_type', 'beschrijving')
 
             gevonden = dict()       # [(comp_type, klasse)] = HistCompetitie
             for obj in qset:
-                tup = (obj.comp_type, obj.boog_str)
+                tup = (obj.comp_type, obj.beschrijving)
                 gevonden[tup] = obj
             # for
 
@@ -151,22 +151,22 @@ class HistCompIndivView(ListView):
 
                 if filter_is_nr:
                     if filter_nr < 100000:
-                        return HistCompetitieIndividueel.objects.filter(
+                        return HistCompRegioIndiv.objects.filter(
                                             vereniging_nr__exact=filter_nr,
                                             histcompetitie=histcomp).order_by('rank')
                     else:
-                        return HistCompetitieIndividueel.objects.filter(
+                        return HistCompRegioIndiv.objects.filter(
                                             sporter_lid_nr__exact=filter_nr,
                                             histcompetitie=histcomp).order_by('rank')
                 else:
-                    return HistCompetitieIndividueel.objects.filter(
+                    return HistCompRegioIndiv.objects.filter(
                                         Q(sporter_naam__icontains=self.get_filter) |
                                         Q(vereniging_naam__icontains=self.get_filter),
                                         histcompetitie=histcomp).order_by('rank')
 
-        self.all_count = HistCompetitieIndividueel.objects.filter(histcompetitie=histcomp).count()
+        self.all_count = HistCompRegioIndiv.objects.filter(histcompetitie=histcomp).count()
 
-        return HistCompetitieIndividueel.objects.filter(histcompetitie=histcomp).order_by('rank')
+        return HistCompRegioIndiv.objects.filter(histcompetitie=histcomp).order_by('rank')
 
     def _make_link_urls(self, context):
         # voorbereidingen voor een regel met volgende/vorige links
@@ -245,7 +245,7 @@ class HistCompIndivView(ListView):
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('HistComp:top'), 'Uitslag vorig seizoen'),
             (None, COMP_TYPE_STR[self.histcomp.comp_type]),
-            (None, self.histcomp.boog_str)
+            (None, self.histcomp.beschrijving)
         )
 
         menu_dynamics(self.request, context)

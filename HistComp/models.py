@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from decimal import Decimal
+from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK, HISTCOMP_CHOICES_RK_BK, COMP_TYPE
 
 
 class HistCompetitie(models.Model):
@@ -15,11 +16,6 @@ class HistCompetitie(models.Model):
         De tabel bevat velden die anders heel vaak herhaald zouden worden in een andere tabel
         en het voorkomt zoeken naar deze informatie uit de grote tabel.
     """
-    COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.models.AFSTAND
-                 ('25', '25m1pijl')]
-
-    comptype2str = {'18': '18m Indoor',
-                    '25': '25m 1pijl'}
 
     # 20xx/20yy (yy = xx+1)
     seizoen = models.CharField(max_length=9)
@@ -28,13 +24,14 @@ class HistCompetitie(models.Model):
     # '25' = 25m = 25m1pijl
     comp_type = models.CharField(max_length=2, choices=COMP_TYPE)
 
-    # boogtype
-    boog_str = models.CharField(max_length=20)          # Recurve / Compound
-
     # is dit voor teams of individueel?
     is_team = models.BooleanField(default=False)
 
-    # beste aantal scores waarover het gemiddelde berekend is
+    # boog: Recurve
+    # team: Recurve Team
+    beschrijving = models.CharField(max_length=20)
+
+    # beste aantal scores waarover het regio gemiddelde berekend is
     # normaal 6, maar in de corona-jaren is dit verlaagd geweest naar 5
     aantal_beste_scores = models.PositiveSmallIntegerField(default=6)
 
@@ -45,61 +42,70 @@ class HistCompetitie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s (%s) %s (team=%s)" % (self.seizoen,
-                                         self.comp_type,
-                                         self.boog_str,
-                                         self.is_team)
+        msg = "%s (%s) %s" % (self.seizoen, self.comp_type, self.beschrijving)
+        if self.is_team:
+            msg += ' (team)'
+        else:
+            msg += ' (indiv)'
+        return msg
 
     class Meta:
         """ meta data voor de admin interface """
+        ordering = ['seizoen', 'comp_type']
         verbose_name = verbose_name_plural = "Historie competitie"
 
     objects = models.Manager()      # for the editor only
 
 
-class HistCompetitieIndividueel(models.Model):
+class HistCompRegioIndiv(models.Model):
     """ Deze database tabel bevat alle resultaten van de individuele competitie
         Per regel: subklasse, rank, schutter details, scores en gemiddelde.
     """
-    # primary key = los uniek nummer
+
     histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
 
-    # volgorde in de vastgestelde uitslag
-    rank = models.PositiveIntegerField()
+    # individuele wedstrijdklasse
+    # voorbeeld: Compound Onder 21 klasse onbekend
+    klasse_indiv = models.CharField(max_length=35, default='')      # TODO: remove default
+
+    # volgorde in de vastgestelde uitslag in deze wedstrijdklasse
+    rank = models.PositiveSmallIntegerField()
 
     # lid nummer en volledige naam
     sporter_lid_nr = models.PositiveIntegerField()
     sporter_naam = models.CharField(max_length=50)
 
-    # R/C/BB/IB/LB/TR (indien beschikbaar)
-    boogtype = models.CharField(max_length=5,
-                                null=True, blank=True)
+    # R/C/BB/IB/LB/TR
+    boogtype = models.CharField(max_length=5, default='')
 
     # vereniging van de sporter (bij afsluiten competitie)
-    vereniging_nr = models.PositiveIntegerField()
+    vereniging_nr = models.PositiveSmallIntegerField()
     vereniging_naam = models.CharField(max_length=50)
+    vereniging_plaats = models.CharField(max_length=35, default='')
 
-    # de scores
-    score1 = models.PositiveIntegerField()
-    score2 = models.PositiveIntegerField()
-    score3 = models.PositiveIntegerField()
-    score4 = models.PositiveIntegerField()
-    score5 = models.PositiveIntegerField()
-    score6 = models.PositiveIntegerField()
-    score7 = models.PositiveIntegerField()
+    # de regio scores
+    score1 = models.PositiveSmallIntegerField(default=0)
+    score2 = models.PositiveSmallIntegerField(default=0)
+    score3 = models.PositiveSmallIntegerField(default=0)
+    score4 = models.PositiveSmallIntegerField(default=0)
+    score5 = models.PositiveSmallIntegerField(default=0)
+    score6 = models.PositiveSmallIntegerField(default=0)
+    score7 = models.PositiveSmallIntegerField(default=0)
 
     # welke score doorstrepen?
-    laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
+    laagste_score_nr = models.PositiveSmallIntegerField(default=0)  # 1..7
 
     # som van de beste 6 scores
-    totaal = models.PositiveIntegerField()
+    totaal = models.PositiveSmallIntegerField()
 
     # gemiddelde pijl (10.000) = totaal / aantal niet-nul scores
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "rank %s: %s %s" % (self.rank, self.sporter_naam, self.gemiddelde)
+        return "rank %s: %s [%s] %s, %s" % (self.rank, self.gemiddelde,
+                                            self.sporter_lid_nr, self.sporter_naam,
+                                            self.boogtype)
 
     def tel_aantal_scores(self):
         count = 0
@@ -118,41 +124,174 @@ class HistCompetitieIndividueel(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = verbose_name_plural = "Historische individuele competitie"
+        ordering = ['rank']
+        verbose_name = verbose_name_plural = "Hist regio indiv"
 
     objects = models.Manager()      # for the editor only
 
 
-class HistCompetitieTeam(models.Model):
+class HistCompRegioTeam(models.Model):
     """ Deze database tabel bevat alle resultaten van de teamcompetitie
         Per regel: subklasse, rank, schutter details, scores en gemiddelde.
     """
-    # primary key = los uniek nummer
+
     histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
-    subklasse = models.CharField(max_length=20)         # ERE / A
-    rank = models.PositiveIntegerField()
-    vereniging_nr = models.PositiveIntegerField()       # NHB nummer
+
+    # voorbeeld: Traditional klasse ERE
+    team_klasse = models.CharField(max_length=30)
+
+    # verenigingsnummer en volledige naam
+    # omdat de naam meerdere keren voorkomt is ook de plaats nodig
+    vereniging_nr = models.PositiveSmallIntegerField()
     vereniging_naam = models.CharField(max_length=50)
+    vereniging_plaats = models.CharField(max_length=35)
+
+    # vereniging kan meerdere teams hebben
+    # team naam wordt niet opgeslagen, omdat het meestal een rommeltje is
     team_nr = models.PositiveSmallIntegerField()
-    totaal_ronde1 = models.PositiveIntegerField()
-    totaal_ronde2 = models.PositiveIntegerField()
-    totaal_ronde3 = models.PositiveIntegerField()
-    totaal_ronde4 = models.PositiveIntegerField()
-    totaal_ronde5 = models.PositiveIntegerField()
-    totaal_ronde6 = models.PositiveIntegerField()
-    totaal_ronde7 = models.PositiveIntegerField()
-    totaal = models.PositiveIntegerField()
-    gemiddelde = models.DecimalField(max_digits=5, decimal_places=1)    # 1000.0
+
+    rank = models.PositiveSmallIntegerField(default=0)
+
+    # score en punten per ronde
+    ronde_1_score = models.PositiveSmallIntegerField(default=0)
+    ronde_2_score = models.PositiveSmallIntegerField(default=0)
+    ronde_3_score = models.PositiveSmallIntegerField(default=0)
+    ronde_4_score = models.PositiveSmallIntegerField(default=0)
+    ronde_5_score = models.PositiveSmallIntegerField(default=0)
+    ronde_6_score = models.PositiveSmallIntegerField(default=0)
+    ronde_7_score = models.PositiveSmallIntegerField(default=0)
+
+    ronde_1_punten = models.PositiveSmallIntegerField(default=0)
+    ronde_2_punten = models.PositiveSmallIntegerField(default=0)
+    ronde_3_punten = models.PositiveSmallIntegerField(default=0)
+    ronde_4_punten = models.PositiveSmallIntegerField(default=0)
+    ronde_5_punten = models.PositiveSmallIntegerField(default=0)
+    ronde_6_punten = models.PositiveSmallIntegerField(default=0)
+    ronde_7_punten = models.PositiveSmallIntegerField(default=0)
+
+    # totale score en punten
+    totaal_score = models.PositiveSmallIntegerField(default=0)
+    totaal_punten = models.PositiveSmallIntegerField(default=0)
+
+    # team leden worden niet bijgehouden voor de regiocompetitie omdat het geen aparte scores zijn
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s, %s, %s" % (self.subklasse,
-                               self.rank,
-                               self.vereniging_nr)
+        return "rank %s: %s / %s [%s] %s, %s" % (self.rank, self.totaal_score, self.totaal_punten,
+                                                 self.vereniging_nr, self.team_nr,
+                                                 self.team_klasse)
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = verbose_name_plural = "Historische team competitie"
+        ordering = ['rank', 'team_klasse']
+        verbose_name = verbose_name_plural = "Hist regio teams"
+
+    objects = models.Manager()      # for the editor only
+
+
+class HistKampIndiv(models.Model):
+
+    histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
+
+    # individuele wedstrijdklasse
+    # voorbeeld: Compound Onder 21 klasse 2
+    # noteer: aspiranten kunnen in de RK uitkomen in een andere klasse
+    klasse_indiv = models.CharField(max_length=35)
+
+    # lid nummer en volledige naam
+    sporter_lid_nr = models.PositiveIntegerField()
+    sporter_naam = models.CharField(max_length=50)
+
+    # R/C/BB/IB/LB/TR
+    boogtype = models.CharField(max_length=5)
+
+    # vereniging van de sporter (bij afsluiten competitie)
+    vereniging_nr = models.PositiveSmallIntegerField()
+    vereniging_naam = models.CharField(max_length=50)
+    vereniging_plaats = models.CharField(max_length=35, default='')
+
+    # volgorde in de vastgestelde uitslag in deze wedstrijdklasse
+    rank_rk = models.PositiveSmallIntegerField()
+    rank_bk = models.PositiveSmallIntegerField(default=0)            # 0 = niet meegedaan
+
+    rk_score_is_blanco = models.BooleanField(default=False)
+    rk_score_1 = models.PositiveSmallIntegerField(default=0)
+    rk_score_2 = models.PositiveSmallIntegerField(default=0)
+
+    bk_score_1 = models.PositiveSmallIntegerField(default=0)
+    bk_score_2 = models.PositiveSmallIntegerField(default=0)
+
+    # bijdrage aan de het rk/bk teams
+    teams_rk_score_1 = models.PositiveSmallIntegerField(default=0)
+    teams_rk_score_2 = models.PositiveSmallIntegerField(default=0)
+
+    teams_bk_score_1 = models.PositiveSmallIntegerField(default=0)
+    teams_bk_score_2 = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "[%s] %s, %s" % (self.sporter_lid_nr, self.sporter_naam, self.boogtype)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = verbose_name_plural = "Hist rk/bk indiv"
+
+    objects = models.Manager()      # for the editor only
+
+
+class HistKampTeam(models.Model):
+    """ Deze database tabel bevat de resultaten van de RK en BK voor de teamcompetitie
+    """
+
+    histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
+
+    rk_of_bk = models.CharField(max_length=1, choices=HISTCOMP_CHOICES_RK_BK, default=HISTCOMP_RK)
+
+    # voorbeeld: Traditional klasse ERE
+    klasse_teams = models.CharField(max_length=30)
+
+    # verenigingsnummer en volledige naam
+    # omdat de naam meerdere keren voorkomt is ook de plaats nodig
+    vereniging_nr = models.PositiveSmallIntegerField()
+    vereniging_naam = models.CharField(max_length=50)
+    vereniging_plaats = models.CharField(max_length=35, default='')
+
+    # vereniging kan meerdere teams hebben
+    # team naam wordt niet opgeslagen, omdat het meestal een rommeltje is
+    team_nr = models.PositiveSmallIntegerField()
+
+    # behaalde score en rank
+    team_score = models.PositiveSmallIntegerField()
+    rank = models.PositiveSmallIntegerField()
+
+    # wie schoten voor dit team: geeft lid nummer, naam en boog
+    # deze sporters waren ook voor het RK geplaatst
+    lid_1 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+                              null=True, blank=True,
+                              related_name='team_lid_1')
+    lid_2 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+                              null=True, blank=True,
+                              related_name='team_lid_2')
+    lid_3 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+                              null=True, blank=True,
+                              related_name='team_lid_3')
+    lid_4 = models.ForeignKey(HistKampIndiv, on_delete=models.CASCADE,
+                              null=True, blank=True,
+                              related_name='team_lid_4')
+
+    # bijdrage van elk team lid, van hoogste naar laagste score
+    score_lid_1 = models.PositiveSmallIntegerField(default=0)
+    score_lid_2 = models.PositiveSmallIntegerField(default=0)
+    score_lid_3 = models.PositiveSmallIntegerField(default=0)
+    score_lid_4 = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "%s: %s - %s (%s)" % (self.rank, self.vereniging_nr, self.team_nr, self.team_score)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = verbose_name_plural = "Hist rk/bk teams"
 
     objects = models.Manager()      # for the editor only
 

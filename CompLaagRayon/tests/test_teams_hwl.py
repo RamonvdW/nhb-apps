@@ -13,7 +13,7 @@ from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
 from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -173,12 +173,12 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.boog_str = 'Testcurve1'
+        histcomp.beschrijving = 'Testcurve1'
         histcomp.is_team = False
         histcomp.save()
 
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100001.lid_nr
@@ -199,7 +199,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         # record voor het jeugdlid
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100002.lid_nr

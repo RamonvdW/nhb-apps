@@ -8,7 +8,7 @@ from django.conf import settings
 from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.models import TemplateCompetitieTeamKlasse
 from Competitie.models import get_competitie_boog_typen
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from Logboek.models import schrijf_in_logboek
 from Sporter.models import Sporter, SporterBoog
 from Score.definities import AG_NUL, AG_DOEL_INDIV
@@ -95,7 +95,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     histcomp = None
     bulk_ag = list()
     for histcomp in histcomps:
-        for obj in (HistCompetitieIndividueel
+        for obj in (HistCompRegioIndiv
                     .objects
                     .select_related('histcompetitie')
                     .filter(histcompetitie=histcomp)):

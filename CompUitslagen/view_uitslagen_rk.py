@@ -7,8 +7,7 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from Competitie.definities import (DEEL_RK, DEELNAME_NEE,
-                                   KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
+from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
@@ -304,7 +303,6 @@ class UitslagenRayonIndivView(TemplateView):
                                                              deelnemer.result_score_1,
                                                              deelnemer.result_score_2)
                     deelnemer.scores_str_2 = deelnemer.result_counts        # 25m1pijl only
-                    deelnemer.geen_rank = (deelnemer.result_rank == KAMP_RANK_UNKNOWN)      # unknown = 99
 
             curr_teller.aantal_regels += 1
         # for
@@ -572,7 +570,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 deelnemers = list()
                 lid_nrs = list()
                 for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
-                    deelnemer.result_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
+                    deelnemer.result_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
                     if deelnemer.result_totaal < 10:
                         deelnemer.result_totaal = '-'
                     deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()

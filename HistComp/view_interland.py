@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from decimal import Decimal
@@ -87,7 +87,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                 # zoek alle records erbij met minimaal 5 scores
                 klasse.indiv = list()
 
-                for indiv in (HistCompetitieIndividueel
+                for indiv in (HistCompRegioIndiv
                               .objects
                               .filter(histcompetitie=klasse,
                                       gemiddelde__gt=Decimal('0.000'))

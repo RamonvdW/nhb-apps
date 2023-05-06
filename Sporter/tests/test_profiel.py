@@ -20,7 +20,7 @@ from Competitie.tijdlijn import (zet_competitie_fases,
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
@@ -147,10 +147,10 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = "2009/2010"
         histcomp.comp_type = "18"
-        histcomp.boog_str = "don't care"
+        histcomp.beschrijving = "don't care"
         histcomp.save()
 
-        indiv = HistCompetitieIndividueel()
+        indiv = HistCompRegioIndiv()
         indiv.histcompetitie = histcomp
         indiv.rank = 1
         indiv.sporter_lid_nr = 100001

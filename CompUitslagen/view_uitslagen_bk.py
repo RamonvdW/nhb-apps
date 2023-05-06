@@ -9,7 +9,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 from Competitie.definities import (DEEL_RK, DEEL_BK,
                                    DEELNAME_NEE,
-                                   KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_UNKNOWN, KAMP_RANK_BLANCO)
+                                   KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
 from Competitie.models import (Competitie, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
@@ -199,7 +199,6 @@ class UitslagenBKIndivView(TemplateView):
                                                                  deelnemer.result_score_1,
                                                                  deelnemer.result_score_2)
                         deelnemer.scores_str_2 = deelnemer.result_counts        # 25m1pijl only
-                        deelnemer.geen_rank = (deelnemer.result_rank == KAMP_RANK_UNKNOWN)
 
                 curr_teller.aantal_regels += 1
             # for

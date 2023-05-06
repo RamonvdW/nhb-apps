@@ -433,6 +433,8 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                            'vereniging',
                            'team_klasse')
 
+    search_fields = ('vereniging__ver_nr', 'vereniging__naam', 'team_naam')
+
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.obj = None
@@ -564,8 +566,8 @@ class KampioenschapSporterBoogAdmin(CreateOnlyAdmin):
                         'result_score_1',
                         'result_score_2',
                         'result_counts',
-                        'result_teamscore_1',
-                        'result_teamscore_2',
+                        'result_rk_teamscore_1',
+                        'result_rk_teamscore_2',
                         'result_bk_teamscore_1',
                         'result_bk_teamscore_2')
         }),

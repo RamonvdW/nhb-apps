@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
 from Functie.operations import maak_functie
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -127,7 +127,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.boog_str = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
+        histcomp.beschrijving = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
         histcomp.is_team = False
         histcomp.save()
         self.histcomp = histcomp
@@ -136,12 +136,12 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         histcomp2 = HistCompetitie()
         histcomp2.seizoen = '2017/2018'
         histcomp2.comp_type = '18'
-        histcomp2.boog_str = 'Testcurve2'
+        histcomp2.beschrijving = 'Testcurve2'
         histcomp2.is_team = False
         histcomp2.save()
 
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100001.lid_nr
@@ -161,7 +161,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         rec.save()
 
         # nog een record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp2
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100001.lid_nr
@@ -181,7 +181,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         rec.save()
 
         # nog een record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 100
         rec.sporter_lid_nr = self.sporter_100001.lid_nr
@@ -201,7 +201,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         rec.save()
 
         # maak een record aan zonder eindgemiddelde
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100002.lid_nr
@@ -221,7 +221,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         rec.save()
 
         # record voor het jeugdlid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100002.lid_nr
@@ -241,7 +241,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         rec.save()
 
         # maak een record aan voor iemand die geen lid meer is
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = 991111
@@ -279,25 +279,25 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
                             sinds_datum=sinds_datum)
             sporters.append(sporter)
 
-            rec = HistCompetitieIndividueel(histcompetitie=self.histcomp,
-                                            boogtype='R',
-                                            rank=lp,
-                                            sporter_lid_nr=sporter.lid_nr,
-                                            vereniging_nr=1000,
-                                            score1=1,
-                                            score2=2,
-                                            score3=3,
-                                            score4=4,
-                                            score5=5,
-                                            score6=6,
-                                            score7=250,
-                                            totaal=270,
-                                            gemiddelde=5.5)
+            rec = HistCompRegioIndiv(histcompetitie=self.histcomp,
+                                     boogtype='R',
+                                     rank=lp,
+                                     sporter_lid_nr=sporter.lid_nr,
+                                     vereniging_nr=1000,
+                                     score1=1,
+                                     score2=2,
+                                     score3=3,
+                                     score4=4,
+                                     score5=5,
+                                     score6=6,
+                                     score7=250,
+                                     totaal=270,
+                                     gemiddelde=5.5)
             records.append(rec)
         # for
 
         Sporter.objects.bulk_create(sporters)
-        HistCompetitieIndividueel.objects.bulk_create(records)
+        HistCompRegioIndiv.objects.bulk_create(records)
 
     def test_anon(self):
         self.e2e_logout()
@@ -533,7 +533,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         competities_aanmaken()
 
         # geen HistCompIndividueel
-        HistCompetitieIndividueel.objects.all().delete()
+        HistCompRegioIndiv.objects.all().delete()
 
         # haal het AG scherm op
         with self.assert_max_queries(20):

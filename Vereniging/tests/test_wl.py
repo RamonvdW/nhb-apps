@@ -9,7 +9,7 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie
 from Competitie.operations import competities_aanmaken
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -135,12 +135,12 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.boog_str = 'Testcurve1'
+        histcomp.beschrijving = 'Testcurve1'
         histcomp.is_team = False
         histcomp.save()
 
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100001.lid_nr
@@ -161,7 +161,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         # record voor het jeugdlid
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.sporter_lid_nr = self.sporter_100002.lid_nr

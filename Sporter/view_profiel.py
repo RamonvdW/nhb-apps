@@ -17,7 +17,7 @@ from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporte
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
@@ -55,7 +55,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
 
         objs = list()
-        for obj in (HistCompetitieIndividueel
+        for obj in (HistCompRegioIndiv
                     .objects
                     .filter(sporter_lid_nr=sporter.lid_nr)
                     .exclude(totaal=0)
@@ -65,9 +65,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
             obj.seizoen_str = obj.histcompetitie.seizoen
             try:
-                obj.boog_str = boogtype2str[obj.boogtype]
+                obj.beschrijving = boogtype2str[obj.boogtype]
             except KeyError:
-                obj.boog_str = "?"
+                obj.beschrijving = "?"
 
             scores = list()
             for score in (obj.score1, obj.score2, obj.score3, obj.score4, obj.score5, obj.score6, obj.score7):

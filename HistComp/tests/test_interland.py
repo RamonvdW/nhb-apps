@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -41,13 +41,13 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2018/2019'
         obj.comp_type = '25'
-        obj.boog_str = 'Compound'
+        obj.beschrijving = 'Compound'
         obj.is_team = False
         obj.save()
         self.klasse_pk_leeg = obj.pk
 
         obj.pk = None
-        obj.boog_str = 'Recurve'
+        obj.beschrijving = 'Recurve'
         obj.save()
         self.klasse_pk = obj.pk
 
@@ -64,7 +64,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
 
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = obj
         rec.rank = 1
         rec.sporter_lid_nr = sporter.lid_nr
@@ -97,7 +97,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
 
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = obj
         rec.rank = 1
         rec.sporter_lid_nr = sporter.lid_nr
@@ -129,7 +129,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         sporter.account = None
         sporter.save()
 
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = obj
         rec.rank = 1
         rec.sporter_lid_nr = sporter.lid_nr
@@ -149,7 +149,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.save()
 
         # maak nog een record aan voor een lid dat weg is
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = obj
         rec.rank = 1
         rec.sporter_lid_nr = 999999
@@ -181,7 +181,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
 
-        rec = HistCompetitieIndividueel()
+        rec = HistCompRegioIndiv()
         rec.histcompetitie = obj
         rec.rank = 1
         rec.sporter_lid_nr = sporter.lid_nr
@@ -254,7 +254,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj = HistCompetitie()
         obj.seizoen = '2017/2018'
         obj.comp_type = '25'
-        obj.boog_str = 'Compound'
+        obj.beschrijving = 'Compound'
         obj.is_team = False
         obj.save()
         with self.assert_max_queries(20):

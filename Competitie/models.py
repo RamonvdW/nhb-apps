@@ -888,18 +888,20 @@ class KampioenschapSporterBoog(models.Model):
 
     # 0 = niet meegedaan (default)
     # 1..24 = plaats op RK deelnemer, voor zover bekend
-    # KAMP_RANK_UNKNOWN = wel meegedaan, uiteindelijke rank niet precies bekend
     # KAMP_RANK_RESERVE = niet afgemeld, reserve, niet meegedaan
     # KAMP_RANK_NO_SHOW = niet afgemeld, wel uitgenodigd, niet meegedaan. Waarschijnlijk een no-show.
     result_rank = models.PositiveSmallIntegerField(default=0)
     result_volgorde = models.PositiveSmallIntegerField(default=99)   # gesorteerde uitslag, inclusief alle 5e plekken
 
+    # individuele RK deelnemer wordt gekoppeld aan de RK/BK teams
+    # scores worden hier bijgehouden
+
     # resultaat van de RK teams deelname van deze sporter
-    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
-    result_teamscore_2 = models.PositiveSmallIntegerField(default=0)
+    result_rk_teamscore_1 = models.PositiveSmallIntegerField(default=0)         # max = 32767
+    result_rk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     # resultaat van de BK teams deelname van deze sporter
-    result_bk_teamscore_1 = models.PositiveSmallIntegerField(default=0)            # max = 32767
+    result_bk_teamscore_1 = models.PositiveSmallIntegerField(default=0)         # max = 32767
     result_bk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):

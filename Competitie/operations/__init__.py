@@ -10,10 +10,16 @@ from .aanvangsgemiddelden import aanvangsgemiddelden_vaststellen_voor_afstand, g
 from .klassengrenzen import (competitie_klassengrenzen_vaststellen,
                              bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams,
                              KlasseBepaler)
+from .vul_histcomp import (uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,
+                           uitslag_rk_indiv_naar_histcomp, uitslag_rk_teams_naar_histcomp,
+                           uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
 
 __all__ = ['bepaal_startjaar_nieuwe_competitie', 'competities_aanmaken', 'maak_regiocompetitie_ronde',
            'aanvangsgemiddelden_vaststellen_voor_afstand', 'get_competitie_bogen',
            'bepaal_klassengrenzen_teams', 'bepaal_klassengrenzen_indiv', 'competitie_week_nr_to_date',
-           'competitie_klassengrenzen_vaststellen', 'KlasseBepaler']
+           'competitie_klassengrenzen_vaststellen', 'KlasseBepaler',
+           'uitslag_regio_indiv_naar_histcomp', 'uitslag_regio_teams_naar_histcomp',
+           'uitslag_rk_indiv_naar_histcomp', 'uitslag_rk_teams_naar_histcomp',
+           'uitslag_bk_indiv_naar_histcomp', 'uitslag_bk_teams_naar_histcomp']
 
 # end of file
