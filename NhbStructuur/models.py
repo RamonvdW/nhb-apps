@@ -109,14 +109,14 @@ class NhbVereniging(models.Model):
     ver_nr = models.PositiveIntegerField(primary_key=True)
 
     # naam van de vereniging
-    naam = models.CharField(max_length=200)
+    naam = models.CharField(max_length=50)
 
     # adres van "het bedrijf"
-    adres_regel1 = models.CharField(max_length=100, default='', blank=True)
-    adres_regel2 = models.CharField(max_length=100, default='', blank=True)
+    adres_regel1 = models.CharField(max_length=50, default='', blank=True)
+    adres_regel2 = models.CharField(max_length=50, default='', blank=True)
 
     # locatie van het doel van de vereniging
-    plaats = models.CharField(max_length=100, blank=True)
+    plaats = models.CharField(max_length=35, blank=True)
 
     # de regio waarin de vereniging zit
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
