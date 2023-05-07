@@ -40,7 +40,6 @@ def uitslag_regio_indiv_naar_histcomp(comp):
         boogtype_pk2histcomp[boogtype.pk] = histcomp
     # for
 
-    aantal = 0
     bulk = list()
     for boogtype in comp.boogtypen.all():
         histcomp = boogtype_pk2histcomp[boogtype.pk]
@@ -65,7 +64,6 @@ def uitslag_regio_indiv_naar_histcomp(comp):
         for deelnemer in deelnemers:
             # skip sporters met helemaal geen scores
             if deelnemer.totaal > 0:
-                aantal += 1
                 rank += 1
                 sporter = deelnemer.sporterboog.sporter
                 ver = deelnemer.bij_vereniging
@@ -102,8 +100,6 @@ def uitslag_regio_indiv_naar_histcomp(comp):
     if len(bulk):
         HistCompRegioIndiv.objects.bulk_create(bulk)
 
-    print('[INFO] --> %s' % aantal)
-
 
 def uitslag_rk_indiv_naar_histcomp(comp):
     """ uitslag rk individueel overnemen als histcomp
@@ -125,7 +121,6 @@ def uitslag_rk_indiv_naar_histcomp(comp):
 
     vlag_rk = list()
 
-    aantal = 0
     bulk = list()
     for deelnemer in (KampioenschapSporterBoog
                       .objects
@@ -165,14 +160,12 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                             rk_score_1=deelnemer.result_score_1,
                             rk_score_2=deelnemer.result_score_2)
             bulk.append(hist)
-            aantal += 1
 
             if histcomp not in vlag_rk:
                 vlag_rk.append(histcomp)
     # for
 
     HistKampIndiv.objects.bulk_create(bulk)
-    print('[INFO] --> %s' % aantal)
 
     for histcomp in vlag_rk:
         histcomp.heeft_uitslag_rk = True
@@ -199,7 +192,6 @@ def uitslag_bk_indiv_naar_histcomp(comp):
     # for
 
     vlag_bk = list()
-    aantal = 0
     for deelnemer in (KampioenschapSporterBoog
                       .objects
                       .filter(kampioenschap__competitie=comp,
@@ -223,8 +215,6 @@ def uitslag_bk_indiv_naar_histcomp(comp):
             hist.bk_score_2 = deelnemer.result_score_2
             hist.save(update_fields=['rank_bk', 'bk_score_1', 'bk_score_2'])
 
-            aantal += 1
-
             histcomp = hist.histcompetitie
             if histcomp not in vlag_bk:
                 vlag_bk.append(histcomp)
@@ -234,8 +224,6 @@ def uitslag_bk_indiv_naar_histcomp(comp):
         histcomp.heeft_uitslag_bk = True
         histcomp.save(update_fields=['heeft_uitslag_bk'])
     # for
-
-    print('[INFO] --> %s' % aantal)
 
 
 def uitslag_regio_teams_naar_histcomp(comp):
@@ -264,8 +252,6 @@ def uitslag_regio_teams_naar_histcomp(comp):
         teamtype_pk2histcomp[teamtype.pk] = histcomp
     # for
 
-    aantal = 0
-
     bulk = list()
     prev_team = None
     hist = None
@@ -288,7 +274,6 @@ def uitslag_regio_teams_naar_histcomp(comp):
             histcomp = teamtype_pk2histcomp[team.team_type.pk]
             ver = team.vereniging
 
-            aantal += 1
             hist = HistCompRegioTeam(
                         histcompetitie=histcomp,
                         team_klasse=team.team_klasse.beschrijving,
@@ -342,8 +327,6 @@ def uitslag_regio_teams_naar_histcomp(comp):
 
     HistCompRegioTeam.objects.bulk_create(bulk)
 
-    print('[INFO] --> %s' % aantal)
-
 
 def uitslag_rk_teams_naar_histcomp(comp):
     """ uitslag rk teams overnemen als histcomp """
@@ -374,7 +357,6 @@ def uitslag_rk_teams_naar_histcomp(comp):
         teamtype_pk2histcomp[pk] = histcomp
     # for
 
-    aantal = 0
     bulk = list()
     vlag_rk = list()
     for team in (KampioenschapTeam
@@ -440,7 +422,6 @@ def uitslag_rk_teams_naar_histcomp(comp):
                 hist.lid_4 = hist_indiv
 
             bulk.append(hist)
-            aantal += 1
 
             if histcomp not in vlag_rk:
                 vlag_rk.append(histcomp)
@@ -452,8 +433,6 @@ def uitslag_rk_teams_naar_histcomp(comp):
         histcomp.heeft_uitslag_rk = True
         histcomp.save(update_fields=['heeft_uitslag_rk'])
     # for
-
-    print('[INFO] --> %s' % aantal)
 
 
 def uitslag_bk_teams_naar_histcomp(comp):
@@ -485,7 +464,6 @@ def uitslag_bk_teams_naar_histcomp(comp):
         teamtype_pk2histcomp[pk] = histcomp
     # for
 
-    aantal = 0
     bulk = list()
     vlag_bk = list()
     for team in (KampioenschapTeam
@@ -551,7 +529,6 @@ def uitslag_bk_teams_naar_histcomp(comp):
                 hist.lid_4 = hist_indiv
 
             bulk.append(hist)
-            aantal += 1
 
             if histcomp not in vlag_bk:
                 vlag_bk.append(histcomp)
@@ -563,8 +540,6 @@ def uitslag_bk_teams_naar_histcomp(comp):
         histcomp.heeft_uitslag_bk = True
         histcomp.save(update_fields=['heeft_uitslag_bk'])
     # for
-
-    print('[INFO] --> %s' % aantal)
 
 
 # end of file

@@ -298,7 +298,7 @@ class Command(BaseCommand):
                     for deelnemer in feitelijke_deelnemers:
                         if not self.dryrun:
                             # uitgestelde save actie
-                            deelnemer.save(update_fields=['result_teamscore_1', 'result_teamscore_2'])
+                            deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
                         deelnemer_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
                         deelnemer_totalen.append(deelnemer_totaal)
                     # for

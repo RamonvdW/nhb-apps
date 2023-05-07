@@ -715,7 +715,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         hist = HistCompetitie(
                         seizoen='2019/2020',
                         is_openbaar=False,
-                        boog_str='Test',
+                        beschrijving='Test',
                         comp_type='18')
         hist.save()
 

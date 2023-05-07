@@ -512,7 +512,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)       # redirect = Success
 
         # kietel de achtergrondtaak
-        self.verwerk_regiocomp_mutaties()
+        self.verwerk_regiocomp_mutaties(show_warnings=False)
 
         self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
         self.comp_18.bepaal_fase()

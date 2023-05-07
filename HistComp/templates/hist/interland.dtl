@@ -55,7 +55,7 @@
                     {% endif %}
                     <tr>
                         <td colspan="6" class="center">
-                            <h5 id="{{ klasse.boog_str }}">Klasse: {{ klasse.boog_str }}</h5>
+                            <h5 id="{{ klasse.beschrijving }}">Klasse: {{ klasse.beschrijving }}</h5>
                             <a class="btn-nhb-rood" href="{{ klasse.url_download }}">
                                 <i class="material-icons-round left">get_app</i>Download</a>
                         </td>

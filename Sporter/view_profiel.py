@@ -17,6 +17,7 @@ from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporte
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
+from HistComp.definities import HISTCOMP_TYPE2STR
 from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
@@ -62,7 +63,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     .select_related('histcompetitie')
                     .order_by('histcompetitie__comp_type',      # 18/25
                               '-histcompetitie__seizoen')):     # jaartal, aflopend
-            obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
+            obj.competitie_str = HISTCOMP_TYPE2STR[obj.histcompetitie.comp_type]
             obj.seizoen_str = obj.histcompetitie.seizoen
             try:
                 obj.beschrijving = boogtype2str[obj.boogtype]
