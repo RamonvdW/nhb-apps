@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import migrations
+from django.db import migrations, models
 
 
 def rename_ib(apps, _):

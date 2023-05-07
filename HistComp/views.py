@@ -8,10 +8,12 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q
+from HistComp.definities import HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE, HISTCOMP_TYPE_18, HISTCOMP_TYPE
 from HistComp.models import HistCompetitie, HistCompRegioIndiv
 from HistComp.forms import FilterForm
 from Plein.menu import menu_dynamics
 from urllib.parse import quote_plus
+from types import SimpleNamespace
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
@@ -20,10 +22,47 @@ RESULTS_PER_PAGE = 100
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive bow", "Instinctive Bow", "Traditional", "Longbow")
 
-COMP_TYPE_STR = {
-    '18': 'Indoor',
-    '25': '25m 1pijl'
-}
+
+def maak_filter_seizoen(context, seizoenen):
+    """ Maak het seizoenen filter
+        Vult in:
+            context['filter_seizoenen']
+    """
+    seizoen = context['seizoen']
+    histcomp_type_url = context['histcomp_type_url']
+
+    context['filter_seizoenen'] = list()
+    for opt in seizoenen:
+        opt_url = opt.replace('/', '-')
+        url = reverse('HistComp:seizoen-top', kwargs={'seizoen': opt_url, 'histcomp_type': histcomp_type_url})
+        obj = SimpleNamespace(
+            beschrijving='Seizoen %s' % opt,
+            sel=opt_url,
+            selected=(opt == seizoen),
+            zoom_url=url)
+        context['filter_seizoenen'].append(obj)
+    # for
+
+
+def maak_filter_histcomp_type(context, **kwargs):
+    """ Maak het competitie type filter (Indoor / 25m1pijl)
+        Vult in:
+            context['filter_histcomp_type']
+    """
+    seizoen_url = context['seizoen_url']
+    histcomp_type_url = context['histcomp_type_url']
+
+    context['filter_histcomp_type'] = list()
+    for opt_sel, opt_descr in HISTCOMP_TYPE:
+        opt_url = HISTCOMP_TYPE2URL[opt_sel]
+        url = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': opt_url})
+        obj = SimpleNamespace(
+            beschrijving=opt_descr,
+            sel=opt_sel,
+            selected=(opt_url == histcomp_type_url),
+            zoom_url=url)
+        context['filter_histcomp_type'].append(obj)
+    # for
 
 
 class HistCompTop(TemplateView):
@@ -35,50 +74,92 @@ class HistCompTop(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # zoek het nieuwste seizoen beschikbaar
-        qset = (HistCompetitie
-                .objects
-                .exclude(is_openbaar=False)     # False vanaf einde regiocompetitie tot afsluiten BK/competitie
-                .order_by('-seizoen')
-                .distinct('seizoen'))
+        seizoenen = list(HistCompetitie
+                         .objects
+                         .exclude(is_openbaar=False)
+                         .order_by('-seizoen')
+                         .distinct('seizoen')
+                         .values_list('seizoen', flat=True))
 
-        if len(qset) == 0:
+        if len(seizoenen) == 0:
+            # geen data beschikbaar
+            context['titel'] = 'Uitslag eerder seizoen'
             context['geen_data'] = True
         else:
-            # neem de data van het nieuwste seizoen
-            context['seizoen'] = seizoen = qset[0].seizoen
+            seizoen = seizoenen[0]  # neem de nieuwste
+            if 'seizoen' in kwargs:
+                seizoen_url = kwargs['seizoen'][:10]  # 20xx-20yy
+                seizoen = seizoen_url.replace('-', '/')
+                if seizoen not in seizoenen:
+                    seizoen = seizoenen[0]  # neem de nieuwste
 
-            qset = HistCompetitie.objects.filter(seizoen=seizoen, is_team=False).distinct('comp_type', 'beschrijving')
+            context['seizoen'] = seizoen
+            context['seizoen_url'] = seizoen_url =seizoen.replace('/', '-')
 
-            gevonden = dict()       # [(comp_type, klasse)] = HistCompetitie
-            for obj in qset:
-                tup = (obj.comp_type, obj.beschrijving)
-                gevonden[tup] = obj
-            # for
-
-            context['bogen_indiv_18'] = bogen_indiv_18 = list()
-            context['bogen_indiv_25'] = bogen_indiv_25 = list()
-
-            for klasse in KLASSEN_VOLGORDE:
-
+            histcomp_type = HISTCOMP_TYPE_18
+            if 'histcomp_type' in kwargs:
+                histcomp_type_url = kwargs['histcomp_type'][:10]  # indoor of 25m1pijl
                 try:
-                    histcomp = gevonden[('18', klasse)]
+                    histcomp_type = URL2HISTCOMP_TYPE[histcomp_type_url]
                 except KeyError:
-                    pass
-                else:
-                    tup = (klasse, reverse('HistComp:indiv', kwargs={'histcomp_pk': histcomp.pk}))
-                    bogen_indiv_18.append(tup)
+                    histcomp_type = HISTCOMP_TYPE_18
 
-                try:
-                    histcomp = gevonden[('25', klasse)]
-                except KeyError:
-                    pass
-                else:
-                    tup = (klasse, reverse('HistComp:indiv', kwargs={'histcomp_pk': histcomp.pk}))
-                    bogen_indiv_25.append(tup)
-            # for
+            context['histcomp_type'] = histcomp_type
+            context['histcomp_type_url'] = histcomp_type_url = HISTCOMP_TYPE2URL[histcomp_type]
 
-        context['show_team'] = False
+            maak_filter_seizoen(context, seizoenen)
+            maak_filter_histcomp_type(context)
+
+            if seizoen == seizoenen[0]:
+                context['titel'] = 'Uitslag vorig seizoen'
+            else:
+                context['titel'] = 'Uitslag eerder seizoen'
+
+            default_boog = 'r'
+            default_team = 'r'
+
+            histcomp_indiv = HistCompetitie.objects.get(seizoen=seizoen, comp_type=histcomp_type, is_team=False, beschrijving__icontains='Recurve')
+
+            context['url_regio_indiv'] = reverse('HistComp:uitslagen-regio-indiv',
+                                                 kwargs={'seizoen': seizoen_url,
+                                                         'histcomp_type': histcomp_type_url,
+                                                         'comp_boog': default_boog})
+
+            if histcomp_indiv.heeft_uitslag_rk:
+                context['url_rayon_indiv'] = reverse('HistComp:uitslagen-rk-indiv',
+                                                     kwargs={'seizoen': seizoen_url,
+                                                             'histcomp_type': histcomp_type_url,
+                                                             'comp_boog': default_boog})
+
+            if histcomp_indiv.heeft_uitslag_bk:
+                context['url_bond_indiv'] = reverse('HistComp:uitslagen-bk-indiv',
+                                                    kwargs={'seizoen': seizoen_url,
+                                                            'histcomp_type': histcomp_type_url,
+                                                            'comp_boog': default_boog})
+
+            try:
+                histcomp_teams = HistCompetitie.objects.get(seizoen=seizoen, comp_type=histcomp_type, is_team=True, beschrijving__contains='Recurve')
+            except HistCompetitie.DoesNotExist:
+                pass
+            else:
+                context['url_regio_teams'] = reverse('HistComp:uitslagen-regio-teams',
+                                                     kwargs={'seizoen': seizoen_url,
+                                                             'histcomp_type': histcomp_type_url,
+                                                             'team_type': default_team})
+
+                if histcomp_teams.heeft_uitslag_rk:
+                    context['url_rayon_teams'] = reverse('HistComp:uitslagen-rk-teams',
+                                                         kwargs={'seizoen': seizoen_url,
+                                                                 'histcomp_type': histcomp_type_url,
+                                                                 'team_type': default_team})
+
+                if histcomp_teams.heeft_uitslag_bk:
+                    context['url_bond_teams'] = reverse('HistComp:uitslagen-bk-teams',
+                                                        kwargs={'seizoen': seizoen_url,
+                                                                'histcomp_type': histcomp_type_url,
+                                                                'team_type': default_team})
+
+        context['waarom'] = "Geen gegevens"
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

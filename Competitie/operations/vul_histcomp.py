@@ -55,6 +55,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                       .objects
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
+                                      'regiocompetitie__nhb_regio',
                                       'indiv_klasse')
                       .filter(regiocompetitie__competitie=comp,
                               indiv_klasse__in=klassen_pks)
@@ -78,6 +79,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                             vereniging_nr=ver.ver_nr,
                             vereniging_naam=ver.naam,
                             vereniging_plaats=ver.plaats,
+                            regio_nr=deelnemer.regiocompetitie.nhb_regio.regio_nr,
                             score1=deelnemer.score1,
                             score2=deelnemer.score2,
                             score3=deelnemer.score3,
@@ -121,6 +123,8 @@ def uitslag_rk_indiv_naar_histcomp(comp):
         boogtype_pk2histcomp[pk] = histcomp
     # for
 
+    vlag_rk = list()
+
     aantal = 0
     bulk = list()
     for deelnemer in (KampioenschapSporterBoog
@@ -129,6 +133,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                               kampioenschap__deel=DEEL_RK)
                       .select_related('sporterboog__sporter',
                                       'sporterboog__boogtype',
+                                      'kampioenschap__nhb_rayon',
                                       'bij_vereniging',
                                       'indiv_klasse')):
 
@@ -136,6 +141,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
         is_in_team = deelnemer.kampioenschapteam_feitelijke_leden.count() > 0
 
         if 0 < deelnemer.result_rank <= KAMP_RANK_BLANCO or is_in_team:
+            kampioenschap = deelnemer.kampioenschap
             sporter = deelnemer.sporterboog.sporter
             boogtype = deelnemer.sporterboog.boogtype
             ver = deelnemer.bij_vereniging
@@ -153,16 +159,25 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                             vereniging_nr=ver.ver_nr,
                             vereniging_naam=ver.naam,
                             vereniging_plaats=ver.plaats,
+                            rayon_nr=kampioenschap.nhb_rayon.rayon_nr,
                             rank_rk=deelnemer.result_rank,
                             rk_score_is_blanco=(deelnemer.result_rank == KAMP_RANK_BLANCO),
                             rk_score_1=deelnemer.result_score_1,
                             rk_score_2=deelnemer.result_score_2)
             bulk.append(hist)
             aantal += 1
+
+            if histcomp not in vlag_rk:
+                vlag_rk.append(histcomp)
     # for
 
     HistKampIndiv.objects.bulk_create(bulk)
     print('[INFO] --> %s' % aantal)
+
+    for histcomp in vlag_rk:
+        histcomp.heeft_uitslag_rk = True
+        histcomp.save(update_fields=['heeft_uitslag_rk'])
+    # for
 
 
 def uitslag_bk_indiv_naar_histcomp(comp):
@@ -183,6 +198,7 @@ def uitslag_bk_indiv_naar_histcomp(comp):
         klasse_indiv_lid_nr2hist[tup] = hist
     # for
 
+    vlag_bk = list()
     aantal = 0
     for deelnemer in (KampioenschapSporterBoog
                       .objects
@@ -208,6 +224,15 @@ def uitslag_bk_indiv_naar_histcomp(comp):
             hist.save(update_fields=['rank_bk', 'bk_score_1', 'bk_score_2'])
 
             aantal += 1
+
+            histcomp = hist.histcompetitie
+            if histcomp not in vlag_bk:
+                vlag_bk.append(histcomp)
+    # for
+
+    for histcomp in vlag_bk:
+        histcomp.heeft_uitslag_bk = True
+        histcomp.save(update_fields=['heeft_uitslag_bk'])
     # for
 
     print('[INFO] --> %s' % aantal)
@@ -249,7 +274,8 @@ def uitslag_regio_teams_naar_histcomp(comp):
                   .objects
                   .filter(team__regiocompetitie__competitie=comp)
                   .select_related('team',
-                                  'team__regiocompetitie')
+                                  'team__regiocompetitie',
+                                  'team__regiocompetitie__nhb_regio')
                   .order_by('team',
                             'ronde_nr')):
 
@@ -269,6 +295,7 @@ def uitslag_regio_teams_naar_histcomp(comp):
                         vereniging_nr=ver.ver_nr,
                         vereniging_naam=ver.naam,
                         vereniging_plaats=ver.plaats,
+                        regio_nr=team.regiocompetitie.nhb_regio.regio_nr,
                         team_nr=team.volg_nr)
             bulk.append(hist)
 
@@ -349,6 +376,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
 
     aantal = 0
     bulk = list()
+    vlag_rk = list()
     for team in (KampioenschapTeam
                  .objects
                  .filter(kampioenschap__competitie=comp,
@@ -413,9 +441,17 @@ def uitslag_rk_teams_naar_histcomp(comp):
 
             bulk.append(hist)
             aantal += 1
+
+            if histcomp not in vlag_rk:
+                vlag_rk.append(histcomp)
     # for
 
     HistKampTeam.objects.bulk_create(bulk)
+
+    for histcomp in vlag_rk:
+        histcomp.heeft_uitslag_rk = True
+        histcomp.save(update_fields=['heeft_uitslag_rk'])
+    # for
 
     print('[INFO] --> %s' % aantal)
 
@@ -451,6 +487,7 @@ def uitslag_bk_teams_naar_histcomp(comp):
 
     aantal = 0
     bulk = list()
+    vlag_bk = list()
     for team in (KampioenschapTeam
                  .objects
                  .filter(kampioenschap__competitie=comp,
@@ -515,9 +552,17 @@ def uitslag_bk_teams_naar_histcomp(comp):
 
             bulk.append(hist)
             aantal += 1
+
+            if histcomp not in vlag_bk:
+                vlag_bk.append(histcomp)
     # for
 
     HistKampTeam.objects.bulk_create(bulk)
+
+    for histcomp in vlag_bk:
+        histcomp.heeft_uitslag_bk = True
+        histcomp.save(update_fields=['heeft_uitslag_bk'])
+    # for
 
     print('[INFO] --> %s' % aantal)
 

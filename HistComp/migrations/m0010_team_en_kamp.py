@@ -18,10 +18,26 @@ class Migration(migrations.Migration):
 
     # migratie functies
     operations = [
+        migrations.AddField(
+            model_name='histcompetitie',
+            name='heeft_uitslag_bk',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='histcompetitie',
+            name='heeft_uitslag_rk',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AlterField(
+            model_name='histcompetitie',
+            name='comp_type',
+            field=models.CharField(choices=[('18', 'Indoor'), ('25', '25m1pijl')], max_length=2),
+        ),
         migrations.AlterModelOptions(
             name='histcompetitie',
             options={'ordering': ['seizoen', 'comp_type'], 'verbose_name': 'Historie competitie', 'verbose_name_plural': 'Historie competitie'},
         ),
+
         migrations.AlterModelOptions(
             name='histcompregioindiv',
             options={'ordering': ['rank'], 'verbose_name': 'Hist regio indiv', 'verbose_name_plural': 'Hist regio indiv'},
@@ -35,6 +51,11 @@ class Migration(migrations.Migration):
             model_name='histcompregioindiv',
             name='vereniging_plaats',
             field=models.CharField(default='', max_length=35),
+        ),
+        migrations.AddField(
+            model_name='histcompregioindiv',
+            name='regio_nr',
+            field=models.PositiveSmallIntegerField(default=0),
         ),
         migrations.AlterField(
             model_name='histcompregioindiv',
@@ -96,6 +117,7 @@ class Migration(migrations.Migration):
             name='vereniging_nr',
             field=models.PositiveSmallIntegerField(),
         ),
+
         migrations.CreateModel(
             name='HistCompRegioTeam',
             fields=[
@@ -104,6 +126,7 @@ class Migration(migrations.Migration):
                 ('vereniging_nr', models.PositiveSmallIntegerField()),
                 ('vereniging_naam', models.CharField(max_length=50)),
                 ('vereniging_plaats', models.CharField(max_length=35)),
+                ('regio_nr', models.PositiveSmallIntegerField()),
                 ('team_nr', models.PositiveSmallIntegerField()),
                 ('rank', models.PositiveSmallIntegerField(default=0)),
                 ('ronde_1_score', models.PositiveSmallIntegerField(default=0)),
@@ -130,6 +153,7 @@ class Migration(migrations.Migration):
                 'ordering': ['rank', 'team_klasse'],
             },
         ),
+
         migrations.CreateModel(
             name='HistKampIndiv',
             fields=[
@@ -142,6 +166,7 @@ class Migration(migrations.Migration):
                 ('vereniging_nr', models.PositiveSmallIntegerField()),
                 ('vereniging_naam', models.CharField(max_length=50)),
                 ('vereniging_plaats', models.CharField(default='', max_length=35)),
+                ('rayon_nr', models.PositiveSmallIntegerField()),
                 ('rank_rk', models.PositiveSmallIntegerField()),
                 ('rank_bk', models.PositiveSmallIntegerField(default=0)),
                 ('rk_score_is_blanco', models.BooleanField(default=False)),

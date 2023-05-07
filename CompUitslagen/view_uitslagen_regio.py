@@ -60,7 +60,7 @@ def get_request_regio_nr(request):
 
 class UitslagenRegioIndivView(TemplateView):
 
-    """ Django class-based view voor de individuele uitslagen van de competitie in 1 regio """
+    """ Django class-based view voor de individuele uitslagen van de regiocompetitie in 1 regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV

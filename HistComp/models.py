@@ -6,7 +6,7 @@
 
 from django.db import models
 from decimal import Decimal
-from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK, HISTCOMP_CHOICES_RK_BK, COMP_TYPE
+from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK, HISTCOMP_CHOICES_RK_BK, HISTCOMP_TYPE
 
 
 class HistCompetitie(models.Model):
@@ -22,7 +22,7 @@ class HistCompetitie(models.Model):
 
     # '18' = 18m = Indoor
     # '25' = 25m = 25m1pijl
-    comp_type = models.CharField(max_length=2, choices=COMP_TYPE)
+    comp_type = models.CharField(max_length=2, choices=HISTCOMP_TYPE)
 
     # is dit voor teams of individueel?
     is_team = models.BooleanField(default=False)
@@ -39,6 +39,10 @@ class HistCompetitie(models.Model):
     # staat op True als de huidige competitie nog loopt, maar de eindstand van de regiocompetitie
     # alvast overgezet is i.v.m. berekenen nieuwe AG's
     is_openbaar = models.BooleanField(default=True)
+
+    # voor het presenteren van de kaartjes: zijn gegevens beschikbaar voor RK en BK uitslag?
+    heeft_uitslag_rk = models.BooleanField(default=False)
+    heeft_uitslag_bk = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -82,6 +86,7 @@ class HistCompRegioIndiv(models.Model):
     vereniging_nr = models.PositiveSmallIntegerField()
     vereniging_naam = models.CharField(max_length=50)
     vereniging_plaats = models.CharField(max_length=35, default='')
+    regio_nr = models.PositiveSmallIntegerField(default=0)
 
     # de regio scores
     score1 = models.PositiveSmallIntegerField(default=0)
@@ -145,6 +150,7 @@ class HistCompRegioTeam(models.Model):
     vereniging_nr = models.PositiveSmallIntegerField()
     vereniging_naam = models.CharField(max_length=50)
     vereniging_plaats = models.CharField(max_length=35)
+    regio_nr = models.PositiveSmallIntegerField()
 
     # vereniging kan meerdere teams hebben
     # team naam wordt niet opgeslagen, omdat het meestal een rommeltje is
@@ -209,6 +215,7 @@ class HistKampIndiv(models.Model):
     vereniging_nr = models.PositiveSmallIntegerField()
     vereniging_naam = models.CharField(max_length=50)
     vereniging_plaats = models.CharField(max_length=35, default='')
+    rayon_nr = models.PositiveSmallIntegerField()
 
     # volgorde in de vastgestelde uitslag in deze wedstrijdklasse
     rank_rk = models.PositiveSmallIntegerField()

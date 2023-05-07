@@ -149,9 +149,9 @@
 
                     <!-- toon disabled -->
                     {% if kaartje.img %}
-                        {% include 'plein/card_logo_nog-niet-beschikbaar.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf img=kaartje.img %}
+                        {% include 'plein/card_beschikbaar-vanaf_logo.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf img=kaartje.img %}
                     {% else %}
-                        {% include 'plein/card_nog-niet-beschikbaar.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf icon=kaartje.icon %}
+                        {% include 'plein/card_beschikbaar-vanaf_icon.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf icon=kaartje.icon %}
                     {% endif %}
 
         {% elif kaartje.img %}

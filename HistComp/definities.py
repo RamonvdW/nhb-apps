@@ -12,11 +12,31 @@ HISTCOMP_CHOICES_RK_BK = (
     (HISTCOMP_BK, 'BK'),
 )
 
+HISTCOMP_TYPE_18 = '18'    # note: 18, 25 must be in sync with Competitie.definities.AFSTAND
+HISTCOMP_TYPE_25 = '25'
 
-COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.models.AFSTAND
-             ('25', '25m1pijl')]
+HISTCOMP_TYPE = [
+    (HISTCOMP_TYPE_18, 'Indoor'),
+    (HISTCOMP_TYPE_25, '25m1pijl')
+]
 
-comptype2str = {'18': '18m Indoor',
-                '25': '25m 1pijl'}
+HISTCOMP_TYPE2STR = {
+    HISTCOMP_TYPE_18: '18m Indoor',
+    HISTCOMP_TYPE_25: '25m 1pijl'
+}
+
+HISTCOMP_TYPE2URL = {
+    HISTCOMP_TYPE_18: 'indoor',
+    HISTCOMP_TYPE_25: '25m1pijl'
+}
+
+URL2HISTCOMP_TYPE = {
+    'indoor': HISTCOMP_TYPE_18,
+    '18m': HISTCOMP_TYPE_18,
+    '25m1pijl': HISTCOMP_TYPE_25,
+    '25m1p': HISTCOMP_TYPE_25,
+    '25m': HISTCOMP_TYPE_25,
+}
+
 
 # end of file
