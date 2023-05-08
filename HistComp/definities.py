@@ -21,8 +21,8 @@ HISTCOMP_TYPE = [
 ]
 
 HISTCOMP_TYPE2STR = {
-    HISTCOMP_TYPE_18: '18m Indoor',
-    HISTCOMP_TYPE_25: '25m 1pijl'
+    HISTCOMP_TYPE_18: 'Indoor',
+    HISTCOMP_TYPE_25: '25m1pijl'
 }
 
 HISTCOMP_TYPE2URL = {
@@ -38,5 +38,13 @@ URL2HISTCOMP_TYPE = {
     '25m': HISTCOMP_TYPE_25,
 }
 
+HIST_BOGEN = {
+    'R': 'Recurve',
+    'C': 'Compound',
+    'BB': 'Barebow',
+    'IB': 'Instinctive bow',
+    'LB': 'Longbow',
+    'TR': 'Traditional',
+}
 
 # end of file

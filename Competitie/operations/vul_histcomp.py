@@ -4,46 +4,48 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from Competitie.definities import DEEL_RK, DEEL_BK, KAMP_RANK_BLANCO
 from Competitie.models import (CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieRondeTeam,
                                KampioenschapSporterBoog, KampioenschapTeam)
 from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK
-from HistComp.models import (HistCompetitie,
+from HistComp.models import (HistCompSeizoen,
                              HistCompRegioIndiv, HistCompRegioTeam,
                              HistKampIndiv, HistKampTeam)
 
 
 def uitslag_regio_indiv_naar_histcomp(comp):
-    """ uitslag regiocompetitie individueel overnemen als histcomp """
+    """ uitslag regiocompetitie individueel overnemen als nieuwe histcomp """
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
     try:
-        histcomps = HistCompetitie.objects.filter(seizoen=seizoen,
-                                                  comp_type=comp.afstand,
-                                                  is_team=False)
-    except HistCompetitie.DoesNotExist:
+        histcomps = HistCompSeizoen.objects.filter(seizoen=seizoen,
+                                                   comp_type=comp.afstand)
+    except HistCompSeizoen.DoesNotExist:
         pass
     else:
         # er bestaat al een uitslag - verwijder deze eerst
         histcomps.delete()
 
-    boogtype_pk2histcomp = dict()
-    for boogtype in comp.boogtypen.all():
-        histcomp = HistCompetitie(seizoen=seizoen,
-                                  comp_type=comp.afstand,
-                                  beschrijving=boogtype.beschrijving,
-                                  is_team=False,
-                                  is_openbaar=False)                # nog niet laten zien
-        histcomp.save()
-        boogtype_pk2histcomp[boogtype.pk] = histcomp
-    # for
+    bogen = ",".join(list(comp.boogtypen.order_by('volgorde').values_list('afkorting', flat=True)))
+
+    hist_seizoen = HistCompSeizoen(
+                        seizoen=seizoen,
+                        comp_type=comp.afstand,
+                        is_openbaar=False,
+                        indiv_bogen=bogen)
+
+    if comp.afstand == '18':
+        hist_seizoen.aantal_beste_scores = settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG
+    else:
+        hist_seizoen.aantal_beste_scores = settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG
+
+    hist_seizoen.save()
 
     bulk = list()
     for boogtype in comp.boogtypen.all():
-        histcomp = boogtype_pk2histcomp[boogtype.pk]
-
         klassen_pks = (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=comp,
@@ -68,7 +70,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                 sporter = deelnemer.sporterboog.sporter
                 ver = deelnemer.bij_vereniging
                 hist = HistCompRegioIndiv(
-                            histcompetitie=histcomp,
+                            seizoen=hist_seizoen,
                             klasse_indiv=deelnemer.indiv_klasse.beschrijving,
                             rank=rank,
                             sporter_lid_nr=sporter.lid_nr,
@@ -108,18 +110,12 @@ def uitslag_rk_indiv_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
+    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+
     beschrijving2boogtype_pk = dict()
     for boogtype in comp.boogtypen.all():
         beschrijving2boogtype_pk[boogtype.beschrijving] = boogtype.pk
     # for
-
-    boogtype_pk2histcomp = dict()
-    for histcomp in HistCompetitie.objects.filter(seizoen=seizoen, comp_type=comp.afstand, is_team=False):
-        pk = beschrijving2boogtype_pk[histcomp.beschrijving]
-        boogtype_pk2histcomp[pk] = histcomp
-    # for
-
-    vlag_rk = list()
 
     bulk = list()
     for deelnemer in (KampioenschapSporterBoog
@@ -140,13 +136,12 @@ def uitslag_rk_indiv_naar_histcomp(comp):
             sporter = deelnemer.sporterboog.sporter
             boogtype = deelnemer.sporterboog.boogtype
             ver = deelnemer.bij_vereniging
-            histcomp = boogtype_pk2histcomp[boogtype.pk]
 
             if deelnemer.result_rank > KAMP_RANK_BLANCO:
                 deelnemer.result_rank = 0                   # verwijder speciale codes (no show / reserve)
 
             hist = HistKampIndiv(
-                            histcompetitie=histcomp,
+                            seizoen=hist_seizoen,
                             klasse_indiv=deelnemer.indiv_klasse.beschrijving,
                             sporter_lid_nr=sporter.lid_nr,
                             sporter_naam=sporter.volledige_naam(),
@@ -160,17 +155,12 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                             rk_score_1=deelnemer.result_score_1,
                             rk_score_2=deelnemer.result_score_2)
             bulk.append(hist)
-
-            if histcomp not in vlag_rk:
-                vlag_rk.append(histcomp)
     # for
 
     HistKampIndiv.objects.bulk_create(bulk)
 
-    for histcomp in vlag_rk:
-        histcomp.heeft_uitslag_rk = True
-        histcomp.save(update_fields=['heeft_uitslag_rk'])
-    # for
+    hist_seizoen.heeft_uitslag_rk_indiv = True
+    hist_seizoen.save(update_fields=['heeft_uitslag_rk_indiv'])
 
 
 def uitslag_bk_indiv_naar_histcomp(comp):
@@ -178,20 +168,14 @@ def uitslag_bk_indiv_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    histcomp_pks = list(HistCompetitie
-                        .objects
-                        .filter(seizoen=seizoen,
-                                comp_type=comp.afstand,
-                                is_team=False)
-                        .values_list('pk', flat=True))
+    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
 
     klasse_indiv_lid_nr2hist = dict()
-    for hist in HistKampIndiv.objects.filter(histcompetitie__pk__in=histcomp_pks):
+    for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
         tup = (hist.klasse_indiv, hist.sporter_lid_nr)
         klasse_indiv_lid_nr2hist[tup] = hist
     # for
 
-    vlag_bk = list()
     for deelnemer in (KampioenschapSporterBoog
                       .objects
                       .filter(kampioenschap__competitie=comp,
@@ -214,16 +198,10 @@ def uitslag_bk_indiv_naar_histcomp(comp):
             hist.bk_score_1 = deelnemer.result_score_1
             hist.bk_score_2 = deelnemer.result_score_2
             hist.save(update_fields=['rank_bk', 'bk_score_1', 'bk_score_2'])
-
-            histcomp = hist.histcompetitie
-            if histcomp not in vlag_bk:
-                vlag_bk.append(histcomp)
     # for
 
-    for histcomp in vlag_bk:
-        histcomp.heeft_uitslag_bk = True
-        histcomp.save(update_fields=['heeft_uitslag_bk'])
-    # for
+    hist_seizoen.heeft_uitslag_bk_indiv = True
+    hist_seizoen.save(update_fields=['heeft_uitslag_bk_indiv'])
 
 
 def uitslag_regio_teams_naar_histcomp(comp):
@@ -231,26 +209,7 @@ def uitslag_regio_teams_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    try:
-        histcomps = HistCompetitie.objects.filter(seizoen=seizoen,
-                                                  comp_type=comp.afstand,
-                                                  is_team=True)
-    except HistCompetitie.DoesNotExist:
-        pass
-    else:
-        # er bestaat al een uitslag - verwijder deze eerst
-        histcomps.delete()
-
-    teamtype_pk2histcomp = dict()
-    for teamtype in comp.teamtypen.all():
-        histcomp = HistCompetitie(seizoen=seizoen,
-                                  comp_type=comp.afstand,
-                                  beschrijving=teamtype.beschrijving,
-                                  is_team=True,
-                                  is_openbaar=False)                # nog niet laten zien
-        histcomp.save()
-        teamtype_pk2histcomp[teamtype.pk] = histcomp
-    # for
+    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
 
     bulk = list()
     prev_team = None
@@ -271,11 +230,10 @@ def uitslag_regio_teams_naar_histcomp(comp):
                 unsorted.append(tup)
 
             team = ronde.team
-            histcomp = teamtype_pk2histcomp[team.team_type.pk]
             ver = team.vereniging
 
             hist = HistCompRegioTeam(
-                        histcompetitie=histcomp,
+                        seizoen=hist_seizoen,
                         team_klasse=team.team_klasse.beschrijving,
                         vereniging_nr=ver.ver_nr,
                         vereniging_naam=ver.naam,
@@ -312,20 +270,23 @@ def uitslag_regio_teams_naar_histcomp(comp):
             hist.ronde_7_punten = ronde.team_punten
     # for
 
-    teamklasse_rank = dict()
+    teamklasse2rank = dict()
     unsorted.sort()
     for tup in unsorted:
         hist = tup[-1]
         try:
-            rank = teamklasse_rank[hist.team_klasse]
+            rank = teamklasse2rank[hist.team_klasse]
         except KeyError:
             rank = 0
         rank += 1
         hist.rank = rank
-        teamklasse_rank[hist.team_klasse] = rank
+        teamklasse2rank[hist.team_klasse] = rank
     # for
 
     HistCompRegioTeam.objects.bulk_create(bulk)
+
+    hist_seizoen.heeft_uitslag_regio_teams = True
+    hist_seizoen.save(update_fields=['heeft_uitslag_regio_teams'])
 
 
 def uitslag_rk_teams_naar_histcomp(comp):
@@ -333,32 +294,15 @@ def uitslag_rk_teams_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    histcomp_pks = list(HistCompetitie
-                        .objects
-                        .filter(seizoen=seizoen,
-                                comp_type=comp.afstand,
-                                is_team=False)
-                        .values_list('pk', flat=True))
+    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
 
     klasse_indiv_lid_nr2hist = dict()
-    for hist in HistKampIndiv.objects.filter(histcompetitie__pk__in=histcomp_pks):
+    for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
         tup = (hist.klasse_indiv, hist.sporter_lid_nr)
         klasse_indiv_lid_nr2hist[tup] = hist
     # for
 
-    beschrijving2teamtype_pk = dict()
-    for teamtype in comp.teamtypen.all():
-        beschrijving2teamtype_pk[teamtype.beschrijving] = teamtype.pk
-    # for
-
-    teamtype_pk2histcomp = dict()
-    for histcomp in HistCompetitie.objects.filter(seizoen=seizoen, comp_type=comp.afstand, is_team=True):
-        pk = beschrijving2teamtype_pk[histcomp.beschrijving]
-        teamtype_pk2histcomp[pk] = histcomp
-    # for
-
     bulk = list()
-    vlag_rk = list()
     for team in (KampioenschapTeam
                  .objects
                  .filter(kampioenschap__competitie=comp,
@@ -369,11 +313,10 @@ def uitslag_rk_teams_naar_histcomp(comp):
                  .prefetch_related('feitelijke_leden')):
 
         if team.result_rank > 0:
-            histcomp = teamtype_pk2histcomp[team.team_type.pk]
             ver = team.vereniging
 
             hist = HistKampTeam(
-                        histcompetitie=histcomp,
+                        seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_RK,
                         klasse_teams=team.team_klasse.beschrijving,
                         vereniging_nr=ver.ver_nr,
@@ -422,17 +365,12 @@ def uitslag_rk_teams_naar_histcomp(comp):
                 hist.lid_4 = hist_indiv
 
             bulk.append(hist)
-
-            if histcomp not in vlag_rk:
-                vlag_rk.append(histcomp)
     # for
 
     HistKampTeam.objects.bulk_create(bulk)
 
-    for histcomp in vlag_rk:
-        histcomp.heeft_uitslag_rk = True
-        histcomp.save(update_fields=['heeft_uitslag_rk'])
-    # for
+    hist_seizoen.heeft_uitslag_rk_teams = True
+    hist_seizoen.save(update_fields=['heeft_uitslag_rk_teams'])
 
 
 def uitslag_bk_teams_naar_histcomp(comp):
@@ -440,32 +378,15 @@ def uitslag_bk_teams_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    histcomp_pks = list(HistCompetitie
-                        .objects
-                        .filter(seizoen=seizoen,
-                                comp_type=comp.afstand,
-                                is_team=False)
-                        .values_list('pk', flat=True))
+    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
 
     klasse_indiv_lid_nr2hist = dict()
-    for hist in HistKampIndiv.objects.filter(histcompetitie__pk__in=histcomp_pks):
+    for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
         tup = (hist.klasse_indiv, hist.sporter_lid_nr)
         klasse_indiv_lid_nr2hist[tup] = hist
     # for
 
-    beschrijving2teamtype_pk = dict()
-    for teamtype in comp.teamtypen.all():
-        beschrijving2teamtype_pk[teamtype.beschrijving] = teamtype.pk
-    # for
-
-    teamtype_pk2histcomp = dict()
-    for histcomp in HistCompetitie.objects.filter(seizoen=seizoen, comp_type=comp.afstand, is_team=True):
-        pk = beschrijving2teamtype_pk[histcomp.beschrijving]
-        teamtype_pk2histcomp[pk] = histcomp
-    # for
-
     bulk = list()
-    vlag_bk = list()
     for team in (KampioenschapTeam
                  .objects
                  .filter(kampioenschap__competitie=comp,
@@ -476,11 +397,10 @@ def uitslag_bk_teams_naar_histcomp(comp):
                  .prefetch_related('feitelijke_leden')):
 
         if team.result_rank > 0:
-            histcomp = teamtype_pk2histcomp[team.team_type.pk]
             ver = team.vereniging
 
             hist = HistKampTeam(
-                        histcompetitie=histcomp,
+                        seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_BK,
                         klasse_teams=team.team_klasse.beschrijving,
                         vereniging_nr=ver.ver_nr,
@@ -529,17 +449,12 @@ def uitslag_bk_teams_naar_histcomp(comp):
                 hist.lid_4 = hist_indiv
 
             bulk.append(hist)
-
-            if histcomp not in vlag_bk:
-                vlag_bk.append(histcomp)
     # for
 
     HistKampTeam.objects.bulk_create(bulk)
 
-    for histcomp in vlag_bk:
-        histcomp.heeft_uitslag_bk = True
-        histcomp.save(update_fields=['heeft_uitslag_bk'])
-    # for
+    hist_seizoen.heeft_uitslag_bk_teams = True
+    hist_seizoen.save(update_fields=['heeft_uitslag_bk_teams'])
 
 
 # end of file

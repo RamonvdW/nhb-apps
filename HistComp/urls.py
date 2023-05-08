@@ -5,18 +5,18 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from HistComp import views, view_interland, view_regio, view_rk, view_bk
+from HistComp import view_top, view_interland, view_regio, view_rk, view_bk
 
 app_name = 'HistComp'
 
 urlpatterns = [
 
     path('',
-         views.HistCompTop.as_view(),
+         view_top.HistCompTop.as_view(),
          name='top'),
 
     path('<seizoen>/<histcomp_type>/',
-         views.HistCompTop.as_view(),
+         view_top.HistCompTop.as_view(),
          name='seizoen-top'),
 
     # regio
@@ -62,11 +62,6 @@ urlpatterns = [
          view_bk.HistBkTeamsView.as_view(),
          name='uitslagen-bk-teams'),
 
-
-    # TODO: OLD
-    path('indiv/<histcomp_pk>/',
-         views.HistCompIndivView.as_view(),
-         name='indiv'),
 
     # interland
     path('interland/',

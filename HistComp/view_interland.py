@@ -11,7 +11,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from HistComp.models import HistCompetitie, HistCompRegioIndiv
+from HistComp.definities import HISTCOMP_TYPE_25
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from decimal import Decimal
@@ -20,8 +21,6 @@ import csv
 
 
 TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
-
-RESULTS_PER_PAGE = 100
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive", "Longbow")
 
@@ -67,7 +66,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         context['klassen'] = list()
 
         # zoek het nieuwste seizoen beschikbaar
-        qset = HistCompetitie.objects.filter(comp_type='25').order_by('-seizoen').distinct('seizoen')
+        qset = HistCompSeizoen.objects.filter(comp_type=HISTCOMP_TYPE_25).order_by('-seizoen').distinct('seizoen')
         if len(qset) > 0:
             # neem de data van het nieuwste seizoen
             context['seizoen'] = seizoen = qset[0].seizoen

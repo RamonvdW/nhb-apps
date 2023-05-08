@@ -6,16 +6,11 @@
 
 from django.db import models
 from decimal import Decimal
-from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK, HISTCOMP_CHOICES_RK_BK, HISTCOMP_TYPE
+from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK, HISTCOMP_CHOICES_RK_BK, HISTCOMP_TYPE, HISTCOMP_TYPE2STR
 
 
-class HistCompetitie(models.Model):
-    """ Deze database tabel bevat een overzicht van alle historische competities.
-        De gebruiker kan een eerste keuze maken uit een lijst die uit deze tabel komt.
-
-        De tabel bevat velden die anders heel vaak herhaald zouden worden in een andere tabel
-        en het voorkomt zoeken naar deze informatie uit de grote tabel.
-    """
+class HistCompSeizoen(models.Model):
+    """ Seizoen """
 
     # 20xx/20yy (yy = xx+1)
     seizoen = models.CharField(max_length=9)
@@ -23,13 +18,6 @@ class HistCompetitie(models.Model):
     # '18' = 18m = Indoor
     # '25' = 25m = 25m1pijl
     comp_type = models.CharField(max_length=2, choices=HISTCOMP_TYPE)
-
-    # is dit voor teams of individueel?
-    is_team = models.BooleanField(default=False)
-
-    # boog: Recurve
-    # team: Recurve Team
-    beschrijving = models.CharField(max_length=20)
 
     # beste aantal scores waarover het regio gemiddelde berekend is
     # normaal 6, maar in de corona-jaren is dit verlaagd geweest naar 5
@@ -41,22 +29,31 @@ class HistCompetitie(models.Model):
     is_openbaar = models.BooleanField(default=True)
 
     # voor het presenteren van de kaartjes: zijn gegevens beschikbaar voor RK en BK uitslag?
-    heeft_uitslag_rk = models.BooleanField(default=False)
-    heeft_uitslag_bk = models.BooleanField(default=False)
+    heeft_uitslag_rk_indiv = models.BooleanField(default=False)
+    heeft_uitslag_bk_indiv = models.BooleanField(default=False)
+
+    heeft_uitslag_regio_teams = models.BooleanField(default=False)
+    heeft_uitslag_rk_teams = models.BooleanField(default=False)
+    heeft_uitslag_bk_teams = models.BooleanField(default=False)
+
+    # lijst van boog afkortingen, gescheiden door een komma
+    # voorbeeld: R,C,BB,TR,LB
+    indiv_bogen = models.CharField(max_length=20)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        msg = "%s (%s) %s" % (self.seizoen, self.comp_type, self.beschrijving)
-        if self.is_team:
-            msg += ' (team)'
-        else:
-            msg += ' (indiv)'
+        try:
+            type_str = HISTCOMP_TYPE2STR[self.comp_type]
+        except KeyError:
+            type_str = '?'
+        msg = "Seizoen %s: %s" % (self.seizoen, type_str)
         return msg
 
     class Meta:
         """ meta data voor de admin interface """
         ordering = ['seizoen', 'comp_type']
-        verbose_name = verbose_name_plural = "Historie competitie"
+        verbose_name = "Hist seizoen"
+        verbose_name_plural = "Hist seizoenen"
 
     objects = models.Manager()      # for the editor only
 
@@ -66,7 +63,7 @@ class HistCompRegioIndiv(models.Model):
         Per regel: subklasse, rank, schutter details, scores en gemiddelde.
     """
 
-    histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
+    seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
 
     # individuele wedstrijdklasse
     # voorbeeld: Compound Onder 21 klasse onbekend
@@ -140,7 +137,7 @@ class HistCompRegioTeam(models.Model):
         Per regel: subklasse, rank, schutter details, scores en gemiddelde.
     """
 
-    histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
+    seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
 
     # voorbeeld: Traditional klasse ERE
     team_klasse = models.CharField(max_length=30)
@@ -197,7 +194,7 @@ class HistCompRegioTeam(models.Model):
 
 class HistKampIndiv(models.Model):
 
-    histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
+    seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
 
     # individuele wedstrijdklasse
     # voorbeeld: Compound Onder 21 klasse 2
@@ -250,7 +247,7 @@ class HistKampTeam(models.Model):
     """ Deze database tabel bevat de resultaten van de RK en BK voor de teamcompetitie
     """
 
-    histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
+    seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
 
     rk_of_bk = models.CharField(max_length=1, choices=HISTCOMP_CHOICES_RK_BK, default=HISTCOMP_RK)
 

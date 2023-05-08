@@ -19,7 +19,7 @@ from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_kl
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from HistComp.models import HistCompetitie
+from HistComp.models import HistCompSeizoen
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
@@ -209,7 +209,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                                              kwargs={'afstand': afstand})
 
         # zoek uit wat de meest recente HistComp is
-        histcomps = HistCompetitie.objects.order_by('-seizoen').all()
+        histcomps = HistCompSeizoen.objects.order_by('-seizoen').all()
         if len(histcomps) == 0:
             context['geen_histcomp'] = True
         else:

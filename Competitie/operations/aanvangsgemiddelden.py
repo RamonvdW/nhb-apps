@@ -8,7 +8,7 @@ from django.conf import settings
 from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.models import TemplateCompetitieTeamKlasse
 from Competitie.models import get_competitie_boog_typen
-from HistComp.models import HistCompetitie, HistCompRegioIndiv
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Logboek.models import schrijf_in_logboek
 from Sporter.models import Sporter, SporterBoog
 from Score.definities import AG_NUL, AG_DOEL_INDIV

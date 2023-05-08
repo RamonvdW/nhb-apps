@@ -18,7 +18,7 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE2STR
-from HistComp.models import HistCompetitie, HistCompRegioIndiv
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
@@ -60,11 +60,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     .objects
                     .filter(sporter_lid_nr=sporter.lid_nr)
                     .exclude(totaal=0)
-                    .select_related('histcompetitie')
-                    .order_by('histcompetitie__comp_type',      # 18/25
-                              '-histcompetitie__seizoen')):     # jaartal, aflopend
-            obj.competitie_str = HISTCOMP_TYPE2STR[obj.histcompetitie.comp_type]
-            obj.seizoen_str = obj.histcompetitie.seizoen
+                    .select_related('seizoen')
+                    .order_by('seizoen__comp_type',      # 18/25
+                              '-seizoen__seizoen')):     # jaartal, aflopend
+            obj.competitie_str = HISTCOMP_TYPE2STR[obj.seizoen.comp_type]
+            obj.seizoen_str = obj.seizoen.seizoen
             try:
                 obj.beschrijving = boogtype2str[obj.boogtype]
             except KeyError:

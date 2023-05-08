@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from HistComp.models import HistCompetitie, HistCompRegioIndiv, HistCompRegioTeam
-from HistComp.views import RESULTS_PER_PAGE
+from HistComp.view_top import RESULTS_PER_PAGE
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
