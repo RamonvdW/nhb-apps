@@ -144,7 +144,8 @@ class Command(BaseCommand):
 
                     try:
                         bestelling = mutatie.bestelling_set.all()[0]
-                    except KeyError:        # TODO: correct exceptie invullen
+                    except IndexError:
+                        # niet gevonden
                         pass
                     else:
                         bestel_betaling_is_gestart(bestelling, actief)
