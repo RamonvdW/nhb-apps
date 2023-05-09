@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -132,6 +132,10 @@ class MyServer(BaseHTTPRequestHandler):
                             details['paypalPayerId'] = 'WDJJHEBZ4X2LY'
                             details['paypalFee'] = {'currency': resp['amount']['currency'],
                                                     'value': '2.50'}
+                        elif resp['method'] == 'bancontact':
+                            details['consumerName'] = None
+                            details['consumerAccount'] = 'BE72RABO0110438885'
+                            details['consumerBic'] = 'AXABBE22'
                         value = float(resp['amount']['value']) - 0.26
                         if test_code != '429':
                             resp['settlementAmount'] = {'currency': resp['amount']['currency'],
@@ -252,6 +256,8 @@ class MyServer(BaseHTTPRequestHandler):
                 resp['method'] = 'creditcard'
             elif test_code == '423':
                 resp['method'] = 'paypal'
+            elif test_code == '424':
+                resp['method'] = 'bancontact'
 
             if test_code == '45':
                 # bijna leeg antwoord
@@ -276,7 +282,7 @@ class MyServer(BaseHTTPRequestHandler):
             # 45 = bijna leeg antwoord (+expired?!)
             # 46 = foute status
             # 47 = foute  id
-            if test_code in ("39", "40", "41", "42", "421", "422", "423", "425", "426", "427", "428", "429", "43", "44", "45", "46", "47"):
+            if test_code in ("39", "40", "41", "42", "421", "422", "423", "424", "425", "426", "427", "428", "429", "43", "44", "45", "46", "47"):
                 self._write_response(200, resp)
         else:
             # geen corner-case
