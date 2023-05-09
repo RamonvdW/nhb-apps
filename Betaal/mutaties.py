@@ -48,22 +48,27 @@ def betaal_mutatieverzoek_start_ontvangst(bestelling, beschrijving, bedrag_euro,
 
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
-    mutatie, is_created = BetaalMutatie.objects.get_or_create(
-                                    when__gt=recent,
-                                    code=BETAAL_MUTATIE_START_ONTVANGST,
-                                    ontvanger=bestelling.ontvanger,
-                                    beschrijving=beschrijving,
-                                    bedrag_euro=bedrag_euro,
-                                    url_betaling_gedaan=url_betaling_gedaan)
-    mutatie.save()
+    try:
+        mutatie, is_created = BetaalMutatie.objects.get_or_create(
+                                        when__gt=recent,
+                                        code=BETAAL_MUTATIE_START_ONTVANGST,
+                                        ontvanger=bestelling.ontvanger,
+                                        beschrijving=beschrijving,
+                                        bedrag_euro=bedrag_euro,
+                                        url_betaling_gedaan=url_betaling_gedaan)
+    except BetaalMutatie.objects.MultipleObjectsReturned:
+        # al meerdere verzoeken in de queue
+        mutatie = None
+    else:
+        mutatie.save()
 
-    # voorkom dat we nog een keer hetzelfde pad doorlopen
-    bestelling.betaal_mutatie = mutatie
-    bestelling.save(update_fields=['betaal_mutatie'])
+        # voorkom dat we nog een keer hetzelfde pad doorlopen
+        bestelling.betaal_mutatie = mutatie
+        bestelling.save(update_fields=['betaal_mutatie'])
 
-    if is_created:                                      # pragma: no branch
-        # wacht kort op de achtergrondtaak
-        _betaal_ping_achtergrondtaak(mutatie, snel)
+        if is_created:                                      # pragma: no branch
+            # wacht kort op de achtergrondtaak
+            _betaal_ping_achtergrondtaak(mutatie, snel)
 
     return mutatie
 
