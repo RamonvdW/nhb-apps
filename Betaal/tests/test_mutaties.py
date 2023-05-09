@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -550,6 +550,31 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         # maak de payment met status=paid en method=paypal
         payment_id = self._prep_mollie_websim(423)
+        actief = BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje')
+        actief.save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertTrue('Betaling is voldaan' in actief.log)
+
+    def test_paid_bancontact(self):
+        # 'method': 'bancontact',
+        # 'details': {'consumerName': None,                       # LET OP!
+        #             'consumerAccount': 'BE12345678901234',
+        #             'consumerBic': 'AXABBE22'},
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('99.01'))
+        bestelling.save()
+
+        # maak de payment met status=paid en method=bancontact
+        payment_id = self._prep_mollie_websim(424)
         actief = BetaalActief(
             payment_id=payment_id,
             ontvanger=self.instellingen,

@@ -186,7 +186,11 @@ class Command(BaseCommand):
         if methode in ('ideal', 'bancontact', 'banktransfer', 'belfius', 'kbc', 'sofort', 'directdebit'):
             # methode 1: "consumer" velden
             try:
-                klant_naam = details['consumerName'][:BETAAL_KLANT_NAAM_MAXLENGTH]
+                klant_naam = details['consumerName']
+                if klant_naam:      # hanteer lege string, maar ook None (gezien bij bancontact)
+                    klant_naam = klant_naam[:BETAAL_KLANT_NAAM_MAXLENGTH]
+                else:
+                    klant_naam = '?'
                 klant_account = '%s (%s)' % (details['consumerAccount'], details['consumerBic'])
                 klant_account = klant_account[:BETAAL_KLANT_ACCOUNT_MAXLENGTH]
             except KeyError:
