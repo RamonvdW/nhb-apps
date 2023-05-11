@@ -14,13 +14,7 @@ from HistComp.models import HistCompSeizoen
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
-
 TEMPLATE_HISTCOMP_ALLEJAREN = 'histcomp/uitslagen-top.dtl'
-TEMPLATE_HISTCOMP_INDIV = 'histcomp/histcomp_indiv.dtl'
-
-RESULTS_PER_PAGE = 100
-
-KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive bow", "Instinctive Bow", "Traditional", "Longbow")
 
 
 def maak_filter_seizoen(context, seizoenen):
