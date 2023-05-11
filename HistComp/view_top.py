@@ -15,7 +15,7 @@ from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
 
-TEMPLATE_HISTCOMP_ALLEJAREN = 'histcomp/histcomp_top.dtl'
+TEMPLATE_HISTCOMP_ALLEJAREN = 'histcomp/uitslagen-top.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'histcomp/histcomp_indiv.dtl'
 
 RESULTS_PER_PAGE = 100

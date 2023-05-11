@@ -113,7 +113,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(self.url_hist_top)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('histcomp/histcomp_top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "2018/2019")
         self.assertNotContains(resp, "2017/2018")
         self.assertContains(resp, 'Compound')

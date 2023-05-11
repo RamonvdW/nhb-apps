@@ -1,0 +1,190 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Uitslagen regiocompetitie{% endblock %}
+
+{% block pagina %}
+
+    <script type="application/javascript">
+        function keuze_gemaakt(groep) {
+
+            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
+
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
+
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Uitslagen regiocompetitie</h3>
+            <p>Eindstand van de individuele regiocompetities {{ seizoen }}.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ comp_beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijdboog</th>
+                    <td>{{ boog_beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ regio }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Filters</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met filters -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m6 l3 offset-l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een boog type:</b></p>
+                <ul id="id_boog">
+                    {% for boog in boog_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ boog.sel }}">
+                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
+                                <span>{{ boog.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een regio:</b></p>
+                <ul id="id_regio">
+                    {% for regio in regio_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ regio.sel }}">
+                                <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
+                                <span>{{ regio.title_str }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    {% if heeft_deelnemers %}
+
+        <table class="white">
+            {% for indiv in uitslag %}
+                {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
+                    <!-- forceer gelijkmatige layout in de Scores kolommen -->
+                    <tr style="visibility: collapse">
+                        <td class="nhb-table-zijrand"></td>
+                        <td colspan="2"><!-- rank, sporter --></td>
+                        <td><!-- vereniging --></td>
+                        <td><!-- gemiddelde --></td>
+                        <td><span class="hide-on-med-and-up">888</span></td>     <!-- scores onder elkaar -->
+                        <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
+                        <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
+                        <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
+                        <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
+                        <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
+                        <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
+                        <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
+                        <td class="right-align"><!-- totaal --></td>
+                        <td class="nhb-table-zijrand"></td>
+                    </tr>
+                {% endif %}
+
+                {% if indiv.break_klasse %}
+                    {% if not indiv.is_eerste_groep %}
+                        <tr>
+                            <td class="nhb-table-onderrand" colspan="13"></td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td class="center" colspan="13"><h5>{{ indiv.indiv_klasse }}</h5></td>
+                    </tr>
+
+                    <tr class="nhb-table-header">
+                        <td class="nhb-table-zijrand" rowspan="{{ indiv.aantal_in_groep }}"></td>
+                        <th><!-- rank --></th>
+                        <th>Sporter</th>
+                        <th><span class="hide-on-small-only" style="padding:0">Vereniging</span></th>
+                        <th class="center">Gemiddelde</th>
+                        <th class="right-align" style="padding:0"><span class="hide-on-med-and-up">Scores</span></th>
+                        <th class="center" style="padding:0" colspan="7"><span class="hide-on-small-only">Scores</span></th>
+                        <th class="right-align" style="padding:0"><span class="hide-on-small-only" style="padding-left:5px; padding-right:5px">Totaal</span></th>
+                        <td class="nhb-table-zijrand" rowspan="{{ indiv.aantal_in_groep }}"></td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <td class="center smal">{{ indiv.rank }}</td>
+                    <td class="smal">{{ indiv.naam_str }}</td>
+                    <td><span class="smal hide-on-small-only">{{ indiv.ver_str}}</span></td>
+                    <td class="center smal">{{ indiv.gemiddelde }}</td>
+                    <td class="right-align"><span class="hide-on-med-and-up">
+    {% if indiv.laagste_score_nr == 1 %}<del>{{ indiv.score1 }}</del>{% else %}{{ indiv.score1 }}{% endif %}<br>
+    {% if indiv.laagste_score_nr == 2 %}<del>{{ indiv.score2 }}</del>{% else %}{{ indiv.score2 }}{% endif %}<br>
+    {% if indiv.laagste_score_nr == 3 %}<del>{{ indiv.score3 }}</del>{% else %}{{ indiv.score3 }}{% endif %}<br>
+    {% if indiv.laagste_score_nr == 4 %}<del>{{ indiv.score4 }}</del>{% else %}{{ indiv.score4 }}{% endif %}<br>
+    {% if indiv.laagste_score_nr == 5 %}<del>{{ indiv.score5 }}</del>{% else %}{{ indiv.score5 }}{% endif %}<br>
+    {% if indiv.laagste_score_nr == 6 %}<del>{{ indiv.score6 }}</del>{% else %}{{ indiv.score6 }}{% endif %}<br>
+    {% if indiv.laagste_score_nr == 7 %}<del>{{ indiv.score7 }}</del>{% else %}{{ indiv.score7 }}{% endif %}</span>
+                    </td>
+                    <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">{% if indiv.laagste_score_nr == 1 %}<del>{{ indiv.score1 }}</del>{% else %}{{ indiv.score1 }}{% endif %}</span></td>
+                    <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">{% if indiv.laagste_score_nr == 2 %}<del>{{ indiv.score2 }}</del>{% else %}{{ indiv.score2 }}{% endif %}</span></td>
+                    <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">{% if indiv.laagste_score_nr == 3 %}<del>{{ indiv.score3 }}</del>{% else %}{{ indiv.score3 }}{% endif %}</span></td>
+                    <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">{% if indiv.laagste_score_nr == 4 %}<del>{{ indiv.score4 }}</del>{% else %}{{ indiv.score4 }}{% endif %}</span></td>
+                    <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">{% if indiv.laagste_score_nr == 5 %}<del>{{ indiv.score5 }}</del>{% else %}{{ indiv.score5 }}{% endif %}</span></td>
+                    <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">{% if indiv.laagste_score_nr == 6 %}<del>{{ indiv.score6 }}</del>{% else %}{{ indiv.score6 }}{% endif %}</span></td>
+                    <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">{% if indiv.laagste_score_nr == 7 %}<del>{{ indiv.score7 }}</del>{% else %}{{ indiv.score7 }}{% endif %}</span></td>
+                    <td class="right-align" style="padding:0"><span class="hide-on-small-only" style="padding-left:5px; padding-right:5px">{{ indiv.totaal }}</span></td>
+                </tr>
+
+            {% endfor %}
+
+            <tr>
+                <td class="nhb-table-onderrand" colspan="13"></td>
+            </tr>
+        </table>
+
+    {% else %}
+        <p class="center"><i>Geen deelnemers gevonden voor deze combinatie van filters</i></p>
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp-uitslagen-regio-indiv" %}
+
+{% endblock %}
