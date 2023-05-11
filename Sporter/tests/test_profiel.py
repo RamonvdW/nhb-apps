@@ -20,7 +20,8 @@ from Competitie.tijdlijn import (zet_competitie_fases,
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from HistComp.models import HistCompetitie, HistCompRegioIndiv
+from HistComp.definities import HISTCOMP_TYPE_18
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
@@ -144,14 +145,14 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         rec.save()
 
         # geef dit account een goede en een slechte HistComp record
-        histcomp = HistCompetitie()
-        histcomp.seizoen = "2009/2010"
-        histcomp.comp_type = "18"
-        histcomp.beschrijving = "don't care"
-        histcomp.save()
+        hist_seizoen = HistCompSeizoen(
+                            seizoen="2009/2010",
+                            comp_type=HISTCOMP_TYPE_18,
+                            indiv_bogen='R')
+        hist_seizoen.save()
 
         indiv = HistCompRegioIndiv()
-        indiv.histcompetitie = histcomp
+        indiv.seizoen = hist_seizoen
         indiv.rank = 1
         indiv.sporter_lid_nr = 100001
         indiv.sporter_naam = "Ramon de Tester"

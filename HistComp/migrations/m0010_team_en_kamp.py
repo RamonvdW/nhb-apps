@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='histcompregioindiv',
-            name='klasse_indiv',
+            name='indiv_klasse',
             field=models.CharField(default='', max_length=35),
         ),
         migrations.AddField(
@@ -202,7 +202,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
-                ('klasse_indiv', models.CharField(max_length=35)),
+                ('indiv_klasse', models.CharField(max_length=35)),
                 ('sporter_lid_nr', models.PositiveIntegerField()),
                 ('sporter_naam', models.CharField(max_length=50)),
                 ('boogtype', models.CharField(max_length=5)),
@@ -233,7 +233,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
                 ('rk_of_bk', models.CharField(choices=[('R', 'RK'), ('B', 'BK')], default='R', max_length=1)),
-                ('klasse_teams', models.CharField(max_length=30)),
+                ('teams_klasse', models.CharField(max_length=30)),
                 ('vereniging_nr', models.PositiveSmallIntegerField()),
                 ('vereniging_naam', models.CharField(max_length=50)),
                 ('vereniging_plaats', models.CharField(default='', max_length=35)),

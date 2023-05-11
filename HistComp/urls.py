@@ -20,11 +20,11 @@ urlpatterns = [
          name='seizoen-top'),
 
     # regio
-    path('<seizoen>/<histcomp_type>/regio-individueel/<comp_boog>/',
+    path('<seizoen>/<histcomp_type>/regio-individueel/<boog_type>/',
          view_regio.HistRegioIndivView.as_view(),
          name='uitslagen-regio-indiv'),
 
-    path('<seizoen>/<histcomp_type>/regio-individueel/<comp_boog>/<regio_nr>/',
+    path('<seizoen>/<histcomp_type>/regio-individueel/<boog_type>/<regio_nr>/',
          view_regio.HistRegioIndivView.as_view(),
          name='uitslagen-regio-indiv-n'),
 
@@ -37,11 +37,11 @@ urlpatterns = [
          name='uitslagen-regio-teams-n'),
 
     # rk
-    path('<seizoen>/<histcomp_type>/rk-individueel/<comp_boog>/',
+    path('<seizoen>/<histcomp_type>/rk-individueel/<boog_type>/',
          view_rk.HistRkIndivView.as_view(),
          name='uitslagen-rk-indiv'),
 
-    path('<seizoen>/<histcomp_type>/rk-individueel/<comp_boog>/<rayon_nr>/',
+    path('<seizoen>/<histcomp_type>/rk-individueel/<boog_type>/<rayon_nr>/',
          view_rk.HistRkIndivView.as_view(),
          name='uitslagen-rk-indiv-n'),
 
@@ -54,7 +54,7 @@ urlpatterns = [
          name='uitslagen-rk-teams-n'),
 
     # bk
-    path('<seizoen>/<histcomp_type>/bk-individueel/<comp_boog>/',
+    path('<seizoen>/<histcomp_type>/bk-individueel/<boog_type>/',
          view_bk.HistBkIndivView.as_view(),
          name='uitslagen-bk-indiv'),
 

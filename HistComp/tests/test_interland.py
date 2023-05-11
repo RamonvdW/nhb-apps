@@ -214,7 +214,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
             resp = self.client.get(self.url_interland)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('hist/interland.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/interland.dtl', 'plein/site_layout.dtl'))
 
     def test_download(self):
         url = self.url_interland_download % self.klasse_pk

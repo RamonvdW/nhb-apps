@@ -10,7 +10,7 @@ from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK, HISTCOMP_CHOICES_RK_BK
 
 
 class HistCompSeizoen(models.Model):
-    """ Seizoen """
+    """ Historisch seizoen """
 
     # 20xx/20yy (yy = xx+1)
     seizoen = models.CharField(max_length=9)
@@ -67,7 +67,7 @@ class HistCompRegioIndiv(models.Model):
 
     # individuele wedstrijdklasse
     # voorbeeld: Compound Onder 21 klasse onbekend
-    klasse_indiv = models.CharField(max_length=35, default='')      # TODO: remove default
+    indiv_klasse = models.CharField(max_length=35)
 
     # volgorde in de vastgestelde uitslag in deze wedstrijdklasse
     rank = models.PositiveSmallIntegerField()
@@ -77,12 +77,12 @@ class HistCompRegioIndiv(models.Model):
     sporter_naam = models.CharField(max_length=50)
 
     # R/C/BB/IB/LB/TR
-    boogtype = models.CharField(max_length=5, default='')
+    boogtype = models.CharField(max_length=5)
 
     # vereniging van de sporter (bij afsluiten competitie)
     vereniging_nr = models.PositiveSmallIntegerField()
     vereniging_naam = models.CharField(max_length=50)
-    vereniging_plaats = models.CharField(max_length=35, default='')
+    vereniging_plaats = models.CharField(max_length=35)
     regio_nr = models.PositiveSmallIntegerField(default=0)
 
     # de regio scores
@@ -105,9 +105,9 @@ class HistCompRegioIndiv(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "rank %s: %s [%s] %s, %s" % (self.rank, self.gemiddelde,
-                                            self.sporter_lid_nr, self.sporter_naam,
-                                            self.boogtype)
+        return "rank %s: %s [%s] %s, %s, %s" % (self.rank, self.gemiddelde,
+                                                self.sporter_lid_nr, self.sporter_naam,
+                                                self.regio_nr, self.boogtype)
 
     def tel_aantal_scores(self):
         count = 0
@@ -199,7 +199,7 @@ class HistKampIndiv(models.Model):
     # individuele wedstrijdklasse
     # voorbeeld: Compound Onder 21 klasse 2
     # noteer: aspiranten kunnen in de RK uitkomen in een andere klasse
-    klasse_indiv = models.CharField(max_length=35)
+    indiv_klasse = models.CharField(max_length=35)
 
     # lid nummer en volledige naam
     sporter_lid_nr = models.PositiveIntegerField()
@@ -252,7 +252,7 @@ class HistKampTeam(models.Model):
     rk_of_bk = models.CharField(max_length=1, choices=HISTCOMP_CHOICES_RK_BK, default=HISTCOMP_RK)
 
     # voorbeeld: Traditional klasse ERE
-    klasse_teams = models.CharField(max_length=30)
+    teams_klasse = models.CharField(max_length=30)
 
     # verenigingsnummer en volledige naam
     # omdat de naam meerdere keren voorkomt is ook de plaats nodig

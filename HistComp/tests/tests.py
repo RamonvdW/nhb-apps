@@ -113,7 +113,7 @@ class TestHistComp(E2EHelpers, TestCase):
             resp = self.client.get(self.url_hist_top)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('hist/histcomp_top.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_top.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "2018/2019")
         self.assertNotContains(resp, "2017/2018")
         self.assertContains(resp, 'Compound')
@@ -146,7 +146,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertNotContains(resp, "page=1")     # pagination not active
         self.assertNotContains(resp, "page=1")     # pagination not active
@@ -161,7 +161,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'page': 6})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, "page=5")
 
@@ -206,7 +206,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'filter': 'Blazoengatenmaker'})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Blazoengatenmaker')
         # FUTURE: check correct records were returned
@@ -215,14 +215,14 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'filter': rec.vereniging_nr})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # filter on a lid_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'filter': rec.sporter_lid_nr})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
     def test_view_indiv_many_filter(self):
@@ -235,7 +235,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'filter': rec.sporter_naam})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, "page=2")         # paginator actief
         self.assertContains(resp, "Test Club")
@@ -244,7 +244,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'filter': rec.vereniging_nr})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, "Test Club")
 
@@ -252,7 +252,7 @@ class TestHistComp(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'filter': 9999})
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertNotContains(resp, "Test Club")
 

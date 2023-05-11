@@ -298,5 +298,12 @@
     </div>
 
 
+
+    <!-- voorkom dubbele posts vanuit form -->
+    <form ... method="post" onsubmit="submit_knop.disabled=true; return true;">
+       <button class="btn-nhb-rood" name="submit_knop">...</button>
+    </form>
+
+
 {% include 'feedback/sidebar.dtl' with op_pagina="app-snippets" %}
 

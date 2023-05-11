@@ -26,7 +26,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">{{ titel }}</h3>
+            <h3 class="page-banner">Uitslag vorig seizoen</h3>
             {% if geen_data %}
                 <p>Er is op dit moment geen uitslag beschikbaar</p>
             {% else %}

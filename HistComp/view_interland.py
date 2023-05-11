@@ -20,7 +20,7 @@ from codecs import BOM_UTF8
 import csv
 
 
-TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
+TEMPLATE_HISTCOMP_INTERLAND = 'histcomp/interland.dtl'
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive", "Longbow")
 
