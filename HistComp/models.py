@@ -110,18 +110,9 @@ class HistCompRegioIndiv(models.Model):
                                                 self.regio_nr, self.boogtype)
 
     def tel_aantal_scores(self):
-        count = 0
         nul = Decimal('0.000')
-        for score in (self.score1,
-                      self.score2,
-                      self.score3,
-                      self.score4,
-                      self.score5,
-                      self.score6,
-                      self.score7):
-            if score > nul:
-                count += 1
-        # for
+        scores = (self.score1, self.score2, self.score3, self.score4, self.score5, self.score6, self.score7)
+        count = len([score for score in scores if score > nul])
         return count
 
     class Meta:

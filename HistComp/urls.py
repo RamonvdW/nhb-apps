@@ -68,7 +68,7 @@ urlpatterns = [
          view_interland.InterlandView.as_view(),
          name='interland'),
 
-    path('interland/als-bestand/<klasse_pk>/',
+    path('interland/als-bestand/<boog_type>/',
          view_interland.InterlandAlsBestandView.as_view(),
          name='interland-als-bestand')
 ]

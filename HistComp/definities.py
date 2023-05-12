@@ -84,6 +84,8 @@ URL2HIST_TEAM = {
     'traditional': 'TR',
 }
 
+HIST_INTERLAND_BOGEN = ('R', 'C', 'BB', 'TR', 'LB')
+
 HIST_KLASSE2VOLGORDE = {
     # indiv
     '': 1,      # oudere seizoenen hebben geen klasse indicatie

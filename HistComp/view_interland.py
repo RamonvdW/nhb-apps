@@ -11,12 +11,13 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from HistComp.definities import HISTCOMP_TYPE_25
+from HistComp.definities import HISTCOMP_TYPE_25, HIST_INTERLAND_BOGEN, HIST_BOOG2STR
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from decimal import Decimal
 from codecs import BOM_UTF8
+from types import SimpleNamespace
 import csv
 
 
@@ -69,26 +70,26 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         qset = HistCompSeizoen.objects.filter(comp_type=HISTCOMP_TYPE_25).order_by('-seizoen').distinct('seizoen')
         if len(qset) > 0:
             # neem de data van het nieuwste seizoen
-            context['seizoen'] = seizoen = qset[0].seizoen
+            seizoen = qset[0]
+            context['seizoen'] = seizoen_str = seizoen.seizoen
 
             # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
             # dit is het tweede jaar van het seizoen
-            context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
+            context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen_str.split('/')[1])
 
-            for klasse in (HistCompetitie
-                           .objects
-                           .filter(comp_type='25', seizoen=seizoen, is_team=False)):
+            for boog_afkorting in HIST_INTERLAND_BOGEN:
+                klasse = SimpleNamespace(
+                            beschrijving=HIST_BOOG2STR[boog_afkorting],
+                            url_download=reverse('HistComp:interland-als-bestand',
+                                                 kwargs={'boog_type': boog_afkorting}),
+                            indiv=list())
                 context['klassen'].append(klasse)
 
-                klasse.url_download = reverse('HistComp:interland-als-bestand',
-                                              kwargs={'klasse_pk': klasse.pk})
-
                 # zoek alle records erbij met minimaal 5 scores
-                klasse.indiv = list()
-
                 for indiv in (HistCompRegioIndiv
                               .objects
-                              .filter(histcompetitie=klasse,
+                              .filter(seizoen=seizoen,
+                                      boogtype=boog_afkorting,
                                       gemiddelde__gt=Decimal('0.000'))
                               .order_by('-gemiddelde')):
 
