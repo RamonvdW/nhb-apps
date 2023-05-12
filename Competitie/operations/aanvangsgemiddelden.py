@@ -47,20 +47,20 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
         en bepaalt daarna de nieuwe AG's aan de hand van de meest recente historische competitie uitslag
     """
     # zoek uit wat de meest recente HistComp is
-    histcomps = (HistCompetitie
-                 .objects
-                 .filter(comp_type=afstand)
-                 .order_by('-seizoen'))
-    if len(histcomps) == 0:
+    seizoenen_qset = (HistCompSeizoen
+                     .objects
+                     .filter(comp_type=afstand)
+                     .order_by('-seizoen'))
+    if len(seizoenen_qset) == 0:
         schrijf_in_logboek(None, 'Competitie',
                            'Geen historisch uitslag om aanvangsgemiddelden vast te stellen voor %sm' % afstand)
         return
 
-    seizoen = histcomps[0].seizoen
+    seizoen = seizoenen_qset[0].seizoen
     schrijf_in_logboek(None, 'Competitie',
                        'Aanvangsgemiddelden vaststellen voor de %sm met uitslag seizoen %s' % (afstand, seizoen))
 
-    histcomps = histcomps.filter(seizoen=seizoen)
+    seizoenen_qset = seizoenen_qset.filter(seizoen=seizoen)
 
     # het eindjaar van de competitie was bepalend voor de klasse
     # daarmee kunnen we bepalen of de sporter aspirant was
@@ -92,13 +92,13 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     }
 
     # doorloop alle individuele histcomp records die bij dit seizoen horen
-    histcomp = None
+    hist_seizoen = None
     bulk_ag = list()
-    for histcomp in histcomps:
+    for hist_seizoen in seizoenen_qset:
         for obj in (HistCompRegioIndiv
                     .objects
-                    .select_related('histcompetitie')
-                    .filter(histcompetitie=histcomp)):
+                    .select_related('seizoen')
+                    .filter(seizoen=hist_seizoen)):
 
             # gebruik scores van IB voor gemiddelde van TR (overgang 2021/2022 --> 2022/2023)
             # if obj.boogtype == 'IB':
@@ -157,7 +157,6 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                         if len(bulk_ag) >= 500:
                             Aanvangsgemiddelde.objects.bulk_create(bulk_ag)
                             bulk_ag = list()
-
         # for
     # for
 
@@ -170,7 +169,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
 
     # hiervoor hebben we Score.pk nodig en die kregen we niet uit bovenstaande Score.objects.bulk_create
     bulk_ag_hist = list()
-    notitie = "Uitslag competitie seizoen %s" % histcomp.seizoen
+    notitie = "Uitslag competitie seizoen %s" % hist_seizoen.seizoen
     for ag in (Aanvangsgemiddelde
                .objects
                .filter(doel=AG_DOEL_INDIV,

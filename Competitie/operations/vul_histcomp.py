@@ -110,7 +110,10 @@ def uitslag_rk_indiv_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    try:
+        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    except HistCompSeizoen.DoesNotExist:
+        return
 
     beschrijving2boogtype_pk = dict()
     for boogtype in comp.boogtypen.all():
@@ -168,7 +171,10 @@ def uitslag_bk_indiv_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    try:
+        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    except HistCompSeizoen.DoesNotExist:
+        return
 
     indiv_klasse_lid_nr2hist = dict()
     for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
@@ -209,7 +215,10 @@ def uitslag_regio_teams_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    try:
+        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    except HistCompSeizoen.DoesNotExist:
+        return
 
     bulk = list()
     prev_team = None
@@ -294,7 +303,10 @@ def uitslag_rk_teams_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    try:
+        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    except HistCompSeizoen.DoesNotExist:
+        return
 
     indiv_klasse_lid_nr2hist = dict()
     for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
@@ -378,7 +390,10 @@ def uitslag_bk_teams_naar_histcomp(comp):
 
     seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-    hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    try:
+        hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
+    except HistCompSeizoen.DoesNotExist:
+        return
 
     indiv_klasse_lid_nr2hist = dict()
     for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):

@@ -430,10 +430,7 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
 
         # maak de HistComp uitslagen openbaar voor dit seizoen
         seizoen = '%s/%s' % (comps[0].begin_jaar, comps[0].begin_jaar + 1)
-        for histcomp in HistCompetitie.objects.filter(seizoen=seizoen, is_openbaar=False):
-            histcomp.is_openbaar = True
-            histcomp.save(update_fields=['is_openbaar'])
-        # for
+        HistCompSeizoen.objects.filter(seizoen=seizoen, is_openbaar=False).update(is_openbaar=True)
 
         return HttpResponseRedirect(reverse('Competitie:kies'))
 

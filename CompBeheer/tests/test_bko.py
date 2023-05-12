@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
@@ -20,7 +19,6 @@ from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
-import io
 
 
 class TestCompetitiePlanningBond(E2EHelpers, TestCase):
