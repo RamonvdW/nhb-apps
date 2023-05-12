@@ -13,7 +13,8 @@ from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
 from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from HistComp.models import HistCompetitie, HistCompRegioIndiv
+from HistComp.definities import HISTCOMP_TYPE_18
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -170,52 +171,48 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
-        histcomp = HistCompetitie()
-        histcomp.seizoen = '2018/2019'
-        histcomp.comp_type = '18'
-        histcomp.beschrijving = 'Testcurve1'
-        histcomp.is_team = False
-        histcomp.save()
+        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18)
+        hist_seizoen.save()
 
         # record voor het volwassen lid
-        rec = HistCompRegioIndiv()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100001.lid_nr
-        rec.sporter_naam = self.sporter_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'R'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100001.lid_nr,
+                    sporter_naam=self.sporter_100001.volledige_naam(),
+                    vereniging_nr=self.nhbver1.ver_nr,
+                    vereniging_naam=self.nhbver1.naam,
+                    boogtype='R',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
         # record voor het jeugdlid
         # record voor het volwassen lid
-        rec = HistCompRegioIndiv()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100002.lid_nr
-        rec.sporter_naam = self.sporter_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'BB'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100002.lid_nr,
+                    sporter_naam=self.sporter_100002.volledige_naam(),
+                    vereniging_nr=self.nhbver1.ver_nr,
+                    vereniging_naam=self.nhbver1.naam,
+                    boogtype='BB',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
     def _create_competitie(self):
