@@ -208,19 +208,16 @@ class Loader(AppDirectoriesLoader):
         contents = re.sub(r'/\*(.*?)\*/', '', contents)
 
         # remove whitespace between template tags
-        contents = re.sub(r'}\s+{', '}{', contents)
+        contents = re.sub(r'%}\s+{%', '%}{%', contents)
 
         # remove whitespace between template tags and html tags
         contents = re.sub(r'%}\s+<', '%}<', contents)
         contents = re.sub(r'>\s+{%', '>{%', contents)
 
         # remove whitespace between template variables and html tags
-        contents = re.sub(r'}}\s+<', '}}<', contents)
-        contents = re.sub(r'>\s+{{', '>{{', contents)
-
-        # remove whitespace between template context variables and html tags
-        # contents = re.sub(r'>\s+{{', '>{{', contents)      # behouden want layout!
+        # NIET DOEN: dit kunnen echte layout spaties zijn!
         # contents = re.sub(r'}}\s+<', '}}<', contents)
+        # contents = re.sub(r'>\s+{{', '>{{', contents)
 
         # remove whitespace between html tags
         contents = re.sub(r'>\s+<', '><', contents)

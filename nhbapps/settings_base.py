@@ -259,6 +259,7 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '40m',
     '30m',
     '50m (72p)',
+    '50m (144p)',
     '60m (72p)',
     '70m (72p)',
     '70m (144p)',
