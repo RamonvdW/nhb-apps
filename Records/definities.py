@@ -45,7 +45,7 @@ makl2str = {'R': 'Recurve',
             'TR': 'Traditional',
             'LB': 'Longbow'}
 
-lcat2str = {'M': '50+ / Masters)',
+lcat2str = {'M': '50+ / Masters',
             'S': '21+ / Senioren',
             'J': 'Onder 21 / Junioren',
             'C': 'Onder 18 / Cadetten',
