@@ -13,7 +13,7 @@ from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
 from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from HistComp.definities import HISTCOMP_TYPE_18
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan
@@ -171,7 +171,8 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
-        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18)
+        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18,
+                                       indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
         hist_seizoen.save()
 
         # record voor het volwassen lid

@@ -79,6 +79,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
             for boog_afkorting in HIST_INTERLAND_BOGEN:
                 klasse = SimpleNamespace(
+                            boog_type=boog_afkorting,
                             beschrijving=HIST_BOOG2STR[boog_afkorting],
                             url_download=reverse('HistComp:interland-als-bestand',
                                                  kwargs={'boog_type': boog_afkorting}),
@@ -143,27 +144,25 @@ class InterlandAlsBestandView(InterlandView):
 
     def get(self, request, *args, **kwargs):
 
-        try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            klasse = HistCompetitie.objects.get(pk=klasse_pk)
-        except (ValueError, HistCompetitie.DoesNotExist):
-            raise Http404('Klasse niet gevonden')
+        afkorting = kwargs['boog_type'][:2]     # afkappen voor de veiligheid
+        if afkorting not in HIST_INTERLAND_BOGEN:
+            raise Http404('Verkeerd boog type')
 
         context = dict()
         self.maak_data(context)
 
         indivs = None
-        for context_klasse in context['klassen']:
-            if context_klasse.pk == klasse.pk:
-                indivs = context_klasse.indiv
+        for klasse in context['klassen']:
+            if klasse.boog_type == afkorting:
+                indivs = klasse.indiv
                 break   # from the for
         # for
 
         if indivs is None:
-            raise Http404('Geen sporters gevonden')
+            raise Http404('Geen data')
 
         response = HttpResponse(content_type=CONTENT_TYPE_CSV)
-        response['Content-Disposition'] = 'attachment; filename="interland.csv"'
+        response['Content-Disposition'] = 'attachment; filename="interland-%s.csv"' % afkorting.lower()
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
@@ -171,6 +170,8 @@ class InterlandAlsBestandView(InterlandView):
 
         for indiv in indivs:
             ver_str = '[%s] %s' % (indiv.vereniging_nr, indiv.vereniging_naam)
+            if indiv.vereniging_plaats:
+                ver_str += ' (%s)' % indiv.vereniging_plaats
 
             writer.writerow([indiv.gemiddelde,
                              indiv.leeftijd_str,

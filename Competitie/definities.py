@@ -132,5 +132,6 @@ MUTATIE_TO_STR = {
 KAMP_RANK_BLANCO = 100
 KAMP_RANK_NO_SHOW = 32000
 KAMP_RANK_RESERVE = 32001
+KAMP_RANK_ALLEEN_TEAM = 32002       # wordt gebruikt bij aanmaken histcomp
 
 # end of file

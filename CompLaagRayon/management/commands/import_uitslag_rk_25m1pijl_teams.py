@@ -25,7 +25,6 @@ class Command(BaseCommand):
         self.team_lid_nrs = dict()      # [team.pk] = [lid_nr, ...]
         self.ver_lid_nrs = dict()       # [ver_nr] = [lid_nr, ...]
         self.kamp_lid_nrs = list()      # [lid_nr, ...]     iedereen die geplaatst is voor de kampioenschappen
-        self.deel = "?"
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
@@ -33,15 +32,11 @@ class Command(BaseCommand):
         parser.add_argument('bestand', type=str,
                             help='Pad naar het Excel bestand')
 
-    def _bepaal_laag(self):
-        # TODO: aan de hand van de competitie fase bepalen of dit een RK of BK uitslag moet zijn
-        self.deel = DEEL_RK
-
     def _deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .filter(kampioenschap__competitie__afstand='25',
-                                  kampioenschap__deel=self.deel)
+                                  kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
@@ -64,11 +59,26 @@ class Command(BaseCommand):
             self.kamp_lid_nrs.append(lid_nr)
         # for
 
+    def _filter_deelnemers(self, team_klasse):
+        # reduceer het aantal KampioenschapSporterBoog aan de hand van de bogen die toegestaan zijn in deze wedstrijdklasse
+        afkortingen = list(team_klasse.boog_typen.values_list('afkorting', flat=True))
+        self.stdout.write('[INFO] Toegestane bogen in team klasse %s = %s' % (team_klasse, ",".join(afkortingen)))
+
+        # count1 = sum([len(deelnemers) for deelnemers in self.deelnemers.values()])
+
+        for lid_nr in self.deelnemers.keys():
+            deelnemers = self.deelnemers[lid_nr]
+            self.deelnemers[lid_nr] = [deelnemer for deelnemer in deelnemers if deelnemer.sporterboog.boogtype.afkorting in afkortingen]
+        # for
+
+        # count2 = sum([len(deelnemers) for deelnemers in self.deelnemers.values()])
+        # self.stdout.write('[INFO] Aantal KampioenschapSporterBoog verwijderd: %s' % (count1 - count2))
+
     def _teams_ophalen(self):
         for team in (KampioenschapTeam
                      .objects
                      .filter(kampioenschap__competitie__afstand='25',
-                             kampioenschap__deel=self.deel)
+                             kampioenschap__deel=DEEL_RK)
                      .select_related('kampioenschap',
                                      'kampioenschap__nhb_rayon',
                                      'vereniging',
@@ -163,7 +173,6 @@ class Command(BaseCommand):
         col_score1 = 'H'
         col_score2 = 'I'
 
-        self._bepaal_laag()
         self._deelnemers_ophalen()
         self._teams_ophalen()
 
@@ -206,6 +215,7 @@ class Command(BaseCommand):
 
             if team_klasse is None:
                 team_klasse = kamp_team.team_klasse
+                self._filter_deelnemers(team_klasse)
 
             ver_lid_nrs = self.ver_lid_nrs[ver_nr]
             team_lid_nrs = self.team_lid_nrs[kamp_team.pk]

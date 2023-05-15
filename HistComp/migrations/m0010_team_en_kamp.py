@@ -25,7 +25,8 @@ def maak_en_koppel_seizoen(apps, _):
                             comp_type=hist.comp_type,
                             aantal_beste_scores=hist.aantal_beste_scores,
                             is_openbaar=hist.is_openbaar,
-                            indiv_bogen='R,C,BB,IB,LB')
+                            indiv_bogen='R,C,BB,IB,LB',
+                            team_typen='R,C,BB,IB,LB')
             seizoen.save()
             hist2seizoen[tup] = seizoen
 
@@ -59,11 +60,12 @@ class Migration(migrations.Migration):
                 ('heeft_uitslag_rk_teams', models.BooleanField(default=False)),
                 ('heeft_uitslag_bk_teams', models.BooleanField(default=False)),
                 ('indiv_bogen', models.CharField(max_length=20)),
+                ('team_typen', models.CharField(max_length=20)),
             ],
             options={
                 'verbose_name': 'Hist seizoen',
                 'verbose_name_plural': 'Hist seizoenen',
-                'ordering': ['seizoen', 'comp_type'],
+                'ordering': ['-seizoen', 'comp_type'],
             },
         ),
         migrations.AlterField(
@@ -167,6 +169,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
                 ('team_klasse', models.CharField(max_length=30)),
+                ('team_type', models.CharField(max_length=5)),
                 ('vereniging_nr', models.PositiveSmallIntegerField()),
                 ('vereniging_naam', models.CharField(max_length=50)),
                 ('vereniging_plaats', models.CharField(max_length=35)),
@@ -215,8 +218,10 @@ class Migration(migrations.Migration):
                 ('rk_score_is_blanco', models.BooleanField(default=False)),
                 ('rk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('rk_score_2', models.PositiveSmallIntegerField(default=0)),
+                ('rk_counts', models.CharField(blank=True, default='', max_length=20)),
                 ('bk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('bk_score_2', models.PositiveSmallIntegerField(default=0)),
+                ('bk_counts', models.CharField(blank=True, default='', max_length=20)),
                 ('teams_rk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('teams_rk_score_2', models.PositiveSmallIntegerField(default=0)),
                 ('teams_bk_score_1', models.PositiveSmallIntegerField(default=0)),
@@ -234,6 +239,7 @@ class Migration(migrations.Migration):
                 ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
                 ('rk_of_bk', models.CharField(choices=[('R', 'RK'), ('B', 'BK')], default='R', max_length=1)),
                 ('teams_klasse', models.CharField(max_length=30)),
+                ('team_type', models.CharField(max_length=5)),
                 ('vereniging_nr', models.PositiveSmallIntegerField()),
                 ('vereniging_naam', models.CharField(max_length=50)),
                 ('vereniging_plaats', models.CharField(default='', max_length=35)),

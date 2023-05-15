@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from HistComp.definities import HISTCOMP_TYPE_25
+from HistComp.definities import HISTCOMP_TYPE_25, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter
@@ -18,7 +18,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
     """ unittests voor de HistComp applicatie, module Interland """
 
     url_interland = '/bondscompetities/hist/interland/'
-    url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'  # klasse_pk
+    url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'  # boog_type
 
     @classmethod
     def setUpTestData(cls):
@@ -39,7 +39,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
                     regio=self.regio_101)
         ver.save()
 
-        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_25)
+        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_25, indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
         hist_seizoen.save()
         self.klasse_pk = hist_seizoen.pk
 
@@ -212,7 +212,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('histcomp/interland.dtl', 'plein/site_layout.dtl'))
 
     def test_download(self):
-        url = self.url_interland_download % self.klasse_pk
+        url = self.url_interland_download % 'R'
 
         # anon
         with self.assert_max_queries(20):
@@ -230,7 +230,6 @@ class TestHistCompInterland(E2EHelpers, TestCase):
 
         # download een lege lijst
         HistCompRegioIndiv.objects.all().delete()
-        url = self.url_interland_download % self.klasse_pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -241,17 +240,10 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
-        # illegale klasse_pk
+        # verkeerd boog type
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_interland_download % 999999)
-        self.assert404(resp, 'Klasse niet gevonden')
-
-        # bestaande klasse_pk, maar verkeerd seizoen
-        obj = HistCompSeizoen(seizoen='2017/2018', comp_type=HISTCOMP_TYPE_25)
-        obj.save()
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_interland_download % obj.pk)
-        self.assert404(resp, 'Geen sporters gevonden')
+            resp = self.client.get(self.url_interland_download % 'XX')
+        self.assert404(resp, 'Verkeerd boog type')
 
         # verwijder de hele histcomp
         HistCompSeizoen.objects.all().delete()
@@ -261,5 +253,10 @@ class TestHistCompInterland(E2EHelpers, TestCase):
             resp = self.client.get(self.url_interland)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_interland_download % 'R')
+        self.assert404(resp, 'Geen data')
+
 
 # end of file

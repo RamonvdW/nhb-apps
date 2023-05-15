@@ -25,7 +25,7 @@ class HistCompRegioIndivAdmin(admin.ModelAdmin):
 
 class HistCompRegioTeamAdmin(admin.ModelAdmin):
 
-    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'team_klasse')
+    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'team_type', 'regio_nr', 'team_klasse')
 
 
 class HistKampIndivAdmin(admin.ModelAdmin):
@@ -38,6 +38,8 @@ class HistKampIndivAdmin(admin.ModelAdmin):
 class HistKampTeamAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ('lid_1', 'lid_2', 'lid_3', 'lid_4')
+
+    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'team_type')
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)

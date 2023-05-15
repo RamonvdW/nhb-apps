@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from HistComp.models import HistCompetitie, HistCompRegioIndiv, HistCompRegioTeam
-from HistComp.view_top import RESULTS_PER_PAGE
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -20,66 +20,65 @@ class TestHistComp(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        obj = HistCompetitie()
-        obj.seizoen = '2018/2019'
-        obj.comp_type = '18'
-        obj.beschrijving = 'Compound'
-        obj.is_team = False
-        obj.save()
+        hist_seizoen = HistCompSeizoen(
+                            seizoen='2018/2019',
+                            comp_type=HISTCOMP_TYPE_18,
+                            indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
+        hist_seizoen.save()
+        self.hist_seizoen = hist_seizoen
 
-        obj.pk = None
-        obj.beschrijving = 'Special Type'
-        obj.save()
-
-        obj.pk = None
-        obj.beschrijving = 'Recurve'
-        obj.save()
-        self.indiv_histcomp_pk = obj.pk
-
-        rec = HistCompRegioIndiv()
-        rec.histcompetitie = obj
-        rec.rank = 1
-        rec.sporter_lid_nr = 123456
-        rec.sporter_naam = 'Schuttie van de Test'
-        rec.vereniging_nr = 1234
-        rec.vereniging_naam = 'Test Club'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.laagste_score_nr = 1
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    indiv_klasse='Recurve ERE',
+                    sporter_lid_nr=123456,
+                    sporter_naam='Schuttie van de Test',
+                    boogtype='R',
+                    vereniging_nr=1234,
+                    vereniging_naam='Test Club',
+                    vereniging_plaats="Pijlstad",
+                    regio_nr=102,
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    laagste_score_nr=1,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
         self.indiv_rec_pk = rec.pk
 
         HistCompRegioTeam(
-            histcompetitie=obj,
-            subklasse="test",
-            rank=1,
-            vereniging_nr=1234,
-            vereniging_naam="Test Club",
-            team_nr=1,
-            totaal_ronde1=100,
-            totaal_ronde2=200,
-            totaal_ronde3=300,
-            totaal_ronde4=400,
-            totaal_ronde5=500,
-            totaal_ronde6=600,
-            totaal_ronde7=700,
-            totaal=800,
-            gemiddelde=543.2
-        ).save()
+                seizoen=hist_seizoen,
+                team_klasse="test",
+                rank=1,
+                vereniging_nr=1234,
+                vereniging_naam="Test Club",
+                vereniging_plaats="Pijlstad",
+                regio_nr="102",
+                team_nr=1,
+                ronde_1_score=100,
+                ronde_2_score=200,
+                ronde_3_score=300,
+                ronde_4_score=400,
+                ronde_5_score=500,
+                ronde_6_score=600,
+                ronde_7_score=700,
+                totaal_score=800,
+                ronde_1_punten=10,
+                ronde_2_punten=20,
+                ronde_3_punten=30,
+                ronde_4_punten=40,
+                ronde_5_punten=50,
+                ronde_6_punten=60,
+                ronde_7_punten=70,
+                totaal_punten=80).save()
 
-        obj = HistCompetitie()
-        obj.seizoen = '2017/2018'
-        obj.comp_type = '18'
-        obj.beschrijving = 'Too old'
-        obj.is_team = False
-        obj.save()
+        HistCompSeizoen(seizoen='2017/2018', comp_type=HISTCOMP_TYPE_18,
+                        indiv_bogen=",".join(HIST_BOGEN_DEFAULT)).save()
 
     def _add_many_records(self, pages):
         # paginator laat 100 entries per pagina zien, dus voeg er 100 toe
@@ -95,10 +94,9 @@ class TestHistComp(E2EHelpers, TestCase):
         # while
 
     def test_histcompetitie(self):
-        obj = HistCompetitie.objects.all()[0]
-        obj.clean_fields()                  # run field validators
-        obj.clean()                         # run model validator
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+        self.hist_seizoen.clean_fields()    # run field validators
+        self.hist_seizoen.clean()           # run model validator
+        self.assertTrue(str(self.hist_seizoen) != '')
 
         obj = HistCompRegioIndiv.objects.all()[0]
         obj.clean_fields()                  # run field validators
@@ -128,7 +126,7 @@ class TestHistComp(E2EHelpers, TestCase):
 
     def test_view_allejaren_leeg(self):
         # verwijder alle records en controleer dat het goed gaat
-        HistCompetitie.objects.all().delete()
+        HistCompSeizoen.objects.all().delete()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_hist_top)
         self.assertEqual(resp.status_code, 200)

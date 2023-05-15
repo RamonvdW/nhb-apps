@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
 from Functie.operations import maak_functie
-from HistComp.definities import HISTCOMP_TYPE_18
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -125,11 +125,13 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         sporterboog.save()
 
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
-        self.hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18)
+        self.hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18,
+                                            indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
         self.hist_seizoen.save()
 
         # een ouder seizoen dat niet gebruikt moet worden
-        hist_seizoen2 = HistCompSeizoen(seizoen='2017/2018', comp_type=HISTCOMP_TYPE_18)
+        hist_seizoen2 = HistCompSeizoen(seizoen='2017/2018', comp_type=HISTCOMP_TYPE_18,
+                                        indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
         hist_seizoen2.save()
 
         # record voor het volwassen lid
@@ -708,7 +710,8 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         hist = HistCompSeizoen(
                         seizoen='2019/2020',
                         is_openbaar=False,
-                        comp_type=HISTCOMP_TYPE_18)
+                        comp_type=HISTCOMP_TYPE_18,
+                        indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
         hist.save()
 
         self.comp_18 = Competitie.objects.get(afstand='18')

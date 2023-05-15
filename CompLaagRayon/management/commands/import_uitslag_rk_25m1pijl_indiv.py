@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
+from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
 from Competitie.models import KampioenschapSporterBoog
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
@@ -31,7 +31,8 @@ class Command(BaseCommand):
     def deelnemers_ophalen(self):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
-                          .filter(kampioenschap__competitie__afstand='25')
+                          .filter(kampioenschap__competitie__afstand='25',
+                                  kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
                                           'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
@@ -120,6 +121,7 @@ class Command(BaseCommand):
         rank_doorlopend = rank = 0
         prev_totaal = 999
         prev_counts_str = ""
+        toon_counts = True
         while nix_count < 10:
             row_nr += 1
             row = str(row_nr)
@@ -213,28 +215,49 @@ class Command(BaseCommand):
                                     self.stderr.write('[ERROR] Score is niet aflopend op regel %s' % row)
                                 else:
                                     rank = rank_doorlopend
+
+                                # counts worden alleen gebruikt voor plaats 1, 2, 3
+                                # nog wel tonen voor plaats 3+ als deze relevant was
+                                if rank > 3 and totaal != prev_totaal:
+                                    toon_counts = False
+
+                                if not toon_counts:
+                                    counts_str = ''
+
                                 prev_totaal = totaal
                                 prev_counts_str = counts_str
-
-                                # telling moet alleen worden gebruik voor plaats 1/2/3
-                                if rank > 3:
-                                    counts_str = ''
 
                                 if self.verbose:
                                     self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
 
-                                do_report = False
+                                opslaan = True
                                 if dupe_check:
                                     # allow result_rank change
-                                    is_dupe = (deelnemer.result_score_1 == score1
-                                               and deelnemer.result_score_2 == score2
-                                               and deelnemer.result_counts == counts_str)
-                                    if not is_dupe:
-                                        do_report = True
+                                    if deelnemer.result_score_1 != score1 or deelnemer.result_score_2 != score2:
+                                        opslaan = False
+                                        diff = "%s,%s,%s -> %s,%s,%s" % (deelnemer.result_score_1,
+                                                                         deelnemer.result_score_2,
+                                                                         deelnemer.result_counts,
+                                                                         score1, score2, counts_str)
+                                        self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s): %s' % (
+                                                            deelnemer.pk, deelnemer, diff))
 
-                                if do_report:
-                                    self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s)' % (deelnemer.pk, deelnemer))
-                                else:
+                                    else:
+                                        # allow counts to change from empty to non-empty
+                                        if deelnemer.result_counts == '' and deelnemer.result_counts != counts_str:
+                                            diff = "%s -> %s" % (deelnemer.result_counts, counts_str)
+                                            self.stderr.write('[WARNING] Deelnemer pk=%s krijgt nieuwe result_counts (%s): %s' % (
+                                                                deelnemer.pk, deelnemer, diff))
+                                        elif deelnemer.result_counts != counts_str:
+                                            opslaan = False
+                                            diff = "%s,%s,%s -> %s,%s,%s" % (deelnemer.result_score_1,
+                                                                             deelnemer.result_score_2,
+                                                                             deelnemer.result_counts,
+                                                                             score1, score2, counts_str)
+                                            self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s): %s' % (
+                                                                deelnemer.pk, deelnemer, diff))
+
+                                if opslaan:
                                     deelnemer.result_rank = rank
                                     deelnemer.result_score_1 = score1
                                     deelnemer.result_score_2 = score2

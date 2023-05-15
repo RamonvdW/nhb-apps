@@ -6,11 +6,34 @@
 
 from django.core.management.base import BaseCommand
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
-from NhbStructuur.models import NhbVereniging
+from NhbStructuur.models import NhbVereniging, NhbRegio
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
-import sys
+
+
+def verwijderde_verenigingen():
+    for tup in [(1026, 109, 'Elshout'),
+                (1028, 107, 'Riel'),
+                (1058, 109, 'Vught'),
+                (1066, 107, 'Prinsenbeek'),
+                (1093, 111, 'Best'),
+                (1147, 114, 'Venray'),
+                (1152, 114, 'America'),
+                (1170, 115, 'Weert'),
+                (1191, 116, 'Maastricht'),
+                (1226, 113, 'Asten'),
+                (1310, 102, 'Culemborg'),
+                (1355, 103, 'Drachten')]:
+
+        ver_nr, regio_nr, plaats = tup
+
+        ver = NhbVereniging(
+                    ver_nr=tup[0],
+                    regio=NhbRegio(regio_nr=regio_nr),
+                    plaats=plaats)
+        yield ver
+    # for
 
 
 class Command(BaseCommand):         # pragma: no cover
@@ -64,7 +87,7 @@ class Command(BaseCommand):         # pragma: no cover
             self.stderr.write('[ERROR] Kan tabblad %s niet vinden' % repr(ws_name))
             return
 
-        lid_nr2indiv = dict()
+        lid_nr2indiv = dict()       # [lid_nr] = [indiv, indiv, ..]
         for indiv in HistCompRegioIndiv.objects.filter(seizoen=hist_seizoen):
             try:
                 lid_nr2indiv[indiv.sporter_lid_nr].append(indiv)
@@ -72,11 +95,14 @@ class Command(BaseCommand):         # pragma: no cover
                 lid_nr2indiv[indiv.sporter_lid_nr] = [indiv]
         # for
 
-        ver_nr2naam = dict()
-        ver_nr2plaats = dict()
-        for ver in NhbVereniging.objects.all():
-            ver_nr2naam[ver.ver_nr] = ver.naam
-            ver_nr2plaats[ver.ver_nr] = ver.plaats
+        ver_nr2ver = dict()
+        for ver in NhbVereniging.objects.select_related('regio'):
+            ver_nr2ver[ver.ver_nr] = ver
+        # for
+
+        # al verwijderde verenigingen toevoegen
+        for ver in verwijderde_verenigingen():
+            ver_nr2ver[ver.ver_nr] = ver
         # for
 
         row_nr = 2 - 1      # skip header
@@ -88,7 +114,13 @@ class Command(BaseCommand):         # pragma: no cover
             ver_nr = ws[col_ver_nr + row_str].value
 
             if lid_nr is None and ver_nr is None:
+                # einde van de lijst
                 break   # from the while
+
+            if ver_nr == 1377:
+                self.stderr.write('[ERROR] Sporter %s van vereniging %s mag niet in de uitslag' % (lid_nr, ver_nr))
+                # TODO: verwijder uit uitslag
+                continue
 
             try:
                 indiv_list = lid_nr2indiv[lid_nr]
@@ -96,36 +128,44 @@ class Command(BaseCommand):         # pragma: no cover
                 # sporter staat niet in de lijst
                 # dat is normaal als er geen uitslag aan hing
                 #self.stderr.write('[ERROR] lid_nr %s niet gevonden op regel %s' % (lid_nr, row_nr))
-                pass
-            else:
-                for indiv in indiv_list:
-                    if indiv.sporter_naam == '':
-                        self.stdout.write('[WARNING] Geen sporter_naam voor pk=%s: %s' % (indiv.pk, indiv))
-                        naam = ws[col_naam + row_str].value
-                        naam = str(naam).strip()
-                        naam = naam.encode('iso-8859-1').decode('utf-8')
-                        if naam == naam.lower():
-                            naam = naam.title()
-                            naam = naam.replace(' De ', ' de ')
-                            naam = naam.replace(' Der ', ' der ')
-                            naam = naam.replace(' Van ', ' van ')
-                            self.stderr.write('[WARNING] Fixing capitalization: %s' % repr(naam))
-                        if len(naam) < 5:
-                            self.stderr.write('[ERROR] Rejected: %s' % repr(naam))
-                        else:
-                            self.stdout.write('          Voorstel: %s' % repr(naam))
-                            indiv.sporter_naam = naam
-                            if not self.dryrun:
-                                indiv.save(update_fields=['sporter_naam'])
+                continue
 
-                    if indiv.vereniging_nr != ver_nr:
-                        self.stdout.write('ver_nr %s --> %s for %s' % (indiv.vereniging_nr, ver_nr, indiv))
-                        indiv.vereniging_nr = ver_nr
-                        indiv.vereniging_naam = ver_nr2naam[ver_nr]
-                        indiv.vereniging_plaats = ver_nr2plaats[ver_nr]
+            try:
+                ver = ver_nr2ver[ver_nr]
+            except KeyError:
+                self.stderr.write('[ERROR] Kan vereniging %s niet vinden' % ver_nr)
+                continue
+
+            # indiv_list: omdat sporter met meerdere bogen in de uitslag kan staan
+            for indiv in indiv_list:
+                if indiv.sporter_naam == '':
+                    self.stdout.write('[WARNING] Geen sporter_naam voor pk=%s: %s' % (indiv.pk, indiv))
+                    naam = ws[col_naam + row_str].value
+                    naam = str(naam).strip()
+                    naam = naam.encode('iso-8859-1').decode('utf-8')
+                    if naam == naam.lower():
+                        naam = naam.title()
+                        naam = naam.replace(' De ', ' de ')
+                        naam = naam.replace(' Der ', ' der ')
+                        naam = naam.replace(' Van ', ' van ')
+                        self.stderr.write('[WARNING] Fixing capitalization: %s' % repr(naam))
+                    if len(naam) < 5:
+                        self.stderr.write('[ERROR] Rejected: %s' % repr(naam))
+                    else:
+                        self.stdout.write('          Voorstel: %s' % repr(naam))
+                        indiv.sporter_naam = naam
                         if not self.dryrun:
-                            indiv.save(update_fields=['vereniging_nr', 'vereniging_naam', 'vereniging_plaats'])
-                # for
+                            indiv.save(update_fields=['sporter_naam'])
+
+                if indiv.vereniging_nr != ver_nr:
+                    self.stdout.write('ver_nr %s --> %s for %s' % (indiv.vereniging_nr, ver_nr, indiv))
+                    indiv.vereniging_nr = ver_nr
+                    indiv.vereniging_naam = ver.naam
+                    indiv.vereniging_plaats = ver.plaats
+                    indiv.regio_nr = ver.regio.regio_nr
+                    if not self.dryrun:
+                        indiv.save(update_fields=['vereniging_nr', 'vereniging_naam', 'vereniging_plaats'])
+            # for
 
 
 # end of file

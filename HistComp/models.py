@@ -6,7 +6,7 @@
 
 from django.db import models
 from decimal import Decimal
-from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK, HISTCOMP_CHOICES_RK_BK, HISTCOMP_TYPE, HISTCOMP_TYPE2STR
+from HistComp.definities import HISTCOMP_RK, HISTCOMP_CHOICES_RK_BK, HISTCOMP_TYPE, HISTCOMP_TYPE2STR
 
 
 class HistCompSeizoen(models.Model):
@@ -18,6 +18,11 @@ class HistCompSeizoen(models.Model):
     # '18' = 18m = Indoor
     # '25' = 25m = 25m1pijl
     comp_type = models.CharField(max_length=2, choices=HISTCOMP_TYPE)
+
+    # lijst van boog afkortingen, gescheiden door een komma
+    # voorbeeld: R,C,BB,TR,LB
+    indiv_bogen = models.CharField(max_length=20)
+    team_typen = models.CharField(max_length=20)
 
     # beste aantal scores waarover het regio gemiddelde berekend is
     # normaal 6, maar in de corona-jaren is dit verlaagd geweest naar 5
@@ -36,10 +41,6 @@ class HistCompSeizoen(models.Model):
     heeft_uitslag_rk_teams = models.BooleanField(default=False)
     heeft_uitslag_bk_teams = models.BooleanField(default=False)
 
-    # lijst van boog afkortingen, gescheiden door een komma
-    # voorbeeld: R,C,BB,TR,LB
-    indiv_bogen = models.CharField(max_length=20)
-
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         try:
@@ -51,7 +52,7 @@ class HistCompSeizoen(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        ordering = ['seizoen', 'comp_type']
+        ordering = ['-seizoen', 'comp_type']
         verbose_name = "Hist seizoen"
         verbose_name_plural = "Hist seizoenen"
 
@@ -133,6 +134,9 @@ class HistCompRegioTeam(models.Model):
     # voorbeeld: Traditional klasse ERE
     team_klasse = models.CharField(max_length=30)
 
+    # R/C/BB/IB/LB/TR
+    team_type = models.CharField(max_length=5)
+
     # verenigingsnummer en volledige naam
     # omdat de naam meerdere keren voorkomt is ook de plaats nodig
     vereniging_nr = models.PositiveSmallIntegerField()
@@ -212,9 +216,11 @@ class HistKampIndiv(models.Model):
     rk_score_is_blanco = models.BooleanField(default=False)
     rk_score_1 = models.PositiveSmallIntegerField(default=0)
     rk_score_2 = models.PositiveSmallIntegerField(default=0)
+    rk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
     bk_score_1 = models.PositiveSmallIntegerField(default=0)
     bk_score_2 = models.PositiveSmallIntegerField(default=0)
+    bk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
     # bijdrage aan de het rk/bk teams
     teams_rk_score_1 = models.PositiveSmallIntegerField(default=0)
@@ -244,6 +250,9 @@ class HistKampTeam(models.Model):
 
     # voorbeeld: Traditional klasse ERE
     teams_klasse = models.CharField(max_length=30)
+
+    # R/C/BB/IB/LB/TR
+    team_type = models.CharField(max_length=5)
 
     # verenigingsnummer en volledige naam
     # omdat de naam meerdere keren voorkomt is ook de plaats nodig

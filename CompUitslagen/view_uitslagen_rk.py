@@ -11,45 +11,14 @@ from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
-from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
+from Sporter.operations import get_request_rayon_nr
 from Plein.menu import menu_dynamics
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_RK_INDIV = 'compuitslagen/uitslagen-rk-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_RK_TEAMS = 'compuitslagen/uitslagen-rk-teams.dtl'
-
-
-def get_request_rayon_nr(request):
-    """ Geeft het rayon nummer van de ingelogde gebruiker/beheerder terug,
-        of 1 als er geen rayon vastgesteld kan worden
-    """
-    rayon_nr = 1
-
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-    if functie_nu:
-        if functie_nu.nhb_ver:
-            # HWL, WL
-            rayon_nr = functie_nu.nhb_ver.regio.rayon.rayon_nr
-        elif functie_nu.nhb_regio:
-            # RCL
-            rayon_nr = functie_nu.nhb_regio.rayon.rayon_nr
-        elif functie_nu.nhb_rayon:
-            # RKO
-            rayon_nr = functie_nu.nhb_rayon.rayon_nr
-
-    elif rol_nu == Rollen.ROL_SPORTER:
-        account = request.user
-        if account.is_authenticated:                                    # pragma: no branch
-            if account.sporter_set.count() > 0:                         # pragma: no branch
-                sporter = account.sporter_set.all()[0]
-                if sporter.is_actief_lid and sporter.bij_vereniging:
-                    nhb_ver = sporter.bij_vereniging
-                    rayon_nr = nhb_ver.regio.rayon.rayon_nr
-
-    return rayon_nr
 
 
 class UitslagenRayonIndivView(TemplateView):

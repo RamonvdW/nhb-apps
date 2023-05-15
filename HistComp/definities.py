@@ -38,12 +38,14 @@ URL2HISTCOMP_TYPE = {
     '25m': HISTCOMP_TYPE_25,
 }
 
+HIST_BOGEN_DEFAULT = ('R', 'C', 'BB', 'TR', 'LB')
+
 HIST_BOOG_DEFAULT = 'R'
 HIST_BOOG2STR = {
     'R': 'Recurve',
     'C': 'Compound',
     'BB': 'Barebow',
-    'IB': 'Instinctive bow',
+    'IB': 'Instinctive',
     'LB': 'Longbow',
     'TR': 'Traditional',
 }
@@ -67,6 +69,15 @@ URL2HIST_BOOG = {
 }
 
 HIST_TEAM_DEFAULT = 'R'
+HIST_TEAM2STR = {
+    'R': 'Recurve',
+    'C': 'Compound',
+    'BB': 'Barebow',
+    'LB': 'Longbow',
+    'TR': 'Traditional',
+    'IB': 'Instinctive',
+}
+
 HIST_TEAM2URL = {
     'R': 'recurve',
     'C': 'compound',
@@ -82,6 +93,7 @@ URL2HIST_TEAM = {
     'barebow': 'BB',
     'longbow': 'LB',
     'traditional': 'TR',
+    'instinctive': 'IB',
 }
 
 HIST_INTERLAND_BOGEN = ('R', 'C', 'BB', 'TR', 'LB')
