@@ -243,8 +243,12 @@ def uitslag_regio_teams_naar_histcomp(comp):
 
         if ronde.team != prev_team:
             if hist:
-                tup = (hist.totaal_punten, hist.totaal_score, len(unsorted), hist)
-                unsorted.append(tup)
+                if hist.totaal_punten == 0:
+                    # helemaal geen scores niet opnemen in de uitslag
+                    bulk.remove(hist)
+                else:
+                    tup = (hist.totaal_punten, hist.totaal_score, len(unsorted), hist)
+                    unsorted.append(tup)
 
             team = ronde.team
             ver = team.vereniging
