@@ -213,7 +213,7 @@ class Speelsterkte(models.Model):
     category = models.CharField(max_length=50)
 
     # afkorting om te tonen op de bondspas
-    pas_code = models.CharField(max_length=8, default='', blank=True)
+    pas_code = models.CharField(max_length=10, default='', blank=True)
 
     # sorteervolgorde (lager = eerder tonen)
     volgorde = models.PositiveSmallIntegerField()
