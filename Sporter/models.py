@@ -61,7 +61,7 @@ def validate_sinds_datum(datum):
 
 class Sporter(models.Model):
 
-    """ Tabel om details van een lid bij te houden """
+    """ Tabel om details van een lid bij te houden, zoals overgenomen uit het CRM """
 
     # het unieke lidmaatschapsnummer
     lid_nr = models.PositiveIntegerField(primary_key=True)
@@ -213,7 +213,7 @@ class Speelsterkte(models.Model):
     category = models.CharField(max_length=50)
 
     # afkorting om te tonen op de bondspas
-    pas_code = models.CharField(max_length=8, default='', blank=True)
+    pas_code = models.CharField(max_length=10, default='', blank=True)
 
     # sorteervolgorde (lager = eerder tonen)
     volgorde = models.PositiveSmallIntegerField()
