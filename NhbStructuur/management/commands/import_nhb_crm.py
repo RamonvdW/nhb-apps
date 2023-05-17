@@ -1668,25 +1668,17 @@ class Command(BaseCommand):
                 self.stderr.write("[ERROR] Geen data voor top-level sleutel %s" % repr(key))
                 return
 
-        # vang generieke fouten af
-        try:
-            self._maak_cache()
-            self._vind_recordhouders()
-            self._import_rayons(data['rayons'])
-            self._import_regions(data['regions'])
-            # circular dependency: secretaris van vereniging is lid; lid hoort bij vereniging
-            # doe clubs eerst, dan members, dan club.secretaris
-            self._import_clubs(data['clubs'])
-            self._import_members(data['members'])
-            self._import_clubs_secretaris(data['clubs'])
-            self._import_wedstrijdlocaties(data['clubs'])
-        except DataError as exc:        # pragma: no cover
-            _, _, tb = sys.exc_info()
-            lst = traceback.format_tb(tb)
-            self.stderr.write('[ERROR] [FATAL] Onverwachte database fout: %s' % str(exc))
-            self.stderr.write('Traceback:')
-            self.stderr.write(''.join(lst))
-            self._exit_code = 1
+        self._maak_cache()
+        self._vind_recordhouders()
+        self._import_rayons(data['rayons'])
+        self._import_regions(data['regions'])
+        # circular dependency: secretaris van vereniging is lid; lid hoort bij vereniging
+        # doe clubs eerst, dan members, dan club.secretaris
+        self._import_clubs(data['clubs'])
+        self._import_members(data['members'])
+        self._import_clubs_secretaris(data['clubs'])
+        self._import_wedstrijdlocaties(data['clubs'])
+
 
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
@@ -1747,6 +1739,7 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] lidmaatschap jaar = %s' % self.lidmaatschap_jaar)
 
+        # vang generieke fouten af
         try:
             self._import_bestand(fname)
         except Exception as exc:
@@ -1772,6 +1765,7 @@ class Command(BaseCommand):
             tb_msg = tb_msg_start + '\n'.join(tb)
 
             # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            self.stdout.write('[WARNING] Stuur crash mail naar ontwikkelaar')
             mailer_notify_internal_error(tb_msg)
 
             self._exit_code = 1
