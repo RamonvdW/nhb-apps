@@ -189,6 +189,8 @@ class HistCompRegioTeam(models.Model):
 
 class HistKampIndiv(models.Model):
 
+    """ Resultaat van de RK en BK voor een individuele sporter """
+
     seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
 
     # individuele wedstrijdklasse
@@ -216,10 +218,12 @@ class HistKampIndiv(models.Model):
     rk_score_is_blanco = models.BooleanField(default=False)
     rk_score_1 = models.PositiveSmallIntegerField(default=0)
     rk_score_2 = models.PositiveSmallIntegerField(default=0)
+    rk_score_totaal = models.PositiveSmallIntegerField(default=0)
     rk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
     bk_score_1 = models.PositiveSmallIntegerField(default=0)
     bk_score_2 = models.PositiveSmallIntegerField(default=0)
+    bk_score_totaal = models.PositiveSmallIntegerField(default=0)
     bk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
     # bijdrage aan de het rk/bk teams

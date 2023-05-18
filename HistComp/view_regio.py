@@ -227,7 +227,6 @@ class HistRegioIndivView(TemplateView):
                    .order_by('indiv_klasse',
                              'rank'))
 
-        rank = 0
         teller = None
         subset = list()
         volgorde = 0
@@ -246,10 +245,6 @@ class HistRegioIndivView(TemplateView):
 
                 volgorde = HIST_KLASSE2VOLGORDE[indiv.indiv_klasse]
                 prev_klasse = indiv.indiv_klasse
-                rank = 0
-
-            rank += 1
-            indiv.rank = rank       # binnen de regio
 
             indiv.naam_str = "[%s] %s" % (indiv.sporter_lid_nr, indiv.sporter_naam)
 
@@ -376,7 +371,6 @@ class HistRegioTeamsView(TemplateView):
                  .order_by('team_klasse',
                            'rank'))
 
-        rank = 0
         teller = None
         subset = list()
         volgorde = 0
@@ -395,10 +389,6 @@ class HistRegioTeamsView(TemplateView):
 
                 volgorde = HIST_KLASSE2VOLGORDE[team.team_klasse]
                 prev_klasse = team.team_klasse
-                rank = 0
-
-            rank += 1
-            team.rank = rank       # binnen de regio
 
             team.ver_str = "[%s] %s" % (team.vereniging_nr, team.vereniging_naam)
             if team.vereniging_plaats:

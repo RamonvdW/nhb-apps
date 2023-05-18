@@ -30,8 +30,12 @@ def maak_en_koppel_seizoen(apps, _):
             seizoen.save()
             hist2seizoen[tup] = seizoen
 
+        # corrigeer de klasse beschrijving
+        if hist.beschrijving == 'Instinctive bow':
+            hist.beschrijving = 'Instinctive'
+
         # alle histcomp records die verwijzen naar deze HistCompetitie ook een seizoen geven
-        indiv_klas.objects.filter(histcompetitie=hist).update(seizoen=seizoen)
+        indiv_klas.objects.filter(histcompetitie=hist).update(seizoen=seizoen, indiv_klasse=hist.beschrijving)
     # for
 
 
@@ -218,9 +222,11 @@ class Migration(migrations.Migration):
                 ('rk_score_is_blanco', models.BooleanField(default=False)),
                 ('rk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('rk_score_2', models.PositiveSmallIntegerField(default=0)),
+                ('rk_score_totaal', models.PositiveSmallIntegerField(default=0)),
                 ('rk_counts', models.CharField(blank=True, default='', max_length=20)),
                 ('bk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('bk_score_2', models.PositiveSmallIntegerField(default=0)),
+                ('bk_score_totaal', models.PositiveSmallIntegerField(default=0)),
                 ('bk_counts', models.CharField(blank=True, default='', max_length=20)),
                 ('teams_rk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('teams_rk_score_2', models.PositiveSmallIntegerField(default=0)),

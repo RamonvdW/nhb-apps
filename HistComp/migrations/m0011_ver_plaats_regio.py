@@ -5,12 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations
+from decimal import Decimal
 
 
 def amend_histcomp(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
-    hist_klas = apps.get_model('HistComp', 'HistCompRegioIndiv')
+    indiv_klas = apps.get_model('HistComp', 'HistCompRegioIndiv')
     ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
 
     ver_nr2regio_nr = dict()
@@ -64,7 +65,48 @@ def amend_histcomp(apps, _):
     for ver_nr in ver_nr2regio_nr.keys():
         regio_nr = ver_nr2regio_nr[ver_nr]
         plaats = ver_nr2plaats[ver_nr]
-        hist_klas.objects.filter(vereniging_nr=ver_nr).update(regio_nr=regio_nr, vereniging_plaats=plaats)
+        indiv_klas.objects.filter(vereniging_nr=ver_nr).update(regio_nr=regio_nr, vereniging_plaats=plaats)
+    # for
+
+    # opnieuw een ranking geven per regio
+    rank = 0
+    regio_klas2rank = dict()
+    later_lijst = list()
+    for indiv in indiv_klas.objects.select_related('seizoen').order_by('-gemiddelde'):
+
+        tup = (indiv.seizoen.pk, indiv.regio_nr, indiv.indiv_klasse)
+        try:
+            rank = regio_klas2rank[tup]
+        except KeyError:
+            rank = 0
+
+        nul = Decimal('0.000')
+        scores = (indiv.score1, indiv.score2, indiv.score3, indiv.score4, indiv.score5, indiv.score6, indiv.score7)
+        count = len([score for score in scores if score > nul])
+        if count < 6:
+            # sporters met te weinig scores komen onder aan de lijst
+            later_lijst.append(indiv)
+        else:
+            rank += 1
+            regio_klas2rank[tup] = rank
+
+            indiv.rank = rank
+            indiv.save(update_fields=['rank'])
+    # for
+
+    for indiv in later_lijst:
+
+        tup = (indiv.seizoen.pk, indiv.regio_nr, indiv.indiv_klasse)
+        try:
+            rank = regio_klas2rank[tup]
+        except KeyError:
+            rank = 0
+
+        rank += 1
+        regio_klas2rank[tup] = rank
+
+        indiv.rank = rank
+        indiv.save(update_fields=['rank'])
     # for
 
 

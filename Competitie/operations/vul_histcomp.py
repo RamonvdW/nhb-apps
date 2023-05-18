@@ -66,12 +66,79 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                                       'indiv_klasse')
                       .exclude(totaal=0)
                       .filter(regiocompetitie__competitie=comp,
-                              indiv_klasse__in=klassen_pks)
+                              indiv_klasse__in=klassen_pks,
+                              aantal_scores__gte=hist_seizoen.aantal_beste_scores)
                       .order_by('-gemiddelde'))     # hoogste boven
 
-        rank = 0
+        regio_klasse2rank = dict()      # [regio_nr, indiv_klasse.pk] = (rank, totaal)
         for deelnemer in deelnemers:
-            rank += 1       # TODO: rank per regio zetten
+            regio_nr = deelnemer.regiocompetitie.nhb_regio.regio_nr
+            tup = (regio_nr, deelnemer.indiv_klasse.pk)
+            try:
+                rank, prev_totaal = regio_klasse2rank[tup]
+            except KeyError:
+                rank = 0
+                prev_totaal = 0
+
+            if deelnemer.totaal != prev_totaal:
+                rank += 1
+            regio_klasse2rank[tup] = (rank, deelnemer.totaal)
+
+            sporter = deelnemer.sporterboog.sporter
+            ver = deelnemer.bij_vereniging
+            hist = HistCompRegioIndiv(
+                        seizoen=hist_seizoen,
+                        indiv_klasse=deelnemer.indiv_klasse.beschrijving,
+                        rank=rank,
+                        sporter_lid_nr=sporter.lid_nr,
+                        sporter_naam=sporter.volledige_naam(),
+                        boogtype=boogtype.afkorting,
+                        vereniging_nr=ver.ver_nr,
+                        vereniging_naam=ver.naam,
+                        vereniging_plaats=ver.plaats,
+                        regio_nr=deelnemer.regiocompetitie.nhb_regio.regio_nr,
+                        score1=deelnemer.score1,
+                        score2=deelnemer.score2,
+                        score3=deelnemer.score3,
+                        score4=deelnemer.score4,
+                        score5=deelnemer.score5,
+                        score6=deelnemer.score6,
+                        score7=deelnemer.score7,
+                        laagste_score_nr=deelnemer.laagste_score_nr,
+                        totaal=deelnemer.totaal,
+                        gemiddelde=deelnemer.gemiddelde)
+
+            bulk.append(hist)
+            if len(bulk) >= 500:
+                HistCompRegioIndiv.objects.bulk_create(bulk)
+                bulk = list()
+        # for
+
+        deelnemers = (RegiocompetitieSporterBoog
+                      .objects
+                      .select_related('sporterboog__sporter',
+                                      'bij_vereniging',
+                                      'regiocompetitie__nhb_regio',
+                                      'indiv_klasse')
+                      .exclude(totaal=0)
+                      .filter(regiocompetitie__competitie=comp,
+                              indiv_klasse__in=klassen_pks,
+                              aantal_scores__lt=hist_seizoen.aantal_beste_scores)
+                      .order_by('-gemiddelde'))     # hoogste boven
+
+        for deelnemer in deelnemers:
+            regio_nr = deelnemer.regiocompetitie.nhb_regio.regio_nr
+            tup = (regio_nr, deelnemer.indiv_klasse.pk)
+            try:
+                rank, prev_totaal = regio_klasse2rank[tup]
+            except KeyError:
+                rank = 0
+                prev_totaal = 0
+
+            if deelnemer.totaal != prev_totaal:
+                rank += 1
+            regio_klasse2rank[tup] = (rank, deelnemer.totaal)
+
             sporter = deelnemer.sporterboog.sporter
             ver = deelnemer.bij_vereniging
             hist = HistCompRegioIndiv(
@@ -163,6 +230,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                             rk_score_is_blanco=(deelnemer.result_rank == KAMP_RANK_BLANCO),
                             rk_score_1=deelnemer.result_score_1,
                             rk_score_2=deelnemer.result_score_2,
+                            rk_score_totaal=deelnemer.result_score_1 + deelnemer.result_score_2,
                             rk_counts=deelnemer.result_counts)
             bulk.append(hist)
     # for
@@ -210,8 +278,9 @@ def uitslag_bk_indiv_naar_histcomp(comp):
             hist.rank_bk = deelnemer.result_rank
             hist.bk_score_1 = deelnemer.result_score_1
             hist.bk_score_2 = deelnemer.result_score_2
+            hist.bk_score_totaal = deelnemer.result_score_1 + deelnemer.result_score_2
             hist.bk_counts = deelnemer.result_counts
-            hist.save(update_fields=['rank_bk', 'bk_score_1', 'bk_score_2', 'bk_counts'])
+            hist.save(update_fields=['rank_bk', 'bk_score_1', 'bk_score_2', 'bk_score_totaal', 'bk_counts'])
     # for
 
     hist_seizoen.heeft_uitslag_bk_indiv = True
@@ -247,7 +316,7 @@ def uitslag_regio_teams_naar_histcomp(comp):
                     # helemaal geen scores niet opnemen in de uitslag
                     bulk.remove(hist)
                 else:
-                    tup = (hist.totaal_punten, hist.totaal_score, len(unsorted), hist)
+                    tup = (hist.regio_nr, hist.totaal_punten, hist.totaal_score, len(unsorted), hist)
                     unsorted.append(tup)
 
             team = ronde.team
@@ -295,17 +364,18 @@ def uitslag_regio_teams_naar_histcomp(comp):
             hist.ronde_7_punten = ronde.team_punten
     # for
 
-    teamklasse2rank = dict()
+    klasse_regio2rank = dict()
     unsorted.sort(reverse=True)     # hoogste punten eerst
     for tup in unsorted:
         hist = tup[-1]
+        tup = (hist.regio_nr, hist.team_klasse)
         try:
-            rank = teamklasse2rank[hist.team_klasse]
+            rank = klasse_regio2rank[tup]
         except KeyError:
             rank = 0
         rank += 1
         hist.rank = rank
-        teamklasse2rank[hist.team_klasse] = rank
+        klasse_regio2rank[tup] = rank
     # for
 
     HistCompRegioTeam.objects.bulk_create(bulk)

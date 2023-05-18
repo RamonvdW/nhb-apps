@@ -17,8 +17,8 @@ from Sporter.operations import get_request_rayon_nr
 from types import SimpleNamespace
 
 
-TEMPLATE_HISTCOMP_RAYON_INDIV = 'histcomp/uitslagen-rk-indiv.dtl'
-TEMPLATE_HISTCOMP_RAYON_TEAMS = 'histcomp/uitslagen-rk-teams.dtl'
+TEMPLATE_HISTCOMP_RK_INDIV = 'histcomp/uitslagen-rk-indiv.dtl'
+TEMPLATE_HISTCOMP_RK_TEAMS = 'histcomp/uitslagen-rk-teams.dtl'
 
 
 def maak_filter_rayon(context):
@@ -83,7 +83,7 @@ class HistRkIndivView(TemplateView):
     """ Django class-based view voor de individuele uitslagen van de regiocompetitie in 1 regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_HISTCOMP_RAYON_INDIV
+    template_name = TEMPLATE_HISTCOMP_RK_INDIV
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -164,9 +164,9 @@ class HistRkIndivView(TemplateView):
                            boogtype=boog_type,
                            rank_rk__lte=100)
                    .order_by('indiv_klasse',
-                             'rank_rk'))
+                             'rank_rk',                 # laagste eerst
+                             '-rk_score_totaal'))       # hoogste eerst
 
-        rank = 0
         teller = None
         subset = list()
         volgorde = 0
@@ -185,10 +185,6 @@ class HistRkIndivView(TemplateView):
 
                 volgorde = HIST_KLASSE2VOLGORDE[indiv.indiv_klasse]
                 prev_klasse = indiv.indiv_klasse
-                rank = 0
-
-            rank += 1
-            indiv.rank = rank       # binnen de regio
 
             indiv.naam_str = '[%s] %s' % (indiv.sporter_lid_nr, indiv.sporter_naam)
 
@@ -202,7 +198,7 @@ class HistRkIndivView(TemplateView):
                 indiv.rank_rk = ''
 
             else:
-                indiv.scores_str_1 = "%s (%s+%s)" % (indiv.rk_score_1 + indiv.rk_score_2,
+                indiv.scores_str_1 = "%s (%s+%s)" % (indiv.rk_score_totaal,
                                                      indiv.rk_score_1,
                                                      indiv.rk_score_2)
                 indiv.scores_str_2 = indiv.rk_counts
@@ -239,9 +235,26 @@ class HistRkIndivView(TemplateView):
         return context
 
 
-
 class HistRkTeamsView(TemplateView):
-    pass
 
+    """ Django class-based view voor de individuele uitslagen van de regiocompetitie in 1 regio """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_HISTCOMP_RK_TEAMS
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (url_top, 'Uitslag vorig seizoen'),
+            (None, 'Uitslagen RK teams')
+        )
+
+        menu_dynamics(self.request, context)
+        return context
 
 # end of file

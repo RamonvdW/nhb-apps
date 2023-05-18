@@ -101,6 +101,11 @@ HIST_INTERLAND_BOGEN = ('R', 'C', 'BB', 'TR', 'LB')
 HIST_KLASSE2VOLGORDE = {
     # indiv
     '': 1,      # oudere seizoenen hebben geen klasse indicatie
+    'Recurve': 1,
+    'Compound': 1,
+    'Barebow': 1,
+    'Instinctive': 1,
+    'Longbow': 1,
 
     'Recurve klasse 1': 11,
     'Recurve klasse 2': 12,
