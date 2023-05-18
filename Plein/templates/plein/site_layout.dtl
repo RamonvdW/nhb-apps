@@ -151,7 +151,9 @@
             {% endblock %}
 
             <!-- echt pagina komt hier, vanuit de template -->
-            {% block pagina %}{% endblock %}
+            <main>
+                {% block pagina %}{% endblock %}
+            </main>
         </div>
 
         <script src="{% static 'materialize-new-13_min.js' %}"></script>
