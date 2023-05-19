@@ -39,6 +39,7 @@ class UitslagenRayonIndivView(TemplateView):
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.opt_text = boogtype.beschrijving
             boogtype.sel = boogtype.afkorting.lower()
 
             if boogtype.afkorting.upper() == comp_boog.upper():
@@ -46,33 +47,26 @@ class UitslagenRayonIndivView(TemplateView):
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
 
-            boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                        kwargs={'comp_pk': comp.pk,
-                                                'comp_boog': boogtype.afkorting.lower(),
-                                                'rayon_nr': gekozen_rayon_nr})
+            boogtype.url_part = boogtype.afkorting.lower()
         # for
 
-        if context['comp_boog']:
-            # rayon filters
-            rayons = (NhbRayon
-                      .objects
-                      .order_by('rayon_nr')
-                      .all())
+        # rayon filters
+        rayons = (NhbRayon
+                  .objects
+                  .order_by('rayon_nr')
+                  .all())
 
-            context['rayon_filters'] = rayons
+        context['rayon_filters'] = rayons
 
-            for rayon in rayons:
-                rayon.title_str = 'Rayon %s' % rayon.rayon_nr
-                rayon.sel = 'rayon_%s' % rayon.pk
-                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'comp_boog': comp_boog,
-                                                 'rayon_nr': rayon.rayon_nr})
+        for rayon in rayons:
+            rayon.opt_text = 'Rayon %s' % rayon.rayon_nr
+            rayon.sel = 'rayon_%s' % rayon.pk
+            rayon.url_part = str(rayon.rayon_nr)
 
-                if rayon.rayon_nr == gekozen_rayon_nr:
-                    context['rayon'] = rayon
-                    rayon.selected = True
-            # for
+            if rayon.rayon_nr == gekozen_rayon_nr:
+                context['rayon'] = rayon
+                rayon.selected = True
+        # for
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -104,6 +98,11 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Verkeerd rayonnummer')
 
         self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
+
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'comp_boog': '~1',
+                                                 'rayon_nr': '~2'})
 
         boogtype = context['comp_boog']
         if not boogtype:
@@ -305,6 +304,7 @@ class UitslagenRayonTeamsView(TemplateView):
         context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
+            team.opt_text = team.beschrijving
             team.sel = 'team_' + team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
                 context['teamtype'] = team
@@ -313,10 +313,7 @@ class UitslagenRayonTeamsView(TemplateView):
             else:
                 team.selected = False
 
-            team.zoom_url = reverse('CompUitslagen:uitslagen-rk-teams-n',
-                                    kwargs={'comp_pk': comp.pk,
-                                            'team_type': team.afkorting.lower(),
-                                            'rayon_nr': gekozen_rayon_nr})
+            team.url_part = team.afkorting.lower()
         # for
 
         # als het team type correct was, maak dan de rayon knoppen
@@ -330,16 +327,13 @@ class UitslagenRayonTeamsView(TemplateView):
             context['rayon_filters'] = rayons
 
             for rayon in rayons:
-                rayon.title_str = 'Rayon %s' % rayon.rayon_nr
+                rayon.opt_text = 'Rayon %s' % rayon.rayon_nr
                 rayon.sel = 'rayon_%s' % rayon.rayon_nr
                 rayon.selected = (rayon.rayon_nr == gekozen_rayon_nr)
                 if rayon.selected:
                     context['rayon'] = rayon
 
-                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rk-teams-n',
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'team_type': teamtype_afkorting,
-                                                 'rayon_nr': rayon.rayon_nr})
+                rayon.url_part = str(rayon.rayon_nr)
             # for
 
     @staticmethod
@@ -417,6 +411,11 @@ class UitslagenRayonTeamsView(TemplateView):
             raise Http404('Verkeerd rayonnummer')
 
         self._maak_filter_knoppen(context, comp, rayon_nr, teamtype_afkorting)
+
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-teams-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'team_type': '~1',
+                                                 'rayon_nr': '~2'})
 
         teamtype = context['teamtype']
         if not teamtype:

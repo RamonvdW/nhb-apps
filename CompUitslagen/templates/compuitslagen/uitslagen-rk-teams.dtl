@@ -10,21 +10,6 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
-        function keuze_gemaakt(groep) {
-
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
-            const selector = "input[type='radio'][name=" + groep + "]:checked"
-            const el = document.querySelector(selector)
-            const url = el.dataset.url
-
-            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
-            if (url.length > 0)
-                window.location.href = url
-        }
-    </script>
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -66,7 +51,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filters</h4>
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
         </div>
     </div>
 
@@ -75,18 +60,18 @@
         <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een team type:</b></p>
-                <ul id="id_team">
-                    {% for teamtype in teamtype_filters %}
+                <ul>
+                    {% for filter in teamtype_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ teamtype.sel }}">
-                                <input class="with-gap" type="radio" name="teamtype" value="{{ teamtype.sel }}" required id="id_{{ teamtype.sel }}" {% if teamtype.selected %}checked{% endif %} data-url="{{ teamtype.zoom_url }}">
-                                <span>{{ teamtype.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -94,18 +79,18 @@
         <div class="col s12 m6 l4 xl3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een rayon:</b></p>
-                <ul id="id_rayon">
-                    {% for rayon in rayon_filters %}
+                <ul>
+                    {% for filter in rayon_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ rayon.sel }}">
-                                <input class="with-gap" type="radio" name="rayon" value="{{ rayon.sel }}" required id="id_{{ rayon.sel }}" {% if rayon.selected %}checked{% endif %} data-url="{{ rayon.zoom_url }}">
-                                <span>{{ rayon.title_str }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('rayon')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>

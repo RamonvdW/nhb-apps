@@ -13,8 +13,6 @@
     <script type="application/javascript">
         function keuze_gemaakt(groep) {
 
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
             const selector = "input[type='radio'][name=" + groep + "]:checked"
             const el = document.querySelector(selector)
             const url = el.dataset.url
@@ -64,7 +62,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filters</h4>
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
         </div>
     </div>
 
@@ -74,18 +72,18 @@
         <div class="col s12 m4 offset-m1 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een regio:</b></p>
-                <ul id="id_regio">
-                    {% for regio in regio_filters %}
+                <ul>
+                    {% for filter in regio_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ regio.sel }}">
-                                <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
-                                <span>{{ regio.title_str }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -93,46 +91,48 @@
         <div class="col s12 m5 l4" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een team type:</b></p>
-                <ul id="id_boog">
-                    {% for teamtype in teamtype_filters %}
+                <ul>
+                    {% for filter in teamtype_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ teamtype.sel }}">
-                                <input class="with-gap" type="radio" name="teamtype" value="{{ teamtype.sel }}" required id="id_{{ teamtype.sel }}" {% if teamtype.selected %}checked{% endif %} data-url="{{ teamtype.zoom_url }}">
-                                <span>{{ teamtype.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
 
-        <div class="col s12 m6 l5">
-            <div class="white left-align" style="padding:10px">
-                <p><b>Kies een vereniging:</b></p>
-                <ul id="id_ver">
-                    <li>
-                        <label class="black-text" for="id_ver_0">
-                            <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
-                            <span>Alle</span>
-                        </label>
-                    </li>
-                    {% for ver in ver_filters %}
+        {% if deelcomp.regio_organiseert_teamcompetitie %}
+            <div class="col s12 m6 l5">
+                <div class="white left-align" style="padding:10px">
+                    <p><b>Kies een vereniging:</b></p>
+                    <ul>
                         <li>
-                            <label class="black-text" for="id_{{ ver.sel }}">
-                                <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
-                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }} ({{ ver.plaats }})</span>
+                            <label class="black-text" for="id_ver_0">
+                                <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
+                                <span>Alle</span>
                             </label>
                         </li>
-                    {% endfor %}
-                </ul>
-                <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
-                </p>
+                        {% for ver in ver_filters %}
+                            <li>
+                                <label class="black-text" for="id_{{ ver.sel }}">
+                                    <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
+                                    <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }} ({{ ver.plaats }})</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+                    </p>
+                </div>
             </div>
-        </div>
+        {% endif %}
     </div>
 
     {% if deelcomp.regio_organiseert_teamcompetitie %}

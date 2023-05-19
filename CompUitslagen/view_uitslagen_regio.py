@@ -40,6 +40,7 @@ class UitslagenRegioIndivView(TemplateView):
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.opt_text = boogtype.beschrijving
             boogtype.sel = 'boog_' + boogtype.afkorting
             if boogtype.afkorting.upper() == comp_boog.upper():
                 context['comp_boog'] = boogtype
@@ -47,10 +48,7 @@ class UitslagenRegioIndivView(TemplateView):
                 # geen url --> knop disabled
                 boogtype.selected = True
 
-            boogtype.zoom_url = reverse(self.url_name,
-                                        kwargs={'comp_pk': comp.pk,
-                                                'comp_boog': boogtype.afkorting.lower(),
-                                                'regio_nr': gekozen_regio_nr})
+            boogtype.url_part = boogtype.afkorting.lower()
         # for
 
         # regio filters
@@ -63,21 +61,14 @@ class UitslagenRegioIndivView(TemplateView):
 
             context['regio_filters'] = regios
 
-            prev_rayon = 1
             for regio in regios:
+                regio.opt_text = 'Regio %s' % regio.regio_nr
                 regio.sel = 'regio_%s' % regio.regio_nr
-                regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
-                prev_rayon = regio.rayon.rayon_nr
-
-                regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr == gekozen_regio_nr:
                     context['regio'] = regio
                     regio.selected = True
 
-                regio.zoom_url = reverse(self.url_name,
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'comp_boog': comp_boog,
-                                                 'regio_nr': regio.regio_nr})
+                regio.url_part = str(regio.regio_nr)
             # for
 
         # vereniging filters
@@ -167,6 +158,11 @@ class UitslagenRegioIndivView(TemplateView):
 
         self._maak_filter_knoppen(context, comp, regio_nr, comp_boog)
 
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'comp_boog': '~1',
+                                                 'regio_nr': '~2'})
+
         boogtype = context['comp_boog']
         if not boogtype:
             raise Http404('Boogtype niet bekend')
@@ -235,15 +231,16 @@ class UitslagenRegioTeamsView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS
-    url_name = 'CompUitslagen:uitslagen-regio-teams-n'
 
-    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, teamtype_afkorting):
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, gekozen_regio_nr, teamtype_afkorting):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         context['teamtype'] = None
         context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
+            team.opt_text = team.beschrijving
             team.sel = team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
                 # validatie van urlconf argument: gevraagde teamtype bestaat echt
@@ -251,10 +248,7 @@ class UitslagenRegioTeamsView(TemplateView):
                 teamtype_afkorting = team.afkorting.lower()
                 team.selected = True
 
-            team.zoom_url = reverse(self.url_name,
-                                    kwargs={'comp_pk': comp.pk,
-                                            'team_type': team.afkorting.lower(),
-                                            'regio_nr': gekozen_regio_nr})
+            team.url_part = team.afkorting.lower()
         # for
 
         # regio filters
@@ -272,17 +266,13 @@ class UitslagenRegioTeamsView(TemplateView):
                 regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
                 prev_rayon = regio.rayon.rayon_nr
 
+                regio.opt_text = 'Regio %s' % regio.regio_nr
                 regio.sel = 'regio_%s' % regio.regio_nr
-
-                regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr == gekozen_regio_nr:
                     regio.selected = True
                     context['regio'] = regio
 
-                regio.zoom_url = reverse(self.url_name,
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'team_type': teamtype_afkorting,
-                                                 'regio_nr': regio.regio_nr})
+                regio.url_part = str(regio.regio_nr)
             # for
 
         # vereniging filters
@@ -364,6 +354,11 @@ class UitslagenRegioTeamsView(TemplateView):
         self._maak_filter_knoppen(context, comp, regio_nr, teamtype_afkorting)
         if not context['teamtype']:
             raise Http404('Verkeerd team type')
+
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-teams-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'team_type': '~1',
+                                                 'regio_nr': '~2'})
 
         # zoek alle regio teams erbij
 
