@@ -6,15 +6,15 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag RK individueel{% endblock %}
+{% block title %}Uitslag RK teams{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslag RK individueel</h3>
-            <p>Eindstand van de individuele rayonkampioenschappen</p>
+            <h3 class="page-banner">Uitslag RK teams</h3>
+            <p>Eindstand van de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>
 
@@ -27,8 +27,8 @@
                     <td>{{ comp_beschrijving }}</td>
                 </tr>
                 <tr>
-                    <th>Wedstrijdboog:</th>
-                    <td>{{ boog_beschrijving }}</td>
+                    <th>Team type</th>
+                    <td>{{ team_beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Rayon:</th>
@@ -50,9 +50,9 @@
     <div class="row-nhb-blauw">
         <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
-                <p><b>Kies een boog type:</b></p>
+                <p><b>Kies een team type:</b></p>
                 <ul>
-                    {% for filter in boog_filters %}
+                    {% for filter in teamtype_filters %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
                                 <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
@@ -87,60 +87,76 @@
         </div>
     </div>
 
-
-    {% if heeft_deelnemers %}
+    {% if heeft_teams %}
 
         <table class="white">
-            {% for indiv in uitslag %}
-
-                {% if indiv.break_klasse %}
-                    {% if not indiv.is_eerste_groep %}
+            {% for team in uitslag %}
+                {% if team.break_klasse %}
+                    {% if not forloop.first %}
                         <tr>
-                            <td colspan="6" class="nhb-table-onderrand"></td>
+                            <td colspan="4" class="nhb-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
-                        <td colspan="8" class="center">
-                            <h5>{{ indiv.indiv_klasse }}</h5>
+                        <td colspan="6" class="center">
+                            <h5>{{ team.teams_klasse }}</h5>
                         </td>
                     </tr>
 
                     <tr class="nhb-table-header">
-                        <td rowspan="{{ indiv.aantal_in_groep }}" class="nhb-table-zijrand"></td>
-
-                        <th class="center">Plaats</th>  <!-- rank -->
-                        <th>Sporter</th>
-                        <th class="hide-on-small-only">Vereniging</th>
-                        <th></th>   <!-- label: rayonkampioen -->
-                        <th colspan="2">RK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
-
-                        <td rowspan="{{ indiv.aantal_in_groep }}" class="nhb-table-zijrand"></td>
+                        <td rowspan="{{ team.aantal_in_groep }}" class="nhb-table-zijrand"></td>
+                        <th></th>   <!-- rank -->
+                        <th>
+                            <span class="hide-on-med-and-up">Ver</span>
+                            <span class="hide-on-small-only">Vereniging</span>
+                        </th>
+                        <th class="right-align" style="padding-right:10px">RK scores</th>
+                        <th>Team</th>
+                        <td rowspan="{{ team.aantal_in_groep }}" class="nhb-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
                 <tr>
+                    <!-- rank -->
+                    <td class="center">{{ team.rank }}</td>
 
-                    <td class="center">{{ indiv.rank_rk }}</td>
-                    <td>{{ indiv.naam_str }}</td>
-                    <td class="hide-on-small-only">{{ indiv.ver_str }}</td>
-                    <td>{% if indiv.rank_rk == 1 %}Rayonkampioen{% endif %}</td>
-                    <td>{{ indiv.scores_str_1 }}</td>
-                    <td>{{ indiv.scores_str_2 }}</td>
+                    <!-- vereniging -->
+                    <td>
+                        <span class="hide-on-med-and-up">{{ team.vereniging_nr }}</span>
+                        <span class="hide-on-small-only">{{ team.ver_str }}</span>
+                    </td>
+
+                    <!-- RK scores -->
+                    <td class="right-align" style="padding-right:10px">
+                        <b>{{ team.team_score }}</b>
+                        {% for deelnemer in team.deelnemers %}
+                            <br>
+                            <span>{{ deelnemer.team_score }}</span>
+                        {% endfor %}
+                    </td>
+
+                    <!-- team nummer + team leden -->
+                    <td>
+                        <!-- <b>{{ team.team_nr }}</b> -->
+                        {% for deelnemer in team.deelnemers %}
+                            <br><span>{{ deelnemer.naam_str }}</span>
+                        {% endfor %}
+                    </td>
 
                 </tr>
 
             {% endfor %}
 
             <tr>
-                <td colspan="6" class="nhb-table-onderrand"></td>
+                <td colspan="4" class="nhb-table-onderrand"></td>
             </tr>
         </table>
 
     {% else %}
-        <p class="center"><i>Geen deelnemers gevonden voor deze combinatie van filters</i></p>
+        <p class="center"><i>Geen teams gevonden voor deze combinatie van filters</i></p>
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp-uitslagen-rk-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp-uitslagen-rk-teams" %}
 
 {% endblock %}

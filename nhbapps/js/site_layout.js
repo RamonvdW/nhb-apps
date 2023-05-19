@@ -214,13 +214,49 @@ function filters_activate() {
     for(let nr=1; nr<8; nr++) {
         let tilde_nr = '~' + nr;
         if (url.includes(tilde_nr)) {
-            let el = document.querySelector("input[type='radio'][name='filter_" + nr + "']:checked");
+            let el = document.querySelector("input[name='filter_" + nr + "']:checked");
+            if (!el) {
+                // find the backup, typically <input type="hidden" ..>
+                el = document.querySelector("input[name='filter_" + nr + "']");
+            }
             url = url.replace(tilde_nr, el.dataset.url);
         }
     }
 
     // navigate to the final url
     window.location.href = url;
+}
+
+
+// radio button groups in sync laten lopen
+// gebruik: als een filter meerdere keren voorkomt, ivm layout (media queries)
+// bij het maken van een wijziging wordt deze doorgezet naar het andere filter
+//
+// voorbeeld:
+//
+//          <input type="radio"
+//                 name="filter_4"
+//                 value="{{ filter.sel }}"
+//                 data-url="{{ filter.url_part }}">
+//
+//          <input type="radio"
+//                 name="makl2"
+//                 value="{{ filter.sel }}"
+//        -->      onchange="mirror_radio('makl2', 'filter_4')">
+//
+function mirror_radio(src_name, dst_name) {
+    'use strict';
+
+    // zoek het geselecteerde element in de bron radiobutton set
+    const src_sel = "input[type='radio'][name=" + src_name + "]:checked";
+    const src_value = document.querySelector(src_sel).value;
+
+    // zoek dezelfde optie in de andere radiobutton set
+    const dst_sel = "input[type='radio'][name=" + dst_name + "][value=" + src_value + "]";
+    const dst_el = document.querySelector(dst_sel);
+
+    // activeer de juiste optie
+    dst_el.checked = true;
 }
 
 // end of file

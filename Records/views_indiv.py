@@ -15,7 +15,7 @@ from Records.models import IndivRecord
 from types import SimpleNamespace
 
 
-TEMPLATE_RECORDS_INDIV = 'records/records_indiv.dtl'
+TEMPLATE_RECORDS_INDIV = 'records/records_filter_indiv.dtl'
 
 
 class RecordsIndivView(TemplateView):
@@ -34,51 +34,27 @@ class RecordsIndivView(TemplateView):
     @staticmethod
     def _maak_filters(context, gesl, disc, lcat, makl, para, verb, soort_nieuwste, spec, heeft_niet_verb):
 
-        # voorbereiden voor alle reverse() aanroepen
-        gesl_url = gesl2url[gesl]
-        disc_url = disc2url[disc]
-        lcat_url = lcat2url[lcat]
-        makl_url = makl2url[makl]
-        para_url = para2url[para]
-        verb_url = verb2url[verb]
-
         context['soorten'] = soorten = list()
         for soort_record, obj in soort_nieuwste.items():
-            obj.url = reverse('Records:indiv-all',
-                              kwargs={'gesl': gesl_url,
-                                      'disc': disc_url,
-                                      'lcat': lcat_url,
-                                      'makl': makl_url,
-                                      'verb': verb_url,
-                                      'para': para_url,
-                                      'nummer': obj.volg_nr})
+            obj.url_part = str(obj.volg_nr)
+            obj.opt_text = obj.soort_record
             obj.sel = 'soort_%s' % obj.pk
             soorten.append(obj)
         # for
 
-        for obj in soorten:
-            if spec.soort_record == obj.soort_record:
-                # deze is "gekozen" en moet dus disabled worden
-                obj.is_gekozen = True
-        # for
-
-        context['toon_soorten'] = (len(soorten) > 0)
-
-        nummer = 0
+        if len(soorten) > 0:
+            context['toon_soorten'] = True
+            for obj in soorten:
+                if spec.soort_record == obj.soort_record:
+                    obj.selected = True
+            # for
 
         context['gesl_filters'] = opties = list()
         for afk, url in gesl2url.items():
             optie = SimpleNamespace()
-            optie.beschrijving = gesl2str[afk]
+            optie.opt_text = gesl2str[afk]
             optie.sel = 'gesl_' + afk
-            optie.zoom_url = reverse('Records:indiv-all',
-                                     kwargs={'gesl': url,
-                                             'disc': disc_url,
-                                             'lcat': lcat_url,
-                                             'makl': makl_url,
-                                             'verb': verb_url,
-                                             'para': para_url,
-                                             'nummer': nummer})
+            optie.url_part = url
             optie.selected = (afk == gesl)
             opties.append(optie)
         # for
@@ -91,22 +67,15 @@ class RecordsIndivView(TemplateView):
                 continue
 
             optie = SimpleNamespace()
-            optie.beschrijving = disc2str[afk]
+            optie.opt_text = disc2str[afk]
             optie.sel = 'disc_' + afk
-            optie.zoom_url = reverse('Records:indiv-all',
-                                     kwargs={'gesl': gesl_url,
-                                             'disc': url,
-                                             'lcat': lcat_url,
-                                             'makl': makl_url,
-                                             'verb': verb_url,
-                                             'para': para_url,
-                                             'nummer': nummer})
+            optie.url_part = url
             optie.selected = (afk == disc)
             opties.append(optie)
         # for
 
         if not para:
-            context['show_lcat'] = True
+            context['toon_lcat'] = True
 
             context['lcat_filters'] = opties = list()
             for afk, url in lcat2url.items():
@@ -115,34 +84,20 @@ class RecordsIndivView(TemplateView):
                     continue
 
                 optie = SimpleNamespace()
-                optie.beschrijving = lcat2short[afk]
+                optie.opt_text = lcat2short[afk]
                 optie.sel = 'lcat_' + afk
                 optie.selected = (lcat == afk)
-                optie.zoom_url = reverse('Records:indiv-all',
-                                         kwargs={'gesl': gesl_url,
-                                                 'disc': disc_url,
-                                                 'lcat': url,
-                                                 'makl': makl_url,
-                                                 'verb': verb_url,
-                                                 'para': para_url,
-                                                 'nummer': nummer})
+                optie.url_part = url
                 opties.append(optie)
             # for
 
         context['makl_filters'] = opties = list()
         for afk, url in makl2url.items():
             optie = SimpleNamespace()
-            optie.beschrijving = makl2str[afk]
+            optie.opt_text = makl2str[afk]
             optie.sel = 'makl_' + afk
             optie.selected = (afk == makl)
-            optie.zoom_url = reverse('Records:indiv-all',
-                                     kwargs={'gesl': gesl_url,
-                                             'disc': disc_url,
-                                             'lcat': lcat_url,
-                                             'makl': url,
-                                             'verb': verb_url,
-                                             'para': para_url,
-                                             'nummer': nummer})
+            optie.url_part = url
             opties.append(optie)
         # for
 
@@ -152,17 +107,10 @@ class RecordsIndivView(TemplateView):
             context['verb_filters'] = opties = list()
             for afk, url in verb2url.items():
                 optie = SimpleNamespace()
-                optie.beschrijving = verb2str[afk]
+                optie.opt_text = verb2str[afk]
                 optie.sel = 'verb_' + str(url)
                 optie.selected = (verb == afk)
-                optie.zoom_url = reverse('Records:indiv-all',
-                                         kwargs={'gesl': gesl_url,
-                                                 'disc': disc_url,
-                                                 'lcat': lcat_url,
-                                                 'makl': makl_url,
-                                                 'verb': url,
-                                                 'para': para_url,
-                                                 'nummer': nummer})
+                optie.url_part = url
                 opties.append(optie)
             # for
 
@@ -172,33 +120,19 @@ class RecordsIndivView(TemplateView):
                 continue
 
             optie = SimpleNamespace()
-            optie.beschrijving = afk
+            optie.opt_text = afk
             optie.sel = 'para_' + afk
             optie.selected = (afk == para)
-            optie.zoom_url = reverse('Records:indiv-all',
-                                     kwargs={'gesl': gesl_url,
-                                             'disc': disc_url,
-                                             'lcat': lcat_url,
-                                             'makl': makl_url,
-                                             'verb': verb_url,
-                                             'para': url,
-                                             'nummer': nummer})
+            optie.url_part = url
             opties.append(optie)
         # for
 
         # voeg de 'niet-para' knop toe
         optie = SimpleNamespace()
-        optie.beschrijving = 'Niet-para'
+        optie.opt_text = 'Niet-para'
         optie.sel = 'para_niet'
         optie.selected = (para == '')
-        optie.zoom_url = reverse('Records:indiv-all',
-                                 kwargs={'gesl': gesl_url,
-                                         'disc': disc_url,
-                                         'lcat': lcat_url,
-                                         'makl': makl_url,
-                                         'verb': verb_url,
-                                         'para': para2url[''],
-                                         'nummer': nummer})
+        optie.url_part = para2url['']
         opties.insert(0, optie)
 
     def get_context_data(self, **kwargs):
@@ -236,7 +170,7 @@ class RecordsIndivView(TemplateView):
 
         # zoek alle records die aan de 4-tuple of 5-tuple voldoen
         # dit minimaliseert het aantal database verzoeken dat we moeten doen
-        alle = (IndivRecord
+        qset = (IndivRecord
                 .objects
                 .filter(discipline=disc,
                         geslacht=gesl,
@@ -247,14 +181,14 @@ class RecordsIndivView(TemplateView):
                           'volg_nr'))           # niet functioneel, wel handig voor test
 
         heeft_niet_verb = False
-        for obj in alle:
+        for obj in qset:
             if not obj.verbeterbaar:
                 heeft_niet_verb = True
                 break
         # for
 
         if heeft_niet_verb:
-            alle = alle.filter(verbeterbaar=verb)
+            qset = qset.filter(verbeterbaar=verb)
         else:
             verb = True
 
@@ -262,7 +196,7 @@ class RecordsIndivView(TemplateView):
         soort_nieuwste = dict()     # ["soort_record"] = IndivRecord()
         nieuwste_record = None
         spec = None
-        for obj in alle:
+        for obj in qset:
             try:
                 if obj.datum > soort_nieuwste[obj.soort_record].datum:
                     soort_nieuwste[obj.soort_record] = obj
@@ -283,6 +217,15 @@ class RecordsIndivView(TemplateView):
         context['obj_record'] = spec
 
         self._maak_filters(context, gesl, disc, lcat, makl, para, verb, soort_nieuwste, spec, heeft_niet_verb)
+
+        context['url_filters'] = reverse('Records:indiv-all',
+                                         kwargs={'gesl': '~1',
+                                                 'disc': '~2',
+                                                 'lcat': '~3',
+                                                 'makl': '~4',
+                                                 'verb': '~5',
+                                                 'para': '~6',
+                                                 'nummer': '~7'})
 
         # voorbereiden voor alle reverse() aanroepen
         gesl_url = gesl2url[gesl]

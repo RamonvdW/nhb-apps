@@ -134,7 +134,9 @@
                 <td>{{ obj.geslacht_str }}</td>
                 <td>{{ obj.beste.score_str }}</td>
                 <td>
-                    <a class="btn-nhb-rood" href="{{ obj.url_details }}">Toon</a>
+                    <a class="btn-nhb-rood" href="{{ obj.url_details }}">
+                        <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                    </a>
                 </td>
             </tr>
         {% endfor %}

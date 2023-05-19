@@ -10,22 +10,6 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
-        function keuze_gemaakt(groep) {
-
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
-            const selector = "input[type='radio'][name=" + groep + "]:checked"
-            const el = document.querySelector(selector)
-            const url = el.dataset.url
-
-            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
-            if (url.length > 0)
-                window.location.href = url
-        }
-    </script>
-
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -54,7 +38,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filters</h4>
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
         </div>
     </div>
 
@@ -63,18 +47,18 @@
         <div class="col s12 m6 offset-m3 l4 offset-l4 xl2 offset-xl5" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
-                <ul id="id_boog">
-                    {% for boog in boog_filters %}
+                <ul>
+                    {% for filter in boog_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ boog.sel }}">
-                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
-                                <span>{{ boog.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>

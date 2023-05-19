@@ -24,26 +24,16 @@ TEMPLATE_HISTCOMP_BK_TEAMS = 'histcomp/uitslagen-bk-teams.dtl'
 def maak_filter_boog_type(context, hist_seizoen):
     """ filter opties voor de bogen """
 
-    seizoen_url = context['seizoen_url']
-    histcomp_type_url = context['histcomp_type_url']
     gekozen_boog_type = context['boog_type']
-
     afkortingen = hist_seizoen.indiv_bogen.split(',')
 
     context['boog_filters'] = list()
     for afkorting in afkortingen:
-        opt_sel = 'boog_' + afkorting
-
-        url = reverse('HistComp:uitslagen-bk-indiv',
-                      kwargs={'seizoen': seizoen_url,
-                              'histcomp_type': histcomp_type_url,
-                              'boog_type': HIST_BOOG2URL[afkorting]})
-
         opt = SimpleNamespace(
-                beschrijving=HIST_BOOG2STR[afkorting],
-                sel=opt_sel,
+                opt_text=HIST_BOOG2STR[afkorting],
+                sel='boog_' + afkorting,
                 selected=(afkorting == gekozen_boog_type),
-                zoom_url=url)
+                url_part=HIST_BOOG2URL[afkorting])
         context['boog_filters'].append(opt)
     # for
 
@@ -51,26 +41,16 @@ def maak_filter_boog_type(context, hist_seizoen):
 def maak_filter_team_type(context, hist_seizoen):
     """ filter opties voor de team typen """
 
-    seizoen_url = context['seizoen_url']
-    histcomp_type_url = context['histcomp_type_url']
     gekozen_team_type = context['team_type']
-
     afkortingen = hist_seizoen.indiv_bogen.split(',')
 
     context['teamtype_filters'] = list()
     for afkorting in afkortingen:
-        opt_sel = 'team_' + afkorting
-
-        url = reverse('HistComp:uitslagen-bk-teams',
-                      kwargs={'seizoen': seizoen_url,
-                              'histcomp_type': histcomp_type_url,
-                              'team_type': HIST_TEAM2URL[afkorting]})
-
         opt = SimpleNamespace(
-                beschrijving=HIST_TEAM2STR[afkorting],
-                sel=opt_sel,
+                opt_text=HIST_TEAM2STR[afkorting],
+                sel='team_' + afkorting,
                 selected=(afkorting == gekozen_team_type),
-                zoom_url=url)
+                url_part=HIST_TEAM2URL[afkorting])
         context['teamtype_filters'].append(opt)
     # for
 
@@ -134,6 +114,11 @@ class HistBkIndivView(TemplateView):
         # maak_filter_seizoen(context, seizoenen)
         # maak_filter_histcomp_type(context)
         maak_filter_boog_type(context, hist_seizoen)
+
+        context['url_filters'] = reverse('HistComp:uitslagen-bk-indiv',
+                                         kwargs={'seizoen': seizoen_url,
+                                                 'histcomp_type': histcomp_type_url,
+                                                 'boog_type': '~1'})
 
         # voor de header
         context['comp_beschrijving'] = '%s seizoen %s' % (HISTCOMP_TYPE2STR[histcomp_type], seizoen_str)
@@ -270,6 +255,11 @@ class HistBkTeamsView(TemplateView):
         # maak_filter_seizoen(context, seizoenen)
         # maak_filter_histcomp_type(context)
         maak_filter_team_type(context, hist_seizoen)
+
+        context['url_filters'] = reverse('HistComp:uitslagen-bk-teams',
+                                         kwargs={'seizoen': seizoen_url,
+                                                 'histcomp_type': histcomp_type_url,
+                                                 'team_type': '~1'})
 
         # voor de header
         context['comp_beschrijving'] = '%s seizoen %s' % (HISTCOMP_TYPE2STR[histcomp_type], seizoen_str)

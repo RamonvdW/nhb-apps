@@ -41,7 +41,7 @@ urlpatterns = [
          view_rk.HistRkIndivView.as_view(),
          name='uitslagen-rk-indiv'),
 
-    path('<seizoen>/<histcomp_type>-individueel/<boog_type>/rk-<rayon_nr>/',
+    path('<seizoen>/<histcomp_type>-individueel/<boog_type>/rk-rayon<rayon_nr>/',
          view_rk.HistRkIndivView.as_view(),
          name='uitslagen-rk-indiv-n'),
 
@@ -49,7 +49,7 @@ urlpatterns = [
          view_rk.HistRkTeamsView.as_view(),
          name='uitslagen-rk-teams'),
 
-    path('<seizoen>/<histcomp_type>-teams/<team_type>/rk-<rayon_nr>/',
+    path('<seizoen>/<histcomp_type>-teams/<team_type>/rk-rayon<rayon_nr>/',
          view_rk.HistRkTeamsView.as_view(),
          name='uitslagen-rk-teams-n'),
 

@@ -10,21 +10,10 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
-        function keuze_gemaakt(groep) {
-
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
-            const selector = "input[type='radio'][name=" + groep + "]:checked"
-            const el = document.querySelector(selector)
-            window.location.href = el.dataset.url
-        }
-    </script>
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Filteren</h3>
+            <h3 class="page-banner" id="filters" data-url="{{ url_filters }}">Filteren</h3>
             <p>Vind nederlandse handboogsport records van interesse</p>
         </div>
     </div>
@@ -36,18 +25,18 @@
         <div class="col s6 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Para classificatie:</b></p>
-                <ul id="id_para">
-                    {% for obj in para_filters %}
+                <ul>
+                    {% for filter in para_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="para" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_6" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('para')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -56,22 +45,23 @@
         <div class="col s6 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Leeftijdsklasse:</b></p>
-                {% if show_lcat %}
-                    <ul id="id_lcat">
-                        {% for obj in lcat_filters %}
+                {% if toon_lcat %}
+                    <ul>
+                        {% for filter in lcat_filters %}
                             <li>
-                                <label class="black-text" for="id_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="lcat" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                    <span>{{ obj.beschrijving }}</span>
+                                <label class="black-text" for="id_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="filter_3" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                    <span>{{ filter.opt_text }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('lcat')">Activeer</a>
+                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
+                    <input type="hidden" name="filter_3" value="lcat_U" data-url="gecombineerd">
                 {% endif %}
             </div>
         </div>
@@ -79,19 +69,19 @@
         <!-- filter: materiaalklasse -->
         <div class="col l3 hide-on-med-and-down" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
-                <p><b>Boog type:</b></p>
-                <ul id="id_makl1">
-                    {% for obj in makl_filters %}
+                <p><b>Boog type (1):</b></p>
+                <ul>
+                    {% for filter in makl_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="makl1" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_4" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}" onchange="mirror_radio('filter_4', 'makl2')">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('makl1')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -100,22 +90,24 @@
         {% if toon_soorten %}
             <div class="col s6 l3 hide-on-med-and-down" style="margin-bottom:15px">
                 <div class="white left-align" style="padding:10px">
-                    <p><b>Soort record:</b></p>
-                    <ul id="id_soort1">
-                        {% for obj in soorten %}
+                    <p><b>Soort record (1):</b></p>
+                    <ul>
+                        {% for filter in soorten %}
                             <li>
-                                <label class="black-text" for="id_soort1_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="soort1" value="{{ obj.sel }}" required id="id_soort1_{{ obj.sel }}" {% if obj.is_gekozen %}checked{% endif %} data-url="{{ obj.url }}">
-                                    <span>{{ obj.soort_record }}</span>
+                                <label class="black-text" for="id_soort1_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="filter_7" value="{{ filter.sel }}" required id="id_soort1_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}" onchange="mirror_radio('filter_7', 'soort2')">
+                                    <span>{{ filter.soort_record }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('soort1')">Activeer</a>
+                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 </div>
             </div>
+        {% else %}
+            <input type="hidden" name="filter_7" value="0" data-url="0">
         {% endif %}
 
     </div>
@@ -125,19 +117,19 @@
         <!-- filter: materiaalklasse -->
         <div class="col s6 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
-                <p><b>Boog type:</b></p>
-                <ul id="id_makl2">
-                    {% for obj in makl_filters %}
+                <p><b>Boog type (2):</b></p>
+                <ul>
+                    {% for filter in makl_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}_2">
-                                <input class="with-gap" type="radio" name="makl2" value="{{ obj.sel }}" required id="id_{{ obj.sel }}_2" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}_2">
+                                <input class="with-gap" type="radio" name="makl2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}_2" {% if filter.selected %}checked{% endif %} onchange="mirror_radio('makl2', 'filter_4')">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('makl2')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -146,19 +138,19 @@
         {% if toon_soorten %}
             <div class="col s6 l3" style="margin-bottom:15px">
                 <div class="white left-align" style="padding:10px">
-                    <p><b>Soort record:</b></p>
-                    <ul id="id_soort2">
-                        {% for obj in soorten %}
+                    <p><b>Soort record (2):</b></p>
+                    <ul>
+                        {% for filter in soorten %}
                             <li>
-                                <label class="black-text" for="id_soort2_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="soort2" value="{{ obj.sel }}" required id="id_soort2_{{ obj.sel }}" {% if obj.is_gekozen %}checked{% endif %} data-url="{{ obj.url }}">
-                                    <span>{{ obj.soort_record }}</span>
+                                <label class="black-text" for="id_soort2_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="soort2" value="{{ filter.sel }}" required id="id_soort2_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} onchange="mirror_radio('soort2', 'filter_7')">
+                                    <span>{{ filter.opt_text }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('soort2')">Activeer</a>
+                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 </div>
             </div>
@@ -171,18 +163,18 @@
         <div class="col s6 l3">
             <div class="white left-align" style="padding:10px">
                 <p><b>Geslacht:</b></p>
-                <ul id="id_geslacht">
-                    {% for gesl in gesl_filters %}
+                <ul>
+                    {% for filter in gesl_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ gesl.sel }}">
-                                <input class="with-gap" type="radio" name="geslacht" value="{{ gesl.sel }}" required id="id_{{ gesl.sel }}" {% if gesl.selected %}checked{% endif %} data-url="{{ gesl.zoom_url }}">
-                                <span>{{ gesl.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('geslacht')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -191,18 +183,18 @@
         <div class="col s6 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Discipline:</b></p>
-                <ul id="id_discipline">
-                    {% for obj in disc_filters %}
+                <ul>
+                    {% for filter in disc_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="discipline" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('discipline')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -212,21 +204,22 @@
             <div class="white left-align" style="padding:10px">
                 <p><b>Verbeterbaar:</b></p>
                 {% if toon_verb %}
-                    <ul id="id_verb">
-                        {% for obj in verb_filters %}
+                    <ul>
+                        {% for filter in verb_filters %}
                             <li>
-                                <label class="black-text" for="id_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="verb" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                    <span>{{ obj.beschrijving }}</span>
+                                <label class="black-text" for="id_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="filter_5" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                    <span>{{ filter.opt_text }}</span>
                                 </label>
                             </li>
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('verb')">Activeer</a>
+                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
+                    <input type="hidden" name="filter_5" value="verb_ja" checked data-url="ja">
                 {% endif %}
             </div>
         </div>
@@ -403,7 +396,9 @@
                                 {% if obj.is_specifieke_record %}
                                     <i>Wordt getoond</i>
                                 {% else %}
-                                    <a class="btn-nhb-rood" href="{{ obj.url }}">Toon</a>
+                                    <a class="btn-nhb-rood" href="{{ obj.url }}">
+                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -424,6 +419,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="records-indiv-zoom5" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-filter-indiv" %}
 
 {% endblock %}
