@@ -244,6 +244,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
                 ('rk_of_bk', models.CharField(choices=[('R', 'RK'), ('B', 'BK')], default='R', max_length=1)),
+                ('rayon_nr', models.PositiveSmallIntegerField(default=0)),
                 ('teams_klasse', models.CharField(max_length=30)),
                 ('team_type', models.CharField(max_length=5)),
                 ('vereniging_nr', models.PositiveSmallIntegerField()),

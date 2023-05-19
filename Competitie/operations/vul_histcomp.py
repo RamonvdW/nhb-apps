@@ -407,7 +407,9 @@ def uitslag_rk_teams_naar_histcomp(comp):
                          kampioenschap__deel=DEEL_RK)
                  .select_related('team_klasse',
                                  'team_type',
-                                 'vereniging')
+                                 'vereniging',
+                                 'kampioenschap',
+                                 'kampioenschap__nhb_rayon')
                  .prefetch_related('feitelijke_leden')):
 
         if team.result_rank > 0:
@@ -419,6 +421,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
             hist = HistKampTeam(
                         seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_RK,
+                        rayon_nr=team.kampioenschap.nhb_rayon.rayon_nr,
                         teams_klasse=team.team_klasse.beschrijving,
                         team_type=team_type,
                         vereniging_nr=ver.ver_nr,

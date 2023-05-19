@@ -1,5 +1,5 @@
 /*!
- * Copyright(c) 2020-2022 Ramon van der Winkel.
+ * Copyright (c) 2020-2023 Ramon van der Winkel.
  * All rights reserved.
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
@@ -170,5 +170,57 @@ function myTableFilter(zoekveld, tableId)
         });
 }
 
+
+// filter activeer knop afhandeling
+//
+// filters moeten de namen "filter_1", "filter_2" hebben
+// elke radiobutton moet een 'url' in zijn dataset hebben
+// maximaal 8 filters
+// 1 element met id "filters" moet de template url hebben met daarin ~1, ~2, etc. die vervangen moeten worden
+// meerdere knoppen kunnen een onclick hebben met filters_activate()
+//
+// voorbeeld:
+//     <h4
+//        id="filters"                        <--
+//        data-url="{{ filter_url }}">        <--
+//        Filters
+//     </h4>
+//     <b>Kies een regio:</b>
+//     <ul>
+//         {% for filter in regio_filters %}
+//             <li>
+//                 <label for="id_{{ filter.sel }}">
+//                     <input
+//                        type="radio"
+//            -->         name="filter_2"
+//                        value="{{ filter.sel }}"
+//                        required id="id_{{ filter.sel }}"
+//                        {% if filter.selected %}checked{% endif %}
+//            -->         data-url="{{ filter.url_part }}">
+//                     <span>{{ filter.opt_text }}</span>
+//                 </label>
+//             </li>
+//         {% endfor %}
+//     </ul>
+//     <a onclick="filter_activate()">Activeer</a>
+
+function filters_activate() {
+    'use strict';
+
+    // get the template url (with the ~1 etc in it)
+    let url = document.getElementById("filters").dataset.url;
+
+    // replace the ~1 etc. as far as present in the url
+    for(let nr=1; nr<8; nr++) {
+        let tilde_nr = '~' + nr;
+        if (url.includes(tilde_nr)) {
+            let el = document.querySelector("input[type='radio'][name='filter_" + nr + "']:checked");
+            url = url.replace(tilde_nr, el.dataset.url);
+        }
+    }
+
+    // navigate to the final url
+    window.location.href = url;
+}
 
 // end of file

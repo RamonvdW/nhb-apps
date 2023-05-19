@@ -22,12 +22,9 @@ TEMPLATE_HISTCOMP_REGIO_INDIV = 'histcomp/uitslagen-regio-indiv.dtl'
 TEMPLATE_HISTCOMP_REGIO_TEAMS = 'histcomp/uitslagen-regio-teams.dtl'
 
 
-def maak_filter_regio_indiv(context):
+def maak_filter_regio_nr(context):
     """ filter opties voor de regio """
 
-    seizoen_url = context['seizoen_url']
-    histcomp_type_url = context['histcomp_type_url']
-    boog_type_url = context['boog_type_url']
     gekozen_regio_nr = context['regio_nr']
 
     regios = (NhbRegio
@@ -39,74 +36,28 @@ def maak_filter_regio_indiv(context):
     context['regio_filters'] = regios
     for regio in regios:
         regio.sel = 'regio_%s' % regio.regio_nr
-        regio.title_str = 'Regio %s' % regio.regio_nr
+        regio.opt_text = 'Regio %s' % regio.regio_nr
         if regio.regio_nr == gekozen_regio_nr:
             context['regio'] = regio
             regio.selected = True
 
-        regio.zoom_url = reverse('HistComp:uitslagen-regio-indiv-n',
-                                 kwargs={'seizoen': seizoen_url,
-                                         'histcomp_type': histcomp_type_url,
-                                         'boog_type': boog_type_url,
-                                         'regio_nr': regio.regio_nr})
-    # for
-
-
-def maak_filter_regio_team(context):
-    """ filter opties voor de regio """
-
-    seizoen_url = context['seizoen_url']
-    histcomp_type_url = context['histcomp_type_url']
-    team_type_url = context['team_type_url']
-    gekozen_regio_nr = context['regio_nr']
-
-    regios = (NhbRegio
-              .objects
-              .select_related('rayon')
-              .filter(is_administratief=False)
-              .order_by('regio_nr'))
-
-    context['regio_filters'] = regios
-    for regio in regios:
-        regio.sel = 'regio_%s' % regio.regio_nr
-        regio.title_str = 'Regio %s' % regio.regio_nr
-        if regio.regio_nr == gekozen_regio_nr:
-            context['regio'] = regio
-            regio.selected = True
-
-        regio.zoom_url = reverse('HistComp:uitslagen-regio-teams-n',
-                                 kwargs={'seizoen': seizoen_url,
-                                         'histcomp_type': histcomp_type_url,
-                                         'team_type': team_type_url,
-                                         'regio_nr': regio.regio_nr})
+        regio.url_part = str(regio.regio_nr)
     # for
 
 
 def maak_filter_boog_type(context, hist_seizoen):
     """ filter opties voor de bogen """
 
-    seizoen_url = context['seizoen_url']
-    histcomp_type_url = context['histcomp_type_url']
-    regio_nr = context['regio_nr']
     gekozen_boog_type = context['boog_type']
-
     afkortingen = hist_seizoen.indiv_bogen.split(',')
 
     context['boog_filters'] = list()
     for afkorting in afkortingen:
-        opt_sel = 'boog_' + afkorting
-
-        url = reverse('HistComp:uitslagen-regio-indiv-n',
-                      kwargs={'seizoen': seizoen_url,
-                              'histcomp_type': histcomp_type_url,
-                              'boog_type': HIST_BOOG2URL[afkorting],
-                              'regio_nr': regio_nr})
-
         opt = SimpleNamespace(
-                beschrijving=HIST_BOOG2STR[afkorting],
-                sel=opt_sel,
+                sel='boog_' + afkorting,
+                opt_text=HIST_BOOG2STR[afkorting],
                 selected=(afkorting == gekozen_boog_type),
-                zoom_url=url)
+                url_part=HIST_BOOG2URL[afkorting])
         context['boog_filters'].append(opt)
     # for
 
@@ -114,28 +65,16 @@ def maak_filter_boog_type(context, hist_seizoen):
 def maak_filter_team_type(context, hist_seizoen):
     """ filter opties voor de team typen """
 
-    seizoen_url = context['seizoen_url']
-    histcomp_type_url = context['histcomp_type_url']
-    regio_nr = context['regio_nr']
     gekozen_team_type = context['team_type']
-
-    afkortingen = hist_seizoen.indiv_bogen.split(',')
+    afkortingen = hist_seizoen.team_typen.split(',')
 
     context['teamtype_filters'] = list()
     for afkorting in afkortingen:
-        opt_sel = 'team_' + afkorting
-
-        url = reverse('HistComp:uitslagen-regio-teams-n',
-                      kwargs={'seizoen': seizoen_url,
-                              'histcomp_type': histcomp_type_url,
-                              'team_type': HIST_TEAM2URL[afkorting],
-                              'regio_nr': regio_nr})
-
         opt = SimpleNamespace(
-                beschrijving=HIST_TEAM2STR[afkorting],
-                sel=opt_sel,
+                sel='team_' + afkorting,
+                opt_text=HIST_TEAM2STR[afkorting],
                 selected=(afkorting == gekozen_team_type),
-                zoom_url=url)
+                url_part=HIST_TEAM2URL[afkorting])
         context['teamtype_filters'].append(opt)
     # for
 
@@ -213,7 +152,14 @@ class HistRegioIndivView(TemplateView):
         # maak_filter_seizoen(context, seizoenen)
         # maak_filter_histcomp_type(context)
         maak_filter_boog_type(context, hist_seizoen)
-        maak_filter_regio_indiv(context)
+        maak_filter_regio_nr(context)
+
+        # for url construction in javascript
+        context['url_filters'] = reverse('HistComp:uitslagen-regio-indiv-n',
+                                         kwargs={'seizoen': seizoen_url,
+                                                 'histcomp_type': histcomp_type_url,
+                                                 'boog_type': '~1',
+                                                 'regio_nr': '~2'})
 
         # voor de header
         context['comp_beschrijving'] = '%s seizoen %s' % (HISTCOMP_TYPE2STR[histcomp_type], seizoen_str)
@@ -357,7 +303,14 @@ class HistRegioTeamsView(TemplateView):
         # maak_filter_seizoen(context, seizoenen)
         # maak_filter_histcomp_type(context)
         maak_filter_team_type(context, hist_seizoen)
-        maak_filter_regio_team(context)
+        maak_filter_regio_nr(context)
+
+        # for url construction in javascript
+        context['url_filters'] = reverse('HistComp:uitslagen-regio-teams-n',
+                                         kwargs={'seizoen': seizoen_url,
+                                                 'histcomp_type': histcomp_type_url,
+                                                 'team_type': '~2',
+                                                 'regio_nr': '~1'})
 
         # voor de header
         context['comp_beschrijving'] = '%s seizoen %s' % (HISTCOMP_TYPE2STR[histcomp_type], seizoen_str)

@@ -251,6 +251,7 @@ class HistKampTeam(models.Model):
     seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
 
     rk_of_bk = models.CharField(max_length=1, choices=HISTCOMP_CHOICES_RK_BK, default=HISTCOMP_RK)
+    rayon_nr = models.PositiveSmallIntegerField(default=0)
 
     # voorbeeld: Traditional klasse ERE
     teams_klasse = models.CharField(max_length=30)
