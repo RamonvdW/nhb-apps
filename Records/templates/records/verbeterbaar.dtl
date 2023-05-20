@@ -10,20 +10,6 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
-        function keuze_gemaakt(groep) {
-
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
-            const selector = "input[type='radio'][name=" + groep + "]:checked"
-            const el = document.querySelector(selector)
-            const url = el.dataset.url
-
-            if (url.length > 0)
-                window.location.href = url
-        }
-    </script>
-
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -36,7 +22,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filteren</h4>
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
         </div>
     </div>
 
@@ -45,18 +31,18 @@
         <div class="col s12 m6 l4" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Boog type:</b></p>
-                <ul id="id_boog">
-                    {% for obj in bogen %}
+                <ul>
+                    {% for filter in makl_filter %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="boog" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -64,18 +50,18 @@
         <div class="col s12 m6 l4" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Leeftijdsklasse:</b></p>
-                <ul id="id_leeftijd">
-                    {% for obj in leeftijd %}
+                <ul>
+                    {% for filter in lcat_filter %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="leeftijd" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('leeftijd')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -83,18 +69,18 @@
         <div class="col s12 m6 l4" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Geslacht:</b></p>
-                <ul id="id_geslacht">
-                    {% for obj in geslacht %}
+                <ul>
+                    {% for filter in gesl_filter %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="geslacht" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_3" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('geslacht')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -103,53 +89,58 @@
     <div class="center">
         {% if is_alles %}
             <p>Hieronder volgen alle <b>{{ object_list.count }}</b> records die verbeterbaar zijn.</p>
+        {% elif lege_lijst %}
+            <p>Geen verbeterbare records gevonden voor deze combinatie van filters.</p>
         {% else %}
             <p>Hieronder volgen <b>{{ object_list.count }}</b> van de records die verbeterbaar zijn.</p>
         {% endif %}
     </div>
 
-    <table class="white">
-        <tr class="nhb-table-header">
-            <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
-            <th>Soort record</th>
-            <th>Materiaal<wbr>klasse</th>
-            <th class="hide-on-small-only">Leeftijds<wbr>categorie</th>
-            {% if toon_para_kolom %}
-                <th>Para klasse</th>
-            {% endif %}
-            <th>Geslacht</th>
-            <th>Score</th>
-            <th><!-- kolom voor de 'details' knop --></th>
-            <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
-        </tr>
+    {% if not lege_lijst %}
 
-        {% for obj in object_list %}
-            <tr>
-                <td>{{ obj.soort_record }}</td>
-                <td>{{ obj.materiaalklasse_str }}</td>
-                <td class="hide-on-small-only">{{ obj.leeftijdscategorie_str }}</td>
+        <table class="white">
+            <tr class="nhb-table-header">
+                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+                <th>Soort record</th>
+                <th>Materiaal<wbr>klasse</th>
+                <th class="hide-on-small-only">Leeftijds<wbr>categorie</th>
                 {% if toon_para_kolom %}
-                    <td>{{ obj.para_klasse }}</td>
+                    <th>Para klasse</th>
                 {% endif %}
-                <td>{{ obj.geslacht_str }}</td>
-                <td>{{ obj.beste.score_str }}</td>
-                <td>
-                    <a class="btn-nhb-rood" href="{{ obj.url_details }}">
-                        <img src="{% static 'plein/zoom_in.svg' %}" height="36px" alt="Toon">
-                    </a>
-                </td>
+                <th>Geslacht</th>
+                <th>Score</th>
+                <th><!-- kolom voor de 'details' knop --></th>
+                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
             </tr>
-        {% endfor %}
 
-        <tr>
-            <td class="hide-on-small-only nhb-table-onderrand"></td>
-            {% if toon_para_kolom %}
-                <td class="nhb-table-onderrand"></td>
-            {% endif %}
-            <td colspan="5" class="nhb-table-onderrand"></td>
-        </tr>
-    </table>
+            {% for obj in object_list %}
+                <tr>
+                    <td>{{ obj.soort_record }}</td>
+                    <td>{{ obj.materiaalklasse_str }}</td>
+                    <td class="hide-on-small-only">{{ obj.leeftijdscategorie_str }}</td>
+                    {% if toon_para_kolom %}
+                        <td>{{ obj.para_klasse }}</td>
+                    {% endif %}
+                    <td>{{ obj.geslacht_str }}</td>
+                    <td>{{ obj.beste.score_str }}</td>
+                    <td>
+                        <a class="btn-nhb-rood" href="{{ obj.url_details }}">
+                            <img src="{% static 'plein/zoom_in.svg' %}" height="36px" alt="Toon">
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
 
+            <tr>
+                <td class="hide-on-small-only nhb-table-onderrand"></td>
+                {% if toon_para_kolom %}
+                    <td class="nhb-table-onderrand"></td>
+                {% endif %}
+                <td colspan="5" class="nhb-table-onderrand"></td>
+            </tr>
+        </table>
+
+    {% endif %}     <!-- not lege_lijst -->
 
     <!-- witruimte -->
     <div class="row center">

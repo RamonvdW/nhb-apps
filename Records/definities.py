@@ -45,6 +45,7 @@ makl2str = {'R': 'Recurve',
             'TR': 'Traditional',
             'LB': 'Longbow'}
 
+# TODO: oude benaming verwijderen
 lcat2str = {'M': '50+ / Masters',
             'S': '21+ / Senioren',
             'J': 'Onder 21 / Junioren',

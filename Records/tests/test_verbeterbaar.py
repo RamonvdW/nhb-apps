@@ -17,7 +17,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
     """ unittests voor de Records applicatie, Views """
 
     url_kies_disc = '/records/indiv/verbeterbaar/'
-    url_verbeterbaar = '/records/indiv/verbeterbaar/%s/'     # disc
+    url_verbeterbaar = '/records/indiv/verbeterbaar/%s/%s/%s/%s/'     # disc, makl, lcat, gesl
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -167,77 +167,78 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_kies_disc)
 
-    def test_verbeterbaar_od(self):
-        url = self.url_verbeterbaar % "outdoor"
+    def test_basics(self):
+        url = self.url_verbeterbaar % ("outdoor", 'alle', 'alle', 'alle')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('records/verbeterbaar_discipline.dtl', 'plein/site_layout.dtl'))
-        self.e2e_assert_other_http_commands_not_supported(url)
+        self.assert_template_used(resp, ('records/verbeterbaar.dtl', 'plein/site_layout.dtl'))
 
-    def test_verbeterbaar_18(self):
-        url = self.url_verbeterbaar % "indoor"
+        url = self.url_verbeterbaar % ("indoor", 'alle', 'alle', 'alle')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
+
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('records/verbeterbaar_discipline.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('records/verbeterbaar.dtl', 'plein/site_layout.dtl'))
         self.e2e_assert_other_http_commands_not_supported(url)
 
-        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(17, len(urls))
+        urls = self.extract_all_urls(resp)
         self.assertTrue('/records/record-18-43/' in urls)
 
-        self.e2e_assert_other_http_commands_not_supported(url)
-
-    def test_verbeterbaar_25(self):
-        url = self.url_verbeterbaar % "25m1pijl"
+        url = self.url_verbeterbaar % ("25m1pijl", 'alle', 'alle', 'alle')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('records/verbeterbaar_discipline.dtl', 'plein/site_layout.dtl'))
-        self.e2e_assert_other_http_commands_not_supported(url)
+        self.assert_template_used(resp, ('records/verbeterbaar.dtl', 'plein/site_layout.dtl'))
 
-        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(17, len(urls))
+        urls = self.extract_all_urls(resp)
         self.assertTrue('/records/record-25-45/' in urls)
 
-    def test_combies(self):
-        url = self.url_verbeterbaar % 'outdoor'
+        self.e2e_assert_other_http_commands_not_supported(url)
+
+    def test_filters(self):
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?boog=recurve')
+            resp = self.client.get(self.url_verbeterbaar % ('outdoor', 'recurve', 'alle', 'alle'))
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?boog=alles&geslacht=man&leeftijdsklassse=senior')
+            resp = self.client.get(self.url_verbeterbaar % ('outdoor', 'alle', '21plus', 'heren'))
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?boog=recurve&geslacht=vrouw&leeftijdsklasse=junior')
+            resp = self.client.get(self.url_verbeterbaar % ('outdoor', 'recurve', 'onder21', 'dames'))
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
-    def test_verbeterbaar_bad(self):
-        url = self.url_verbeterbaar % "bad"
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert_is_redirect(resp, self.url_kies_disc)
+            resp = self.client.get(self.url_verbeterbaar % ('indoor', 'alle', 'gecombineerd', 'alle'))
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
 
-        url = self.url_verbeterbaar % "outdoor"
+    def test_bad(self):
+        # slechte disc
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?boog=bad')
-        self.assert_is_redirect(resp, self.url_kies_disc)
+            resp = self.client.get(self.url_verbeterbaar % ("bad", 'alle', 'alle', 'alle'))
+        self.assert404(resp, '?')
 
+        # slechte makl
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?geslacht=bad')
-        self.assert_is_redirect(resp, self.url_kies_disc)
+            resp = self.client.get(self.url_verbeterbaar % ("outdoor", 'bad', 'alle', 'alle'))
+        self.assert404(resp, '?')
 
+        # slechte lcat
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?leeftijdsklasse=bad')
-        self.assert_is_redirect(resp, self.url_kies_disc)
+            resp = self.client.get(self.url_verbeterbaar % ("indoor", 'alle', 'bad', 'alle'))
+        self.assert404(resp, '?')
+
+        # slecht gesl
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_verbeterbaar % ("25m1pijl", 'alle', 'alle', 'bad'))
+        self.assert404(resp, '?')
 
 # end of file

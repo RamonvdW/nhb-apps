@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT, HIST_TEAM_TYPEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam
 from TestHelpers.e2ehelpers import E2EHelpers
 
@@ -13,8 +13,25 @@ from TestHelpers.e2ehelpers import E2EHelpers
 class TestHistComp(E2EHelpers, TestCase):
     """ unittests voor de HistComp applicatie """
 
-    url_hist_top = '/bondscompetities/hist/'
-    url_hist_indiv = '/bondscompetities/hist/indiv/%s/'  # indiv_pk
+    url_top = '/bondscompetities/hist/'
+    url_seizoen = '/bondscompetities/hist/%s/%s/'      # seizoen, histcomp_type
+
+    url_regio_indiv = '/bondscompetities/hist/%s/%s-individueel/%s/regio/'  # seizoen, histcomp_type, boog_type
+    url_regio_teams = '/bondscompetities/hist/%s/%s-teams/%s/regio/'        # seizoen, histcomp_type, team_type
+
+    url_regio_indiv_nr = '/bondscompetities/hist/%s/%s-individueel/%s/regio-%s/'  # seizoen, histcomp_type, boog_type, regio_nr
+    url_regio_teams_nr = '/bondscompetities/hist/%s/%s-teams/%s/regio-%s/'        # seizoen, histcomp_type, team_type, regio_nr
+
+    # rk
+    url_rk_indiv = '/bondscompetities/hist/%s/%s-individueel/%s/rk/'  # seizoen, histcomp_type, boog_type
+    url_rk_teams = '/bondscompetities/hist/%s/%s-teams/%s/rk/'        # seizoen, histcomp_type, team_type
+
+    url_rk_indiv_nr = '/bondscompetities/hist/%s/%s-individueel/%s/rk-rayon%s/'   # seizoen, histcomp_type, boog_type, rayon_nr
+    url_rk_teams_nr = '/bondscompetities/hist/%s/%s-teams/%s/rk-rayon%s/'         # seizoen, histcomp_type, team_type, rayon_nr
+
+    # bk
+    url_bk_indiv = '/bondscompetities/hist/%s/%s-individueel/%s/bk/'  # seizoen, histcomp_type, boog_type
+    url_bk_teams = '/bondscompetities/hist/%s/%s-teams/%s/bk/'        # seizoen, histcomp_type, team_type
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -23,7 +40,8 @@ class TestHistComp(E2EHelpers, TestCase):
         hist_seizoen = HistCompSeizoen(
                             seizoen='2018/2019',
                             comp_type=HISTCOMP_TYPE_18,
-                            indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
+                            indiv_bogen=",".join(HIST_BOGEN_DEFAULT),
+                            team_typen=",".join(HIST_TEAM_TYPEN_DEFAULT))
         hist_seizoen.save()
         self.hist_seizoen = hist_seizoen
 

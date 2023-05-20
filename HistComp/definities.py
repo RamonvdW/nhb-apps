@@ -68,6 +68,8 @@ URL2HIST_BOOG = {
     'instinctive': 'IB',
 }
 
+HIST_TEAM_TYPEN_DEFAULT = ('R', 'C', 'BB', 'TR', 'LB')
+
 HIST_TEAM_DEFAULT = 'R'
 HIST_TEAM2STR = {
     'R': 'Recurve',

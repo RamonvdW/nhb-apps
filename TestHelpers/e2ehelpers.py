@@ -310,12 +310,14 @@ class E2EHelpers(TestCase):
             pos1 = content.find('href="')
             pos2 = content.find('action="')
             pos3 = content.find('data-url="')
+            could_be_part_url = False
             if pos1 >= 0 and (pos2 == -1 or pos2 > pos1) and (pos3 == -1 or pos3 > pos1):
                 content = content[pos1+6:]       # strip all before href
             elif pos2 >= 0 and (pos1 == -1 or pos1 > pos2) and (pos3 == -1 or pos3 > pos2):
                 content = content[pos2+8:]       # strip all before action
             elif pos3 >= 0:
                 content = content[pos3+10:]      # strip all before data-url
+                could_be_part_url = True
             else:
                 # all interesting aspects handled
                 content = ""
@@ -327,7 +329,8 @@ class E2EHelpers(TestCase):
                 content = content[pos:]
                 if url != "#":
                     if not (skip_smileys and url.startswith('/feedback/')):
-                        urls.append(url)
+                        if not (could_be_part_url and url[0].count('/') == 0):
+                            urls.append(url)
         # while
         return urls
 
@@ -517,7 +520,6 @@ class E2EHelpers(TestCase):
                             line = lines[l1-1]
                             context = line[p1-1:p2]
                         else:
-                            # TODO
                             context = ''
                             pass
                         clean = ": ".join(spl[1:])
