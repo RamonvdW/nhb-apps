@@ -15,7 +15,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     """
 
     # Tijdlijn
-    url = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
+    url = reverse('CompBeheer:tijdlijn', kwargs={'comp_pk': comp.pk})
     kaartje = SimpleNamespace(
                     prio=1,
                     titel="Tijdlijn",

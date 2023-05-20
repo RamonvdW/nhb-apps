@@ -142,7 +142,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartje.titel = "Tijdlijn"
             kaartje.tekst = 'Toon de fases en planning van de %s.' % comp.beschrijving
             kaartje.icon = 'schedule'
-            kaartje.url = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
+            kaartje.url = reverse('CompBeheer:tijdlijn', kwargs={'comp_pk': comp.pk})
             kaartjes.append(kaartje)
 
             # 1 - leden aanmelden voor de competitie (niet voor de WL)

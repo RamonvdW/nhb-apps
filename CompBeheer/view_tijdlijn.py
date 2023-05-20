@@ -13,12 +13,9 @@ from Competitie.tijdlijn import is_open_voor_inschrijven_rk_teams
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
-import datetime
 
 
-# TODO: verhuizen naar CompBeheer
-
-TEMPLATE_COMPETITIE_OVERZICHT_TIJDLIJN = 'competitie/tijdlijn.dtl'
+TEMPLATE_COMPETITIE_OVERZICHT_TIJDLIJN = 'compbeheer/tijdlijn.dtl'
 
 
 class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):

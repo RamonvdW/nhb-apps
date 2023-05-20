@@ -17,8 +17,6 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
 
     """ tests voor de Competitie applicatie, module Tijdlijn """
 
-    url_overzicht = '/bondscompetities/%s/'
-
     @staticmethod
     def _maak_twee_klassen(comp):
         indiv = TemplateCompetitieIndivKlasse.objects.all()[0]

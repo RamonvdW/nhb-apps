@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CompBeheer import views_bb, views_bko, view_stats, view_overzicht, view_wijzig_datums
+from CompBeheer import views_bb, views_bko, view_stats, view_overzicht, view_wijzig_datums, view_tijdlijn
 
 app_name = 'CompBeheer'
 
@@ -80,7 +80,13 @@ urlpatterns = [
     # landing page voor beheerders
     path('<comp_pk>/',
          view_overzicht.CompetitieBeheerView.as_view(),
-         name='overzicht')
+         name='overzicht'),
+
+    # tijdlijn
+    path('<comp_pk>/tijdlijn/',
+         view_tijdlijn.CompetitieTijdlijnView.as_view(),
+         name='tijdlijn'),
+
 ]
 
 # end of file

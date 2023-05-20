@@ -25,8 +25,8 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
     test_after = ('Functie',)
 
     url_kies = '/bondscompetities/'
-    url_tijdlijn = '/bondscompetities/%s/tijdlijn/'             # comp_pk
     url_overzicht = '/bondscompetities/%s/'                     # comp_pk
+    url_tijdlijn = '/bondscompetities/beheer/%s/tijdlijn/'      # comp_pk
     url_overzicht_beheer = '/bondscompetities/beheer/%s/'       # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
 
@@ -310,6 +310,12 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_tijdlijn % comp18.pk)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
+
         # HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
@@ -317,13 +323,17 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_tijdlijn % comp18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_tijdlijn % comp25.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_tijdlijn % 'x')
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # TODO: add WL
 
