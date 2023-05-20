@@ -49,34 +49,36 @@ def maak_filter_boog_type(context, hist_seizoen):
     """ filter opties voor de bogen """
 
     gekozen_boog_type = context['boog_type']
-    afkortingen = hist_seizoen.indiv_bogen.split(',')
-
     context['boog_filters'] = list()
-    for afkorting in afkortingen:
-        opt = SimpleNamespace(
-                sel='boog_' + afkorting,
-                opt_text=HIST_BOOG2STR[afkorting],
-                selected=(afkorting == gekozen_boog_type),
-                url_part=HIST_BOOG2URL[afkorting])
-        context['boog_filters'].append(opt)
-    # for
+
+    if hist_seizoen.indiv_bogen:
+        afkortingen = hist_seizoen.indiv_bogen.split(',')
+        for afkorting in afkortingen:
+            opt = SimpleNamespace(
+                    sel='boog_' + afkorting,
+                    opt_text=HIST_BOOG2STR[afkorting],
+                    selected=(afkorting == gekozen_boog_type),
+                    url_part=HIST_BOOG2URL[afkorting])
+            context['boog_filters'].append(opt)
+        # for
 
 
 def maak_filter_team_type(context, hist_seizoen):
     """ filter opties voor de team typen """
 
     gekozen_team_type = context['team_type']
-    afkortingen = hist_seizoen.team_typen.split(',')
-
     context['teamtype_filters'] = list()
-    for afkorting in afkortingen:
-        opt = SimpleNamespace(
-                sel='team_' + afkorting,
-                opt_text=HIST_TEAM2STR[afkorting],
-                selected=(afkorting == gekozen_team_type),
-                url_part=HIST_TEAM2URL[afkorting])
-        context['teamtype_filters'].append(opt)
-    # for
+
+    if hist_seizoen.team_typen:
+        afkortingen = hist_seizoen.team_typen.split(',')
+        for afkorting in afkortingen:
+            opt = SimpleNamespace(
+                    sel='team_' + afkorting,
+                    opt_text=HIST_TEAM2STR[afkorting],
+                    selected=(afkorting == gekozen_team_type),
+                    url_part=HIST_TEAM2URL[afkorting])
+            context['teamtype_filters'].append(opt)
+        # for
 
 
 class HistRegioIndivView(TemplateView):

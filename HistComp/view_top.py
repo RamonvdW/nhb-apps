@@ -109,41 +109,40 @@ class HistCompTop(TemplateView):
 
             hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=histcomp_type)
 
-            if hist_seizoen.is_openbaar:
-                context['url_regio_indiv'] = reverse('HistComp:uitslagen-regio-indiv',
+            context['url_regio_indiv'] = reverse('HistComp:uitslagen-regio-indiv',
+                                                 kwargs={'seizoen': seizoen_url,
+                                                         'histcomp_type': histcomp_type_url,
+                                                         'boog_type': default_boog_url})
+
+            if hist_seizoen.heeft_uitslag_rk_indiv:
+                context['url_rayon_indiv'] = reverse('HistComp:uitslagen-rk-indiv',
                                                      kwargs={'seizoen': seizoen_url,
                                                              'histcomp_type': histcomp_type_url,
                                                              'boog_type': default_boog_url})
 
-                if hist_seizoen.heeft_uitslag_rk_indiv:
-                    context['url_rayon_indiv'] = reverse('HistComp:uitslagen-rk-indiv',
-                                                         kwargs={'seizoen': seizoen_url,
-                                                                 'histcomp_type': histcomp_type_url,
-                                                                 'boog_type': default_boog_url})
+            if hist_seizoen.heeft_uitslag_bk_indiv:
+                context['url_bond_indiv'] = reverse('HistComp:uitslagen-bk-indiv',
+                                                    kwargs={'seizoen': seizoen_url,
+                                                            'histcomp_type': histcomp_type_url,
+                                                            'boog_type': default_boog_url})
 
-                if hist_seizoen.heeft_uitslag_bk_indiv:
-                    context['url_bond_indiv'] = reverse('HistComp:uitslagen-bk-indiv',
-                                                        kwargs={'seizoen': seizoen_url,
-                                                                'histcomp_type': histcomp_type_url,
-                                                                'boog_type': default_boog_url})
+            if hist_seizoen.heeft_uitslag_regio_teams:
+                context['url_regio_teams'] = reverse('HistComp:uitslagen-regio-teams',
+                                                     kwargs={'seizoen': seizoen_url,
+                                                             'histcomp_type': histcomp_type_url,
+                                                             'team_type': default_team_url})
 
-                if hist_seizoen.heeft_uitslag_regio_teams:
-                    context['url_regio_teams'] = reverse('HistComp:uitslagen-regio-teams',
-                                                         kwargs={'seizoen': seizoen_url,
-                                                                 'histcomp_type': histcomp_type_url,
-                                                                 'team_type': default_team_url})
+            if hist_seizoen.heeft_uitslag_rk_teams:
+                context['url_rayon_teams'] = reverse('HistComp:uitslagen-rk-teams',
+                                                     kwargs={'seizoen': seizoen_url,
+                                                             'histcomp_type': histcomp_type_url,
+                                                             'team_type': default_team_url})
 
-                if hist_seizoen.heeft_uitslag_rk_teams:
-                    context['url_rayon_teams'] = reverse('HistComp:uitslagen-rk-teams',
-                                                         kwargs={'seizoen': seizoen_url,
-                                                                 'histcomp_type': histcomp_type_url,
-                                                                 'team_type': default_team_url})
-
-                if hist_seizoen.heeft_uitslag_bk_teams:
-                    context['url_bond_teams'] = reverse('HistComp:uitslagen-bk-teams',
-                                                        kwargs={'seizoen': seizoen_url,
-                                                                'histcomp_type': histcomp_type_url,
-                                                                'team_type': default_team_url})
+            if hist_seizoen.heeft_uitslag_bk_teams:
+                context['url_bond_teams'] = reverse('HistComp:uitslagen-bk-teams',
+                                                    kwargs={'seizoen': seizoen_url,
+                                                            'histcomp_type': histcomp_type_url,
+                                                            'team_type': default_team_url})
 
         context['waarom'] = "Geen gegevens"
 

@@ -72,7 +72,7 @@ def amend_histcomp(apps, _):
     rank = 0
     regio_klas2rank = dict()
     later_lijst = list()
-    for indiv in indiv_klas.objects.select_related('seizoen').order_by('-gemiddelde'):
+    for indiv in indiv_klas.objects.select_related('seizoen').order_by('-gemiddelde'):      # pragma: no cover
 
         tup = (indiv.seizoen.pk, indiv.regio_nr, indiv.indiv_klasse)
         try:
@@ -94,7 +94,7 @@ def amend_histcomp(apps, _):
             indiv.save(update_fields=['rank'])
     # for
 
-    for indiv in later_lijst:
+    for indiv in later_lijst:       # pragma: no cover
 
         tup = (indiv.seizoen.pk, indiv.regio_nr, indiv.indiv_klasse)
         try:

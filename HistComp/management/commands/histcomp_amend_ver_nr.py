@@ -36,7 +36,7 @@ def verwijderde_verenigingen():
     # for
 
 
-class Command(BaseCommand):         # pragma: no cover
+class Command(BaseCommand):
     help = "Check consistentie van historische uitslag, individueel"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
@@ -83,7 +83,7 @@ class Command(BaseCommand):         # pragma: no cover
 
         try:
             ws = prg[ws_name]
-        except KeyError:        # pragma: no cover
+        except KeyError:
             self.stderr.write('[ERROR] Kan tabblad %s niet vinden' % repr(ws_name))
             return
 
@@ -105,8 +105,8 @@ class Command(BaseCommand):         # pragma: no cover
             ver_nr2ver[ver.ver_nr] = ver
         # for
 
-        row_nr = 2 - 1      # skip header
-        while row_nr < 5000:
+        row_nr = 2 - 1              # skip header
+        while row_nr < 5000:        # pragma: no branch
             row_nr += 1
             row_str = str(row_nr)
 
@@ -148,7 +148,7 @@ class Command(BaseCommand):         # pragma: no cover
                         naam = naam.replace(' De ', ' de ')
                         naam = naam.replace(' Der ', ' der ')
                         naam = naam.replace(' Van ', ' van ')
-                        self.stderr.write('[WARNING] Fixing capitalization: %s' % repr(naam))
+                        self.stdout.write('[WARNING] Fixing capitalization: %s' % repr(naam))
                     if len(naam) < 5:
                         self.stderr.write('[ERROR] Rejected: %s' % repr(naam))
                     else:

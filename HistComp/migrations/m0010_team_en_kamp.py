@@ -15,7 +15,7 @@ def maak_en_koppel_seizoen(apps, _):
 
     hist2seizoen = dict()    # [(comp_type, seizoen)] = HistCompSeizoen
 
-    for hist in comp_klas.objects.all():
+    for hist in comp_klas.objects.all():            # pragma: no cover
         tup = (hist.comp_type, hist.seizoen)
         try:
             seizoen = hist2seizoen[tup]

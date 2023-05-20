@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT, HIST_TEAM_TYPEN_DEFAULT
-from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT, HIST_TEAM_TYPEN_DEFAULT, HISTCOMP_RK, HISTCOMP_BK
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam, HistKampIndiv, HistKampTeam
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -44,11 +44,12 @@ class TestHistComp(E2EHelpers, TestCase):
                             team_typen=",".join(HIST_TEAM_TYPEN_DEFAULT))
         hist_seizoen.save()
         self.hist_seizoen = hist_seizoen
+        self.seizoen4url = '2018-2019'
 
         rec = HistCompRegioIndiv(
                     seizoen=hist_seizoen,
                     rank=1,
-                    indiv_klasse='Recurve ERE',
+                    indiv_klasse='Recurve klasse 1',
                     sporter_lid_nr=123456,
                     sporter_naam='Schuttie van de Test',
                     boogtype='R',
@@ -67,209 +68,465 @@ class TestHistComp(E2EHelpers, TestCase):
                     totaal=80,
                     gemiddelde=5.321)
         rec.save()
+        self.hist_regio_indiv = rec
         self.indiv_rec_pk = rec.pk
 
-        HistCompRegioTeam(
-                seizoen=hist_seizoen,
-                team_klasse="test",
-                rank=1,
-                vereniging_nr=1234,
-                vereniging_naam="Test Club",
-                vereniging_plaats="Pijlstad",
-                regio_nr="102",
-                team_nr=1,
-                ronde_1_score=100,
-                ronde_2_score=200,
-                ronde_3_score=300,
-                ronde_4_score=400,
-                ronde_5_score=500,
-                ronde_6_score=600,
-                ronde_7_score=700,
-                totaal_score=800,
-                ronde_1_punten=10,
-                ronde_2_punten=20,
-                ronde_3_punten=30,
-                ronde_4_punten=40,
-                ronde_5_punten=50,
-                ronde_6_punten=60,
-                ronde_7_punten=70,
-                totaal_punten=80).save()
+        rec.pk = None
+        rec.sporter_lid_nr += 1
+        rec.save()
 
-        HistCompSeizoen(seizoen='2017/2018', comp_type=HISTCOMP_TYPE_18,
-                        indiv_bogen=",".join(HIST_BOGEN_DEFAULT)).save()
+        rec.pk = None
+        rec.sporter_lid_nr += 1
+        rec.sporter_naam += 'er'
+        rec.vereniging_plaats = ''
+        rec.indiv_klasse = 'Recurve klasse 2'
+        rec.save()
 
-    def _add_many_records(self, pages):
-        # paginator laat 100 entries per pagina zien, dus voeg er 100 toe
-        rec = HistCompRegioIndiv.objects.get(pk=self.indiv_rec_pk)
-        while pages > 0:
-            pages -= 1
-            for lp in range(RESULTS_PER_PAGE):
-                rec.pk = None
-                rec.rank += 1
-                rec.totaal += 10
-                rec.save()
-            # for
-        # while
+        team = HistCompRegioTeam(
+                    seizoen=hist_seizoen,
+                    team_klasse="Recurve klasse ERE",
+                    team_type='R',
+                    rank=1,
+                    vereniging_nr=1234,
+                    vereniging_naam="Test Club",
+                    vereniging_plaats="Pijlstad",
+                    regio_nr=102,
+                    team_nr=1,
+                    ronde_1_score=100,
+                    ronde_2_score=200,
+                    ronde_3_score=300,
+                    ronde_4_score=400,
+                    ronde_5_score=500,
+                    ronde_6_score=600,
+                    ronde_7_score=700,
+                    totaal_score=800,
+                    ronde_1_punten=10,
+                    ronde_2_punten=20,
+                    ronde_3_punten=30,
+                    ronde_4_punten=40,
+                    ronde_5_punten=50,
+                    ronde_6_punten=60,
+                    ronde_7_punten=70,
+                    totaal_punten=80)
+        team.save()
+        self.hist_regio_team = team
 
-    def test_histcompetitie(self):
-        self.hist_seizoen.clean_fields()    # run field validators
-        self.hist_seizoen.clean()           # run model validator
-        self.assertTrue(str(self.hist_seizoen) != '')
+        team.pk = None
+        team.rank += 1
+        team.save()
 
-        obj = HistCompRegioIndiv.objects.all()[0]
-        obj.clean_fields()                  # run field validators
-        obj.clean()                         # run model validator
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+        team.pk = None
+        team.team_klasse = 'Recurve klasse A'
+        team.team_nr += 1
+        team.vereniging_plaats = ''
+        team.save()
 
-        obj = HistCompRegioTeam.objects.all()[0]
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+        rec = HistKampIndiv(
+                    seizoen=self.hist_seizoen,
+                    indiv_klasse='Recurve klasse 1',
+                    sporter_lid_nr=100001,
+                    sporter_naam='Achie van de Bond',
+                    boogtype='R',
+                    vereniging_nr=1001,
+                    vereniging_naam='De bond',
+                    vereniging_plaats='Arnhem',
+                    rayon_nr=1,
+                    rank_rk=1,
+                    rank_bk=1,
+                    rk_score_1=100,
+                    rk_score_2=101,
+                    rk_score_totaal=201,
+                    rk_counts='30x10 29x9',
+                    bk_score_1=102,
+                    bk_score_2=103,
+                    bk_score_totaal=205,
+                    bk_counts='29x10 30x8',
+                    teams_rk_score_1=200,
+                    teams_rk_score_2=201,
+                    teams_bk_score_1=202,
+                    teams_bk_score_2=203)
+        rec.save()
+        self.hist_kamp_indiv = rec
 
-    def test_view_allejaren(self):
+        rec.pk = None
+        rec.sporter_lid_nr += 1
+        rec.sporter_naam += 'er'
+        rec.save()
+
+        rec.pk = None
+        rec.indiv_klasse = 'Recurve klasse 2'
+        rec.sporter_lid_nr += 1
+        rec.vereniging_plaats = ''
+        rec.rk_score_is_blanco = True
+        rec.save()
+
+        team = HistKampTeam(
+                    seizoen=self.hist_seizoen,
+                    rk_of_bk=HISTCOMP_RK,
+                    rayon_nr=1,
+                    teams_klasse='Recurve klasse ERE',
+                    team_type='R',
+                    vereniging_nr=self.hist_kamp_indiv.vereniging_nr,
+                    vereniging_naam=self.hist_kamp_indiv.vereniging_naam,
+                    vereniging_plaats='Pijlstad',
+                    team_nr=1,
+                    team_score=303,
+                    rank=1,
+                    lid_1=rec,
+                    lid_2=rec,
+                    lid_3=rec,
+                    lid_4=None,
+                    score_lid_1=100,
+                    score_lid_2=101,
+                    score_lid_3=102,
+                    score_lid_4=0)
+        team.save()
+        self.hist_kamp_team_rk = team
+
+        team.pk = None
+        team.rank += 1
+        team.save()
+
+        team.pk = None
+        team.rank = 1
+        team.vereniging_plaats = ''
+        team.teams_klasse = 'Recurve klasse A'
+        team.save()
+
+        team = HistKampTeam(
+                    seizoen=self.hist_seizoen,
+                    rk_of_bk=HISTCOMP_BK,
+                    rayon_nr=1,
+                    teams_klasse='Recurve klasse ERE',
+                    team_type='R',
+                    vereniging_nr=self.hist_kamp_indiv.vereniging_nr,
+                    vereniging_naam=self.hist_kamp_indiv.vereniging_naam,
+                    vereniging_plaats='Pijlstad',
+                    team_nr=1,
+                    team_score=333,
+                    rank=1,
+                    lid_1=rec,
+                    lid_2=rec,
+                    lid_3=rec,
+                    lid_4=None,
+                    score_lid_1=110,
+                    score_lid_2=111,
+                    score_lid_3=112,
+                    score_lid_4=0)
+        team.save()
+        self.hist_kamp_team_bk = team
+
+        team.pk = None
+        team.teams_klasse = 'Recurve klasse A'
+        team.save()
+
+        team.pk = None
+        team.vereniging_plaats = ''
+        team.save()
+
+        HistCompSeizoen(
+                seizoen='2017/2018',
+                comp_type=HISTCOMP_TYPE_18,
+                indiv_bogen=",".join(HIST_BOGEN_DEFAULT)).save()
+
+    def test_top(self):
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_hist_top)
+            resp = self.client.get(self.url_top)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+
+        # alle kaartjes activeren
+        self.hist_seizoen.heeft_uitslag_regio_teams = True
+        self.hist_seizoen.heeft_uitslag_rk_indiv = True
+        self.hist_seizoen.heeft_uitslag_rk_teams = True
+        self.hist_seizoen.heeft_uitslag_bk_indiv = True
+        self.hist_seizoen.heeft_uitslag_bk_teams = True
+        self.hist_seizoen.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_top)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "2018/2019")
-        self.assertNotContains(resp, "2017/2018")
-        self.assertContains(resp, 'Compound')
-        self.assertContains(resp, 'Recurve')
-        self.e2e_assert_other_http_commands_not_supported(self.url_hist_top)
 
-        # controleer de volgorde waarin de klassen getoond wordt
-        resp_str = str(resp.content)
-        pos1 = resp_str.find('Recurve')
-        pos2 = resp_str.find('Compound')
-        self.assertTrue(0 < pos1 < pos2)
+        # gebruik filters
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_seizoen % (self.seizoen4url, HISTCOMP_TYPE_18))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
 
-    def test_view_allejaren_leeg(self):
-        # verwijder alle records en controleer dat het goed gaat
+        # bad filters
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_seizoen % ('x', 'y'))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+
+        # gebruik de model helpers
+        self.assertTrue(str(self.hist_seizoen) != '')
+        self.hist_seizoen.comp_type = 'x'
+        self.assertTrue(str(self.hist_seizoen) != '')
+
+        self.assertTrue(str(self.hist_regio_indiv) != '')
+        self.assertEqual(self.hist_regio_indiv.tel_aantal_scores(), 7)
+
+        self.assertTrue(str(self.hist_regio_team) != '')
+
+        self.assertTrue(str(self.hist_kamp_indiv) != '')
+
+        self.assertTrue(str(self.hist_kamp_team_rk) != '')
+
+        # niet openbaar
+        self.hist_seizoen.is_openbaar = False
+        self.hist_seizoen.save(update_fields=['is_openbaar'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_seizoen % (self.seizoen4url, HISTCOMP_TYPE_18))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_top)
+
+    def test_regio_indiv(self):
+        url = self.url_regio_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_regio_indiv_nr % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve', 102)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_regio_indiv % ('x', 'x', 'x')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # fallback to default
+        url = self.url_regio_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # empty filter exception
+        self.hist_seizoen.indiv_bogen = ''
+        self.hist_seizoen.save(update_fields=['indiv_bogen'])
+        url = self.url_regio_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+
+    def test_regio_teams(self):
+        url = self.url_regio_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_regio_teams_nr % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve', 102)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_regio_teams % ('x', 'x', 'x')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # fallback to default
+        url = self.url_regio_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+
+        # empty filter exception
+        self.hist_seizoen.team_typen = ''
+        self.hist_seizoen.save(update_fields=['team_typen'])
+        url = self.url_regio_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+
+    def test_rk_indiv(self):
+        url = self.url_rk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # geen uitslag
+        url = self.url_rk_indiv_nr % (self.seizoen4url, HISTCOMP_TYPE_18, 'compound', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_rk_indiv % ('x', 'x', 'x')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # fallback to default
+        url = self.url_rk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # empty filter exception
+        self.hist_seizoen.indiv_bogen = ''
+        self.hist_seizoen.save(update_fields=['indiv_bogen'])
+        url = self.url_rk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-indiv.dtl', 'plein/site_layout.dtl'))
+
+    def test_rk_teams(self):
+        # geen uitslag
+        url = self.url_rk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'compound')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_rk_teams_nr % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_rk_teams % ('x', 'x', 'x')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # fallback to default
+        url = self.url_rk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+
+        # empty filter exception
+        self.hist_seizoen.team_typen = ''
+        self.hist_seizoen.save(update_fields=['team_typen'])
+        url = self.url_rk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
+
+    def test_bk_indiv(self):
+        url = self.url_bk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # geen uitslag
+        url = self.url_bk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'compound')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_bk_indiv % ('x', 'x', 'x')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # fallback to default
+        url = self.url_bk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # empty filter exception
+        self.hist_seizoen.indiv_bogen = ''
+        self.hist_seizoen.save(update_fields=['indiv_bogen'])
+        url = self.url_bk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+    def test_bk_teams(self):
+        # lege uitslag
+        url = self.url_bk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'compound')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_bk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_bk_teams % ('x', 'x', 'x')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # fallback to default
+        url = self.url_bk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+
+        # empty filter exception
+        self.hist_seizoen.team_typen = ''
+        self.hist_seizoen.save(update_fields=['team_typen'])
+        url = self.url_bk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('histcomp/uitslagen-bk-teams.dtl', 'plein/site_layout.dtl'))
+
+    def test_geen_data(self):
         HistCompSeizoen.objects.all().delete()
+
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_hist_top)
+            resp = self.client.get(self.url_top)
         self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "Er is op dit moment geen uitslag beschikbaar")
+        self.assert_template_used(resp, ('histcomp/uitslagen-top.dtl', 'plein/site_layout.dtl'))
 
-    def test_view_indiv_non_existing(self):
-        url = self.url_hist_indiv % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp, 'Competitie niet gevonden')
+        url = self.url_regio_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        self.assert404(self.client.get(url), 'Geen data')
 
-    def test_view_indiv_few(self):
-        url = self.url_hist_indiv % self.indiv_histcomp_pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertNotContains(resp, "page=1")     # pagination not active
-        self.assertNotContains(resp, "page=1")     # pagination not active
-        self.assertContains(resp, "2018/2019")
-        self.assertContains(resp, "Recurve")
-        self.e2e_assert_other_http_commands_not_supported(url)
+        url = self.url_regio_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        self.assert404(self.client.get(url), 'Geen data')
 
-    def test_view_indiv_many(self):
-        self._add_many_records(10)  # 10*100 = +1000 records
-        url = self.url_hist_indiv % self.indiv_histcomp_pk
+        url = self.url_rk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        self.assert404(self.client.get(url), 'Geen data')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'page': 6})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "page=5")
+        url = self.url_rk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        self.assert404(self.client.get(url), 'Geen data')
 
-        # haal de eerste aan de laatste pagina op, voor coverage
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
+        url = self.url_bk_indiv % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        self.assert404(self.client.get(url), 'Geen data')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'page': 11})
-        self.assertEqual(resp.status_code, 200)
-
-    def test_view_indiv_all(self):
-        # haal alle regels op, zonder paginering
-        self._add_many_records(2)  # 20*100 = +200 records --> paginering actief
-        url = self.url_hist_indiv % self.indiv_histcomp_pk
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "page=2")         # paginator actief
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'all': 1})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assertNotContains(resp, "page=2")      # paginator inactief
-
-        # corner-case: invalid form data
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'all': 'not an integer'})
-        self.assertEqual(resp.status_code, 200)
-
-    def test_view_indiv_few_filter(self):
-        rec = HistCompRegioIndiv.objects.get(pk=self.indiv_rec_pk)
-        rec.sporter_naam = "Dhr Blazoengatenmaker"
-        rec.save()
-        url = self.url_hist_indiv % self.indiv_histcomp_pk
-
-        # filter on a string
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': 'Blazoengatenmaker'})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertContains(resp, 'Blazoengatenmaker')
-        # FUTURE: check correct records were returned
-
-        # filter on a ver_nr
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': rec.vereniging_nr})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-
-        # filter on a lid_nr
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': rec.sporter_lid_nr})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-
-    def test_view_indiv_many_filter(self):
-        self._add_many_records(2)  # 20*100 = +200 records --> paginering actief
-
-        rec = HistCompRegioIndiv.objects.get(pk=self.indiv_rec_pk)
-        url = self.url_hist_indiv % self.indiv_histcomp_pk
-
-        # filter on a string
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': rec.sporter_naam})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "page=2")         # paginator actief
-        self.assertContains(resp, "Test Club")
-
-        # filter on a number
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': rec.vereniging_nr})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "Test Club")
-
-        # filter on an unknown number
-        with self.assert_max_queries(20):
-            resp = self.client.get(url, {'filter': 9999})
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('histcomp/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertNotContains(resp, "Test Club")
+        url = self.url_bk_teams % (self.seizoen4url, HISTCOMP_TYPE_18, 'recurve')
+        self.assert404(self.client.get(url), 'Geen data')
 
 # end of file
