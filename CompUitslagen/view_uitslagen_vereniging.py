@@ -37,7 +37,7 @@ def get_sporter_ver_nr(request):
         if ver_nr < 0:
             # pak de vereniging van de ingelogde gebruiker
             account = request.user
-            if account.sporter_set.count() > 0:
+            if account.sporter_set.count() > 0:     # pragma: no branch
                 sporter = account.sporter_set.all()[0]
                 if sporter.is_actief_lid and sporter.bij_vereniging:
                     ver_nr = sporter.bij_vereniging.ver_nr

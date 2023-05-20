@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
+from Competitie.models import CompetitieIndivKlasse, CompetitieMatch
 from Competitie.tijdlijn import zet_competitie_fase_bk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
@@ -50,9 +51,35 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
+        # maak een wedstrijdlocatie aan
+        locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
+
+        # maak een RK match aan
+        indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, is_ook_voor_rk_bk=True)[0]
+
+        match = CompetitieMatch(
+                    competitie=self.testdata.comp18,
+                    beschrijving='test match 1',
+                    vereniging=self.testdata.vereniging[self.ver_nr],
+                    locatie=locatie,
+                    datum_wanneer="2000-01-01",
+                    tijd_begin_wedstrijd="10:00")
+        match.save()
+        match.indiv_klassen.add(indiv_klasse)
+
+        self.testdata.deelkamp18_bk.rk_bk_matches.add(match)
+
         # fase O
         zet_competitie_fase_bk_prep(self.testdata.comp18)
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # zet_competitie_fase_bk_prep(self.testdata.comp25)
+        url = self.url_uitslagen_bond_indiv % (self.testdata.comp25.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)

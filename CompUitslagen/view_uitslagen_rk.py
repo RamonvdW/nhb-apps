@@ -266,7 +266,7 @@ class UitslagenRayonIndivView(TemplateView):
                     deelnemer.scores_str_2 = '(blanco)'
                     deelnemer.geen_rank = True
 
-                elif deelnemer.result_rank < KAMP_RANK_BLANCO:
+                elif deelnemer.result_rank < KAMP_RANK_BLANCO:      # pragma: no branch
                     deelnemer.scores_str_1 = "%s (%s+%s)" % (deelnemer.result_score_1 + deelnemer.result_score_2,
                                                              deelnemer.result_score_1,
                                                              deelnemer.result_score_2)
@@ -448,7 +448,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
             else:
                 # geen beheerder, dus sporter
-                if account.sporter_set.count() > 0:
+                if account.sporter_set.count() > 0:     # pragma: no branch
                     sporter = account.sporter_set.all()[0]
                     if sporter.is_actief_lid and sporter.bij_vereniging:
                         toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
@@ -539,24 +539,26 @@ class UitslagenRayonTeamsView(TemplateView):
                 lid_nrs = list()
                 for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
                     deelnemer.result_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
+                    tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
+                    deelnemers.append(tup)      # toevoegen voordat result_totaal een string wordt
+
                     if deelnemer.result_totaal < 10:
                         deelnemer.result_totaal = '-'
                     deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                     lid_nr = deelnemer.sporterboog.sporter.lid_nr
                     if lid_nr not in originele_lid_nrs:
                         deelnemer.is_invaller = True
-                    tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
-                    deelnemers.append(tup)
 
                     lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
                 # for
                 for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter'):
                     if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
+                        tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
+                        deelnemers.append(tup)
+
                         deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                         deelnemer.is_uitvaller = True
                         deelnemer.result_totaal = '-'
-                        tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
-                        deelnemers.append(tup)
                 # for
 
                 deelnemers.sort(reverse=True)       # hoogste eerst

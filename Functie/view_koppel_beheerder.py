@@ -365,7 +365,7 @@ class OntvangBeheerderWijzigingenView(View):
         except Account.DoesNotExist:
             raise Http404('Account niet gevonden')
 
-        if account.sporter_set.count() > 0:
+        if account.sporter_set.count() > 0:     # pragma: no branch
             sporter = account.sporter_set.all()[0]
             wie = "Sporter %s (%s)" % (sporter.lid_nr, sporter.volledige_naam())
         else:
@@ -443,7 +443,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         for account in beheerder_accounts:
             account.geo_beschrijving = '-'
             account.let_op = ''
-            if account.sporter_set.count() > 0:
+            if account.sporter_set.count() > 0:     # pragma: no branch
                 sporter = account.sporter_set.all()[0]
                 if sporter.bij_vereniging:
                     regio = sporter.bij_vereniging.regio

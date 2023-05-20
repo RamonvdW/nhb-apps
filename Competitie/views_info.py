@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,7 +34,7 @@ class InfoCompetitieView(TemplateView):
 
         account = self.request.user
         if account and account.is_authenticated:
-            if account.sporter_set.count() > 0:
+            if account.sporter_set.count() > 0:     # pragma: no branch
                 sporter = account.sporter_set.all()[0]
                 nhb_ver = sporter.bij_vereniging
                 if nhb_ver:
