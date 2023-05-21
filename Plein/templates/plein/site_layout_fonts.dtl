@@ -34,6 +34,7 @@
   font-family: 'Material Icons Round';
   font-style: normal;
   font-weight: 400;
+  font-display: block;  /* voorkomt verspringen door icon-selector-texts als het font nog niet geladen is */
   src: url({% static 'fonts/Material-Icons-Round-v108.otf' %}) format('opentype');
 }
 </style>
