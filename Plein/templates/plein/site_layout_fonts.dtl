@@ -19,7 +19,7 @@
   font-family: 'Fira Sans';
   font-style: normal;
   font-weight: 500;
-  font-display: swap;
+  font-display: block;  /* liever later tonen dan verspringende layout */
   src: url({% static 'fonts/FiraSans-Medium-v16.ttf' %}) format('truetype');
 }
 @font-face {
@@ -27,7 +27,7 @@
   font-style: normal;
   font-weight: 400;
   font-stretch: normal;
-  font-display: swap;
+  font-display: block;  /* liever later tonen dan verspringende layout */
   src: url({% static 'fonts/OpenSans-Regular-v34.ttf' %}) format('truetype');
 }
 @font-face {

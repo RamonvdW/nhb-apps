@@ -141,15 +141,19 @@ i {
   }
   &.tiny {
     font-size: 1rem;
+    width: unset;       /* remove force width that prevents layout shifts */
   }
   &.small {
     font-size: 2rem;
+    width: unset;       /* remove force width that prevents layout shifts */
   }
   &.medium {
     font-size: 4rem;
+    width: unset;       /* remove force width that prevents layout shifts */
   }
   &.large {
     font-size: 6rem;
+    width: unset;       /* remove force width that prevents layout shifts */
   }
 }
 

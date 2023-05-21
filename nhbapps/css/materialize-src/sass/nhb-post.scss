@@ -494,6 +494,7 @@ input.table-filter {
     white-space: nowrap;
     word-wrap: normal;
     direction: ltr;
+    width: 21px;      /* prevent layout shifts due to width = length of selector text */
 }
 
 /* reduceer de padding rond de content op echt kleine schermen */
