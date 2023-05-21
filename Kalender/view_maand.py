@@ -7,6 +7,7 @@
 from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
+from django.shortcuts import render
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from Bestel.operations.mandje import eval_mandje_inhoud
@@ -15,7 +16,7 @@ from Plein.menu import menu_dynamics
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
 from Wedstrijden.models import Wedstrijd
 from datetime import date, timedelta
-
+from types import SimpleNamespace
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
 
@@ -129,10 +130,25 @@ class KalenderMaandView(TemplateView):
 
         return url_prev, url_next
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
+    @staticmethod
+    def _maak_soort_filter(context, gekozen_soort):
+        if gekozen_soort not in ('alle', 'wa_a'):
+            gekozen_soort = 'alle'
 
-        context = super().get_context_data(**kwargs)
+        context['soort_filter'] = [
+            SimpleNamespace(
+                opt_text='Alle',
+                sel='alle',
+                selected=(gekozen_soort == 'alle')
+            ),
+            SimpleNamespace(
+                opt_text='WA A-status',
+                sel='wa_a',
+                selected=(gekozen_soort == 'wa_a')
+            )
+        ]
+
+    def _maak_pagina(self, context, zoekterm, **kwargs):
 
         jaar = kwargs['jaar']                           # int
         maand = self._maand_to_nr(kwargs['maand'])      # str
@@ -176,6 +192,7 @@ class KalenderMaandView(TemplateView):
         # for
 
         context['kan_aanmelden'] = self.request.user.is_authenticated
+        context['zoekterm'] = ''
 
         # bepaal of het knopje voor het mandje getoond moet worden
         if self.request.user.is_authenticated:
@@ -189,5 +206,31 @@ class KalenderMaandView(TemplateView):
         menu_dynamics(self.request, context)
         return context
 
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        soort = ''
+        zoekterm = ''
+        self._maak_pagina(context, zoekterm, **kwargs)
+        self._maak_soort_filter(context, soort)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        context = dict()
+
+        print('hoi!')
+        print(request.POST)
+
+        soort = request.POST.get('soort', '')
+        soort = soort[:6]       # afkappen voor de veiligheid
+        self._maak_soort_filter(context, soort)
+
+        zoekterm = request.POST.get('zoekterm', '')
+        zoekterm = zoekterm[:50]    # afkappen voor de veiligheid
+        context['zoekterm'] = zoekterm
+
+        self._maak_pagina(context, zoekterm, **kwargs)
+
+        return render(request, self.template_name, context)
 
 # end of file

@@ -133,18 +133,18 @@
         <div class="col s3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een xxx type:</b></p>
-                <ul id="id_xxx">
-                    {% for obj in xxx_filters %}
+                <ul>
+                    {% for filter in xxx_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="xxx" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="xxx" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('xxx')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>

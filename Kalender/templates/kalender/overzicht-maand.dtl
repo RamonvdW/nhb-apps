@@ -20,9 +20,54 @@
         </div>
     </div>
 
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
 
-    <!-- TODO: filters -->
+        <form action="{{ url_zoek }}" method="post">
+            {% csrf_token %}
 
+            <!-- zoek tekst -->
+            <div class="col s12 m6">
+                <div class="white z-depth-3 left-align" style="padding:10px">
+
+                    <p><b>Zoek naar:</b></p>
+                    <div class="input-text">
+                        <label>
+                            <input type="text" name="zoekterm" value="{{ zoekterm }}" placeholder="beschrijving">
+                        </label>
+                    </div>
+
+                    <p class="center">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">search</i>Zoek</button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- filter: soort wedstrijd -->
+            <div class="col s12 m6" style="margin-bottom:15px">
+                <div class="white left-align" style="padding:10px">
+                    <p><b>Soort wedstrijd:</b></p>
+                    <ul>
+                        {% for filter in soort_filter %}
+                            <li>
+                                <label class="black-text" for="id_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="soort" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %}>
+                                    <span>{{ filter.opt_text }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <button class="btn-nhb-rood" type="submit">Activeer</button>
+                    </p>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- maand titel met knoppen prev/next -->
     <table class="white">
         <tr style="visibility:collapse">
             <td><i class="material-icons-round">chevron_left</i></td>
