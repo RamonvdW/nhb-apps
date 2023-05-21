@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING,
                                BESTELLING_STATUS_MISLUKT)
-from Bestel.forms import ZoekAccountForm
+from Bestel.forms import ZoekBestellingForm
 from Bestel.models import Bestelling
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
@@ -45,7 +45,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
         # zoekformulier
         context['zoek_url'] = reverse('Bestel:activiteit')
-        context['zoekform'] = form = ZoekAccountForm(self.request.GET)
+        context['zoekform'] = form = ZoekBestellingForm(self.request.GET)
         form.full_clean()   # vult form.cleaned_data
 
         try:
@@ -106,6 +106,12 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                             'ontvanger',
                                             'ontvanger__vereniging')
                             .order_by('-bestel_nr'))                # nieuwste eerst
+
+        if not form.cleaned_data['webwinkel']:
+            bestellingen = bestellingen.filter(producten__webwinkel_keuze=None)
+
+        if not form.cleaned_data['wedstrijden']:
+            bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
 
         bestellingen = bestellingen.distinct('bestel_nr')       # verwijder dupes
 

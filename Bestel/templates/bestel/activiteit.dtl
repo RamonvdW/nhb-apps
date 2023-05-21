@@ -37,11 +37,12 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Details specifieke gebruiker</h4>
-            <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker</p>
+            <h4>Details bestellingen</h4>
+            <p>Gebruik het formulier om details op te vragen over een specifieke bestelling, koper of verkoper</p>
             <p>Zoek op ** om nog te betalen / mislukte betalingen te zoeken</p>
         </div>
     </div>
+
     <!-- zoekformulier -->
     <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">
@@ -55,8 +56,22 @@
                         {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
                     </div>
 
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in" name="wedstrijden"{% if zoekform.wedstrijden.value %} checked{% endif %}>
+                            <span class="black-text">{{ zoekform.wedstrijden.label }}</span>
+                        </label>
+                    </p>
+
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in" name="webwinkel"{% if zoekform.webwinkel.value %} checked{% endif %}>
+                            <span class="black-text">{{ zoekform.webwinkel.label }}</span>
+                        </label>
+                    </p>
+
                     <!-- button -->
-                    <p class="center">
+                    <p class="center" style="margin-top:50px">
                         <button class="btn-nhb-rood" type="submit">
                             <i class="material-icons-round left">search</i>Zoek</button>
                     </p>
