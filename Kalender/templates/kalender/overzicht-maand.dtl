@@ -123,12 +123,12 @@
     <!-- maand titel met knoppen prev/next -->
     <table class="white">
         <!-- template for fixed layout -->
-        <tr style="visibility:collapse">
+        <tr style="visibility:collapse; border-bottom:none">
             <td><i class="material-icons-round">chevron_left</i></td>
             <td><h5>september 2021</h5></td>
             <td><i class="material-icons-round">chevron_right</i></td>
         </tr>
-        <tr>
+        <tr style="border-bottom:none">
             <!-- knop -->
             <td class="right-align">
                 <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ arg_prev }}')">

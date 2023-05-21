@@ -20,7 +20,7 @@ urlpatterns = [
          view_maand.KalenderMaandView.as_view(),
          name='maand'),
 
-    path('pagina-<int:jaar>/',
+    path('pagina-<int:jaar>-<str:maand>/jaar/',
          view_jaar.KalenderJaarView.as_view(),
          name='jaar'),
 ]

@@ -11,11 +11,18 @@
 {% block pagina %}
 
     <script type="application/javascript">
-        function stuur_keuzes() {
+        function stuur_keuzes(arg) {
             // voer een POST uit om de keuze door te geven
             const form = document.createElement('form')
             form.setAttribute('method', 'post')
             form.setAttribute('action', '{{ url_keuzes }}')
+
+            // console.log('arg=', arg)
+            let inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "arg"
+            inp.value = arg
+            form.appendChild(inp)
 
             let el_zoek = document.getElementById('id_zoekterm')
             // console.log('el_zoek:', el_zoek)
@@ -113,12 +120,29 @@
 
     </div>
 
-    <!-- titel -->
+    <!-- jaar titel met knoppen prev/next -->
     <table class="white">
         <!-- template for fixed layout -->
-        <tr>
+        <tr style="visibility:collapse; border-bottom:none">
+            <td><i class="material-icons-round">chevron_left</i></td>
+            <td><h5>september 2021 - september 2021</h5></td>
+            <td><i class="material-icons-round">chevron_right</i></td>
+        </tr>
+        <tr style="border-bottom:none">
+            <!-- knop -->
+            <td class="right-align">
+                <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ arg_prev }}')">
+                    <i class="material-icons-round">chevron_left</i></button>
+            </td>
+
             <td class="center">
                 <h5>{{ datum_vanaf|date:'F Y' }} - {{ datum_tot|date:'F Y' }}</h5>
+            </td>
+
+            <!-- knop -->
+            <td class="left-align">
+                <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ arg_next }}')">
+                    <i class="material-icons-round">chevron_right</i></button>
             </td>
         </tr>
     </table>

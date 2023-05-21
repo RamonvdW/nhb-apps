@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from Bestel.operations.mandje import eval_mandje_inhoud
-from Kalender.definities import MAAND2URL
+from Kalender.definities import MAANDEN, MAAND2URL
 from Kalender.view_maand import maak_soort_filter, maak_compacte_wanneer_str
 from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
@@ -29,17 +29,49 @@ class KalenderJaarView(TemplateView):
     template_name = TEMPLATE_KALENDER_JAAR
 
     @staticmethod
-    def _validate_jaar(jaar):
-        if not (2020 <= jaar <= 2050):
-            raise Http404('Geen valide jaar')
+    def _maand_to_nr(maand_str):
+        maand_str = maand_str[:15].lower()      # afkappen voor de veiligheid
 
-    def _maak_pagina(self, context, jaar, zoekterm):
+        for maand_nr, str1, str2 in MAANDEN:
+            if maand_str == str1 or maand_str == str2:
+                return maand_nr
+        # for
+
+        try:
+            maand_nr = int(maand_str)
+        except ValueError:
+            pass
+        else:
+            return maand_nr
+
+        raise Http404('Geen valide maand')
+
+    @staticmethod
+    def _validate_jaar_maand(jaar, maand):
+        if not (2020 <= jaar <= 2050 and 1 <= maand <= 12):
+            raise Http404('Geen valide jaar / maand combinatie')
+
+    @staticmethod
+    def _maak_prev_next(context, jaar, maand):
+        prev_jaar = jaar
+        prev_maand = maand - 1
+        if prev_maand < 1:
+            prev_maand += 12
+            prev_jaar -= 1
+        context['arg_prev'] = '%s-%s' % (prev_jaar, prev_maand)
+
+        next_jaar = jaar
+        next_maand = maand + 1
+        if next_maand > 12:
+            next_maand -= 12
+            next_jaar += 1
+        context['arg_next'] = '%s-%s' % (next_jaar, next_maand)
+
+    def _maak_pagina(self, context, jaar, maand, zoekterm):
 
         # url voor het insturen van de filter keuzes met een POST
-        context['url_keuzes'] = reverse('Kalender:jaar', kwargs={'jaar': jaar})
-
-        now_date = timezone.now().date()
-        maand = now_date.month
+        context['url_keuzes'] = reverse('Kalender:jaar',
+                                        kwargs={'jaar': jaar, 'maand': MAAND2URL[maand]})
 
         context['url_toon_maand'] = reverse('Kalender:maand', kwargs={'jaar': jaar, 'maand': MAAND2URL[maand]})
 
@@ -49,6 +81,8 @@ class KalenderJaarView(TemplateView):
 
         context['datum_vanaf'] = datum_vanaf
         context['datum_tot'] = datum_voor
+
+        self._maak_prev_next(context, jaar, maand)
 
         wedstrijden = (Wedstrijd
                        .objects
@@ -80,6 +114,8 @@ class KalenderJaarView(TemplateView):
         elif gekozen_soort == 'wa_b':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_B)
+
+        now_date = timezone.now().date()
 
         for wed in wedstrijden:
             if wed.status == WEDSTRIJD_STATUS_GEANNULEERD:
@@ -115,16 +151,20 @@ class KalenderJaarView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         jaar = kwargs['jaar']                           # int
-        self._validate_jaar(jaar)
+        maand = self._maand_to_nr(kwargs['maand'])      # str
+        self._validate_jaar_maand(jaar, maand)
 
         soort = ''
-        zoekterm = ''
         maak_soort_filter(context, soort)
-        self._maak_pagina(context, jaar, zoekterm)
+
+        zoekterm = ''
+        self._maak_pagina(context, jaar, maand, zoekterm)
+
         return context
 
     def post(self, request, *args, **kwargs):
         jaar = kwargs['jaar']  # int
+        maand = self._maand_to_nr(kwargs['maand'])  # str
 
         # ondersteuning voor springen naar een ander jaar/maand
         arg = request.POST.get('arg', '')
@@ -141,7 +181,7 @@ class KalenderJaarView(TemplateView):
                 else:
                     jaar, maand = arg1, arg2
 
-        self._validate_jaar(jaar)
+        self._validate_jaar_maand(jaar, maand)
 
         context = dict()
 
@@ -153,7 +193,7 @@ class KalenderJaarView(TemplateView):
         zoekterm = zoekterm[:50]    # afkappen voor de veiligheid
         context['zoekterm'] = zoekterm
 
-        self._maak_pagina(context, jaar, zoekterm)
+        self._maak_pagina(context, jaar, maand, zoekterm)
 
         return render(request, self.template_name, context)
 

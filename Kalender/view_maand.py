@@ -166,10 +166,8 @@ class KalenderMaandView(TemplateView):
         context['url_keuzes'] = reverse('Kalender:maand',
                                         kwargs={'jaar': jaar, 'maand': MAAND2URL[maand]})
 
-        context['datum'] = date(year=jaar, month=maand, day=1)
-        self._maak_prev_next(context, jaar, maand)
-
-        context['url_toon_jaar'] = reverse('Kalender:jaar', kwargs={'jaar': jaar})
+        context['url_toon_jaar'] = reverse('Kalender:jaar',
+                                           kwargs={'jaar': jaar, 'maand': MAAND2URL[maand]})
 
         # bepaal de datum-range voor deze maand
         datum_vanaf = date(year=jaar, month=maand, day=1)
@@ -180,7 +178,8 @@ class KalenderMaandView(TemplateView):
             maand += 1
         datum_voor = date(year=jaar, month=maand, day=1)
 
-        now_date = timezone.now().date()
+        context['datum'] = date(year=jaar, month=maand, day=1)
+        self._maak_prev_next(context, jaar, maand)
 
         wedstrijden = (Wedstrijd
                        .objects
@@ -212,6 +211,8 @@ class KalenderMaandView(TemplateView):
         elif gekozen_soort == 'wa_b':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_B)
+
+        now_date = timezone.now().date()
 
         for wed in wedstrijden:
             if wed.status == WEDSTRIJD_STATUS_GEANNULEERD:
