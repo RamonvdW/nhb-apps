@@ -16,13 +16,17 @@ urlpatterns = [
          view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
 
-    path('pagina-<int:jaar>-<str:maand>/',
+    path('pagina-<int:jaar>-<maand>/',                  # backwards compatibility
          view_maand.KalenderMaandView.as_view(),
          name='maand'),
 
-    path('pagina-<int:jaar>-<str:maand>/jaar/',
+    path('maand/<maand>-<int:jaar>/<soort>/',
+         view_maand.KalenderMaandView.as_view(),
+         name='maand-soort'),
+
+    path('jaar/<maand>-<int:jaar>/<soort>/',
          view_jaar.KalenderJaarView.as_view(),
-         name='jaar'),
+         name='jaar-soort'),
 ]
 
 # end of file

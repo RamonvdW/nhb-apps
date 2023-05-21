@@ -14,7 +14,8 @@ from Bestel.operations.mandje import eval_mandje_inhoud
 from Kalender.definities import MAANDEN, MAAND2URL
 from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
-                                    ORGANISATIE_IFAA, ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
+                                    ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_NHB,
+                                    WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
 from Wedstrijden.models import Wedstrijd
 from datetime import date, timedelta
 from types import SimpleNamespace
@@ -80,7 +81,7 @@ def maak_compacte_wanneer_str(datum_begin, datum_einde):
 
 
 def maak_soort_filter(context, gekozen_soort):
-    if gekozen_soort not in ('alle', 'wa_a', 'wa_b', 'ifaa', 'nhb'):
+    if gekozen_soort not in ('alle', 'wa-a', 'wa-b', 'ifaa', 'nhb'):
         gekozen_soort = 'alle'
 
     context['gekozen_soort'] = gekozen_soort
@@ -89,28 +90,33 @@ def maak_soort_filter(context, gekozen_soort):
         SimpleNamespace(
             opt_text='Alle',
             sel='alle',
-            selected=(gekozen_soort == 'alle')
+            selected=(gekozen_soort == 'alle'),
+            url_part='alle'
         ),
         SimpleNamespace(
             opt_text='IFAA',
             sel='ifaa',
-            selected=(gekozen_soort == 'ifaa')
+            selected=(gekozen_soort == 'ifaa'),
+            url_part='ifaa'
         ),
         SimpleNamespace(
             opt_text='WA A-status',
             sel='wa_a',
-            selected=(gekozen_soort == 'wa_a')
-        ),
+            selected=(gekozen_soort == 'wa-a'),
+            url_part='wa-a'
+    ),
         SimpleNamespace(
             opt_text='WA B-status',
             sel='wa_b',
-            selected=(gekozen_soort == 'wa_b')
-        ),
+            selected=(gekozen_soort == 'wa-b'),
+            url_part='wa-b'
+    ),
         SimpleNamespace(
             opt_text='NHB',
             sel='nhb',
-            selected=(gekozen_soort == 'nhb')
-        ),
+            selected=(gekozen_soort == 'nhb'),
+            url_part='nhb'
+    ),
     ]
 
 
@@ -151,23 +157,41 @@ class KalenderMaandView(TemplateView):
         if prev_maand < 1:
             prev_maand += 12
             prev_jaar -= 1
-        context['arg_prev'] = '%s-%s' % (prev_jaar, prev_maand)
+        context['url_prev'] = reverse('Kalender:maand-soort',
+                                      kwargs={'jaar': prev_jaar,
+                                              'maand': MAAND2URL[prev_maand],
+                                              'soort': '~1'})
 
         next_jaar = jaar
         next_maand = maand + 1
         if next_maand > 12:
             next_maand -= 12
             next_jaar += 1
-        context['arg_next'] = '%s-%s' % (next_jaar, next_maand)
+        context['url_next'] = reverse('Kalender:maand-soort',
+                                      kwargs={'jaar': next_jaar,
+                                              'maand': MAAND2URL[next_maand],
+                                              'soort': '~1'})
 
-    def _maak_pagina(self, context, jaar, maand, zoekterm):
-
+    def _maak_pagina(self, context, jaar, maand, gekozen_soort, zoekterm):
         # url voor het insturen van de filter keuzes met een POST
-        context['url_keuzes'] = reverse('Kalender:maand',
-                                        kwargs={'jaar': jaar, 'maand': MAAND2URL[maand]})
+        context['url_keuzes'] = reverse('Kalender:maand-soort',
+                                        kwargs={'jaar': jaar,
+                                                'maand': MAAND2URL[maand],
+                                                'soort': '~1'})
 
-        context['url_toon_jaar'] = reverse('Kalender:jaar',
-                                           kwargs={'jaar': jaar, 'maand': MAAND2URL[maand]})
+        context['url_toon_jaar'] = reverse('Kalender:jaar-soort',
+                                           kwargs={'jaar': jaar,
+                                                   'maand': MAAND2URL[maand],
+                                                   'soort': gekozen_soort})
+
+        if zoekterm:
+            # url voor het resetten van de filter keuzes en zoekterm
+            context['url_toon_alles'] = reverse('Kalender:maand-soort',
+                                                kwargs={'jaar': jaar,
+                                                        'maand': maand,
+                                                        'soort': 'alle'})
+
+        self._maak_prev_next(context, jaar, maand)
 
         # bepaal de datum-range voor deze maand
         datum_vanaf = date(year=jaar, month=maand, day=1)
@@ -178,8 +202,7 @@ class KalenderMaandView(TemplateView):
             maand += 1
         datum_voor = date(year=jaar, month=maand, day=1)
 
-        context['datum'] = date(year=jaar, month=maand, day=1)
-        self._maak_prev_next(context, jaar, maand)
+        context['datum'] = datum_vanaf
 
         wedstrijden = (Wedstrijd
                        .objects
@@ -195,22 +218,20 @@ class KalenderMaandView(TemplateView):
         if zoekterm:
             wedstrijden = wedstrijden.filter(titel__icontains=zoekterm)
 
-            # url voor het resetten van de filter keuzes en zoekterm
-            context['url_toon_alles'] = context['url_keuzes']
-
         # verder verkleinen
-        gekozen_soort = context['gekozen_soort']
-
         if gekozen_soort == 'ifaa':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_IFAA)
 
-        elif gekozen_soort == 'wa_a':
+        elif gekozen_soort == 'wa-a':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_A)
 
-        elif gekozen_soort == 'wa_b':
+        elif gekozen_soort == 'wa-b':
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_B)
+
+        elif gekozen_soort == 'nhb':
+            wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_NHB)
 
         now_date = timezone.now().date()
 
@@ -251,38 +272,27 @@ class KalenderMaandView(TemplateView):
         maand = self._maand_to_nr(kwargs['maand'])      # str
         self._validate_jaar_maand(jaar, maand)
 
-        soort = ''
+        if 'soort' in kwargs:
+            soort = kwargs['soort']
+            soort = soort[:6]       # afkappen voor de veiligheid
+        else:
+            soort = 'alle'
         maak_soort_filter(context, soort)
 
-        zoekterm = ''
-        self._maak_pagina(context, jaar, maand, zoekterm)
+        zoekterm = self.request.GET.get('zoek', '')
+        zoekterm = str(zoekterm)[:50]   # afkappen voor de veiligheid
+        self._maak_pagina(context, jaar, maand, soort, zoekterm)
 
         return context
 
     def post(self, request, *args, **kwargs):
-        jaar = kwargs['jaar']  # int
-        maand = self._maand_to_nr(kwargs['maand'])  # str
-
-        # ondersteuning voor springen naar een ander jaar/maand
-        arg = request.POST.get('arg', '')
-        arg = arg[:10]  # afkappen voor de veiligheid
-        if arg:
-            # format: jaar-maand
-            spl = arg.split('-')
-            if len(spl) == 2:
-                try:
-                    arg1 = int(spl[0])
-                    arg2 = int(spl[1])
-                except ValueError:
-                    pass
-                else:
-                    jaar, maand = arg1, arg2
-
-        self._validate_jaar_maand(jaar, maand)
-
         context = dict()
 
-        soort = request.POST.get('soort', '')
+        jaar = kwargs['jaar']  # int
+        maand = self._maand_to_nr(kwargs['maand'])
+        self._validate_jaar_maand(jaar, maand)
+
+        soort = kwargs['soort']
         soort = soort[:6]       # afkappen voor de veiligheid
         maak_soort_filter(context, soort)
 
@@ -290,7 +300,7 @@ class KalenderMaandView(TemplateView):
         zoekterm = zoekterm[:50]    # afkappen voor de veiligheid
         context['zoekterm'] = zoekterm
 
-        self._maak_pagina(context, jaar, maand, zoekterm)
+        self._maak_pagina(context, jaar, maand, soort, zoekterm)
 
         return render(request, self.template_name, context)
 
