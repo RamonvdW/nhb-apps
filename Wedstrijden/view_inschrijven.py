@@ -83,7 +83,10 @@ class WedstrijdDetailsView(TemplateView):
         if wedstrijd.locatie:
             toon_kaart = wedstrijd.locatie.plaats != '(diverse)' and wedstrijd.locatie.adres != '(diverse)'
             if toon_kaart:
-                zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + wedstrijd.locatie.adres
+                zoekterm = wedstrijd.locatie.adres
+                if wedstrijd.locatie.adres_uit_crm:
+                    # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
+                    zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + zoekterm
                 zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
                 context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
