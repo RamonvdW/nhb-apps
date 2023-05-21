@@ -45,13 +45,21 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
         # zoekformulier
         context['zoek_url'] = reverse('Bestel:activiteit')
-        context['zoekform'] = form = ZoekBestellingForm(self.request.GET)
-        form.full_clean()   # vult form.cleaned_data
+        if len(self.request.GET.keys()) == 0:
+            # no query parameters
+            form = ZoekBestellingForm(initial={'webwinkel': True, 'wedstrijden': True})
+        else:
+            form = ZoekBestellingForm(self.request.GET)
+            form.full_clean()   # vult form.cleaned_data
+        context['zoekform'] = form
 
-        try:
-            zoekterm = form.cleaned_data['zoekterm']
-        except KeyError:
-            # hier komen we als het form field niet valide was, bijvoorbeeld veel te lang
+        if form.is_bound:
+            try:
+                zoekterm = form.cleaned_data['zoekterm']
+            except KeyError:
+                # hier komen we als het form field niet valide was, bijvoorbeeld veel te lang
+                zoekterm = ""
+        else:
             zoekterm = ""
         context['zoekterm'] = zoekterm
 
@@ -105,16 +113,31 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                             .select_related('account',
                                             'ontvanger',
                                             'ontvanger__vereniging')
-                            .order_by('-bestel_nr'))                # nieuwste eerst
-
-        if not form.cleaned_data['webwinkel']:
-            bestellingen = bestellingen.filter(producten__webwinkel_keuze=None)
-
-        if not form.cleaned_data['wedstrijden']:
-            bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
+                            .order_by('-bestel_nr'))     # nieuwste eerst
 
         bestellingen = bestellingen.distinct('bestel_nr')       # verwijder dupes
 
+        if form.is_bound:
+            if not form.cleaned_data['webwinkel']:
+                bestellingen = bestellingen.filter(producten__webwinkel_keuze=None)
+
+            if not form.cleaned_data['wedstrijden']:
+                bestellingen = bestellingen.filter(producten__wedstrijd_inschrijving=None)
+
+        # bepaal het aantal bestellingen sinds het begin van de maand
+        now = timezone.now()
+        context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
+        begin_maand = datetime.datetime(day=1, month=now.month, year=now.year)
+        begin_maand = timezone.make_aware(begin_maand)
+
+        qset = bestellingen.filter(aangemaakt__gte=begin_maand)
+        context['aantal_bestellingen'] = qset.count()
+
+        pks = qset.values_list('pk', flat=True)
+        verkopers = Bestelling.objects.filter(pk__in=pks).order_by('ontvanger').distinct('ontvanger')
+        context['aantal_verkopers'] = verkopers.count()
+
+        # details toevoegen voor de eerste 50 bestellingen deze maand
         context['bestellingen'] = list(bestellingen[:50])
         for bestelling in context['bestellingen']:
             bestelling.bestel_nr_str = bestelling.mh_bestel_nr()
@@ -189,18 +212,6 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (None, 'Bestellingen en Betalingen'),
             )
-
-        now = timezone.now()
-
-        context['begin_maand'] = datetime.date(day=1, month=now.month, year=now.year)
-
-        begin_maand = datetime.datetime(day=1, month=now.month, year=now.year)
-        begin_maand = timezone.make_aware(begin_maand)
-
-        qset = Bestelling.objects.filter(aangemaakt__gte=begin_maand)
-
-        context['aantal_bestellingen'] = qset.count()
-        context['aantal_verkopers'] = qset.distinct('ontvanger').count()
 
         menu_dynamics(self.request, context)
         return context

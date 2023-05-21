@@ -14,20 +14,18 @@ class ZoekBestellingForm(forms.Form):
 
     # een simpel tekstveld waarin de gebruiker de zoektekst in kan voeren
     zoekterm = forms.CharField(
-                    label='Nummer of deel van naam',
-                    max_length=50,
-                    required=False,
-                    widget=forms.TextInput(attrs={'autofocus': True}))
+                        label='Nummer of deel van naam',
+                        widget=forms.TextInput(attrs={'autofocus': True}),
+                        max_length=50,
+                        required=False)     # allow absence
 
     webwinkel = forms.BooleanField(
                         label='Toon webwinkel',
-                        initial=True,
-                        required=False)     # avoids form validation failure when not checked
+                        required=False)     # allow absence
 
     wedstrijden = forms.BooleanField(
                         label='Toon wedstrijden',
-                        initial=True,
-                        required=False)     # avoids form validation failure when not checked
+                        required=False)     # allow absence
 
 
 # end of file
