@@ -125,7 +125,7 @@
                     <td>{{ obj.beste.score_str }}</td>
                     <td>
                         <a class="btn-nhb-rood" href="{{ obj.url_details }}">
-                            <img src="{% static 'plein/zoom_in.svg' %}" height="36px" alt="Toon">
+                            <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
                         </a>
                     </td>
                 </tr>

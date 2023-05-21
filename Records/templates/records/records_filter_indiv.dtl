@@ -219,7 +219,7 @@
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
-                    <input type="hidden" name="filter_5" value="verb_ja" checked data-url="ja">
+                    <input type="hidden" name="filter_5" value="verb_ja" data-url="ja">
                 {% endif %}
             </div>
         </div>
@@ -397,7 +397,7 @@
                                     <i>Wordt getoond</i>
                                 {% else %}
                                     <a class="btn-nhb-rood" href="{{ obj.url }}">
-                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36px" alt="Toon">
+                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
                                     </a>
                                 {% endif %}
                             </td>

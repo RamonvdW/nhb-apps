@@ -26,7 +26,7 @@ cd $(dirname $0)    # ga naar de directory van het script
 # avoid this by writing to a logfile
 
 STAMP=$(date +"%Y%m%d_%H%M%S")
-SHORTSTAMP=$(date +"%Y%m")       # elke maand een nieuwe logfile
+SHORTSTAMP=$(date +"%Y%m%d")       # elke dag een nieuwe logfile
 LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_crm.log"
 #echo "Logging to: $LOG"
 echo "[INFO] Started at $STAMP" >> "$LOG"
@@ -79,16 +79,19 @@ then
 
     # download
     curl -sS -H "secret: $SECRET" "$URL" > "$SPOOLFILE" 2>>"$LOG"
+    RES=$?
+    if [ $RES -ne 0 ]
+    then
+        echo "[ERROR] Unexpected exit code $RES from curl" >> "$LOG"
+    else
+        echo "[INFO] Importing new data set" >> "$LOG"
 
-    # TODO: error handling
+        # move from NhbStructuur/cron/ to top-dir
+        cd ../..
 
-    echo "[INFO] Importing new data set" >> "$LOG"
-
-    # move from NhbStructuur/cron/ to top-dir
-    cd ../..
-
-    # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
-    python3 -u ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
+        # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
+        python3 -u ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
+    fi
 
     echo "[INFO] Import finished" >> "$LOG"
 fi
