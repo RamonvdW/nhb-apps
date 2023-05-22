@@ -346,7 +346,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase_indiv not in ('N', 'O'):
+        if comp.fase_indiv not in ('N', 'O', 'P'):
             raise Http404('Mag nog niet wijzigen')
 
         sporter = deelnemer.sporterboog.sporter
@@ -387,7 +387,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
-        if comp.fase_indiv not in ('N', 'O'):
+        if comp.fase_indiv not in ('N', 'O', 'P'):
             raise Http404('Mag niet meer wijzigen')
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]
