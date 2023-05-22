@@ -56,7 +56,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         #     kaartjes_teams.append(kaartje)
 
         # BK selectie (individueel)
-        if 'N' <= comp.fase_indiv <= 'O':
+        if 'N' <= comp.fase_indiv <= 'P':
             url = reverse('CompLaagBond:bk-selectie', kwargs={'deelkamp_pk': deelkamp_bk.pk})
             kaartje = SimpleNamespace(
                         prio=5,
@@ -67,7 +67,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartjes_indiv.append(kaartje)
 
         # BK teams aanmelden/afmelden
-        if 'N' <= comp.fase_teams <= 'O':
+        if 'N' <= comp.fase_teams <= 'P':
             url = reverse('CompLaagBond:bk-teams', kwargs={'deelkamp_pk': deelkamp_bk.pk})
             kaartje = SimpleNamespace(
                         prio=5,
@@ -78,7 +78,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
             kaartjes_teams.append(kaartje)
 
         # BK limieten (individueel en teams)
-        if 'L' <= comp.fase_indiv <= 'O' or 'L' <= comp.fase_teams <= 'O':
+        if 'L' <= comp.fase_indiv <= 'P' or 'L' <= comp.fase_teams <= 'P':
             url = reverse('CompLaagBond:wijzig-limieten', kwargs={'deelkamp_pk': deelkamp_bk.pk})
             kaartje = SimpleNamespace(
                         prio=5,
