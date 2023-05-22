@@ -261,7 +261,8 @@ class KalenderMaandView(TemplateView):
                                datum_begin__lt=datum_voor,
                                status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD,
                                            WEDSTRIJD_STATUS_GEANNULEERD))
-                       .order_by('datum_begin'))
+                       .order_by('datum_begin',
+                                 'pk'))     # ingeval van gelijke datum
 
         context['zoekterm'] = zoekterm
         if zoekterm:
@@ -285,7 +286,8 @@ class KalenderMaandView(TemplateView):
         # filter op bogen
         if gekozen_bogen != 'alle':
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
-            wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks)
+            # distinct is nodig om verdubbeling te voorkomen
+            wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
 
         now_date = timezone.now().date()
 

@@ -140,7 +140,8 @@ class KalenderJaarView(TemplateView):
         # filter op bogen
         if gekozen_bogen != 'alle':
             boog_pks = context['boog_pks']      # ingevuld in maak_bogen_filter en gegarandeerd niet leeg
-            wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks)
+            # distinct is nodig om verdubbeling te voorkomen
+            wedstrijden = wedstrijden.filter(boogtypen__pk__in=boog_pks).distinct('datum_begin', 'pk')
 
         now_date = timezone.now().date()
 
