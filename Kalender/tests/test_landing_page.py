@@ -21,7 +21,7 @@ class TestKalender(E2EHelpers, TestCase):
     url_kalender = '/kalender/'
     url_kalender_manager = '/wedstrijden/manager/'
     url_kalender_vereniging = '/wedstrijden/vereniging/'
-    url_kalender_maand = '/kalender/pagina-##'          # startswith
+    url_kalender_maand = '/kalender/maand/##'          # startswith
 
     def setUp(self):
         """ initialisatie van de test case """

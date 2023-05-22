@@ -21,8 +21,12 @@
             // vervang de ~1 in de url met het soort filter
             let el_soort = document.querySelector("input[name='filter_soort']:checked");
             // console.log('el_soort:', el_soort)
-
             url = url.replace('~1', el_soort.dataset.url);
+
+            // vervang de ~2 in de url met het bogen filter
+            let el_bogen = document.querySelector("input[name='filter_bogen']:checked");
+            // console.log('el_bogen:', el_bogen)
+            url = url.replace('~2', el_bogen.dataset.url);
 
             // voeg de zoekterm toe als query parameter
             if (zoekterm !== "") {
@@ -52,6 +56,13 @@
             {% if not kan_aanmelden %}
                 <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
             {% endif %}
+
+            {% if url_toon_alles %}
+                <p>
+                    <a class="btn-nhb-rood" href="{{ url_toon_alles }}"><i class="material-icons-round left">backspace</i>Toon alles</a>
+                </p>
+            {% endif %}
+
         </div>
     </div>
 
@@ -59,7 +70,7 @@
     <div class="row-nhb-blauw">
 
         <!-- zoek tekst -->
-        <div class="col s12 m8" style="margin-bottom:15px">
+        <div class="col s12 m12 l6" style="margin-bottom:15px">
             <div class="white z-depth-3 left-align" style="padding:10px">
 
                 <p><b>Zoek naar:</b></p>
@@ -72,23 +83,39 @@
                 <p class="center">
                     <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">
                         <i class="material-icons-round left">search</i>Zoek</button>
+                </p>
+            </div>
+        </div>
 
-                    {% if url_toon_alles %}
-                        <span>&nbsp;&nbsp;</span><a class="btn-nhb-rood" href="{{ url_toon_alles }}"><i class="material-icons-round left">backspace</i>Toon alles</a>
-                    {% endif %}
+        <!-- filter: bogen -->
+        <div class="col s12 m6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Bogen:</b></p>
+                <ul>
+                    {% for filter in bogen_filter %}
+                    <li>
+                        <label class="{% if filter.disabled %}grey-text{% else %}black-text{% endif %}" for="id_{{ filter.sel }}">
+                            <input class="with-gap" type="radio" name="filter_bogen" id="id_{{ filter.sel }}" data-url="{{ filter.url_part }}"{% if filter.selected %} checked{% endif %}{% if filter.disabled %} disabled{% endif %}>
+                            <span>{{ filter.opt_text }}</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">Activeer</button>
                 </p>
             </div>
         </div>
 
         <!-- filter: soort wedstrijd -->
-        <div class="col s12 m4">
+        <div class="col s12 m6 l3">
             <div class="white left-align" style="padding:10px">
                 <p><b>Soort wedstrijd:</b></p>
                 <ul>
                     {% for filter in soort_filter %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="filter_soort" value="{{ filter.sel }}" required id="id_{{ filter.sel }}"{% if filter.selected %} checked{% endif %} data-url="{{ filter.url_part }}">
+                                <input class="with-gap" type="radio" name="filter_soort" value="{{ filter.sel }}" id="id_{{ filter.sel }}"{% if filter.selected %} checked{% endif %} data-url="{{ filter.url_part }}">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
@@ -130,6 +157,7 @@
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
     </table>
 
+    <p class="center">{{ aantal_wedstrijden }} wedstrijden gevonden</p>
     <br>
 
     <!-- blauwe balk met informatie in een tabel -->
@@ -201,6 +229,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-maand" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-maand" %}
 
 {% endblock %}
