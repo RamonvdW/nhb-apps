@@ -207,7 +207,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 team.sterkte_str = team.sterkte_str.replace('.', ',')
 
                 team.gekoppelde_leden_lijst = list()
-                for lid in team.gekoppelde_leden.select_related('sporterboog__sporter').all():
+                for lid in team.gekoppelde_leden.select_related('sporterboog__sporter').order_by('-gemiddelde'):
                     sporter = lid.sporterboog.sporter
                     lid.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     lid.gem_str = lid.gemiddelde
