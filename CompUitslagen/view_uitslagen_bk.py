@@ -127,7 +127,7 @@ class UitslagenBKIndivView(TemplateView):
                                           'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('indiv_klasse__volgorde',
-                                    'result_volgorde',               # is constant zolang er geen resultaat is
+                                    'result_rank',
                                     'volgorde'))                     # inschrijf ranking
 
             for limiet in (KampioenschapIndivKlasseLimiet
