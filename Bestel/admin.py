@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -36,7 +36,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
     auto_complete = ('account', 'ontvanger', 'betaal_mutatie', 'betaal_actief')
 
-    filter_horizontal = ('producten',)
+    filter_horizontal = ('producten', 'transacties')
 
     list_filter = ('status',)
 
@@ -84,6 +84,8 @@ class BestelMutatieAdmin(admin.ModelAdmin):
     readonly_fields = ('when', 'account', 'code_plus')
 
     auto_complete = ('wedstrijd_inschrijving', 'product', 'bestelling')
+
+    list_filter = ('is_verwerkt', 'code')
 
     fieldsets = (
         ('BestelMutatie',

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
+from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
 from Competitie.models import KampioenschapSporterBoog
 from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
@@ -32,9 +32,8 @@ class Command(BaseCommand):
         for deelnemer in (KampioenschapSporterBoog
                           .objects
                           .filter(kampioenschap__competitie__afstand='25',
-                                  kampioenschap__deel=DEEL_RK)
+                                  kampioenschap__deel=DEEL_BK)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -71,7 +70,7 @@ class Command(BaseCommand):
                     try:
                         deelnemers = self.deelnemers[lid_nr]
                     except KeyError:
-                        self.stderr.write('[ERROR] Geen RK deelnemer op regel %s: %s' % (row, lid_nr))
+                        self.stderr.write('[ERROR] Geen BK deelnemer op regel %s: %s' % (row, lid_nr))
                     else:
                         for kandidaat in deelnemers:
                             if kandidaat.deelname != DEELNAME_NEE:
@@ -137,7 +136,7 @@ class Command(BaseCommand):
                     try:
                         deelnemers = self.deelnemers[lid_nr]
                     except KeyError:
-                        self.stderr.write('[ERROR] Geen RK deelnemer op regel %s: %s' % (row, lid_nr))
+                        self.stderr.write('[ERROR] Geen BK deelnemer op regel %s: %s' % (row, lid_nr))
                     else:
                         if len(deelnemers) == 1:
                             deelnemer = deelnemers[0]

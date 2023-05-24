@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -208,15 +208,16 @@ class Loader(AppDirectoriesLoader):
         contents = re.sub(r'/\*(.*?)\*/', '', contents)
 
         # remove whitespace between template tags
-        contents = re.sub(r'}\s+{', '}{', contents)
+        contents = re.sub(r'%}\s+{%', '%}{%', contents)
 
         # remove whitespace between template tags and html tags
         contents = re.sub(r'%}\s+<', '%}<', contents)
         contents = re.sub(r'>\s+{%', '>{%', contents)
 
-        # remove whitespace between template context variables and html tags
-        # contents = re.sub(r'>\s+{{', '>{{', contents)      # behouden want layout!
+        # remove whitespace between template variables and html tags
+        # NIET DOEN: dit kunnen echte layout spaties zijn!
         # contents = re.sub(r'}}\s+<', '}}<', contents)
+        # contents = re.sub(r'>\s+{{', '>{{', contents)
 
         # remove whitespace between html tags
         contents = re.sub(r'>\s+<', '><', contents)
@@ -229,6 +230,9 @@ class Loader(AppDirectoriesLoader):
 
         # whitespace tussen een endblock en </style>
         contents = re.sub(r'%}\s+</style>', '%}</style>', contents)
+
+        # whitespace tussen laatste javascript statement en </script>
+        contents = re.sub(r'\s+</script>', '</script>', contents)
 
         new_contents = ''
 

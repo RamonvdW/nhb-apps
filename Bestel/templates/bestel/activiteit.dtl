@@ -37,11 +37,12 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Details specifieke gebruiker</h4>
-            <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker</p>
+            <h4>Details bestellingen</h4>
+            <p>Gebruik het formulier om details op te vragen over een specifieke bestelling, koper of verkoper</p>
             <p>Zoek op ** om nog te betalen / mislukte betalingen te zoeken</p>
         </div>
     </div>
+
     <!-- zoekformulier -->
     <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">

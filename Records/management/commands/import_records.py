@@ -281,7 +281,7 @@ class Command(BaseCommand):
                 # 13 = Land
                 val = row[13][:50]
                 record.land = val
-                if val and curr_record:
+                if curr_record:
                     if curr_record.land != record.land:
                         wijzigingen.append('land: %s --> %s' % (repr(curr_record.land), repr(record.land)))
                         curr_record.land = record.land

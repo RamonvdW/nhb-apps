@@ -13,8 +13,6 @@
     <script type="application/javascript">
         function keuze_gemaakt(groep) {
 
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
             const selector = "input[type='radio'][name=" + groep + "]:checked"
             const el = document.querySelector(selector)
             const url = el.dataset.url
@@ -134,12 +132,12 @@
                 {% if obj.break_klasse %}
                     {% if not obj.is_eerste_break %}
                         <tr>
-                            <td colspan="{% if obj.toon_uitslag %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+                            <td colspan="6" class="nhb-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
-                        <td colspan="{% if obj.toon_uitslag %}8{% else %}7{% endif %}" class="center">
+                        <td colspan="8" class="center">
                             <h5>{{ obj.klasse_str }}</h5>
                             {% if obj.match %}
                                 {% if comp.bk_is_afgelast %}<s>{% endif %}
@@ -157,7 +155,6 @@
 
                         {% if obj.toon_uitslag %}
 
-                            <!-- 6 cols -->
                             <th class="center">Plaats</th>  <!-- rank -->
                             <th>Sporter</th>
                             <th class="hide-on-small-only">Vereniging</th>
@@ -171,7 +168,7 @@
                             <th class="hide-on-small-only">Vereniging</th>
                             <th class="center">RK score</th>
                             <th></th>   <!-- label: Kampioen Rayon # -->
-                            <th>BK scores</th>
+                            <th colspan="2">BK scores</th>
 
                         {% endif %}
                         <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
@@ -182,7 +179,6 @@
 
                     {% if obj.toon_uitslag%}
 
-                        <!-- 6 cols -->
                         <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}</td>
                         <td>{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{{ obj.ver_str }}</td>
@@ -192,7 +188,6 @@
 
                     {% else %}
 
-                        <!-- 5 cols -->
                         <td>{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen BK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
                         <td class="center">{{ obj.rk_score }}</td>
@@ -202,14 +197,14 @@
                             <td>{{ obj.kampioen_label }}</td>
                         {% endif %}
                         <td><i class="grey-text">volgt later</i></td>       <!-- BK scores -->
-
+                        <td>{% if forloop.last %}&nbsp;{% endif %}</td>
                     {% endif %}
                 </tr>
 
             {% endfor %}
 
             <tr>
-                <td colspan="{% if obj.toon_uitslag %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+                <td colspan="6" class="nhb-table-onderrand"></td>
             </tr>
         </table>
 
