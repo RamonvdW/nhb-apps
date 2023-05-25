@@ -1679,7 +1679,6 @@ class Command(BaseCommand):
         self._import_clubs_secretaris(data['clubs'])
         self._import_wedstrijdlocaties(data['clubs'])
 
-
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
 
