@@ -27,13 +27,20 @@
         <!-- blauwe balk met informatie in een tabel -->
         <div class="row-nhb-blauw">
             <div class="col s12">
-                <table class="white">
+                <table class="white" id="tabel1">
                     <thead>
+                        <tr>        <!-- filter veld -->
+                            <td colspan="3"></td>
+                            <td class="table-filter">
+                                <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                            </td>
+                            <td><!-- kolom voor knoppen --></td>
+                        </tr>
                         <tr>
                             <th>Wanneer</th>
                             <th>Status</th>
                             <th>Discipline</th>
-                            <th>Titel</th>
+                            <th data-filter="on">Titel</th>
                             <th><!-- kolom voor knoppen --></th>
                         </tr>
                     </thead>
@@ -57,13 +64,13 @@
                             </td>
                         </tr>
                     {% empty %}
-                        <tr>
+                        <tr data-tablefilter="stop">
                             <td colspan="5"><i>Er zijn nog geen wedstrijden</i></td>
                         </tr>
                     {% endfor %}
 
                     {% if url_nieuwe_wedstrijd %}
-                        <tr>
+                        <tr data-tablefilter="stop">
                             <td colspan="5" class="center">
                                 <a class="btn-nhb-rood" href="{{ url_nieuwe_wedstrijd }}">
                                     <i class="material-icons-round">add</i></a>

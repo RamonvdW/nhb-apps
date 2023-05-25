@@ -186,6 +186,42 @@
     </div>
 
 
+    <!-- tabel met filter -->
+    <table class="white" id="tabel_hulp">
+        <thead>
+            <tr>        <!-- filter veld -->
+                <td colspan="3" class="table-filter">
+                    <input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <th data-filter="on">Inlog</th>
+                <th data-filter="on">Naam</th>
+                <th data-filter="on">Rollen</th>
+                <th>Laatste inlog</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for account in hulp %}
+                <tr>
+                    <td>{{ account.username }}</td>
+                    <td>{{ account.volledige_naam }}</td>
+                    <td>{{ account.functies_str }}</td>
+                    <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">
+                        <i>Geen accounts gevonden die hulp nodig hebben</i>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
     <!-- scherm-brede tabel met dunne blauw rand -->
     <table class="white">
         {% for obj in deelnemers %}
