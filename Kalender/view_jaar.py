@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import Http404
+from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
@@ -120,7 +121,7 @@ class KalenderJaarView(TemplateView):
 
         context['zoekterm'] = zoekterm
         if zoekterm:
-            wedstrijden = wedstrijden.filter(titel__icontains=zoekterm)
+            wedstrijden = wedstrijden.filter(Q(titel__icontains=zoekterm) | Q(locatie__plaats__icontains=zoekterm))
 
         # filter op soort wedstrijd
         if gekozen_soort == 'ifaa':
