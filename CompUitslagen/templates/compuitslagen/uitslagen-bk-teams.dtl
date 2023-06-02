@@ -175,6 +175,16 @@
                                     {% endfor %}
                                 {% endif %}
                             {% endfor %}
+                        {% else %}
+                            {% if team.toon_team_leden %}
+                                <b>{{ team.team_naam }}</b>
+                                {% for team_lid in team.team_leden %}
+                                    <br>
+                                    <span>{{ team_lid.naam_str }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span>{{ team.team_naam }}</span>
+                            {% endif %}
                         {% endif %}
                     </td>
 
