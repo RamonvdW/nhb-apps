@@ -7,7 +7,10 @@
 {% endblock %}
 
 {% block welcome-msg %}{% endblock %}
-{% block userlinks %}<a href="{{ site_url }}">Terug naar de site</a>{% endblock %}
+{% block userlinks %}
+    <a href="{{ site_url }}">Terug naar de site</a>
+    {% include "admin/color_theme_toggle.html" %}
+{% endblock %}
 
 {% block content_title %}{% endblock %}
 
