@@ -1267,7 +1267,8 @@ class Command(BaseCommand):
         # maak een vertaal tabel voor de individuele klassen voor seizoen 2022/2023
         # 141 TR klasse ERE --> 131 BB klasse ERE
         temp_klassen_map = dict()
-        temp_klassen_map[141] = CompetitieTeamKlasse.objects.get(competitie=comp, volgorde=131)
+        # self.stdout.write('[WARNING] TR teams worden aan BB teams toegevoegd')
+        # temp_klassen_map[141] = CompetitieTeamKlasse.objects.get(competitie=comp, volgorde=131)
 
         for klasse in (CompetitieTeamKlasse
                        .objects
@@ -1289,6 +1290,9 @@ class Command(BaseCommand):
                 self.stdout.write('[WARNING] Teams worden samengevoegd met klasse %s' % team_klasse)
 
             teams_per_ver = dict()  # [ver_nr] = count
+
+            # TODO: volgens reglement Indoor doorzetten: ERE=2 finalisten per rayon + 4 landelijk resultaat; rest=1 finalist per rayon + 4 landelijke resultaat, max 2 per ver per klasse
+            # TODO: volgens reglement 25m1pijl doorzetten: ERE=max 32 teams, B=max 16 teams, C+D samen max 16 teams. Alle volgens landelijk resultaat.
 
             # haal alle teams uit de RK op
             for rk_team in (KampioenschapTeam
