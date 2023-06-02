@@ -86,7 +86,7 @@ def account_email_bevestiging_ontvangen(account):
     """
     # voorkom verlies van een bevestigde email bij interne fouten
     if account.nieuwe_email != '':
-        account.bevestigde_email = account.nieuwe_email
+        account.bevestigde_email = account.nieuwe_email     # TODO: geen garantie dat dit de bevestigde e-mail is!
         account.nieuwe_email = ''
         account.email_is_bevestigd = True
         account.save(update_fields=['bevestigde_email', 'nieuwe_email', 'email_is_bevestigd'])

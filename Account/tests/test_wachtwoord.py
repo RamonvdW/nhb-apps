@@ -144,6 +144,41 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.client.logout()
         self.e2e_login(self.account_normaal, wachtwoord=nieuw_ww)
 
+    def test_vergeten_gewijzigd(self):
+        self.client.logout()
+
+        # test ophalen van het wachtwoord-vergeten formulier
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_vergeten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(MailQueue.objects.count(), 0)
+        self.assertEqual(TijdelijkeCode.objects.count(), 0)
+
+        self.account_normaal.nieuwe_email = 'nieuwe@test.com'
+        self.account_normaal.save(update_fields=['nieuwe_email'])
+
+        # gebruiker moet valide e-mailadres invoeren via POST
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten, {'lid_nr': 'normaal',
+                                                        'email': 'nieuwe@test.com'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
+
+        # er moet nu een mail in de MailQueue staan met een single-use url
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
+
+        self.assertEqual(TijdelijkeCode.objects.count(), 1)
+        obj = TijdelijkeCode.objects.all()[0]
+
+        self.assertEqual(obj.hoortbij_account.nieuwe_email, 'nieuwe@test.com')
+
     def test_dupe_email(self):
         # maak nog een account aan met hetzelfde e-mailadres
         # door ook het de inlog naam op te geven lukt het toch om het wachtwoord te resetten
@@ -264,8 +299,17 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # niet bestaand valide e-mailadres
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'lid_nr': '123456',
+            resp = self.client.post(self.url_vergeten, {'lid_nr': 'normaal',
                                                         'email': 'als.het.maar@test.org'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Voer het e-mailadres en NHB nummer in van een bestaand account')
+
+        # niet bestaand account
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten, {'lid_nr': '123456',
+                                                        'email': 'normaal@test.org'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))

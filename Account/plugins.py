@@ -4,14 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.shortcuts import render
 from Account.operations.email import (account_check_gewijzigde_email,
                                       account_email_bevestiging_ontvangen,
                                       account_stuur_email_bevestig_nieuwe_email)
 from Account.plugin_manager import account_add_plugin_login_gate
 from Logboek.models import schrijf_in_logboek
-from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, render_email_template
+from Mailer.operations import mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
 from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_ACCOUNT_EMAIL
@@ -63,7 +62,7 @@ def account_check_email_is_bevestigd(request, from_ip, account):
         my_logger.info('%s LOGIN Mislukte inlog voor account %s met onbevestigde email' % (
                                from_ip, repr(account.username)))
 
-        # FUTURE: knop maken om na X uur een nieuwe mail te kunnen krijgen
+        # FUTURE: knop maken om een paar keer per uur een nieuwe mail te kunnen krijgen
         context = {'partial_email': mailer_obfuscate_email(account.nieuwe_email)}
         menu_dynamics(request, context)
         return render(request, TEMPLATE_EMAIL_BEVESTIG_HUIDIGE, context)

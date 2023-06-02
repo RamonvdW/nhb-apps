@@ -57,7 +57,7 @@ def sporter_login_plugin(request, from_ip, account):
 
         # kijk of het email adres gewijzigd is
         if account.bevestigde_email != sporter.email:
-            # propageer het email adres uit de CRM data naar AccountEmail
+            # propageer het email adres uit de CRM data naar het Account
             account.nieuwe_email = sporter.email
             updated.append('nieuwe_email')
 

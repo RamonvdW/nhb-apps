@@ -83,7 +83,8 @@ class WachtwoordVergetenView(TemplateView):
         context['foutmelding'] = ''
 
         email = request.POST.get('email', '')[:150]   # afkappen voor extra veiligheid
-        if not mailer_email_is_valide(email):
+        email = str(email).lower()
+        if not mailer_email_is_valide(email):       # vangt ook te korte / lege invoer af
             context['foutmelding'] = 'Voer een valide e-mailadres in van een bestaand account'
 
         account = None
@@ -91,19 +92,17 @@ class WachtwoordVergetenView(TemplateView):
             username = request.POST.get('lid_nr', '')[:10]  # afkappen voor extra veiligheid
 
             # zoek een account met deze email
-            # TODO: dit werkt dus niet als er een nieuw e-mail adres bevestigd moet worden
             try:
-                account = (Account
-                           .objects
-                           .get(bevestigde_email__iexact=email,  # iexact = case insensitive volledige match
-                                username=username))
-
+                account = Account.objects.get(username=username)
             except Account.DoesNotExist:
                 # email is niet bekend en past niet bij de inlog naam
                 context['foutmelding'] = 'Voer het e-mailadres en NHB nummer in van een bestaand account'
                 # (niet te veel wijzer maken over de combi NHB nummer en e-mailadres)
-
-        # we controleren hier niet of het account inactief is, dat doet login wel weer
+            else:
+                if account.bevestigde_email.lower() != email and account.nieuwe_email.lower() != email:
+                    # geen match
+                    context['foutmelding'] = 'Voer het e-mailadres en NHB nummer in van een bestaand account'
+                    # (niet te veel wijzer maken over de combi NHB nummer en e-mailadres)
 
         menu_dynamics(self.request, context)
 
@@ -113,13 +112,14 @@ class WachtwoordVergetenView(TemplateView):
             schrijf_in_logboek(account=None,
                                gebruikte_functie="Wachtwoord",
                                activiteit="Stuur e-mail naar adres %s voor account %s, verzocht vanaf IP %s." % (
-                                           repr(account.bevestigde_email),
+                                           repr(account.email),         # kan bevestigde of nieuwe email zijn
                                            repr(account.get_account_full_name()),
                                            from_ip))
 
             account_stuur_email_wachtwoord_vergeten(account,
                                                     wachtwoord='vergeten',
-                                                    email=account.bevestigde_email)
+                                                    email=email)        # kan bevestigde of nieuwe email zijn
+
             httpresp = render(request, TEMPLATE_WW_VERGETEN_EMAIL, context)
         else:
             httpresp = render(request, self.template_name, context)
@@ -141,6 +141,8 @@ def receive_wachtwoord_vergeten(request, account):
 
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (from_ip, repr(account.username)))
+
+    # TODO: als WW vergeten via Account.nieuwe_email ging, dan kunnen we die als bevestigd markeren
 
     for _, func, _ in account_plugins_login_gate:
         httpresp = func(request, from_ip, account)
