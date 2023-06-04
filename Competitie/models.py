@@ -853,10 +853,10 @@ class KampioenschapSporterBoog(models.Model):
     # kampioenen hebben een label
     kampioen_label = models.CharField(max_length=50, default='', blank=True)
 
-    # Positie van deze sporter in de lijst zoals vastgesteld aan het begin van het RK
-    # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt de sporter zich af.
-    # Wordt gebruikt om de sporters in originele volgorde te tonen aan de RKO, inclusief afmeldingen
-    # bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
+    # Positie van deze sporter in de lijst zoals vastgesteld aan het begin van het RK/BK.
+    # Dit is de originele volgorde, welke nooit meer wijzigt ook al meldt de sporter zich af.
+    # Wordt gebruikt om de sporters in originele volgorde te tonen aan de RKO/BKO, inclusief afmeldingen.
+    # Bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
     volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
 
     # deelname positie van de sporter in de meest up-to-date lijst
