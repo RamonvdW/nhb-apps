@@ -353,7 +353,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        json_data = self.assert200_json(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         # nog een keer opslaan - met mutaties
@@ -365,7 +365,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        json_data = self.assert200_json(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
     def test_rcl_accorderen(self):
@@ -392,7 +392,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        json_data = self.assert200_json(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
@@ -550,7 +550,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         resp = self.client.post(self.url_uitslag_opslaan,
                                 json.dumps(json_data),
                                 content_type='application/json')
-        json_data = self.assert200_json(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
@@ -615,7 +615,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        json_data = self.assert200_json(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         self.client.logout()
