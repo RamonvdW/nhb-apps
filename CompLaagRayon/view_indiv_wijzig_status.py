@@ -151,7 +151,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             mutatie.save()
             mutatie_ping.ping()
 
-            if snel != '1':
+            if snel != '1':         # pragma: no cover
                 # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
                 interval = 0.2      # om steeds te verdubbelen
                 total = 0.0         # om een limiet te stellen

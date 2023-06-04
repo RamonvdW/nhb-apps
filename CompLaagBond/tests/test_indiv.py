@@ -7,11 +7,10 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEELNAME_ONBEKEND
-from Competitie.models import CompetitieMatch, KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog
+from Competitie.models import KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, CompetitieMutatie
 from Competitie.tijdlijn import zet_competitie_fase_bk_wedstrijden, zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-from Wedstrijden.models import WedstrijdLocatie
 
 
 class TestCompLaagBondIndiv(E2EHelpers, TestCase):
@@ -24,13 +23,8 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
     url_bk_selectie_download = '/bondscompetities/bk/selectie/%s/bestand/'              # deelkamp_pk
     url_wijzig_status = '/bondscompetities/bk/selectie/wijzig-status-bk-deelnemer/%s/'  # deelnemer_pk
 
-    url_forms_indiv = '/bondscompetities/bk/formulieren/indiv/%s/'               # deelkamp_bk
-    url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_bk
-    url_forms_download_indiv = '/bondscompetities/bk/formulieren/indiv/download/%s/%s/'   # match_pk, klasse_pk
-    url_forms_download_teams = '/bondscompetities/bk/formulieren/teams/download/%s/%s/'   # match_pk, klasse_pk
-
     testdata = None
-    bk18_pk = 0
+    deelnemers_no_ver = list()
 
     @classmethod
     def setUpTestData(cls):
@@ -46,18 +40,16 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
             ver_nr = data.regio_ver_nrs[regio_nr][0]
             data.maak_rk_deelnemers(18, ver_nr, regio_nr, limit_boogtypen=['R', 'BB'])
             data.maak_rk_teams(18, ver_nr, zet_klasse=True)
-            data.maak_uitslag_rk_indiv(18)
-            data.maak_bk_deelnemers(18, ver_nr, limit_boogtypen=['R', 'BB'])
-            data.maak_bk_teams(18)
         # for
+
+        data.maak_uitslag_rk_indiv(18)
+        data.maak_bk_deelnemers(18)
+        data.maak_bk_teams(18)
 
         # we hebben heel veel sporters in Recurve klasse 6
         # (waarschijnlijk omdat de klassegrenzen niet vastgesteld zijn)
         grote_klasse = KampioenschapSporterBoog.objects.filter(kampioenschap=data.deelkamp18_bk, volgorde=20)[0].indiv_klasse
         KampioenschapIndivKlasseLimiet(kampioenschap=data.deelkamp18_bk, indiv_klasse=grote_klasse, limiet=8).save()
-
-        # zet een paar sporters op 'geen vereniging'
-        KampioenschapSporterBoog.objects.filter(volgorde=18).update(bij_vereniging=None)
 
         # zet een sporter met kampioen label op 'deelname onzeker'
         kampioen = KampioenschapSporterBoog.objects.exclude(kampioen_label='').order_by('pk')[0]
@@ -79,44 +71,14 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_bko)
         self.e2e_check_rol('BKO')
 
-        # from Competitie.models import Competitie
-        # comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
-        # comp.bepaal_fase()
-        # print('fase:', comp.fase_indiv, comp.fase_teams)
-
-        return
-
-        loc = WedstrijdLocatie(banen_18m=8,
-                               banen_25m=8,
-                               adres='De Spanning 1, Houtdorp')
-        loc.save()
-        loc.verenigingen.add(self.ver)
-
-        # maak een BK wedstrijd aan
-        self.match = CompetitieMatch(
-                        competitie=self.testdata.comp18,
-                        beschrijving='test wedstrijd BK',
-                        datum_wanneer='2020-01-01',
-                        tijd_begin_wedstrijd='10:00',
-                        vereniging=self.ver,              # koppelt wedstrijd aan de vereniging
-                        locatie=loc)
-        self.match.save()
-
-        # koppel de wedstrijdklassen aan de match
-        match_klassen = list()
-        for klasse in self.testdata.comp18_klassen_indiv['R']:
-            if klasse.is_ook_voor_rk_bk:
-                match_klassen.append(klasse)
+        # zet een paar sporters op 'geen vereniging'
+        self.deelnemers_no_ver = list()
+        for deelnemer in self.testdata.comp18_bk_deelnemers:
+            if deelnemer.volgorde == 18:
+                deelnemer.bij_vereniging = None
+                deelnemer.save(update_fields=['bij_vereniging'])
+                self.deelnemers_no_ver.append(deelnemer)
         # for
-        self.match.indiv_klassen.add(*match_klassen)
-        self.comp18_klassen_indiv_bk = match_klassen
-
-        match_klassen = list()
-        for klasse in self.testdata.comp18_klassen_teams['R2']:
-            match_klassen.append(klasse)
-        # for
-        self.match.team_klassen.add(*match_klassen)
-        self.comp18_klassen_teams_bk = match_klassen
 
     def test_anon(self):
         self.client.logout()
@@ -148,7 +110,7 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         resp = self.client.get(self.url_bk_selectie % self.testdata.deelkamp18_bk.pk)
         self.assert404(resp, 'Verkeerde competitie fase')
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_bk_selectie)
+        self.e2e_assert_other_http_commands_not_supported(self.url_bk_selectie % 999999)
 
     def test_download(self):
         # ingelogd als BKO Indoor
@@ -176,15 +138,74 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         resp = self.client.get(self.url_bk_selectie_download % self.testdata.deelkamp25_bk.pk)
         self.assert200_is_bestand_csv(resp)
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_bk_selectie_download)
+        self.e2e_assert_other_http_commands_not_supported(self.url_bk_selectie_download % 999999)
 
-    def test_wijzig_status(self):
+    def test_wijzig_status_get(self):
         # ingelogd als BKO Indoor
         resp = self.client.get(self.url_wijzig_status % 999999)
         self.assert404(resp, 'Deelnemer niet gevonden')
 
-        #resp = self.client.get(self.url_wijzig_status % 0)      # TODO
+        deelnemer = self.testdata.comp18_bk_deelnemers[0]
+        resp = self.client.get(self.url_wijzig_status % deelnemer.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/wijzig-status-bk-deelnemer.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_bk_selectie_download, post=False)
+        # deelnemer zonder vereniging
+        resp = self.client.get(self.url_wijzig_status % self.deelnemers_no_ver[0].pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagbond/wijzig-status-bk-deelnemer.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde competitie fase
+        zet_competitie_fase_rk_wedstrijden(self.testdata.comp18)
+        resp = self.client.get(self.url_wijzig_status % deelnemer.pk)
+        self.assert404(resp, 'Mag nog niet wijzigen')
+
+        # verkeerde BKO
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+        resp = self.client.get(self.url_wijzig_status % deelnemer.pk)
+        self.assert403(resp, 'Niet de beheerder')
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_wijzig_status % 999999, post=False)
+
+    def test_wijzig_status_post(self):
+        # ingelogd als BKO Indoor
+        resp = self.client.post(self.url_wijzig_status % 999999)
+        self.assert404(resp, 'Deelnemer niet gevonden')
+
+        deelnemer = self.testdata.comp18_bk_deelnemers[0]
+
+        # geen data
+        resp = self.client.post(self.url_wijzig_status % deelnemer.pk)
+        self.assert_is_redirect_not_plein(resp)
+
+        # bevestig
+        self.assertEqual(0, CompetitieMutatie.objects.count())
+        resp = self.client.post(self.url_wijzig_status % deelnemer.pk, {'snel': 1, 'bevestig': '1'})
+        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(1, CompetitieMutatie.objects.count())
+
+        # deelnemer zonder vereniging
+        resp = self.client.post(self.url_wijzig_status % self.deelnemers_no_ver[0].pk, {'bevestig': '1'})
+        self.assert404(resp, 'Sporter moet lid zijn bij een vereniging')
+        self.assertEqual(1, CompetitieMutatie.objects.count())
+
+        # afmelden
+        resp = self.client.post(self.url_wijzig_status % deelnemer.pk, {'snel': 1, 'afmelden': '1'})
+        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(2, CompetitieMutatie.objects.count())
+
+        # verkeerde competitie fase
+        zet_competitie_fase_rk_wedstrijden(self.testdata.comp18)
+        resp = self.client.post(self.url_wijzig_status % deelnemer.pk)
+        self.assert404(resp, 'Mag niet meer wijzigen')
+
+        # verkeerde BKO
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+        resp = self.client.post(self.url_wijzig_status % deelnemer.pk)
+        self.assert403(resp, 'Niet de beheerder')
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_wijzig_status % 999999, post=False)
 
 # end of file

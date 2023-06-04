@@ -225,6 +225,10 @@ class TestData(object):
         self.comp18_kampioenschapteams = list()
         self.comp25_kampioenschapteams = list()
 
+        # aangemaakte BK sporters
+        self.comp18_bk_deelnemers = list()
+        self.comp25_bk_deelnemers = list()
+
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
         self.afkorting2teamtype_nhb = dict()    # [team afkorting] = TeamType()
@@ -1571,11 +1575,6 @@ class TestData(object):
         return locatie
 
     def maak_uitslag_rk_indiv(self, afstand: int):
-        if afstand == 18:
-            deelnemers = self.comp18_rk_deelnemers
-        else:
-            deelnemers = self.comp25_rk_deelnemers
-
         nr = 1
         score1 = 200
         score2 = 150
@@ -1619,7 +1618,7 @@ class TestData(object):
             score2 -= 1
         # for
 
-    def maak_bk_deelnemers(self, afstand, ver_nr, limit_boogtypen=('R', 'C', 'BB', 'LB', 'TR')):
+    def maak_bk_deelnemers(self, afstand):
         """ Laat RK deelnemers doorstromen naar de BK
             afstand = 18 / 25
         """
@@ -1628,10 +1627,12 @@ class TestData(object):
             deelkamp_bk = self.deelkamp18_bk
             rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp18_rk.values()]
             pijlen = 2.0 * 30
+            bk_deelnemers = self.comp18_bk_deelnemers
         else:
             deelkamp_bk = self.deelkamp25_bk
             rk_pks = [deelkamp_rk.pk for deelkamp_rk in self.deelkamp25_rk.values()]
             pijlen = 2.0 * 25
+            bk_deelnemers = self.comp25_bk_deelnemers
 
         bulk = list()
         prev_klasse = None
@@ -1680,6 +1681,20 @@ class TestData(object):
 
         if len(bulk):
             KampioenschapSporterBoog.objects.bulk_create(bulk)
+
+        nieuwe_deelnemers = (KampioenschapSporterBoog
+                             .objects
+                             .select_related('indiv_klasse',
+                                             'bij_vereniging',
+                                             'kampioenschap',
+                                             'kampioenschap__competitie',
+                                             'sporterboog',
+                                             'sporterboog__sporter',
+                                             'sporterboog__boogtype')
+                             .filter(kampioenschap=deelkamp_bk)
+                             .order_by('sporterboog__sporter__lid_nr',
+                                       'sporterboog__boogtype__afkorting'))
+        bk_deelnemers.extend(nieuwe_deelnemers)
 
     def maak_bk_teams(self, afstand):
         """ Laat BK teams doorstromen naar de BK """

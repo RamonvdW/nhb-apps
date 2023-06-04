@@ -926,7 +926,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             # wacht op verwerking door achtergrond-taak voordat we verder gaan
             snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
-            if snel != '1':
+            if snel != '1':         # pragma: no cover
                 # wacht 3 seconden tot de mutatie uitgevoerd is
                 interval = 0.2      # om steeds te verdubbelen
                 total = 0.0         # om een limiet te stellen
