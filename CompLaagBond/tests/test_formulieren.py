@@ -44,10 +44,11 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
             ver_nr = data.regio_ver_nrs[regio_nr][0]
             data.maak_rk_deelnemers(18, ver_nr, regio_nr, limit_boogtypen=['R', 'BB'])
             data.maak_rk_teams(18, ver_nr, zet_klasse=True)
-            data.maak_uitslag_rk_indiv(18)
-            data.maak_bk_deelnemers(18, ver_nr, limit_boogtypen=['R', 'BB'])
-            data.maak_bk_teams(18)
         # for
+
+        data.maak_uitslag_rk_indiv(18)
+        data.maak_bk_deelnemers(18)
+        data.maak_bk_teams(18)
 
         ver_nr = data.regio_ver_nrs[111][0]
         cls.ver = data.vereniging[ver_nr]
