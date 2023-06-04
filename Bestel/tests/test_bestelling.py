@@ -475,6 +475,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         resp = self.client.post(self.url_check_status % andere.bestel_nr)
         self.assert404(resp, 'Niet gevonden')       # want verkeerd account
 
+        self.e2e_assert_other_http_commands_not_supported(self.url_check_status % andere.bestel_nr, get=True, post=False)
+
         url = self.url_check_status % bestelling.bestel_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url)

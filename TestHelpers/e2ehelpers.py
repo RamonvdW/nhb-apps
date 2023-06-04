@@ -7,6 +7,7 @@
 from django.contrib import auth
 from django.core import management
 from django.conf import settings
+from django.http import UnreadablePostError
 from django.test import TestCase, Client, override_settings
 from django.db import connection
 from Account.operations.aanmaken import account_create
@@ -21,6 +22,7 @@ import datetime
 import tempfile
 import vnujar
 import pyotp
+import json
 import time
 import io
 
@@ -792,7 +794,7 @@ class E2EHelpers(TestCase):
         if resp.status_code == 200:                     # pragma: no branch
             self.fail(msg='Onverwacht ingelogd')        # pragma: no cover
 
-    def e2e_assert_other_http_commands_not_supported(self, url, post=True, delete=True, put=True, patch=True):
+    def e2e_assert_other_http_commands_not_supported(self, url, get=False, post=True, delete=True, put=True, patch=True):
         """ Test een aantal 'common' http methoden
             en controleer dat deze niet ondersteund zijn (status code 405 = not allowed)
             POST, DELETE, PATCH
@@ -803,6 +805,11 @@ class E2EHelpers(TestCase):
         #   404 (not found)
         #   405 (not allowed)
         accepted_status_codes = (302, 403, 404, 405)
+
+        if get:
+            resp = self.client.get(url)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij GET command' % resp.status_code)
 
         if post:
             resp = self.client.post(url)
@@ -1028,7 +1035,7 @@ class E2EHelpers(TestCase):
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
 
         # check the headers that make this a download
-        # print("response: ", repr([(a,b) for a,b in response.items()]))
+        # print("response: ", repr([(a,b) for a,b in resp.items()]))
         content_type_header = resp['Content-Type']
         self.assertEqual(expected_content_type, content_type_header)
         content_disposition_header = resp['Content-Disposition']
@@ -1036,6 +1043,23 @@ class E2EHelpers(TestCase):
 
         # ensure the file is not empty
         self.assertTrue(len(str(resp.content)) > 30)
+
+    def assert200_json(self, resp):
+        if resp.status_code != 200:                                 # pragma: no cover
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
+
+        # print("response: ", repr([(a,b) for a,b in resp.items()]))
+        content_type_header = resp['Content-Type']
+        self.assertEqual(content_type_header, 'application/json')
+
+        try:
+            json_data = json.loads(resp.content)
+        except (json.decoder.JSONDecodeError, UnreadablePostError) as exc:
+            self.fail('No valid JSON response (%s)' % str(exc))
+            json_data = None
+
+        return json_data
 
     def assert200_is_bestand_csv(self, resp):
         self._assert_bestand(resp, 'text/csv; charset=UTF-8')

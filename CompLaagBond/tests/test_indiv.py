@@ -100,7 +100,8 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         resp = self.client.get(self.url_bk_selectie % self.testdata.deelkamp25_bk.pk)
         self.assert403(resp, 'Niet de beheerder')
 
-        resp = self.client.get(self.url_bk_selectie % self.testdata.deelkamp18_bk.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bk_selectie % self.testdata.deelkamp18_bk.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagbond/bk-selectie.dtl', 'plein/site_layout.dtl'))
@@ -126,7 +127,8 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         self.testdata.deelkamp18_bk.heeft_deelnemerslijst = True
         self.testdata.deelkamp18_bk.save(update_fields=['heeft_deelnemerslijst'])
 
-        resp = self.client.get(self.url_bk_selectie_download % self.testdata.deelkamp18_bk.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bk_selectie_download % self.testdata.deelkamp18_bk.pk)
         self.assert200_is_bestand_csv(resp)
 
         # repeat voor 25m1pijl
@@ -146,13 +148,15 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         self.assert404(resp, 'Deelnemer niet gevonden')
 
         deelnemer = self.testdata.comp18_bk_deelnemers[0]
-        resp = self.client.get(self.url_wijzig_status % deelnemer.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_status % deelnemer.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagbond/wijzig-status-bk-deelnemer.dtl', 'plein/site_layout.dtl'))
 
         # deelnemer zonder vereniging
-        resp = self.client.get(self.url_wijzig_status % self.deelnemers_no_ver[0].pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_status % self.deelnemers_no_ver[0].pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagbond/wijzig-status-bk-deelnemer.dtl', 'plein/site_layout.dtl'))
@@ -177,7 +181,8 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         deelnemer = self.testdata.comp18_bk_deelnemers[0]
 
         # geen data
-        resp = self.client.post(self.url_wijzig_status % deelnemer.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_status % deelnemer.pk)
         self.assert_is_redirect_not_plein(resp)
 
         # bevestig
