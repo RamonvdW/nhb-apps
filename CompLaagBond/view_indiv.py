@@ -177,11 +177,10 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
         context['deelnemers'] = deelnemers
         context['aantal_klassen'] = aantal_klassen
 
-        if deelkamp.heeft_deelnemerslijst:
-            context['aantal_afgemeld'] = aantal_afgemeld
-            context['aantal_onbekend'] = aantal_onbekend
-            context['aantal_bevestigd'] = aantal_bevestigd
-            context['aantal_attentie'] = aantal_attentie
+        context['aantal_afgemeld'] = aantal_afgemeld
+        context['aantal_onbekend'] = aantal_onbekend
+        context['aantal_bevestigd'] = aantal_bevestigd
+        context['aantal_attentie'] = aantal_attentie
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -211,12 +210,12 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
         except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        if not deelkamp.heeft_deelnemerslijst:
-            raise Http404('Geen deelnemerslijst')
-
         # laat alleen de juiste BKO de lijst ophalen
         if self.functie_nu != deelkamp.functie:
             raise PermissionDenied('Niet de beheerder')     # niet de juiste BKO
+
+        if not deelkamp.heeft_deelnemerslijst:
+            raise Http404('Geen deelnemerslijst')
 
         deelnemers = (KampioenschapSporterBoog
                       .objects

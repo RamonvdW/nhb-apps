@@ -15,7 +15,7 @@ from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
                                    MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
-from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_RESERVE
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_RESERVE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Regiocompetitie, RegiocompetitieSporterBoog, RegiocompetitieTeam,
                                RegiocompetitieTeamPoule,
@@ -1651,10 +1651,13 @@ class TestData(object):
 
             volgorde += 1
             deelname = DEELNAME_JA if volgorde <= 24 else DEELNAME_NEE
+            if volgorde == 5:
+                deelname = DEELNAME_ONBEKEND
             ag = rk_deelnemer.result_score_1 + rk_deelnemer.result_score_2
             ag /= pijlen
             scores_str = '%03d%03d' % (max(rk_deelnemer.result_score_1, rk_deelnemer.result_score_2),
                                        min(rk_deelnemer.result_score_1, rk_deelnemer.result_score_2))
+            label = 'RK Kampioen' if volgorde in (6, 9) else ''     # 9 heeft ook para opmerking in voorkeuren
 
             bk_deelnemer = KampioenschapSporterBoog(
                                 kampioenschap=deelkamp_bk,
@@ -1662,7 +1665,9 @@ class TestData(object):
                                 indiv_klasse=rk_deelnemer.indiv_klasse,
                                 bij_vereniging=rk_deelnemer.bij_vereniging,
                                 volgorde=volgorde,
+                                rank=volgorde,
                                 deelname=deelname,
+                                kampioen_label=label,
                                 gemiddelde=ag,
                                 gemiddelde_scores=scores_str)
             bulk.append(bk_deelnemer)

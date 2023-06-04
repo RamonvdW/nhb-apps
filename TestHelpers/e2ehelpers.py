@@ -105,7 +105,9 @@ class E2EHelpers(TestCase):
         lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms') and not tmpl.name.startswith('email_')]
         if len(lst) > 1:        # pragma: no cover
             print('[WARNING] e2ehelpers._get_useful_template_name: too many choices!!! %s' % repr(lst))
-        return lst[0]
+        if len(lst):
+            return lst[0]
+        return 'no template!'
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account aan in de database van de website """
@@ -676,6 +678,13 @@ class E2EHelpers(TestCase):
 
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
+
+        # check for files
+        # 'Content-Disposition': 'attachment; filename="bond_alle.csv"'
+        check = response.get('Content-Disposition', '')
+        if 'ATTACHMENT;' in str(check).upper():
+            self.fail('Found attachment instead of html page')
+
         html = response.content.decode('utf-8')
         html = self._remove_debug_toolbar(html)
 

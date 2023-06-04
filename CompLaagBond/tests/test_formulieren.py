@@ -18,7 +18,7 @@ import os
 
 class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
-    """ tests voor de CompLaagRayon applicatie, Formulieren functie """
+    """ tests voor de CompLaagBond applicatie, Formulieren functie """
 
     test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko')
 
