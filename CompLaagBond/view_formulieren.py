@@ -428,8 +428,10 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             max_teams = 12
         else:
             max_teams = 8
+
             # maximaal 4 teams naar de finale, dus verwijder het blad voor 8 team finale
-            del prg['Finales 8 teams']
+            if comp.afstand == '18':
+                del prg['Finales 8 teams']
 
             # verwijder 4 regels in Uitslag (voor teams 9..12)
             prg['Uitslag'].delete_rows(17, 4)
