@@ -177,11 +177,10 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
         context['deelnemers'] = deelnemers
         context['aantal_klassen'] = aantal_klassen
 
-        if deelkamp.heeft_deelnemerslijst:
-            context['aantal_afgemeld'] = aantal_afgemeld
-            context['aantal_onbekend'] = aantal_onbekend
-            context['aantal_bevestigd'] = aantal_bevestigd
-            context['aantal_attentie'] = aantal_attentie
+        context['aantal_afgemeld'] = aantal_afgemeld
+        context['aantal_onbekend'] = aantal_onbekend
+        context['aantal_bevestigd'] = aantal_bevestigd
+        context['aantal_attentie'] = aantal_attentie
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -211,12 +210,12 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
         except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
-        if not deelkamp.heeft_deelnemerslijst:
-            raise Http404('Geen deelnemerslijst')
-
         # laat alleen de juiste BKO de lijst ophalen
         if self.functie_nu != deelkamp.functie:
             raise PermissionDenied('Niet de beheerder')     # niet de juiste BKO
+
+        if not deelkamp.heeft_deelnemerslijst:
+            raise Http404('Geen deelnemerslijst')
 
         deelnemers = (KampioenschapSporterBoog
                       .objects
@@ -333,7 +332,9 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
             deelnemer = (KampioenschapSporterBoog
                          .objects
-                         .select_related('kampioenschap__competitie',
+                         .select_related('kampioenschap',
+                                         'kampioenschap__functie',
+                                         'kampioenschap__competitie',
                                          'sporterboog__sporter',
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk,
@@ -379,11 +380,15 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             deelnemer = (KampioenschapSporterBoog
                          .objects
                          .select_related('kampioenschap',
+                                         'kampioenschap__functie',
                                          'kampioenschap__competitie')
                          .get(pk=deelnemer_pk,
                               kampioenschap__deel=DEEL_BK))
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
+
+        if self.functie_nu != deelnemer.kampioenschap.functie:
+            raise PermissionDenied('Niet de beheerder')
 
         comp = deelnemer.kampioenschap.competitie
         comp.bepaal_fase()
@@ -393,9 +398,6 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
         bevestig = str(request.POST.get('bevestig', ''))[:2]
         afmelden = str(request.POST.get('afmelden', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
-
-        if self.functie_nu != deelnemer.kampioenschap.functie:
-            raise PermissionDenied('Geen toegang tot deze competitie')
 
         account = request.user
         door_str = "BKO %s" % account.volledige_naam()
@@ -418,7 +420,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
             mutatie.save()
             mutatie_ping.ping()
 
-            if snel != '1':
+            if snel != '1':         # pragma: no cover
                 # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
                 interval = 0.2      # om steeds te verdubbelen
                 total = 0.0         # om een limiet te stellen

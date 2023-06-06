@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse, Http404, UnreadablePostError
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV
@@ -79,6 +79,7 @@ class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):
                        .objects
                        .filter(competitie=deelkamp.competitie,
                                is_ook_voor_rk_bk=True)
+                       .prefetch_related('boogtype')
                        .order_by('volgorde')):
             klassen_cache[klasse.pk] = klasse
             klasse.aantal_deelnemers = 0
@@ -161,14 +162,13 @@ class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class VerplaatsDeelnemerView(UserPassesTestMixin, TemplateView):
+class VerplaatsDeelnemerView(UserPassesTestMixin, View):
 
     """ Met deze view kan de BKO deelnemers van een kleine individuele klasse
         verplaatsen naar een andere klasse.
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPBOND_KLEINE_KLASSEN_INDIV
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
