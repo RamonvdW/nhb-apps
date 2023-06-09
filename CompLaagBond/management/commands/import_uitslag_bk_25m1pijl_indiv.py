@@ -258,12 +258,13 @@ class Command(BaseCommand):
 
                                 if opslaan:
                                     deelnemer.result_rank = rank
+                                    deelnemer.result_volgorde = rank_doorlopend
                                     deelnemer.result_score_1 = score1
                                     deelnemer.result_score_2 = score2
                                     deelnemer.result_counts = counts_str
 
                         if not self.dryrun:
-                            deelnemer.save(update_fields=['result_rank',
+                            deelnemer.save(update_fields=['result_rank', 'result_volgorde',
                                                           'result_score_1', 'result_score_2',
                                                           'result_counts'])
             else:
@@ -281,11 +282,13 @@ class Command(BaseCommand):
                             if self.verbose:
                                 self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
                             deelnemer.result_rank = KAMP_RANK_NO_SHOW
+                            deelnemer.result_volgorde = 99
                         else:
                             deelnemer.result_rank = KAMP_RANK_RESERVE
+                            deelnemer.result_volgorde = 99
 
                         if not self.dryrun:
-                            deelnemer.save(update_fields=['result_rank'])
+                            deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
             # for
         # for
 

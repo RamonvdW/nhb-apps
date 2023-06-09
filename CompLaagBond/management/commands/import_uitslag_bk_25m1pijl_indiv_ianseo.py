@@ -346,6 +346,7 @@ class Command(BaseCommand):
 
                         if rank == 'DNS':
                             deelnemer.result_rank = KAMP_RANK_NO_SHOW
+                            deelnemer.result_volgorde = 99
                             deelnemer.result_score_1 = 0
                             deelnemer.result_score_2 = 0
                             deelnemer.result_counts = ''
@@ -354,12 +355,14 @@ class Command(BaseCommand):
                                 self.stdout.write('[WARNING] Afwijkende rank: %s vs %s' % (rank_deze, rank))
 
                             deelnemer.result_rank = rank_deze
+                            deelnemer.result_volgorde = rank_doorlopend
                             deelnemer.result_score_1 = score1
                             deelnemer.result_score_2 = score2
                             deelnemer.result_counts = counts_str
 
                         if not self.dryrun:
-                            deelnemer.save(update_fields=['result_rank', 'result_score_1', 'result_score_2', 'result_counts'])
+                            deelnemer.save(update_fields=['result_rank', 'result_volgorde',
+                                                          'result_score_1', 'result_score_2', 'result_counts'])
 
             else:
                 parts = list()
@@ -388,11 +391,13 @@ class Command(BaseCommand):
                         if self.verbose:
                             self.stdout.write('[WARNING] Mogelijke no-show voor deelnemer %s' % deelnemer)
                         deelnemer.result_rank = KAMP_RANK_NO_SHOW
+                        deelnemer.result_volgorde = 99
                     else:
                         deelnemer.result_rank = KAMP_RANK_RESERVE
+                        deelnemer.result_volgorde = 99
 
                     if not self.dryrun:
-                        deelnemer.save(update_fields=['result_rank'])
+                        deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
             # for
         # for
 
