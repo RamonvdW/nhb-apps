@@ -56,6 +56,28 @@
         </div>
     </div>
 
+    {% if toon_tip %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Veilig wachtwoord</h4>
+            </div>
+        </div>
+
+        <!-- blauw balk met wit informatie veld -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <div class="white" style="padding:10px">
+                    <p>Je wachtwoord moet <b>9 tekens of langer</b> zijn en <b>5 verschillende</b> tekens bevatten.</p>
+                    <p>De woorden 'wachtwoord', 'password', 'handboog' en je bondsnummer mogen niet voorkomen,<br>maar hoofdletters of speciale tekens zijn niet verplicht.</p>
+                    <p>Verder blokkeren we reeksen zoals 123456 en QWERTY.</p>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
     {% include 'feedback/sidebar.dtl' with op_pagina="account-wachtwoord-wijzigen" %}
 
 {% endblock %}

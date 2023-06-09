@@ -15,45 +15,45 @@ class TestAccountOpWachtwoord(E2EHelpers, TestCase):
 
     def test_wachtwoord_sterkte(self):
         res, msg = account_test_wachtwoord_sterkte('xx', '')
-        self.assertEqual((res, msg), (False, "Wachtwoord moet minimaal 9 tekens lang zijn"))
+        self.assertEqual((res, msg), (False, "wachtwoord is te kort"))
 
         res, msg = account_test_wachtwoord_sterkte('NHB123456', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord bevat een verboden reeks"))
+        self.assertEqual((res, msg), (False, "wachtwoord bevat een verboden reeks"))
 
         res, msg = account_test_wachtwoord_sterkte('xxxxxXXXXX', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord bevat te veel gelijke tekens"))
+        self.assertEqual((res, msg), (False, "wachtwoord bevat te veel gelijke tekens"))
 
         res, msg = account_test_wachtwoord_sterkte('jajajaJAJAJA', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord bevat te veel gelijke tekens"))
+        self.assertEqual((res, msg), (False, "wachtwoord bevat te veel gelijke tekens"))
 
         res, msg = account_test_wachtwoord_sterkte('blablabla', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord bevat te veel gelijke tekens"))
+        self.assertEqual((res, msg), (False, "wachtwoord bevat te veel gelijke tekens"))
 
         res, msg = account_test_wachtwoord_sterkte('grootGROOT', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord bevat te veel gelijke tekens"))
+        self.assertEqual((res, msg), (False, "wachtwoord bevat te veel gelijke tekens"))
 
         res, msg = account_test_wachtwoord_sterkte('groteGROTE', '123456')
         self.assertEqual((res, msg), (True, None))
 
         res, msg = account_test_wachtwoord_sterkte('wachtwoord', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+        self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('mijnGeheim', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+        self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('HandBoogSport', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+        self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('qwertyuiop', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+        self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('234567890', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+        self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('zxcvbnm,.', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+        self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
         res, msg = account_test_wachtwoord_sterkte('passWORD!', '123456')
-        self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+        self.assertEqual((res, msg), (False, "wachtwoord is niet sterk genoeg"))
 
 # end of file

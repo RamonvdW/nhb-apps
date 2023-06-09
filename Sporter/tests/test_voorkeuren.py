@@ -341,7 +341,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
+        self.assertContains(resp, 'wachtwoord bevat te veel gelijke tekens')
 
         # wijzig het wachtwoord
         with self.assert_max_queries(20):

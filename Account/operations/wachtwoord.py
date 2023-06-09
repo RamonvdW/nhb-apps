@@ -18,6 +18,23 @@ VERBODEN_WOORDEN_IN_WACHTWOORD = (
     '45678',
     '56789',
     '67890',
+    # keyboard walks achteruit
+    '09876',
+    '98765',
+    '87654',
+    '76543',
+    '65432',
+    '54321',
+    # numpad walks
+    '78963',
+    '36987',
+    '14789',
+    '98741',
+    '12369',
+    '96321',
+    '74123',
+    '32147',
+    # keyboard walks
     'qwert',
     'werty',
     'ertyu',
@@ -46,11 +63,11 @@ def account_test_wachtwoord_sterkte(wachtwoord, verboden_str):
 
     # controleer de minimale length
     if len(wachtwoord) < 9:
-        return False, "Wachtwoord moet minimaal 9 tekens lang zijn"
+        return False, "wachtwoord is te kort"
 
     # verboden_str is de inlog naam
     if verboden_str in wachtwoord:
-        return False, "Wachtwoord bevat een verboden reeks"
+        return False, "wachtwoord bevat een verboden reeks"
 
     # entropie van elk teken is gelijk, dus het verminderen van de zoekruimte is niet verstandig
     # dus NIET: controleer op alleen cijfers
@@ -60,12 +77,12 @@ def account_test_wachtwoord_sterkte(wachtwoord, verboden_str):
     # tel het aantal unieke tekens dat gebruikt is
     # (voorkomt wachtwoorden zoals jajajajajaja of xxxxxxxxxx)
     if len(set(lower_wachtwoord)) < 5:
-        return False, "Wachtwoord bevat te veel gelijke tekens"
+        return False, "wachtwoord bevat te veel gelijke tekens"
 
     # detecteer herkenbare woorden en keyboard walks
     for verboden_woord in VERBODEN_WOORDEN_IN_WACHTWOORD:
         if verboden_woord in lower_wachtwoord:
-            return False, "Wachtwoord is niet sterk genoeg"
+            return False, "wachtwoord is niet sterk genoeg"
 
     return True, None
 

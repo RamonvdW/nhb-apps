@@ -276,7 +276,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord moet minimaal 9 tekens lang zijn")
+        self.assertContains(resp, "wachtwoord is te kort")
 
         # verboden reeks
         with self.assert_max_queries(20):
@@ -288,7 +288,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+        self.assertContains(resp, "wachtwoord is niet sterk genoeg")
 
         # NHB nummer in wachtwoord
         with self.assert_max_queries(20):
@@ -300,7 +300,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord bevat een verboden reeks")
+        self.assertContains(resp, "wachtwoord bevat een verboden reeks")
 
         # keyboard walk 1
         with self.assert_max_queries(20):
@@ -312,7 +312,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+        self.assertContains(resp, "wachtwoord is niet sterk genoeg")
 
         # keyboard walk 2
         with self.assert_max_queries(20):
@@ -324,7 +324,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+        self.assertContains(resp, "wachtwoord is niet sterk genoeg")
 
         # keyboard walk 3
         with self.assert_max_queries(20):
@@ -336,7 +336,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+        self.assertContains(resp, "wachtwoord is niet sterk genoeg")
 
         # keyboard walk 4
         with self.assert_max_queries(20):
@@ -348,7 +348,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+        self.assertContains(resp, "wachtwoord is niet sterk genoeg")
 
         # te weinig verschillende tekens 1
         with self.assert_max_queries(20):
@@ -360,7 +360,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+        self.assertContains(resp, "wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 2
         with self.assert_max_queries(20):
@@ -372,7 +372,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+        self.assertContains(resp, "wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 3
         with self.assert_max_queries(20):
@@ -384,7 +384,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+        self.assertContains(resp, "wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 4
         with self.assert_max_queries(20):
@@ -396,7 +396,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+        self.assertContains(resp, "wachtwoord bevat te veel gelijke tekens")
 
     def test_inactief(self):
         self.sporter_100001.is_actief_lid = False

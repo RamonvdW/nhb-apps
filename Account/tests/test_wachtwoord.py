@@ -71,14 +71,14 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Wachtwoord moet minimaal 9 tekens lang zijn')
+        self.assertContains(resp, 'wachtwoord is te kort')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
+        self.assertContains(resp, 'wachtwoord bevat te veel gelijke tekens')
 
     def test_vergeten_uitgelogd(self):
         self.client.logout()

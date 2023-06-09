@@ -236,6 +236,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
         if not valid:
             context['foutmelding'] = errmsg
+            context['toon_tip'] = True
 
             try:
                 context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']

@@ -100,6 +100,7 @@ class RegistreerNhbNummerView(TemplateView):
         menu_dynamics(request, context)
 
         if form.is_valid():
+            # compleetheid en wachtwoord sterkte worden gecontroleerd door het formulier
             nhb_nummer = form.cleaned_data.get('nhb_nummer')
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
@@ -165,6 +166,7 @@ class RegistreerNhbNummerView(TemplateView):
                 return render(request, TEMPLATE_REGISTREER_AANGEMAAKT, context)
 
         # opnieuw
+        context['toon_tip'] = True
         return render(request, TEMPLATE_REGISTREER, context)
 
     def get(self, request, *args, **kwargs):
