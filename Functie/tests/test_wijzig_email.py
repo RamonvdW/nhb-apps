@@ -19,7 +19,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie; module wijzig functie e-mail """
 
-    test_after = ('Functie.tests.test_otp', 'Functie.tests.test_wisselvanrol')
+    test_after = ('Account', 'Functie.tests.test_wisselvanrol')
 
     url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
     url_code_prefix = '/tijdelijke-codes/'

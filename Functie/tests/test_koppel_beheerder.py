@@ -23,7 +23,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.tests.test_otp', 'Functie.tests.test_overzicht')
+    test_after = ('Account', 'Functie.tests.test_overzicht')
 
     url_overzicht = '/functie/overzicht/'
     url_overzicht_vereniging = '/functie/overzicht/vereniging/'
@@ -597,7 +597,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # haal de pagina op - het gevonden lid heeft geen regio vermelding
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?zoekterm=100')       # matcht alle nhb nummers
+            resp = self.client.get(url + '?zoekterm=100')       # matcht alle bondsnummers
         self.assertEqual(resp.status_code, 200)
         self.assertNotContains(resp, 'regio 112')
 
