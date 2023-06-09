@@ -212,12 +212,12 @@ class Command(BaseCommand):
                     except Sporter.DoesNotExist:
                         # toch door, want niet alle oude leden zitten nog in de database
                         naam = row[10]
-                        fout = 'NHB nummer niet bekend: %s (voor sporter %s)' % (repr(val), repr(naam))
+                        fout = 'Bondsnummer niet bekend: %s (voor sporter %s)' % (repr(val), repr(naam))
                         if fout not in reported_lid_nrs:
                             reported_lid_nrs.append(fout)
                             self.stderr.write(fout)
                 else:
-                    errors.append('Fout NHB nummer: %s' % repr(val))
+                    errors.append('Fout bondsnummer: %s' % repr(val))
                     val = None
                 if val and curr_record:
                     if record.sporter != curr_record.sporter:

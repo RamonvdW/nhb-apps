@@ -162,7 +162,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         with self.assert_max_queries(37):
             f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_05.json')
         self.assertTrue("[ERROR] Foute index (geen nummer): 'XA' in" in f1.getvalue())
-        self.assertTrue("Fout geslacht: 'XB' + Foute leeftijdscategorie': 'XC' + Foute materiaalklasse: 'XD' + Foute discipline: 'XE' op blad 'OD' + Fout in soort_record: 'XF' is niet bekend + Fout in para klasse: 'XG' is niet bekend + Fout in pijlen: 'XI' is geen nummer + Fout NHB nummer: 'XJ' + Fout in score 'XK' + Fout in X-count 'XL' is geen getal + Foute tekst in Ook ER: 'XM' + Foute tekst in Ook WR: 'XN' in " in f1.getvalue())
+        self.assertTrue("Fout geslacht: 'XB' + Foute leeftijdscategorie': 'XC' + Foute materiaalklasse: 'XD' + Foute discipline: 'XE' op blad 'OD' + Fout in soort_record: 'XF' is niet bekend + Fout in para klasse: 'XG' is niet bekend + Fout in pijlen: 'XI' is geen nummer + Fout bondsnummer: 'XJ' + Fout in score 'XK' + Fout in X-count 'XL' is geen getal + Foute tekst in Ook ER: 'XM' + Foute tekst in Ook WR: 'XN' in " in f1.getvalue())
         obj = IndivRecord.objects.get(discipline='18', volg_nr=2)
         self.assertEqual(obj.leeftijdscategorie, 'U')
 
@@ -200,10 +200,10 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue("DRY RUN\nSamenvatting: 5 records;" in f2.getvalue())
 
     def test_onbekend_nhbnr(self):
-        # onbekend NHB nummer
+        # onbekend bondsnummer
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_07.json')
-        self.assertTrue("NHB nummer niet bekend: '999999' " in f1.getvalue())
+        self.assertTrue("Bondsnummer niet bekend: '999999' " in f1.getvalue())
 
     def test_foute_datums(self):
         # foute datums

@@ -96,13 +96,13 @@ class WachtwoordVergetenView(TemplateView):
                 account = Account.objects.get(username=username)
             except Account.DoesNotExist:
                 # email is niet bekend en past niet bij de inlog naam
-                context['foutmelding'] = 'Voer het e-mailadres en NHB nummer in van een bestaand account'
-                # (niet te veel wijzer maken over de combi NHB nummer en e-mailadres)
+                context['foutmelding'] = 'Voer het e-mailadres en bondsnummer in van een bestaand account'
+                # (niet te veel wijzer maken over de combi bondsnummer en e-mailadres)
             else:
                 if account.bevestigde_email.lower() != email and account.nieuwe_email.lower() != email:
                     # geen match
-                    context['foutmelding'] = 'Voer het e-mailadres en NHB nummer in van een bestaand account'
-                    # (niet te veel wijzer maken over de combi NHB nummer en e-mailadres)
+                    context['foutmelding'] = 'Voer het e-mailadres en bondsnummer in van een bestaand account'
+                    # (niet te veel wijzer maken over de combi bondsnummer en e-mailadres)
 
         menu_dynamics(self.request, context)
 

@@ -65,7 +65,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
 
-        # controleer aanwezigheid van Selecteer knop, NHB nummer en Vereniging naam
+        # controleer aanwezigheid van Selecteer knop, bondsnummer en Vereniging naam
         self.assertNotContains(resp, "Niets gevonden")
         self.assertContains(resp, "normaal")
         self.assertContains(resp, "play_arrow")

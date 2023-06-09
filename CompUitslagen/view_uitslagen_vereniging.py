@@ -22,7 +22,7 @@ TEMPLATE_COMPUITSLAGEN_VERENIGING_TEAMS = 'compuitslagen/uitslagen-vereniging-te
 
 def get_sporter_ver_nr(request):
 
-    """ Geeft het vereniging nhb nummer van de ingelogde schutter terug,
+    """ Geeft het vereniging bondsnummer van de ingelogde sporter terug,
         of 101 als er geen regio vastgesteld kan worden
     """
     ver_nr = -1

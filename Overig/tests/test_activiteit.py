@@ -167,7 +167,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         account.last_login -= datetime.timedelta(days=720)
         account.save(update_fields=['otp_is_actief', 'last_login'])
 
-        # zoek op nhb nummer  --> geen functies, dus geen 2FA nodig
+        # zoek op bondsnummer  --> geen functies, dus geen 2FA nodig
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -178,7 +178,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         functie = maak_functie('Test functie', 'HWL')
         functie.accounts.add(self.account_100001)
 
-        # zoek op nhb nummer --> wel functie, dus wel 2FA nodig
+        # zoek op bondsnummer --> wel functie, dus wel 2FA nodig
         with self.assert_max_queries(23):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -199,7 +199,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         # maak nog wat wijzigingen
         vhpg.delete()
 
-        # zoek op nhb nummer --> geen VHPG record
+        # zoek op bondsnummer --> geen VHPG record
         with self.assert_max_queries(23):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK

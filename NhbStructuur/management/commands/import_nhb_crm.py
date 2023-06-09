@@ -1474,7 +1474,7 @@ class Command(BaseCommand):
 
         # for member
 
-        # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(lid_nrs), repr(lid_nrs)))
+        # self.stdout.write('[DEBUG] Volgende %s bondsnummers moeten verwijderd worden: %s' % (len(lid_nrs), repr(lid_nrs)))
         while len(lid_nrs) > 0:
             lid_nr = lid_nrs.pop(0)
             obj = self._vind_sporter(lid_nr)

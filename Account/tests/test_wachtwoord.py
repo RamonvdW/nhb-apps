@@ -304,7 +304,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Voer het e-mailadres en NHB nummer in van een bestaand account')
+        self.assertContains(resp, 'Voer het e-mailadres en bondsnummer in van een bestaand account')
 
         # niet bestaand account
         with self.assert_max_queries(20):
@@ -313,7 +313,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Voer het e-mailadres en NHB nummer in van een bestaand account')
+        self.assertContains(resp, 'Voer het e-mailadres en bondsnummer in van een bestaand account')
 
 
 # FUTURE: controleer dat andere sessies van deze gebruiker verdwijnen bij wijzigen wachtwoord?

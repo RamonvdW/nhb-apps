@@ -12,10 +12,10 @@ from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 class RegistreerForm(forms.Form):
     """
         Dit formulier wordt gebruikt om een nieuw account aan te maken
-        met een NHB nummer.
+        met een bondsnummer.
     """
     nhb_nummer = forms.CharField(
-                        label='NHB nummer',
+                        label='Bondsnummer',
                         min_length=6,
                         max_length=6,
                         required=True,

@@ -30,7 +30,7 @@
                     {% if foutmelding %}
                         <p class="nhb-rood-text">Fout: {{ foutmelding }}</p>
                     {% else %}
-                        <p>Vul je NHB nummer en e-mailadres in, dan sturen we een e-mail waarmee je een nieuw wachtwoord in kan stellen.</p>
+                        <p>Vul je bondsnummer en e-mailadres in, dan sturen we een e-mail waarmee je een nieuw wachtwoord in kan stellen.</p>
                     {% endif %}
 
                     <p>&nbsp;</p>

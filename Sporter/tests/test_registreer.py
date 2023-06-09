@@ -113,7 +113,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'Onbekend NHB nummer')
+        self.assertFormError(resp.context['form'], None, 'Onbekend bondsnummer')
 
     def test_non_existing_nr(self):
         with self.assert_max_queries(20):
@@ -125,7 +125,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'Onbekend NHB nummer')
+        self.assertFormError(resp.context['form'], None, 'Onbekend bondsnummer')
 
     def test_geen_email(self):
         # vul de sec in
@@ -177,7 +177,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None, 'De combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
 
     def test_registreer(self):
         # maak een andere sporter secretaris van de vereniging
@@ -290,7 +290,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "wachtwoord is niet sterk genoeg")
 
-        # NHB nummer in wachtwoord
+        # bondsnummer in wachtwoord
         with self.assert_max_queries(20):
             resp = self.client.post('/sporter/registreer/',
                                     {'nhb_nummer': '100001',
