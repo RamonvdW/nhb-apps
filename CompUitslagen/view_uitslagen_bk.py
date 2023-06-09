@@ -22,6 +22,32 @@ TEMPLATE_COMPUITSLAGEN_BK_INDIV = 'compuitslagen/uitslagen-bk-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_BK_TEAMS = 'compuitslagen/uitslagen-bk-teams.dtl'
 
 
+# TODO: vervangen door klasse.titel
+def get_label_eerste_plek_bk(afstand, klasse):
+    """
+        Retourneer het label 'Bondskampioen' of 'Nederlands Kampioen'
+        
+        afstand: '18' of '25'
+        klasse: een CompetitieIndivKlasse of CompetitieTeamKlasse 
+    """
+
+    # individueel klasse 1
+    if 'klasse 1' in klasse.beschrijving:
+        if afstand == '18':
+            return 'Bondskampioen'
+        return 'Nederlands Kampioen'
+
+    # teams ERE klasse
+    if 'klasse ERE' in klasse.beschrijving:
+        return 'Nederlands Kampioen'
+
+    # aspiranten klassen
+    if ' klasse ' not in klasse.beschrijving:
+        return 'Nederlands Kampioen'
+
+    return ''
+
+
 class UitslagenBKIndivView(TemplateView):
 
     """ Django class-based view voor de de uitslagen van de bondskampioenschappen """
@@ -121,13 +147,13 @@ class UitslagenBKIndivView(TemplateView):
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
                           .filter(kampioenschap=deelkamp_bk,
                                   indiv_klasse__boogtype=boogtype,
-                                  volgorde__lte=48)                  # toon tot 48 sporters per klasse
+                                  rank__lte=48)                      # toon tot 48 sporters per klasse
                           .select_related('indiv_klasse',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('indiv_klasse__volgorde',
-                                    'result_rank',
+                                    'result_volgorde',               # zet niet meegedaan (99) onderaan
                                     'volgorde'))                     # inschrijf ranking
 
             for limiet in (KampioenschapIndivKlasseLimiet
@@ -199,6 +225,11 @@ class UitslagenBKIndivView(TemplateView):
                                                                  deelnemer.result_score_1,
                                                                  deelnemer.result_score_2)
                         deelnemer.scores_str_2 = deelnemer.result_counts        # 25m1pijl only
+
+                    if deelnemer.result_rank == 1:
+                        deelnemer.result_label = get_label_eerste_plek_bk(comp.afstand, deelnemer.indiv_klasse)
+                    else:
+                        deelnemer.result_label = ''
 
                 curr_teller.aantal_regels += 1
             # for
