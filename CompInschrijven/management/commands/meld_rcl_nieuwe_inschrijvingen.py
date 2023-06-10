@@ -40,7 +40,10 @@ class Command(BaseCommand):
             # alleen nieuwe aanmeldingen rapporteren als de open inschrijving gesloten is
             # en de competitie nog in de actieve wedstrijden periode is waarin mensen zich in kunnen schrijven
             comp = deelcomp.competitie
-            if comp.is_open_voor_inschrijven():
+            comp.bepaal_fase()
+            if comp.fase_indiv == 'F':
+                # regio wedstrijden zijn begonnen
+                # tijdens deze periode willen we de RCL informeren over late inschrijvingen
                 tup = (deelcomp.competitie.afstand, deelcomp.nhb_regio.regio_nr)
                 afstand_regio2deelcomp[tup] = deelcomp
         # for
@@ -59,7 +62,7 @@ class Command(BaseCommand):
             try:
                 deelcomp = afstand_regio2deelcomp[tup]
             except KeyError:
-                # competitie is niet meer in de juiste fase
+                # competitie is niet (meer) in de juiste fase
                 pass
             else:
                 qset = (RegiocompetitieSporterBoog
