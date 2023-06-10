@@ -88,6 +88,9 @@ class TestSporterLogin(E2EHelpers, TestCase):
         # controleer dat de naam van het NHB lid door de login overgenomen wordt in het account
         self.assertNotEqual(self.account_normaal.first_name, self.sporter_100001.voornaam)
         self.assertNotEqual(self.account_normaal.last_name, self.sporter_100001.achternaam)
+        self.account_normaal.bevestigde_email = self.sporter_100001.email
+        self.account_normaal.save(update_fields=['bevestigde_email'])
+
         self.e2e_login(self.account_normaal)
         self.account_normaal = Account.objects.get(username=self.account_normaal.username)
         self.assertEqual(self.account_normaal.first_name, self.sporter_100001.voornaam)
@@ -95,6 +98,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
 
         # nogmaals inloggen voor coverage "naam is al gelijk"
         self.e2e_login(self.account_normaal)
+        self.account_normaal = Account.objects.get(username=self.account_normaal.username)
         self.assertEqual(self.account_normaal.first_name, self.sporter_100001.voornaam)
         self.assertEqual(self.account_normaal.last_name, self.sporter_100001.achternaam)
 
