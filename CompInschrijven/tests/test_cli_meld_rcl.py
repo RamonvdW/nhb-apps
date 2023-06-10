@@ -78,7 +78,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             self.assertEqual(f1.getvalue(), '')
             self.assertTrue('skipping want uur=19' in f2.getvalue())
 
-            #  competitie niet in fase C..E
+            # competitie niet in fase F
             dt = datetime(year=2000, month=1, day=1, hour=8)
             mock_timezone.return_value = dt
             f1, f2 = self.run_management_command('meld_rcl_nieuwe_inschrijvingen')
