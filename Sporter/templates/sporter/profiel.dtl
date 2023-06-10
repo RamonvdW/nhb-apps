@@ -274,7 +274,7 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% url 'Sporter:leeftijdsklassen' as card_url %}
+            {% url 'Sporter:leeftijdsgroepen-persoonlijk' as card_url %}
             {% include 'plein/card.dtl' with title="Leeftijdsklassen" text="Bekijk in welke leeftijdsklassen jij uit moet komen." icon="grade" url=card_url %}
         </div>
     </div>

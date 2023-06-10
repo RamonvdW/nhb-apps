@@ -26,7 +26,7 @@
                 {% if persoonlijke_leeftijdsklassen %}
                     <p>Een persoonlijk overzicht kan je hier inzien:</p>
                     <p>
-                        <a class="btn-nhb-rood" href="{% url 'Sporter:leeftijdsklassen' %}">
+                        <a class="btn-nhb-rood" href="{% url 'Sporter:leeftijdsgroepen-persoonlijk' %}">
                             <i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a>
                     </p>
                 {% endif %}
