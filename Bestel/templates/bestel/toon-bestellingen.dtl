@@ -42,7 +42,7 @@
                         <td class="center hide-on-small-only">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                         <td class="center">
                             <a class="btn-nhb-rood" href="{{ bestelling.url_details }}">
-                                <i class="material-icons-round">play_arrow</i></a>
+                                <i class="notranslate material-icons-round">play_arrow</i></a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -72,7 +72,7 @@
                     <td><code>{{ email_webshop }}</code></td>
                     <td>
                         <a class="btn-nhb-rood" href="mailto:{{ email_webshop }}">
-                            <i class="material-icons-round">mail</i></a>
+                            <i class="notranslate material-icons-round">mail</i></a>
                     </td>
                 </tr>
                 <tr>
@@ -80,7 +80,7 @@
                     <td><code>{{ email_support }}</code></td>
                     <td>
                         <a class="btn-nhb-rood" href="mailto:{{ email_support }}">
-                            <i class="material-icons-round">mail</i></a></td>
+                            <i class="notranslate material-icons-round">mail</i></a></td>
                 </tr>
             </table>
         </div>

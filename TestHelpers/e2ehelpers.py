@@ -678,6 +678,23 @@ class E2EHelpers(TestCase):
 
         self._assert_no_csrf_except_in_script(html, dtl)
 
+    def _assert_notranslate(self, html, dtl):
+        """ control gebruik notranslate class, bijvoorbeeld bij material-icons
+        """
+        pos_class = html.find(' class="')
+        while pos_class > 0:
+            pos_end = html.find('"', pos_class+8)
+            if pos_end < 0:
+                pos_end = len(html)
+            class_str = html[pos_class+1:pos_end+1]
+
+            if 'notranslate' not in class_str:
+                if 'material-icons' in class_str:
+                    self.fail('Bug in template %s: missing "notranslate" in %s' % (repr(dtl), class_str))
+
+            pos_class = html.find(' class="', pos_end)
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
 
@@ -706,6 +723,7 @@ class E2EHelpers(TestCase):
         self._assert_no_col_white(html, dtl)
         self._assert_inputs(html, dtl)
         self._assert_csrf_token_usage(html, dtl)
+        self._assert_notranslate(html, dtl)
 
         self._assert_template_bug(html, dtl)
 

@@ -47,7 +47,7 @@
 
                     <p class="center-align">
                         <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">email</i>Verstuur e-mail</button>
+                            <i class="notranslate material-icons-round left">email</i>Verstuur e-mail</button>
                     </p>
 
                 </form>

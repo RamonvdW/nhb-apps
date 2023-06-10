@@ -24,7 +24,7 @@
             {% if url_sec_hwl %}
                 <p>
                     <a class="btn-nhb-rood" href="{{ url_sec_hwl }}">
-                        <i class="material-icons-round left">email</i>E-mailadressen van SEC en HWL</a>
+                        <i class="notranslate material-icons-round left">email</i>E-mailadressen van SEC en HWL</a>
                 </p>
             {% endif %}
 
@@ -103,7 +103,7 @@
                             {% if obj.wijzig_url %}
                                 <br><br>
                                 <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
-                                    <i class="material-icons-round left">group_add</i>Wijzig beheerders</a>
+                                    <i class="notranslate material-icons-round left">group_add</i>Wijzig beheerders</a>
                             {% endif %}
                         </td>
 
@@ -128,7 +128,7 @@
                             {% if obj.email_url %}
                                 <br><br>
                                 <a class="btn-nhb-rood" href="{{ obj.email_url }}">
-                                    <i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                                    <i class="notranslate material-icons-round left">alternate_email</i>Wijzig e-mail</a>
                             {% endif %}
                         </td>
                     </tr>

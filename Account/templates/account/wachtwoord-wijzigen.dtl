@@ -48,7 +48,7 @@
 
                     <p class="center">
                         <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">check</i>Opslaan</button>
+                            <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                     </p>
 
                 </form>

@@ -71,7 +71,7 @@
                         <!-- button -->
                         <p class="center">
                             <button class="btn-nhb-rood" type="submit">
-                                <i class="material-icons-round left">check</i>Opslaan</button>
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
                         {% endcomment %}
@@ -99,7 +99,7 @@
 
                         <p class="center">
                             <!-- TODO: make floating button -->
-                            <button class="btn-nhb-rood" type="submit"><i class="material-icons-round left">check</i>Opslaan</button>
+                            <button class="btn-nhb-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
                     </div>
@@ -158,7 +158,7 @@
 
                         <p class="center">
                             <!-- TODO: make floating button -->
-                            <button class="btn-nhb-rood" type="submit"><i class="material-icons-round left">check</i>Opslaan</button>
+                            <button class="btn-nhb-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
                     </div>
@@ -182,7 +182,7 @@
                     <p><code>{{ email_bondsbureau }}</code></p>
                     <p>
                         <a class="btn-nhb-rood" href="mailto:{{ email_bondsbureau }}">
-                            <i class="material-icons-round">email</i></a>
+                            <i class="notranslate material-icons-round">email</i></a>
                     </p>
                 </div>
             </div>

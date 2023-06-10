@@ -59,7 +59,7 @@
 
             {% if url_toon_alles %}
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_toon_alles }}"><i class="material-icons-round left">backspace</i>Toon alles</a>
+                    <a class="btn-nhb-rood" href="{{ url_toon_alles }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
                 </p>
             {% endif %}
 
@@ -82,7 +82,7 @@
 
                 <p class="center">
                     <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">
-                        <i class="material-icons-round left">search</i>Zoek</button>
+                        <i class="notranslate material-icons-round left">search</i>Zoek</button>
                 </p>
             </div>
         </div>
@@ -133,15 +133,15 @@
     <table class="white">
         <!-- template for fixed layout -->
         <tr style="visibility:collapse; border-bottom:none">
-            <td><i class="material-icons-round">chevron_left</i></td>
+            <td><i class="notranslate material-icons-round">chevron_left</i></td>
             <td><h5>september 2021 - september 2021</h5></td>
-            <td><i class="material-icons-round">chevron_right</i></td>
+            <td><i class="notranslate material-icons-round">chevron_right</i></td>
         </tr>
         <tr style="border-bottom:none">
             <!-- knop -->
             <td class="right-align">
                 <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ url_prev }}')">
-                    <i class="material-icons-round">chevron_left</i></button>
+                    <i class="notranslate material-icons-round">chevron_left</i></button>
             </td>
 
             <td class="center">
@@ -151,7 +151,7 @@
             <!-- knop -->
             <td class="left-align">
                 <button class="btn-nhb-rood" onclick="stuur_keuzes('{{ url_next }}')">
-                    <i class="material-icons-round">chevron_right</i></button>
+                    <i class="notranslate material-icons-round">chevron_right</i></button>
             </td>
         </tr>
     </table>
@@ -201,7 +201,7 @@
                         <td class="center">
                             {% if wed.url_details %}
                                 <a class="{% if wed.kan_inschrijven %}btn-nhb-rood{% else %}btn-nhb-blauw{% endif %}" href="{{ wed.url_details }}">
-                                    <!--<i class="material-icons-round">play_arrow</i>-->Details</a>
+                                    <!--<i class="notranslate material-icons-round">play_arrow</i>-->Details</a>
                             {% endif %}
                         </td>
                     </tr>

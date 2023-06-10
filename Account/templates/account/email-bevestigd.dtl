@@ -30,12 +30,12 @@
                     <p>Je kan nu inloggen.</p>
                     <p>
                         <a class="btn-nhb-rood" href="{% url 'Account:login' %}">
-                            <i class="material-icons-round left">person</i>inloggen</a>
+                            <i class="notranslate material-icons-round left">person</i>inloggen</a>
                     </p>
                 {% else %}
                     <p>
                         <a class="btn-nhb-rood" href="{% url 'Plein:plein' %}">
-                            <i class="material-icons-round left">close</i>Sluiten</a>
+                            <i class="notranslate material-icons-round left">close</i>Sluiten</a>
                     </p>
                 {% endif %}
             </div>

@@ -151,7 +151,7 @@
             {% if not readonly_blok_2 %}
                         <p>
                             <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
-                                <i class="material-icons-round left">check</i>Opslaan</button>
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
                     </form>
                 </div>

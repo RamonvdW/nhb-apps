@@ -71,12 +71,12 @@
                         <td>
                             {% if mag_wijzigen %}
                                 <a class="btn-nhb-rood" href="{{ team.url_koppelen }}">
-                                    <i class="material-icons-round">group</i></a>
+                                    <i class="notranslate material-icons-round">group</i></a>
                             {% endif %}
                             {% if team.url_wijzig %}
                                 <span>&nbsp;&nbsp;</span>
                                 <a class="btn-nhb-rood" href="{{ team.url_wijzig }}">
-                                    <i class="material-icons-round">edit</i></a>
+                                    <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -95,7 +95,7 @@
                             <form method="post" action="{{ url_nieuw_team }}">
                                 {% csrf_token %}
                                 <button class="btn-nhb-rood" type="submit">
-                                    <i class="material-icons-round">add</i></button>
+                                    <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>
                     </tr>
@@ -137,7 +137,7 @@
                         <td>
                             {% if deelnemer.url_wijzig_ag %}
                                 <a class="btn-nhb-rood" href="{{ deelnemer.url_wijzig_ag }}">
-                                    <i class="material-icons-round">edit</i></a>
+                                    <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>
                     </tr>

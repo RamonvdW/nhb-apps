@@ -22,6 +22,7 @@
   .card-title {
     font-size: 20px;
     font-weight: 300;
+    white-space: nowrap;    // voorkom wrappen van de titel naar 2e regel
     &.activator {
       cursor: pointer;
     }

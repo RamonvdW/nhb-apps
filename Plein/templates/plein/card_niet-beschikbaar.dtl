@@ -32,7 +32,7 @@
 
         <!-- icoon -->
         <div style="margin-bottom:8px">
-            <i class="material-icons-round medium grey-text">{{ icon }}</i>
+            <i class="notranslate material-icons-round medium grey-text">{{ icon }}</i>
         </div>
 
         <div class="grey-text">{{ text }}</div>

@@ -41,7 +41,7 @@
                     <!-- button -->
                     <div class="center-align">
                         <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">search</i>Zoek</button>
+                            <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </div>
 
                 </form>

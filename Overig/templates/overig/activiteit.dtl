@@ -62,7 +62,7 @@
                     <!-- button -->
                     <p class="center">
                         <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">search</i>Zoek</button>
+                            <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </p>
                 </form>
             </div>

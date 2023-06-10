@@ -222,7 +222,7 @@
 
                 <div class="fixed-action-btn" style="display: none">
                     <button id="opslaan_knop" class="btn-nhb-rood" onclick="post_datums()" disabled>
-                        <i class="material-icons-round left">check</i>Opslaan</button>
+                        <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                 </div>
 
             </div>

@@ -94,7 +94,7 @@
                                     <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
                                     <td class="right-align">
                                         <button class="btn-nhb-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">
-                                            <i class="material-icons-round">delete</i></button>
+                                            <i class="notranslate material-icons-round">delete</i></button>
                                     </td>
                                 </tr>
 
@@ -160,7 +160,7 @@
                                 <form action="{{ url_bestellen }}" method="post">
                                     {% csrf_token %}
                                     <button id="id_bestellen" class="btn-nhb-rood">
-                                        <i class="material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
+                                        <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
                                 </form>
                             </div>
                         {% endif %}

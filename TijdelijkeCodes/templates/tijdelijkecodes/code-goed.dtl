@@ -29,7 +29,7 @@
                 <form method="post" action="{{ url }}" style="padding:30px">
                     {% csrf_token %}
                     <button class="btn-nhb-rood" type="submit" value="Ga door">
-                        <i class="material-icons-round left">check</i>Ga door</button>
+                        <i class="notranslate material-icons-round left">check</i>Ga door</button>
                 </form>
 
                 <p>Klopt er helemaal niets van? Sluit dan gewoon dit venster.</p>

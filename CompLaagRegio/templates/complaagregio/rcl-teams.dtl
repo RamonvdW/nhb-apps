@@ -102,7 +102,7 @@
             {% if url_download %}
                 <p>
                     <a class="btn-nhb-rood" href="{{ url_download }}">
-                        <i class="material-icons-round left">download</i>Download lijst</a>
+                        <i class="notranslate material-icons-round left">download</i>Download lijst</a>
                 </p>
             {% endif %}
         </div>
@@ -144,12 +144,12 @@
                     <!-- knoppen -->
                     {% if team.url_aanpassen %}
                         <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
-                            <i class="material-icons-round">edit</i></a>
+                            <i class="notranslate material-icons-round">edit</i></a>
                     {% endif %}
                     {% if team.url_verwijder %}
                         <span>&nbsp;&nbsp;</span>
                         <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_team_{{ team.pk }}">
-                            <i class="material-icons-round">delete</i></a>
+                            <i class="notranslate material-icons-round">delete</i></a>
 
                         <div class="modal" id="bevestig_verwijder_team_{{ team.pk }}">
                             <div class="modal-content center">
@@ -212,7 +212,7 @@
                         <!-- knoppen -->
                         {% if team.url_aanpassen %}
                             <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
-                                <i class="material-icons-round">edit</i></a>
+                                <i class="notranslate material-icons-round">edit</i></a>
                         {% endif %}
                     </td>
                 </tr>

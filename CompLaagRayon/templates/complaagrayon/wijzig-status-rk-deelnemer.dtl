@@ -90,7 +90,7 @@
                                 {% csrf_token %}
                                 <input name="bevestig" type="hidden" value="1">
                                 <button class="btn-nhb-blauw" type="submit">
-                                    <i class="material-icons-round left">thumb_up</i>Bevestig deelname</button>
+                                    <i class="notranslate material-icons-round left">thumb_up</i>Bevestig deelname</button>
                             </form>
                         {% endif %}
 
@@ -101,7 +101,7 @@
                                 {% csrf_token %}
                                 <input name="afmelden" type="hidden" value="1">
                                 <button class="btn-nhb-rood" type="submit">
-                                    <i class="material-icons-round left">report_problem</i>Afmelden</button>
+                                    <i class="notranslate material-icons-round left">report_problem</i>Afmelden</button>
                             </form>
                         {% endif %}
 

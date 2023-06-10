@@ -387,7 +387,7 @@
                         <td colspan="4" class="center">
                             <span>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een prestatiespeld aan kan vragen:</span><br><br>
                             <a class="btn-nhb-rood" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
-                                <i class="material-icons-round left">open_in_new</i>Link</a>
+                                <i class="notranslate material-icons-round left">open_in_new</i>Link</a>
                         </td>
                     </tr>
                 </table>
@@ -679,7 +679,7 @@
                         <td>
                             {% if rcl18_email %}
                                 <a class="btn-nhb-rood" href="mailto:{{ rcl18_email }}">
-                                    <i class="material-icons-round">mail</i></a>
+                                    <i class="notranslate material-icons-round">mail</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -713,7 +713,7 @@
                         <td>
                             {% if rcl25_email %}
                                 <a class="btn-nhb-rood" href="mailto:{{ rcl25_email }}">
-                                    <i class="material-icons-round">mail</i></a>
+                                    <i class="notranslate material-icons-round">mail</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -762,7 +762,7 @@
                         <td>
                             {% if hwl_email %}
                                 <a class="btn-nhb-rood" href="mailto:{{ hwl_email }}">
-                                    <i class="material-icons-round">mail</i></a>
+                                    <i class="notranslate material-icons-round">mail</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -811,7 +811,7 @@
                     <td>
                         {% if sec_email %}
                             <a class="btn-nhb-rood" href="mailto:{{ sec_email }}">
-                                <i class="material-icons-round">mail</i></a>
+                                <i class="notranslate material-icons-round">mail</i></a>
                         {% endif %}
                     </td>
                 </tr>
@@ -837,7 +837,7 @@
                     <td><code>{{ bb_email|wbr_email }}</code></td>
                     <td>
                         <a class="btn-nhb-rood" href="mailto:{{ bb_email }}">
-                                <i class="material-icons-round">mail</i></a>
+                                <i class="notranslate material-icons-round">mail</i></a>
                     </td>
                 </tr>
 
@@ -847,7 +847,7 @@
                     <td><code>{{ url_vcp_contact|wbr_www }}</code></td>
                     <td>
                         <a class="btn-nhb-rood" href="{{ url_vcp_contact }}" target="_blank" rel="noopener noreferrer">
-                                <i class="material-icons-round">open_in_new</i></a>
+                                <i class="notranslate material-icons-round">open_in_new</i></a>
                     </td>
                 </tr>
 

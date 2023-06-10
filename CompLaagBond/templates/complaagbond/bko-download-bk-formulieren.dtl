@@ -39,9 +39,9 @@
                         <td class="hide-on-small-only">{{ regel.match.datum_wanneer }} om {{ regel.match.tijd_begin_wedstrijd }}</td>
                         <td>
                             <a class="btn-nhb-rood hide-on-med-and-up" href="{{ regel.url }}">
-                                <i class="material-icons-round">download</i></a>
+                                <i class="notranslate material-icons-round">download</i></a>
                             <a class="btn-nhb-rood hide-on-small-only" href="{{ regel.url }}">
-                                <i class="material-icons-round left">download</i>Download</a>
+                                <i class="notranslate material-icons-round left">download</i>Download</a>
                         </td>
                     </tr>
                 {% endfor %}

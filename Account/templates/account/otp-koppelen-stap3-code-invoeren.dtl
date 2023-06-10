@@ -17,7 +17,7 @@
             <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
 
             <p>
-                <a class="btn-nhb-rood" href="{{ url_stap_2 }}"><i class="material-icons-round left">arrow_back_ios</i>Terug naar stap 2</a>
+                <a class="btn-nhb-rood" href="{{ url_stap_2 }}"><i class="notranslate material-icons-round left">arrow_back_ios</i>Terug naar stap 2</a>
             </p>
         </div>
     </div>
@@ -28,9 +28,9 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <div class="white left-align" style="padding:10px">
                 <h5>Stappenplan</h5>
-                <p class="valign-wrapper"><i class="small material-icons-round">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
-                <p class="valign-wrapper"><i class="small material-icons-round">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
-                <p class="valign-wrapper nhb-rood-text"><i class="small material-icons-round">looks_3</i> <b>Voer 6 cijfers in om koppeling te controleren.</b></p>
+                <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
+                <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
+                <p class="valign-wrapper nhb-rood-text"><i class="small notranslate material-icons-round">looks_3</i> <b>Voer 6 cijfers in om koppeling te controleren.</b></p>
             </div>
         </div>
     </div>

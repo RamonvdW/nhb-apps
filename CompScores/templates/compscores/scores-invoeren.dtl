@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -670,7 +670,7 @@
 
                     <div style="display:inline-block; margin-left:100px">
                         <button id="id_zoek_knop" class="btn-nhb-rood" onclick="opzoeken(this)" data-opzoeken="id_lid_nr" data-lid_nr="id_bondsnummer" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
-                            <i class="material-icons-round left">search</i>Zoek</button>
+                            <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </div>
                 </div>
 
@@ -710,7 +710,7 @@
                     <!-- toevoegen knop -->
                     <p class="center">
                         <button id="id_btn_toevoegen" class="btn-nhb-rood" onclick="toevoegen()" disabled>
-                            <i class="material-icons-round left">add</i>Toevoegen</button>
+                            <i class="notranslate material-icons-round left">add</i>Toevoegen</button>
                     </p>
                 </div>
 
@@ -731,7 +731,7 @@
 
     <div class="fixed-action-btn">
         <button class="btn-nhb-rood" onclick="opslaan(this)">
-            <i class="material-icons-round left">check</i>Opslaan</button>
+            <i class="notranslate material-icons-round left">check</i>Opslaan</button>
     </div>
 
 

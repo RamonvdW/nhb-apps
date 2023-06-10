@@ -122,32 +122,32 @@
                             {% if obj.locatie.baan_type == 'X' %}
                                 <!-- ga er vanuit dat nog niets ingevuld is -->
                                 {% if not obj.heeft_externe_locaties %}
-                                    <i class="material-icons-round nhb-rood-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
+                                    <i class="notranslate material-icons-round nhb-rood-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
                                     <br>
                                 {% endif %}
                             {% else %}
                                 <!-- toon binnen-buiten icoon -->
                                 {% if obj.locatie.baan_type == 'H' %}
-                                    <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Half overdekt">flip</i>
+                                    <i class="notranslate material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Half overdekt">flip</i>
                                     <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
                                     <br>
-                                    <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">flip</i>
+                                    <i class="notranslate material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">flip</i>
                                     <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
                                     <br>
                                 {% endif %}
                                 <!-- toon volledig-overdekt icoon -->
                                 {% if obj.locatie.baan_type == 'O' %}
-                                    <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Volledig overdekt">crop_din</i>
+                                    <i class="notranslate material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Volledig overdekt">crop_din</i>
                                     <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
                                     <br>
-                                    <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">crop_din</i>
+                                    <i class="notranslate material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">crop_din</i>
                                     <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
                                     <br>
                                 {% endif %}
 
                                 <!-- toon het belletje icoon als er notities zijn -->
                                 {% if obj.locatie.notities != '' %}
-                                    <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications_none</i>
+                                    <i class="notranslate material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications_none</i>
                                     <br>
                                 {% endif %}
                             {% endif %}
@@ -156,14 +156,14 @@
                         {% endif %}
 
                         {% if obj.buiten_locatie %}
-                            <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Buiten locatie">wb_sunny</i>
+                            <i class="notranslate material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Buiten locatie">wb_sunny</i>
                             <span>&nbsp;tot {{ obj.buiten_locatie.buiten_max_afstand }}m: {{ obj.buiten_locatie.buiten_banen }}</span>
                             <br>
                         {% endif %}
 
                         <!-- externe locaties -->
                         {% if obj.heeft_externe_locaties %}
-                            <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">hiking</i>
+                            <i class="notranslate material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">hiking</i>
                         {% endif %}
                     </td>
 

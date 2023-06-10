@@ -31,11 +31,11 @@
 
                             <td class="center">
                                 {% if obj.bevinding == "4" %}
-                                    <i class="material-icons-round nhb-rood-text">thumb_down</i>
+                                    <i class="notranslate material-icons-round nhb-rood-text">thumb_down</i>
                                 {% elif obj.bevinding == "6" %}
-                                    <i class="material-icons-round">thumbs_up_down</i>
+                                    <i class="notranslate material-icons-round">thumbs_up_down</i>
                                 {% elif obj.bevinding == "8" %}
-                                    <i class="material-icons-round green-text">thumb_up</i>
+                                    <i class="notranslate material-icons-round green-text">thumb_up</i>
                                 {% else %}
                                     <span class="nhb-rood-text">{{ obj.bevinding }}</span>
                                 {% endif %}
@@ -46,12 +46,12 @@
                                 <!-- button om pagina te openen -->
                                 {% if obj.volledige_url %}
                                     <a class="btn-nhb-rood" href="{{ obj.volledige_url }}" target="_blank" rel="noopener noreferrer" style="margin-right:10px">
-                                        <i class="material-icons-round">open_in_new</i></a>
+                                        <i class="notranslate material-icons-round">open_in_new</i></a>
                                 {% endif %}
 
                                 <!-- button for admin site -->
                                 <a class="btn-nhb-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/">
-                                    <i class="material-icons-round">edit</i></a>
+                                    <i class="notranslate material-icons-round">edit</i></a>
                             </td>
                         </tr>
 
