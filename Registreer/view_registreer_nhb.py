@@ -20,11 +20,11 @@ from Vereniging.models import Secretaris
 import logging
 
 
-TEMPLATE_REGISTREER = 'sporter/registreer-nhb-account.dtl'
-TEMPLATE_REGISTREER_GEEN_EMAIL = 'sporter/registreer-geen-email.dtl'
-TEMPLATE_REGISTREER_AANGEMAAKT = 'sporter/registreer-aangemaakt.dtl'
+TEMPLATE_REGISTREER = 'registreer/registreer-nhb-account.dtl'
+TEMPLATE_REGISTREER_GEEN_EMAIL = 'registreer/registreer-geen-email.dtl'
+TEMPLATE_REGISTREER_AANGEMAAKT = 'registreer/registreer-aangemaakt.dtl'
 
-my_logger = logging.getLogger('NHBApps.Sporter')
+my_logger = logging.getLogger('NHBApps.Registreer')
 
 
 def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
@@ -74,7 +74,7 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
     account_vraag_email_bevestiging(account, nhb_nummer=lid_nr_str, email=email)
 
 
-class RegistreerNhbNummerView(TemplateView):
+class RegistreerNhbLidView(TemplateView):
     """
         Deze view wordt gebruikt om het bondsnummer in te voeren voor een nieuw account.
     """

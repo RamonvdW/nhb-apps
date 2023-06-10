@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,6 +23,7 @@ handler500 = site_handler500_internal_server_error
 urlpatterns = [
     path('',                                site_root_view),
     path('account/',                        include('Account.urls')),
+    path('account/registreer/',             include('Registreer.urls')),
     path('beheer/',                         admin.site.urls),
     path('bestel/',                         include('Bestel.urls')),
     path('bestel/betaal/',                  include('Betaal.urls')),

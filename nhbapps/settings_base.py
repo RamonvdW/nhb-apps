@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'Opleidingen.apps.OpleidingenConfig',
     'Overig.apps.OverigConfig',
     'Records.apps.RecordsConfig',
+    'Registreer.apps.RegistreerConfig',
     'Score.apps.ScoreConfig',
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',
