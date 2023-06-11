@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.conf import settings
 from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_BEVESTIG_FUNCTIE_EMAIL,
+                                        RECEIVER_BEVESTIG_GAST_EMAIL,
                                         RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN,
                                         RECEIVER_KAMPIOENSCHAP_JA, RECEIVER_KAMPIOENSCHAP_NEE)
 from uuid import uuid5, NAMESPACE_URL
@@ -76,10 +77,22 @@ def maak_tijdelijke_code_account_email(account, **kwargs):
         url_code en waar deze voor bedoeld is.
         De volledige url wordt terug gegeven.
     """
-    # TODO: we geven 7 dagen om de mail te bevestigen, maar onvolledige accounts worden na 3 dagen al opgeruimd
     url_code = _maak_unieke_code(**kwargs, pk=account.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_BEVESTIG_ACCOUNT_EMAIL, geldig_dagen=7, account=account)
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_ACCOUNT_EMAIL, geldig_dagen=3, account=account)
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
+
+
+def maak_tijdelijke_code_registreer_gast_email(gast, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden om een
+        gast-account registratie e-mail te bevestigen.
+        Een SiteTijdelijkeUrl record wordt in de database gezet met de
+        url_code en waar deze voor bedoeld is.
+        De volledige url wordt terug gegeven.
+    """
+    url_code = _maak_unieke_code(**kwargs, pk=gast.pk)
+    func = tijdelijkeurl_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_GAST_EMAIL, geldig_dagen=3, gast=gast)
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
@@ -89,7 +102,7 @@ def maak_tijdelijke_code_functie_email(functie):
     """
     url_code = _maak_unieke_code(pk=functie.pk, email=functie.nieuwe_email)
     func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_BEVESTIG_FUNCTIE_EMAIL, geldig_dagen=7, functie=functie)
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_FUNCTIE_EMAIL, geldig_dagen=3, functie=functie)
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
@@ -128,6 +141,11 @@ def do_dispatch(request, obj):
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoortbij_account)
 
+    elif obj.dispatch_to == RECEIVER_BEVESTIG_GAST_EMAIL:
+        # referentie = GastRegistratie
+        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoortbij_gast)
+
     elif obj.dispatch_to == RECEIVER_BEVESTIG_FUNCTIE_EMAIL:
         # referentie = Functie
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
@@ -151,7 +169,8 @@ def beschrijving_activiteit(obj):
         return "in te loggen als een andere gebruiker"
 
     if obj.dispatch_to in (RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
-                           RECEIVER_BEVESTIG_FUNCTIE_EMAIL):
+                           RECEIVER_BEVESTIG_FUNCTIE_EMAIL,
+                           RECEIVER_BEVESTIG_GAST_EMAIL):
         return "een e-mailadres te bevestigen"
 
     if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:

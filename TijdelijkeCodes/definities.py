@@ -7,10 +7,11 @@
 # limiet: 20 tekens                12345678901234567890
 RECEIVER_BEVESTIG_ACCOUNT_EMAIL = 'account_email'
 RECEIVER_BEVESTIG_FUNCTIE_EMAIL = 'functie_email'
-RECEIVER_ACCOUNT_WISSEL = 'account_wissel'
+RECEIVER_BEVESTIG_GAST_EMAIL = 'gast_email'
 RECEIVER_WACHTWOORD_VERGETEN = 'wachtwoord_vergeten'     # 19 lang
-RECEIVER_KAMPIOENSCHAP_JA = 'kampioenschap_ja'
 RECEIVER_KAMPIOENSCHAP_NEE = 'kampioenschap_nee'
+RECEIVER_KAMPIOENSCHAP_JA = 'kampioenschap_ja'
+RECEIVER_ACCOUNT_WISSEL = 'account_wissel'
 
 
 # end of file

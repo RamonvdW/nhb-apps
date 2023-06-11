@@ -10,6 +10,7 @@ from datetime import timedelta
 from Account.models import Account
 from Competitie.models import KampioenschapSporterBoog
 from Functie.models import Functie
+from Registreer.models import GastRegistratie
 from TijdelijkeCodes.operations import set_tijdelijke_code_saver
 import datetime
 
@@ -37,6 +38,11 @@ class TijdelijkeCode(models.Model):
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)        # optional
 
+    hoortbij_gast = models.ForeignKey(
+                                GastRegistratie,
+                                on_delete=models.CASCADE,
+                                blank=True, null=True)  # optional
+
     hoortbij_functie = models.ForeignKey(
                                 Functie,
                                 on_delete=models.CASCADE,
@@ -57,6 +63,8 @@ class TijdelijkeCode(models.Model):
         hoort_bij = list()
         if self.hoortbij_account:
             hoort_bij. append('account: %s' % self.hoortbij_account)
+        if self.hoortbij_gast:
+            hoort_bij. append('gast registratie: %s' % self.hoortbij_gast)
         if self.hoortbij_functie:
             hoort_bij.append('functie: %s' % self.hoortbij_functie)
         if self.hoortbij_kampioenschap:
@@ -65,7 +73,9 @@ class TijdelijkeCode(models.Model):
         return msg
 
 
-def save_tijdelijke_code(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, account=None, functie=None):
+def save_tijdelijke_code(url_code, dispatch_to,
+                         geldig_dagen=0, geldig_seconden=0,
+                         account=None, gast=None, functie=None):
 
     if geldig_seconden > 0:
         delta = timedelta(seconds=geldig_seconden)
@@ -77,13 +87,14 @@ def save_tijdelijke_code(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=
     # TODO: voorkom dubbele records voor dezelfde url_code
     # (voorbeeld: na elke inlog wordt code gebruikt voor bevestigen email)
 
-    obj = TijdelijkeCode(
-            url_code=url_code,
-            aangemaakt_op=now,
-            geldig_tot=now + delta,
-            dispatch_to=dispatch_to,
-            hoortbij_account=account,
-            hoortbij_functie=functie)
+    obj, is_created = TijdelijkeCode.objects.get_or_create(
+                            url_code=url_code,
+                            aangemaakt_op=now,
+                            geldig_tot=now + delta,
+                            dispatch_to=dispatch_to,
+                            hoortbij_account=account,
+                            hoortbij_gast=gast,
+                            hoortbij_functie=functie)
     obj.save()
 
     return obj
