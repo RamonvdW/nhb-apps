@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Helper om een ping te geven aan een management taak die in de achtergrond draait
-    en wacht op een nieuwe opdracht, welke via de database doorgegeven moet worden.
+""" Helper om een een management taak te kietelen die in de achtergrond draait en wacht op een nieuwe opdracht.
+    De management taak wordt typisch gebruikt om vele verzoeken 1 voor 1 af te handelen, zodat er geen
+    concurrency problemen ontstaan.
+
+    De queue met data van de verzoeken is typisch een database tabel.
 
     Elke taak kan met een unieke naam benaderd worden.
 """
@@ -15,10 +18,20 @@ import select
 
 
 class BackgroundSync(object):
-
-    """ Poort nummer moeten gelijk zijn aan de zendende en ontvangende kant
-        en moeten dus globaal gealloceerd worden, typisch in settings.py
     """
+        BackgroundSync: implementatie voor zowel de zendende als ontvangende kant.
+
+        ping()          is voor de zender
+        wait_for_ping() is voor de ontvanger
+                        accepteert een maximale tijd om te wachten (default: 1 seconde)
+
+        Ontvanger en zender moeten geconfigureerd worden met hetzelfde poortnummer.
+        Deze kunnen het beste dus globaal gealloceerd worden, typisch in settings.py
+
+        De manier waarop de synchronisatie gedaan wordt is niet relevant voor zender of ontvanger.
+        De huidige implementation geeft geen belasting op de database.
+    """
+
     def __init__(self, poort_nummer):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._address = ('localhost', poort_nummer)
@@ -58,5 +71,6 @@ class BackgroundSync(object):
             got_ping = True
 
         return got_ping
+
 
 # end of file

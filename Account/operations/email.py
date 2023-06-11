@@ -81,8 +81,8 @@ def account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url):
 
 
 def account_email_bevestiging_ontvangen(account):
-    """ Deze functie wordt vanuit de tijdelijke url receiver functie (zie view)
-        aanroepen met account = Account object waar dit op van toepassing is
+    """ Deze functie wordt vanuit de tijdelijke url receiver aangeroepen, via onze plugin.py
+        met account = Account object waar dit op van toepassing is
     """
     # voorkom verlies van een bevestigde email bij interne fouten
     if account.nieuwe_email != '':
