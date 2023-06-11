@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,20 +46,20 @@ echo "[INFO] Starting regiocomp_tussenstand (runtime: $BG_DURATION minutes)"
 pkill -f regiocomp_tussenstand
 ./manage.py regiocomp_tussenstand --settings=$SETTINGS $BG_DURATION &
 
+# wacht tot alle achtergrondtaken gestart zijn
+sleep 0.8
+
 # start the development webserver
-if [ $DEBUG -eq 1 ]
+EXTRA_ARGS=''
+if [ $DEBUG -ne 1 ]
 then
-    echo "[INFO] Starting runserver with dev config and DEBUG=True"
-    ./manage.py runserver --settings=$SETTINGS
-else
     # run with DEBUG=False stops serving static files..
     # using --insecure fixes that
-    echo "[INFO] Starting runserver"
-    ./manage.py runserver --settings=$SETTINGS --insecure
+    EXTRA_ARGS="--insecure"
 fi
 
-# set normal performance
-#sudo cpupower frequency-set --governor schedutil > /dev/null
+echo "[INFO] Starting runserver with config $SETTINGS"
+./manage.py runserver --settings=$SETTINGS --skip-checks $EXTRA_ARGS
 
 # kill the background processes
 echo "[INFO] Stopping background tasks"

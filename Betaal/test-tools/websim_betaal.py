@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -171,14 +171,14 @@ monitor_keep_running = True
 
 
 def monitor_payment_changes():
-    # wait some, to allow the runserver to load
+    # wait some time, to ensure POST is possible (allow runserver to load)
     for lp in range(5):
         time.sleep(1)
         if not monitor_keep_running:
             return
     # for
 
-    out_info('Starting monitoring of payment status changes')
+    # out_info('Starting monitoring of payment status changes')
 
     while monitor_keep_running:
         # check for changes
