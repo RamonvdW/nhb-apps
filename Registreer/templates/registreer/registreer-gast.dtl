@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2023 Ramon van der Winkel.
+                Copyright (c) 2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,9 +13,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Account aanmaken</h3>
-            <p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
-            <p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mailadres bekend is bij de NHB.</p>
+            <h3 class="page-banner">Gast-account aanmaken</h3>
+            <p>Via deze pagina kan je een gast-account aanmaken waarmee je aankopen kan doen op deze site.</p>
         </div>
     </div>
 
@@ -27,19 +26,23 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
 
-                    <form action="{% url 'Sporter:registreer' %}" method="post">
+                    <form action="{{ url_aanmaken }}" method="post">
                         {% csrf_token %}
 
                         <div class="input-field">
-                            {{ form.nhb_nummer.label_tag }}{{ form.nhb_nummer }}
+                            {{ form.voornaam.label_tag }}{{ form.voornaam }}
+                        </div>
+
+                        <div class="input-field">
+                            {{ form.tussenvoegsel.label_tag }}{{ form.tussenvoegsel }}
+                        </div>
+
+                        <div class="input-field">
+                            {{ form.achternaam.label_tag }}{{ form.achternaam }}
                         </div>
 
                         <div class="input-field">
                             {{ form.email.label_tag }}{{ form.email }}
-                        </div>
-
-                        <div class="input-field">
-                            {{ form.nieuw_wachtwoord.label_tag }}{{ form.nieuw_wachtwoord }}
                         </div>
 
                         {% if form.errors %}

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from django.views.generic import TemplateView
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.email import account_vraag_email_bevestiging
@@ -14,15 +14,15 @@ from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
-from Sporter.forms import RegistreerForm
+from Registreer.forms import RegistreerNhbForm
 from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
 from Vereniging.models import Secretaris
 import logging
 
 
-TEMPLATE_REGISTREER = 'registreer/registreer-nhb-account.dtl'
-TEMPLATE_REGISTREER_GEEN_EMAIL = 'registreer/registreer-geen-email.dtl'
-TEMPLATE_REGISTREER_AANGEMAAKT = 'registreer/registreer-aangemaakt.dtl'
+TEMPLATE_REGISTREER_NHB = 'registreer/registreer-nhb.dtl'
+TEMPLATE_REGISTREER_GEEN_EMAIL = 'registreer/registreer-nhb-geen-email.dtl'
+TEMPLATE_REGISTREER_AANGEMAAKT = 'registreer/registreer-nhb-aangemaakt.dtl'
 
 my_logger = logging.getLogger('NHBApps.Registreer')
 
@@ -76,15 +76,31 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
 
 class RegistreerNhbLidView(TemplateView):
     """
-        Deze view wordt gebruikt om het bondsnummer in te voeren voor een nieuw account.
+        Deze view wordt gebruikt om het bondsnummer en e-mailadres van een NHB lid en daarmee een account aan te maken.
     """
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een GET request ontvangen is
+        """
+        # begin met een leeg formulier
+        form = RegistreerNhbForm()
+
+        context = {
+            'form': form,
+            'kruimels': (
+                (reverse('Registreer:begin'), 'Account aanmaken'),
+                (None, 'NHB lid')),
+        }
+
+        menu_dynamics(request, context)
+        return render(request, TEMPLATE_REGISTREER_NHB, context)
 
     @staticmethod
     def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
-        form = RegistreerForm(request.POST)
+        form = RegistreerNhbForm(request.POST)
 
         # still here --> re-render with error message
         context = {
@@ -93,10 +109,12 @@ class RegistreerNhbLidView(TemplateView):
             'sec_naam': '',
             'email_bb': settings.EMAIL_BONDSBUREAU,
             'verberg_login_knop': True,
+            'url_aanmaken': reverse('Registreer:nhb'),
             'kruimels': (
-                (None, 'Account aanmaken'),
-            ),
+                (reverse('Registreer:begin'), 'Account aanmaken'),
+                (None, 'NHB lid')),
         }
+
         menu_dynamics(request, context)
 
         if form.is_valid():
@@ -134,13 +152,16 @@ class RegistreerNhbLidView(TemplateView):
                 return render(request, TEMPLATE_REGISTREER_GEEN_EMAIL, context)
 
             except AccountCreateError as exc:
+                # verkeerd e-mailadres
                 form.add_error(None, str(exc))
 
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
-                                   activiteit="Mislukt voor bondsnummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
-                my_logger.info('%s REGISTREER Mislukt voor bondsnummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
+                                   activiteit="Mislukt voor bondsnummer %s vanaf IP %s: %s" % (
+                                       repr(nhb_nummer), from_ip, str(exc)))
+                my_logger.info('%s REGISTREER Mislukt voor bondsnummer %s met email %s (reden: %s)' % (
+                                from_ip, repr(nhb_nummer), repr(email), str(exc)))
 
             except SporterInactief:
                 # lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
@@ -150,7 +171,8 @@ class RegistreerNhbLidView(TemplateView):
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
                                    activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
-                my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (inactief)' % (from_ip, repr(nhb_nummer)))
+                my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (inactief)' % (
+                                from_ip, repr(nhb_nummer)))
 
                 # FUTURE: redirect naar een pagina met een uitgebreider duidelijk bericht
 
@@ -158,8 +180,10 @@ class RegistreerNhbLidView(TemplateView):
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
-                                   activiteit="Account aangemaakt voor bondsnummer %s vanaf IP %s" % (repr(nhb_nummer), from_ip))
-                my_logger.info('%s REGISTREER account aangemaakt voor bondsnummer %s' % (from_ip, repr(nhb_nummer)))
+                                   activiteit="Account aangemaakt voor bondsnummer %s vanaf IP %s" % (
+                                       repr(nhb_nummer), from_ip))
+                my_logger.info('%s REGISTREER account aangemaakt voor bondsnummer %s' % (
+                                from_ip, repr(nhb_nummer)))
 
                 context['login_naam'] = nhb_nummer
                 context['partial_email'] = mailer_obfuscate_email(email)
@@ -167,23 +191,7 @@ class RegistreerNhbLidView(TemplateView):
 
         # opnieuw
         context['toon_tip'] = True
-        return render(request, TEMPLATE_REGISTREER, context)
-
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is
-        """
-        # GET operation --> create empty form
-        form = RegistreerForm()
-
-        context = dict()
-        context['form'] = form
-
-        context['kruimels'] = (
-            (None, 'Account aanmaken'),
-        )
-
-        menu_dynamics(request, context)
-        return render(request, TEMPLATE_REGISTREER, context)
+        return render(request, TEMPLATE_REGISTREER_NHB, context)
 
 
 # end of file

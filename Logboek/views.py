@@ -233,6 +233,7 @@ class LogboekAccountsView(LogboekBasisView):
                         Q(gebruikte_functie='Bevestig e-mail') |
                         Q(gebruikte_functie='Registreer met NHB nummer') |
                         Q(gebruikte_functie='Registreer met bondsnummer') |
+                        Q(gebruikte_functie='Registreer gast-account') |
                         Q(gebruikte_functie='Wachtwoord'))
                 .order_by('-toegevoegd_op'))
 
