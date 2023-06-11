@@ -194,7 +194,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
-        self.e2e_login(self.testdata.account_admin)
+        self.client.logout()
         url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
