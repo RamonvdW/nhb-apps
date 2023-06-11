@@ -87,6 +87,7 @@ class RegistreerNhbLidView(TemplateView):
 
         context = {
             'form': form,
+            'url_aanmaken': reverse('Registreer:nhb'),
             'kruimels': (
                 (reverse('Registreer:begin'), 'Account aanmaken'),
                 (None, 'NHB lid')),
@@ -102,14 +103,13 @@ class RegistreerNhbLidView(TemplateView):
         """
         form = RegistreerNhbForm(request.POST)
 
-        # still here --> re-render with error message
         context = {
             'form': form,
+            'url_aanmaken': reverse('Registreer:nhb'),
             'sec_email': '',
             'sec_naam': '',
             'email_bb': settings.EMAIL_BONDSBUREAU,
             'verberg_login_knop': True,
-            'url_aanmaken': reverse('Registreer:nhb'),
             'kruimels': (
                 (reverse('Registreer:begin'), 'Account aanmaken'),
                 (None, 'NHB lid')),
@@ -148,7 +148,6 @@ class RegistreerNhbLidView(TemplateView):
                     functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
                     context['sec_email'] = functie.bevestigde_email
 
-                menu_dynamics(request, context)
                 return render(request, TEMPLATE_REGISTREER_GEEN_EMAIL, context)
 
             except AccountCreateError as exc:
