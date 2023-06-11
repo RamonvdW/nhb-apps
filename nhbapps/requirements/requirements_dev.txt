@@ -4,13 +4,13 @@
 #
 #    pip-compile --resolver=backtracking requirements_dev.in
 #
-asgiref==3.7.1
+asgiref==3.7.2
     # via
     #   -r requirements.txt
     #   django
 beautifulsoup4==4.12.2
     # via -r requirements_dev.in
-cachetools==5.3.0
+cachetools==5.3.1
     # via
     #   -r requirements.txt
     #   google-auth
@@ -22,7 +22,7 @@ charset-normalizer==3.1.0
     # via
     #   -r requirements.txt
     #   requests
-coverage==7.2.6
+coverage==7.2.7
     # via -r requirements_dev.in
 django==4.2.2
     # via
@@ -31,23 +31,19 @@ django==4.2.2
     #   django-extensions
 django-debug-toolbar==4.1.0
     # via -r requirements_dev.in
-django-extensions==3.2.1
+django-extensions==3.2.3
     # via -r requirements_dev.in
 et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-freetype-py==2.3.0
-    # via
-    #   reportlab
-    #   rlpycairo
 google-api-core==2.11.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.86.0
+google-api-python-client==2.88.0
     # via -r requirements.txt
-google-auth==2.18.1
+google-auth==2.19.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -92,7 +88,7 @@ pip-review==1.3.0
     # via -r requirements_dev.in
 prettytable==3.7.0
     # via pip-licenses
-protobuf==4.23.1
+protobuf==4.23.2
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -108,8 +104,6 @@ pyasn1-modules==0.3.0
     # via
     #   -r requirements.txt
     #   google-auth
-pycairo==1.23.0
-    # via rlpycairo
 pyotp==2.8.0
     # via -r requirements.txt
 pyparsing==3.0.9
@@ -124,7 +118,7 @@ pyyaml==6.0
     # via html5validator
 qrcode==7.4.2
     # via -r requirements.txt
-reportlab==4.0.0
+reportlab==4.0.4
     # via -r requirements_dev.in
 requests==2.31.0
     # via
@@ -136,8 +130,6 @@ requests-oauthlib==1.3.1
     # via
     #   -r requirements.txt
     #   mollie-api-python
-rlpycairo==0.2.0
-    # via reportlab
 rsa==4.9
     # via
     #   -r requirements.txt
@@ -154,7 +146,7 @@ sqlparse==0.4.4
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
-typing-extensions==4.6.1
+typing-extensions==4.6.3
     # via
     #   -r requirements.txt
     #   asgiref
