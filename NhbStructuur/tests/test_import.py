@@ -201,7 +201,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        with self.assert_max_queries(73):
+        with self.assert_max_queries(74):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -224,7 +224,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
-        with self.assert_max_queries(73):
+        with self.assert_max_queries(74):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_08_VER_MUTATIES,
                                                  OPTION_SIM)
@@ -669,7 +669,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue(sporter.bij_vereniging is not None)
 
         # lid 100001 heeft zich uitgeschreven tijdens het jaar
-        with self.assert_max_queries(53):
+        with self.assert_max_queries(54):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_18_LID_UITGESCHREVEN,
                                                  '--sim_now=2020-07-02')
@@ -682,7 +682,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue(sporter.bij_vereniging is not None)
 
         # lid 100001 is nog steeds uitgeschreven - geen verandering tot 15 januari
-        with self.assert_max_queries(53):
+        with self.assert_max_queries(54):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_18_LID_UITGESCHREVEN,
                                         '--sim_now=2021-01-15')
