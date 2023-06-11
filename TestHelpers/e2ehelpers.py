@@ -105,11 +105,11 @@ class E2EHelpers(TestCase):
     @staticmethod
     def _get_useful_template_name(response):
         lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms') and not tmpl.name.startswith('email_')]
+        if len(lst) == 0:       # pragma: no cover
+            return 'no template!'
         if len(lst) > 1:        # pragma: no cover
             print('[WARNING] e2ehelpers._get_useful_template_name: too many choices!!! %s' % repr(lst))
-        if len(lst):
-            return lst[0]
-        return 'no template!'
+        return lst[0]
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account aan in de database van de website """
@@ -143,7 +143,7 @@ class E2EHelpers(TestCase):
     def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         resp = self.e2e_login_no_check(account, wachtwoord)
-        if resp.status_code != 302:
+        if resp.status_code != 302:         # pragma: no cover
             self.e2e_dump_resp(resp)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
@@ -187,7 +187,7 @@ class E2EHelpers(TestCase):
 
         try:
             expected_url = self.WISSEL_VAN_ROL_EXPECTED_URL[functie.rol]
-        except KeyError:
+        except KeyError:        # pragma: no cover
             expected_url = 'functie ontbreekt'
 
         # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
@@ -622,7 +622,7 @@ class E2EHelpers(TestCase):
 
     def _assert_template_bug(self, html, dtl):
         pos = html.find('##BUG')
-        if pos >= 0:
+        if pos >= 0:                        # pragma: no cover
             msg = html[pos:]
             context = html[pos-30:]
             pos = msg.find('##', 3)
@@ -638,16 +638,16 @@ class E2EHelpers(TestCase):
 
         pos_csrf = html.find('csrfmiddlewaretoken')
         if is_post:
-            if pos_csrf < 0:
+            if pos_csrf < 0:        # pragma: no cover
                 self.fail(msg='Bug in template %s: missing csrf token inside form with method=post' % repr(dtl))
         else:
-            if pos_csrf >= 0:
+            if pos_csrf >= 0:       # pragma: no cover
                 self.fail(msg='Bug in template %s: found csrf token inside form not using method=post' % repr(dtl))
 
     def _assert_no_csrf(self, html, dtl):
         """ controleer geen oneigenlijk gebruik van het csrf_token """
         pos_csrf = html.find('csrfmiddlewaretoken')
-        if pos_csrf >= 0:
+        if pos_csrf >= 0:           # pragma: no cover
             self.fail('Bug in template %s: found csrf token usage outside form' % repr(dtl))
 
     def _assert_no_csrf_except_in_script(self, html, dtl):
@@ -684,12 +684,12 @@ class E2EHelpers(TestCase):
         pos_class = html.find(' class="')
         while pos_class > 0:
             pos_end = html.find('"', pos_class+8)
-            if pos_end < 0:
+            if pos_end < 0:     # pragma: no cover
                 pos_end = len(html)
             class_str = html[pos_class+1:pos_end+1]
 
             if 'notranslate' not in class_str:
-                if 'material-icons' in class_str:
+                if 'material-icons' in class_str:       # pragma: no cover
                     self.fail('Bug in template %s: missing "notranslate" in %s' % (repr(dtl), class_str))
 
             pos_class = html.find(' class="', pos_end)
@@ -701,7 +701,7 @@ class E2EHelpers(TestCase):
         # check for files
         # 'Content-Disposition': 'attachment; filename="bond_alle.csv"'
         check = response.get('Content-Disposition', '')
-        if 'ATTACHMENT;' in str(check).upper():
+        if 'ATTACHMENT;' in str(check).upper():     # pragma: no cover
             self.fail('Found attachment instead of html page')
 
         html = response.content.decode('utf-8')
@@ -826,7 +826,7 @@ class E2EHelpers(TestCase):
 
         if get:
             resp = self.client.get(url)
-            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):    # pragma: no cover
                 self.fail(msg='Onverwachte status code %s bij GET command' % resp.status_code)
 
         if post:
@@ -1073,7 +1073,7 @@ class E2EHelpers(TestCase):
 
         try:
             json_data = json.loads(resp.content)
-        except (json.decoder.JSONDecodeError, UnreadablePostError) as exc:
+        except (json.decoder.JSONDecodeError, UnreadablePostError) as exc:      # pragma: no cover
             self.fail('No valid JSON response (%s)' % str(exc))
             json_data = None
 
@@ -1088,8 +1088,8 @@ class E2EHelpers(TestCase):
     def assert200_is_bestand_xlsx(self, resp):
         self._assert_bestand(resp, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-    def assert200_is_bestand_xlsm(self, resp):
-        self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
+    # def assert200_is_bestand_xlsm(self, resp):
+    #     self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
 
     def run_management_command(self, *args, report_exit_code=True):
         """ Helper om code duplicate te verminderen en bij een SystemExit toch de traceback (in stderr) te tonen """
