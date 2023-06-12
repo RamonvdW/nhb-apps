@@ -79,7 +79,8 @@ def receive_bevestiging_account_email(request, account):
     """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
         om een email adres te bevestigen, zowel de eerste keer als wijziging van email.
             account is een Account object.
-        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
+        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
+        of een HttpResponse object.
     """
     account_email_bevestiging_ontvangen(account)
 

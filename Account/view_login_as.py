@@ -35,7 +35,8 @@ def receiver_account_wissel(request, account):
     """ Met deze functie kan een geautoriseerd persoon tijdelijk inloggen op de site
         als een andere gebruiker.
             obj is een AccountEmail object.
-        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
+        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
+        of een HttpResponse object.
     """
     old_last_login = account.last_login
 

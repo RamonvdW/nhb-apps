@@ -36,7 +36,10 @@ class TijdelijkeCodesDispatcher(object):
         self._dispatcher[topic] = func
 
     def get_receiver(self, topic):
-        return self._dispatcher[topic]
+        try:
+            return self._dispatcher[topic]
+        except KeyError:
+            raise NotImplementedError('Receiver function not configured for topic %s' % repr(topic))
 
     def set_saver(self, func):
         self._saver = func

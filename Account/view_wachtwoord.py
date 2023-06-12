@@ -131,7 +131,8 @@ def receive_wachtwoord_vergeten(request, account):
     """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
         voor een vergeten wachtwoord.
             account is een Account object.
-        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
+        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
+        of een HttpResponse object.
 
         We loggen automatisch in op het account waar de link bij hoort
         en sturen dan door naar de wijzig-wachtwoord pagina

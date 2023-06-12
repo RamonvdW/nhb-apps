@@ -69,6 +69,9 @@ class OntvangerView(View):
         """
         url_code = kwargs['code']
 
+        # TODO: voorkom parallelle afhandeling van dezelfde eenmalig code
+        # atomic transaction? select_for_update?
+
         url_or_response = None
         now = timezone.now()
         for obj in TijdelijkeCode.objects.filter(url_code=url_code):
