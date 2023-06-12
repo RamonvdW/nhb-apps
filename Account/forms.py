@@ -43,7 +43,7 @@ class LoginForm(forms.Form):
             wachtwoord = self.cleaned_data.get("wachtwoord")
             # print("cleaned_data: %s" % repr(self.cleaned_data))
             if login_naam == "" or wachtwoord == "":
-                self.add_error(None, 'Niet alle velden zijn ingevuld')
+                self.add_error(None, 'niet alle velden zijn ingevuld')
                 valid = False
         return valid
 

@@ -49,6 +49,7 @@ def account_vraag_email_bevestiging(account, **kwargs):
     # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_code_account_email(account, **kwargs)
 
+    # TODO: omzetten naar een email template
     text_body = ("Hallo!\n\n"
                  + "Je hebt een account aangemaakt op " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om dit te bevestigen.\n\n"
