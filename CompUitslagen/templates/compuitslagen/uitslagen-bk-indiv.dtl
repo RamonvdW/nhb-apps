@@ -158,7 +158,7 @@
                             <th class="center">Plaats</th>  <!-- rank -->
                             <th>Sporter</th>
                             <th class="hide-on-small-only">Vereniging</th>
-                            <th></th>   <!-- label: Kampioen Rayon # -->
+                            <th class="hide-on-small-only"></th>   <!-- label: Kampioen -->
                             <th colspan="2">BK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
 
                         {% else %}
@@ -180,9 +180,9 @@
                     {% if obj.toon_uitslag%}
 
                         <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}<!-- <span class="nhb-blauw-text">/{{ obj.result_volgorde }}</span>--></td>
-                        <td>{{ obj.naam_str }}</td>
+                        <td>{% if obj.result_label %}<div class="hide-on-med-and-up"><b>{{ obj.result_label }}</b><br></div>{% endif %}{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{{ obj.ver_str }}</td>
-                        <td>{{ obj.result_label }}</td>
+                        <td class="hide-on-small-only">{{ obj.result_label }}</td>
                         <td>{{ obj.scores_str_1 }}</td>
                         <td>{{ obj.scores_str_2 }}</td>
 
