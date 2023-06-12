@@ -755,10 +755,22 @@ class TestData(object):
             ver_nr = functie.nhb_ver.ver_nr
             if functie.rol == 'SEC':
                 self.functie_sec[ver_nr] = functie
-                functie.accounts.add(self.account_sec[ver_nr])
+                try:
+                    account = self.account_sec[ver_nr]
+                except KeyError:
+                    # typically ver_nr=8000
+                    pass
+                else:
+                    functie.accounts.add(account)
             else:
                 self.functie_hwl[ver_nr] = functie
-                functie.accounts.add(self.account_hwl[ver_nr])
+                try:
+                    account = self.account_hwl[ver_nr]
+                except KeyError:
+                    # typically ver_nr=8000
+                    pass
+                else:
+                    functie.accounts.add(account)
         # for
 
     def maak_clubs_en_sporters(self, ook_ifaa_bogen=False):
