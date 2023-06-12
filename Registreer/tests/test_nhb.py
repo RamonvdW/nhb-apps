@@ -18,7 +18,7 @@ import datetime
 
 class TestRegistreerNhb(E2EHelpers, TestCase):
 
-    """ tests voor de Sporter applicatie; module Registreer """
+    """ tests voor de Registreer applicatie; voor NHB leden """
 
     test_after = ('Account',)
 
@@ -37,40 +37,40 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = NhbVereniging(
+                    naam="Grote Club",
+                    ver_nr="1000",
+                    regio=NhbRegio.objects.get(pk=111))
         ver.save()
-        self.nhbver = ver
 
         # maak de SEC functie aan
         functie = Functie(rol='SEC', nhb_ver=ver, beschrijving='SEC vereniging 1000')
         functie.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    email="normaal@test.com",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.account_normaal)
         sporter.save()
         self.sporter_100001 = sporter
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Testerin",
+                    email="",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100002 = sporter
 

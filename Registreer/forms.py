@@ -7,6 +7,7 @@
 from django import forms
 
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
+from Mailer.operations import mailer_email_is_valide
 
 
 class RegistreerNhbForm(forms.Form):
@@ -39,14 +40,14 @@ class RegistreerNhbForm(forms.Form):
             nieuw_wachtwoord = self.cleaned_data.get('nieuw_wachtwoord')
 
             if nhb_nummer == "" or email == "" or nieuw_wachtwoord == "":
-                self.add_error(None, 'Niet alle velden zijn ingevuld')
+                self.add_error(None, 'niet alle velden zijn ingevuld')
                 valid = False
             else:
                 valid, errmsg = account_test_wachtwoord_sterkte(nieuw_wachtwoord, nhb_nummer)
                 if not valid:
                     self.add_error(None, errmsg)
         else:
-            self.add_error(None, 'De gegevens worden niet geaccepteerd')
+            self.add_error(None, 'de gegevens worden niet geaccepteerd')
 
         return valid
 
@@ -57,19 +58,14 @@ class RegistreerGastForm(forms.Form):
     """
     voornaam = forms.CharField(
                         label='Voornaam',
-                        max_length=40,
+                        max_length=50,
                         required=True,
                         widget=forms.TextInput(attrs={'autofocus': True}))
-
-    tussenvoegsel = forms.CharField(
-                        label='Tussenvoegsel',
-                        max_length=25,
-                        required=False)
 
     achternaam = forms.CharField(
                         label='Achternaam',
                         max_length=100,
-                        required=False)
+                        required=True)
 
     email = forms.EmailField(
                         label='E-mail adres',
@@ -78,16 +74,17 @@ class RegistreerGastForm(forms.Form):
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
         if valid:
-            voornaam = self.cleaned_data.get('voornaam')
-            tussenvoegsel = self.cleaned_data.get('tussenvoegsel')
-            achternaam = self.cleaned_data.get('achternaam')
+            # alle velden zijn 'required' en dus niet leeg
+
+            # voornaam = self.cleaned_data.get('voornaam')
+            # achternaam = self.cleaned_data.get('achternaam')
             email = self.cleaned_data.get('email')
 
-            if voornaam == "" or achternaam == "" or email == "":
-                self.add_error(None, 'Niet alle velden zijn ingevuld')
+            if not mailer_email_is_valide(email):
+                self.add_error(None, 'voer een valide e-mailadres in')
                 valid = False
         else:
-            self.add_error(None, 'De gegevens worden niet geaccepteerd')
+            self.add_error(None, 'de gegevens worden niet geaccepteerd')
 
         return valid
 

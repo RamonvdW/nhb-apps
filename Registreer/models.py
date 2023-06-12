@@ -9,7 +9,7 @@ from Account.models import Account
 from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MAN
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging
-from Registreer.definities import REGISTRATIE_FASE_BEGIN
+from Registreer.definities import REGISTRATIE_FASE_BEGIN, REGISTRATIE_FASE2STR
 from Sporter.models import Sporter, validate_geboorte_datum
 
 
@@ -40,7 +40,7 @@ class GastRegistratie(models.Model):
     # 3: invoer alle benodigde gegevens
 
     # wanneer is deze registratie gestart?
-    datum_aangemaakt = models.DateField(auto_now_add=True)
+    aangemaakt = models.DateTimeField(auto_now_add=True)
 
     # fase van het registratie-process
     fase = models.PositiveSmallIntegerField(default=REGISTRATIE_FASE_BEGIN)
@@ -64,7 +64,6 @@ class GastRegistratie(models.Model):
 
     # volledige naam
     voornaam = models.CharField(max_length=50)
-    tussenvoegsel = models.CharField(max_length=25)
     achternaam = models.CharField(max_length=100)
 
     # geboortedatum
@@ -96,6 +95,10 @@ class GastRegistratie(models.Model):
         """ meta data voor de admin interface """
         verbose_name = 'Gast registratie'
 
+    def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        return "%s [%s] %s: %s %s" % (self.aangemaakt.strftime('%Y-%m-%d %H:%M utc'), REGISTRATIE_FASE2STR[self.fase], self.lid_nr, self.voornaam, self.achternaam)
+
     objects = models.Manager()      # for the editor only
 
 
@@ -109,11 +112,15 @@ class GastRegistratieRateTracker(models.Model):
     from_ip = models.CharField(max_length=48)
 
     # wanneer is er vanaf dit IP adres voor het laatst een verzoek gedaan
-    vorige_gebruik = models.DateTimeField()
+    vorig_gebruik = models.DateTimeField()
 
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = 'Rate tracker'
+
+    def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        return "%s %s" % (self.vorig_gebruik, self.from_ip)
 
     objects = models.Manager()      # for the editor only
 

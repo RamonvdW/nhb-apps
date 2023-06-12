@@ -11,7 +11,7 @@ from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRat
 class GastRegistratieAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Sporter klasse """
 
-    ordering = ('-datum_aangemaakt',)       # nieuwste bovenaan
+    ordering = ('-aangemaakt',)       # nieuwste bovenaan
 
     search_fields = ('voornaam', 'achternaam', 'lid_nr', 'email')
 

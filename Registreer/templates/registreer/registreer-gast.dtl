@@ -34,10 +34,6 @@
                         </div>
 
                         <div class="input-field">
-                            {{ form.tussenvoegsel.label_tag }}{{ form.tussenvoegsel }}
-                        </div>
-
-                        <div class="input-field">
                             {{ form.achternaam.label_tag }}{{ form.achternaam }}
                         </div>
 
@@ -60,48 +56,6 @@
             </div>
         </div>
     </div>
-
-    {% if toon_tip %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Veilig wachtwoord</h4>
-            </div>
-        </div>
-
-        <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
-            <div class="col s12">
-                <div class="white" style="padding:10px">
-                    <p>Je wachtwoord moet <b>9 tekens of langer</b> zijn en <b>5 verschillende</b> tekens bevatten.</p>
-                    <p>De woorden 'wachtwoord', 'password', 'handboog' en je bondsnummer mogen niet voorkomen,<br>maar hoofdletters of speciale tekens zijn niet verplicht.</p>
-                    <p>Verder blokkeren we reeksen zoals 123456 en QWERTY.</p>
-                </div>
-            </div>
-        </div>
-
-    {% endif %}
-
-
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Wat is mijn e-mail?</h4>
-        </div>
-    </div>
-
-    <!-- blauw balk -->
-    <div class="row-nhb-blauw">
-        <div class="col s12 l10 offset-l1">
-            <div class="white" style="padding:10px">
-                <p>Gebruik het e-mailadres wat bekend is bij de NHB. Tip: hier is je digitale bondspas heen gestuurd.</p>
-                <p>Om veiligheidsredenen is er geen manier om je e-mailadres op te vragen.</p>
-                <p>De secretaris van je handboogvereniging kan je verder helpen.</p>
-            </div>
-        </div>
-    </div>
-
 
     <!-- witruimte -->
     <div class="row center">
