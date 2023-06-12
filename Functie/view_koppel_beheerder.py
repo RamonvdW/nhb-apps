@@ -306,7 +306,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         form = WijzigEmailForm(self.request.POST)
         if not form.is_valid():
             # geeft het invulformulier terug voor de foutmelding + nieuwe poging
-            form.add_error(None, 'E-mailadres niet geaccepteerd')
+            form.add_error(None, 'e-mailadres niet geaccepteerd')
             return self._render_form(form, functie)
 
         # sla het nieuwe e-mailadres op

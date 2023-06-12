@@ -45,19 +45,19 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
         # deze conversie beschermd ook tegen gevaarlijke invoer
         lid_nr = int(lid_nr_str)
     except ValueError:
-        raise AccountCreateError('Onbekend bondsnummer')
+        raise AccountCreateError('onbekend bondsnummer')
 
     try:
         sporter = Sporter.objects.get(lid_nr=lid_nr)
     except Sporter.DoesNotExist:
-        raise AccountCreateError('Onbekend bondsnummer')
+        raise AccountCreateError('onbekend bondsnummer')
 
     if not mailer_email_is_valide(sporter.email):
         raise SporterGeenEmail(sporter)
 
     # vergelijk e-mailadres hoofdletter ongevoelig
     if email.lower() != sporter.email.lower():
-        raise AccountCreateError('De combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
+        raise AccountCreateError('de combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
 
     if not sporter.is_actief_lid or not sporter.bij_vereniging:
         raise SporterInactief()

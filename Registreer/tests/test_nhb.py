@@ -42,6 +42,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
                     ver_nr="1000",
                     regio=NhbRegio.objects.get(pk=111))
         ver.save()
+        self.nhbver = ver
 
         # maak de SEC functie aan
         functie = Functie(rol='SEC', nhb_ver=ver, beschrijving='SEC vereniging 1000')
@@ -103,7 +104,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-nhb.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'De gegevens worden niet geaccepteerd')
+        self.assertFormError(resp.context['form'], None, 'de gegevens worden niet geaccepteerd')
 
         # bad fields
         with self.assert_max_queries(20):
@@ -115,7 +116,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-nhb.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'Onbekend bondsnummer')
+        self.assertFormError(resp.context['form'], None, 'onbekend bondsnummer')
 
         # niet bestaand nummer
         with self.assert_max_queries(20):
@@ -127,7 +128,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-nhb.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'Onbekend bondsnummer')
+        self.assertFormError(resp.context['form'], None, 'onbekend bondsnummer')
 
         # verkeerde email
         with self.assert_max_queries(20):
@@ -139,7 +140,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-nhb.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'De combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None, 'de combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
 
         # zwak wachtwoord: te kort
         with self.assert_max_queries(20):
@@ -239,7 +240,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_nhb,
                                     {'nhb_nummer': '100001',
-                                     'email': 'rDeTester@gmail.not',    # dekt case-insensitive e-mailadres
+                                     'email': 'norMAAl@test.com',    # dekt case-insensitive e-mailadres
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -247,8 +248,8 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('registreer/registreer-nhb-aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat het email adres obfuscated is
-        self.assertNotContains(resp, 'rdetester@gmail.not')
-        self.assertContains(resp, 'r@gmail.not')     # iets van r######r@gmail.not
+        self.assertNotContains(resp, 'normaal@test.com')
+        self.assertContains(resp, 'l@test.com')     # iets van n####l@test.com
 
         # controleer dat de volledige naam meteen al overgenomen is
         account = Account.objects.get(username='100001')
@@ -268,7 +269,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         objs = TijdelijkeCode.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
         self.assertTrue(len(objs) > 0)
         obj = objs[0]
-        self.assertEqual(obj.hoortbij_account.nieuwe_email, 'rdetester@gmail.not')
+        self.assertEqual(obj.hoortbij_account.nieuwe_email, 'normaal@test.com')
         self.assertFalse(obj.hoortbij_account.email_is_bevestigd)
         url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
@@ -285,7 +286,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
 
         account = Account.objects.get(username='100001')
         self.assertTrue(account.email_is_bevestigd)
-        self.assertEqual(account.bevestigde_email, 'rdetester@gmail.not')
+        self.assertEqual(account.bevestigde_email, 'normaal@test.com')
 
         # tijdens inlog wordt de volledige naam overgenomen
         self.e2e_login(account)
@@ -296,7 +297,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_nhb,
                                     {'nhb_nummer': '100001',
-                                     'email': 'rdetester@gmail.not',
+                                     'email': 'normaal@test.com',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -307,7 +308,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_nhb,
                                     {'nhb_nummer': '100001',
-                                     'email': 'rdetester@gmail.not',
+                                     'email': 'normaal@test.com',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -344,7 +345,7 @@ class TestRegistreerNhb(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_nhb,
                                     {'nhb_nummer': '100001',
-                                     'email': 'rdetester@gmail.not',
+                                     'email': 'normaal@test.com',
                                      'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

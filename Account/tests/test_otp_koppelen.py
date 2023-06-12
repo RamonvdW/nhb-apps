@@ -129,7 +129,7 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': '-10000'})      # moet 6 posities zijn
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Fout: Voer de vereiste code in')
+        self.assertContains(resp, 'Fout: voer de vereiste code in')
         self.assert_html_ok(resp)
 
         # geef verkeerde otp code op
@@ -137,7 +137,7 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': '123456'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Verkeerde code. Probeer het nog eens')
+        self.assertContains(resp, 'Fout: verkeerde code. Probeer het nog eens')
         self.assert_html_ok(resp)
 
         self.testdata.account_admin = Account.objects.get(username='admin')

@@ -120,7 +120,7 @@ class OTPControleForm(forms.Form):
                 if code < 0 or code > 999999:
                     raise ValueError()
             except ValueError:
-                self.add_error(None, 'Voer de vereiste code in')
+                self.add_error(None, 'voer de vereiste code in')
                 valid = False
         return valid
 
@@ -143,7 +143,7 @@ class OTPControleForm(forms.Form):
         valid = self._validate_next_url(valid)
 
         if not valid:
-            self.add_error(None, 'De gegevens worden niet geaccepteerd')
+            self.add_error(None, 'de gegevens worden niet geaccepteerd')
         return valid
 
 

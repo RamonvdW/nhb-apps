@@ -85,7 +85,7 @@ class OTPControleView(TemplateView):
                 return HttpResponseRedirect(next_url)
 
             # controle is mislukt (is al gelogd en in het logboek geschreven)
-            form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
+            form.add_error(None, 'verkeerde code. Probeer het nog eens.')
             context['toon_hulp'] = True
             context['email_support'] = settings.EMAIL_SUPPORT
 

@@ -91,28 +91,28 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, "De gegevens worden niet geaccepteerd")
+        self.assertContains(resp, "de gegevens worden niet geaccepteerd")
 
         # lege code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "De gegevens worden niet geaccepteerd")
+        self.assertContains(resp, "de gegevens worden niet geaccepteerd")
 
         # illegale code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': 'ABCDEF'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Voer de vereiste code in")
+        self.assertContains(resp, "voer de vereiste code in")
 
         # foute code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': '123456'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Verkeerde code. Probeer het nog eens.")
+        self.assertContains(resp, "verkeerde code. Probeer het nog eens.")
 
         # juiste otp code
         code = get_otp_code(self.testdata.account_admin)
@@ -127,7 +127,7 @@ class TestAccountOtpControle(E2EHelpers, TestCase):
             resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/niet-bekend/'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'De gegevens worden niet geaccepteerd')
+        self.assertContains(resp, 'de gegevens worden niet geaccepteerd')
 
         # juiste otp code + next url zonder final slash
         code = get_otp_code(self.testdata.account_admin)

@@ -132,7 +132,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
                 return render(request, TEMPLATE_OTP_GEKOPPELD, context)
 
             # controle is mislukt - is al gelogd
-            form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
+            form.add_error(None, 'verkeerde code. Probeer het nog eens.')
             # FUTURE: blokkeer na X pogingen
 
         # still here --> re-render with error message

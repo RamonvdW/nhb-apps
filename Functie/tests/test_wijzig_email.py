@@ -370,7 +370,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'E-mailadres niet geaccepteerd')
+        self.assertContains(resp, 'e-mailadres niet geaccepteerd')
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
