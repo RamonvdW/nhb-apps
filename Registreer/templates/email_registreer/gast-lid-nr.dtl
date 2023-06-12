@@ -8,10 +8,10 @@
 {% block inhoud_text %}
     |Hallo {{ voornaam }},
     |
-    |Je hebt een gast-account aangemaakt op {{ naam_site }}.
-    |Gebruik onderstaande link om dit te bevestigen.
+    |We hebben een bondsnummer toegekend aan jouw gast-account.
+    |Jouw bondsnummer is {{ lid_nr }}.
     |
-    |{{ url }}
+    |Met dit nummer kan je altijd inloggen op {{ naam_site }} via de optie 'wachtwoord vergeten'.
     |
     |Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
     |
@@ -21,10 +21,10 @@
 {% block inhoud_html %}
     <div>Hallo {{ voornaam }},</div>
     <br>
-    <div>Je hebt een gast-account aangemaakt op {{ naam_site }}.</div>
-    <div>Gebruik onderstaande link om dit te bevestigen.</div>
+    <div>We hebben een bondsnummer toegekend aan jouw gast-account.</div>
+    <div>Jouw bondsnummer is {{ lid_nr }}.</div>
     <br>
-    <div style="padding-left:30px"><code><a href="{{ url }}" target="_blank">{{ url }}</a></code></div>
+    <div>Met dit nummer kan je altijd inloggen op {{ naam_site }} via de optie 'wachtwoord vergeten'.</div>
     <br>
     <div>Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
     <br>

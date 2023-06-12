@@ -25,6 +25,10 @@ urlpatterns = [
     path('gast/',
          view_registreer_gast.RegistreerGastView.as_view(),
          name='gast'),
+
+    path('gast/meer-vragen/',
+         view_registreer_gast.RegistreerGastMeerView.as_view(),
+         name='gast-meer-vragen'),
 ]
 
 # end of file

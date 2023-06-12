@@ -15,20 +15,22 @@ from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
-from Registreer.definities import REGISTRATIE_FASE_EMAIL
+from Registreer.definities import REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASSWORD
 from Registreer.forms import RegistreerGastForm
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker, GAST_LID_NUMMER_FIXED_PK
 from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
-from TijdelijkeCodes.operations import maak_tijdelijke_code_registreer_gast_email
+from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
+                                        maak_tijdelijke_code_registreer_gast_email)
 import datetime
 import logging
 
 
 TEMPLATE_REGISTREER_GAST = 'registreer/registreer-gast.dtl'
-TEMPLATE_REGISTREER_GAST_BEVESTIG_EMAIL = 'registreer/registreer-gast-bevestig-email.dtl'
+TEMPLATE_REGISTREER_GAST_BEVESTIG_EMAIL = 'registreer/registreer-gast-1-bevestig-email.dtl'
+TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD = 'registreer/registreer-gast-2-email-bevestigd.dtl'
 
-EMAIL_TEMPLATE_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
-
+EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
+EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-lid-nr.dtl'
 
 my_logger = logging.getLogger('NHBApps.Registreer')
 
@@ -48,14 +50,6 @@ def registratie_gast_volgende_lid_nr():
         nummer = tracker.volgende_lid_nr
 
     return nummer
-
-
-def registreer_gast_email_bevestiging_ontvangen(gast):
-    """ Deze functie wordt vanuit de tijdelijke url receiver functie (zie view)
-        aanroepen met gast = GastRegistratie object waar dit op van toepassing is
-    """
-    gast.email_is_bevestigd = True
-    gast.save(update_fields=['email_is_bevestigd'])
 
 
 class RegistreerGastView(TemplateView):
@@ -161,7 +155,7 @@ class RegistreerGastView(TemplateView):
 
         # laat het e-mailadres bevestigen (ook al accepteren we deze straks niet)
 
-        # write in syslog, but limit database pollution
+        # schrijf in syslog om database vervuiling te voorkomen
         my_logger.info('%s REGISTREER gast-account aanmaken; stuur e-mail' % from_ip)
 
         # maak de url aan om het e-mailadres te bevestigen
@@ -174,10 +168,11 @@ class RegistreerGastView(TemplateView):
         # maak de e-mail aan
         context = {
             'url': url,
+            'voornaam': gast.voornaam,
             'naam_site': settings.NAAM_SITE,
             'contact_email': settings.EMAIL_BONDSBUREAU,
         }
-        mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_EMAIL)
+        mail_body = render_email_template(context, EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL)
 
         # stuur de e-mail
         mailer_queue_email(gast.email,
@@ -187,6 +182,73 @@ class RegistreerGastView(TemplateView):
 
         context['email'] = email
         return render(request, TEMPLATE_REGISTREER_GAST_BEVESTIG_EMAIL, context)
+
+
+def receive_bevestiging_gast_email(request, gast):
+    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
+        om het email adres van een nieuw gast-account te bevestigen.
+            gast is een GastRegistratie object.
+        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
+        of een HttpResponse object.
+    """
+    from_ip = get_safe_from_ip(request)
+
+    # schrijf in syslog om database vervuiling te voorkomen
+    my_logger.info('%s REGISTREER gast-account e-mail is bevestigd' % from_ip)
+
+    # schrijf in het logboek
+    msg = "E-mail voor gast-account e-mail %s bevestigd vanaf IP %s" % (gast.email, from_ip)
+    schrijf_in_logboek(account=None,
+                       gebruikte_functie="Registreer gast-account",
+                       activiteit=msg)
+
+    now = timezone.now()
+    stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
+    gast.email_is_bevestigd = True
+    gast.lid_nr = registratie_gast_volgende_lid_nr()
+    gast.logboek += '[%s] IP=%s: e-mail is bevestigd; lidnummer %s toegekend\n' % (stamp_str, from_ip, gast.lid_nr)
+    gast.fase = REGISTRATIE_FASE_PASSWORD
+    gast.save(update_fields=['email_is_bevestigd', 'lid_nr', 'logboek', 'fase'])
+
+    # stuur een e-mail met het bondsnummer
+    # maak de e-mail aan
+    context = {
+        'url': reverse('Account:wachtwoord-vergeten'),
+        'voornaam': gast.voornaam,
+        'lid_nr': gast.lid_nr,
+        'naam_site': settings.NAAM_SITE,
+        'contact_email': settings.EMAIL_BONDSBUREAU,
+    }
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_GAST_LID_NR)
+
+    # stuur de e-mail
+    mailer_queue_email(gast.email,
+                       'Bondsnummer %s toegekend' % gast.lid_nr,
+                       mail_body,
+                       enforce_whitelist=False)  # deze mails altijd doorlaten
+
+    now = timezone.now()
+    stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+    gast.logboek += '[%s] e-mail verstuurd met bondsnummer\n' % stamp_str
+    gast.save(update_fields=['logboek'])
+
+    context = {
+        'verberg_login_knop': True,
+        'toon_broodkruimels': False,
+        'lid_nr': gast.lid_nr,
+        'url_volgende': reverse('Registreer:gast-meer-vragen'),
+    }
+
+    menu_dynamics(request, context)
+    return render(request, TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD, context)
+
+
+set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_GAST_EMAIL, receive_bevestiging_gast_email)
+
+
+class RegistreerGastMeerView(TemplateView):
+    pass
 
 
 # end of file

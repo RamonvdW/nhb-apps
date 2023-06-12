@@ -25,8 +25,8 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
     test_after = ('Account',)
 
-    url_tijdelijk = '/tijdelijke-codes/%s/'
     url_registreer_gast = '/account/registreer/gast/'
+    url_tijdelijk = '/tijdelijke-codes/%s/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -70,6 +70,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
         self.assertEqual(0, GastRegistratie.objects.count())
         self.assertEqual(0, MailQueue.objects.count())
+        self.assertEqual(0, TijdelijkeCode.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
@@ -79,7 +80,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-1-bevestig-email.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(1, GastRegistratie.objects.count())
         gast = GastRegistratie.objects.first()
@@ -91,6 +92,35 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(gast.fase, REGISTRATIE_FASE_EMAIL)
 
         self.assertEqual(1, MailQueue.objects.count())
+        self.assertEqual(1, TijdelijkeCode.objects.count())
+
+        # TODO: check e-mail inhoud
+
+        # volg de link om de email te bevestigen
+        obj = TijdelijkeCode.objects.first()
+        self.assertEqual(obj.hoortbij_gast.pk, gast.pk)
+        url = self.url_tijdelijk % obj.url_code
+
+        # haal de pagina op - deze bevat een POST url
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        post_url = urls[0]
+
+        # gebruik de POST
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-2-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(0, TijdelijkeCode.objects.count())
+        self.assertEqual(1, GastRegistratie.objects.count())
+        self.assertEqual(2, MailQueue.objects.count())
+
+        # TODO: check e-mail inhoud
 
         # voorkom ingreep door de rate limiter
         GastRegistratieRateTracker.objects.all().delete()
@@ -108,7 +138,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertContains(resp, 'Fout: dubbel verzoek')
 
         self.assertEqual(1, GastRegistratie.objects.count())
-        self.assertEqual(1, MailQueue.objects.count())
+        self.assertEqual(2, MailQueue.objects.count())
 
     def test_begin_bad(self):
         # onvolledige verzoeken
@@ -217,7 +247,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('registreer/registreer-gast-bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/registreer-gast-1-bevestig-email.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(1, GastRegistratie.objects.count())
         self.assertEqual(1, GastRegistratieRateTracker.objects.count())
