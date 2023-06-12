@@ -8,7 +8,6 @@
 
 from django.conf import settings
 from django.utils import timezone
-from django.db.utils import DataError
 from django.db.models import ProtectedError
 from django.core.management.base import BaseCommand
 from django.core.validators import URLValidator
@@ -55,6 +54,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
+SKIP_VER_NR = (8000,)
 
 
 class Command(BaseCommand):
@@ -118,6 +118,7 @@ class Command(BaseCommand):
 
         for ver in (NhbVereniging
                     .objects
+                    .exclude(ver_nr__in=SKIP_VER_NR)
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set')
                     .all()):
@@ -639,17 +640,17 @@ class Command(BaseCommand):
 
             if is_nieuw:
                 obj = None
-                ver = NhbVereniging()
-                ver.ver_nr = ver_nr
-                ver.naam = ver_naam
-                ver.plaats = ver_plaats
-                ver.geen_wedstrijden = ver_geen_wedstrijden
-                ver.kvk_nummer = ver_kvk
-                ver.website = ver_website
-                ver.telefoonnummer = ver_tel_nr
-                ver.contact_email = ver_email
-                ver.adres_regel1 = ver_adres1
-                ver.adres_regel2 = ver_adres2
+                ver = NhbVereniging(
+                            ver_nr=ver_nr,
+                            naam=ver_naam,
+                            plaats=ver_plaats,
+                            geen_wedstrijden=ver_geen_wedstrijden,
+                            kvk_nummer=ver_kvk,
+                            website=ver_website,
+                            telefoonnummer=ver_tel_nr,
+                            contact_email=ver_email,
+                            adres_regel1=ver_adres1,
+                            adres_regel2=ver_adres2)
                 regio_obj = self._vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1

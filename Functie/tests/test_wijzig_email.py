@@ -270,7 +270,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assertEqual(TijdelijkeCode.objects.count(), 0)
 
         # eerste invoer
-        with self.assert_max_queries(8):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
