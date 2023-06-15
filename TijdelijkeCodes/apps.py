@@ -8,8 +8,11 @@ from django.apps import AppConfig
 
 
 class TijdelijkeCodesConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
+
     name = 'TijdelijkeCodes'
+    verbose_name = "Tijdelijke codes"
+
+    default_auto_field = 'django.db.models.BigAutoField'
 
 
 # end of file

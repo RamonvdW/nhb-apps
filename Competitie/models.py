@@ -267,6 +267,7 @@ class CompetitieIndivKlasse(models.Model):
     # TODO: standaard limiet toevoegen voor elke klasse: 24
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
         if self.is_ook_voor_rk_bk:
             msg += ' regio+RK'
@@ -304,6 +305,8 @@ class CompetitieTeamKlasse(models.Model):
     # voorbeeld: Recurve klasse ERE
     beschrijving = models.CharField(max_length=80)
 
+    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
+
     # R/R2/C/BB/BB2/IB/TR/LB
     team_afkorting = models.CharField(max_length=3)
 
@@ -327,11 +330,10 @@ class CompetitieTeamKlasse(models.Model):
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
-    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
-
     # TODO: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = self.beschrijving + ' [' + self.team_afkorting + '] (%.3f)' % self.min_ag
         if self.is_voor_teams_rk_bk:
             msg += ' (RK/BK)'
@@ -413,6 +415,7 @@ class CompetitieMatch(models.Model):
                                 blank=True, null=True)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         extra = ""
         if self.vereniging:
             extra = " bij %s" % self.vereniging
@@ -599,6 +602,7 @@ class RegiocompetitieSporterBoog(models.Model):
     aangemeld_door = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         # deze naam wordt gebruikt in de admin interface, dus kort houden
         return "%s (%s)" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
                             self.sporterboog.boogtype.beschrijving)
@@ -664,6 +668,7 @@ class RegiocompetitieTeam(models.Model):
         return self.maak_team_naam()
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.maak_team_naam()
 
     class Meta:
@@ -686,6 +691,7 @@ class RegiocompetitieTeamPoule(models.Model):
                                    blank=True)      # mag leeg zijn
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.beschrijving
 
 
@@ -733,6 +739,7 @@ class RegiocompetitieRondeTeam(models.Model):
     logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforced, so can be removed
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "Ronde %s, team %s" % (self.ronde_nr, self.team)
 
 
@@ -798,6 +805,7 @@ class KampioenschapIndivKlasseLimiet(models.Model):
     limiet = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "%s - %s: %s" % (self.kampioenschap, self.indiv_klasse.beschrijving, self.limiet)
 
     class Meta:
@@ -820,6 +828,7 @@ class KampioenschapTeamKlasseLimiet(models.Model):
     limiet = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = "%s : " % self.limiet
         msg += "%s - " % self.team_klasse.beschrijving
         msg += "%s" % self.kampioenschap
@@ -905,6 +914,7 @@ class KampioenschapSporterBoog(models.Model):
     result_bk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         if self.kampioenschap.deel == DEEL_BK:
             substr = "BK"
         else:
@@ -1012,6 +1022,7 @@ class KampioenschapTeam(models.Model):
     result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "%s: %s (deelname=%s, rank=%s, volgorde=%s)" % (self.vereniging,
                                                                self.team_naam,
                                                                self.deelname,
@@ -1076,6 +1087,7 @@ class CompetitieMutatie(models.Model):
         verbose_name = "Competitie mutatie"
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = "[%s]" % self.when
         if not self.is_verwerkt:
             msg += " (nog niet verwerkt)"

@@ -96,7 +96,8 @@ def maak_tijdelijke_code_registreer_gast_email(gast, **kwargs):
     url_code = _maak_unieke_code(**kwargs, pk=gast.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_BEVESTIG_GAST_EMAIL, geldig_dagen=3, gast=gast)
-    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
+    temp = reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
+    return settings.SITE_URL + temp  # reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
 def maak_tijdelijke_code_functie_email(functie):
@@ -172,9 +173,11 @@ def beschrijving_activiteit(obj):
         return "in te loggen als een andere gebruiker"
 
     if obj.dispatch_to in (RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
-                           RECEIVER_BEVESTIG_FUNCTIE_EMAIL,
-                           RECEIVER_BEVESTIG_GAST_EMAIL):
+                           RECEIVER_BEVESTIG_FUNCTIE_EMAIL):
         return "een e-mailadres te bevestigen"
+
+    if obj.dispatch_to == RECEIVER_BEVESTIG_GAST_EMAIL:
+        return "gast-account aan te maken"
 
     if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:
         return "een nieuw wachtwoord in te stellen"
