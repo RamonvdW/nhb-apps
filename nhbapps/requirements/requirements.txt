@@ -16,11 +16,11 @@ django==4.2.2
     # via -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-google-api-core==2.11.0
+google-api-core==2.11.1
     # via google-api-python-client
-google-api-python-client==2.88.0
+google-api-python-client==2.89.0
     # via -r requirements.in
-google-auth==2.19.1
+google-auth==2.20.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -28,7 +28,7 @@ google-auth==2.19.1
     #   google-auth-httplib2
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-googleapis-common-protos==1.59.0
+googleapis-common-protos==1.59.1
     # via google-api-core
 httplib2==0.22.0
     # via
@@ -44,7 +44,7 @@ openpyxl==3.1.2
     # via -r requirements.in
 pillow==9.5.0
     # via -r requirements.in
-protobuf==4.23.2
+protobuf==4.23.3
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -60,6 +60,8 @@ pyotp==2.8.0
     # via -r requirements.in
 pyparsing==3.0.9
     # via httplib2
+pypdf==3.9.1
+    # via -r requirements.in
 pypng==0.20220715.0
     # via qrcode
 qrcode==7.4.2
@@ -83,6 +85,7 @@ typing-extensions==4.6.3
     # via
     #   asgiref
     #   psycopg
+    #   pypdf
     #   qrcode
 uritemplate==4.1.1
     # via google-api-python-client
