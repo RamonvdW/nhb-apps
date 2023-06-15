@@ -108,7 +108,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('from_ip', models.CharField(max_length=48)),
-                ('vorig_gebruik', models.DateTimeField()),
+                ('minuut', models.PositiveSmallIntegerField(default=0)),
+                ('teller_minuut', models.PositiveSmallIntegerField(default=0)),
+                ('teller_uur', models.PositiveSmallIntegerField(default=0)),
+                ('uur', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Rate tracker',
