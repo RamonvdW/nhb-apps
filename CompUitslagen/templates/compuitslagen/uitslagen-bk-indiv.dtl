@@ -116,7 +116,7 @@
         {% endif %}
 
         <!-- uitleg over tijdstippen -->
-        {% if not comp.bk_is_afgelast and comp.fase_indiv >= 'N' and comp.fase_indiv <= 'P' %}
+        {% if not comp.bk_is_afgelast and not deelkamp_bk.is_klaar_indiv and comp.fase_indiv >= 'N' and comp.fase_indiv <= 'P' %}
             <div class="row">
                 <div style="padding:10px">
                     <div class="col s12 center">
