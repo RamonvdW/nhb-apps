@@ -66,16 +66,34 @@ class RegistreerGastView(TemplateView):
                 True:  Mag door
                 False: Verzoek blokkeren
         """
+        mag_door = False
+
         now = timezone.now()
-        recent_limiet = now - datetime.timedelta(seconds=60)
+        uur = now.hour
+        minuut = uur * 60 + now.minute      # sinds middernacht
 
         # ga er vanuit dat er meerdere threads zijn die tegelijkertijd bezig willen!
-        if GastRegistratieRateTracker.objects.filter(from_ip=from_ip, vorig_gebruik__gt=recent_limiet).count() == 0:
-            # voeg een nieuw record toe
-            GastRegistratieRateTracker(from_ip=from_ip, vorig_gebruik=now).save()
-            mag_door = True
-        else:
-            mag_door = False
+        with transaction.atomic():
+            tracker, _ = GastRegistratieRateTracker.objects.get_or_create(from_ip=from_ip)
+
+            if tracker.teller_minuut <= 5 and tracker.teller_uur <= 30:
+                mag_door = True
+
+                if tracker.minuut != minuut:
+                    tracker.teller_minuut = 0
+                    tracker.minuut = minuut
+
+                if tracker.uur != uur:
+                    tracker.teller_uur = 0
+                    tracker.uur = uur
+
+                tracker.teller_minuut += 1
+                tracker.teller_uur += 1
+
+                tracker.save()
+            else:
+                # geblokkeerd --> voorkom onnodig loggen
+                pass
 
         return mag_door
 
@@ -163,7 +181,7 @@ class RegistreerGastView(TemplateView):
                                                          naam=voornaam + achternaam,
                                                          stamp=stamp_str,
                                                          from_ip=from_ip,
-                                                         gast_email=email),
+                                                         gast_email=email)
 
         # maak de e-mail aan
         context = {

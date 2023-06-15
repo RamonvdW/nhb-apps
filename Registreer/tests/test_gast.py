@@ -5,18 +5,20 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from Account.models import Account
 from Functie.models import Functie
 from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Registreer.definities import REGISTRATIE_FASE_EMAIL
-from Registreer.models import GastRegistratie, GastRegistratieRateTracker
+from Registreer.models import GastRegistratie, GastRegistratieRateTracker, GastLidNummer
 from Sporter.models import Sporter
 from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Secretaris
 import datetime
+import time
 
 
 class TestRegistreerGast(E2EHelpers, TestCase):
@@ -62,6 +64,10 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Fout:')
 
+        # admin beschrijving
+        obj = GastLidNummer.objects.first()
+        self.assertTrue(str(obj) != '')
+
     def test_fase_begin(self):
         # ontvang naam en e-mailadres + stuur e-mail voor bevestigen
         test_voornaam = 'Bågskytt'
@@ -84,6 +90,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
         self.assertEqual(1, GastRegistratie.objects.count())
         gast = GastRegistratie.objects.first()
+
         # print(gast)
         self.assertEqual(gast.voornaam, test_voornaam)
         self.assertEqual(gast.achternaam, test_achternaam)
@@ -93,6 +100,9 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
         self.assertEqual(1, TijdelijkeCode.objects.count())
+
+        # admin beschrijving
+        self.assertTrue(str(gast) != '')
 
         # TODO: check e-mail inhoud
 
@@ -121,9 +131,6 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(2, MailQueue.objects.count())
 
         # TODO: check e-mail inhoud
-
-        # voorkom ingreep door de rate limiter
-        GastRegistratieRateTracker.objects.all().delete()
 
         # herhaal het verzoek --> deze wordt afgewezen
         with self.assert_max_queries(20):
@@ -238,6 +245,13 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(0, GastRegistratie.objects.count())
         self.assertEqual(0, MailQueue.objects.count())
 
+        # voorkom problemen met deze test op het punt van overstappen op een nieuwe minuut
+        now = timezone.now()
+        if now.second > 55:                         # pragma: no cover
+            sleep_seconds = 61 - now.second
+            print('Sleeping %s seconds' % sleep_seconds)
+            time.sleep(sleep_seconds)
+
         # basis verzoek
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
@@ -253,7 +267,32 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(1, GastRegistratieRateTracker.objects.count())
         self.assertEqual(1, MailQueue.objects.count())
 
-        # herhaal verzoek --> deze wordt afgewezen
+        # herhaal verzoek met te veel verzoeken in de afgelopen minuut
+        tracker = GastRegistratieRateTracker.objects.first()
+        tracker.teller_minuut = 50
+        tracker.save(update_fields=['teller_minuut'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_registreer_gast,
+                                    {'achternaam': test_achternaam,
+                                     'voornaam': test_voornaam,
+                                     'email': test_email},
+                                    follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Fout: te snel')
+
+        self.assertEqual(1, GastRegistratie.objects.count())
+        self.assertEqual(1, GastRegistratieRateTracker.objects.count())
+        self.assertEqual(1, MailQueue.objects.count())
+
+        # herhaal met veel verzoeker in het afgelopen uur
+        tracker = GastRegistratieRateTracker.objects.first()
+        tracker.teller_minuut = 1
+        tracker.teller_uur = 100
+        tracker.save(update_fields=['teller_minuut', 'teller_uur'])
+
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
                                     {'achternaam': test_achternaam,
@@ -273,6 +312,9 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         tracker = GastRegistratieRateTracker.objects.first()
         tracker.from_ip = 'test'
         tracker.save(update_fields=['from_ip'])
+
+        # admin beschrijving
+        self.assertTrue(str(tracker) != '')
 
         # herhaal verzoek --> deze wordt afgewezen als dubbel verzoek (zelfde naam/email, vanaf een andere IP)
         with self.assert_max_queries(20):

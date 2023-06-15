@@ -8,6 +8,12 @@ from django.contrib import admin
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker
 
 
+class GastRegistratieRateTrackerAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Sporter klasse """
+
+    ordering = ('teller_uur',)
+
+
 class GastRegistratieAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Sporter klasse """
 
@@ -17,9 +23,11 @@ class GastRegistratieAdmin(admin.ModelAdmin):
 
     list_select_related = True
 
+    autocomplete_fields = ('account', 'sporter')
+
 
 admin.site.register(GastRegistratie, GastRegistratieAdmin)
+admin.site.register(GastRegistratieRateTracker, GastRegistratieRateTrackerAdmin)
 admin.site.register(GastLidNummer)
-admin.site.register(GastRegistratieRateTracker)
 
 # end of file

@@ -69,11 +69,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='GastLidNummer',
             fields=[
-                ('volgende_lid_nr', models.PositiveIntegerField(primary_key=True, serialize=False)),
+                ('volgende_lid_nr', models.PositiveIntegerField()),
             ],
             options={
-                'verbose_name': 'Volgende lid nr',
-                'verbose_name_plural': 'Volgende lid nr'
+                'verbose_name': 'Volgende gast lid nr',
+                'verbose_name_plural': 'Volgende gast lid nr'
             },
         ),
         migrations.CreateModel(

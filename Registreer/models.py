@@ -23,11 +23,15 @@ class GastLidNummer(models.Model):
     """
 
     # het volgende vrije lidnummer wat toegekend kan worden
-    volgende_lid_nr = models.PositiveIntegerField(primary_key=True)
+    volgende_lid_nr = models.PositiveIntegerField()
+
+    def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        return "Volgende = %s" % self.volgende_lid_nr
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = verbose_name_plural = 'Volgende lid nr'
+        verbose_name = verbose_name_plural = 'Volgende gast lid nr'
 
 
 class GastRegistratie(models.Model):
@@ -39,21 +43,18 @@ class GastRegistratie(models.Model):
     # 2: aanmaak account + sporter
     # 3: invoer alle benodigde gegevens
 
+    # het unieke lidmaatschapsnummer
+    lid_nr = models.PositiveIntegerField(default=0)
+
     # wanneer is deze registratie gestart?
     aangemaakt = models.DateTimeField(auto_now_add=True)
 
     # fase van het registratie-process
     fase = models.PositiveSmallIntegerField(default=REGISTRATIE_FASE_BEGIN)
 
-    # voortgang bijhouden
-    logboek = models.TextField(default='')
-
-    # het unieke lidmaatschapsnummer
-    lid_nr = models.PositiveIntegerField(default=0)
-
     # het e-mailadres waarop de gast bereikbaar is
-    email_is_bevestigd = models.BooleanField(default=False)
     email = models.CharField(max_length=150)
+    email_is_bevestigd = models.BooleanField(default=False)
 
     # koppeling met de standaard tabellen (null=True, want worden later aangemaakt)
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
@@ -91,6 +92,9 @@ class GastRegistratie(models.Model):
     # TODO: officieel geregistreerde para classificatie
     # para_classificatie = models.CharField(max_length=30, blank=True)
 
+    # voortgang bijhouden
+    logboek = models.TextField(default='')
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = 'Gast registratie'
@@ -111,8 +115,15 @@ class GastRegistratieRateTracker(models.Model):
     # vanaf welk IP adres
     from_ip = models.CharField(max_length=48)
 
-    # wanneer is er vanaf dit IP adres voor het laatst een verzoek gedaan
-    vorig_gebruik = models.DateTimeField()
+    # aantal minuten sinds middernacht
+    minuut = models.PositiveSmallIntegerField(default=0)
+
+    # aantal verzoeken in deze minuut
+    teller_minuut = models.PositiveSmallIntegerField(default=0)
+
+    # aantal verzoeken binnen dit uur
+    uur = models.PositiveSmallIntegerField(default=0)
+    teller_uur = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         """ meta data voor de admin interface """
@@ -120,12 +131,12 @@ class GastRegistratieRateTracker(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        return "%s %s" % (self.vorig_gebruik, self.from_ip)
+        return "%s: %s" % (self.from_ip, self.teller_uur)
 
     objects = models.Manager()      # for the editor only
 
 
-# TODO: clean up old database record
+# TODO: clean up old rate tracker database record
 
 
 # end of file
