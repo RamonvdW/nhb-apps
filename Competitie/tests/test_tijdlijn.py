@@ -61,6 +61,9 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
         comp.save()
         comp = Competitie.objects.get(pk=comp.pk)
 
+        # trigger 1e keer vaststellen fase_indiv
+        self.assertFalse(comp.is_open_voor_inschrijving())
+
         self.assertEqual(bepaal_fase_indiv(comp), 'A')
 
         zet_competitie_fases(comp, 'A', 'A')

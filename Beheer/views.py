@@ -102,7 +102,7 @@ def beheer_opschonen(stdout):
     objs = LogEntry.objects.filter(action_time__lt=max_age)
 
     count = objs.count()
-    if count > 0:
+    if count > 0:               # pragma: no cover
         stdout.write('[INFO] Verwijder %s oude django admin log regels' % count)
         objs.delete()
 

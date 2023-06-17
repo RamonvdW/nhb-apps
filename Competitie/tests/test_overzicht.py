@@ -23,14 +23,6 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
 
     url_overzicht = '/bondscompetities/%s/'
 
-    @staticmethod
-    def _maak_twee_klassen(comp):
-        indiv = TemplateCompetitieIndivKlasse.objects.all()[0]
-        CompetitieIndivKlasse(competitie=comp, volgorde=1, boogtype=indiv.boogtype, min_ag=0.0).save()
-
-        teamtype = TeamType.objects.all()[0]
-        CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
-
     def test_openbaar(self):
         einde_jaar = datetime.date(year=2000, month=12, day=31)
         comp = Competitie(

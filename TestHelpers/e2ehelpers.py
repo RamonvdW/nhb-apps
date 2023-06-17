@@ -214,7 +214,7 @@ class E2EHelpers(TestCase):
         if rol_nu != rol_verwacht:
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
-    def _interpreteer_resp(self, resp):
+    def _interpreteer_resp(self, resp):                 # pragma: no cover
         long_msg = list()
         long_msg.append("status code: %s" % resp.status_code)
         long_msg.append(repr(resp))
@@ -601,7 +601,7 @@ class E2EHelpers(TestCase):
                     part_spl = part.split('=')
                     tag = part_spl[0]
                     # print('part_spl: %s' % repr(part_spl))
-                    if tag not in ('value', 'autofocus') and part_spl[1] in ('""', "''"):
+                    if tag not in ('value', 'autofocus') and part_spl[1] in ('""', "''"):       # pragma: no cover
                         msg = 'Found input tag %s with empty value: %s' % (repr(tag), repr(inp))
                         self.fail(msg)
             # for
