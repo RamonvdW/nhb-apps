@@ -80,7 +80,8 @@ class GastRegistratie(models.Model):
     eigen_lid_nummer = models.CharField(max_length=25, default='', blank=True)
 
     # naam van vereniging in eigen land
-    eigen_vereniging = models.CharField(max_length=100, default='', blank=True)
+    club = models.CharField(max_length=100, default='', blank=True)
+    club_plaats = models.CharField(max_length=50, default='', blank=True)
 
     # het adres van deze sporter
     woonplaats = models.CharField(max_length=100, default='', blank=True)
@@ -88,6 +89,9 @@ class GastRegistratie(models.Model):
 
     # het telefoonnummer waarop de sporter te bereiken is
     telefoon = models.CharField(max_length=25, default='', blank=True)
+
+    # World Archery nummer van deze sporter
+    wa_id = models.CharField(max_length=8, default='', blank=True)
 
     # TODO: officieel geregistreerde para classificatie
     # para_classificatie = models.CharField(max_length=30, blank=True)

@@ -275,7 +275,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
         # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
         # hierdoor blijft de gebruiker niet ingelogd op andere sessies
-        account.set_password(nieuw_ww)
+        account.set_password(nieuw_ww)      # does not save the account
         account.save()
 
         # houd de gebruiker ingelogd in deze sessie

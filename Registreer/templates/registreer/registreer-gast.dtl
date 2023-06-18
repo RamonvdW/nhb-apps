@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <!-- blauwe balk met informatie -->
+    <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
             {% url 'Plein:privacy' as card_url %}

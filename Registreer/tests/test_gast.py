@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Mailer.models import MailQueue
-from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASSWORD,
+from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS,
                                    REGISTRATIE_FASE_DONE)
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker, GastLidNummer
 from TijdelijkeCodes.models import TijdelijkeCode
@@ -392,7 +392,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(urls, [self.url_meer_vragen])
 
         gast = GastRegistratie.objects.first()
-        self.assertEqual(gast.fase, REGISTRATIE_FASE_PASSWORD)
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_PASS)
 
         # gebruiker is nu ingelogd
 

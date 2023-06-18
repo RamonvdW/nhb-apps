@@ -6,27 +6,38 @@
 
 from django.db import transaction
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.shortcuts import render, reverse, redirect, Http404
-from django.views.generic import TemplateView
+from django.contrib.auth import update_session_auth_hash
+from django.views.generic import View, TemplateView
 from Account.operations.aanmaken import AccountCreateError, account_create
+from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.view_wachtwoord import auto_login_gast_account
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
-from Registreer.definities import REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASSWORD, REGISTRATIE_FASE_DONE
+from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_LAND,
+                                   REGISTRATIE_FASE_CLUB, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
+                                   REGISTRATIE_FASE_DONE)
 from Registreer.forms import RegistreerGastForm
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker, GAST_LID_NUMMER_FIXED_PK
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
                                         maak_tijdelijke_code_registreer_gast_email)
+import datetime
 import logging
 
 
 TEMPLATE_REGISTREER_GAST = 'registreer/registreer-gast.dtl'
+TEMPLATE_REGISTREER_GAST_VERVOLG = 'registreer/registreer-gast-3-vervolg.dtl'
 TEMPLATE_REGISTREER_GAST_BEVESTIG_EMAIL = 'registreer/registreer-gast-1-bevestig-email.dtl'
 TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD = 'registreer/registreer-gast-2-email-bevestigd.dtl'
-TEMPLATE_REGISTREER_KIES_WACHTWOORD = 'registreer/registreer-gast-3-kies-wachtwoord.dtl'
+TEMPLATE_REGISTREER_GAST_WACHTWOORD = 'registreer/registreer-gast-4-kies-wachtwoord.dtl'
+TEMPLATE_REGISTREER_GAST_LAND_BOND_NR = 'registreer/registreer-gast-5-land-bond-nr.dtl'
+TEMPLATE_REGISTREER_GAST_VER_NAAM_PLAATS = 'registreer/registreer-gast-6-club.dtl'
+TEMPLATE_REGISTREER_GAST_AGE = 'registreer/registreer-gast-7-age.dtl'
+TEMPLATE_REGISTREER_GAST_TEL = 'registreer/registreer-gast-8-tel.dtl'
 
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-lid-nr.dtl'
@@ -241,7 +252,7 @@ def receive_bevestiging_gast_email(request, gast):
 
     gast.account = account
     gast.logboek += '[%s] Account is aangemaakt\n' % stamp_str
-    gast.fase = REGISTRATIE_FASE_PASSWORD
+    gast.fase = REGISTRATIE_FASE_PASS
     gast.save(update_fields=['account', 'logboek', 'fase'])
 
     account.vraag_nieuw_wachtwoord = True
@@ -291,14 +302,13 @@ def receive_bevestiging_gast_email(request, gast):
 set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_GAST_EMAIL, receive_bevestiging_gast_email)
 
 
-class RegistreerGastMeerView(TemplateView):
+class RegistreerGastVervolgView(TemplateView):
+    """
+        Deze view geeft de landing page om de gebruiker het proces uit te leggen.
+    """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_REGISTREER_KIES_WACHTWOORD
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.gast = None
+    template_name = TEMPLATE_REGISTREER_GAST_VERVOLG
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
@@ -316,87 +326,237 @@ class RegistreerGastMeerView(TemplateView):
             # registratie is al voltooid
             return redirect('Plein:plein')
 
-        self.gast = gast
-
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        try:
-            context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
-        except KeyError:
-            context['moet_oude_ww_weten'] = True
-
-        context['kruimels'] = (
-            (None, 'Wachtwoord wijzigen'),
-        )
-
+        # geen kruimels
         menu_dynamics(self.request, context)
         return context
+
+
+class RegistreerGastVolgendeVraagView(View):
+
+    # class variables shared by all instances
+    # (none)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.account = None
+        self.gast = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if not request.user.is_authenticated:
+            return redirect('Plein:plein')
+
+        self.account = request.user
+        gast = self.account.gastregistratie_set.first()
+        if not gast:
+            # dit is geen gast-account
+            return redirect('Plein:plein')
+
+        if gast.fase == REGISTRATIE_FASE_DONE:
+            # registratie is al voltooid
+            return redirect('Plein:plein')
+
+        self.gast = gast
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        context = dict()
+
+        gast = self.gast
+
+        if gast.fase == REGISTRATIE_FASE_PASS:
+            template_name = TEMPLATE_REGISTREER_GAST_WACHTWOORD
+
+        elif gast.fase == REGISTRATIE_FASE_LAND:
+            template_name = TEMPLATE_REGISTREER_GAST_LAND_BOND_NR
+            context['land'] = context['bond'] = context['lid_nr'] = ''
+
+        elif gast.fase == REGISTRATIE_FASE_CLUB:
+            template_name = TEMPLATE_REGISTREER_GAST_VER_NAAM_PLAATS
+            context['naam'] = context['plaats'] = ''
+
+        elif gast.fase == REGISTRATIE_FASE_AGE:
+            template_name = TEMPLATE_REGISTREER_GAST_AGE
+            context['jaar'] = context['maand'] = context['dag'] = context['tel'] = ''
+
+        elif gast.fase == REGISTRATIE_FASE_TEL:
+            template_name = TEMPLATE_REGISTREER_GAST_TEL
+            context['tel'] = ''
+
+        else:
+            print('LET OP: CODE IS NIET AF')
+            return HttpResponseRedirect(reverse('Account:logout'))
+
+        # noteer: geen kruimels
+        menu_dynamics(self.request, context)
+        return render(request, template_name, context)
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de OPSLAAN knop gebruikt wordt op het formulier
             om een nieuw wachtwoord op te geven.
         """
-        context = super().get_context_data(**kwargs)
+        gast = self.gast
+        account = self.account
 
-        account = request.user
-        huidige_ww = request.POST.get('huidige', '')[:50]   # afkappen voor extra veiligheid
-        nieuw_ww = request.POST.get('nieuwe', '')[:50]      # afkappen voor extra veiligheid
-        from_ip = get_safe_from_ip(self.request)
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
-        try:
-            moet_oude_ww_weten = self.request.session['moet_oude_ww_weten']
-        except KeyError:
-            moet_oude_ww_weten = True
+        if gast.fase == REGISTRATIE_FASE_PASS:
 
-        # controleer het nieuwe wachtwoord
-        valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, account.username)
+            nieuw_ww = request.POST.get('pass', '')[:50]      # afkappen voor extra veiligheid
 
-        # controleer het huidige wachtwoord
-        if moet_oude_ww_weten and valid:
-            if not authenticate(username=account.username, password=huidige_ww):
-                valid = False
-                errmsg = "Huidige wachtwoord komt niet overeen"
+            # controleer het nieuwe wachtwoord
+            valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, account.username)
 
-                schrijf_in_logboek(account=account,
-                                   gebruikte_functie="Wachtwoord",
-                                   activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (from_ip, repr(account.username)))
-                my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (from_ip, repr(account.username)))
+            if not valid:
+                context = {
+                    'foutmelding': errmsg,
+                    'toon_tip': True,
+                }
 
-        if not valid:
-            context['foutmelding'] = errmsg
-            context['toon_tip'] = True
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_WACHTWOORD, context)
 
+            # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
+            # hierdoor blijft de gebruiker niet ingelogd op andere sessies
+            account.set_password(nieuw_ww)      # does not save the account
+            account.save()
+
+            # houd de gebruiker ingelogd in deze sessie
+            update_session_auth_hash(request, account)
+
+            gast.logboek += '[%s] Wachtwoord is gezet\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_LAND
+            gast.save(update_fields=['logboek', 'fase'])
+
+        elif gast.fase == REGISTRATIE_FASE_LAND:
+
+            land = request.POST.get('land', '')[:100]      # afkappen voor extra veiligheid
+            bond = request.POST.get('bond', '')[:100]      # afkappen voor extra veiligheid
+            lid_nr = request.POST.get('lid_nr', '')[:25]   # afkappen voor extra veiligheid
+
+            # land: Chad, Cuba, Iran, Fiji
+            # bond: Afkortingen, zoals NHB
+            is_valid = len(land) >= 4 and len(bond) >= 3 and len(lid_nr) >= 3
+
+            if not is_valid:
+                context = {
+                    'foutmelding': 'niet alle velden zijn goed ingevuld',
+                    'land': land,
+                    'bond': bond,
+                    'lid_nr': lid_nr,
+                }
+
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_LAND_BOND_NR, context)
+
+            gast.land = land
+            gast.eigen_sportbond_naam = bond
+            gast.eigen_lid_nummer = lid_nr
+            gast.logboek += '[%s] Land, bond, lid_nr zijn ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_CLUB
+            gast.save(update_fields=['land', 'eigen_sportbond_naam', 'eigen_lid_nummer', 'fase', 'logboek'])
+
+        elif gast.fase == REGISTRATIE_FASE_CLUB:
+
+            club = request.POST.get('club', '')[:100]       # afkappen voor extra veiligheid
+            plaats = request.POST.get('plaats', '')[:50]    # afkappen voor extra veiligheid
+
+            # naam: OGIO
+            # plaats: Epe, Ede, Ee, As
+            is_valid = len(club) >= 4 and len(plaats) >= 2
+
+            if not is_valid:
+                context = {
+                    'foutmelding': 'niet alle velden zijn goed ingevuld',
+                    'club': club,
+                    'plaats': plaats,
+                }
+
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_VER_NAAM_PLAATS, context)
+
+            gast.club = club
+            gast.club_plaats = plaats
+            gast.logboek += '[%s] Vereniging naam, plaats zijn ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_AGE
+            gast.save(update_fields=['club_naam', 'club_plaats', 'fase', 'logboek'])
+
+        elif gast.fase == REGISTRATIE_FASE_AGE:
+
+            jaar = request.POST.get('jaar', '')[:4]     # afkappen voor extra veiligheid
+            maand = request.POST.get('maand', '')[:2]   # afkappen voor extra veiligheid
+            dag = request.POST.get('dag', '')[:2]       # afkappen voor extra veiligheid
+
+            datum = '2000-01-01'
             try:
-                context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
-            except KeyError:
-                context['moet_oude_ww_weten'] = True
+                jaar_nr = int(jaar)
+                maand_nr = int(maand)
+                dag_nr = int(dag)
 
-            menu_dynamics(self.request, context)
-            return render(request, self.template_name, context)
+                is_valid = 1900 < jaar_nr < 2100 and 1 <= maand_nr <= 12 and 1 <= dag_nr <= 31
+                if is_valid:
+                    datum = datetime.datetime.strptime('%d-%d-%d' % (jaar_nr, maand_nr, dag_nr), '%Y-%m-%d')
 
-        # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
-        # hierdoor blijft de gebruiker niet ingelogd op andere sessies
-        account.set_password(nieuw_ww)
-        account.save()
+            except ValueError:
+                is_valid = False
 
-        # houd de gebruiker ingelogd in deze sessie
-        update_session_auth_hash(request, account)
+            if not is_valid:
+                context = {
+                    'foutmelding': 'niet alle velden zijn goed ingevuld',
+                    'jaar': jaar,
+                    'maand': maand,
+                    'dag': dag,
+                }
 
-        try:
-            del request.session['moet_oude_ww_weten']
-        except KeyError:
-            pass
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_AGE, context)
 
-        # schrijf in het logboek
-        schrijf_in_logboek(account=account,
-                           gebruikte_functie="Wachtwoord",
-                           activiteit="Nieuw wachtwoord voor account %s" % repr(account.get_account_full_name()))
+            gast.geboorte_datum = datum
+            gast.logboek += '[%s] Geboortedatum is ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_TEL
+            gast.save(update_fields=['geboorte_datum', 'fase', 'logboek'])
 
-        return HttpResponseRedirect(reverse('Plein:plein'))
+        elif gast.fase == REGISTRATIE_FASE_TEL:
+
+            tel = request.POST.get('tel', '')[:25]      # afkappen voor extra veiligheid
+
+            is_valid = len(tel) > 10 and tel[0] == '+' and tel.count('+') == 1 and tel.count('-') <= 1
+            try:
+                # after removing +-*# and spaces, the phone number should be a number
+                clean_tel = tel.replace(' ', '').replace('-', '').replace('+', '').replace('*', '').replace('#', '')
+                tel_int = int(clean_tel)
+            except ValueError:
+                is_valid = False
+
+            if not is_valid:
+                context = {
+                    'foutmelding': 'niet alle velden zijn goed ingevuld',
+                    'tel': tel
+                }
+
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_AGE, context)
+
+            gast.telefoon = tel
+            gast.logboek += '[%s] Telefoonnummer is ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_TEL
+            gast.save(update_fields=['tel', 'fase', 'logboek'])
+
+        return HttpResponseRedirect(reverse('Registreer:gast-volgende-vraag'))
 
 
 # end of file
