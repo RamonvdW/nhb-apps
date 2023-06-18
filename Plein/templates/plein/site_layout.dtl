@@ -50,13 +50,15 @@
                     <ul id="nav-mobile" class="right">
                         {% if menu_toon_mandje %}
                             <li>
-                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood">
-                                    <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>{% if menu_mandje_aantal %}{{ menu_mandje_aantal }}{% endif %}</a>
+                                <!-- position:relative + z-index=2: knop boven op het logo -->
+                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood" style="position:relative; z-index:2">
+                                    <i class="notranslate material-icons-round" style="line-height:36px">shopping_cart</i>{% if menu_mandje_aantal %}{{ menu_mandje_aantal }}{% endif %}</a>
                             </li>
                         {% endif %}
 
                         {% if menu_voornaam %}
                             <li>
+                                <!-- position:relative + z-index=2: knop boven op het logo -->
                                 <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2">
                                     <i class="notranslate material-icons-round hide-on-small-only right" style="line-height:36px">expand_more</i>
                                     <i class="notranslate material-icons-round hide-on-med-and-up"       style="line-height:36px">expand_more</i>
