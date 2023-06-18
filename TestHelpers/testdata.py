@@ -299,7 +299,7 @@ class TestData(object):
 
         err_msg = f1.getvalue()
         if '[ERROR]' in err_msg:                                                # pragma: no cover
-            print('Unexpected error from regiocomp_mutaties:\n' + err_msg)
+            print('Onverwachte fout van regiocomp_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
             print(f1.getvalue())
