@@ -43,6 +43,11 @@ class OTPControleView(TemplateView):
         context = dict()
         context['form'] = form
 
+        # de otpauth string bevat de issuer name
+        # laat deze terug komen in de pagina titel
+        # dan laat google authenticator automatisch de passende entries zien
+        context['site_name'] = settings.OTP_ISSUER_NAME
+
         context['kruimels'] = (
             (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
             (None, 'Controle tweede factor')
