@@ -72,8 +72,8 @@
             <div class="col s12">
                 <div class="white" style="padding:10px">
                     <p>Je wachtwoord moet <b>9 tekens of langer</b> zijn en <b>5 verschillende</b> tekens bevatten.</p>
-                    <p>De woorden 'wachtwoord', 'password', 'handboog' en je bondsnummer mogen niet voorkomen,<br>maar hoofdletters of speciale tekens zijn niet verplicht.</p>
-                    <p>Verder blokkeren we reeksen zoals 123456 en QWERTY.</p>
+                    <p>De woorden<span class="notranslate"> 'wachtwoord', 'password', 'handboog' </span>>en je bondsnummer mogen niet voorkomen,<br>maar hoofdletters of speciale tekens zijn niet verplicht.</p>
+                    <p>Verder blokkeren we reeksen zoals<span class="notranslate"> 123456 </span>en<span class="notranslate"> QWERTY</span>.</p>
                 </div>
             </div>
         </div>
