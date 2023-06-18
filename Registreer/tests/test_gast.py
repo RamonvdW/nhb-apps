@@ -101,10 +101,12 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
         self.assertEqual(1, TijdelijkeCode.objects.count())
 
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
+
         # admin beschrijving
         self.assertTrue(str(gast) != '')
-
-        # TODO: check e-mail inhoud
 
         # volg de link om de email te bevestigen
         obj = TijdelijkeCode.objects.first()
@@ -130,7 +132,9 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(1, GastRegistratie.objects.count())
         self.assertEqual(2, MailQueue.objects.count())
 
-        # TODO: check e-mail inhoud
+        mail = MailQueue.objects.exclude(pk=mail.pk).first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         # herhaal het verzoek --> deze wordt afgewezen
         with self.assert_max_queries(20):
