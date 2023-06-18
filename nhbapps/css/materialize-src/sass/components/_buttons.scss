@@ -9,7 +9,7 @@
   line-height: $button-height;
   padding: $button-padding;
   text-transform: uppercase;
-  vertical-align: middle;
+  // vertical-align: middle;    // geeft verspringing bij vertaling (+extra styling) door Google Translate
   -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
 }
 
@@ -25,7 +25,7 @@
   text-transform: uppercase;
   text-align: center;
   letter-spacing: .5px;
-  vertical-align: middle;
+  // vertical-align: middle;    // geeft verspringing bij vertaling (+extra styling) door Google Translate
   -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
   background-color: $button-outline-background;
   cursor: pointer;

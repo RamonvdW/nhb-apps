@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'materialize-new-132.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-134.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -63,7 +63,7 @@
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
                             </li>
                         {% elif not verberg_login_knop %}
-                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood" style="position:relative; z-index:2">Inloggen</a></li>
+                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood">Inloggen</a></li>
                         {% endif %}
                     </ul>
                 </div>
