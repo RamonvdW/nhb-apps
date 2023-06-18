@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from Plein.menu import menu_dynamics
 

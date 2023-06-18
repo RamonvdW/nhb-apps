@@ -174,6 +174,32 @@ def receive_wachtwoord_vergeten(request, account):
 set_tijdelijke_codes_receiver(RECEIVER_WACHTWOORD_VERGETEN, receive_wachtwoord_vergeten)
 
 
+def auto_login_gast_account(request, account):
+    """ automatisch inlog op een nieuw account; wordt gebruikt voor aanmaken gast-account.
+    """
+    # integratie met de authenticatie laag van Django
+    login(request, account)
+
+    from_ip = get_safe_from_ip(request)
+    my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (from_ip, repr(account.username)))
+
+    # we slaan de typische plug-ins over omdat we geen pagina of redirect kunnen doorgeven
+
+    otp_zet_control_niet_gelukt(request)
+
+    # gebruiker mag NIET aangemeld blijven
+    # zorg dat de session-cookie snel verloopt
+    request.session.set_expiry(0)
+
+    # schrijf in het logboek
+    schrijf_in_logboek(account=None,
+                       gebruikte_functie="Login",
+                       activiteit="Automatische inlog op account %s vanaf IP %s" % (repr(account.get_account_full_name()), from_ip))
+
+    # zorg dat de rollen goed ingesteld staan
+    rol_bepaal_beschikbare_rollen(request, account)
+
+
 class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
     """
         Deze view geeft de pagina waarmee de gebruiker zijn wachtwoord kan wijzigen

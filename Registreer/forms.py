@@ -88,4 +88,5 @@ class RegistreerGastForm(forms.Form):
 
         return valid
 
+
 # end of file

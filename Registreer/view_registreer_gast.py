@@ -1,33 +1,32 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2023 Ramon van der Winkel.
+#  Copyright (c) 2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import transaction
 from django.conf import settings
 from django.utils import timezone
-from django.shortcuts import render, reverse
+from django.shortcuts import render, reverse, redirect, Http404
 from django.views.generic import TemplateView
 from Account.operations.aanmaken import AccountCreateError, account_create
-from Account.operations.email import account_vraag_email_bevestiging
+from Account.view_wachtwoord import auto_login_gast_account
 from Logboek.models import schrijf_in_logboek
-from Mailer.operations import mailer_email_is_valide, mailer_queue_email, render_email_template
+from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
-from Registreer.definities import REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASSWORD
+from Registreer.definities import REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASSWORD, REGISTRATIE_FASE_DONE
 from Registreer.forms import RegistreerGastForm
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker, GAST_LID_NUMMER_FIXED_PK
-from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
                                         maak_tijdelijke_code_registreer_gast_email)
-import datetime
 import logging
 
 
 TEMPLATE_REGISTREER_GAST = 'registreer/registreer-gast.dtl'
 TEMPLATE_REGISTREER_GAST_BEVESTIG_EMAIL = 'registreer/registreer-gast-1-bevestig-email.dtl'
 TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD = 'registreer/registreer-gast-2-email-bevestigd.dtl'
+TEMPLATE_REGISTREER_KIES_WACHTWOORD = 'registreer/registreer-gast-3-kies-wachtwoord.dtl'
 
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-lid-nr.dtl'
@@ -224,10 +223,29 @@ def receive_bevestiging_gast_email(request, gast):
     stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
 
     gast.email_is_bevestigd = True
+    gast.logboek += '[%s] IP=%s: e-mail is bevestigd\n' % (stamp_str, from_ip)
+    gast.save(update_fields=['email_is_bevestigd', 'logboek'])
+
     gast.lid_nr = registratie_gast_volgende_lid_nr()
-    gast.logboek += '[%s] IP=%s: e-mail is bevestigd; lidnummer %s toegekend\n' % (stamp_str, from_ip, gast.lid_nr)
+    gast.logboek += "[%s] Lidnummer %s is toegekend\n" % (stamp_str, gast.lid_nr)
+    gast.save(update_fields=['lid_nr', 'logboek'])
+
+    try:
+        username = str(gast.lid_nr)
+        wachtwoord = 'Gast' + from_ip + stamp_str       # tijdelijk en lastig te raden (geen risico)
+        account = account_create(username, gast.voornaam, gast.achternaam, wachtwoord, gast.email, True)
+    except AccountCreateError as exc:
+        gast.logboek += '[%s] account_create mislukt: %s\n' % (stamp_str, exc)
+        gast.save(update_fields=['logboek'])
+        raise Http404('Account aanmaken is onverwacht mislukt')
+
+    gast.account = account
+    gast.logboek += '[%s] Account is aangemaakt\n' % stamp_str
     gast.fase = REGISTRATIE_FASE_PASSWORD
-    gast.save(update_fields=['email_is_bevestigd', 'lid_nr', 'logboek', 'fase'])
+    gast.save(update_fields=['account', 'logboek', 'fase'])
+
+    account.vraag_nieuw_wachtwoord = True
+    account.save(update_fields=['vraag_nieuw_wachtwoord'])
 
     # stuur een e-mail met het bondsnummer
     # maak de e-mail aan
@@ -251,6 +269,14 @@ def receive_bevestiging_gast_email(request, gast):
     gast.logboek += '[%s] e-mail verstuurd met bondsnummer\n' % stamp_str
     gast.save(update_fields=['logboek'])
 
+    schrijf_in_logboek(account=None,
+                       gebruikte_functie="Registreer gast-account",
+                       activiteit="E-mail is bevestigd; account %s aangemaakt" % gast.lid_nr)
+
+    # log de gebruiker automatisch in op zijn nieuwe account
+    # gebruiker weet het wachtwoord niet
+    auto_login_gast_account(request, account)
+
     context = {
         'verberg_login_knop': True,
         'toon_broodkruimels': False,
@@ -266,7 +292,111 @@ set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_GAST_EMAIL, receive_bevestiging_
 
 
 class RegistreerGastMeerView(TemplateView):
-    pass
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_REGISTREER_KIES_WACHTWOORD
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.gast = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if not request.user.is_authenticated:
+            return redirect('Plein:plein')
+
+        account = request.user
+        gast = account.gastregistratie_set.first()
+        if not gast:
+            # dit is geen gast-account
+            return redirect('Plein:plein')
+
+        if gast.fase == REGISTRATIE_FASE_DONE:
+            # registratie is al voltooid
+            return redirect('Plein:plein')
+
+        self.gast = gast
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
+        except KeyError:
+            context['moet_oude_ww_weten'] = True
+
+        context['kruimels'] = (
+            (None, 'Wachtwoord wijzigen'),
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ wordt aangeroepen als de OPSLAAN knop gebruikt wordt op het formulier
+            om een nieuw wachtwoord op te geven.
+        """
+        context = super().get_context_data(**kwargs)
+
+        account = request.user
+        huidige_ww = request.POST.get('huidige', '')[:50]   # afkappen voor extra veiligheid
+        nieuw_ww = request.POST.get('nieuwe', '')[:50]      # afkappen voor extra veiligheid
+        from_ip = get_safe_from_ip(self.request)
+
+        try:
+            moet_oude_ww_weten = self.request.session['moet_oude_ww_weten']
+        except KeyError:
+            moet_oude_ww_weten = True
+
+        # controleer het nieuwe wachtwoord
+        valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, account.username)
+
+        # controleer het huidige wachtwoord
+        if moet_oude_ww_weten and valid:
+            if not authenticate(username=account.username, password=huidige_ww):
+                valid = False
+                errmsg = "Huidige wachtwoord komt niet overeen"
+
+                schrijf_in_logboek(account=account,
+                                   gebruikte_functie="Wachtwoord",
+                                   activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (from_ip, repr(account.username)))
+                my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (from_ip, repr(account.username)))
+
+        if not valid:
+            context['foutmelding'] = errmsg
+            context['toon_tip'] = True
+
+            try:
+                context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
+            except KeyError:
+                context['moet_oude_ww_weten'] = True
+
+            menu_dynamics(self.request, context)
+            return render(request, self.template_name, context)
+
+        # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
+        # hierdoor blijft de gebruiker niet ingelogd op andere sessies
+        account.set_password(nieuw_ww)
+        account.save()
+
+        # houd de gebruiker ingelogd in deze sessie
+        update_session_auth_hash(request, account)
+
+        try:
+            del request.session['moet_oude_ww_weten']
+        except KeyError:
+            pass
+
+        # schrijf in het logboek
+        schrijf_in_logboek(account=account,
+                           gebruikte_functie="Wachtwoord",
+                           activiteit="Nieuw wachtwoord voor account %s" % repr(account.get_account_full_name()))
+
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
 
 # end of file

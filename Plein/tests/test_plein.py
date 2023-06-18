@@ -9,6 +9,7 @@ from Bestel.models import BestelMandje, BestelProduct
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
+from Registreer.models import GastRegistratie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -27,11 +28,12 @@ class TestPlein(E2EHelpers, TestCase):
     url_niet_ondersteund = '/plein/niet-ondersteund/'
     url_speciale_pagina = '/plein/test-speciale-pagina/%s/'     # code
     url_mandje = '/bestel/mandje/'
+    url_registreer_meer_vragen = '/account/registreer/gast/meer-vragen/'
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts_admin_en_bb()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -296,5 +298,26 @@ class TestPlein(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_handleidingen)
+
+    def test_registreer(self):
+        # test doorsturen vast een onvolledig gast-account
+
+        lid_nr = 800001
+        account = self.e2e_create_account(str(lid_nr), 'ext@test.com', 'Ext van de Ern')
+        gast = GastRegistratie(
+                    lid_nr=lid_nr,
+                    voornaam='Ext',
+                    achternaam='van de Ern',
+                    email_is_bevestigd=True,
+                    email=account.bevestigde_email,
+                    account=account)
+        gast.save()
+
+        self.e2e_login_no_check(account)
+
+        # haal 'het plein' op en controleer dat deze doorstuurt naar de 'meer vragen' pagina
+        resp = self.client.get(self.url_plein)
+        self.assert_is_redirect(resp, self.url_registreer_meer_vragen)
+
 
 # end of file

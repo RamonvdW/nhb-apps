@@ -1,23 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils import timezone
-from Account.models import Account
-from Functie.models import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio, NhbVereniging
-from Registreer.definities import REGISTRATIE_FASE_EMAIL
+from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASSWORD,
+                                   REGISTRATIE_FASE_DONE)
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker, GastLidNummer
-from Sporter.models import Sporter
 from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
-from TestHelpers import testdata
-from Vereniging.models import Secretaris
-import datetime
 import time
 
 
@@ -28,32 +22,16 @@ class TestRegistreerGast(E2EHelpers, TestCase):
     test_after = ('Account',)
 
     url_registreer_gast = '/account/registreer/gast/'
+    url_meer_vragen = '/account/registreer/gast/meer-vragen/'
     url_tijdelijk = '/tijdelijke-codes/%s/'
+
+    test_voornaam = 'Bågskytt'
+    test_achternaam = 'från Utlandet'
+    test_email = 'skytt46@test.se'
 
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-
-        # # maak een test vereniging
-        # ver = NhbVereniging(
-        #             naam="Grote Club",
-        #             ver_nr="1000",
-        #             regio=NhbRegio.objects.get(pk=111))
-        # ver.save()
-        #
-        # # maak een test lid aan
-        # sporter = Sporter(
-        #             lid_nr=100001,
-        #             geslacht="M",
-        #             voornaam="Ramon",
-        #             achternaam="de Tester",
-        #             email="normaal@test.com",
-        #             geboorte_datum=datetime.date(year=1972, month=3, day=4),
-        #             sinds_datum=datetime.date(year=2010, month=11, day=12),
-        #             bij_vereniging=ver,
-        #             account=self.account_normaal)
-        # sporter.save()
-        # self.sporter = sporter
 
     def test_get(self):
         # haal het formulier op
@@ -70,19 +48,15 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
     def test_fase_begin(self):
         # ontvang naam en e-mailadres + stuur e-mail voor bevestigen
-        test_voornaam = 'Bågskytt'
-        test_achternaam = 'från Utlandet'
-        test_email = 'skytt46@test.se'
-
         self.assertEqual(0, GastRegistratie.objects.count())
         self.assertEqual(0, MailQueue.objects.count())
         self.assertEqual(0, TijdelijkeCode.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
-                                    {'achternaam': test_achternaam,
-                                     'voornaam': test_voornaam,
-                                     'email': test_email},
+                                    {'achternaam': self.test_achternaam,
+                                     'voornaam': self.test_voornaam,
+                                     'email': self.test_email},
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -92,9 +66,9 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         gast = GastRegistratie.objects.first()
 
         # print(gast)
-        self.assertEqual(gast.voornaam, test_voornaam)
-        self.assertEqual(gast.achternaam, test_achternaam)
-        self.assertEqual(gast.email, test_email)
+        self.assertEqual(gast.voornaam, self.test_voornaam)
+        self.assertEqual(gast.achternaam, self.test_achternaam)
+        self.assertEqual(gast.email, self.test_email)
         self.assertFalse(gast.email_is_bevestigd)
         self.assertEqual(gast.fase, REGISTRATIE_FASE_EMAIL)
 
@@ -122,7 +96,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         post_url = urls[0]
 
         # gebruik de POST
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(37):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -139,9 +113,9 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         # herhaal het verzoek --> deze wordt afgewezen
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
-                                    {'achternaam': test_achternaam,
-                                     'voornaam': test_voornaam,
-                                     'email': test_email},
+                                    {'achternaam': self.test_achternaam,
+                                     'voornaam': self.test_voornaam,
+                                     'email': self.test_email},
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -240,6 +214,48 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Fout: voer een valide e-mailadres in')
 
+    def test_bad_create(self):
+        # trigger een AccountCreateError met een slechte e-mail
+
+        test_voornaam = 'Bågskytt'
+        test_achternaam = 'från Utlandet'
+        test_email = 'skytt46@test.se'
+
+        self.assertEqual(0, GastRegistratie.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
+        self.assertEqual(0, TijdelijkeCode.objects.count())
+
+        self.client.post(self.url_registreer_gast,
+                         {'achternaam': test_achternaam,
+                          'voornaam': test_voornaam,
+                          'email': test_email},
+                         follow=True)
+
+        self.assertEqual(1, GastRegistratie.objects.count())
+        self.assertEqual(1, TijdelijkeCode.objects.count())
+
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_EMAIL)
+
+        # volg de link om de email te bevestigen
+        obj = TijdelijkeCode.objects.first()
+        self.assertEqual(obj.hoortbij_gast.pk, gast.pk)
+        url = self.url_tijdelijk % obj.url_code
+
+        # haal de pagina op - deze bevat een POST url
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        post_url = urls[0]
+
+        # verpruts het e-mailadres
+        gast.email = 'bla!'
+        gast.save(update_fields=['email'])
+
+        # gebruik de POST en controleer de foutmelding
+        resp = self.client.post(post_url)
+        self.assert404(resp, 'Account aanmaken is onverwacht mislukt')
+
     def test_rate_limiter(self):
         # controleer dat we snelle POSTs blokkeren
         test_voornaam = 'voornaam'
@@ -336,5 +352,74 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(2, GastRegistratieRateTracker.objects.count())
         self.assertEqual(1, MailQueue.objects.count())
 
+    def test_meer_vragen(self):
+        # ontvang naam en e-mailadres + stuur e-mail voor bevestigen
+        self.assertEqual(0, GastRegistratie.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
+        self.assertEqual(0, TijdelijkeCode.objects.count())
+
+        resp = self.client.post(self.url_registreer_gast,
+                                {'achternaam': self.test_achternaam,
+                                 'voornaam': self.test_voornaam,
+                                 'email': self.test_email},
+                                follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('registreer/registreer-gast-1-bevestig-email.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(1, GastRegistratie.objects.count())
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_EMAIL)
+
+        # volg de link om de email te bevestigen
+        self.assertEqual(1, TijdelijkeCode.objects.count())
+        obj = TijdelijkeCode.objects.first()
+        self.assertEqual(obj.hoortbij_gast.pk, gast.pk)
+        url = self.url_tijdelijk % obj.url_code
+
+        # haal de pagina op - deze bevat een POST url
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        post_url = urls[0]
+
+        # gebruik de POST
+        resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-2-email-bevestigd.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        self.assertEqual(urls, [self.url_meer_vragen])
+
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_PASSWORD)
+
+        # gebruiker is nu ingelogd
+
+        # haal de meer-vragen pagina op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_meer_vragen)
+        self.e2e_dump_resp(resp)
+
+        # TODO: meer tests
+
+        # registratie done
+        gast.fase = REGISTRATIE_FASE_DONE
+        gast.save(update_fields=['fase'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_meer_vragen)
+        self.assert_is_redirect(resp, '/plein/')
+
+    def test_bad_meer_vragen(self):
+        # meer vragen zonder inlog
+        self.client.logout()
+        resp = self.client.get(self.url_meer_vragen)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # ingelogd als een niet-gast
+        self.e2e_login(self.account_normaal)
+        resp = self.client.get(self.url_meer_vragen)
+        self.assert_is_redirect(resp, '/plein/')
 
 # end of file
