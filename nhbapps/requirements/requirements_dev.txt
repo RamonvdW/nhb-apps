@@ -110,6 +110,8 @@ pyparsing==3.0.9
     # via
     #   -r requirements.txt
     #   httplib2
+pypdf==3.9.1
+    # via -r requirements.txt
 pypng==0.20220715.0
     # via
     #   -r requirements.txt
@@ -149,6 +151,7 @@ sqlparse==0.4.3
 typing-extensions==4.5.0
     # via
     #   -r requirements.txt
+    #   pypdf
     #   qrcode
 uritemplate==4.1.1
     # via

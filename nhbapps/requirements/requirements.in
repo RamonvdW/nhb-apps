@@ -28,4 +28,7 @@ google-api-python-client
 # collecting payment service provide
 mollie-api-python
 
+# voor inlezen uitslag uit pdf
+pypdf
+
 # end of file
