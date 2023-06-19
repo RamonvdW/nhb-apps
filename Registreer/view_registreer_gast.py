@@ -14,13 +14,16 @@ from django.views.generic import View, TemplateView
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.view_wachtwoord import auto_login_gast_account
+from BasisTypen.definities import ORGANISATIE_IFAA, GESLACHT2STR
+from BasisTypen.models import BoogType
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
-from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_LAND,
-                                   REGISTRATIE_FASE_CLUB, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
-                                   REGISTRATIE_FASE_DONE)
+from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
+                                   REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
+                                   REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER, REGISTRATIE_FASE_BOGEN,
+                                   REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_DONE)
 from Registreer.forms import RegistreerGastForm
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker, GAST_LID_NUMMER_FIXED_PK
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
@@ -30,14 +33,18 @@ import logging
 
 
 TEMPLATE_REGISTREER_GAST = 'registreer/registreer-gast.dtl'
-TEMPLATE_REGISTREER_GAST_VERVOLG = 'registreer/registreer-gast-3-vervolg.dtl'
-TEMPLATE_REGISTREER_GAST_BEVESTIG_EMAIL = 'registreer/registreer-gast-1-bevestig-email.dtl'
-TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD = 'registreer/registreer-gast-2-email-bevestigd.dtl'
-TEMPLATE_REGISTREER_GAST_WACHTWOORD = 'registreer/registreer-gast-4-kies-wachtwoord.dtl'
-TEMPLATE_REGISTREER_GAST_LAND_BOND_NR = 'registreer/registreer-gast-5-land-bond-nr.dtl'
-TEMPLATE_REGISTREER_GAST_VER_NAAM_PLAATS = 'registreer/registreer-gast-6-club.dtl'
-TEMPLATE_REGISTREER_GAST_AGE = 'registreer/registreer-gast-7-age.dtl'
-TEMPLATE_REGISTREER_GAST_TEL = 'registreer/registreer-gast-8-tel.dtl'
+TEMPLATE_REGISTREER_GAST_VERVOLG = 'registreer/registreer-gast-03-vervolg.dtl'
+TEMPLATE_REGISTREER_GAST_BEVESTIG_EMAIL = 'registreer/registreer-gast-01-bevestig-email.dtl'
+TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD = 'registreer/registreer-gast-02-email-bevestigd.dtl'
+TEMPLATE_REGISTREER_GAST_WACHTWOORD = 'registreer/registreer-gast-04-kies-wachtwoord.dtl'
+TEMPLATE_REGISTREER_GAST_CLUB = 'registreer/registreer-gast-05-club.dtl'
+TEMPLATE_REGISTREER_GAST_LAND_BOND_NR = 'registreer/registreer-gast-06-land-bond-nr.dtl'
+TEMPLATE_REGISTREER_GAST_AGE = 'registreer/registreer-gast-07-age.dtl'
+TEMPLATE_REGISTREER_GAST_TEL = 'registreer/registreer-gast-08-tel.dtl'
+TEMPLATE_REGISTREER_GAST_WA_ID = 'registreer/registreer-gast-09-wa-id.dtl'
+TEMPLATE_REGISTREER_GAST_GENDER = 'registreer/registreer-gast-10-gender.dtl'
+TEMPLATE_REGISTREER_GAST_CONFIRM = 'registreer/registreer-gast-25-confirm.dtl'
+TEMPLATE_REGISTREER_GAST_BOGEN = 'registreer/registreer-gast-50-bogen.dtl'
 
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-lid-nr.dtl'
@@ -292,7 +299,7 @@ def receive_bevestiging_gast_email(request, gast):
         'verberg_login_knop': True,
         'toon_broodkruimels': False,
         'lid_nr': gast.lid_nr,
-        'url_volgende': reverse('Registreer:gast-meer-vragen'),
+        'url_volgende_vraag': reverse('Registreer:gast-volgende-vraag'),
     }
 
     menu_dynamics(request, context)
@@ -367,6 +374,28 @@ class RegistreerGastVolgendeVraagView(View):
 
         return super().dispatch(request, *args, **kwargs)
 
+    @staticmethod
+    def _get_bogen():
+
+        # opsplitsen in WA/IFAA
+        bogen_wa = list()
+        bogen_ifaa = list()
+
+        for boog in (BoogType
+                     .objects
+                     .exclude(buiten_gebruik=True)
+                     .order_by('volgorde')):
+
+            boog.sel = 'schiet_' + boog.afkorting
+
+            if boog.organisatie == ORGANISATIE_IFAA:
+                bogen_ifaa.append(boog)
+            else:
+                bogen_wa.append(boog)
+        # for
+
+        return bogen_wa, bogen_ifaa
+
     def get(self, request, *args, **kwargs):
         context = dict()
 
@@ -375,13 +404,13 @@ class RegistreerGastVolgendeVraagView(View):
         if gast.fase == REGISTRATIE_FASE_PASS:
             template_name = TEMPLATE_REGISTREER_GAST_WACHTWOORD
 
+        elif gast.fase == REGISTRATIE_FASE_CLUB:
+            template_name = TEMPLATE_REGISTREER_GAST_CLUB
+            context['club'] = context['plaats'] = ''
+
         elif gast.fase == REGISTRATIE_FASE_LAND:
             template_name = TEMPLATE_REGISTREER_GAST_LAND_BOND_NR
             context['land'] = context['bond'] = context['lid_nr'] = ''
-
-        elif gast.fase == REGISTRATIE_FASE_CLUB:
-            template_name = TEMPLATE_REGISTREER_GAST_VER_NAAM_PLAATS
-            context['naam'] = context['plaats'] = ''
 
         elif gast.fase == REGISTRATIE_FASE_AGE:
             template_name = TEMPLATE_REGISTREER_GAST_AGE
@@ -391,8 +420,26 @@ class RegistreerGastVolgendeVraagView(View):
             template_name = TEMPLATE_REGISTREER_GAST_TEL
             context['tel'] = ''
 
+        elif gast.fase == REGISTRATIE_FASE_WA_ID:
+            template_name = TEMPLATE_REGISTREER_GAST_WA_ID
+            context['wa_id'] = ''
+
+        elif gast.fase == REGISTRATIE_FASE_GENDER:
+            template_name = TEMPLATE_REGISTREER_GAST_GENDER
+
+        elif gast.fase == REGISTRATIE_FASE_CONFIRM:
+            template_name = TEMPLATE_REGISTREER_GAST_CONFIRM
+            gast.geslacht_str = GESLACHT2STR[gast.geslacht]
+            context['gast'] = gast
+
+        elif gast.fase == REGISTRATIE_FASE_BOGEN:
+            template_name = TEMPLATE_REGISTREER_GAST_BOGEN
+            context['bogen_wa'], context['bogen_ifaa'] = self._get_bogen()
+
+        # TODO: extra pagina maken: bevestig alle gegevens
+
         else:
-            print('LET OP: CODE IS NIET AF')
+            # onverwacht
             return HttpResponseRedirect(reverse('Account:logout'))
 
         # noteer: geen kruimels
@@ -435,8 +482,34 @@ class RegistreerGastVolgendeVraagView(View):
             update_session_auth_hash(request, account)
 
             gast.logboek += '[%s] Wachtwoord is gezet\n' % stamp_str
-            gast.fase = REGISTRATIE_FASE_LAND
+            gast.fase = REGISTRATIE_FASE_CLUB
             gast.save(update_fields=['logboek', 'fase'])
+
+        elif gast.fase == REGISTRATIE_FASE_CLUB:
+
+            club = request.POST.get('club', '')[:100]       # afkappen voor extra veiligheid
+            plaats = request.POST.get('plaats', '')[:50]    # afkappen voor extra veiligheid
+
+            # naam: OGIO
+            # plaats: Epe, Ede, Ee, As
+            is_valid = len(club) >= 4 and len(plaats) >= 2
+
+            if not is_valid:
+                context = {
+                    'foutmelding': 'niet alle velden zijn goed ingevuld',
+                    'club': club,
+                    'plaats': plaats,
+                }
+
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_CLUB, context)
+
+            gast.club = club
+            gast.club_plaats = plaats
+            gast.logboek += '[%s] Vereniging naam, plaats zijn ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_LAND
+            gast.save(update_fields=['club', 'club_plaats', 'fase', 'logboek'])
 
         elif gast.fase == REGISTRATIE_FASE_LAND:
 
@@ -464,34 +537,8 @@ class RegistreerGastVolgendeVraagView(View):
             gast.eigen_sportbond_naam = bond
             gast.eigen_lid_nummer = lid_nr
             gast.logboek += '[%s] Land, bond, lid_nr zijn ingevoerd\n' % stamp_str
-            gast.fase = REGISTRATIE_FASE_CLUB
-            gast.save(update_fields=['land', 'eigen_sportbond_naam', 'eigen_lid_nummer', 'fase', 'logboek'])
-
-        elif gast.fase == REGISTRATIE_FASE_CLUB:
-
-            club = request.POST.get('club', '')[:100]       # afkappen voor extra veiligheid
-            plaats = request.POST.get('plaats', '')[:50]    # afkappen voor extra veiligheid
-
-            # naam: OGIO
-            # plaats: Epe, Ede, Ee, As
-            is_valid = len(club) >= 4 and len(plaats) >= 2
-
-            if not is_valid:
-                context = {
-                    'foutmelding': 'niet alle velden zijn goed ingevuld',
-                    'club': club,
-                    'plaats': plaats,
-                }
-
-                # noteer: geen kruimels
-                menu_dynamics(self.request, context)
-                return render(request, TEMPLATE_REGISTREER_GAST_VER_NAAM_PLAATS, context)
-
-            gast.club = club
-            gast.club_plaats = plaats
-            gast.logboek += '[%s] Vereniging naam, plaats zijn ingevoerd\n' % stamp_str
             gast.fase = REGISTRATIE_FASE_AGE
-            gast.save(update_fields=['club_naam', 'club_plaats', 'fase', 'logboek'])
+            gast.save(update_fields=['land', 'eigen_sportbond_naam', 'eigen_lid_nummer', 'fase', 'logboek'])
 
         elif gast.fase == REGISTRATIE_FASE_AGE:
 
@@ -549,12 +596,63 @@ class RegistreerGastVolgendeVraagView(View):
 
                 # noteer: geen kruimels
                 menu_dynamics(self.request, context)
-                return render(request, TEMPLATE_REGISTREER_GAST_AGE, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_TEL, context)
 
             gast.telefoon = tel
             gast.logboek += '[%s] Telefoonnummer is ingevoerd\n' % stamp_str
-            gast.fase = REGISTRATIE_FASE_TEL
-            gast.save(update_fields=['tel', 'fase', 'logboek'])
+            gast.fase = REGISTRATIE_FASE_WA_ID
+            gast.save(update_fields=['telefoon', 'fase', 'logboek'])
+
+        elif gast.fase == REGISTRATIE_FASE_WA_ID:
+
+            wa_id = request.POST.get('wa_id', '')[:8]      # afkappen voor extra veiligheid
+
+            gast.wa_id = wa_id
+            gast.logboek += '[%s] World Archery ID is ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_GENDER
+            gast.save(update_fields=['wa_id', 'fase', 'logboek'])
+
+        elif gast.fase == REGISTRATIE_FASE_GENDER:
+
+            gender = request.POST.get('gender', '')[:1]      # afkappen voor extra veiligheid
+
+            is_valid = gender in 'MV'
+
+            if not is_valid:
+                context = {
+                    'foutmelding': 'niet alle velden zijn goed ingevuld',
+                }
+
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_GENDER, context)
+
+            gast.geslacht = gender
+            gast.logboek += '[%s] Geslacht is ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_BOGEN
+            gast.save(update_fields=['geslacht', 'fase', 'logboek'])
+
+        #elif gast.fase == REGISTRATIE_FASE_CONFIRM:
+
+        elif gast.fase == REGISTRATIE_FASE_BOGEN:
+
+            gender = request.POST.get('gender', '')[:1]      # afkappen voor extra veiligheid
+
+            is_valid = gender in 'MV'
+
+            if not is_valid:
+                context = {
+                    'foutmelding': 'niet alle velden zijn goed ingevuld',
+                }
+
+                # noteer: geen kruimels
+                menu_dynamics(self.request, context)
+                return render(request, TEMPLATE_REGISTREER_GAST_GENDER, context)
+
+            gast.geslacht = gender
+            gast.logboek += '[%s] Geslacht is ingevoerd\n' % stamp_str
+            gast.fase = REGISTRATIE_FASE_BOGEN
+            gast.save(update_fields=['geslacht', 'fase', 'logboek'])
 
         return HttpResponseRedirect(reverse('Registreer:gast-volgende-vraag'))
 

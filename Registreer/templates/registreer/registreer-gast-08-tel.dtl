@@ -46,6 +46,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-age-tel" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-tel" %}
 
 {% endblock %}

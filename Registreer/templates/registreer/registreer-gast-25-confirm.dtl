@@ -1,0 +1,125 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Controle{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Controle</h3>
+            <p>Bevestig alle ingevoerde gegevens om het gast-account te voltooien.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post">
+                    {% csrf_token %}
+
+                    <table>
+                        <tr>
+                            <td colspan="2"><h5 class="nhb-blauw-text center">Persoonsgegevens</h5></td>
+                        </tr>
+                        <tr>
+                            <td>Voornaam</td>
+                            <td class="notranslate">{{ gast.voornaam }}</td>
+                        </tr>
+                        <tr>
+                            <td>Achternaam</td>
+                            <td class="notranslate">{{ gast.achternaam }}</td>
+                        </tr>
+                        <tr>
+                            <td>Geslacht</td>
+                            <td>{{ gast.geslacht_str }}</td>
+                        </tr>
+                        <tr>
+                            <td>Geboortedatum</td>
+                            <td>{{ gast.geboorte_datum }}</td>
+                        </tr>
+                        <tr>
+                            <td>E-mailadres</td>
+                            <td><code>{{ gast.email }}</code></td>
+                        </tr>
+                        <tr>
+                            <td>Telefoonnummer</td>
+                            <td>{{ gast.telefoon }}</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2"><h5 class="nhb-blauw-text center">Lidmaatschap</h5></td>
+                        </tr>
+                        <tr>
+                            <td>Club</td>
+                            <td class="notranslate">{{ gast.club }}</td>
+                        </tr>
+                        <tr>
+                            <td>Plaats</td>
+                            <td class="notranslate">{{ gast.club_plaats }}</td>
+                        </tr>
+                        <tr>
+                            <td>Land</td>
+                            <td>{{ gast.land }}</td>
+                        </tr>
+                        <tr>
+                            <td>Sportbond</td>
+                            <td class="notranslate">{{ gast.eigen_sportbond_naam }}</td>
+                        </tr>
+                        <tr>
+                            <td>Lid nummer</td>
+                            <td>{{ gast.eigen_lid_nummer }}</td>
+                        </tr>
+                        <tr>
+                            <td>World Archery ID</td>
+                            <td>{{ gast.wa_id }}</td>
+                        </tr>
+                    </table>
+
+                    <p class="center">
+                        <a class="btn-nhb-rood modal-trigger" style="margin:20px" href="#bevestig">
+                            <i class="notranslate material-icons-round left">check</i>Bevestig</a>
+
+                        <button type="submit" class="btn-nhb-blauw" style="margin:20px">
+                            <i class="notranslate material-icons-round left">undo</i>Wijzig</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal dialog -->
+    <div class="modal" id="bevestig">
+        <div class="modal-content center">
+            <h5>Toestemming</h5>
+            <p>Geef je toestemming om de door jou ingevoerde gegevens op te slaan in ons systeem?</p>
+            <p>Wijzigen kan alleen door contact op te nemen Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>
+
+            <form method="post" action="{% url 'Registreer:gast-volgende-vraag' %}">
+                {% csrf_token %}
+                <input type="hidden" name="bevestigd" value="1">
+
+                <div class="modal-footer" style="text-align:center; display:block">
+                    <div style="display:inline-block; width:50%">
+                        <button class="btn-nhb-rood" type="submit">Ja</button>
+                    </div>
+                    <div style="display:inline-block; width:50%">
+                        <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-confirm" %}
+
+{% endblock %}

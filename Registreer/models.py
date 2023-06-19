@@ -84,7 +84,7 @@ class GastRegistratie(models.Model):
     club_plaats = models.CharField(max_length=50, default='', blank=True)
 
     # het adres van deze sporter
-    woonplaats = models.CharField(max_length=100, default='', blank=True)
+    woonplaats = models.CharField(max_length=100, default='', blank=True)       # TODO: buiten gebruik. Behouden?
     land = models.CharField(max_length=100, default='', blank=True)
 
     # het telefoonnummer waarop de sporter te bereiken is
