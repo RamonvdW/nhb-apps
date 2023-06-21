@@ -148,6 +148,7 @@ def otp_loskoppelen(request, account):
         Geeft True terug als OTP actief was en echt losgekoppeld is.
     """
 
+    # control dat gebruiker genoeg rechten heeft moet door aanroeper gedaan zijn
     if not request.user.is_authenticated:           # pragma: no cover
         return False
 
@@ -161,7 +162,7 @@ def otp_loskoppelen(request, account):
     my_logger.info('%s 2FA losgekoppeld voor account %s' % (from_ip, account.username))
 
     # schrijf in het logboek
-    schrijf_in_logboek(account=None,
+    schrijf_in_logboek(account=request.user,
                        gebruikte_functie="OTP loskoppelen",
                        activiteit='OTP is losgekoppeld voor gebruiker %s' % account.username)
     return True

@@ -221,7 +221,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_post_next_bad(self):
         # controleer dat een slechte next parameter er niet doorheen komt
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD,
                                                      'next_url': '/bla/bla/'}, follow=True)
