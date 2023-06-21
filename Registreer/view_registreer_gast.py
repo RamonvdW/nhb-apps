@@ -14,18 +14,20 @@ from django.views.generic import View, TemplateView
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.view_wachtwoord import auto_login_gast_account
-from BasisTypen.definities import ORGANISATIE_IFAA, GESLACHT2STR
-from BasisTypen.models import BoogType
+from BasisTypen.definities import GESLACHT2STR
+from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
-from Overig.helpers import get_safe_from_ip
+from NhbStructuur.models import NhbVereniging
+from Overig.helpers import get_safe_from_ip, maak_unaccented
 from Plein.menu import menu_dynamics
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
-                                   REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER, REGISTRATIE_FASE_BOGEN,
+                                   REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
                                    REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_DONE)
 from Registreer.forms import RegistreerGastForm
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker, GAST_LID_NUMMER_FIXED_PK
+from Sporter.models import Sporter
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
                                         maak_tijdelijke_code_registreer_gast_email)
 import datetime
@@ -44,7 +46,6 @@ TEMPLATE_REGISTREER_GAST_TEL = 'registreer/registreer-gast-08-tel.dtl'
 TEMPLATE_REGISTREER_GAST_WA_ID = 'registreer/registreer-gast-09-wa-id.dtl'
 TEMPLATE_REGISTREER_GAST_GENDER = 'registreer/registreer-gast-10-gender.dtl'
 TEMPLATE_REGISTREER_GAST_CONFIRM = 'registreer/registreer-gast-25-confirm.dtl'
-TEMPLATE_REGISTREER_GAST_BOGEN = 'registreer/registreer-gast-50-bogen.dtl'
 
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-lid-nr.dtl'
@@ -374,28 +375,6 @@ class RegistreerGastVolgendeVraagView(View):
 
         return super().dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def _get_bogen():
-
-        # opsplitsen in WA/IFAA
-        bogen_wa = list()
-        bogen_ifaa = list()
-
-        for boog in (BoogType
-                     .objects
-                     .exclude(buiten_gebruik=True)
-                     .order_by('volgorde')):
-
-            boog.sel = 'schiet_' + boog.afkorting
-
-            if boog.organisatie == ORGANISATIE_IFAA:
-                bogen_ifaa.append(boog)
-            else:
-                bogen_wa.append(boog)
-        # for
-
-        return bogen_wa, bogen_ifaa
-
     def get(self, request, *args, **kwargs):
         context = dict()
 
@@ -432,19 +411,45 @@ class RegistreerGastVolgendeVraagView(View):
             gast.geslacht_str = GESLACHT2STR[gast.geslacht]
             context['gast'] = gast
 
-        elif gast.fase == REGISTRATIE_FASE_BOGEN:
-            template_name = TEMPLATE_REGISTREER_GAST_BOGEN
-            context['bogen_wa'], context['bogen_ifaa'] = self._get_bogen()
-
-        # TODO: extra pagina maken: bevestig alle gegevens
-
         else:
             # onverwacht
-            return HttpResponseRedirect(reverse('Account:logout'))
+            raise Http404('Verkeerde fase')
 
         # noteer: geen kruimels
         menu_dynamics(self.request, context)
         return render(request, template_name, context)
+
+    @staticmethod
+    def _maak_sporter_gast(gast, account):
+        """ Voltooi het gast-account door het Sporter record aan te maken """
+
+        aantal = Sporter.objects.filter(lid_nr=gast.lid_nr).count()
+        if aantal == 0:
+            date_now = timezone.now().date()
+            ver_8000 = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+
+            sporter = Sporter(
+                        lid_nr=gast.lid_nr,
+                        wa_id=gast.wa_id,
+                        voornaam=gast.voornaam,
+                        achternaam=gast.achternaam,
+                        unaccented_naam=maak_unaccented(gast.voornaam + ' ' + gast.achternaam),
+                        email=gast.email,
+                        telefoon=gast.telefoon,
+                        geboorte_datum=gast.geboorte_datum,
+                        geboorteplaats='',
+                        geslacht=gast.geslacht,
+                        adres_code=gast.lid_nr,     # voorkom match
+                        para_classificatie='',
+                        is_actief_lid=True,
+                        sinds_datum=date_now,
+                        bij_vereniging=ver_8000,
+                        lid_tot_einde_jaar=date_now.year,
+                        account=account)
+            sporter.save()
+
+            gast.sporter = sporter
+            gast.save(update_fields=['sporter'])
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de OPSLAAN knop gebruikt wordt op het formulier
@@ -584,7 +589,7 @@ class RegistreerGastVolgendeVraagView(View):
             try:
                 # after removing +-*# and spaces, the phone number should be a number
                 clean_tel = tel.replace(' ', '').replace('-', '').replace('+', '').replace('*', '').replace('#', '')
-                tel_int = int(clean_tel)
+                _ = int(clean_tel)
             except ValueError:
                 is_valid = False
 
@@ -616,7 +621,7 @@ class RegistreerGastVolgendeVraagView(View):
 
             gender = request.POST.get('gender', '')[:1]      # afkappen voor extra veiligheid
 
-            is_valid = gender in 'MV'
+            is_valid = gender in ('M', 'V')
 
             if not is_valid:
                 context = {
@@ -629,30 +634,29 @@ class RegistreerGastVolgendeVraagView(View):
 
             gast.geslacht = gender
             gast.logboek += '[%s] Geslacht is ingevoerd\n' % stamp_str
-            gast.fase = REGISTRATIE_FASE_BOGEN
+            gast.fase = REGISTRATIE_FASE_CONFIRM
             gast.save(update_fields=['geslacht', 'fase', 'logboek'])
 
-        #elif gast.fase == REGISTRATIE_FASE_CONFIRM:
+        elif gast.fase == REGISTRATIE_FASE_CONFIRM:
 
-        elif gast.fase == REGISTRATIE_FASE_BOGEN:
+            bevestigd = request.POST.get('bevestigd', '')[:2]
+            if bevestigd == 'Ja':
+                # gebruiker heeft op 'Ja' gedrukt
 
-            gender = request.POST.get('gender', '')[:1]      # afkappen voor extra veiligheid
+                self._maak_sporter_gast(gast, account)
 
-            is_valid = gender in 'MV'
+                gast.logboek += '[%s] Toestemming opslaan ontvangen\n' % stamp_str
+                gast.fase = REGISTRATIE_FASE_DONE
+                gast.save(update_fields=['fase', 'logboek'])
 
-            if not is_valid:
-                context = {
-                    'foutmelding': 'niet alle velden zijn goed ingevuld',
-                }
+                # doe de evaluatie opnieuw, nu met het Sporter record
+                rol_bepaal_beschikbare_rollen(self.request, account)
 
-                # noteer: geen kruimels
-                menu_dynamics(self.request, context)
-                return render(request, TEMPLATE_REGISTREER_GAST_GENDER, context)
+                # stuur de sporter door naar Mijn Pagina, om de voorkeuren aan te passen
+                return HttpResponseRedirect(reverse('Sporter:profiel'))
 
-            gast.geslacht = gender
-            gast.logboek += '[%s] Geslacht is ingevoerd\n' % stamp_str
-            gast.fase = REGISTRATIE_FASE_BOGEN
-            gast.save(update_fields=['geslacht', 'fase', 'logboek'])
+        else:
+            raise Http404('Verkeerde fase')
 
         return HttpResponseRedirect(reverse('Registreer:gast-volgende-vraag'))
 

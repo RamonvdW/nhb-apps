@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-06-19'
+SITE_VERSIE = '2023-06-21'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -506,6 +506,11 @@ LOGGING = {
     }
 }
 
+# speciale verenigingsnummer voor externe leden
+# (let op: niet aanpassen)
+EXTERN_VER_NR = 8000
+
+
 # CRM import flexibiliteit
 CRM_IMPORT_SKIP_MEMBERS = (101711,)            # CRM developer
 
@@ -516,7 +521,8 @@ CRM_IMPORT_GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijd
 CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
                                     1377)      # persoonlijk lid, geen wedstrijden
 
-CRM_IMPORT_BEHOUD_CLUB = (1999,)               # voor demo
+CRM_IMPORT_BEHOUD_CLUB = (1999,                # voor demo
+                          EXTERN_VER_NR)
 
 
 # begin waarden voor unieke ticket nummers

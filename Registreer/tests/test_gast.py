@@ -9,8 +9,10 @@ from django.utils import timezone
 from Mailer.models import MailQueue
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
-                                   REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_DONE)
+                                   REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
+                                   REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_DONE)
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker, GastLidNummer
+from Sporter.models import Sporter
 from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 import time
@@ -27,6 +29,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
     url_volgende_vraag = '/account/registreer/gast/volgende-vraag/'
 
     url_tijdelijk = '/tijdelijke-codes/%s/'
+    url_sporter_profiel = '/sporter/'
 
     test_voornaam = 'Bågskytt'
     test_achternaam = 'från Utlandet'
@@ -497,6 +500,30 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Fout:')
 
+        # POST een verkeerd antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag, {'jaar': '2000', 'maand': '13', 'dag': '01'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Fout:')
+
+        # POST een verkeerd antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag, {'jaar': '9999', 'maand': '12', 'dag': '1'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Fout:')
+
+        # POST een verkeerd antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag, {'jaar': '0x1234', 'maand': '1-2', 'dag': '#'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Fout:')
+
         # POST een goed antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag, {'jaar': '2000', 'maand': '12', 'dag': '31'})
@@ -543,14 +570,69 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_volgende_vraag)
         gast = GastRegistratie.objects.first()
         self.assertEqual(gast.wa_id, '12345')
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_GENDER)
+
+        # vraag: Gender
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-10-gender.dtl', 'plein/site_layout.dtl'))
+
+        # POST een verkeerd antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-10-gender.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Fout:')
+
+        # POST een goed antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag, {'gender': 'M'})
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.geslacht, 'M')
         self.assertEqual(gast.fase, REGISTRATIE_FASE_CONFIRM)
 
-        # TODO: confirm pagina
+        # confirm pagina
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-25-confirm.dtl', 'plein/site_layout.dtl'))
 
-        # registratie done
-        gast.fase = REGISTRATIE_FASE_DONE
+        # POST een verkeerd antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag)
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+
+        # POST een goed antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag, {'bevestigd': 'Ja'})
+        self.assert_is_redirect(resp, self.url_sporter_profiel)
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_DONE)
+
+        sporter = gast.sporter
+        self.assertEqual(sporter.voornaam, self.test_voornaam)
+
+        # nog een keer, dan bestaat het Sporter record al
+        gast.fase = REGISTRATIE_FASE_CONFIRM
         gast.save(update_fields=['fase'])
 
+        sporter_count = Sporter.objects.count()
+
+        # POST een goed antwoord
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag, {'bevestigd': 'Ja'})
+        self.assert_is_redirect(resp, self.url_sporter_profiel)
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_DONE)
+
+        self.assertEqual(sporter_count, Sporter.objects.count())
+
+        # registratie done
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_meer_vragen)
         self.assert_is_redirect(resp, '/plein/')
@@ -558,6 +640,22 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_volgende_vraag)
         self.assert_is_redirect(resp, '/plein/')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # niet bestaande fase
+        gast.fase = 666
+        gast.save(update_fields=['fase'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assert404(resp, 'Verkeerde fase')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag)
+        self.assert404(resp, 'Verkeerde fase')
 
     def test_bad_meer_vragen(self):
         # meer vragen zonder inlog

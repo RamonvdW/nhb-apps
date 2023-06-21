@@ -102,11 +102,11 @@
         <div class="modal-content center">
             <h5>Toestemming</h5>
             <p>Geef je toestemming om de door jou ingevoerde gegevens op te slaan in ons systeem?</p>
-            <p>Wijzigen kan alleen door contact op te nemen Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>
+            <p>Wijzigen kan alleen door contact op te nemen met het Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>
 
             <form method="post" action="{% url 'Registreer:gast-volgende-vraag' %}">
                 {% csrf_token %}
-                <input type="hidden" name="bevestigd" value="1">
+                <input type="hidden" name="bevestigd" value="Ja">
 
                 <div class="modal-footer" style="text-align:center; display:block">
                     <div style="display:inline-block; width:50%">

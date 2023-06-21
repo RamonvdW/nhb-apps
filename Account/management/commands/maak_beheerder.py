@@ -25,8 +25,9 @@ class Command(BaseCommand):
         except Account.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
         else:
-            account.is_staff = True
-            account.save(update_fields=['is_staff'])
+            account.is_staff = True         # toegang tot Admin site
+            account.is_superuser = True     # alle rechten op alle database tabellen (view, change, add, delete)
+            account.save(update_fields=['is_staff', 'is_superuser'])
 
             # schrijf in het logboek
             schrijf_in_logboek(account=None,

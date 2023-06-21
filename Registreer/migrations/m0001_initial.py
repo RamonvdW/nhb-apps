@@ -23,8 +23,10 @@ def init_gast_lid_nr(apps, _):
               volgende_lid_nr=GAST_LID_NUMMER_EERSTE).save()
 
 
-def maak_vereniging_8000(apps, _):
+def maak_vereniging_extern(apps, _):
     """ maak de NHB vereniging voor gast sporters """
+
+    ver_nr = settings.EXTERN_VER_NR
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
@@ -34,9 +36,9 @@ def maak_vereniging_8000(apps, _):
     # zoek regio 100 op
     regio100 = regio_klas.objects.get(regio_nr=100)
 
-    # maak vereniging 8000 aan
+    # maak de vereniging voor externe leden aan
     ver = ver_klas(
-                ver_nr=8000,
+                ver_nr=ver_nr,
                 naam='Extern',
                 plaats='',
                 regio=regio100,
@@ -45,9 +47,9 @@ def maak_vereniging_8000(apps, _):
     ver.save()
 
     # maak de beheerders rollen aan
-    functie_klas(rol='SEC', beschrijving='Secretaris 8000', nhb_ver=ver).save()
-    functie_klas(rol='HWL', beschrijving='Hoofdwedstrijdleider 8000', nhb_ver=ver).save()
-    functie_klas(rol='WL', beschrijving='Wedstrijdleider 8000', nhb_ver=ver).save()
+    functie_klas(rol='SEC', beschrijving='Secretaris %s' % ver_nr, nhb_ver=ver).save()
+    functie_klas(rol='HWL', beschrijving='Hoofdwedstrijdleider %s' % ver_nr, nhb_ver=ver).save()
+    functie_klas(rol='WL', beschrijving='Wedstrijdleider %s' % ver_nr, nhb_ver=ver).save()
 
 
 class Migration(migrations.Migration):
@@ -119,7 +121,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.RunPython(init_gast_lid_nr),
-        migrations.RunPython(maak_vereniging_8000),
+        migrations.RunPython(maak_vereniging_extern),
     ]
 
 # end of file
