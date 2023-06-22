@@ -447,8 +447,12 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         alle_bogen = BoogType.objects.all()
 
-        is_administratief = sporter.bij_vereniging.regio.is_administratief      # dus helemaal geen wedstrijden
-        is_extern = sporter.bij_vereniging.ver_nr == settings.EXTERN_VER_NR     # dus geen bondscompetities
+        if sporter.bij_vereniging:
+            is_administratief = sporter.bij_vereniging.regio.is_administratief      # dus helemaal geen wedstrijden
+            is_extern = sporter.bij_vereniging.ver_nr == settings.EXTERN_VER_NR     # dus geen bondscompetities
+        else:
+            is_administratief = False
+            is_extern = False
 
         context['sporter'] = sporter
         context['records'], context['show_loc'] = self._find_records(sporter)
