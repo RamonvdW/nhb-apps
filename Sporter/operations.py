@@ -80,4 +80,31 @@ def get_request_rayon_nr(request):
 
     return rayon_nr
 
+
+def get_sporter_gekozen_bogen(sporter, alle_bogen):
+    """ geeft een dictionary terug met een mapping van boog afkorting naar SporterBoog
+        geeft een lijst terug met boog afkortingen waarmee wedstrijden geschoten willen worden
+    """
+    # stel vast welke boogtypen de sporter mee wil schieten (opt-in)
+    boog_dict = dict()      # [afkorting] = BoogType()
+    for boogtype in alle_bogen:
+        boog_dict[boogtype.afkorting] = boogtype
+    # for
+
+    boog_afkorting_wedstrijd = list()
+    boogafk2sporterboog = dict()       # [boog_afkorting] = SporterBoog()
+    # typische 0 tot 20 records (5 WA + vele IFAA)
+    for sporterboog in (sporter
+                        .sporterboog_set
+                        .select_related('boogtype')
+                        .order_by('boogtype__volgorde')):
+        if sporterboog.voor_wedstrijd:
+            afkorting = sporterboog.boogtype.afkorting
+            boog_afkorting_wedstrijd.append(afkorting)
+            boogafk2sporterboog[afkorting] = sporterboog
+    # for
+
+    return boogafk2sporterboog, boog_afkorting_wedstrijd
+
+
 # end of file

@@ -25,6 +25,7 @@ from Records.models import IndivRecord
 from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
+from Sporter.operations import get_sporter_gekozen_bogen
 import logging
 import copy
 
@@ -139,7 +140,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return comps
 
     @staticmethod
-    def _find_regiocompetities(comps, sporter, voorkeuren, alle_bogen):
+    def _find_regiocompetities(comps, sporter, voorkeuren, alle_bogen, boogafk2sporterboog, boog_afkorting_wedstrijd):
         """ Zoek regiocompetities waar de sporter zich op aan kan melden """
 
         # stel vast welke boogtypen de sporter mee wil schieten (opt-in)
@@ -148,20 +149,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             boog_dict[boogtype.afkorting] = boogtype
         # for
 
-        boog_afkorting_wedstrijd = list()
-        boogafk2sporterboog = dict()       # [boog_afkorting] = SporterBoog()
-        # typische 0 tot 5 records
-        for sporterboog in (sporter
-                            .sporterboog_set
-                            .select_related('boogtype')
-                            .order_by('boogtype__volgorde')):
-            if sporterboog.voor_wedstrijd:
-                afkorting = sporterboog.boogtype.afkorting
-                boog_afkorting_wedstrijd.append(afkorting)
-                boogafk2sporterboog[afkorting] = sporterboog
-        # for
-
-        moet_bogen_kiezen = (len(boogafk2sporterboog) == 0)
         gebruik_knoppen = False
 
         # zoek alle inschrijvingen van deze sporter erbij
@@ -173,7 +160,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         if not voorkeuren.voorkeur_meedoen_competitie:
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
-                return None, moet_bogen_kiezen, gebruik_knoppen
+                return None, gebruik_knoppen
 
         kampioenen = list(KampioenschapSporterBoog
                           .objects
@@ -281,7 +268,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 gebruik_knoppen = True
         # for
 
-        return objs, moet_bogen_kiezen, gebruik_knoppen
+        return objs, gebruik_knoppen
 
     @staticmethod
     def _find_gemiddelden(sporter, alle_bogen):
@@ -382,9 +369,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         namen = [sporter.volledige_naam() for sporter in sec.sporters.all()]
                     context['sec_namen'] = namen
                     context['sec_email'] = functie.bevestigde_email
+
                 elif functie.rol == 'HWL':
                     context['hwl_namen'] = namen
                     context['hwl_email'] = functie.bevestigde_email
+
                 else:
                     if functie.comp_type == '18':
                         # RCL 18m
@@ -458,20 +447,26 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         alle_bogen = BoogType.objects.all()
 
+        is_administratief = sporter.bij_vereniging.regio.is_administratief      # dus helemaal geen wedstrijden
+        is_extern = sporter.bij_vereniging.ver_nr == settings.EXTERN_VER_NR     # dus geen bondscompetities
+
         context['sporter'] = sporter
         context['records'], context['show_loc'] = self._find_records(sporter)
-        context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
         context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
+        boog_afk2sporterboog, boog_afkorting_wedstrijd = get_sporter_gekozen_bogen(sporter, alle_bogen)
+        context['moet_bogen_kiezen'] = len(boog_afkorting_wedstrijd) == 0
+
         context['toon_bondscompetities'] = False
-        if sporter.bij_vereniging and not sporter.bij_vereniging.geen_wedstrijden:
+        if sporter.bij_vereniging and not sporter.bij_vereniging.geen_wedstrijden and not (is_extern or is_administratief):
             context['toon_bondscompetities'] = True
+
+            context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
 
             context['competities'] = comps = self._find_competities(voorkeuren)
 
-            regiocomps, moet_bogen_kiezen, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen)
+            regiocomps, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen, boog_afk2sporterboog, boog_afkorting_wedstrijd)
             context['regiocompetities'] = regiocomps
-            context['moet_bogen_kiezen'] = moet_bogen_kiezen
             context['gebruik_knoppen'] = gebruik_knoppen
 
             context['regiocomp_scores'] = self._find_scores(sporter)
