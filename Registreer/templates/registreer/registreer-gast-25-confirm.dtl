@@ -89,6 +89,8 @@
                         <a class="btn-nhb-rood modal-trigger" style="margin:20px" href="#bevestig">
                             <i class="notranslate material-icons-round left">check</i>Bevestig</a>
 
+                        <input type="hidden" name="bevestigd" value="Nee">
+
                         <button type="submit" class="btn-nhb-blauw" style="margin:20px">
                             <i class="notranslate material-icons-round left">undo</i>Wijzig</button>
                     </p>

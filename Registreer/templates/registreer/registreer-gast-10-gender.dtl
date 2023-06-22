@@ -37,14 +37,14 @@
                         <ul>
                             <li>
                                 <label class="black-text" for="id_man">
-                                    <input class="with-gap" id="id_man" type="radio" name="gender" value="M" required>
+                                    <input class="with-gap" id="id_man" type="radio" name="gender" value="M"{% if geslacht == 'M'%} checked{% endif %} required>
                                     <span>Man</span>
                                 </label>
                             </li>
 
                             <li>
                                 <label class="black-text" for="id_vrouw">
-                                    <input class="with-gap" id="id_vrouw" type="radio" name="gender" value="V" required>
+                                    <input class="with-gap" id="id_vrouw" type="radio" name="gender" value="V"{% if geslacht == 'V'%} checked{% endif %}  required>
                                     <span>Vrouw</span>
                                 </label>
                             </li>

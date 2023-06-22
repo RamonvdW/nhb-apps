@@ -385,26 +385,32 @@ class RegistreerGastVolgendeVraagView(View):
 
         elif gast.fase == REGISTRATIE_FASE_CLUB:
             template_name = TEMPLATE_REGISTREER_GAST_CLUB
-            context['club'] = context['plaats'] = ''
+            context['club'] = gast.club
+            context['plaats'] = gast.club_plaats
 
         elif gast.fase == REGISTRATIE_FASE_LAND:
             template_name = TEMPLATE_REGISTREER_GAST_LAND_BOND_NR
-            context['land'] = context['bond'] = context['lid_nr'] = ''
+            context['land'] = gast.land
+            context['bond'] = gast.eigen_sportbond_naam
+            context['lid_nr'] = gast.eigen_lid_nummer
 
         elif gast.fase == REGISTRATIE_FASE_AGE:
             template_name = TEMPLATE_REGISTREER_GAST_AGE
-            context['jaar'] = context['maand'] = context['dag'] = context['tel'] = ''
+            context['jaar'] = gast.geboorte_datum.year
+            context['maand'] = gast.geboorte_datum.month
+            context['dag'] = gast.geboorte_datum.day
 
         elif gast.fase == REGISTRATIE_FASE_TEL:
             template_name = TEMPLATE_REGISTREER_GAST_TEL
-            context['tel'] = ''
+            context['tel'] = gast.telefoon
 
         elif gast.fase == REGISTRATIE_FASE_WA_ID:
             template_name = TEMPLATE_REGISTREER_GAST_WA_ID
-            context['wa_id'] = ''
+            context['wa_id'] = gast.wa_id
 
         elif gast.fase == REGISTRATIE_FASE_GENDER:
             template_name = TEMPLATE_REGISTREER_GAST_GENDER
+            context['geslacht'] = gast.geslacht
 
         elif gast.fase == REGISTRATIE_FASE_CONFIRM:
             template_name = TEMPLATE_REGISTREER_GAST_CONFIRM
@@ -639,7 +645,8 @@ class RegistreerGastVolgendeVraagView(View):
 
         elif gast.fase == REGISTRATIE_FASE_CONFIRM:
 
-            bevestigd = request.POST.get('bevestigd', '')[:2]
+            bevestigd = request.POST.get('bevestigd', '')[:3]       # afkappen voor extra veiligheid
+            print('bevestigd=%s' % repr(bevestigd))
             if bevestigd == 'Ja':
                 # gebruiker heeft op 'Ja' gedrukt
 
@@ -654,6 +661,12 @@ class RegistreerGastVolgendeVraagView(View):
 
                 # stuur de sporter door naar Mijn Pagina, om de voorkeuren aan te passen
                 return HttpResponseRedirect(reverse('Sporter:profiel'))
+
+            elif bevestigd == "Nee":
+                # nog een rondje langs alle instellingen
+                gast.logboek += "[%s] Gebruiker will gegeven wijzigen\n" % stamp_str
+                gast.fase = REGISTRATIE_FASE_CLUB
+                gast.save(update_fields=['fase', 'logboek'])
 
         else:
             raise Http404('Verkeerde fase')
