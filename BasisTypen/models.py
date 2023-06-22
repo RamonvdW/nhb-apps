@@ -207,6 +207,11 @@ class TemplateCompetitieIndivKlasse(models.Model):
     # is dit een klasse voor aspiranten?
     is_aspirant_klasse = models.BooleanField(default=False)
 
+    # welke titel krijgt de hoogst geëindigde sport in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk_18m = models.CharField(max_length=30, default='Bondskampioen')
+    titel_bk_25m = models.CharField(max_length=30, default='Bondskampioen')
+
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
     blazoen1_18m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
@@ -255,6 +260,11 @@ class TemplateCompetitieTeamKlasse(models.Model):
 
     # voorbeeld: Recurve klasse ERE
     beschrijving = models.CharField(max_length=80)
+
+    # welke titel krijgt het hoogst geëindigde team in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk_18m = models.CharField(max_length=30, default='Bondskampioen')
+    titel_bk_25m = models.CharField(max_length=30, default='Bondskampioen')
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2

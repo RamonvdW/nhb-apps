@@ -256,6 +256,10 @@ class CompetitieIndivKlasse(models.Model):
     # staat op False voor aspiranten klassen en klassen 'onbekend'
     is_ook_voor_rk_bk = models.BooleanField(default=False)
 
+    # welke titel krijgt de hoogst geëindigde sport in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk = models.CharField(max_length=30, default='')
+
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
     blazoen1_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
@@ -321,6 +325,10 @@ class CompetitieTeamKlasse(models.Model):
     # voor de RK/BK teams worden nieuwe klassengrenzen vastgesteld, dus houd ze uit elkaar
     # niet van toepassing op individuele klassen
     is_voor_teams_rk_bk = models.BooleanField(default=False)
+
+    # welke titel krijgt de hoogst geëindigde sport in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk = models.CharField(max_length=30, default='')
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2

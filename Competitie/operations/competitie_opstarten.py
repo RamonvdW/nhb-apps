@@ -188,39 +188,39 @@ def _maak_competitieklassen(comp):
         volgorde2lkl_pks = dict()     # [volgorde] = [LeeftijdsKlasse.pk, ...]
         bulk = list()
 
-        for indiv in (TemplateCompetitieIndivKlasse
-                      .objects
-                      .prefetch_related('leeftijdsklassen')):
+        for template in (TemplateCompetitieIndivKlasse
+                         .objects
+                         .prefetch_related('leeftijdsklassen')):
 
             if is_18m:
-                if not indiv.gebruik_18m:
+                if not template.gebruik_18m:
                     continue
             else:
-                if not indiv.gebruik_25m:
+                if not template.gebruik_25m:
                     continue
 
             klasse = CompetitieIndivKlasse(
                             competitie=comp,
-                            volgorde=indiv.volgorde,
-                            beschrijving=indiv.beschrijving,
-                            boogtype=indiv.boogtype,
-                            is_ook_voor_rk_bk=not indiv.niet_voor_rk_bk,
-                            is_onbekend=indiv.is_onbekend,
-                            is_aspirant_klasse=indiv.is_aspirant_klasse,
+                            volgorde=template.volgorde,
+                            beschrijving=template.beschrijving,
+                            boogtype=template.boogtype,
+                            is_ook_voor_rk_bk=not template.niet_voor_rk_bk,
+                            is_onbekend=template.is_onbekend,
+                            is_aspirant_klasse=template.is_aspirant_klasse,
                             min_ag=AG_NUL)
 
             if is_18m:
-                klasse.blazoen1_regio = indiv.blazoen1_18m_regio
-                klasse.blazoen2_regio = indiv.blazoen2_18m_regio
-                klasse.blazoen_rk_bk = indiv.blazoen_18m_rk_bk
+                klasse.blazoen1_regio = template.blazoen1_18m_regio
+                klasse.blazoen2_regio = template.blazoen2_18m_regio
+                klasse.blazoen_rk_bk = template.blazoen_18m_rk_bk
             else:
-                klasse.blazoen1_regio = indiv.blazoen1_25m_regio
-                klasse.blazoen2_regio = indiv.blazoen2_25m_regio
-                klasse.blazoen_rk_bk = indiv.blazoen_25m_rk_bk
+                klasse.blazoen1_regio = template.blazoen1_25m_regio
+                klasse.blazoen2_regio = template.blazoen2_25m_regio
+                klasse.blazoen_rk_bk = template.blazoen_25m_rk_bk
 
             bulk.append(klasse)
 
-            volgorde2lkl_pks[klasse.volgorde] = list(indiv.leeftijdsklassen.values_list('pk', flat=True))
+            volgorde2lkl_pks[klasse.volgorde] = list(template.leeftijdsklassen.values_list('pk', flat=True))
         # for
 
         CompetitieIndivKlasse.objects.bulk_create(bulk)
@@ -235,60 +235,62 @@ def _maak_competitieklassen(comp):
         teamtype_pk2boog_pks = dict()        # [teamtype.pk] = [boogtype.pk, ...]
 
         bulk = list()
-        for team in (TemplateCompetitieTeamKlasse
-                     .objects
-                     .select_related('team_type')
-                     .prefetch_related('team_type__boog_typen')):
+        for template in (TemplateCompetitieTeamKlasse
+                         .objects
+                         .select_related('team_type')
+                         .prefetch_related('team_type__boog_typen')):
 
             if is_18m:
-                if not team.gebruik_18m:
+                if not template.gebruik_18m:
                     continue
             else:
-                if not team.gebruik_25m:
+                if not template.gebruik_25m:
                     continue
 
-            boog_pks = list(team.team_type.boog_typen.all().values_list('pk', flat=True))
-            teamtype_pk2boog_pks[team.team_type.pk] = boog_pks
+            boog_pks = list(template.team_type.boog_typen.all().values_list('pk', flat=True))
+            teamtype_pk2boog_pks[template.team_type.pk] = boog_pks
 
             # voor de regiocompetitie teams
             klasse = CompetitieTeamKlasse(
                         competitie=comp,
-                        volgorde=team.volgorde,
-                        beschrijving=team.beschrijving,
-                        team_afkorting=team.team_type.afkorting,
-                        team_type=team.team_type,
+                        volgorde=template.volgorde,
+                        beschrijving=template.beschrijving,
+                        team_afkorting=template.team_type.afkorting,
+                        team_type=template.team_type,
                         min_ag=AG_NUL,
                         is_voor_teams_rk_bk=False)
 
             if is_18m:
-                klasse.blazoen1_regio = team.blazoen1_18m_regio
-                klasse.blazoen2_regio = team.blazoen2_18m_regio
-                klasse.blazoen_rk_bk = team.blazoen_18m_rk_bk
+                klasse.blazoen1_regio = template.blazoen1_18m_regio
+                klasse.blazoen2_regio = template.blazoen2_18m_regio
+                klasse.blazoen_rk_bk = template.blazoen_18m_rk_bk
             else:
-                klasse.blazoen1_regio = team.blazoen1_25m_regio
-                klasse.blazoen2_regio = team.blazoen2_25m_regio
-                klasse.blazoen_rk_bk = team.blazoen_25m_rk_bk
+                klasse.blazoen1_regio = template.blazoen1_25m_regio
+                klasse.blazoen2_regio = template.blazoen2_25m_regio
+                klasse.blazoen_rk_bk = template.blazoen_25m_rk_bk
 
             bulk.append(klasse)
 
             # voor de rayonkampioenschappen teams
             klasse = CompetitieTeamKlasse(
                         competitie=comp,
-                        volgorde=team.volgorde + 100,
-                        beschrijving=team.beschrijving,
-                        team_afkorting=team.team_type.afkorting,
-                        team_type=team.team_type,
+                        volgorde=template.volgorde + 100,
+                        beschrijving=template.beschrijving,
+                        team_afkorting=template.team_type.afkorting,
+                        team_type=template.team_type,
                         min_ag=AG_NUL,
                         is_voor_teams_rk_bk=True)
 
             if is_18m:
-                klasse.blazoen1_regio = team.blazoen1_18m_regio
-                klasse.blazoen2_regio = team.blazoen2_18m_regio
-                klasse.blazoen_rk_bk = team.blazoen_18m_rk_bk
+                klasse.blazoen1_regio = template.blazoen1_18m_regio
+                klasse.blazoen2_regio = template.blazoen2_18m_regio
+                klasse.blazoen_rk_bk = template.blazoen_18m_rk_bk
+                klasse.titel_bk = template.titel_bk_18m
             else:
-                klasse.blazoen1_regio = team.blazoen1_25m_regio
-                klasse.blazoen2_regio = team.blazoen2_25m_regio
-                klasse.blazoen_rk_bk = team.blazoen_25m_rk_bk
+                klasse.blazoen1_regio = template.blazoen1_25m_regio
+                klasse.blazoen2_regio = template.blazoen2_25m_regio
+                klasse.blazoen_rk_bk = template.blazoen_25m_rk_bk
+                klasse.titel_bk = template.titel_bk_25m
 
             bulk.append(klasse)
         # for
@@ -296,9 +298,9 @@ def _maak_competitieklassen(comp):
         CompetitieTeamKlasse.objects.bulk_create(bulk)
 
         # zet de boogtypen
-        for team in bulk:
-            boog_pks = teamtype_pk2boog_pks[team.team_type.pk]
-            team.boog_typen.set(boog_pks)
+        for template in bulk:
+            boog_pks = teamtype_pk2boog_pks[template.team_type.pk]
+            template.boog_typen.set(boog_pks)
         # for
 
 
@@ -362,7 +364,7 @@ def competities_aanmaken(jaar=None):
                     begin_fase_P_indiv=begin_bk,
                     einde_fase_P_indiv=begin_bk + datetime.timedelta(days=7),
                     begin_fase_P_teams=begin_bk,
-                    einde_fase_P_teams = begin_bk + datetime.timedelta(days=7))
+                    einde_fase_P_teams=begin_bk + datetime.timedelta(days=7))
 
         if afstand == '18':
             comp.einde_fase_F = yearend
