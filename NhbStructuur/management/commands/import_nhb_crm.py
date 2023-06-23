@@ -1480,7 +1480,7 @@ class Command(BaseCommand):
             lid_nr = lid_nrs.pop(0)
             obj = self._vind_sporter(lid_nr)
 
-            # behoud fictieve leden
+            # behoud fictieve leden en externe leden
             if obj.bij_vereniging and obj.bij_vereniging.ver_nr in settings.CRM_IMPORT_BEHOUD_CLUB:
                 continue
 
