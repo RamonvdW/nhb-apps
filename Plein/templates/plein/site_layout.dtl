@@ -52,7 +52,9 @@
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
                                 <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood" style="position:relative; z-index:2">
-                                    <i class="notranslate material-icons-round" style="line-height:36px">shopping_cart</i>{% if menu_mandje_aantal %}{{ menu_mandje_aantal }}{% endif %}</a>
+                                    <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
+                                    {% if menu_mandje_aantal %}<span>{{ menu_mandje_aantal }}</span>{% endif %}
+                                </a>
                             </li>
                         {% endif %}
 
