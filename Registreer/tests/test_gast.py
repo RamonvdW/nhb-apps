@@ -607,7 +607,17 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.post(self.url_volgende_vraag)
         self.assert_is_redirect(resp, self.url_volgende_vraag)
 
-        # POST een goed antwoord
+        # POST een negatief goed antwoord (nog een rondje wijzigen)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_volgende_vraag, {'bevestigd': 'Nee'})
+        self.assert_is_redirect(resp, self.url_volgende_vraag)
+        gast = GastRegistratie.objects.first()
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_CLUB)
+
+        gast.fase = REGISTRATIE_FASE_CONFIRM
+        gast.save(update_fields=['fase'])
+
+        # POST een positief goed antwoord
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag, {'bevestigd': 'Ja'})
         self.assert_is_redirect(resp, self.url_sporter_profiel)

@@ -40,8 +40,9 @@ def maak_vereniging_extern(apps, _):
     ver = ver_klas(
                 ver_nr=ver_nr,
                 naam='Extern',
-                plaats='',
+                is_extern=True,
                 regio=regio100,
+                plaats='',
                 geen_wedstrijden=False,
                 contact_email=settings.EMAIL_BONDSBUREAU)
     ver.save()
@@ -62,7 +63,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0025_merge_accountemail_2'),
-        ('NhbStructuur', 'm0032_korter'),
+        ('NhbStructuur', 'm0033_ver_is_extern'),
         ('Sporter', 'm0022_pas_code'),
     ]
 

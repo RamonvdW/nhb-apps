@@ -129,6 +129,9 @@ class NhbVereniging(models.Model):
     # deze leden mogen geen wedstrijden schieten
     geen_wedstrijden = models.BooleanField(default=False)
 
+    # is dit deze vereniging voor gast-accounts?
+    is_extern = models.BooleanField(default=False)
+
     # KvK-nummer - wordt gebruikt bij verkoop wedstrijd/opleiding
     kvk_nummer = models.CharField(max_length=15, default='', blank=True)
 
