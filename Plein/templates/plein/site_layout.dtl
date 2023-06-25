@@ -51,7 +51,7 @@
                         {% if menu_toon_mandje %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood" style="position:relative; z-index:2">
+                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood" style="position:relative; z-index:2; margin-top:14px">
                                     <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
                                     {% if menu_mandje_aantal %}<span>{{ menu_mandje_aantal }}</span>{% endif %}
                                 </a>
@@ -61,10 +61,11 @@
                         {% if menu_voornaam %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2">
-                                    <i class="notranslate material-icons-round hide-on-small-only right" style="line-height:36px">expand_more</i>
-                                    <i class="notranslate material-icons-round hide-on-med-and-up"       style="line-height:36px">expand_more</i>
-                                    <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
+                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2; margin-top:14px">
+                                    <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
+                                    <i class="notranslate material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
+                                    <i class="notranslate material-icons-round       hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                </a>
                             </li>
                         {% elif not verberg_login_knop %}
                             <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood">Inloggen</a></li>
@@ -86,7 +87,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round nhb-rood-text">build</i>Admin site</a>
+                                <i class="notranslate material-icons-round nhb-blauw-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
 
