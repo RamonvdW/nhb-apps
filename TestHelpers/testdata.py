@@ -625,59 +625,51 @@ class TestData(object):
             if sporter.account:
                 self.ver_sporters_met_account[ver_nr].append(sporter)
 
-            try:
-                gewenste_boogtypen = geslacht_voornaam2boogtypen[sporter.geslacht + sporter.voornaam]
-                para_voorwerpen, para_opmerking = geslacht_voornaam2para[sporter.geslacht + sporter.voornaam]
-            except KeyError:
-                # admins
-                pass
-            else:
-                # voorkeuren
-                voorkeuren = SporterVoorkeuren(
+            gewenste_boogtypen = geslacht_voornaam2boogtypen[sporter.geslacht + sporter.voornaam]
+            para_voorwerpen, para_opmerking = geslacht_voornaam2para[sporter.geslacht + sporter.voornaam]
+
+            # voorkeuren
+            voorkeuren = SporterVoorkeuren(
+                                sporter=sporter,
+                                para_voorwerpen=para_voorwerpen)
+
+            for gewenst_boogtype in gewenste_boogtypen:
+                if para_opmerking > 0:
+                    voorkeuren.opmerking_para_sporter = 'Para opmerking van redelijke lengte om mee te testen'
+
+                if gewenst_boogtype.islower():
+                    voorkeuren.voorkeur_meedoen_competitie = False
+                    gewenst_boogtype = gewenst_boogtype.upper()
+
+                # alle junioren willen een eigen blazoen
+                if gewenst_boogtype == 'R' and sporter.voornaam.startswith('Jun'):
+                    voorkeuren.voorkeur_eigen_blazoen = True
+            # for
+
+            bulk_voorkeuren.append(voorkeuren)
+            if len(bulk_voorkeuren) > 100:
+                SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
+                bulk_voorkeuren = list()
+
+            # sporterboog
+            for boogtype in boogtypen:
+                sporterboog = SporterBoog(
                                     sporter=sporter,
-                                    para_voorwerpen=para_voorwerpen)
+                                    # heeft_interesse=True
+                                    # voor_wedstrijd=False
+                                    boogtype=boogtype)
 
                 for gewenst_boogtype in gewenste_boogtypen:
-                    if para_opmerking > 0:
-                        voorkeuren.opmerking_para_sporter = 'Para opmerking van redelijke lengte om mee te testen'
-
-                    if gewenst_boogtype.islower():
-                        voorkeuren.voorkeur_meedoen_competitie = False
-                        gewenst_boogtype = gewenst_boogtype.upper()
-
-                    # alle junioren willen een eigen blazoen
-                    if gewenst_boogtype == 'R' and sporter.voornaam.startswith('Jun'):
-                        voorkeuren.voorkeur_eigen_blazoen = True
+                    if boogtype.afkorting == gewenst_boogtype:
+                        sporterboog.voor_wedstrijd = True
                 # for
 
-                bulk_voorkeuren.append(voorkeuren)
-                if len(bulk_voorkeuren) > 100:
-                    SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
-                    bulk_voorkeuren = list()
+                bulk_sporter.append(sporterboog)
 
-                # sporterboog
-                for boogtype in boogtypen:
-                    sporterboog = SporterBoog(
-                                        sporter=sporter,
-                                        # heeft_interesse=True
-                                        # voor_wedstrijd=False
-                                        boogtype=boogtype)
-
-                    for gewenst_boogtype in gewenste_boogtypen:
-                        if gewenst_boogtype[-2:] in ('*1', '*2'):
-                            # hak de laatste twee tekens eraf
-                            gewenst_boogtype = gewenst_boogtype[:-2]
-
-                        if boogtype.afkorting == gewenst_boogtype:
-                            sporterboog.voor_wedstrijd = True
-                    # for
-
-                    bulk_sporter.append(sporterboog)
-
-                    if len(bulk_sporter) > 250:
-                        SporterBoog.objects.bulk_create(bulk_sporter)
-                        bulk_sporter = list()
-                # for
+                if len(bulk_sporter) > 250:
+                    SporterBoog.objects.bulk_create(bulk_sporter)
+                    bulk_sporter = list()
+            # for
         # for
 
         if len(bulk_voorkeuren):                            # pragma: no branch
@@ -893,7 +885,7 @@ class TestData(object):
         # zorg dat er accounts gekoppeld zijn aan de functies BKO, RKO, RCL
         accounts = self._accounts_beheerders[:]
 
-        if len(accounts) > 0:
+        if len(accounts) > 0:       # pragma: no branch
             for functie in (Functie
                             .objects
                             .select_related('nhb_regio', 'nhb_rayon')
@@ -1684,14 +1676,9 @@ class TestData(object):
                                 gemiddelde=ag,
                                 gemiddelde_scores=scores_str)
             bulk.append(bk_deelnemer)
-
-            if len(bulk) >= 500:
-                KampioenschapSporterBoog.objects.bulk_create(bulk)
-                bulk = list()
-
         # for
 
-        if len(bulk):
+        if len(bulk):           # pragma: no branch
             KampioenschapSporterBoog.objects.bulk_create(bulk)
 
         nieuwe_deelnemers = (KampioenschapSporterBoog
@@ -1759,7 +1746,7 @@ class TestData(object):
             bulk.append(bk_team)
         # for
 
-        if len(bulk):
+        if len(bulk):       # pragma: no branch
             KampioenschapTeam.objects.bulk_create(bulk)
 
         for bk_team in KampioenschapTeam.objects.filter(kampioenschap=deelkamp_bk):
