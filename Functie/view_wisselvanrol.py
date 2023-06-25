@@ -127,15 +127,9 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 tup = (volgorde, obj.pk, obj)
                 objs.append(tup)
 
-            elif rol == Rollen.ROL_NONE:
+            elif rol == Rollen.ROL_NONE:        # pragma: no cover
                 # wisselen naar "geen rol" kan alleen door uit te loggen
                 pass
-                # obj = Functie(beschrijving='Gebruiker')
-                # obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                # obj.selected = (self.rol_nu == rol)
-                # obj.pk = volgorde = 90001
-                # tup = (volgorde, obj.pk, obj)
-                # objs.append(tup)
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
@@ -226,6 +220,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
+
                 if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
                     # voeg de beschrijving van de vereniging toe
                     functie = pk2func[functie_pk]
@@ -264,8 +259,8 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                     func = pk2func[functie_pk]
 
                     ver = functie.nhb_ver
-                    if ver.plaats == '':
-                        ver.plaats = 'onbekend'
+                    # if ver.plaats == '':
+                    #     ver.plaats = 'onbekend'       # is hierboven al gedaan
 
                     func.beschrijving = 'HWL %s %s (%s)' % (ver.ver_nr, ver.naam, ver.plaats)
                     func.selected = (functie.nhb_ver.ver_nr == selected_hwl)

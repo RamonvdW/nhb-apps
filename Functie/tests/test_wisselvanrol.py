@@ -10,7 +10,7 @@ from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
-from Functie.rol import rol_get_huidige_functie
+from Functie.rol import rol_get_huidige_functie, rol_activeer_wissel_van_rol_menu_voor_account, SESSIONVAR_ROL_MAG_WISSELEN
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -49,6 +49,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         ver = NhbVereniging(
                     ver_nr="1000",
                     naam="Grote Club",
+                    plaats='Pijlstad',
                     regio=regio_111)
         ver.save()
         self.ver1000 = ver
@@ -66,24 +67,29 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                        lid_nr=100001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Tester",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_normaal,
+                        email=self.account_normaal.email)
         sporter.save()
 
         # maak een test vereniging zonder HWL rol
-        ver2 = NhbVereniging()
-        ver2.naam = "Grote Club"
-        ver2.ver_nr = "1001"
-        ver2.regio = regio_111
+        ver2 = NhbVereniging(
+                    naam="Grote Club",
+                    plaats='',
+                    ver_nr="1001",
+                    regio=regio_111)
         ver2.save()
+
+        self.functie_sec2 = maak_functie("SEC test 2", "SEC")
+        self.functie_sec2.nhb_ver = ver2
+        self.functie_sec2.save()
 
         self.functie_bko = maak_functie("BKO test", "BKO")
 
@@ -327,6 +333,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_rcl(self):
+        self.functie_hwl.nhb_ver.plaats = ''
+        self.functie_hwl.nhb_ver.save(update_fields=['plaats'])
+
         self.functie_rcl.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
@@ -351,6 +360,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
     def test_sec(self):
         self.functie_sec.accounts.add(self.account_normaal)
+        self.functie_sec2.accounts.add(self.account_normaal)        # ver.plaats is leeg
+
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_sec)
