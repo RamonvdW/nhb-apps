@@ -120,8 +120,8 @@
     <div class="modal" id="bevestig">
         <div class="modal-content center">
             <h5>Toestemming</h5>
-            <p>Geef je toestemming om de door jou ingevoerde gegevens op te slaan in ons systeem?</p>
-            <p>Wijzigen kan alleen door contact op te nemen met het Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>
+            <p>Door op 'Ja' te drukken geef je toestemming om de door jou ingevoerde gegevens op te slaan in ons systeem en te gebruiken voor de dienstverlening.<br>Details staan beschreven in het document Privacyverklaring.</p>
+            <p>Wijzigen van de gegevens kan alleen door contact op te nemen met het Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>
 
             <form method="post" action="{% url 'Registreer:gast-volgende-vraag' %}">
                 {% csrf_token %}

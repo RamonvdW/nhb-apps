@@ -14,7 +14,8 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Lidmaatschap</h3>
-            <p>Geef door bij welke landelijke organisatie je lid bent.</p>
+            <p>Geef door bij welke nationale federatie je lid bent.</p>
+            <p>Let op: deze moet aangesloten zijn bij World Archery en/of IFAA.</p>
         </div>
     </div>
 
@@ -33,7 +34,7 @@
                     {% endif %}
 
                     <div class="input-field">
-                        <label for="id_nieuwe">Naam van de organisatie:</label>
+                        <label for="id_nieuwe">Naam van de nationale federatie:</label>
                         <input id="id_nieuwe" class="with-gap" type="text" name="bond" value="{{ bond }}" required autofocus>
                     </div>
 
