@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
@@ -23,10 +24,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie')
 
     url_lijst = '/vereniging/accommodaties/lijst/'
-    url_accommodatie_details = '/vereniging/accommodaties/details/%s/'           # vereniging_pk
-    url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/'         # vereniging_pk
-    url_externe_locaties = '/vereniging/externe-locaties/%s/'                    # vereniging_pk
-    url_externe_locatie_details = '/vereniging/externe-locaties/%s/details/%s/'  # vereniging_pk, locatie_pk
+    url_accommodatie_details = '/vereniging/accommodaties/details/%s/'           # ver_nr
+    url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/'         # ver_nr
+    url_externe_locaties = '/vereniging/externe-locaties/%s/'                    # ver_nr
+    url_externe_locatie_details = '/vereniging/externe-locaties/%s/details/%s/'  # ver_nr, locatie_pk
     url_geen_beheerders = '/vereniging/contact-geen-beheerders/'
 
     testdata = None
@@ -55,16 +56,16 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_rcl111.accounts.add(self.account_rcl)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Noordelijke Club"
-        ver.ver_nr = 1000
-        ver.regio = regio_101
+        ver = NhbVereniging(
+                    naam="Noordelijke Club",
+                    ver_nr=1000,
+                    regio=regio_101)
         ver.save()
         self.nhbver1 = ver
 
         # maak een locatie aan
-        loc = WedstrijdLocatie()
-        loc.adres = 'Grote baan'
+        loc = WedstrijdLocatie(
+                    adres='Grote baan')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc1 = loc
@@ -90,10 +91,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_wl1.save()
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = 1001
-        ver.regio = regio_111
+        ver = NhbVereniging(
+                    naam="Grote Club",
+                    ver_nr=1001,
+                    regio=regio_111)
         ver.save()
         self.nhbver2 = ver
 
@@ -113,22 +114,22 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak een locatie aan
-        loc = WedstrijdLocatie()
-        loc.adres = 'Kleine baan'
+        loc = WedstrijdLocatie(
+                    adres='Kleine baan')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc2 = loc
 
         # maak het lid aan dat HWL wordt
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Tester",
+                        email="rdetester@gmail.not",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver)
         sporter.save()
 
         self.account_hwl = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -139,15 +140,15 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.sporter_100001 = sporter
 
         # maak het lid aan dat SEC wordt
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Secretaris"
-        sporter.email = "rdesecretaris@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100002,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Secretaris",
+                        email="rdesecretaris@gmail.not",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver)
         sporter.save()
 
         self.account_sec = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -169,7 +170,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assert403(resp)
 
-        url = self.url_accommodatie_details % self.nhbver1.pk
+        url = self.url_accommodatie_details % self.nhbver1.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp)
@@ -192,7 +193,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
         # specifieke locatie
-        url = self.url_accommodatie_details % self.nhbver1.pk
+        url = self.url_accommodatie_details % self.nhbver1.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -226,7 +227,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # TODO: check alleen rayon
 
         # details van een vereniging binnen het rayon
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -249,7 +250,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertNotContains(resp, '[1000]')      # in regio 101
 
         # details van een vereniging binnen de regio
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -257,7 +258,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # details van een vereniging buiten de regio
-        url = self.url_accommodatie_details % self.nhbver1.pk
+        url = self.url_accommodatie_details % self.nhbver1.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -265,7 +266,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # wijziging aanbrengen
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -318,7 +319,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertNotContains(resp, '[1000]')      # in regio 101
 
         # check accommodatie detail pagina
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -328,7 +329,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertContains(resp, 'Wijzigingen opslaan')
 
         # check the specifieke accommodatie pagina voor de HWL, met andere terug url
-        url = self.url_accommodatie_vereniging % self.nhbver2.pk
+        url = self.url_accommodatie_vereniging % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -404,12 +405,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # gebruik de alternatieve url
         loc2.delete()
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.pk,
+            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.ver_nr,
                                     {'maak_buiten_locatie': 'graag'})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.pk,
+            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.ver_nr,
                                     {'baan_type': 'X'})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
 
@@ -437,7 +438,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_sec.accounts.clear()
 
         # check accommodatie detail pagina
-        url = self.url_accommodatie_vereniging % self.nhbver2.pk
+        url = self.url_accommodatie_vereniging % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -492,7 +493,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
         # check accommodatie detail pagina
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -544,7 +545,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         # probeer van andere vereniging te wijzigen
-        url = self.url_accommodatie_details % self.nhbver1.pk
+        url = self.url_accommodatie_details % self.nhbver1.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 5,
@@ -565,7 +566,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         loc.verenigingen.add(self.nhbver2)
 
         # haal de details op
-        url = self.url_accommodatie_details % self.nhbver1.pk
+        url = self.url_accommodatie_details % self.nhbver1.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -573,7 +574,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # haal de details op
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -600,7 +601,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
         # accommodatie details
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -624,7 +625,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        url = self.url_accommodatie_vereniging % self.nhbver2.pk
+        url = self.url_accommodatie_vereniging % self.nhbver2.ver_nr
 
         # verwijder de buitenlocatie terwijl deze niet bestaat
         with self.assert_max_queries(20):
@@ -701,7 +702,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # nog een keer, via de alternatieve url
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.pk,
+            resp = self.client.post(self.url_accommodatie_details % self.nhbver2.ver_nr,
                                     {'verwijder_buitenbaan': 'ja'})
         self.assert_is_redirect_not_plein(resp)
 
@@ -725,7 +726,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        url = self.url_externe_locaties % self.nhbver2.pk
+        url = self.url_externe_locaties % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -747,7 +748,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        url = self.url_externe_locaties % self.nhbver2.pk
+        url = self.url_externe_locaties % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -776,7 +777,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # probeer een locatie toe te voegen van een andere vereniging
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_externe_locaties % self.nhbver1.pk)
+            resp = self.client.post(self.url_externe_locaties % self.nhbver1.ver_nr)
         self.assert403(resp)
 
         # hanteer de externe locatie in de lijst van alle verenigingen
@@ -785,7 +786,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -798,13 +799,13 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maak een externe locatie aan
-        url = self.url_externe_locaties % self.nhbver2.pk
+        url = self.url_externe_locaties % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
 
         locatie = WedstrijdLocatie.objects.get(baan_type='E')
-        url = self.url_externe_locatie_details % (self.nhbver2.pk, locatie.pk)
+        url = self.url_externe_locatie_details % (self.nhbver2.ver_nr, locatie.pk)
 
         # haal de locatie details op
         with self.assert_max_queries(20):
@@ -930,12 +931,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         # niet bestaande locatie
-        resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.pk, 999999))
+        resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.ver_nr, 999999))
         self.assert404(resp, 'Locatie bestaat niet')
 
         # niet externe locatie
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.pk, self.loc2.pk))
+            resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.ver_nr, self.loc2.pk))
         self.assert404(resp, 'Locatie bestaat niet')
 
         # niet bestaande vereniging
@@ -946,7 +947,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.loc1.baan_type = 'E'
         self.loc1.save()
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.pk, self.loc1.pk))
+            resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.ver_nr, self.loc1.pk))
         self.assert404(resp, 'Locatie hoort niet bij de vereniging')
 
         # login als HWL van nhbver1
@@ -1002,7 +1003,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maak een externe locatie aan
-        url = self.url_externe_locaties % self.nhbver2.pk
+        url = self.url_externe_locaties % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
@@ -1012,7 +1013,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         loc.save()
 
         # bekijk de accommodatie details
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_details % self.nhbver2.ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -1023,7 +1024,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # verwijder de externe locatie
         self.assertTrue(loc.zichtbaar, True)
-        url = self.url_externe_locatie_details % (self.nhbver2.pk, loc.pk)
+        url = self.url_externe_locatie_details % (self.nhbver2.ver_nr, loc.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verwijder': 'zekers'})
         self.assert_is_redirect_not_plein(resp)

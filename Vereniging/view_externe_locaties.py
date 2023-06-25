@@ -45,8 +45,8 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])        # afkappen voor de veiligheid
-            ver = NhbVereniging.objects.get(pk=ver_pk)
+            ver_nr = int(self.kwargs['ver_nr'][:6])        # afkappen voor de veiligheid
+            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
 
@@ -62,7 +62,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         if self.functie_nu and self.functie_nu.rol == 'HWL' and self.functie_nu.nhb_ver == ver:
             context['readonly'] = False
             context['url_toevoegen'] = reverse('Vereniging:externe-locaties',
-                                               kwargs={'vereniging_pk': ver.pk})
+                                               kwargs={'ver_nr': ver.ver_nr})
 
         locaties = ver.wedstrijdlocatie_set.filter(zichtbaar=True,
                                                    baan_type='E')
@@ -74,7 +74,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             locatie.geen_disciplines = locatie.disciplines_str() == ""
 
             locatie.url_wijzig = reverse('Vereniging:locatie-details',
-                                         kwargs={'vereniging_pk': ver.pk,
+                                         kwargs={'ver_nr': ver.ver_nr,
                                                  'locatie_pk': locatie.pk})
         # for
 
@@ -106,7 +106,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
         # meteen wijzigen
         url = reverse('Vereniging:locatie-details',
-                      kwargs={'vereniging_pk': ver.pk,
+                      kwargs={'ver_nr': ver.ver_nr,
                               'locatie_pk': locatie.pk})
 
         return HttpResponseRedirect(url)
@@ -137,8 +137,8 @@ class ExterneLocatieDetailsView(TemplateView):
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])          # afkappen voor de veiligheid
-            ver = NhbVereniging.objects.get(pk=ver_pk)
+            ver_nr = int(self.kwargs['ver_nr'][:6])          # afkappen voor de veiligheid
+            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
 
@@ -181,17 +181,17 @@ class ExterneLocatieDetailsView(TemplateView):
 
         if not readonly:
             context['url_opslaan'] = reverse('Vereniging:locatie-details',
-                                             kwargs={'vereniging_pk': ver.pk,
+                                             kwargs={'ver_nr': ver.ver_nr,
                                                      'locatie_pk': locatie.pk})
 
             context['url_verwijder'] = context['url_opslaan']
 
         context['url_terug'] = reverse('Vereniging:externe-locaties',
-                                       kwargs={'vereniging_pk': ver.pk})
+                                       kwargs={'ver_nr': ver.ver_nr})
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Vereniging:externe-locaties', kwargs={'vereniging_pk': ver.pk}), 'Wedstrijdlocaties'),
+            (reverse('Vereniging:externe-locaties', kwargs={'ver_nr': ver.ver_nr}), 'Wedstrijdlocaties'),
             (None, 'Locatie details')
         )
 
@@ -212,7 +212,7 @@ class ExterneLocatieDetailsView(TemplateView):
             # FUTURE: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
 
             url = reverse('Vereniging:externe-locaties',
-                          kwargs={'vereniging_pk': ver.pk})
+                          kwargs={'ver_nr': ver.ver_nr})
             return HttpResponseRedirect(url)
 
         data = request.POST.get('naam', '')
@@ -353,7 +353,7 @@ class ExterneLocatieDetailsView(TemplateView):
         locatie.save()
 
         url = reverse('Vereniging:externe-locaties',
-                      kwargs={'vereniging_pk': ver.pk})
+                      kwargs={'ver_nr': ver.ver_nr})
         return HttpResponseRedirect(url)
 
 

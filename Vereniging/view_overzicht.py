@@ -57,11 +57,11 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         if self.functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
-                                                          kwargs={'vereniging_pk': ver.pk})
+                                                          kwargs={'ver_nr': ver.ver_nr})
 
         if not ver.is_extern:
             context['url_externe_locaties'] = reverse('Vereniging:externe-locaties',
-                                                      kwargs={'vereniging_pk': ver.pk})
+                                                      kwargs={'ver_nr': ver.ver_nr})
 
         comps = list()
         deelcomps = list()

@@ -154,33 +154,33 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         context['verenigingen'] = verenigingen = self._get_verenigingen()
 
         # voeg de url toe voor de "details" knoppen
-        for nhbver in verenigingen:
+        for ver in verenigingen:
 
-            nhbver.details_url = reverse('Vereniging:accommodatie-details',
-                                         kwargs={'vereniging_pk': nhbver.pk})
+            ver.details_url = reverse('Vereniging:accommodatie-details',
+                                      kwargs={'ver_nr': ver.ver_nr})
 
-            for loc in (nhbver
+            for loc in (ver
                         .wedstrijdlocatie_set           # FUTURE: kost een query -> aparte ophalen in dict
                         .filter(zichtbaar=True)):
                 if loc.baan_type == 'E':
-                    nhbver.heeft_externe_locaties = True
+                    ver.heeft_externe_locaties = True
                 elif loc.baan_type == 'B':
-                    nhbver.buiten_locatie = loc
+                    ver.buiten_locatie = loc
                 else:
-                    nhbver.locatie = loc
+                    ver.locatie = loc
             # for
 
-            nhbver.cluster_letters = ''
+            ver.cluster_letters = ''
 
-            if nhbver.clusters.count() > 0:
+            if ver.clusters.count() > 0:
                 context['toon_cluster'] = True
-                letters = [cluster.letter for cluster in nhbver.clusters.all()]
+                letters = [cluster.letter for cluster in ver.clusters.all()]
                 letters.sort()
-                nhbver.cluster_letters = ",".join(letters)
+                ver.cluster_letters = ",".join(letters)
 
                 if not context['toon_regio']:
                     # verander in 101a,b
-                    nhbver.cluster_letters = str(nhbver.regio.regio_nr) + nhbver.cluster_letters
+                    ver.cluster_letters = str(ver.regio.regio_nr) + ver.cluster_letters
         # for
 
         context['kruimels'] = (
