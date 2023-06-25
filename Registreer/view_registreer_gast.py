@@ -15,6 +15,7 @@ from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.view_wachtwoord import auto_login_gast_account
 from BasisTypen.definities import GESLACHT2STR
+from Functie.models import Functie
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
@@ -29,6 +30,7 @@ from Registreer.forms import RegistreerGastForm
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker
 from Registreer.operations import registratie_gast_volgende_lid_nr, registratie_gast_is_open
 from Sporter.models import Sporter
+from Taken.operations import maak_taak
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
                                         maak_tijdelijke_code_registreer_gast_email)
 import datetime
@@ -388,9 +390,14 @@ class RegistreerGastVolgendeVraagView(View):
 
         elif gast.fase == REGISTRATIE_FASE_AGE:
             template_name = TEMPLATE_REGISTREER_GAST_AGE
-            context['jaar'] = gast.geboorte_datum.year
-            context['maand'] = gast.geboorte_datum.month
-            context['dag'] = gast.geboorte_datum.day
+            if gast.geboorte_datum.year == 2000 and gast.geboorte_datum.month == 1 and gast.geboorte_datum.day == 1:
+                context['jaar'] = ''
+                context['maand'] = ''
+                context['dag'] = ''
+            else:
+                context['jaar'] = gast.geboorte_datum.year
+                context['maand'] = gast.geboorte_datum.month
+                context['dag'] = gast.geboorte_datum.day
 
         elif gast.fase == REGISTRATIE_FASE_TEL:
             template_name = TEMPLATE_REGISTREER_GAST_TEL
@@ -448,6 +455,24 @@ class RegistreerGastVolgendeVraagView(View):
 
             gast.sporter = sporter
             gast.save(update_fields=['sporter'])
+
+    def _informeer_sec(self, gast):
+
+        functie_sec = Functie.objects.get(rol='SEC', nhb_ver__ver_nr=settings.EXTERN_VER_NR)
+
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+        taak_deadline = now + datetime.timedelta(days=7)
+        taak_tekst = "Er is zojuist een nieuwe gast-account aangemaakt. Het bondsnummer is %s.\n" % gast.lid_nr
+        taak_tekst += "Als secretaris van vereniging %s kan je de details inzien." % settings.EXTERN_VER_NR
+        taak_log = "[%s] Taak aangemaakt" % stamp_str
+
+        # maak een taak aan voor deze BKO
+        maak_taak(toegekend_aan_functie=functie_sec,
+                  deadline=taak_deadline,
+                  aangemaakt_door=None,  # systeem
+                  beschrijving=taak_tekst,
+                  log=taak_log)
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de OPSLAAN knop gebruikt wordt op het formulier
@@ -549,18 +574,34 @@ class RegistreerGastVolgendeVraagView(View):
             maand = request.POST.get('maand', '')[:2]   # afkappen voor extra veiligheid
             dag = request.POST.get('dag', '')[:2]       # afkappen voor extra veiligheid
 
-            datum = '2000-01-01'
+            is_valid = True
+
             try:
                 jaar_nr = int(jaar)
-                maand_nr = int(maand)
-                dag_nr = int(dag)
+            except ValueError:
+                is_valid = False
+                jaar = ''
+                jaar_nr = 0
 
+            try:
+                maand_nr = int(maand)
+            except ValueError:
+                is_valid = False
+                maand = ''
+                maand_nr = 0
+
+            try:
+                dag_nr = int(dag)
+            except ValueError:
+                is_valid = False
+                dag = ''
+                dag_nr = 0
+
+            datum = '2000-01-01'
+            if is_valid:
                 is_valid = 1900 < jaar_nr < 2100 and 1 <= maand_nr <= 12 and 1 <= dag_nr <= 31
                 if is_valid:
                     datum = datetime.datetime.strptime('%d-%d-%d' % (jaar_nr, maand_nr, dag_nr), '%Y-%m-%d')
-
-            except ValueError:
-                is_valid = False
 
             if not is_valid:
                 context = {
@@ -647,6 +688,9 @@ class RegistreerGastVolgendeVraagView(View):
                 gast.logboek += '[%s] Toestemming opslaan ontvangen\n' % stamp_str
                 gast.fase = REGISTRATIE_FASE_DONE
                 gast.save(update_fields=['fase', 'logboek'])
+
+                # informeer de secretaris over de nieuwe registratie
+                self._informeer_sec(gast)
 
                 # doe de evaluatie opnieuw, nu met het Sporter record
                 rol_bepaal_beschikbare_rollen(self.request, account)
