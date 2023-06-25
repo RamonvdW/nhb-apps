@@ -432,7 +432,7 @@ class RegistreerGastVolgendeVraagView(View):
         aantal = Sporter.objects.filter(lid_nr=gast.lid_nr).count()
         if aantal == 0:
             date_now = timezone.now().date()
-            ver_8000 = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+            ver_extern = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
 
             sporter = Sporter(
                         lid_nr=gast.lid_nr,
@@ -449,7 +449,7 @@ class RegistreerGastVolgendeVraagView(View):
                         para_classificatie='',
                         is_actief_lid=True,
                         sinds_datum=date_now,
-                        bij_vereniging=ver_8000,
+                        bij_vereniging=ver_extern,
                         lid_tot_einde_jaar=date_now.year,
                         account=account)
             sporter.save()

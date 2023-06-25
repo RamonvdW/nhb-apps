@@ -399,27 +399,31 @@
                         </td>
                     </tr>
 
-                    <tr>
-                        <th>Hoofdwedstrijdleider(s)</th>
-                        <td>
-                            {% for name in hwl_names %}
-                                <span>{{ name }}</span><br>
-                            {% empty %}
-                                <i class="grey-text">Nog niet gekoppeld</i>
-                            {% endfor %}
-                        </td>
-                    </tr>
+                    {% if toon_hwl %}
+                        <tr>
+                            <th>Hoofdwedstrijdleider(s)</th>
+                            <td>
+                                {% for name in hwl_names %}
+                                    <span>{{ name }}</span><br>
+                                {% empty %}
+                                    <i class="grey-text">Nog niet gekoppeld</i>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                    <tr>
-                        <th>Wedstrijdleider(s)</th>
-                        <td>
-                            {% for name in wl_names %}
-                                <span>{{ name }}</span><br>
-                            {% empty %}
-                                <i class="grey-text">Nog niet gekoppeld</i>
-                            {% endfor %}
-                        </td>
-                    </tr>
+                    {% if toon_wl %}
+                        <tr>
+                            <th>Wedstrijdleider(s)</th>
+                            <td>
+                                {% for name in wl_names %}
+                                    <span>{{ name }}</span><br>
+                                {% empty %}
+                                    <i class="grey-text">Nog niet gekoppeld</i>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
                     <tr>
                         <th>E-mailadres secretaris</th>
@@ -432,27 +436,31 @@
                         </td>
                     </tr>
 
-                    <tr>
-                        <th>E-mailadres hoofdwedstrijdleider</th>
-                        <td>
-                            {% if hwl_email %}
-                                <code>{{ hwl_email }}</code>
-                            {% else %}
-                                <i class="grey-text">Onbekend</i>
-                            {% endif %}
-                        </td>
-                    </tr>
+                    {% if toon_hwl %}
+                        <tr>
+                            <th>E-mailadres hoofdwedstrijdleider</th>
+                            <td>
+                                {% if hwl_email %}
+                                    <code>{{ hwl_email }}</code>
+                                {% else %}
+                                    <i class="grey-text">Onbekend</i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                    <tr>
-                        <th>E-mailadres wedstrijdleider</th>
-                        <td>
-                            {% if wl_email %}
-                                <code>{{ wl_email }}</code>
-                            {% else %}
-                                <i class="grey-text">Onbekend</i>
-                            {% endif %}
-                        </td>
-                    </tr>
+                    {% if toon_wl %}
+                        <tr>
+                            <th>E-mailadres wedstrijdleider</th>
+                            <td>
+                                {% if wl_email %}
+                                    <code>{{ wl_email }}</code>
+                                {% else %}
+                                    <i class="grey-text">Onbekend</i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
                 </table>
             </div>
@@ -492,8 +500,11 @@
         </div>
     {% endif %}
 
-
-    <p class="center">Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
+    {% if nhbver.regio.is_administratief %}
+        <p class="center">Deze gegevens kunnen worden aangepast door de secretaris.</p>
+    {% else %}
+        <p class="center">Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-accommodatie-details" %}
 

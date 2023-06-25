@@ -109,14 +109,22 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek de beheerders erbij
-        qset = Functie.objects.filter(nhb_ver=nhbver).prefetch_related('accounts')
+        qset = Functie.objects.filter(nhb_ver=ver).prefetch_related('accounts')
         try:
             functie_sec = qset.filter(rol='SEC')[0]
-            functie_hwl = qset.filter(rol='HWL')[0]
-            functie_wl = qset.filter(rol='WL')[0]
         except IndexError:                  # pragma: no cover
             # only in autotest environment
             raise Http404('Rol ontbreekt')
+
+        if ver.is_extern:
+            functie_hwl = functie_wl = None
+        else:
+            try:
+                functie_hwl = qset.filter(rol='HWL')[0]
+                functie_wl = qset.filter(rol='WL')[0]
+            except IndexError:                  # pragma: no cover
+                # only in autotest environment
+                raise Http404('Rol ontbreekt')
 
         context['sec_names'] = self.get_all_names(functie_sec)
         context['sec_email'] = functie_sec.bevestigde_email

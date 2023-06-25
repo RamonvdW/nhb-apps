@@ -502,6 +502,41 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(url in urls)                                    # opslaan url
 
+    def test_geen_hwl_wl(self):
+        # vereniging 'extern' heeft geen HWL en WL
+
+        # haal de speciale vereniging en functie op
+        ver = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+        self.assertTrue(ver.is_extern)
+        functie_sec = Functie.objects.get(rol='SEC', nhb_ver=ver)
+
+        # maak het lid aan dat SEC wordt
+        sporter = Sporter(
+                        lid_nr=108001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Secretaris",
+                        email="sec8000@test.not",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=5),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver)
+        sporter.save()
+
+        account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
+        functie_sec.accounts.add(account)
+
+        self.e2e_login_and_pass_otp(account)
+        self.e2e_wissel_naar_functie(functie_sec)
+        self.e2e_check_rol('SEC')
+
+        # check accommodatie detail pagina
+        url = self.url_accommodatie_details % ver.ver_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+
     def test_bad(self):
         # login als SEC van ver2 op loc2
         self.e2e_login_and_pass_otp(self.account_sec)

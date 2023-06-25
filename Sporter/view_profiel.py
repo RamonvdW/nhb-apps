@@ -449,7 +449,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         if sporter.bij_vereniging:
             is_administratief = sporter.bij_vereniging.regio.is_administratief      # dus helemaal geen wedstrijden
-            is_extern = sporter.bij_vereniging.ver_nr == settings.EXTERN_VER_NR     # dus geen bondscompetities
+            is_extern = sporter.bij_vereniging.is_extern                            # dus geen bondscompetities
         else:
             is_administratief = False
             is_extern = False

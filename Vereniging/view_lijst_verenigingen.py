@@ -250,7 +250,10 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
                 geen_sec.append(ver)
                 ver.nr_geen_sec = len(geen_sec)
 
-            count += hwl_count[ver_nr]
+            try:
+                count += hwl_count[ver_nr]
+            except KeyError:
+                count = 0
             if count == 0:
                 geen_beheerders.append(ver)
                 ver.nr_geen_beheerders = len(geen_beheerders)

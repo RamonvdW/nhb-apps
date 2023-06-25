@@ -351,7 +351,7 @@ class TestData(object):
 
         # alle accounts moeten en Sporter hebben en die hebben weer een vereniging nodig
         ver = NhbVereniging(
-                    ver_nr=8000,
+                    ver_nr=7000,
                     naam='Admin vereniging',
                     plaats='Stadium',
                     regio=self.regio[100],

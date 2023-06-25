@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -341,5 +342,24 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(len(urls2), 1)
 
         # ophalen en aanpassen: zie test_accommodatie
+
+    def test_is_extern(self):
+        # corner case: SEC van de vereniging voor gast-accounts
+
+        ver = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.beschrijving = 'SEC extern'
+        self.functie_sec.save()
+
+        # login als SEC
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
 # end of file

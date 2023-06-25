@@ -47,10 +47,9 @@ def maak_vereniging_extern(apps, _):
                 contact_email=settings.EMAIL_BONDSBUREAU)
     ver.save()
 
-    # maak de beheerders rollen aan
+    # maak de beheerders rol aan
     functie_klas(rol='SEC', beschrijving='Secretaris %s' % ver_nr, nhb_ver=ver).save()
-    functie_klas(rol='HWL', beschrijving='Hoofdwedstrijdleider %s' % ver_nr, nhb_ver=ver).save()
-    functie_klas(rol='WL', beschrijving='Wedstrijdleider %s' % ver_nr, nhb_ver=ver).save()
+    # (bewust geen HWL en WL)
 
 
 class Migration(migrations.Migration):
