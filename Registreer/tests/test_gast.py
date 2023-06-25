@@ -645,6 +645,16 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         gast = GastRegistratie.objects.first()
         self.assertEqual(gast.fase, REGISTRATIE_FASE_CLUB)
 
+        # vraag: geboortedatum (met al ingevulde niet-default datum)
+        gast = GastRegistratie.objects.first()
+        gast.fase = REGISTRATIE_FASE_AGE
+        gast.save(update_fields=['fase'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_volgende_vraag)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast-07-age.dtl', 'plein/site_layout.dtl'))
+
         gast.fase = REGISTRATIE_FASE_CONFIRM
         gast.save(update_fields=['fase'])
 
