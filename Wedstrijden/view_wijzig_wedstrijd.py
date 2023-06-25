@@ -666,8 +666,9 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
     @staticmethod
     def _maak_taak_voor_bb(wedstrijd, msg):
         now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         taak_deadline = now + datetime.timedelta(days=3)
-        taak_log = "[%s] Taak aangemaakt" % now
+        taak_log = "[%s] Taak aangemaakt" % stamp_str
         taak_tekst = msg % "%s van vereniging %s" % (repr(wedstrijd.titel), wedstrijd.organiserende_vereniging)
         taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
 
@@ -682,8 +683,9 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
     @staticmethod
     def _maak_taak_voor_hwl(wedstrijd, msg):
         now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
         taak_deadline = now + datetime.timedelta(days=3)
-        taak_log = "[%s] Taak aangemaakt" % now
+        taak_log = "[%s] Taak aangemaakt" % stamp_str
         taak_tekst = msg % repr(wedstrijd.titel)
         taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
 

@@ -19,6 +19,7 @@ class Command(BaseCommand):
 
         now = timezone.now()
         now = timezone.localtime(now)
+        stamp_str = now.strftime('%Y-%m-%d om %H:%M')
 
         # dit commando wordt elk uur uitgevoerd
         # we willen pas vanaf 08:00 een taak / mailtje
@@ -100,7 +101,7 @@ class Command(BaseCommand):
                     beschrijving = '\n'.join(regels)
 
                     # maak een taak aan met alle details
-                    taak_log = "[%s] Taak aangemaakt" % timezone.localtime(now)
+                    taak_log = "[%s] Taak aangemaakt" % stamp_str
                     taak_deadline = now + timedelta(days=7)
 
                     # voorkom dubbele meldingen (ook als deze al afgehandeld is)

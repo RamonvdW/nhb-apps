@@ -1417,12 +1417,13 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             # maak het bericht voor een taak aan de RKO's en BKO's
             account = request.user
             now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             taak_deadline = now
             assert isinstance(account, Account)
             taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (
                             str(deelcomp), account.volledige_naam())
             taak_tekst += "\nAls RKO kan je onder Bondscompetities, Planning Rayon de status van elke regio zien."
-            taak_log = "[%s] Taak aangemaakt" % now
+            taak_log = "[%s] Taak aangemaakt" % stamp_str
 
             # maak een taak aan voor de RKO
             deelkamp = Kampioenschap.objects.get(competitie=deelcomp.competitie,

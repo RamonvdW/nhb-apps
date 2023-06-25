@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,7 +34,8 @@ def store_feedback(gebruiker_str, rol_str, op_pagina, volledige_url, bevinding, 
 
     # maak taken aan om door te geven dat er nieuwe feedback is
     now = timezone.now()
-    taak_log = "[%s] Taak aangemaakt" % now
+    stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+    taak_log = "[%s] Taak aangemaakt" % stamp_str
     taak_deadline = now + datetime.timedelta(days=7)
     taak_tekst = "Er is nieuwe feedback om te bekijken"
 

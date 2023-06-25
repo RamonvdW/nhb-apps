@@ -935,9 +935,10 @@ class Command(BaseCommand):
             # stuur de RKO een taak ('ter info')
             functie_rko = deelkamp.functie
             now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             taak_deadline = now
             taak_tekst = "Ter info: De deelnemerslijst voor jouw Rayonkampioenschappen zijn zojuist vastgesteld door de BKO"
-            taak_log = "[%s] Taak aangemaakt" % now
+            taak_log = "[%s] Taak aangemaakt" % stamp_str
 
             # maak een taak aan voor deze BKO
             maak_taak(toegekend_aan_functie=functie_rko,
