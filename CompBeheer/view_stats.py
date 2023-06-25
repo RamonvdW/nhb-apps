@@ -227,11 +227,13 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             qset = (KampioenschapSporterBoog
                     .objects
                     .filter(kampioenschap__competitie__afstand=afstand,
+                            kampioenschap__competitie__pk__in=pks,
                             kampioenschap__deel=DEEL_RK))
 
             qset_teams = (KampioenschapTeam
                           .objects
                           .filter(kampioenschap__competitie__afstand=afstand,
+                                  kampioenschap__competitie__pk__in=pks,
                                   kampioenschap__deel=DEEL_RK))
 
             totaal1 = totaal2 = totaal3 = totaal4 = 0
@@ -266,6 +268,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             qset_bk = (KampioenschapSporterBoog
                        .objects
                        .filter(kampioenschap__competitie__afstand=afstand,
+                               kampioenschap__competitie__pk__in=pks,
                                kampioenschap__deel=DEEL_BK))
             context['deelnemers_bk_%sm' % afstand] = qset_bk.count()
 
@@ -275,6 +278,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             qset_bk = (KampioenschapTeam
                        .objects
                        .filter(kampioenschap__competitie__afstand=afstand,
+                               kampioenschap__competitie__pk__in=pks,
                                kampioenschap__deel=DEEL_BK))
             context['teams_bk_%sm' % afstand] = qset_bk.count()
 
@@ -287,20 +291,23 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         actuele_comps = list()
+        afstand_gevonden = list()       # afstand
 
         for comp in (Competitie
                      .objects
                      .exclude(is_afgesloten=True)
                      .order_by('afstand',
-                               'begin_jaar')):
+                               '-begin_jaar')):     # nieuwste eerst
 
-            comp.bepaal_fase()
-            comp.bepaal_openbaar(self.rol_nu)
+            if comp.afstand not in afstand_gevonden:
+                comp.bepaal_fase()
+                comp.bepaal_openbaar(self.rol_nu)
 
-            if comp.is_openbaar:
-                if comp.fase_indiv >= 'C':
-                    actuele_comps.append(comp)
-                    context['seizoen'] = comp.maak_seizoen_str()
+                if comp.is_openbaar:
+                    if comp.fase_indiv >= 'C':
+                        actuele_comps.append(comp)
+                        afstand_gevonden.append(comp.afstand)
+                        context['seizoen'] = comp.maak_seizoen_str()
         # for
 
         self._tel_aantallen(context, actuele_comps)
