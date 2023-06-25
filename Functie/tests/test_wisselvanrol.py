@@ -7,8 +7,10 @@
 from django.test import TestCase
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
+from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
+from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -707,6 +709,27 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_activeer_functie % 999999)
         self.assert404(resp, 'Foute parameter (functie)')
+
+    def test_inconsistent(self):
+        # corner case: BB naar niet-bestaande functie
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+
+        resp = self.client.get('/plein/')
+        request = resp.wsgi_request
+
+        rol, functie = rol_get_huidige_functie(request)
+        self.assertEqual(rol, Rollen.ROL_BKO)
+        self.assertEqual(functie, self.functie_bko)
+
+        self.functie_bko.rol = 'RCL'
+        self.functie_bko.save(update_fields=['rol'])
+        self.e2e_wissel_naar_functie(self.functie_bko)
+
+        rol, functie = rol_get_huidige_functie(request)
+        self.assertEqual(rol, Rollen.ROL_BKO)
+        self.assertEqual(functie, self.functie_bko)
 
     def test_vhpg(self):
         # controleer doorsturen naar de VHPG acceptatie pagina

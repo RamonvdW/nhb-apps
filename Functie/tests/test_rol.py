@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Functie.definities import Rollen
+from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
                          SESSIONVAR_ROL_BESCHRIJVING, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK,
                          rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
-                         rol_activeer_rol, rol_activeer_functie)
-from Functie.operations import maak_functie, maak_account_vereniging_secretaris
+                         rol_activeer_rol, rol_activeer_functie,
+                         rol_get_huidige, rol_get_huidige_functie)
 from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -44,7 +46,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.functie_sec.nhb_ver = ver
         self.functie_sec.save()
 
-    def test_maak_hwl(self):
+    def test_maak_sec(self):
         self.assertEqual(self.functie_sec.accounts.count(), 0)
         added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
         self.assertTrue(added)
@@ -60,6 +62,28 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertFalse(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 
+    def test_huidige(self):
+        self.e2e_login_no_check(self.account_normaal)
+        resp = self.client.get('/plein/')
+        request = resp.wsgi_request
+        self.assertTrue(request.user.is_authenticated)
+
+        del request.session[SESSIONVAR_ROL_HUIDIGE]
+        rol = rol_get_huidige(request)
+        self.assertEqual(rol, Rollen.ROL_NONE)
+
+        session = request.session
+        session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = 'Test1!'
+        session.save()
+
+        rol, functie = rol_get_huidige_functie(request)
+        self.assertIsNone(functie)
+
+        del request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
+        rol, functie = rol_get_huidige_functie(request)
+        self.assertEqual(rol, Rollen.ROL_NONE)
+        self.assertIsNone(functie)
+
     def test_geen_sessie(self):
         # probeer beveiliging tegen afwezigheid sessie variabelen
         # typisch tweedelijns, want views checken user.is_authenticated
@@ -71,7 +95,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertFalse(res)
 
         self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
-        rol_activeer_rol(request, 'schutter')
+        rol_activeer_rol(request, 'bestaat niet')
         self.assertTrue(SESSIONVAR_ROL_HUIDIGE not in request.session.keys())
 
         rol_activeer_functie(request, 'geen getal')

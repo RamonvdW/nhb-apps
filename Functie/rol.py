@@ -383,7 +383,6 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
             functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
         except KeyError:
             # geen functie opgeslagen
-            # of geen pk-like nummer
             pass
         else:
             if functie_pk:      # filter None
