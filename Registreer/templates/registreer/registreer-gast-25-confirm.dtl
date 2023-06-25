@@ -99,6 +99,23 @@
         </div>
     </div>
 
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Hoe zit het met mijn privacy?</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            {% url 'Plein:privacy' as card_url %}
+            {% include 'plein/card.dtl' with title="Privacyverklaring" text="Lees hier om we omgaan met jouw privacy." icon="security" url=card_url %}
+        </div>
+    </div>
+
+
     <!-- modal dialog -->
     <div class="modal" id="bevestig">
         <div class="modal-content center">
@@ -121,6 +138,7 @@
             </form>
         </div>
     </div>
+
 
     {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-confirm" %}
 
