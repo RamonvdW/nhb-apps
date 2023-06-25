@@ -90,6 +90,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
         # volg de link om de email te bevestigen
         obj = TijdelijkeCode.objects.first()
+        self.assertTrue(str(obj) != '')         # coverage of __str__
         self.assertEqual(obj.hoortbij_gast.pk, gast.pk)
         url = self.url_tijdelijk % obj.url_code
 
@@ -117,6 +118,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail)
 
         # herhaal het verzoek --> deze wordt afgewezen
+        self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_registreer_gast,
                                     {'achternaam': self.test_achternaam,
@@ -130,6 +132,35 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
         self.assertEqual(1, GastRegistratie.objects.count())
         self.assertEqual(2, MailQueue.objects.count())
+
+    def test_kill_switch(self):
+        # controleer gedrag van de kill-switch
+        volgende = GastLidNummer.objects.first()
+        volgende.kan_aanmaken = False
+        volgende.save(update_fields=['kan_aanmaken'])
+
+        self.assertEqual(0, GastRegistratie.objects.count())
+        self.assertEqual(0, MailQueue.objects.count())
+        self.assertEqual(0, TijdelijkeCode.objects.count())
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_registreer_gast)
+
+        self.assertContains(resp, 'Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_registreer_gast,
+                                    {'achternaam': self.test_achternaam,
+                                     'voornaam': self.test_voornaam,
+                                     'email': self.test_email},
+                                    follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.')
+
+        self.assertEqual(0, GastRegistratie.objects.count())
 
     def test_begin_bad(self):
         # onvolledige verzoeken
@@ -681,5 +712,6 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
         resp = self.client.get(self.url_volgende_vraag)
         self.assert_is_redirect(resp, '/plein/')
+
 
 # end of file

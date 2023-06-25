@@ -25,6 +25,9 @@ class GastLidNummer(models.Model):
     # het volgende vrije lidnummer wat toegekend kan worden
     volgende_lid_nr = models.PositiveIntegerField()
 
+    # kill-switch voor registratie van nieuwe gast-accounts
+    kan_aanmaken = models.BooleanField(default=True)
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "Volgende = %s" % self.volgende_lid_nr

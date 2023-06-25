@@ -19,34 +19,40 @@
         </div>
     </div>
 
+
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- voor leden -->
             {% include 'plein/card.dtl' with title="voor NHB leden" text="Doorloop eenmalig de korte registratie procedure." icon="badge" url=url_registreer_nhb %}
 
-            <!-- voor gast-account -->
-            {% include 'plein/card.dtl' with title="Gast-account" text="Maak een gast-account om deze site te ontdekken en in te schrijven op wedstrijden." icon="explore" url=url_registreer_gast %}
+            {% if gast_is_open %}
+                <!-- voor gast-account -->
+                {% include 'plein/card.dtl' with title="Gast-account" text="Maak een gast-account om deze site te ontdekken en in te schrijven op wedstrijden." icon="explore" url=url_registreer_gast %}
+            {% endif %}
         </div>
     </div>
 
+    {% if gast_is_open %}
 
-    <!-- banner -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>English</h4>
-            <p>Members of any <b>World Archery</b> or <b>IFAA</b> association can sign up for matches after creating an account on this site.<br>(this option is not intended for members of the Dutch Archery Federation)</p>
-            <p>This site is in Dutch, but has proven to be perfectly usable with the translation function built into modern browsers.</p>
+        <!-- banner -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>English</h4>
+                <p>Members of any <b>World Archery</b> or <b>IFAA</b> association can sign up for matches after creating an account on this site.<br>(this option is not intended for members of the Dutch Archery Federation)</p>
+                <p>This site is in Dutch, but has proven to be perfectly usable with the translation function built into modern browsers.</p>
+            </div>
         </div>
-    </div>
 
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
-        <div class="col s12">
-            <!-- gast-account, engels -->
-            {% include 'plein/card.dtl' with title="Create account" text="Use only when not a member of the Dutch Archery Federation." icon="public" url=url_registreer_gast %}
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <!-- gast-account, engels -->
+                {% include 'plein/card.dtl' with title="Create account" text="Use only when not a member of the Dutch Archery Federation." icon="public" url=url_registreer_gast %}
+            </div>
         </div>
-    </div>
+
+    {% endif %}
 
     <!-- geen feedback: with op_pagina="registreer-begin" -->
 

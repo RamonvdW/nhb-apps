@@ -18,44 +18,59 @@
         </div>
     </div>
 
-    <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
+    {% if not gast_is_open %}
 
-            <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
-                <div class="form-padding">
-
-                    <form action="{{ url_aanmaken }}" method="post">
-                        {% csrf_token %}
-
-                        <div class="input-field">
-                            {{ form.voornaam.label_tag }}{{ form.voornaam }}
-                        </div>
-
-                        <div class="input-field">
-                            {{ form.achternaam.label_tag }}{{ form.achternaam }}
-                        </div>
-
-                        <div class="input-field">
-                            {{ form.email.label_tag }}{{ form.email }}
-                        </div>
-
-                        {% if form.errors %}
-                            {% for error in form.non_field_errors %}
-                                <p class="left-align nhb-rood-text">Fout: {{ error|escape }}</p>
-                            {% endfor %}
-                            <p>&nbsp;</p>
-                        {% endif %}
-
-                        <div class="center-align">
-                            <input class="btn-nhb-rood" name="button_registreer" type="submit" value="Aanmaken">
-                        </div>
-                    </form>
+        <!-- rood bordje -->
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                    <p>Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.</p>
                 </div>
             </div>
         </div>
-    </div>
+
+    {% else %}
+
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
+
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div class="form-padding">
+
+                        <form action="{{ url_aanmaken }}" method="post">
+                            {% csrf_token %}
+
+                            <div class="input-field">
+                                {{ form.voornaam.label_tag }}{{ form.voornaam }}
+                            </div>
+
+                            <div class="input-field">
+                                {{ form.achternaam.label_tag }}{{ form.achternaam }}
+                            </div>
+
+                            <div class="input-field">
+                                {{ form.email.label_tag }}{{ form.email }}
+                            </div>
+
+                            {% if form.errors %}
+                                {% for error in form.non_field_errors %}
+                                    <p class="left-align nhb-rood-text">Fout: {{ error|escape }}</p>
+                                {% endfor %}
+                                <p>&nbsp;</p>
+                            {% endif %}
+
+                            <div class="center-align">
+                                <input class="btn-nhb-rood" name="button_registreer" type="submit" value="Aanmaken">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
 
     <!-- witruimte -->
     <div class="row center">

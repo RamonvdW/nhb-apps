@@ -7,6 +7,7 @@
 from django.test import TestCase
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
+from Registreer.models import GastLidNummer
 from Sporter.models import Sporter
 import datetime
 
@@ -55,7 +56,16 @@ class TestRegistreerBegin(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_begin)
-        # TODO: self.assert_is_redirect(resp, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')
+
+        # kill-switch
+        volgende = GastLidNummer.objects.first()
+        volgende.kan_aanmelden = False
+        volgende.save(update_fields=['kan_aanmaken'])
+
+        self.client.logout()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_begin)
 
 
 # end of file

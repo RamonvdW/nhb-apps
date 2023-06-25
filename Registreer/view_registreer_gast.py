@@ -26,7 +26,8 @@ from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS
                                    REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
                                    REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_DONE)
 from Registreer.forms import RegistreerGastForm
-from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker, GAST_LID_NUMMER_FIXED_PK
+from Registreer.models import GastRegistratie, GastRegistratieRateTracker
+from Registreer.operations import registratie_gast_volgende_lid_nr, registratie_gast_is_open
 from Sporter.models import Sporter
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
                                         maak_tijdelijke_code_registreer_gast_email)
@@ -51,23 +52,6 @@ EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-ema
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-lid-nr.dtl'
 
 my_logger = logging.getLogger('NHBApps.Registreer')
-
-
-def registratie_gast_volgende_lid_nr():
-    """ Neem het volgende lid_nr voor gast accounts uit """
-    with transaction.atomic():
-        tracker = (GastLidNummer
-                   .objects
-                   .select_for_update()                 # lock tegen concurrency
-                   .get(pk=GAST_LID_NUMMER_FIXED_PK))
-
-        # het volgende nummer is het nieuwe unieke nummer
-        tracker.volgende_lid_nr += 1
-        tracker.save()
-
-        nummer = tracker.volgende_lid_nr
-
-    return nummer
 
 
 class RegistreerGastView(TemplateView):
@@ -124,6 +108,7 @@ class RegistreerGastView(TemplateView):
         context = {
             'form': form,
             'url_aanmaken': reverse('Registreer:gast'),
+            'gast_is_open': registratie_gast_is_open(),
             'kruimels': (
                 (reverse('Registreer:begin'), 'Account aanmaken'),
                 (None, 'Gast')),
@@ -136,12 +121,16 @@ class RegistreerGastView(TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
+
         form = RegistreerGastForm(request.POST)
+
+        gast_is_open = registratie_gast_is_open()
 
         # still here --> re-render with error message
         context = {
             'form': form,
             'email_bb': settings.EMAIL_BONDSBUREAU,
+            'gast_is_open': gast_is_open,
             'verberg_login_knop': True,
             'url_aanmaken': reverse('Registreer:gast'),
             'kruimels': (
@@ -150,6 +139,9 @@ class RegistreerGastView(TemplateView):
         }
 
         menu_dynamics(request, context)
+
+        if not gast_is_open:
+            return render(request, TEMPLATE_REGISTREER_GAST, context)
 
         if not form.is_valid():
             # opnieuw
@@ -646,7 +638,7 @@ class RegistreerGastVolgendeVraagView(View):
         elif gast.fase == REGISTRATIE_FASE_CONFIRM:
 
             bevestigd = request.POST.get('bevestigd', '')[:3]       # afkappen voor extra veiligheid
-            print('bevestigd=%s' % repr(bevestigd))
+
             if bevestigd == 'Ja':
                 # gebruiker heeft op 'Ja' gedrukt
 
