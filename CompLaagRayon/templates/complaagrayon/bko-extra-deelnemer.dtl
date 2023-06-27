@@ -56,7 +56,7 @@
                         <td class="right-align">
                             {% if obj.url %}
                                 <a class="btn-nhb-rood modal-trigger" href="#bevestig_{{ obj.pk }}">
-                                    <i class="material-icons-round">add</i>
+                                    <i class="notranslate material-icons-round">add</i>
                                 </a>
                             {% endif %}
                         </td>

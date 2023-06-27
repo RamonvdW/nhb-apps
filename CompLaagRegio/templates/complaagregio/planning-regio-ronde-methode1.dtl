@@ -85,7 +85,7 @@
                             <td class="center">
                                 {% if wedstrijd.url_wijzig %}
                                     <a class="btn-nhb-rood" href="{{ wedstrijd.url_wijzig }}">
-                                        <i class="material-icons-round">edit</i></a>
+                                        <i class="notranslate material-icons-round">edit</i></a>
                                 {% endif %}
                             </td>
                         {% endif %}
@@ -105,7 +105,7 @@
                             <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                                 {% csrf_token %}
                                 <button class="btn-nhb-rood" type="submit">
-                                    <i class="material-icons-round">add</i></button>
+                                    <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>
                     </tr>

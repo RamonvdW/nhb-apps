@@ -279,7 +279,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde', 'Notities'])
+        writer.writerow(['Rank', 'Bondsnummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde', 'Notities'])
 
         for deelnemer in deelnemers:
 

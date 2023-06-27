@@ -138,7 +138,8 @@ class Command(BaseCommand):
 
         self._verwijder_score_scorehist_met_notitie("Invoer uitslag wedstrijd")
 
-        self._verwijder_score_scorehist_met_notitie("Nieuw handmatig AG voor teams")
+        # behouden, want dit kan zijn voor seizoen 2023/2024!
+        # self._verwijder_score_scorehist_met_notitie("Nieuw handmatig AG voor teams")
 
         # behouden, want dit zijn de AG's voor seizoen 2021/2022!
         # self._verwijder_score_scorehist_met_notitie(

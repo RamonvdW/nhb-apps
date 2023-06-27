@@ -35,7 +35,9 @@ def init_rayons(apps, _):
 
 
 def init_regios(apps, _):
-    """ Maak de regios aan """
+    """ Maak de regios aan met korte namen
+        De CRM import levert de feitelijke namen
+    """
 
     # haal de klassen op die van toepassing zijn vóór de migratie
     regio_klas = apps.get_model('NhbStructuur', 'NhbRegio')

@@ -72,11 +72,11 @@
                         <td>
                             {% if rk_team.url_wijzig %}
                                 <a class="btn-nhb-rood" href="{{ rk_team.url_wijzig }}">
-                                    <i class="material-icons-round">edit</i></a>
+                                    <i class="notranslate material-icons-round">edit</i></a>
                                 <span>&nbsp;&nbsp;</span>
                             {% endif %}
                             {% if rk_team.url_koppelen %}
-                                <a class="btn-nhb-rood" href="{{ rk_team.url_koppelen }}">{% if rk_bk_klassen_vastgesteld %}<i class="material-icons-round">visibility</i>{% else %}<i class="material-icons-round">group</i>{% endif %}</a>
+                                <a class="btn-nhb-rood" href="{{ rk_team.url_koppelen }}">{% if rk_bk_klassen_vastgesteld %}<i class="notranslate material-icons-round">visibility</i>{% else %}<i class="notranslate material-icons-round">group</i>{% endif %}</a>
 
                             {% endif %}
                         </td>
@@ -92,7 +92,7 @@
                     <tr>
                         <td colspan="7" class="center">
                             <a class="btn-nhb-rood" href="{{ url_nieuw_team }}">
-                                <i class="material-icons-round">add</i></a>
+                                <i class="notranslate material-icons-round">add</i></a>
                         </td>
                     </tr>
                 {% endif %}

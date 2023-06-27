@@ -73,7 +73,7 @@
                             <td class="nhb-nhb-rood-text">{{ account.let_op }}</td>
                             <td class="center">
                                 <a class="btn-nhb-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
-                                    <i class="material-icons-round left">delete</i>Verwijder</a>
+                                    <i class="notranslate material-icons-round left">delete</i>Verwijder</a>
 
                                 <!-- modal dialog voor deze specifieke beheerder -->
                                 <div class="modal" id="bevestig_ontkoppel_{{ account.pk }}">
@@ -97,7 +97,7 @@
 
                     <tr>
                         <td colspan="4" class="center">
-                            <i>Let op: gebruikers worden via een e-mail automatisch op de hoogte gesteld worden van een verwijderde rol.</i>
+                            <i>Gebruikers worden via een e-mail automatisch op de hoogte gesteld worden van een verwijderde rol.</i>
                         </td>
                     </tr>
 
@@ -134,7 +134,7 @@
                     <div class="row"> <!-- style="margin-top:90px">-->
                         <div class="col s12">
                             <button class="btn-nhb-rood" type="submit">
-                                <i class="material-icons-round left">search</i>Zoek</button>
+                                <i class="notranslate material-icons-round left">search</i>Zoek</button>
                         </div>
                     </div>
 
@@ -151,7 +151,7 @@
             <div class="col s12">
                 <h4>Beheerders toevoegen</h4>
                 <p>Gevonden leden: {{ object_list|length }}</p>
-                <p>Staat de gezochte persoon er niet bij? Alleen personen met een <b>account</b> op deze website worden getoond.</p>
+                <p>Staat de gezochte persoon er niet bij? Alleen personen met een <b>account</b> op deze website en lid van de vereniging worden getoond.</p>
             </div>
         </div>
 
@@ -176,7 +176,7 @@
                                 <td>{% if is_vereniging_rol %}{{ account.vereniging_naam }}{% else %}{{ account.geo_beschrijving }}{% endif %}</td>
                                 <td>
                                     <button class="btn-nhb-rood" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
-                                        <i class="material-icons-round left">add</i>Koppel</button>
+                                        <i class="notranslate material-icons-round left">add</i>Koppel</button>
                                 </td>
                             </tr>
                         {% endfor %}

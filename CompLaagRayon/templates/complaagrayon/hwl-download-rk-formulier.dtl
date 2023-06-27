@@ -82,7 +82,7 @@
                                     <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     <br>
                                     <a class="btn-nhb-rood" href="{{ deelnemer.url_download_indiv }}">
-                                        <i class="material-icons-round left">download</i>Download excel</a>
+                                        <i class="notranslate material-icons-round left">download</i>Download excel</a>
                                 </td>
                             </tr>
 
@@ -102,9 +102,9 @@
                             <td>[{{ deelnemer.lid_nr }}] {{ deelnemer.volledige_naam }}</td>
                             <td class="center">{{ deelnemer.gemiddelde_str }}</td>
                             <td class="center">
-                                {% if deelnemer.deelname == 'J' %}<i class="material-icons-round green-text">check</i>
-                                {% elif deelnemer.deelname == 'N' %}<i class="material-icons-round grey-text">block</i>     <!-- are excluded -->
-                                {% else %}<i class="material-icons-round nhb-blauw-text">help</i>
+                                {% if deelnemer.deelname == 'J' %}<i class="notranslate material-icons-round green-text">check</i>
+                                {% elif deelnemer.deelname == 'N' %}<i class="notranslate material-icons-round grey-text">block</i>     <!-- are excluded -->
+                                {% else %}<i class="notranslate material-icons-round nhb-blauw-text">help</i>
                                 {% endif %}
                             </td>
                             <td>{{ deelnemer.kampioen_label|linebreaksbr }}</td>
@@ -159,7 +159,7 @@
                                 <td colspan="5" class="center">
                                     <h5>{{ team.team_klasse.beschrijving }}</h5>
                                     <a class="btn-nhb-rood" href="{{ team.url_download_teams }}">
-                                        <i class="material-icons-round left">download</i>Download excel</a>
+                                        <i class="notranslate material-icons-round left">download</i>Download excel</a>
                                 </td>
                             </tr>
                             <tr>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,9 +10,10 @@ import sys
 import os
 
 
-def my_watchdog_dtl(sender, **kwargs):      # pragma: no cover
-    """ Deze functie wordt aangeroepen als de auto reloader gestart is
-        We vragen om de .dtl files van alle applicaties te monitoren
+def start_dev_watch(sender, **kwargs):      # pragma: no cover
+    """ Wordt aangeroepen na elke reload
+        Monitor bestanden om live-edits te ondersteunen in de dev omgeving
+        Python modules worden standaard al gemonitord.
     """
     print('[INFO] Watching for template edits')
     for root, dirs, files in os.walk('.'):
@@ -32,8 +33,8 @@ class OverigConfig(AppConfig):
         # perform one-time startup logic
         if 'runserver' in sys.argv:     # pragma: no cover
             # very likely started with ./manage.py runserver
-            # monitor for .dtl file changes
-            autoreload_started.connect(my_watchdog_dtl)
+            # monitor for live edits
+            autoreload_started.connect(start_dev_watch)
 
 
 # end of file

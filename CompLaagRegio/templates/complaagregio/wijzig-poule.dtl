@@ -64,7 +64,7 @@
                                                             </label>
                                                         {% else %}
                                                             {% if team.geselecteerd %}
-                                                                <i class="material-icons-round">check</i>
+                                                                <i class="notranslate material-icons-round">check</i>
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>
@@ -91,7 +91,7 @@
 
                         <div class="center" style="margin-top:30px">
                             <button class="btn-nhb-rood" type="submit">
-                                <i class="material-icons-round left">check</i>Opslaan</button>
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </div>
 
                     </form>
@@ -115,7 +115,7 @@
                     <div class="collapsible-body white">
                         <p>Heb je deze poule echt niet meer nodig?</p>
                         <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">delete</i>Verwijder deze poule</button>
+                            <i class="notranslate material-icons-round left">delete</i>Verwijder deze poule</button>
                     </div>
                 </li>
             </ul>

@@ -33,7 +33,7 @@
 
         {% if extern_open %}
             <div style="position:absolute; right:6px; top:6px">
-                <i class="material-icons-round nhb-blauw-text">open_in_new</i>
+                <i class="notranslate material-icons-round nhb-blauw-text">open_in_new</i>
             </div>
         {% endif %}
 
@@ -47,7 +47,7 @@
 
             <!-- icoon -->
             <div style="margin-bottom:8px">
-                <i class="material-icons-round medium nhb-rood-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
+                <i class="notranslate material-icons-round medium nhb-rood-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
             </div>
 
             <div>{{ text }}</div>

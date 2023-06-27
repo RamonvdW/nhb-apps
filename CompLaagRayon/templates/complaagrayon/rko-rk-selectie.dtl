@@ -90,26 +90,26 @@
                     </tr>
 
                     <tr>
-                        <td class="center"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                        <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
                         <td class="nhb-blauw-text">Onbekend</td>
                         <td class="center">{{ aantal_onbekend }}</td>
                     </tr>
 
                     <tr>
-                        <td class="center"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                        <td class="center"><i class="green-text in-table-icon notranslate material-icons-round">check</i></td>
                         <td class="green-text">Deelname bevestigd</td>
                         <td class="center">{{ aantal_bevestigd }}</td>
                     </tr>
 
                     <tr>
-                        <td class="center"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                        <td class="center"><i class="grey-text in-table-icon notranslate material-icons-round">block</i></td>
                         <td class="grey-text">Afgemeld</td>
                         <td class="center">{{ aantal_afgemeld }}</td>
                     </tr>
 
                     {% if aantal_attentie %}
                         <tr>
-                            <td class="center"><i class="nhb-rood-text in-table-icon material-icons-round">warning</i></td>
+                            <td class="center"><i class="nhb-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
                             <td class="nhb-rood-text">Attentie</td>
                             <td class="center">{{ aantal_attentie }}</td>
                         </tr>
@@ -126,7 +126,7 @@
                 {% if url_download %}
                     <p>
                         <a class="btn-nhb-rood" href="{{ url_download }}">
-                            <i class="material-icons-round left">get_app</i>RK selectie bestand</a>
+                            <i class="notranslate material-icons-round left">get_app</i>RK selectie bestand</a>
                     </p>
                 {% endif %}
             </div>
@@ -186,19 +186,19 @@
                             </td>
 
                             {% if not obj.bij_vereniging %}
-                                <td class="center"><i class="nhb-rood-text in-table-icon material-icons-round">warning</i></td>
+                                <td class="center"><i class="nhb-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
                             {% elif obj.deelname == 'J' %}
-                                <td class="center"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                                <td class="center"><i class="green-text in-table-icon notranslate material-icons-round">check</i></td>
                             {% elif obj.deelname == 'N' %}
-                                <td class="center"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                                <td class="center"><i class="grey-text in-table-icon notranslate material-icons-round">block</i></td>
                             {% else %}
                                 <!-- onbekend -->
-                                <td class="center"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                                <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
                             {% endif %}
 
                             <td>
                                 <a class="btn-nhb-rood" href="{{ obj.url_wijzig }}">
-                                    <i class="material-icons-round">edit</i></a>
+                                    <i class="notranslate material-icons-round">edit</i></a>
                             </td>
                         </tr>
 

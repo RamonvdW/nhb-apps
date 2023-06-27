@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,9 +25,9 @@ class Command(BaseCommand):
         except Account.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
         else:
-            account.is_staff = True
-            account.is_superuser = True
-            account.save()
+            account.is_staff = True         # toegang tot Admin site
+            account.is_superuser = True     # alle rechten op alle database tabellen (view, change, add, delete)
+            account.save(update_fields=['is_staff', 'is_superuser'])
 
             # schrijf in het logboek
             schrijf_in_logboek(account=None,

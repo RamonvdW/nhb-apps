@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django import forms
 
 class ScoreGeschiedenisForm(forms.Form):
     """ definitie van het formulier waarmee de een zoekterm in kan voeren
-        om te zoeken naar een NHB nummer voor de Score Geschiedenis functionaliteit.
+        om te zoeken naar een bondsnummer voor de Score Geschiedenis functionaliteit.
     """
 
     # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren

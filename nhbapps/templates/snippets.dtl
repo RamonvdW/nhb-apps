@@ -37,7 +37,7 @@
 
                 <p>
                     <a class="btn-nhb-rood" href="{% url 'Plein:plein' %}">
-                        <i class="material-icons-round left">close</i>Sluiten</a>
+                        <i class="notranslate material-icons-round left">close</i>Sluiten</a>
                 </p>
             </div>
         </div>
@@ -115,7 +115,7 @@
                         <!-- button -->
                         <p class="center">
                             <button class="btn-nhb-rood" type="submit">
-                                <i class="material-icons-round left">check</i>Opslaan</button>
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
                     </form>
@@ -133,18 +133,18 @@
         <div class="col s3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een xxx type:</b></p>
-                <ul id="id_xxx">
-                    {% for obj in xxx_filters %}
+                <ul>
+                    {% for filter in xxx_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="xxx" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
-                                <span>{{ obj.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="xxx" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('xxx')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -184,6 +184,42 @@
             </table>
         </div>
     </div>
+
+
+    <!-- tabel met filter -->
+    <table class="white" id="tabel_hulp">
+        <thead>
+            <tr>        <!-- filter veld -->
+                <td colspan="3" class="table-filter">
+                    <input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <th data-filter="on">Inlog</th>
+                <th data-filter="on">Naam</th>
+                <th data-filter="on">Rollen</th>
+                <th>Laatste inlog</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for account in hulp %}
+                <tr>
+                    <td>{{ account.username }}</td>
+                    <td>{{ account.volledige_naam }}</td>
+                    <td>{{ account.functies_str }}</td>
+                    <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">
+                        <i>Geen accounts gevonden die hulp nodig hebben</i>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 
     <!-- scherm-brede tabel met dunne blauw rand -->
@@ -296,6 +332,13 @@
             </div>
         </div>
     </div>
+
+
+
+    <!-- voorkom dubbele posts vanuit form -->
+    <form ... method="post" onsubmit="submit_knop.disabled=true; return true;">
+       <button class="btn-nhb-rood" name="submit_knop">...</button>
+    </form>
 
 
 {% include 'feedback/sidebar.dtl' with op_pagina="app-snippets" %}

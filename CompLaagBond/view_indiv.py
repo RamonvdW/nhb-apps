@@ -248,7 +248,7 @@ class LijstBkSelectieAlsBestandView(LijstBkSelectieView):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'RK score', 'Notities'])
+        writer.writerow(['Rank', 'Bondsnummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'RK score', 'Notities'])
 
         if deelkamp.competitie.afstand == '18':
             aantal_pijlen = 2 * 30

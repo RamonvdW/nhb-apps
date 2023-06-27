@@ -25,16 +25,16 @@
 
     <table class="white">
         <tr style="visibility:collapse">
-            <td><i class="material-icons-round">chevron_left</i></td>
+            <td><i class="notranslate material-icons-round">chevron_left</i></td>
             <td><h5>september 2021</h5></td>
-            <td><i class="material-icons-round">chevron_right</i></td>
+            <td><i class="notranslate material-icons-round">chevron_right</i></td>
         </tr>
         <tr>
             <td class="right-align"><a class="btn-nhb-rood" href="{{ url_prev_maand }}">
-                <i class="material-icons-round">chevron_left</i></a></td>
+                <i class="notranslate material-icons-round">chevron_left</i></a></td>
             <td class="center"><h5>{{ datum|date:'F Y' }}</h5></td>
             <td class="left-align"><a class="btn-nhb-rood" href="{{ url_next_maand }}">
-                <i class="material-icons-round">chevron_right</i></a></td>
+                <i class="notranslate material-icons-round">chevron_right</i></a></td>
         </tr>
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
     </table>
@@ -84,7 +84,7 @@
                         <td class="center">
                             {% if wed.url_details %}
                                 <a class="{% if wed.kan_inschrijven %}btn-nhb-rood{% else %}btn-nhb-blauw{% endif %}" href="{{ wed.url_details }}">
-                                    <!--<i class="material-icons-round">play_arrow</i>-->Details</a>
+                                    <!--<i class="notranslate material-icons-round">play_arrow</i>-->Details</a>
                             {% endif %}
                         </td>
                     </tr>

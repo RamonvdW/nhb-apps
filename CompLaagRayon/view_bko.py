@@ -228,7 +228,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
             competitie_mutaties_ping.ping()
 
             snel = str(request.POST.get('snel', ''))[:1]
-            if snel != '1':
+            if snel != '1':         # pragma: no cover
                 # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
                 interval = 0.2  # om steeds te verdubbelen
                 total = 0.0  # om een limiet te stellen

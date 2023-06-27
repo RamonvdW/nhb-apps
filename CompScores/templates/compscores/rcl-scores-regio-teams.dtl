@@ -145,7 +145,7 @@
 
                             <div class="fixed-action-btn">
                                 <button class="btn-nhb-rood" type="submit">
-                                    <i class="material-icons-round left">check</i>Opslaan</button>
+                                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                             </div>
                         </form>
                     </div>

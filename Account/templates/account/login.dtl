@@ -76,20 +76,20 @@
         // but we need to move the label out of the way to avoid visual overlap
 
         function delayedUpdate() {
-            const els = document.querySelectorAll('input[type=text]:-webkit-autofill, input[type=password]:-webkit-autofill')
+            const els = document.querySelectorAll('input[type=text]:-webkit-autofill, input[type=password]:-webkit-autofill');
             els.forEach(el => {
-                const el2 = el.previousSibling
-                el2.classList.add('active')
+                const el2 = el.previousSibling;
+                el2.classList.add('active');
             })
         }
 
         document.addEventListener("DOMContentLoaded", function() {
             // not all devices are equally fast, so repeat to ensure quick response when possible
-            setTimeout(delayedUpdate, 50)
-            setTimeout(delayedUpdate, 100)
-            setTimeout(delayedUpdate, 200)
-            setTimeout(delayedUpdate, 500)
-            setTimeout(delayedUpdate, 1000)
+            setTimeout(delayedUpdate, 50);
+            setTimeout(delayedUpdate, 100);
+            setTimeout(delayedUpdate, 200);
+            setTimeout(delayedUpdate, 500);
+            setTimeout(delayedUpdate, 1000);
         })
     </script>
 

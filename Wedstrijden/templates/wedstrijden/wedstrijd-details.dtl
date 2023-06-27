@@ -97,7 +97,7 @@
                         {% if url_map %}
                             <br><br>
                             <a class="btn-nhb-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
-                                <i class="material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                                <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -154,7 +154,7 @@
                             <th>Website voor inschrijven</th>
                             <td>
                                 <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
-                                    <i class="material-icons-round left nhb-blauw-text">open_in_new</i>
+                                    <i class="notranslate material-icons-round left nhb-blauw-text">open_in_new</i>
                                     <code>{{ wed.contact_website }}</code>
                                 </a>
                             </td>
