@@ -177,7 +177,7 @@ def beschrijving_activiteit(obj):
         return "een e-mailadres te bevestigen"
 
     if obj.dispatch_to == RECEIVER_BEVESTIG_GAST_EMAIL:
-        return "gast-account aan te maken"
+        return "een gast-account aan te maken"
 
     if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:
         return "een nieuw wachtwoord in te stellen"

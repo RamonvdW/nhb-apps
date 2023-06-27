@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
+from Account.models import Account
 from Competitie.definities import (DEEL_RK, DEEL_BK,
                                    DEELNAME_NEE,
                                    KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
@@ -20,32 +21,6 @@ import datetime
 
 TEMPLATE_COMPUITSLAGEN_BK_INDIV = 'compuitslagen/uitslagen-bk-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_BK_TEAMS = 'compuitslagen/uitslagen-bk-teams.dtl'
-
-
-# TODO: vervangen door klasse.titel
-def get_label_eerste_plek_bk(afstand, klasse):
-    """
-        Retourneer het label 'Bondskampioen' of 'Nederlands Kampioen'
-        
-        afstand: '18' of '25'
-        klasse: een CompetitieIndivKlasse of CompetitieTeamKlasse 
-    """
-
-    # individueel klasse 1
-    if 'klasse 1' in klasse.beschrijving:
-        if afstand == '18':
-            return 'Bondskampioen'
-        return 'Nederlands Kampioen'
-
-    # teams ERE klasse
-    if 'klasse ERE' in klasse.beschrijving:
-        return 'Nederlands Kampioen'
-
-    # aspiranten klassen
-    if ' klasse ' not in klasse.beschrijving:
-        return 'Nederlands Kampioen'
-
-    return ''
 
 
 class UitslagenBKIndivView(TemplateView):
@@ -205,7 +180,7 @@ class UitslagenBKIndivView(TemplateView):
                 deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                 deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
-                deelnemer.geen_deelname_risico = deelnemer.sporterboog.sporter.bij_vereniging != deelnemer.bij_vereniging
+                deelnemer.geen_deelname_risico = sporter.bij_vereniging != deelnemer.bij_vereniging
 
                 deelnemer.rk_score = round(deelnemer.gemiddelde * aantal_pijlen)
 
@@ -225,11 +200,6 @@ class UitslagenBKIndivView(TemplateView):
                                                                  deelnemer.result_score_1,
                                                                  deelnemer.result_score_2)
                         deelnemer.scores_str_2 = deelnemer.result_counts        # 25m1pijl only
-
-                    if deelnemer.result_rank == 1:
-                        deelnemer.result_label = get_label_eerste_plek_bk(comp.afstand, deelnemer.indiv_klasse)
-                    else:
-                        deelnemer.result_label = ''
 
                 curr_teller.aantal_regels += 1
             # for
@@ -359,6 +329,7 @@ class UitslagenBKTeamsView(TemplateView):
         toon_team_leden_van_ver_nr = None
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         account = self.request.user
+        assert isinstance(account, Account)
         if account.is_authenticated:
             if functie_nu and functie_nu.nhb_ver:
                 # HWL, WL

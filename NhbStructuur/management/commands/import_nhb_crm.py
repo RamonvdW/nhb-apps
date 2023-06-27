@@ -54,7 +54,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
-SKIP_VER_NR = (8000,)
+SKIP_VER_NR = (settings.EXTERN_VER_NR,)
 
 
 class Command(BaseCommand):

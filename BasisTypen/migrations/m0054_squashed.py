@@ -97,6 +97,7 @@ TEAM_COMP_KLASSEN = (                    # 18m                                  
     (50, 'Longbow klasse ERE',     'LB',  (BLAZOEN_40CM,),                          (BLAZOEN_60CM,)),
 )
 
+# alle ERE klassen teams mogen zich Nederlands Kampioen noemen
 TEAM_VOLGORDE__TITEL_NK = (15, 20, 31, 41, 50)
 
 
@@ -183,17 +184,18 @@ INDIV_COMP_KLASSEN = (                        # boog   lkl            regio 1   
     (1556, 'Longbow Onder 12 Meisjes',          'LB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
 )
 
-INDIV_VOLGORDE_18M__TITEL_NK = (1110, 1120, 1150, 1151, 1160, 1161,          # R:  O14 j/m, O12 j/m
-                                1210, 1220, 1250, 1251, 1260, 1261,          # C:  O14 j/m, O12 j/m
-                                1310, 1320, 1350, 1351, 1360, 1361,          # BB: O14 j/m, O12 j/m
-                                1410, 1420, 1450, 1451, 1460, 1461,          # TR: Jeugd, O14 j/m, O12 j/m
-                                1510, 1520, 1550, 1551, 1560, 1561)          # LB: Jeugd, O14 j/m, O12 j/m
+INDIV_VOLGORDE_18M__TITEL_NK = (1150, 1151, 1160, 1161,                      # R:  O14 j/m, O12 j/m
+                                1250, 1251, 1260, 1261,                      # C:  O14 j/m, O12 j/m
+                                1350, 1351, 1360, 1361,                      # BB: O14 j/m, O12 j/m
+                                1450, 1451, 1460, 1461,                      # TR: O14 j/m, O12 j/m
+                                1550, 1551, 1560, 1561)                      # LB: O14 j/m, O12 j/m
 
-INDIV_VOLGORDE_25M__TITEL_NK = (1110, 1120, 1150, 1151, 1160, 1161,          # R:       O21, O18, O14 j/m, O12 j/m
+#                                                                         klasse:  kl1, kl1, kl1
+INDIV_VOLGORDE_25M__TITEL_NK = (      1110, 1120, 1150, 1151, 1160, 1161,    # R:       O21, O18, O14 j/m, O12 j/m
                                 1200, 1210, 1220, 1250, 1251, 1260, 1261,    # C:  21+, O21, O18, O14 j/m, O12 j/m
-                                1300, 1310, 1320, 1350, 1351, 1360, 1361,    # BB: 21+, O21, O18, O14 j/m, O12 j/m
-                                1400, 1410, 1420, 1450, 1451, 1460, 1461,    # TR: 21+, O21, O18, O14 j/m, O12 j/m
-                                1500, 1510, 1520, 1550, 1551, 1560, 1561)    # LB: 21+, O21, O18, O14 j/m, O12 j/m
+                                1300, 1310, 1350, 1351, 1360, 1361,          # BB: 21+, Jeugd,    O14 j/m, O12 j/m
+                                1400, 1410, 1450, 1451, 1460, 1461,          # TR: 21+, Jeugd,    O14 j/m, O12 j/m
+                                1500, 1510, 1550, 1551, 1560, 1561)          # LB: 21+, Jeugd,    O14 j/m, O12 j/m
 
 
 KALENDERWEDSTRIJDENKLASSEN = (

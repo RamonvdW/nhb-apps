@@ -223,7 +223,7 @@
                     <td class="hide-on-small-only center">
                         {% if team.klasse_heeft_uitslag %}
                             {% if team.result_rank == 1 %}
-                                <span>Bondskampioen</span>
+                                <span>{{ team.team_klasse.titel_bk }}</span>
                             {% endif %}
                         {% else %}
                             {% if team.niet_deelgenomen %}

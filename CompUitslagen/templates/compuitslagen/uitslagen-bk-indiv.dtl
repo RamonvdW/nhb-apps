@@ -182,7 +182,7 @@
                         <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}<!-- <span class="nhb-blauw-text">/{{ obj.result_volgorde }}</span>--></td>
                         <td>{% if obj.result_label %}<div class="hide-on-med-and-up"><b>{{ obj.result_label }}</b><br></div>{% endif %}{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{{ obj.ver_str }}</td>
-                        <td class="hide-on-small-only">{{ obj.result_label }}</td>
+                        <td class="hide-on-small-only">{% if obj.result_rank == 1 %}{{ obj.indiv_klasse.titel_bk }}{% endif %}</td>
                         <td>{{ obj.scores_str_1 }}</td>
                         <td>{{ obj.scores_str_2 }}</td>
 

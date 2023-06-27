@@ -183,6 +183,7 @@ class LogboekRestView(LogboekBasisView):
                          Q(gebruikte_functie='Bevestig e-mail') |
                          Q(gebruikte_functie='Registreer met NHB nummer') |
                          Q(gebruikte_functie='Registreer met bondsnummer') |
+                         Q(gebruikte_functie='Registreer gast-account') |
                          Q(gebruikte_functie='Rollen') |            # Rollen
                          Q(gebruikte_functie='NhbStructuur') |      # NhbStructuur
                          Q(gebruikte_functie='Competitie') |        # Competitie
