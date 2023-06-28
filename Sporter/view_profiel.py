@@ -130,7 +130,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     comp.fase_str = 'Regiocompetitie'
 
                     if comp.fase_indiv == 'C':
-                        # TODO: 15 augustus opslaan in Competitie
+                        # TODO: 15 augustus opslaan in Competitie --> fase D?
                         comp.inschrijven = 'De inschrijving is open tot 15 augustus'  # % localize(comp.datum_einde_inschrijvingen)
                     elif comp.fase_indiv <= 'F':
                         # tijdens de hele wedstrijden fase kan er aangemeld worden
