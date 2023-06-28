@@ -124,7 +124,7 @@
                     <td class="center">{{ indiv.rank_rk }}</td>
                     <td>{{ indiv.naam_str }}</td>
                     <td class="hide-on-small-only">{{ indiv.ver_str }}</td>
-                    <td>{% if indiv.rank_rk == 1 %}Rayonkampioen{% endif %}</td>
+                    <td>{{ indiv.titel }}</td>
                     <td>{{ indiv.scores_str_1 }}</td>
                     <td>{{ indiv.scores_str_2 }}</td>
 

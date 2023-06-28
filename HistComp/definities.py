@@ -98,6 +98,25 @@ URL2HIST_TEAM = {
     'instinctive': 'IB',
 }
 
+HISTCOMP_TITEL_NONE = ' '
+HISTCOMP_TITEL_RK = 'R'
+HISTCOMP_TITEL_BK = 'B'
+HISTCOMP_TITEL_NK = 'N'
+
+HISTCOMP_TITEL_CHOICES = (
+    (HISTCOMP_TITEL_NONE, 'None'),
+    (HISTCOMP_TITEL_RK, 'RK'),
+    (HISTCOMP_TITEL_BK, 'BK'),
+    (HISTCOMP_TITEL_NK, 'NK'),
+)
+
+HISTCOMP_TITEL2STR = {
+    HISTCOMP_TITEL_NONE: '',
+    HISTCOMP_TITEL_RK: 'Rayonkampioen',
+    HISTCOMP_TITEL_BK: 'Bondskampioen',
+    HISTCOMP_TITEL_NK: 'Nederlands Kampioen',
+}
+
 HIST_INTERLAND_BOGEN = ('R', 'C', 'BB', 'TR', 'LB')
 
 HIST_KLASSE2VOLGORDE = {

@@ -6,7 +6,9 @@
 
 from django.test import TestCase
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT, HIST_TEAM_TYPEN_DEFAULT, HISTCOMP_RK, HISTCOMP_BK
-from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam, HistKampIndiv, HistKampTeam
+from HistComp.models import (HistCompSeizoen,
+                             HistCompRegioIndiv, HistKampIndiv, HistKampIndivBK,
+                             HistCompRegioTeam, HistKampTeam)
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -125,26 +127,19 @@ class TestHistComp(E2EHelpers, TestCase):
                     seizoen=self.hist_seizoen,
                     indiv_klasse='Recurve klasse 1',
                     sporter_lid_nr=100001,
-                    sporter_naam='Achie van de Bond',
+                    sporter_naam='Archie van de Bond',
                     boogtype='R',
                     vereniging_nr=1001,
                     vereniging_naam='De bond',
                     vereniging_plaats='Arnhem',
                     rayon_nr=1,
                     rank_rk=1,
-                    rank_bk=1,
                     rk_score_1=100,
                     rk_score_2=101,
                     rk_score_totaal=201,
                     rk_counts='30x10 29x9',
-                    bk_score_1=102,
-                    bk_score_2=103,
-                    bk_score_totaal=205,
-                    bk_counts='29x10 30x8',
                     teams_rk_score_1=200,
-                    teams_rk_score_2=201,
-                    teams_bk_score_1=202,
-                    teams_bk_score_2=203)
+                    teams_rk_score_2=201)
         rec.save()
         self.hist_kamp_indiv = rec
 
@@ -223,6 +218,24 @@ class TestHistComp(E2EHelpers, TestCase):
         team.pk = None
         team.vereniging_plaats = ''
         team.save()
+
+        # BK
+        rec = HistKampIndivBK(
+                    seizoen=self.hist_seizoen,
+                    bk_indiv_klasse='Recurve klasse 1',
+                    sporter_lid_nr=100001,
+                    sporter_naam='Archie van de Bond',
+                    boogtype='R',
+                    vereniging_nr=1001,
+                    vereniging_naam='De bond',
+                    vereniging_plaats='Arnhem',
+                    rank_bk=1,
+                    bk_score_1=102,
+                    bk_score_2=103,
+                    bk_score_totaal=205,
+                    bk_counts='29x10 30x8')
+        rec.save()
+        self.hist_kamp_indiv_bk = rec
 
         HistCompSeizoen(
                 seizoen='2017/2018',

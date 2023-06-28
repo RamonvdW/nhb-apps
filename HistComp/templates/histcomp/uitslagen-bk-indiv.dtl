@@ -80,7 +80,7 @@
 
                     <tr>
                         <td colspan="8" class="center">
-                            <h5>{{ indiv.indiv_klasse }}</h5>
+                            <h5>{{ indiv.bk_indiv_klasse }}</h5>
                         </td>
                     </tr>
 
@@ -102,7 +102,7 @@
                     <td class="center">{{ indiv.rank_bk }}</td>
                     <td>{{ indiv.naam_str }}</td>
                     <td class="hide-on-small-only">{{ indiv.ver_str }}</td>
-                    <td>{% if indiv.rank_bk == 1 %}Bondskampioen{% endif %}</td>
+                    <td>{{ indiv.titel }}</td>
                     <td>{{ indiv.scores_str_1 }}</td>
                     <td>{{ indiv.scores_str_2 }}</td>
 

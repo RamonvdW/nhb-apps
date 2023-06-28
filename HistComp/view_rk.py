@@ -11,7 +11,7 @@ from HistComp.definities import (HISTCOMP_RK, HISTCOMP_TYPE_18,
                                  HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE, HISTCOMP_TYPE2STR,
                                  HIST_BOOG_DEFAULT, HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG2STR,
                                  HIST_TEAM_DEFAULT, HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM2STR,
-                                 HIST_KLASSE2VOLGORDE)
+                                 HIST_KLASSE2VOLGORDE, HISTCOMP_TITEL2STR)
 from HistComp.models import HistCompSeizoen, HistKampIndiv, HistKampTeam
 from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
@@ -209,6 +209,8 @@ class HistRkIndivView(TemplateView):
                                                      indiv.rk_score_1,
                                                      indiv.rk_score_2)
                 indiv.scores_str_2 = indiv.rk_counts
+
+            indiv.titel = HISTCOMP_TITEL2STR[indiv.titel_code_rk]
 
             subset.append(indiv)
         # for

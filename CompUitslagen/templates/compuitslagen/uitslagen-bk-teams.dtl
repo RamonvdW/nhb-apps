@@ -205,7 +205,7 @@
                                     <span class="grey-text">-</span>
                                 {% else %}
                                     <br>
-                                    <span>{{ deelnemer.result_totaal }}</span>
+                                    <span>{% if deelnemer.result_totaal < 10 %}-{% else %}{{ deelnemer.result_totaal }}{% endif %}</span>
                                 {% endif %}
                             {% empty %}
                                 {% if team.toon_team_leden %}

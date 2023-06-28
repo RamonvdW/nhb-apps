@@ -7,7 +7,6 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
-from Account.models import Account
 from Competitie.definities import (DEEL_RK, DEEL_BK,
                                    DEELNAME_NEE,
                                    KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
@@ -16,6 +15,7 @@ from Competitie.models import (Competitie, CompetitieMatch,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Sporter.models import Sporter
 from types import SimpleNamespace
 import datetime
 
@@ -329,17 +329,15 @@ class UitslagenBKTeamsView(TemplateView):
         toon_team_leden_van_ver_nr = None
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         account = self.request.user
-        assert isinstance(account, Account)
         if account.is_authenticated:
             if functie_nu and functie_nu.nhb_ver:
                 # HWL, WL
                 toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
             else:
                 # geen beheerder, dus sporter
-                if account.sporter_set.count() > 0:         # pragma: no branch
-                    sporter = account.sporter_set.all()[0]
-                    if sporter.is_actief_lid and sporter.bij_vereniging:
-                        toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
+                sporter = Sporter.objects.filter(account=account).first()
+                if sporter.is_actief_lid and sporter.bij_vereniging:
+                    toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
@@ -488,12 +486,7 @@ class UitslagenBKTeamsView(TemplateView):
                 # for
 
                 unsorted.sort(reverse=True)       # hoogste eerst
-                team.deelnemers = list()
-                for _, _, voor_uitslag in unsorted:
-                    if voor_uitslag.result_totaal < 10:
-                        voor_uitslag.result_totaal = '-'
-                    team.deelnemers.append(voor_uitslag)
-                # for
+                team.deelnemers = [voor_uitslag for _, _, voor_uitslag in unsorted]
 
                 klasse_teams_done.append(team)
             else:

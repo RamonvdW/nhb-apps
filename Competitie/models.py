@@ -179,7 +179,8 @@ class Competitie(models.Model):
         """ bepaalde huidige fase van de competitie en zet self.fase_indiv en self.fase_teams """
         self.fase_indiv = bepaal_fase_indiv(self)
         self.fase_teams = bepaal_fase_teams(self)
-        # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (self.afstand, self.fase_indiv, self.fase_teams))
+        # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (
+        #           self.afstand, self.fase_indiv, self.fase_teams))
 
     def is_open_voor_inschrijven(self):
         if not hasattr(self, 'fase_indiv'):

@@ -11,8 +11,8 @@ from HistComp.definities import (HISTCOMP_BK, HISTCOMP_TYPE_18,
                                  HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE, HISTCOMP_TYPE2STR,
                                  HIST_BOOG_DEFAULT, HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG2STR,
                                  HIST_TEAM_DEFAULT, HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM2STR,
-                                 HIST_KLASSE2VOLGORDE)
-from HistComp.models import HistCompSeizoen, HistKampIndiv, HistKampTeam
+                                 HIST_KLASSE2VOLGORDE, HISTCOMP_TITEL2STR)
+from HistComp.models import HistCompSeizoen, HistKampIndivBK, HistKampTeam
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
@@ -126,13 +126,13 @@ class HistBkIndivView(TemplateView):
         context['comp_beschrijving'] = '%s seizoen %s' % (HISTCOMP_TYPE2STR[histcomp_type], seizoen_str)
         context['boog_beschrijving'] = HIST_BOOG2STR[boog_type]
 
-        uitslag = (HistKampIndiv
+        uitslag = (HistKampIndivBK
                    .objects
                    .exclude(rank_bk=0)                  # 0 = niet meegedaan
                    .filter(seizoen=hist_seizoen,
                            boogtype=boog_type,
                            rank_bk__lte=100)
-                   .order_by('indiv_klasse',
+                   .order_by('bk_indiv_klasse',
                              'rank_bk',                 # laagste eerst
                              '-bk_score_totaal'))       # hoogste eerst
 
@@ -142,7 +142,7 @@ class HistBkIndivView(TemplateView):
         unsorted = list()
         prev_klasse = None
         for indiv in uitslag:
-            if prev_klasse != indiv.indiv_klasse:
+            if prev_klasse != indiv.bk_indiv_klasse:
                 if len(subset) > 0:
                     teller.aantal_in_groep = len(subset) + 2
                     tup = (volgorde, subset[0].pk, subset)
@@ -152,8 +152,8 @@ class HistBkIndivView(TemplateView):
                 indiv.break_klasse = True
                 teller = indiv
 
-                volgorde = HIST_KLASSE2VOLGORDE[indiv.indiv_klasse]
-                prev_klasse = indiv.indiv_klasse
+                volgorde = HIST_KLASSE2VOLGORDE[indiv.bk_indiv_klasse]
+                prev_klasse = indiv.bk_indiv_klasse
 
             indiv.naam_str = '[%s] %s' % (indiv.sporter_lid_nr, indiv.sporter_naam)
 
@@ -165,6 +165,8 @@ class HistBkIndivView(TemplateView):
                                                  indiv.bk_score_1,
                                                  indiv.bk_score_2)
             indiv.scores_str_2 = indiv.bk_counts
+
+            indiv.titel = HISTCOMP_TITEL2STR[indiv.titel_code_bk]
 
             subset.append(indiv)
         # for
@@ -308,6 +310,8 @@ class HistBkTeamsView(TemplateView):
 
             # verwijder lege posities
             team.deelnemers = [lid for lid in team.deelnemers if lid]
+
+            team.titel = HISTCOMP_TITEL2STR[team.titel_code]
 
             subset.append(team)
         # for

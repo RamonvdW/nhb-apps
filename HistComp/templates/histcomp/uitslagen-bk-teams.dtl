@@ -84,12 +84,12 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr>
-                            <td colspan="4" class="nhb-table-onderrand"></td>
+                            <td colspan="5" class="nhb-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
-                        <td colspan="6" class="center">
+                        <td colspan="7" class="center">
                             <h5>{{ team.teams_klasse }}</h5>
                         </td>
                     </tr>
@@ -103,6 +103,7 @@
                         </th>
                         <th class="right-align" style="padding-right:10px">BK scores</th>
                         <th>Team</th>
+                        <th><!-- titel --></th>
                         <td rowspan="{{ team.aantal_in_groep }}" class="nhb-table-zijrand"></td>
                     </tr>
                 {% endif %}
@@ -134,12 +135,15 @@
                         {% endfor %}
                     </td>
 
+                    <td>
+                        <span class="hide-on-small-only">{{ team.titel }}</span>
+                    </td>
                 </tr>
 
             {% endfor %}
 
             <tr>
-                <td colspan="4" class="nhb-table-onderrand"></td>
+                <td colspan="5" class="nhb-table-onderrand"></td>
             </tr>
         </table>
 

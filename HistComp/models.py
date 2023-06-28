@@ -6,7 +6,9 @@
 
 from django.db import models
 from decimal import Decimal
-from HistComp.definities import HISTCOMP_RK, HISTCOMP_CHOICES_RK_BK, HISTCOMP_TYPE, HISTCOMP_TYPE2STR
+from HistComp.definities import (HISTCOMP_RK, HISTCOMP_CHOICES_RK_BK,
+                                 HISTCOMP_TYPE, HISTCOMP_TYPE2STR,
+                                 HISTCOMP_TITEL_NONE, HISTCOMP_TITEL_CHOICES)
 
 
 class HistCompSeizoen(models.Model):
@@ -61,7 +63,7 @@ class HistCompSeizoen(models.Model):
 
 class HistCompRegioIndiv(models.Model):
     """ Deze database tabel bevat alle resultaten van de individuele competitie
-        Per regel: subklasse, rank, schutter details, scores en gemiddelde.
+        Per regel: sub-klasse, rank, schutter details, scores en gemiddelde.
     """
 
     seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
@@ -119,14 +121,14 @@ class HistCompRegioIndiv(models.Model):
     class Meta:
         """ meta data voor de admin interface """
         ordering = ['rank']
-        verbose_name = verbose_name_plural = "Hist regio indiv"
+        verbose_name = verbose_name_plural = "Hist indiv regio"
 
     objects = models.Manager()      # for the editor only
 
 
 class HistCompRegioTeam(models.Model):
     """ Deze database tabel bevat alle resultaten van de teamcompetitie
-        Per regel: subklasse, rank, schutter details, scores en gemiddelde.
+        Per regel: sub-klasse, rank, schutter details, scores en gemiddelde.
     """
 
     seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
@@ -189,13 +191,14 @@ class HistCompRegioTeam(models.Model):
 
 class HistKampIndiv(models.Model):
 
-    """ Resultaat van de RK en BK voor een individuele sporter """
+    """ Resultaat van de RK voor een individuele sporter """
 
     seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
 
     # individuele wedstrijdklasse
     # voorbeeld: Compound Onder 21 klasse 2
     # noteer: aspiranten kunnen in de RK uitkomen in een andere klasse
+    # noteer: klassen kunnen samengevoegd worden, dus RK en BK klasse kunnen verschillen
     indiv_klasse = models.CharField(max_length=35)
 
     # lid nummer en volledige naam
@@ -213,18 +216,15 @@ class HistKampIndiv(models.Model):
 
     # volgorde in de vastgestelde uitslag in deze wedstrijdklasse
     rank_rk = models.PositiveSmallIntegerField()
-    rank_bk = models.PositiveSmallIntegerField(default=0)            # 0 = niet meegedaan
+
+    # bijbehorende titel
+    titel_code_rk = models.CharField(max_length=1, choices=HISTCOMP_TITEL_CHOICES, default=HISTCOMP_TITEL_NONE)
 
     rk_score_is_blanco = models.BooleanField(default=False)
     rk_score_1 = models.PositiveSmallIntegerField(default=0)
     rk_score_2 = models.PositiveSmallIntegerField(default=0)
     rk_score_totaal = models.PositiveSmallIntegerField(default=0)
     rk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
-
-    bk_score_1 = models.PositiveSmallIntegerField(default=0)
-    bk_score_2 = models.PositiveSmallIntegerField(default=0)
-    bk_score_totaal = models.PositiveSmallIntegerField(default=0)
-    bk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
 
     # bijdrage aan de het rk/bk teams
     teams_rk_score_1 = models.PositiveSmallIntegerField(default=0)
@@ -235,11 +235,63 @@ class HistKampIndiv(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "[%s] %s, %s" % (self.sporter_lid_nr, self.sporter_naam, self.boogtype)
+        return "%s: %s [%s] %s (%s)" % (self.rank_rk, self.boogtype,
+                                        self.sporter_lid_nr, self.sporter_naam,
+                                        self.indiv_klasse)
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = verbose_name_plural = "Hist rk/bk indiv"
+        verbose_name = verbose_name_plural = "Hist indiv RK"
+
+    objects = models.Manager()      # for the editor only
+
+
+class HistKampIndivBK(models.Model):
+
+    """ Resultaat van de BK voor een individuele sporter
+        Deze is apart van de RK ivm mogelijk verschillende klasse (door samenvoegen kleine klassen tijdens RK)
+    """
+
+    seizoen = models.ForeignKey(HistCompSeizoen, on_delete=models.CASCADE)
+
+    # individuele wedstrijdklasse
+    # voorbeeld: Compound Onder 21 klasse 2
+    # noteer: aspiranten kunnen in de RK uitkomen in een andere klasse
+    # noteer: klassen kunnen samengevoegd worden, dus RK en BK klasse kunnen verschillen
+    bk_indiv_klasse = models.CharField(max_length=35)
+
+    # lid nummer en volledige naam
+    sporter_lid_nr = models.PositiveIntegerField()
+    sporter_naam = models.CharField(max_length=50)
+
+    # R/C/BB/IB/LB/TR
+    boogtype = models.CharField(max_length=5)
+
+    # vereniging van de sporter (bij afsluiten competitie)
+    vereniging_nr = models.PositiveSmallIntegerField()
+    vereniging_naam = models.CharField(max_length=50)
+    vereniging_plaats = models.CharField(max_length=35, default='')
+
+    # volgorde in de vastgestelde uitslag in deze wedstrijdklasse
+    rank_bk = models.PositiveSmallIntegerField(default=0)            # 0 = niet meegedaan
+
+    # bijbehorende titel
+    titel_code_bk = models.CharField(max_length=1, choices=HISTCOMP_TITEL_CHOICES, default=HISTCOMP_TITEL_NONE)
+
+    bk_score_1 = models.PositiveSmallIntegerField(default=0)
+    bk_score_2 = models.PositiveSmallIntegerField(default=0)
+    bk_score_totaal = models.PositiveSmallIntegerField(default=0)
+    bk_counts = models.CharField(max_length=20, default='', blank=True)     # 25m1pijl: 5x10 3x9
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "%s: %s [%s] %s (%s)" % (self.rank_bk, self.boogtype,
+                                        self.sporter_lid_nr, self.sporter_naam,
+                                        self.bk_indiv_klasse)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = verbose_name_plural = "Hist indiv BK"
 
     objects = models.Manager()      # for the editor only
 
@@ -269,9 +321,10 @@ class HistKampTeam(models.Model):
     # team naam wordt niet opgeslagen, omdat het meestal een rommeltje is
     team_nr = models.PositiveSmallIntegerField()
 
-    # behaalde score en rank
+    # behaalde score, rank en bijbehorende titel
     team_score = models.PositiveSmallIntegerField()
     rank = models.PositiveSmallIntegerField()
+    titel_code = models.CharField(max_length=1, choices=HISTCOMP_TITEL_CHOICES, default=HISTCOMP_TITEL_NONE)
 
     # wie schoten voor dit team: geeft lid nummer, naam en boog
     # deze sporters waren ook voor het RK geplaatst
@@ -296,7 +349,7 @@ class HistKampTeam(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s: %s - %s (%s)" % (self.rank, self.vereniging_nr, self.team_nr, self.team_score)
+        return "%s: %s - %s (%s)" % (self.rank, self.vereniging_nr, self.team_nr, self.teams_klasse)
 
     class Meta:
         """ meta data voor de admin interface """

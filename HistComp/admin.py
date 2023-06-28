@@ -7,7 +7,7 @@
 from django.contrib import admin
 from HistComp.models import (HistCompSeizoen,
                              HistCompRegioIndiv, HistCompRegioTeam,
-                             HistKampIndiv, HistKampTeam)
+                             HistKampIndiv, HistKampIndivBK, HistKampTeam)
 
 
 class HistCompSeizoenAdmin(admin.ModelAdmin):
@@ -28,11 +28,22 @@ class HistCompRegioTeamAdmin(admin.ModelAdmin):
     list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'team_type', 'regio_nr', 'team_klasse')
 
 
-class HistKampIndivAdmin(admin.ModelAdmin):
+class HistKampIndivRKAdmin(admin.ModelAdmin):
 
     list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'boogtype')
 
     search_fields = ('sporter_lid_nr',)
+
+    ordering = ['rank_rk', 'boogtype', 'indiv_klasse']
+
+
+class HistKampIndivBKAdmin(admin.ModelAdmin):
+
+    list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'boogtype')
+
+    search_fields = ('sporter_lid_nr',)
+
+    ordering = ['rank_bk', 'boogtype', 'bk_indiv_klasse']
 
 
 class HistKampTeamAdmin(admin.ModelAdmin):
@@ -40,6 +51,8 @@ class HistKampTeamAdmin(admin.ModelAdmin):
     autocomplete_fields = ('lid_1', 'lid_2', 'lid_3', 'lid_4')
 
     list_filter = ('seizoen__seizoen', 'seizoen__comp_type', 'team_type')
+
+    ordering = ['rank', 'team_type', 'teams_klasse']
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -68,7 +81,8 @@ class HistKampTeamAdmin(admin.ModelAdmin):
 admin.site.register(HistCompSeizoen, HistCompSeizoenAdmin)
 admin.site.register(HistCompRegioIndiv, HistCompRegioIndivAdmin)
 admin.site.register(HistCompRegioTeam, HistCompRegioTeamAdmin)
-admin.site.register(HistKampIndiv, HistKampIndivAdmin)
+admin.site.register(HistKampIndiv, HistKampIndivRKAdmin)
+admin.site.register(HistKampIndivBK, HistKampIndivBKAdmin)
 admin.site.register(HistKampTeam, HistKampTeamAdmin)
 
 # end of file

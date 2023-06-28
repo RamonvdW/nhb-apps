@@ -9,10 +9,11 @@ from Competitie.definities import DEEL_RK, DEEL_BK, KAMP_RANK_BLANCO, KAMP_RANK_
 from Competitie.models import (CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieRondeTeam,
                                KampioenschapSporterBoog, KampioenschapTeam)
-from HistComp.definities import HISTCOMP_RK, HISTCOMP_BK
+from HistComp.definities import (HISTCOMP_RK, HISTCOMP_BK,
+                                 HISTCOMP_TITEL_NONE, HISTCOMP_TITEL_RK, HISTCOMP_TITEL_BK, HISTCOMP_TITEL_NK)
 from HistComp.models import (HistCompSeizoen,
                              HistCompRegioIndiv, HistCompRegioTeam,
-                             HistKampIndiv, HistKampTeam)
+                             HistKampIndiv, HistKampIndivBK, HistKampTeam)
 
 
 def uitslag_regio_indiv_naar_histcomp(comp):
@@ -216,6 +217,10 @@ def uitslag_rk_indiv_naar_histcomp(comp):
             if deelnemer.deelname == DEELNAME_NEE:
                 deelnemer.result_rank = KAMP_RANK_ALLEEN_TEAM
 
+            titel_code = HISTCOMP_TITEL_NONE
+            if deelnemer.result_rank == 1:
+                titel_code = HISTCOMP_TITEL_RK
+
             hist = HistKampIndiv(
                             seizoen=hist_seizoen,
                             indiv_klasse=deelnemer.indiv_klasse.beschrijving,
@@ -227,6 +232,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                             vereniging_plaats=ver.plaats,
                             rayon_nr=kampioenschap.nhb_rayon.rayon_nr,
                             rank_rk=deelnemer.result_rank,
+                            titel_code_rk=titel_code,
                             rk_score_is_blanco=(deelnemer.result_rank == KAMP_RANK_BLANCO),
                             rk_score_1=deelnemer.result_score_1,
                             rk_score_2=deelnemer.result_score_2,
@@ -251,12 +257,7 @@ def uitslag_bk_indiv_naar_histcomp(comp):
     except HistCompSeizoen.DoesNotExist:
         return
 
-    indiv_klasse_lid_nr2hist = dict()
-    for hist in HistKampIndiv.objects.filter(seizoen=hist_seizoen):
-        tup = (hist.indiv_klasse, hist.sporter_lid_nr)
-        indiv_klasse_lid_nr2hist[tup] = hist
-    # for
-
+    bulk = list()
     for deelnemer in (KampioenschapSporterBoog
                       .objects
                       .filter(kampioenschap__competitie=comp,
@@ -269,19 +270,41 @@ def uitslag_bk_indiv_naar_histcomp(comp):
         if 0 < deelnemer.result_rank < KAMP_RANK_BLANCO:
             sporter = deelnemer.sporterboog.sporter
 
-            tup = (deelnemer.indiv_klasse.beschrijving, sporter.lid_nr)
-            hist = indiv_klasse_lid_nr2hist[tup]
+            boogtype = deelnemer.sporterboog.boogtype
+            ver = deelnemer.bij_vereniging
 
             if deelnemer.result_rank > KAMP_RANK_BLANCO:
+                # TOO: onmogelijk om te bereiken?
                 deelnemer.result_rank = 0                   # verwijder speciale codes (no show / reserve)
 
-            hist.rank_bk = deelnemer.result_rank
-            hist.bk_score_1 = deelnemer.result_score_1
-            hist.bk_score_2 = deelnemer.result_score_2
-            hist.bk_score_totaal = deelnemer.result_score_1 + deelnemer.result_score_2
-            hist.bk_counts = deelnemer.result_counts
-            hist.save(update_fields=['rank_bk', 'bk_score_1', 'bk_score_2', 'bk_score_totaal', 'bk_counts'])
+            titel_code = HISTCOMP_TITEL_NONE
+            if deelnemer.result_rank == 1:
+                titel = deelnemer.indiv_klasse.titel_bk
+                if titel == 'Bondskampioen':
+                    titel_code = HISTCOMP_TITEL_BK
+                elif titel == 'Nederlands Kampioen':
+                    titel_code = HISTCOMP_TITEL_NK
+
+            hist = HistKampIndivBK(
+                    seizoen=hist_seizoen,
+                    bk_indiv_klasse=deelnemer.indiv_klasse.beschrijving,
+                    sporter_lid_nr=sporter.lid_nr,
+                    sporter_naam=sporter.volledige_naam(),
+                    boogtype=boogtype.afkorting,
+                    vereniging_nr=ver.ver_nr,
+                    vereniging_naam=ver.naam,
+                    vereniging_plaats=ver.plaats,
+                    rank_bk=deelnemer.result_rank,
+                    titel_code_bk=titel_code,
+                    bk_score_1=deelnemer.result_score_1,
+                    bk_score_2=deelnemer.result_score_2,
+                    bk_score_totaal=deelnemer.result_score_1 + deelnemer.result_score_2,
+                    bk_counts=deelnemer.result_counts)
+            bulk.append(hist)
     # for
+
+    HistKampIndivBK.objects.bulk_create(bulk)
+    del bulk
 
     hist_seizoen.heeft_uitslag_bk_indiv = True
     hist_seizoen.save(update_fields=['heeft_uitslag_bk_indiv'])
@@ -418,6 +441,10 @@ def uitslag_rk_teams_naar_histcomp(comp):
             team_type = team.team_klasse.team_afkorting
             team_type = team_type.replace('2', '')      # BB2->BB, R2->R2
 
+            titel_code = HISTCOMP_TITEL_NONE
+            if team.result_rank == 1:
+                titel_code = HISTCOMP_TITEL_RK
+
             hist = HistKampTeam(
                         seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_RK,
@@ -429,7 +456,8 @@ def uitslag_rk_teams_naar_histcomp(comp):
                         vereniging_plaats=ver.plaats,
                         team_nr=team.volg_nr,
                         team_score=team.result_teamscore,
-                        rank=team.result_rank)
+                        rank=team.result_rank,
+                        titel_code=titel_code)
 
             unsorted = list()
             for team_lid in team.feitelijke_leden.select_related('indiv_klasse', 'sporterboog__sporter').all():
@@ -510,6 +538,14 @@ def uitslag_bk_teams_naar_histcomp(comp):
             team_type = team.team_klasse.team_afkorting
             team_type = team_type.replace('2', '')      # BB2->BB, R2->R2
 
+            titel_code = HISTCOMP_TITEL_NONE
+            if team.result_rank == 1:
+                titel = team.team_klasse.titel_bk
+                if titel == 'Bondskampioen':
+                    titel_code = HISTCOMP_TITEL_BK
+                elif titel == 'Nederlands Kampioen':
+                    titel_code = HISTCOMP_TITEL_NK
+
             hist = HistKampTeam(
                         seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_BK,
@@ -520,7 +556,8 @@ def uitslag_bk_teams_naar_histcomp(comp):
                         vereniging_plaats=ver.plaats,
                         team_nr=team.volg_nr,
                         team_score=team.result_teamscore,
-                        rank=team.result_rank)
+                        rank=team.result_rank,
+                        titel_code=titel_code)
 
             unsorted = list()
             for team_lid in team.feitelijke_leden.select_related('indiv_klasse', 'sporterboog__sporter').all():
