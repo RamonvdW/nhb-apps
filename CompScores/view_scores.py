@@ -291,7 +291,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         self._team_naam_toevoegen(scores, deelcomp)
 
-        context['url_check_nhbnr'] = reverse('CompScores:dynamic-check-nhbnr')
+        context['url_check_bondsnummer'] = reverse('CompScores:dynamic-check-bondsnummer')
         context['url_opslaan'] = reverse('CompScores:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('CompScores:dynamic-deelnemers-ophalen')
 

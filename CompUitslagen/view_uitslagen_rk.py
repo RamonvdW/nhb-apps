@@ -13,6 +13,7 @@ from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKl
                                Kampioenschap)
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
+from Sporter.models import Sporter
 from Sporter.operations import get_request_rayon_nr
 from Plein.menu import menu_dynamics
 import datetime
@@ -280,7 +281,8 @@ class UitslagenRayonIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK individueel')
         )
 
@@ -448,10 +450,9 @@ class UitslagenRayonTeamsView(TemplateView):
                 toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
             else:
                 # geen beheerder, dus sporter
-                if account.sporter_set.count() > 0:     # pragma: no branch
-                    sporter = account.sporter_set.all()[0]
-                    if sporter.is_actief_lid and sporter.bij_vereniging:
-                        toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
+                sporter = Sporter.objects.filter(account=account).first()
+                if sporter.is_actief_lid and sporter.bij_vereniging:
+                    toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
@@ -506,7 +507,7 @@ class UitslagenRayonTeamsView(TemplateView):
                         except KeyError:
                             pass
                     else:
-                        teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+                        teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
 
                 totaal_lijst.extend(klasse_teams_done)
                 totaal_lijst.extend(klasse_teams_plan)
@@ -534,7 +535,9 @@ class UitslagenRayonTeamsView(TemplateView):
                     team.rk_score_str = str(team.result_teamscore)
                 team.klasse_heeft_uitslag = True
 
-                originele_lid_nrs = list(team.gekoppelde_leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
+                originele_lid_nrs = list(team
+                                         .gekoppelde_leden.all()
+                                         .values_list('sporterboog__sporter__lid_nr', flat=True))
                 deelnemers = list()
                 lid_nrs = list()
                 for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
@@ -598,7 +601,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 except KeyError:
                     pass
             else:
-                teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+                teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
 
         totaal_lijst.extend(klasse_teams_done)
         totaal_lijst.extend(klasse_teams_plan)
@@ -609,7 +612,8 @@ class UitslagenRayonTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK teams')
         )
 

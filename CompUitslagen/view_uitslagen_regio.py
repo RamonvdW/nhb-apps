@@ -30,7 +30,8 @@ class UitslagenRegioIndivView(TemplateView):
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV
     url_name = 'CompUitslagen:uitslagen-regio-indiv-n'
 
-    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog):
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, gekozen_regio_nr, comp_boog):
         """ filter optie voor de regio """
 
         # boogtype filters
@@ -217,7 +218,8 @@ class UitslagenRegioIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio individueel')
         )
 
@@ -501,7 +503,8 @@ class UitslagenRegioTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio teams')
         )
 

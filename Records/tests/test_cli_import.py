@@ -199,7 +199,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_06.json', '--dryrun')
         self.assertTrue("DRY RUN\nSamenvatting: 5 records;" in f2.getvalue())
 
-    def test_onbekend_nhbnr(self):
+    def test_onbekend_bondsnummer(self):
         # onbekend bondsnummer
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_07.json')

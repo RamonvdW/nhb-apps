@@ -204,7 +204,7 @@
                 const data = JSON.stringify(obj)
 
                 // POST voorkomt caching
-                xhr.open("POST", "{{ url_check_nhbnr }}", true)     // true = async
+                xhr.open("POST", "{{ url_check_bondsnummer }}", true)     // true = async
                 xhr.timeout = 3000                                  // 3 sec
                 xhr.onloadend = function(){
                                     opzoeken_klaar(xhr, btn)

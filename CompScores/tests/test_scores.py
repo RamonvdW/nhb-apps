@@ -27,7 +27,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
     url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # match_pk
     url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
     url_deelnemers_ophalen = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
-    url_deelnemer_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
+    url_deelnemer_zoeken = '/bondscompetities/scores/dynamic/check-bondsnummer/'
 
     url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # match_pk
     url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # match_pk
