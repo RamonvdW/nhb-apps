@@ -74,9 +74,16 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                        .order_by('-date_joined')
                                        .filter(date_joined__gte=deze_maand)
                                        .count())
+        context['deze_maand_count_gast'] = (Account
+                                            .objects
+                                            .order_by('-date_joined')
+                                            .filter(date_joined__gte=deze_maand,
+                                                    is_gast=True)
+                                            .count())
         context['deze_maand'] = deze_maand
 
         context['totaal'] = Account.objects.count()
+        context['totaal_gast'] = Account.objects.filter(is_gast=True).count()
 
         context['aantal_actieve_gebruikers'] = self.tel_actieve_gebruikers()
 

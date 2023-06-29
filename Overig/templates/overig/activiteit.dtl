@@ -23,12 +23,20 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
-                    <th>Totaal accounts aangemaakt</th>
+                    <th>Totaal aantal accounts</th>
                     <td>{{ totaal }}</td>
+                </tr>
+                <tr>
+                    <th>Waarvan gast-accounts</th>
+                    <td>{{ totaal_gast }}</td>
                 </tr>
                 <tr>
                     <th>Nieuw sinds {{ deze_maand|date }}</th>
                     <td>{{ deze_maand_count }}</td>
+                </tr>
+                <tr>
+                    <th>Waarvan gast-accounts</th>
+                    <td>{{ deze_maand_count_gast }}</td>
                 </tr>
                 <tr>
                     <th>Aantal actieve gebruikers</th>
