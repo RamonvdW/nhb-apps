@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -22,51 +22,54 @@
         </div>
     </div>
 
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
-        <div class="col s12">
-            <!-- bondscompetities -->
-            {% if toon_bondscompetities %}
-                {% url 'Competitie:kies' as card_url %}
-                {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
-            {% endif %}
+    {% if toon_bondscompetities or rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_mww or rol_is_mo or rol_is_wl%}
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <!-- bondscompetities -->
+                {% if toon_bondscompetities %}
+                    {% url 'Competitie:kies' as card_url %}
+                    {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+                {% endif %}
 
-            <!-- wedstrijdkalender -->
-            {% if rol_is_bb or rol_is_mwz %}
-                {% url 'Wedstrijden:manager-status' status='wacht' as card_url %}
-                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." icon="event_note" url=card_url %}
-            {% elif rol_is_hwl %}
-                {% url 'Wedstrijden:vereniging' as card_url %}
-                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die jullie vereniging organiseert." icon="event_note" url=card_url %}
-            {% endif %}
+                <!-- wedstrijdkalender -->
+                {% if rol_is_bb or rol_is_mwz %}
+                    {% url 'Wedstrijden:manager-status' status='wacht' as card_url %}
+                    {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." icon="event_note" url=card_url %}
+                {% elif rol_is_hwl %}
+                    {% url 'Wedstrijden:vereniging' as card_url %}
+                    {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die jullie vereniging organiseert." icon="event_note" url=card_url %}
+                {% endif %}
 
-            <!-- webwinkel -->
-            {% if rol_is_mww %}
-                {% url 'Webwinkel:manager' as card_url %}
-                {% include 'plein/card.dtl' with title="Webwinkel" text="Beheer de webwinkel." icon="local_mall" url=card_url %}
-            {% endif %}
+                <!-- webwinkel -->
+                {% if rol_is_mww %}
+                    {% url 'Webwinkel:manager' as card_url %}
+                    {% include 'plein/card.dtl' with title="Webwinkel" text="Beheer de webwinkel." icon="local_mall" url=card_url %}
+                {% endif %}
 
-            <!-- opleidingen -->
-            {% if rol_is_mo %}
-                {% url 'Opleidingen:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." icon="school" url=card_url %}
-            {% endif %}
+                <!-- opleidingen -->
+                {% if rol_is_mo %}
+                    {% url 'Opleidingen:overzicht' as card_url %}
+                    {% include 'plein/card.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." icon="school" url=card_url %}
+                {% endif %}
 
-            <!-- records -->
-            {% if rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl %}
-                {% url 'Records:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
-            {% endif %}
+                <!-- records -->
+                {% if rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl %}
+                    {% url 'Records:overzicht' as card_url %}
+                    {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+                {% endif %}
+            </div>
         </div>
-    </div>
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <p>&nbsp;</p>
-            <h4>Voor de beheerder</h4>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <p>&nbsp;</p>
+                <h4>Voor de beheerder</h4>
+            </div>
         </div>
-    </div>
+
+    {% endif %}
 
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
