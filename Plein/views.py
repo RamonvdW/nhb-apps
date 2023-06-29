@@ -73,11 +73,12 @@ class PleinView(View):
 
         if request.user.is_authenticated:
             account = request.user
-            gast = account.gastregistratie_set.first()
-            if gast and gast.fase != REGISTRATIE_FASE_DONE:
-                # registratie is nog niet voltooid
-                # dwing terug naar de lijst met vragen
-                return redirect('Registreer:gast-meer-vragen')
+            if account.is_gast:
+                gast = account.gastregistratie_set.first()
+                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                    # registratie is nog niet voltooid
+                    # dwing terug naar de lijst met vragen
+                    return redirect('Registreer:gast-meer-vragen')
 
         return super().dispatch(request, *args, **kwargs)
 
