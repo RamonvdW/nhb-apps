@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.urls import reverse
+from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.formats import localize
@@ -22,6 +22,7 @@ from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
+from Registreer.definities import REGISTRATIE_FASE_DONE
 from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
@@ -47,6 +48,20 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
         return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if request.user.is_authenticated:
+            account = request.user
+            if account.is_gast:
+                gast = account.gastregistratie_set.first()
+                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                    # registratie is nog niet voltooid
+                    # dwing terug naar de lijst met vragen
+                    return redirect('Registreer:gast-meer-vragen')
+
+        return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
     def _find_histcomp_scores(sporter, alle_bogen):

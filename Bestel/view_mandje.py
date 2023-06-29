@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
+from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.models import BestelMandje
@@ -18,6 +18,7 @@ from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
+from Registreer.definities import REGISTRATIE_FASE_DONE
 from decimal import Decimal
 
 
@@ -41,6 +42,20 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu != Rollen.ROL_NONE
+
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if request.user.is_authenticated:
+            account = request.user
+            if account.is_gast:
+                gast = account.gastregistratie_set.first()
+                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                    # registratie is nog niet voltooid
+                    # dwing terug naar de lijst met vragen
+                    return redirect('Registreer:gast-meer-vragen')
+
+        return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
     def _beschrijf_inhoud_mandje(account):
