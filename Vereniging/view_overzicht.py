@@ -284,6 +284,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartje.einde_blok = True
             kaartjes.append(kaartje)
 
+        context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rollen.ROL_SEC
+
         eval_open_taken(self.request)
 
         context['kruimels'] = (

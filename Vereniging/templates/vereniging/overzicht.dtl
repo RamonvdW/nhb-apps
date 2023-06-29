@@ -175,9 +175,15 @@
     <!-- blauwe balk -->
     <div class="row-nhb-blauw">
         <div class="col s12">
+
             <!-- ledenlijst -->
-            {% url 'Vereniging:ledenlijst' as card_url %}
-            {% include 'plein/card.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="import_contacts" url=card_url %}
+            {% if toon_gast_accounts %}
+                {% url 'Vereniging:gast-accounts' as card_url %}
+                {% include 'plein/card.dtl' with title="Gast accounts" text="Toon de aangemaakte gast-accounts." icon="import_contacts" url=card_url %}
+            {% else %}
+                {% url 'Vereniging:ledenlijst' as card_url %}
+                {% include 'plein/card.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="import_contacts" url=card_url %}
+            {% endif %}
 
             <!-- beheerders vereniging -->
             {% url 'Functie:overzicht-vereniging' as card_url %}

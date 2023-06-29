@@ -24,6 +24,14 @@ urlpatterns = [
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
+    path('gast-accounts/',
+         view_ledenlijst.GastAccountsView.as_view(),
+         name='gast-accounts'),
+
+    path('gast-accounts/<lid_nr>/details/',
+         view_ledenlijst.GastAccountDetailsView.as_view(),
+         name='gast-account-details'),
+
 
     # Accommodatie (voor gebruik van buiten Beheer vereniging)
     path('accommodaties/lijst/',

@@ -1,0 +1,70 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Gast-accounts{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Gast-accounts</h3>
+            <p>Sporters die lid zijn bij World Archery of de IFAA kunnen inschrijven op wedstrijden met een gast-account.</p>
+            <p>Personen die niet lid zijn bij de NHB kunnen een gast-account aanmaken om de site te ontdekken en in te schrijven op wedstrijden.</p>
+            <p>NHB leden moeten een normaal account aanmaken, geen gast-account.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <table class="white" id="table2">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="2" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <th data-filter="on">Bonds<wbr>nummer</th>
+                        <th data-filter="on">Naam</th>
+                        <th>Laatste inlog</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for obj in object_list %}
+                    <tr>
+                        <td>{{ obj.lid_nr }}</td>
+                        <td>{{ obj.volledige_naam }}</td>
+
+                        <td>
+                            {% if obj.geen_inlog == 2 %}
+                                <i>Onvoltooid account</i>
+                            {% elif obj.geen_inlog %}
+                                <i>Nooit</i>
+                            {% else %}
+                                <span>{{ obj.laatste_inlog }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a class="btn-nhb-rood" href="{{ obj.url_details }}">Details</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    </div>
+
+{% include 'feedback/sidebar.dtl' with op_pagina="vereniging-gast-accounts" %}
+
+{% endblock %}
