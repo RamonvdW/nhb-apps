@@ -225,21 +225,25 @@
     {% endif %}         <!-- toon_bondscompetities -->
 
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Bondspas</h4>
-            <p>De digitale bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
-        </div>
-    </div>
+    {% if url_bondspas %}
 
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
-        <div class="col s12">
-            <!-- bondspas -->
-            {% include 'plein/card.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Bondspas</h4>
+                <p>De digitale bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
+            </div>
         </div>
-    </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <!-- bondspas -->
+                {% include 'plein/card.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
+            </div>
+        </div>
+
+    {% endif %}
 
 
     {% if toon_bestellingen %}
@@ -584,24 +588,39 @@
     <div class="row-nhb-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
-                <tr>
-                    <th>Jouw bondsnummer</th>
-                    <td>{{ sporter.lid_nr }}</td>
-                </tr>
-                <tr>
-                    <th>Lid sinds</th>
-                    <td>{{ sporter.sinds_datum }}</td>
-                </tr>
-                <tr>
-                    <th>Lid bij vereniging</th>
-                    <td>
-                        {% if sporter.bij_vereniging %}
-                            <span>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</span>
-                        {% else %}
-                            <i>Geen</i>
-                        {% endif %}
-                    </td>
-                </tr>
+                {% if sporter.is_gast %}
+                    <tr>
+                        <th>Gast-account aangemaakt op</th>
+                        <td>{{ gast.aangemaakt|date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tijdelijke bondsnummer</th>
+                        <td>{{ sporter.lid_nr }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tijdelijke vereniging</th>
+                        <td>{{ sporter.bij_vereniging.ver_nr_en_naam }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <th>Jouw bondsnummer</th>
+                        <td>{{ sporter.lid_nr }}</td>
+                    </tr>
+                    <tr>
+                        <th>Lid sinds</th>
+                        <td>{{ sporter.sinds_datum }}</td>
+                    </tr>
+                    <tr>
+                        <th>Lid bij vereniging</th>
+                        <td>
+                            {% if sporter.bij_vereniging %}
+                                <span>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</span>
+                            {% else %}
+                                <i>Geen</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
 
                 {% if sporter.bij_vereniging %}
                     {% if sporter.bij_vereniging.plaats %}
@@ -611,14 +630,34 @@
                                 {{ sporter.bij_vereniging.plaats }}</td>
                         </tr>
                     {% endif %}
-                    <tr>
-                        <th>In NHB regio</th>
-                        <td>{{ sporter.bij_vereniging.regio }}</td>
-                    </tr>
-                    <tr>
-                        <th>In NHB rayon</th>
-                        <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
-                    </tr>
+
+                    {% if sporter.is_gast %}
+                        <tr>
+                            <th>Nationale federatie</th>
+                            <td>{{ gast.eigen_sportbond_naam }}</td>
+                        </tr>
+                        <tr>
+                            <th>Land</th>
+                            <td>{{ gast.land }}</td>
+                        </tr>
+                        <tr>
+                            <th>Lidnummer</th>
+                            <td>{{ gast.eigen_lid_nummer }}</td>
+                        </tr>
+                        <tr>
+                            <th>Vereniging</th>
+                            <td>{{ gast.club }} te {{ gast.club_plaats }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <th>In NHB regio</th>
+                            <td>{{ sporter.bij_vereniging.regio }}</td>
+                        </tr>
+                        <tr>
+                            <th>In NHB rayon</th>
+                            <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
+                        </tr>
+                    {% endif %}
                 {% endif %}
                 {% if sporter.para_classificatie %}
                     <tr>
@@ -642,100 +681,101 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             <table class="white">
-                <thead>
-                    <tr>
-                        <th>Functie</th>
-                        <th colspan="3">Contactgegevens</th>
-                    </tr>
-                </thead>
 
-                {% if not geen_wedstrijden %}
-
-                    {% if toon_bondscompetities %}
-
-                        <!-- RCL Indoor -->
-                        <tr>
-                            <td rowspan="2">Regio<wbr>competitie<wbr>leider Indoor</td>
-
-                            <td><span class="hide-on-small-only">{% if rcl18_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
-
-                            <td colspan="2">
-                                {% for naam in rcl18_namen %}
-                                    {% if not forloop.first %}<br>{% endif %}
-                                    <span>{{ naam }}</span>
-                                {% empty %}
-                                    <i>Onbekend</i>
-                                {% endfor %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><span class="hide-on-small-only">E-mail:</span></td>
-
-                            <td>
-                                {% if rcl18_email %}
-                                    <code>{{ rcl18_email|wbr_email }}</code>
-                                {% else %}
-                                    <i>Onbekend</i>
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if rcl18_email %}
-                                    <a class="btn-nhb-rood" href="mailto:{{ rcl18_email }}">
-                                        <i class="notranslate material-icons-round">mail</i></a>
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        <!-- RCL 25m1pijl -->
-                        <tr>
-                            <td rowspan="2">Regio<wbr>competitie<wbr>leider 25m1pijl</td>
-
-                            <td><span class="hide-on-small-only">{% if rcl25_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
-
-                            <td colspan="2">
-                                {% for naam in rcl25_namen %}
-                                    {% if not forloop.first %}<br>{% endif %}
-                                    <span>{{ naam }}</span>
-                                {% empty %}
-                                    <i>Onbekend</i>
-                                {% endfor %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><span class="hide-on-small-only">E-mail:</span></td>
-                            <td>
-                                {% if rcl25_email %}
-                                    <code>{{ rcl25_email|wbr_email }}</code>
-                                {% else %}
-                                    <i>Onbekend</i>
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if rcl25_email %}
-                                    <a class="btn-nhb-rood" href="mailto:{{ rcl25_email }}">
-                                        <i class="notranslate material-icons-round">mail</i></a>
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="4">De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</td>
-                        </tr>
-
-                        <tr class="nhb-table-header">
-                            <td colspan="4"></td>
-                        </tr>
-
+                {% if toon_bondscompetities %}
+                    <thead>
                         <tr>
                             <th>Functie</th>
                             <th colspan="3">Contactgegevens</th>
                         </tr>
-                    {% endif %}
+                    </thead>
 
+                    <!-- RCL Indoor -->
+                    <tr>
+                        <td rowspan="2">Regio<wbr>competitie<wbr>leider Indoor</td>
+
+                        <td><span class="hide-on-small-only">{% if rcl18_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
+
+                        <td colspan="2">
+                            {% for naam in rcl18_namen %}
+                                {% if not forloop.first %}<br>{% endif %}
+                                <span>{{ naam }}</span>
+                            {% empty %}
+                                <i>Onbekend</i>
+                            {% endfor %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="hide-on-small-only">E-mail:</span></td>
+
+                        <td>
+                            {% if rcl18_email %}
+                                <code>{{ rcl18_email|wbr_email }}</code>
+                            {% else %}
+                                <i>Onbekend</i>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if rcl18_email %}
+                                <a class="btn-nhb-rood" href="mailto:{{ rcl18_email }}">
+                                    <i class="notranslate material-icons-round">mail</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- RCL 25m1pijl -->
+                    <tr>
+                        <td rowspan="2">Regio<wbr>competitie<wbr>leider 25m1pijl</td>
+
+                        <td><span class="hide-on-small-only">{% if rcl25_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
+
+                        <td colspan="2">
+                            {% for naam in rcl25_namen %}
+                                {% if not forloop.first %}<br>{% endif %}
+                                <span>{{ naam }}</span>
+                            {% empty %}
+                                <i>Onbekend</i>
+                            {% endfor %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="hide-on-small-only">E-mail:</span></td>
+                        <td>
+                            {% if rcl25_email %}
+                                <code>{{ rcl25_email|wbr_email }}</code>
+                            {% else %}
+                                <i>Onbekend</i>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if rcl25_email %}
+                                <a class="btn-nhb-rood" href="mailto:{{ rcl25_email }}">
+                                    <i class="notranslate material-icons-round">mail</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="4">De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</td>
+                    </tr>
+
+                    <tr class="nhb-table-header">
+                        <td colspan="4"></td>
+                    </tr>
+
+                {% endif %}
+
+
+                {% if not sporter.is_gast %}
+
+                    <tr>
+                        <th>Functie</th>
+                        <th colspan="3">Contactgegevens</th>
+                    </tr>
 
                     <!-- HWL -->
                     <tr>
@@ -784,52 +824,52 @@
                         <th colspan="3">Contactgegevens</th>
                     </tr>
 
+
+                    <!-- SEC -->
+                    <tr>
+                        <td rowspan="2">Secretaris vereniging</td>
+
+                        <td><span class="hide-on-small-only">{% if sec_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
+
+                        <td colspan="2">
+                            {% for naam in sec_namen %}
+                                {% if not forloop.first %}<br>{% endif %}
+                                <span>{{ naam }}</span>
+                            {% empty %}
+                                <i>Onbekend</i>
+                            {% endfor %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="hide-on-small-only">E-mail:</span></td>
+                        <td>
+                            {% if sec_email %}
+                                <code>{{ sec_email|wbr_email }}</code>
+                            {% else %}
+                                <i>Onbekend</i>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if sec_email %}
+                                <a class="btn-nhb-rood" href="mailto:{{ sec_email }}">
+                                    <i class="notranslate material-icons-round">mail</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="4">De secretaris is er voor vragen over je lidmaatschap, voor het wijziging van je e-mailadres, doorgeven van een verhuizing, etc.</td>
+                    </tr>
+
+                    <tr class="nhb-table-header">
+                        <td colspan="4"></td>
+                    </tr>
+
                 {% endif %}
 
-                <!-- SEC -->
-                <tr>
-                    <td rowspan="2">Secretaris vereniging</td>
-
-                    <td><span class="hide-on-small-only">{% if sec_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</span></td>
-
-                    <td colspan="2">
-                        {% for naam in sec_namen %}
-                            {% if not forloop.first %}<br>{% endif %}
-                            <span>{{ naam }}</span>
-                        {% empty %}
-                            <i>Onbekend</i>
-                        {% endfor %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td><span class="hide-on-small-only">E-mail:</span></td>
-                    <td>
-                        {% if sec_email %}
-                            <code>{{ sec_email|wbr_email }}</code>
-                        {% else %}
-                            <i>Onbekend</i>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if sec_email %}
-                            <a class="btn-nhb-rood" href="mailto:{{ sec_email }}">
-                                <i class="notranslate material-icons-round">mail</i></a>
-                        {% endif %}
-                    </td>
-                </tr>
-
-                <tr>
-                    <td colspan="4">De secretaris is er voor vragen over je lidmaatschap, voor het wijziging van je e-mailadres, doorgeven van een verhuizing, etc.</td>
-                </tr>
-
-
                 <!-- bondsbureau -->
-                <tr class="nhb-table-header">
-                    <td colspan="4"></td>
-                </tr>
-
                 <tr>
                     <th>Functie</th>
                     <th colspan="3">Contactgegevens</th>

@@ -8,7 +8,7 @@
 {% block inhoud_text %}
     |Hallo {{ voornaam }},
     |
-    |We hebben een bondsnummer toegekend aan jouw gast-account.
+    |We hebben een tijdelijk bondsnummer toegekend aan jouw gast-account.
     |Jouw bondsnummer is {{ lid_nr }}.
     |
     |Met dit nummer kan je altijd inloggen op {{ naam_site }} via de optie 'wachtwoord vergeten'.
@@ -21,7 +21,7 @@
 {% block inhoud_html %}
     <div>Hallo {{ voornaam }},</div>
     <br>
-    <div>We hebben een bondsnummer toegekend aan jouw gast-account.</div>
+    <div>We hebben een tijdelijk bondsnummer toegekend aan jouw gast-account.</div>
     <div>Jouw bondsnummer is {{ lid_nr }}.</div>
     <br>
     <div>Met dit nummer kan je altijd inloggen op {{ naam_site }} via de optie 'wachtwoord vergeten'.</div>

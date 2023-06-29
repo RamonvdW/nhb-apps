@@ -472,7 +472,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         context['sporter'] = sporter
         context['records'], context['show_loc'] = self._find_records(sporter)
-        context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
+
+        if not sporter.is_gast:
+            context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
         boog_afk2sporterboog, boog_afkorting_wedstrijd = get_sporter_gekozen_bogen(sporter, alle_bogen)
         context['moet_bogen_kiezen'] = len(boog_afkorting_wedstrijd) == 0
@@ -500,6 +502,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             context['speelsterktes'] = self._find_speelsterktes(sporter)
             context['diplomas'] = self._find_diplomas(sporter)
+
+        if sporter.is_gast:
+            context['gast'] = sporter.gastregistratie_set.first()
 
         if Bestelling.objects.filter(account=account).count() > 0:
             context['toon_bestellingen'] = True

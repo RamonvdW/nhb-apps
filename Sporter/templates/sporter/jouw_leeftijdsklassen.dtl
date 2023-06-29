@@ -207,7 +207,12 @@
     <div class="row center">
         <div class="col s12">
             <h4>Bondscompetitie</h4>
-            <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} schiet je de bondscompetitie als <b class="nhb-rood-text">{{ lkl_comp.1.tekst }}</b></p>
+            {% if is_gast %}
+                <p>Je moet lid zijn bij de NHB om deel te nemen aan de bondscompetities.</p>
+                <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} zou je de bondscompetitie schieten als <b class="nhb-rood-text">{{ lkl_comp.1.tekst }}</b></p>
+            {% else %}
+                <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} schiet je de bondscompetitie als <b class="nhb-rood-text">{{ lkl_comp.1.tekst }}</b></p>
+            {% endif %}
         </div>
     </div>
 

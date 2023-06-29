@@ -54,6 +54,8 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
         sporter = account.sporter_set.all()[0]
         voorkeur = get_sporter_voorkeuren(sporter)
 
+        context['is_gast'] = sporter.is_gast
+
         if voorkeur.wedstrijd_geslacht_gekozen:
             # geslacht M/V of
             # geslacht X + keuze voor M/V gemaakt

@@ -25,7 +25,7 @@
             <div class="white center" style="padding:10px">
                 <p>Je hebt laten zien dat je toegang hebt de opgegeven e-mail.</p>
                 <br>
-                <p>We hebben het volgende bondsnummer toegekend aan jouw gast-account:</p>
+                <p>We hebben het volgende tijdelijke bondsnummer toegekend aan jouw gast-account:</p>
                 <h4><b>{{ lid_nr }}</b></h4>
                 <br>
                 <p>Je kan nu een wachtwoord instellen.</p>

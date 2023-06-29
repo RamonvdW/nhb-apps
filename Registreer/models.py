@@ -102,6 +102,9 @@ class GastRegistratie(models.Model):
     # voortgang bijhouden
     logboek = models.TextField(default='')
 
+    def volledige_naam(self):
+        return self.voornaam + " " + self.achternaam
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = 'Gast registratie'
