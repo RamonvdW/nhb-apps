@@ -168,7 +168,8 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -234,7 +235,8 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -327,7 +329,8 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -633,8 +636,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio',
+                     kwargs={'comp_pk': comp.pk,
+                             'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
             (None, 'Benodigde dagdelen')
         )
 
@@ -861,8 +867,11 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio',
+                     kwargs={'comp_pk': comp.pk,
+                             'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
             (None, 'Gekozen wedstrijden')
         )
 
@@ -1012,7 +1021,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                           .order_by('bij_vereniging__ver_nr',
                                     'sporterboog__sporter__lid_nr')):
 
-            pks = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
+            pks = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))  # TODO: 1 query per deelnemer!
 
             kruisjes = list()
             for pk in kolom_pks:

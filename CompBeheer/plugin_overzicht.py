@@ -35,7 +35,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
                     url=url)
         kaartjes_algemeen.append(kaartje)
 
-    # Toon klassegrenzen (is een openbaar kaartje)
+    # Toon klassengrenzen (is een openbaar kaartje)
     if comp.klassengrenzen_vastgesteld:
         url = reverse('Competitie:klassengrenzen-tonen', kwargs={'comp_pk': comp.pk})
         kaartje = SimpleNamespace(

@@ -22,7 +22,7 @@ from Plein.menu import menu_dynamics
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 TEMPLATE_COMPBEHEER_DOORZETTEN_REGIO_NAAR_RK = 'compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl'
-TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_RK_BK_TEAMS = 'compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_KAMP_TEAMS = 'compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_INDIV = 'compbeheer/bko-doorzetten-2a-rk-naar-bk-indiv.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_TEAMS = 'compbeheer/bko-doorzetten-2b-rk-naar-bk-teams.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_INDIV = 'compbeheer/bko-doorzetten-3a-bk-kleine-klassen-indiv.dtl'
@@ -158,7 +158,7 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de BKO de teams klassengrenzen voor het RK en BK vaststellen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_RK_BK_TEAMS
+    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_KAMP_TEAMS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -310,7 +310,8 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Doorzetten')
         )
 
@@ -471,7 +472,8 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Competitie doorzetten')
         )
 

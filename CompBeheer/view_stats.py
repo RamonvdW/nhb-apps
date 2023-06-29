@@ -63,7 +63,10 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
                             .filter(regiocompetitie__competitie=comp)
                             .count())
 
-            qset = RegiocompetitieTeam.objects.filter(regiocompetitie__competitie=comp).select_related('vereniging__regio__rayon')
+            qset = (RegiocompetitieTeam
+                    .objects
+                    .filter(regiocompetitie__competitie=comp)
+                    .select_related('vereniging__regio__rayon'))
             aantal_teams_ag_nul = qset.filter(aanvangsgemiddelde__lt=0.001).count()
 
             if comp.afstand == '18':
@@ -177,7 +180,12 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         context['aantal_multiboog'] = aantal_sportersboog - context['aantal_sporters']
         context['aantal_zelfstandig'] = qset.filter(aangemeld_door=F('sporterboog__sporter__account')).count()
 
-        for sporter in Sporter.objects.select_related('bij_vereniging__regio').filter(is_actief_lid=True).exclude(bij_vereniging=None):
+        for sporter in (Sporter
+                        .objects
+                        .select_related('bij_vereniging__regio')
+                        .filter(is_actief_lid=True)
+                        .exclude(bij_vereniging=None)):
+
             regio_nr = sporter.bij_vereniging.regio.regio_nr
             if regio_nr >= 101:
                 aantal_leden_regio[regio_nr] += 1

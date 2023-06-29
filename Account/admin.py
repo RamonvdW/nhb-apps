@@ -46,7 +46,6 @@ class AccountAdmin(UserAdmin):
         return "\n".join([functie.beschrijving for functie in obj.functie_set.all()])
 
 
-
 class AccountVerzoekenTellerAdmin(admin.ModelAdmin):
 
     search_fields = ('account__username', 'account__unaccented_naam')

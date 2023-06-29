@@ -10,6 +10,7 @@ from django.urls import reverse
 from Plein.menu import menu_dynamics
 from BasisTypen.models import TemplateCompetitieIndivKlasse
 from NhbStructuur.models import NhbRegio
+from Sporter.models import Sporter
 
 
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
@@ -34,8 +35,8 @@ class InfoCompetitieView(TemplateView):
 
         account = self.request.user
         if account and account.is_authenticated:
-            if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.all()[0]
+            sporter = Sporter.objects.filter(account=account).first()
+            if sporter:
                 nhb_ver = sporter.bij_vereniging
                 if nhb_ver:
                     context['mijn_vereniging'] = nhb_ver

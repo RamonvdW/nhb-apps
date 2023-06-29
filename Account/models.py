@@ -96,9 +96,6 @@ class Account(AbstractUser):
     def volledige_naam(self):
         """ Geef de volledige naam (voornaam achternaam) van het account terug
             als beide niet ingevuld zijn, geef dan de username terug
-
-            Wordt ook gebruikt vanuit djangosaml2idp
-            in settings.py staat de referentie naar deze methode naam
         """
         if self.first_name or self.last_name:
             name = self.first_name + " " + self.last_name

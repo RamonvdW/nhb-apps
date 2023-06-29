@@ -77,7 +77,10 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.team_type.boog_typen.order_by('volgorde')]
+            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in (klasse
+                                                                            .team_type
+                                                                            .boog_typen
+                                                                            .order_by('volgorde'))]
             prev = groep
         # for
         return objs
@@ -314,9 +317,9 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
-                comp.beschrijving.replace(' competitie', '')),
-            (None, 'Klassegrenzen')
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Klassengrenzen')
         )
 
         menu_dynamics(self.request, context)

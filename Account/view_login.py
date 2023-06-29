@@ -56,12 +56,14 @@ class LoginView(TemplateView):
             # account met deze username bestaat niet
             # sta ook toe dat met het e-mailadres ingelogd wordt
             try:
-                account = Account.objects.get(bevestigde_email__iexact=login_naam)   # iexact = case insensitive volledige match
+                # iexact = case insensitive volledige match
+                account = Account.objects.get(bevestigde_email__iexact=login_naam)
             except Account.DoesNotExist:
                 # email is ook niet bekend
                 # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
                 # my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
-                # schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
+                # schrijf_in_logboek(None, 'Inloggen',
+                #       'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
                 pass
             except Account.MultipleObjectsReturned:
                 # kan niet kiezen tussen verschillende accounts
@@ -230,7 +232,8 @@ class LoginView(TemplateView):
 
             # gebruiker mag het nog een keer proberen
             if len(form.errors) == 0:
-                form.add_error(None, 'de combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+                form.add_error(None,
+                               'de combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
         # still here --> re-render with error message
         context = {

@@ -451,7 +451,7 @@ class UitslagenRayonTeamsView(TemplateView):
             else:
                 # geen beheerder, dus sporter
                 sporter = Sporter.objects.filter(account=account).first()
-                if sporter.is_actief_lid and sporter.bij_vereniging:
+                if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
                     toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
 
         # haal de planning erbij: team klasse --> match

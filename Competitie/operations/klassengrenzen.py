@@ -405,7 +405,7 @@ def bepaal_klassengrenzen_teams(comp):
 
 
 class KlasseBepaler(object):
-    """ deze klasse helpt met het bepalen van de CompetitieIndivKlasse voor een deelnemer """
+    """ deze klasse helpt met het kiezen van de CompetitieIndivKlasse voor een deelnemer """
 
     def __init__(self, comp):
         self.competitie = comp

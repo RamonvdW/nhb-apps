@@ -141,7 +141,8 @@ def receive_wachtwoord_vergeten(request, account):
     login(request, account)
 
     from_ip = get_safe_from_ip(request)
-    my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (from_ip, repr(account.username)))
+    my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (
+                        from_ip, repr(account.username)))
 
     # TODO: als WW vergeten via Account.nieuwe_email ging, dan kunnen we die als bevestigd markeren
 
@@ -163,7 +164,8 @@ def receive_wachtwoord_vergeten(request, account):
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Wachtwoord",
-                       activiteit="Automatische inlog op account %s vanaf IP %s" % (repr(account.get_account_full_name()), from_ip))
+                       activiteit="Automatische inlog op account %s vanaf IP %s" % (
+                                        repr(account.get_account_full_name()), from_ip))
 
     # zorg dat de rollen goed ingesteld staan
     rol_bepaal_beschikbare_rollen(request, account)
@@ -181,7 +183,8 @@ def auto_login_gast_account(request, account):
     login(request, account)
 
     from_ip = get_safe_from_ip(request)
-    my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (from_ip, repr(account.username)))
+    my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (
+                        from_ip, repr(account.username)))
 
     # we slaan de typische plug-ins over omdat we geen pagina of redirect kunnen doorgeven
 
@@ -194,7 +197,8 @@ def auto_login_gast_account(request, account):
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Login",
-                       activiteit="Automatische inlog op account %s vanaf IP %s" % (repr(account.get_account_full_name()), from_ip))
+                       activiteit="Automatische inlog op account %s vanaf IP %s" % (
+                                        repr(account.get_account_full_name()), from_ip))
 
     # zorg dat de rollen goed ingesteld staan
     rol_bepaal_beschikbare_rollen(request, account)
@@ -258,8 +262,10 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
                 schrijf_in_logboek(account=account,
                                    gebruikte_functie="Wachtwoord",
-                                   activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (from_ip, repr(account.username)))
-                my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (from_ip, repr(account.username)))
+                                   activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (
+                                                    from_ip, repr(account.username)))
+                my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (
+                                    from_ip, repr(account.username)))
 
         if not valid:
             context['foutmelding'] = errmsg

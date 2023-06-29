@@ -219,7 +219,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     font = ImageFont.truetype(settings.BONDSPAS_FONT, size=40)
     font_bold = ImageFont.truetype(settings.BONDSPAS_FONT_BOLD, size=45)
     color_black = (0, 0, 0)
-    color_grijs = (221, 217, 215)       # reverse engineered
+    # color_grijs = (221, 217, 215)       # reverse engineered
 
     # het grijze kader waarin de tekst moet komen
     # coördinaten: (0,0) = top-left
@@ -232,7 +232,7 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     # color_grijs = (200, 200, 200)
     # draw.rectangle(((grijze_kader_x1, grijze_kader_y1), (grijze_kader_x2, grijze_kader_y2)), fill=color_grijs)
 
-    witte_kader_x1 = 0
+    # witte_kader_x1 = 0
     witte_kader_x2 = width
     witte_kader_y1 = grijze_kader_y2 + 1
     witte_kader_y2 = witte_kader_y1 + 225
@@ -258,24 +258,28 @@ def maak_bondspas_image(lid_nr, jaar, regels):
     wa_id = regels[1][1]
     regels = regels[2:]
 
-    _, _, text_width, text_height = draw.textbbox((0, 0), lid_nr, font=font_bold)
+    _, _, text_width, text_height = draw.textbbox((0, 0),
+                                                  lid_nr, font=font_bold)
 
     wa_id_x = bondsnr_x = witte_kader_x1
+    wa_id_y = witte_kader_y_midden + 25
 
     if len(wa_id):
         bondsnr_y = witte_kader_y_midden - 25
-        wa_id_y = witte_kader_y_midden + 25
     else:
         bondsnr_y = witte_kader_y_midden
 
     # bondsnummer
     # text anchors: https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
     bondsnr_width = draw.textlength("Bondsnummer: ", font=font)
-    draw.text((bondsnr_x, bondsnr_y), "Bondsnummer: ", color_black, font=font, anchor="lb")
-    draw.text((bondsnr_x + bondsnr_width, bondsnr_y), lid_nr, color_black, font=font_bold, anchor="lb")
+    draw.text((bondsnr_x, bondsnr_y),
+              "Bondsnummer: ", color_black, font=font, anchor="lb")
+    draw.text((bondsnr_x + bondsnr_width, bondsnr_y),
+              lid_nr, color_black, font=font_bold, anchor="lb")
 
     if len(wa_id):
-        draw.text((wa_id_x, wa_id_y), "World Archery ID: " + wa_id, color_black, font=font, anchor="lt")
+        draw.text((wa_id_x, wa_id_y),
+                  "World Archery ID: " + wa_id, color_black, font=font, anchor="lt")
 
     # barcode
     # 480 plaatst deze midden boven de logo's van WA en IFAA
@@ -315,11 +319,14 @@ def maak_bondspas_image(lid_nr, jaar, regels):
         if header:
             header += ': '
             if wkl:
-                draw.text((grijze_kader_x1 + header_width - header_width_wkl + wkl_indent, next_y), header, color_black, font=font_bold)
+                draw.text((grijze_kader_x1 + header_width - header_width_wkl + wkl_indent, next_y),
+                          header, color_black, font=font_bold)
             else:
-                draw.text((grijze_kader_x1, next_y), header, color_black, font=font)
+                draw.text((grijze_kader_x1, next_y),
+                          header, color_black, font=font)
 
-        draw.text((grijze_kader_x1 + header_width, next_y), regel, color_black, font=font)
+        draw.text((grijze_kader_x1 + header_width, next_y),
+                  regel, color_black, font=font)
         next_y += text_spacing
 
         if header == "Wedstrijdklassen: ":

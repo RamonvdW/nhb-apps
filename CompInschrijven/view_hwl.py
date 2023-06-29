@@ -195,7 +195,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # sporterboog niet van deze vereniging
                 pass
             else:
-                # maak een kopie van het nhblid en maak het uniek voor dit boogtype
+                # maak een kopie van de sporter en maak het uniek voor dit boogtype
                 obj = copy.copy(sporter)
                 obj.afkorting = sporterboog.boogtype.afkorting
                 obj.boogtype = sporterboog.boogtype.beschrijving
@@ -303,7 +303,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 wedstrijden = (CompetitieMatch
                                .objects
                                .filter(pk__in=pks)
-                               .exclude(vereniging__isnull=True)        # voorkom wedstrijd niet toegekend aan vereniging
+                               .exclude(vereniging__isnull=True)      # voorkom wedstrijd niet toegekend aan vereniging
                                .select_related('vereniging')
                                .order_by('datum_wanneer',
                                          'tijd_begin_wedstrijd'))

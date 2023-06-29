@@ -12,7 +12,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.forms import OTPControleForm
 from Account.operations.maak_qrcode import qrcode_get
 from Account.operations.otp import otp_prepare_koppelen, otp_koppel_met_code
-from Functie.rol import rol_bepaal_beschikbare_rollen, rol_bepaal_beschikbare_rollen_opnieuw, rol_get_huidige_functie, rol_mag_wisselen
+from Functie.rol import (rol_bepaal_beschikbare_rollen, rol_bepaal_beschikbare_rollen_opnieuw,
+                         rol_get_huidige_functie, rol_mag_wisselen)
 from Plein.menu import menu_dynamics
 
 
@@ -31,6 +32,7 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.account = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -48,8 +50,8 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
         if not request.user.is_authenticated:
             return redirect('Plein:plein')
 
-        account = request.user
-        if account.otp_is_actief:
+        self.account = request.user
+        if self.account.otp_is_actief:
             # OTP is al actief, dus niet nodig om te koppelen
             return redirect('Plein:plein')
 
@@ -81,13 +83,11 @@ class OTPKoppelenStap2View(OTPKoppelenStapView):
         context['url_stap_1'] = reverse('Account:otp-koppelen-stap1')
         context['url_stap_3'] = reverse('Account:otp-koppelen-stap3')
 
-        account = self.request.user
-
         # haal de QR code op (en alles wat daar voor nodig is)
-        otp_prepare_koppelen(account)
-        context['qrcode'] = qrcode_get(account)
+        otp_prepare_koppelen(self.account)
+        context['qrcode'] = qrcode_get(self.account)
 
-        tmp = account.otp_code.lower()
+        tmp = self.account.otp_code.lower()
         context['otp_secret'] = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
 
         menu_dynamics(self.request, context)
@@ -115,16 +115,14 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Controleer knop.
         """
-        account = request.user
-
         form = OTPControleForm(request.POST)
         if form.is_valid():
             otp_code = form.cleaned_data.get('otp_code')
-            if otp_koppel_met_code(request, account, otp_code):
+            if otp_koppel_met_code(request, self.account, otp_code):
                 # gelukt
 
                 # propageer het succes zodat de gebruiker meteen aan de slag kan
-                rol_bepaal_beschikbare_rollen(request, account)
+                rol_bepaal_beschikbare_rollen(request, self.account)
 
                 # geef de succes pagina
                 context = dict()
