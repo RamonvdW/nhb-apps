@@ -58,7 +58,6 @@ class WedstrijdLocatie(models.Model):
     # alleen voor indoor: beschikbare banen
     banen_18m = models.PositiveSmallIntegerField(default=0)
     banen_25m = models.PositiveSmallIntegerField(default=0)
-    max_dt_per_baan = models.PositiveSmallIntegerField(default=4)       # FUTURE: obsolete
 
     # het maximum aantal sporters
     # (noodzakelijk voor als max_sporters != banen * 4)
