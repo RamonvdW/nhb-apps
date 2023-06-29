@@ -72,16 +72,16 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         return binnen_locatie, buiten_locatie, externe_locaties, ver
 
     @staticmethod
-    def _mag_wijzigen(nhbver, rol_nu, functie_nu):
+    def _mag_wijzigen(ver, rol_nu, functie_nu):
         """ Controleer of de huidige rol de instellingen van de accommodatie mag wijzigen """
         if functie_nu:
             if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
                 # HWL mag van zijn eigen vereniging wijzigen
-                if functie_nu.nhb_ver == nhbver:
+                if functie_nu.nhb_ver == ver:
                     return True
             elif rol_nu == Rollen.ROL_RCL:
                 # RCL mag van alle verenigingen in zijn regio de accommodatie instellingen wijzigen
-                if functie_nu.nhb_regio == nhbver.regio:
+                if functie_nu.nhb_regio == ver.regio:
                     return True
 
         return False
@@ -286,7 +286,8 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             data_25 = form.cleaned_data.get('max_sporters_25m')
             if data_18 is not None and data_25 is not None:
                 if binnen_locatie.max_sporters_18m != data_18 or binnen_locatie.max_sporters_25m != data_25:
-                    msgs.append("Max sporters 18m/25m aangepast van %s/%s naar %s/%s" % (binnen_locatie.max_sporters_18m, binnen_locatie.max_sporters_25m, data_18, data_25))
+                    msgs.append("Max sporters 18m/25m aangepast van %s/%s naar %s/%s" % (
+                                binnen_locatie.max_sporters_18m, binnen_locatie.max_sporters_25m, data_18, data_25))
                     binnen_locatie.max_sporters_18m = data_18
                     binnen_locatie.max_sporters_25m = data_25
 

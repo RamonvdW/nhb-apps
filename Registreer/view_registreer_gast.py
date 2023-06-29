@@ -456,7 +456,8 @@ class RegistreerGastVolgendeVraagView(View):
             gast.sporter = sporter
             gast.save(update_fields=['sporter'])
 
-    def _informeer_sec(self, gast):
+    @staticmethod
+    def _informeer_sec(gast):
 
         functie_sec = Functie.objects.get(rol='SEC', nhb_ver__ver_nr=settings.EXTERN_VER_NR)
 

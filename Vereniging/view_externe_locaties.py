@@ -180,11 +180,11 @@ class ExterneLocatieDetailsView(TemplateView):
         context['buiten_max_afstand'] = [nr for nr in range(30, 100+1, 10)]
 
         if not readonly:
-            context['url_opslaan'] = reverse('Vereniging:locatie-details',
-                                             kwargs={'ver_nr': ver.ver_nr,
-                                                     'locatie_pk': locatie.pk})
-
-            context['url_verwijder'] = context['url_opslaan']
+            url = reverse('Vereniging:locatie-details',
+                          kwargs={'ver_nr': ver.ver_nr,
+                                  'locatie_pk': locatie.pk})
+            context['url_opslaan'] = url
+            context['url_verwijder'] = url
 
         context['url_terug'] = reverse('Vereniging:externe-locaties',
                                        kwargs={'ver_nr': ver.ver_nr})
@@ -264,8 +264,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 banen = 0
             if locatie.banen_18m != banen:
-                activiteit = "Aanpassing aantal 18m banen van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, banen, locatie.banen_18m)
+                activiteit = "Aanpassing aantal 18m banen van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, banen, locatie.banen_18m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.banen_18m = banen
 
@@ -276,20 +276,10 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 banen = 0
             if locatie.banen_25m != banen:
-                activiteit = "Aanpassing aantal 25m banen van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, banen, locatie.banen_25m)
+                activiteit = "Aanpassing aantal 25m banen van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, banen, locatie.banen_25m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.banen_25m = banen
-
-            # FUTURE: remove when max_dt_per_baan has been removed
-            # max_dt = 3
-            # if request.POST.get('max_dt', '') == '4':
-            #     max_dt = 4
-            # if locatie.max_dt_per_baan != max_dt:
-            #     activiteit = "Aanpassing max DT per baan van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-            #                     locatie.naam, ver, max_dt, locatie.max_dt_per_baan)
-            #     schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
-            #     locatie.max_dt_per_baan = max_dt
 
             try:
                 sporters = int(request.POST.get('max_sporters_18m', 0))
@@ -298,8 +288,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 sporters = 0
             if locatie.max_sporters_18m != sporters:
-                activiteit = "Aanpassing maximum sporters 18m van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, sporters, locatie.max_sporters_18m)
+                activiteit = "Aanpassing maximum sporters 18m van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, sporters, locatie.max_sporters_18m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.max_sporters_18m = sporters
 
@@ -310,8 +300,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 sporters = 0
             if locatie.max_sporters_25m != sporters:
-                activiteit = "Aanpassing maximum sporters 25m van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, sporters, locatie.max_sporters_25m)
+                activiteit = "Aanpassing maximum sporters 25m van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, sporters, locatie.max_sporters_25m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.max_sporters_25m = sporters
 
@@ -332,8 +322,9 @@ class ExterneLocatieDetailsView(TemplateView):
                 banen = 0
 
             if max_afstand != locatie.buiten_max_afstand or banen != locatie.buiten_banen:
-                activiteit = "Aanpassing aantal outdoor banen van externe locatie %s van vereniging %s: naar %s x %s meter (was %s x %sm)" % (
-                                locatie.naam, ver,
+                activiteit = "Aanpassing aantal outdoor banen van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s: naar %s x %s meter (was %s x %sm)" % (
+                                ver,
                                 banen, max_afstand,
                                 locatie.buiten_banen, locatie.buiten_max_afstand)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -343,10 +334,11 @@ class ExterneLocatieDetailsView(TemplateView):
         data = request.POST.get('notities', '')
         data = data.replace('\r\n', '\n')
         if locatie.notities != data:
-            activiteit = "Aanpassing bijzonderheden van externe locatie %s van vereniging %s: %s (was %s)" % (
-                        locatie.naam, ver,
-                        repr(data.replace('\n', ' / ')),
-                        repr(locatie.notities.replace('\n', ' / ')))
+            activiteit = "Aanpassing bijzonderheden van externe locatie %s" % locatie.naam
+            activiteit += " van vereniging %s: %s (was %s)" % (
+                            ver,
+                            repr(data.replace('\n', ' / ')),
+                            repr(locatie.notities.replace('\n', ' / ')))
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
             locatie.notities = data
 

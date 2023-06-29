@@ -227,7 +227,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                     volgorde = self._functie_volgorde(functie)
 
                     if rol == Rollen.ROL_SEC:               # pragma: no cover
-                        # nergens in de hierarchie kan je vandaag wisselen naar de HWL rol
+                        # nergens in de hiërarchie kan je vandaag wisselen naar de HWL rol
                         kort = 'SEC'
                     elif rol == Rollen.ROL_HWL:
                         kort = 'HWL'

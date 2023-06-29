@@ -108,7 +108,10 @@ class GastRegistratie(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        return "%s [%s] %s: %s %s" % (self.aangemaakt.strftime('%Y-%m-%d %H:%M utc'), REGISTRATIE_FASE2STR[self.fase], self.lid_nr, self.voornaam, self.achternaam)
+        return "%s [%s] %s: %s %s" % (self.aangemaakt.strftime('%Y-%m-%d %H:%M utc'),
+                                      REGISTRATIE_FASE2STR[self.fase],
+                                      self.lid_nr,
+                                      self.voornaam, self.achternaam)
 
     objects = models.Manager()      # for the editor only
 

@@ -32,6 +32,7 @@ def maak_vereniging_extern(apps, _):
     ver_klas = apps.get_model('NhbStructuur', 'NhbVereniging')
     regio_klas = apps.get_model('NhbStructuur', 'NhbRegio')
     functie_klas = apps.get_model('Functie', 'Functie')
+    sec_klas = apps.get_model('Vereniging', 'Secretaris')
 
     # zoek regio 100 op
     regio100 = regio_klas.objects.get(regio_nr=100)
@@ -46,6 +47,9 @@ def maak_vereniging_extern(apps, _):
                 geen_wedstrijden=False,
                 contact_email=settings.EMAIL_BONDSBUREAU)
     ver.save()
+
+    # maak de Secretaris administratie aan voor deze vereniging
+    sec_klas(vereniging=ver).save()
 
     # maak de beheerders rol aan
     functie_klas(rol='SEC', beschrijving='Secretaris %s' % ver_nr, nhb_ver=ver).save()
@@ -64,6 +68,7 @@ class Migration(migrations.Migration):
         ('Account', 'm0025_merge_accountemail_2'),
         ('NhbStructuur', 'm0033_ver_is_extern'),
         ('Sporter', 'm0022_pas_code'),
+        ('Vereniging', 'm0001_initial'),
     ]
 
     # migratie functies

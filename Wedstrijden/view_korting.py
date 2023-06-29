@@ -60,7 +60,10 @@ class KortingenView(UserPassesTestMixin, TemplateView):
 
         for korting in kortingen:
             korting.voor_wie_str = '-'
-            korting.voor_wedstrijden_str = '\n'.join(korting.voor_wedstrijden.order_by('datum_begin', 'pk').values_list('titel', flat=True))
+            korting.voor_wedstrijden_str = '\n'.join(korting
+                                                     .voor_wedstrijden
+                                                     .order_by('datum_begin', 'pk')
+                                                     .values_list('titel', flat=True))
 
             if korting.soort == WEDSTRIJD_KORTING_SPORTER:
                 korting.icon_name = 'account_circle'
@@ -228,8 +231,9 @@ class WijzigKortingView(UserPassesTestMixin, View):
         # for
 
         # nodig voor de datum picker
+        # zorg dat de huidige datum weer gekozen kan worden
         context['now'] = now = timezone.now()
-        context['begin_jaar'] = min(now.year, korting.geldig_tot_en_met.year)   # zorg dat de huidige datum weer gekozen kan worden
+        context['begin_jaar'] = min(now.year, korting.geldig_tot_en_met.year)
         context['min_date'] = min(now.date(), korting.geldig_tot_en_met)
         context['max_date'] = datetime.date(now.year + 1, 12, 31)
 

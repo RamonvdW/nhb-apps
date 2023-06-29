@@ -220,7 +220,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         response = HttpResponse(content_type=CONTENT_TYPE_TSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.txt"'
 
-        # Ianseo supports a tab-separate file with specific column order, without headers
+        # Ianseo supports a tab-separated file with specific column order, without headers
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter="\t")       # tab separated fields
 
@@ -449,7 +449,6 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             # alleen van de eigen vereniging laten zien
-            ver = self.functie_nu.nhb_ver
             if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
                 raise Http404('Verkeerde vereniging')
 

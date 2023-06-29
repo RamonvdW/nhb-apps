@@ -32,7 +32,7 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
         raises AccountCreateError als:
             - het lidnummer niet valide is
             - het lidnummer niet bekend is in het CRM
-            - het ingevoerde emailadres niet overeen komt
+            - het ingevoerde e-mailadres niet overeen komt
             - er al een account bestaat
         raises SporterGeenEmail als:
             - voor de sporter geen e-mail bekend is
@@ -57,7 +57,8 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
 
     # vergelijk e-mailadres hoofdletter ongevoelig
     if email.lower() != sporter.email.lower():
-        raise AccountCreateError('de combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
+        raise AccountCreateError('de combinatie van bondsnummer en e-mailadres worden niet herkend.' +
+                                 ' Probeer het nog eens.')
 
     if not sporter.is_actief_lid or not sporter.bij_vereniging:
         raise SporterInactief()
@@ -69,7 +70,8 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
     sporter.account = account
     sporter.save()
 
-    # bij de volgende CRM import wordt dit account gekoppeld aan de SEC functie en wordt een e-mail gestuurd met instructies
+    # bij de volgende CRM import wordt dit account gekoppeld aan de SEC functie
+    # en wordt een e-mail gestuurd met instructies
 
     account_vraag_email_bevestiging(account, nhb_nummer=lid_nr_str, email=email)
 
@@ -119,19 +121,20 @@ class RegistreerNhbLidView(TemplateView):
 
         if form.is_valid():
             # compleetheid en wachtwoord sterkte worden gecontroleerd door het formulier
-            nhb_nummer = form.cleaned_data.get('nhb_nummer')
+            nummer = form.cleaned_data.get('nhb_nummer')
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
             from_ip = get_safe_from_ip(request)
 
             try:
-                sporter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord)
+                sporter_create_account_nhb(nummer, email, nieuw_wachtwoord)
 
             except SporterGeenEmail as exc:
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
-                                   activiteit='NHB lid %s heeft geen email adres.' % nhb_nummer)
-                my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (geen email)' % (from_ip, repr(nhb_nummer)))
+                                   activiteit='NHB lid %s heeft geen email adres.' % nummer)
+                my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (geen email)' % (
+                                    from_ip, repr(nummer)))
 
                 # redirect naar een pagina met een uitgebreider duidelijk bericht
                 ver = exc.sporter.bij_vereniging
@@ -158,20 +161,21 @@ class RegistreerNhbLidView(TemplateView):
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
                                    activiteit="Mislukt voor bondsnummer %s vanaf IP %s: %s" % (
-                                       repr(nhb_nummer), from_ip, str(exc)))
+                                       repr(nummer), from_ip, str(exc)))
                 my_logger.info('%s REGISTREER Mislukt voor bondsnummer %s met email %s (reden: %s)' % (
-                                from_ip, repr(nhb_nummer), repr(email), str(exc)))
+                                from_ip, repr(nummer), repr(email), str(exc)))
 
             except SporterInactief:
                 # lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
-                form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+                form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd.' +
+                                     ' Neem contact op met de secretaris van je vereniging.')
 
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
-                                   activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
+                                   activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nummer)
                 my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (inactief)' % (
-                                from_ip, repr(nhb_nummer)))
+                                  from_ip, repr(nummer)))
 
                 # FUTURE: redirect naar een pagina met een uitgebreider duidelijk bericht
 
@@ -180,11 +184,11 @@ class RegistreerNhbLidView(TemplateView):
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
                                    activiteit="Account aangemaakt voor bondsnummer %s vanaf IP %s" % (
-                                       repr(nhb_nummer), from_ip))
+                                       repr(nummer), from_ip))
                 my_logger.info('%s REGISTREER account aangemaakt voor bondsnummer %s' % (
-                                from_ip, repr(nhb_nummer)))
+                                from_ip, repr(nummer)))
 
-                context['login_naam'] = nhb_nummer
+                context['login_naam'] = nummer
                 context['partial_email'] = mailer_obfuscate_email(email)
                 return render(request, TEMPLATE_REGISTREER_AANGEMAAKT, context)
 

@@ -124,7 +124,10 @@ class WedstrijdDetailsView(TemplateView):
         if wedstrijd.is_ter_info:
             context['toon_inschrijven'] = False
         else:
-            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or (wedstrijd.extern_beheerd and wedstrijd.contact_website)
+            context['toon_inschrijven'] = (context['kan_aanmelden'] and
+                                           context['kan_inschrijven'] and
+                                           context['toon_sessies']) or (wedstrijd.extern_beheerd and
+                                                                        wedstrijd.contact_website)
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True

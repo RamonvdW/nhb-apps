@@ -77,8 +77,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         context['wed'] = wedstrijd
 
+        # zorg dat de huidige datum weer gekozen kan worden
         context['now'] = now = timezone.now()
-        context['begin_jaar'] = min(now.year, wedstrijd.datum_begin.year)     # zorg dat de huidige datum weer gekozen kan worden
+        context['begin_jaar'] = min(now.year, wedstrijd.datum_begin.year)
 
         context['min_date'] = min(datetime.date(now.year, now.month, now.day), wedstrijd.datum_begin)
         context['max_date'] = datetime.date(now.year + 1, 12, 31)

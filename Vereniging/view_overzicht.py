@@ -55,7 +55,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         else:
             context['toon_wedstrijden'] = self.rol_nu != Rollen.ROL_SEC
 
-        if self.functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
+        if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
                                                           kwargs={'ver_nr': ver.ver_nr})
 
@@ -165,12 +165,16 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
-                    if deelcomp.regio_organiseert_teamcompetitie and comp.fase_teams == 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
+                    if (deelcomp.regio_organiseert_teamcompetitie and
+                            comp.fase_teams == 'F' and
+                            1 <= deelcomp.huidige_team_ronde <= 7):
                         # team invallers opgeven
+                        tekst = "Invallers opgeven voor ronde %s van de regiocompetitie." % deelcomp.huidige_team_ronde
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
-                                    tekst="Invallers opgeven voor ronde %s van de regiocompetitie." % deelcomp.huidige_team_ronde,
-                                    url=reverse('CompLaagRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
+                                    tekst=tekst,
+                                    url=reverse('CompLaagRegio:teams-regio-invallers',
+                                                kwargs={'deelcomp_pk': deelcomp.pk}),
                                     icon='how_to_reg')
                         kaartjes.append(kaartje)
                     else:
@@ -179,7 +183,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'
-                            kaartje.url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+                            kaartje.url = reverse('CompLaagRegio:teams-regio',
+                                                  kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
                             if comp.fase_indiv < 'C':
                                 kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
@@ -208,7 +213,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams RK"
                             kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
-                            kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                            kaartje.url = reverse('CompLaagRayon:teams-rk',
+                                                  kwargs={'deelkamp_pk': deelkamp_rk.pk})
                             kaartje.icon = 'api'
                             # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
                             if vanaf_datum:
@@ -220,11 +226,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                 kaartje = SimpleNamespace()
                                 kaartje.titel = "Teams RK"
                                 kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen inzien."
-                                kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'deelkamp_pk': deelkamp_rk.pk})
+                                kaartje.url = reverse('CompLaagRayon:teams-rk',
+                                                      kwargs={'deelkamp_pk': deelkamp_rk.pk})
                                 kaartje.icon = 'api'
                                 kaartjes.append(kaartje)
-
-
             # for
             del deelkamp_rk
 
@@ -235,7 +240,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Ingeschreven"
                         kaartje.tekst = "Overzicht ingeschreven leden."
-                        kaartje.url = reverse('CompInschrijven:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.url = reverse('CompInschrijven:leden-ingeschreven',
+                                              kwargs={'deelcomp_pk': deelcomp.pk})
                         if comp.afstand == '18':
                             kaartje.img = static('plein/badge_nhb_indoor.png')
                         else:
@@ -247,7 +253,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
                         kaartje.tekst = 'Overzicht gekozen wedstrijden.'
-                        kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.url = reverse('CompLaagRegio:wie-schiet-waar',
+                                              kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         # if comp.fase_indiv < 'C':
                         #     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
@@ -260,7 +267,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                 titel="Uitslagenlijsten",
                                 tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
                                 icon='scoreboard',
-                                url=reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}))
+                                url=reverse('Competitie:overzicht',
+                                            kwargs={'comp_pk': comp.pk}))
                 kaartjes.append(kaartje)
         # for
 

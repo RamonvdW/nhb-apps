@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,7 @@ class SecretarisAdmin(admin.ModelAdmin):
 
     list_select_related = ('vereniging',)
 
-    auto_complete = ('vereniging', 'sporters')
+    filter_horizontal = ('sporters',)
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
