@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'materialize-new-134.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-135.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -52,8 +52,12 @@
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
                                 <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood" style="position:relative; z-index:2; margin-top:14px">
-                                    <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
-                                    {% if menu_mandje_aantal %}<span>{{ menu_mandje_aantal }}</span>{% endif %}
+                                    {% if menu_mandje_aantal %}
+                                        <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
+                                        <span>{{ menu_mandje_aantal }}</span>
+                                    {% else %}
+                                        <i class="notranslate material-icons-round" style="line-height:36px">shopping_cart</i>
+                                    {% endif %}
                                 </a>
                             </li>
                         {% endif %}

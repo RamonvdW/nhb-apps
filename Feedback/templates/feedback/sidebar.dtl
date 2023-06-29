@@ -24,7 +24,7 @@
 {% if menu_voornaam %}
 
     {% with request.path|slice:"1:-1"|truncatechars:100 as volledige_url %}
-        <div class="site-sidebar-box z-depth-1">
+        <div class="site-feedback-box z-depth-1">
             <div class="site-feedback">
                 <span>Wat vind je van deze pagina?</span>
                 <br>

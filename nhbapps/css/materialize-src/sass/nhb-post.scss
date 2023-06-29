@@ -459,19 +459,19 @@ input.table-filter {
     border-radius: 2px;
 }
 
-/* site feedback floater */
-.site-sidebar-box {
+/* feedback kader in de linker onderhoek */
+.site-feedback-box {
     width: 180px;
-    float: left;
-    text-align: center;
+    display: block;
+    text-align: center;         /* centreert inhoud van div */
     margin-top: 10px;
     margin-left: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 10px;        /* is ignored by Chrome in geval van float: left */
     border-radius: 5px;
     background-color: #fff;     /* wit */
 }
 
-/* de binnenkant van de feedback floater */
+/* de binnenkant van het feedback kader */
 .site-feedback {
     display: inline-block;
     font-size: 12px;
