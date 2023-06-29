@@ -130,6 +130,9 @@ class Sporter(models.Model):
     # is dit een erelid (voor vermelding op de bondspas)
     is_erelid = models.BooleanField(default=False)
 
+    # is dit een gast-account (minder minder mogelijkheden)?
+    is_gast = models.BooleanField(default=False)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus lid_nr eerst

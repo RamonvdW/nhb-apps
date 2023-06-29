@@ -252,13 +252,14 @@ def receive_bevestiging_gast_email(request, gast):
         gast.save(update_fields=['logboek'])
         raise Http404('Account aanmaken is onverwacht mislukt')
 
+    account.vraag_nieuw_wachtwoord = True
+    account.is_gast = True
+    account.save(update_fields=['vraag_nieuw_wachtwoord', 'is_gast'])
+
     gast.account = account
     gast.logboek += '[%s] Account is aangemaakt\n' % stamp_str
     gast.fase = REGISTRATIE_FASE_PASS
     gast.save(update_fields=['account', 'logboek', 'fase'])
-
-    account.vraag_nieuw_wachtwoord = True
-    account.save(update_fields=['vraag_nieuw_wachtwoord'])
 
     # stuur een e-mail met het bondsnummer
     # maak de e-mail aan
@@ -450,6 +451,7 @@ class RegistreerGastVolgendeVraagView(View):
                         sinds_datum=date_now,
                         bij_vereniging=ver_extern,
                         lid_tot_einde_jaar=date_now.year,
+                        is_gast=True,
                         account=account)
             sporter.save()
 

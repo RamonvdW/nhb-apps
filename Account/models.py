@@ -79,6 +79,9 @@ class Account(AbstractUser):
     optout_herinnering_taken = models.BooleanField(default=False)
     laatste_email_over_taken = models.DateTimeField(blank=True, null=True)
 
+    # is dit een gast-account (minder minder mogelijkheden)?
+    is_gast = models.BooleanField(default=False)
+
     REQUIRED_FIELDS = ['password']
 
     class Meta:

@@ -25,7 +25,7 @@ class AccountAdmin(UserAdmin):
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'unaccented_naam')}),
         (_('Email'), {'fields': ('email_is_bevestigd', 'bevestigde_email', 'nieuwe_email',
                                  'optout_nieuwe_taak', 'optout_herinnering_taken', 'laatste_email_over_taken')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_BB', 'is_staff', 'is_superuser', 'gekoppelde_functies')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_gast', 'is_BB', 'is_staff', 'is_superuser', 'gekoppelde_functies')}),
         (_('Beveiliging'), {'fields': ('password',
                                        'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller',
                                        'is_geblokkeerd_tot',
@@ -40,6 +40,8 @@ class AccountAdmin(UserAdmin):
 
     # velden om in te zoeken (in de lijst)
     search_fields = ('username', 'unaccented_naam', 'first_name', 'last_name', 'bevestigde_email', 'nieuwe_email')
+
+    ordering = ('-username',)       # nieuwste eerst
 
     @staticmethod
     def gekoppelde_functies(obj):     # pragma: no cover

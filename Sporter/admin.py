@@ -45,7 +45,7 @@ class HeeftAccountFilter(admin.SimpleListFilter):
 class SporterAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Sporter klasse """
 
-    ordering = ('lid_nr',)
+    ordering = ('-lid_nr',)         # nieuwste eerst
 
     search_fields = ('unaccented_naam', 'lid_nr', 'email')
 
