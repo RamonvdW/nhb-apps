@@ -16,7 +16,7 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, import van de BK uitslag """
 
-    # real_testfile_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-indiv.xlsx'
+    real_testfile_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-indiv.xlsx'
     real_testfile_indoor = 'CompLaagBond/management/testfiles/test_bk-indoor-indiv.xlsx'
 
     testdata = None
@@ -71,36 +71,22 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
     def setUp(self):
         pass
 
-    # def test_25m(self):
-    #     # bestand NOK
-    #     self.run_management_command('import_uitslag_rk_25m1pijl_indiv', 'bestand')
-    #     self.assertTrue('[ERROR] Kan het excel bestand niet openen')
-    #
-    #     f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl, '--dryrun')
-    #     # print('\nf1: %s' % f1.getvalue())
-    #     # print('\nf2: %s' % f2.getvalue())
-    #     self.assertTrue('[ERROR] Kan deelnemer niet bepalen voor regel 7' in f1.getvalue())
-    #     self.assertTrue('[ERROR] Score is niet aflopend op regel 11' in f1.getvalue())
-    #     # self.assertTrue('[ERROR] Probleem met 10/9/8 count op regel 13' in f1.getvalue())
-    #     self.assertTrue('[ERROR] Probleem met scores op regel 16' in f1.getvalue())
-    #     self.assertTrue('[ERROR] Geen RK deelnemer op regel 17: 123456' in f1.getvalue())
-    #     self.assertTrue('[WARNING] Regel 14 wordt overgeslagen (geen scores)' in f2.getvalue())
-    #
-    #     # echte import
-    #     self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl)
-    #
-    #     # geef de dupe-check iets om op te reageren
-    #     deelnemer = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand=25,
-    #                                                      sporterboog__sporter__lid_nr=301834)
-    #     deelnemer.result_counts = 'test'
-    #     deelnemer.save(update_fields=['result_counts'])
-    #
-    #     # tweede import zodat dupe check gedaan wordt
-    #     f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_indiv', self.real_testfile_25m1pijl)
-    #     # print('\nf1: %s' % f1.getvalue())
-    #     # print('\nf2: %s' % f2.getvalue())
-    #     self.assertTrue(' heeft al andere resultaten!' in f1.getvalue())
-    #     self.assertTrue('[301834] ' in f1.getvalue())
+    def test_25m(self):
+        # bestand NOK
+        self.run_management_command('import_uitslag_bk_25m1pijl_indiv', 'bestand')
+        self.assertTrue('[ERROR] Kan het excel bestand niet openen')
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv', self.real_testfile_25m1pijl, '--dryrun', '--verbose')
+        # print('\nf1: %s' % f1.getvalue())
+        # print('\nf2: %s' % f2.getvalue())
+        self.assertTrue('[ERROR] Probleem met scores op regel 26' in f1.getvalue())
+        self.assertTrue('[ERROR] Geen BK deelnemer op regel 24: 123456' in f1.getvalue())
+        self.assertTrue('[ERROR] Te hoge scores op regel 22: 251' in f1.getvalue())
+
+        # echte import
+        self.run_management_command('import_uitslag_bk_25m1pijl_indiv', self.real_testfile_25m1pijl)
+        # print('\nf1: %s' % f1.getvalue())
+        # print('\nf2: %s' % f2.getvalue())
 
     def test_18m(self):
         # file NOK
