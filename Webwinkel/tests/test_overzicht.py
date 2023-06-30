@@ -108,11 +108,15 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_webwinkel_overzicht)
-        self.assert403(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_webwinkel_product % self.product.pk)
-        self.assert403(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
 
         self.assertTrue(str(self.foto2) != '')
         self.assertTrue(str(self.product3) != '')

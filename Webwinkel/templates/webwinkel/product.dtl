@@ -87,46 +87,51 @@
     </script>
 
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Bestellen</h4>
-        </div>
-    </div>
+    {% if url_toevoegen %}
 
-
-    <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
-        <div class="col s12 m8 offset-m2 l6 offset-l3">
-
-            <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
-                <div class="form-padding">
-                    <form action="{{ url_toevoegen }}" method="post">
-                        {% csrf_token %}
-
-                        <div class="input-field">
-                            <div class="select-wrapper">
-                                <select name="aantal">
-                                    {% for aantal, msg in product.sel_opts %}
-                                        <option value="{{ aantal }}">{{ msg }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <label class="black-text">Kies aantal</label>
-                        </div>
-
-                        <!-- button -->
-                        <p class="center">
-                            <button class="btn-nhb-rood">Leg in mijn mandje</button>
-                        </p>
-
-                    </form>
-                </div>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Bestellen</h4>
             </div>
-
         </div>
-    </div>
+
+
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s12 m8 offset-m2 l6 offset-l3">
+
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div class="form-padding">
+                        <form action="{{ url_toevoegen }}" method="post">
+                            {% csrf_token %}
+
+                            <div class="input-field">
+                                <div class="select-wrapper">
+                                    <select name="aantal">
+                                        {% for aantal, msg in product.sel_opts %}
+                                            <option value="{{ aantal }}">{{ msg }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <label class="black-text">Kies aantal</label>
+                            </div>
+
+                            <!-- button -->
+                            <p class="center">
+                                <button class="btn-nhb-rood">Leg in mijn mandje</button>
+                            </p>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    {% endif %}
+
 
     <!-- witruimte -->
     <div class="row center">
@@ -164,6 +169,27 @@
             </table>
         </div>
     </div>
+
+
+    {% if not url_toevoegen %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Bestellen</h4>
+            </div>
+        </div>
+
+        <!-- rood bordje -->
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                    <p>Je moet lid zijn bij de NHB om een bestelling te kunnen plaatsen.</p>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="webwinkel-product" %}
 

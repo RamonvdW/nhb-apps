@@ -15,6 +15,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Plein.menu import menu_dynamics
+from Sporter.models import Sporter
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
 
@@ -23,18 +24,12 @@ TEMPLATE_WEBWINKEL_PRODUCT = 'webwinkel/product.dtl'
 TEMPLATE_WEBWINKEL_TOEGEVOEGD_AAN_MANDJE = 'webwinkel/toegevoegd-aan-mandje.dtl'
 
 
-class OverzichtView(UserPassesTestMixin, TemplateView):
+class OverzichtView(TemplateView):
 
     """ Via deze view laten we alle producten zien als kaartjes """
 
     # class variables shared by all instances
     template_name = TEMPLATE_WEBWINKEL_OVERZICHT
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.request.user.is_authenticated
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -76,18 +71,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class ProductView(UserPassesTestMixin, TemplateView):
+class ProductView(TemplateView):
 
     """ Via deze view kan 1 product ingezien en besteld worden """
 
     # class variables shared by all instances
     template_name = TEMPLATE_WEBWINKEL_PRODUCT
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.request.user.is_authenticated
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -155,7 +144,9 @@ class ProductView(UserPassesTestMixin, TemplateView):
             context['heeft_fotos'] = True
         # for
 
-        context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+        account = self.request.user
+        if account.is_authenticated and not account.is_gast:
+            context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
 
         context['menu_toon_mandje'] = True
 
@@ -168,6 +159,10 @@ class ProductView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+
+        account = self.request.user
+        if not account.is_authenticated or account.is_gast:
+            raise Http404('Geen toegang')
 
         try:
             product_pk = kwargs['product_pk'][:6]           # afkappen voor de veiligheid
