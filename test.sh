@@ -30,7 +30,7 @@ COV_INCLUDE_3RD_PARTY=""
 
 PYCOV=""
 PYCOV="-m coverage run --append --branch"       # --pylib
-[ ! -z "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
+[ -n "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
 
 export PYTHONDONTWRITEBYTECODE=1
 
@@ -39,7 +39,8 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # kill the http simulator if still running in the background
 # -f check entire commandline program name is python and does not match
 pgrep -f websim > /dev/null
-if [ $? -eq 0 ]
+RES=$?
+if [ $RES -eq 0 ]
 then
     echo "[WARNING] simulators found running - cleaning up now"
     pkill -f websim
@@ -89,7 +90,7 @@ fi
 
 echo "[INFO] Provided  arguments: $ARGS"
 # convert a path to a test file into a test case
-ARGS=${ARGS//\//.}    # replace all (//) occurences of / with .
+ARGS=${ARGS//\//.}    # replace all (//) occurrences of / with .
 ARGS=${ARGS/.py/}   # string .py at the end
 echo "[INFO] Converted arguments: $ARGS"
 
@@ -117,7 +118,7 @@ else
     echo "[INFO] Focus set to $FOCUS"
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
-    [ ! -z "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
+    [ -n "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
 fi
 
 # echo "[DEBUG] FOCUS=$FOCUS, FOCUS_SPECIFIC_TEST=$FOCUS_SPECIFIC_TEST"
@@ -148,7 +149,7 @@ then
     sudo -u postgres dropdb --if-exists test_data3
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
 
-    # add coverage with nodebug
+    # add coverage with no-debug
     python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
@@ -166,14 +167,16 @@ PID_WEBSIM2=$!
 # check all websim programs have started properly
 sleep 0.5               # give python some time to load everything
 kill -0 $PID_WEBSIM1    # check the simulator is running
-if [ $? -ne 0 ]
+RES=$?
+if [ $RES -ne 0 ]
 then
     echo "[ERROR] Mail transport service simulator failed to start"
     exit
 fi
 
 kill -0 $PID_WEBSIM2    # check the simulator is running
-if [ $? -ne 0 ]
+RES=$?
+if [ $RES -ne 0 ]
 then
     echo "[ERROR] Betaal service simulator failed to start"
     exit
@@ -197,8 +200,8 @@ echo "[INFO] Finished main test run" >>"$LOG"
 # stop showing the additions to the logfile, because the rest is less interesting
 # use bash construct to prevent the Terminated message on the console
 sleep 0.1
-kill $PID_TAIL
-wait $PID_TAIL 2>/dev/null
+kill "$PID_TAIL"
+wait "$PID_TAIL" 2>/dev/null
 
 # launch log in editor
 [ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
@@ -212,7 +215,7 @@ then
         then
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-            python3 $PY_OPTS -u $PYCOV ./manage.py help $cmd &>>"$LOG"
+            python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
         fi
     done
     echo
@@ -221,12 +224,12 @@ fi
 if [ $RES -eq 0 ] && [ $# -eq 0 ]
 then
     echo "[INFO] Running help for each management command"
-    for cmd_file in $(ls */management/commands/*py | sed 's/\.py$//g');
+    for cmd_file in $(find -- */management/commands -name \*py | sed 's/\.py$//g');
     do
-        cmd=$(basename $cmd_file)
+        cmd=$(basename "$cmd_file")
         echo -n '.'
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-        python3 $PY_OPTS -u $PYCOV ./manage.py help $cmd &>>"$LOG"
+        python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
     done
     echo
 fi
@@ -252,7 +255,7 @@ then
     # delete old coverage report
     rm -rf "$REPORT_DIR" &>>"$LOG"
 
-    if [ -z "$FOCUS" -o $FORCE_FULL_COV -ne 0 ]
+    if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
         python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
         res=$?
@@ -264,7 +267,7 @@ then
             COVERAGE_RED=1
         fi
     else
-        [ ! -z "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
+        [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
         python3 -m coverage report --precision=$PRECISION $COV_INCLUDE $OMIT
         python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
     fi
@@ -294,7 +297,8 @@ then
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
     read -t 5
-    if [ $? -ne 0 ]
+    RES=$?
+    if [ $RES -ne 0 ]
     then
         # automatically abort
         echo "^C"
