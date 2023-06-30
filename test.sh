@@ -129,9 +129,6 @@ then
     python3 $PY_OPTS ./manage.py check --tag admin --tag models || exit $?
 fi
 
-# set high performance
-#sudo cpupower frequency-set --governor performance > /dev/null
-
 ABORTED=0
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
@@ -181,6 +178,9 @@ then
     echo "[ERROR] Betaal service simulator failed to start"
     exit
 fi
+
+# set high performance
+powerprofilesctl set performance
 
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
@@ -275,7 +275,7 @@ then
 fi
 
 # set normal performance
-#sudo cpupower frequency-set --governor schedutil > /dev/null
+powerprofilesctl set balanced
 
 if [ $COVERAGE_RED -ne 0 ]
 then
