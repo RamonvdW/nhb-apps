@@ -16,8 +16,9 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, import van de BK uitslag """
 
-    real_testfile_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-indiv.xlsx'
-    real_testfile_indoor = 'CompLaagBond/management/testfiles/test_bk-indoor-indiv.xlsx'
+    real_testfile_excel_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-indiv.xlsx'
+    real_testfile_excel_indoor = 'CompLaagBond/management/testfiles/test_bk-indoor-indiv.xlsx'
+    real_testfile_html_25m1pijl = 'CompLaagBond/management/testfiles/ianseo_html_25m1pijl_indiv.txt'
 
     testdata = None
     rayon_nr = 3
@@ -71,12 +72,14 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
     def setUp(self):
         pass
 
-    def test_25m(self):
+    def test_excel_25m(self):
         # bestand NOK
-        self.run_management_command('import_uitslag_bk_25m1pijl_indiv', 'bestand')
-        self.assertTrue('[ERROR] Kan het excel bestand niet openen')
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv', 'bestand')
+        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv', self.real_testfile_25m1pijl, '--dryrun', '--verbose')
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv',
+                                             self.real_testfile_excel_25m1pijl,
+                                             '--dryrun', '--verbose')
         # print('\nf1: %s' % f1.getvalue())
         # print('\nf2: %s' % f2.getvalue())
         self.assertTrue('[ERROR] Probleem met scores op regel 26' in f1.getvalue())
@@ -84,16 +87,19 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] Te hoge scores op regel 22: 251' in f1.getvalue())
 
         # echte import
-        self.run_management_command('import_uitslag_bk_25m1pijl_indiv', self.real_testfile_25m1pijl)
+        self.run_management_command('import_uitslag_bk_25m1pijl_indiv',
+                                    self.real_testfile_excel_25m1pijl)
         # print('\nf1: %s' % f1.getvalue())
         # print('\nf2: %s' % f2.getvalue())
 
-    def test_18m(self):
+    def test_excel_18m(self):
         # file NOK
-        self.run_management_command('import_uitslag_bk_indoor_indiv', 'bestand')
-        self.assertTrue('[ERROR] Kan het excel bestand niet openen')
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', 'bestand')
+        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', self.real_testfile_indoor, '--dryrun', '--verbose')
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv',
+                                             self.real_testfile_excel_indoor,
+                                             '--dryrun', '--verbose')
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -104,7 +110,7 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Regel 26 wordt overgeslagen (geen scores)" in f2.getvalue())
         self.assertTrue("Volgorde=1, Rank=1, Q-scores=204, 228, deelnemer=[301849]" in f2.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', self.real_testfile_indoor)
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', self.real_testfile_excel_indoor)
         _ = (f1, f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
@@ -115,5 +121,20 @@ class TestCompLaagBondCliImportUitslagBkIndiv(E2EHelpers, TestCase):
         self.assertEqual(kampioen.result_score_2, 228)
         self.assertEqual(kampioen.result_counts, '')        # alleen voor 25m1pijl
 
+    def test_ianseo_html_25m(self):
+        # bestand NOK
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html', 'bestand')
+        self.assertTrue('[ERROR] Kan het html bestand niet openen' in f1.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html',
+                                             self.real_testfile_html_25m1pijl,
+                                             '--dryrun', '--verbose')
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html',
+                                             self.real_testfile_html_25m1pijl)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
 
 # end of file

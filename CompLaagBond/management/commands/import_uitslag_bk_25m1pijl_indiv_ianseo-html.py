@@ -49,9 +49,10 @@ class Command(BaseCommand):
     def _read_html(self, fname):
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
         try:
-            data = open(fname).read()
+            with open(fname) as f:
+                data = f.read()
         except OSError as exc:
-            self.stderr.write('[ERROR] Kan het  bestand niet openen (%s)' % str(exc))
+            self.stderr.write('[ERROR] Kan het html bestand niet openen (%s)' % str(exc))
             return
 
         rank_doorlopend = 0

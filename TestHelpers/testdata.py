@@ -1538,7 +1538,7 @@ class TestData(object):
                                 vereniging=ver,
                                 volg_nr=next_nr,
                                 team_type=teamtype,
-                                team_naam='rk-%s-%s-%s' % (ver_nr, next_nr, afkorting),
+                                team_naam='team-%s-%s-%s' % (ver_nr, next_nr, afkorting),
                                 # team_klasse wordt later bepaald door de BKO
                                 aanvangsgemiddelde=team_ag)
                     if zet_klasse:
@@ -1696,7 +1696,7 @@ class TestData(object):
         bk_deelnemers.extend(nieuwe_deelnemers)
 
     def maak_bk_teams(self, afstand):
-        """ Laat BK teams doorstromen naar de BK """
+        """ Laat RK teams doorstromen naar de BK """
 
         if afstand == 18:
             deelkamp_bk = self.deelkamp18_bk
