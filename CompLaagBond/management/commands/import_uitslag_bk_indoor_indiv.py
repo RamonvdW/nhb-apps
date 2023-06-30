@@ -450,15 +450,23 @@ class Command(BaseCommand):
                 sort_scores.append(tup)
         # for
         sort_scores.sort(reverse=True)  # hoogste eerst
-        for _, _, _, deelnemer in sort_scores:
-            deelnemer.result_rank = result
-            deelnemer.result_volgorde = result
-            result += 1
+        rank_doorlopend = result
+        rank = rank_doorlopend
+        prev_totaal = -1
+        for totaal, _, _, deelnemer in sort_scores:
+            if totaal != prev_totaal:
+                rank = rank_doorlopend
+            # else: zelfde score, zelfde rank
+            deelnemer.result_rank = rank
+            deelnemer.result_volgorde = rank_doorlopend
+            rank_doorlopend += 1
+            prev_totaal = totaal
             if not self.dryrun:
                 deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
         # for
 
     def _vind_finales_blad(self, prg):
+        ws = None
         max_finalisten = 0
 
         for blad_naam, col in (("Finales 16", "X"), ("Finales 8", "R"), ("Finales 4", "L")):
