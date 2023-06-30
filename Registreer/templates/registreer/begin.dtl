@@ -15,7 +15,9 @@
         <div class="col s12">
             <h3 class="page-banner">Account aanmaken</h3>
             <p>NHB leden kunnen een account aanmaken met hun bondsnummer en het e-mailadres dat bekend is bij de NHB.</p>
-            <p>Nog geen lid? Met een gast-account kun je begrensd gebruik maken deze site.</p>
+            {% if gast_is_open %}
+                <p>Nog geen lid? Met een gast-account kun je begrensd gebruik maken deze site.</p>
+            {% endif %}
         </div>
     </div>
 
