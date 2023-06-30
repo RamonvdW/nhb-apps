@@ -304,6 +304,8 @@ class TestPlein(E2EHelpers, TestCase):
 
         lid_nr = 800001
         account = self.e2e_create_account(str(lid_nr), 'ext@test.com', 'Ext van de Ern')
+        account.is_gast = True
+        account.save(update_fields=['is_gast'])
         gast = GastRegistratie(
                     lid_nr=lid_nr,
                     voornaam='Ext',
