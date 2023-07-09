@@ -59,7 +59,7 @@ OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
 
 class Command(BaseCommand):
 
-    help = "Importeer een JSON file met data uit het CRM systeem van de KHSN"
+    help = "Importeer een JSON file met data uit het CRM systeem van de bond"
 
     def __init__(self):
         super().__init__()

@@ -15,7 +15,7 @@ from django.core.management.base import BaseCommand
 from BasisTypen.definities import GESLACHT_ANDERS
 from Sporter.models import Sporter, get_sporter_voorkeuren
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
-                                      bereken_leeftijdsklasse_nhb,
+                                      bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
 from reportlab.pdfgen import canvas
 from reportlab.lib import pagesizes, colors
@@ -50,11 +50,11 @@ class Command(BaseCommand):     # pragma: no cover
             # geslacht M/V of
             # geslacht X + keuze voor M/V gemaakt
             wedstrijdgeslacht = voorkeur.wedstrijd_geslacht
-            wedstrijdgeslacht_nhb = voorkeur.wedstrijd_geslacht
+            wedstrijdgeslacht_khsn = voorkeur.wedstrijd_geslacht
         else:
             # geslacht X, geen keuze gemaakt --> neem mannen
             wedstrijdgeslacht = 'M'
-            wedstrijdgeslacht_nhb = GESLACHT_ANDERS
+            wedstrijdgeslacht_khsn = GESLACHT_ANDERS
 
         geboorte_jaar = sporter.geboorte_datum.year
         naam_str = sporter.volledige_naam()
@@ -62,13 +62,13 @@ class Command(BaseCommand):     # pragma: no cover
 
         lkl_wa = bereken_leeftijdsklasse_wa(wedstrijdleeftijd_wa, wedstrijdgeslacht)
 
-        lkl_nhb = bereken_leeftijdsklasse_nhb(wedstrijdleeftijd_wa, wedstrijdgeslacht_nhb)
+        lkl_khsn = bereken_leeftijdsklasse_khsn(wedstrijdleeftijd_wa, wedstrijdgeslacht_khsn)
 
         lkl_ifaa_1 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_voor_verjaardag, wedstrijdgeslacht)
         lkl_ifaa_2 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_vanaf_verjaardag, wedstrijdgeslacht)
 
         c = canvas.Canvas(pdf_naam, pagesize=pagesizes.A6)
-        c.setAuthor("de Nederlandse Handboog Bonds (NHB) - www.handboogsport.nl")
+        c.setAuthor("Koninklijke HandboogSport Nederland (KHSN) - www.handboogsport.nl")
         c.setTitle("Bondspas %s" % jaar)
         c.setSubject("Bondspas %s voor lid %s" % (jaar, sporter.lid_nr))
         c.setCreator("%s - %s" % (settings.AFSCHRIFT_SITE_NAAM, settings.AFSCHRIFT_SITE_URL))
@@ -83,8 +83,8 @@ class Command(BaseCommand):     # pragma: no cover
         regels.append("Geboren: %s" % geboren_str)
         regels.append("WA wedstrijden: %s" % lkl_wa)
 
-        if lkl_nhb != lkl_wa:
-            regels.append("NHB wedstrijden: %s" % lkl_nhb)
+        if lkl_khsn != lkl_wa:
+            regels.append("KHSN wedstrijden: %s" % lkl_khsn)
 
         if lkl_ifaa_1 == lkl_ifaa_2:
             regels.append("IFAA wedstrijden: %s" % lkl_ifaa_1)

@@ -104,6 +104,11 @@ class OTPControleView(TemplateView):
         context = dict()
         context['form'] = form
 
+        # de otpauth string bevat de issuer name
+        # laat deze terug komen in de pagina titel
+        # dan laat google authenticator automatisch de passende entries zien
+        context['site_name'] = settings.OTP_ISSUER_NAME
+
         context['kruimels'] = (
             (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
             (None, 'Controle tweede factor')
@@ -150,6 +155,17 @@ class OTPControleView(TemplateView):
             # de code verandert sneller dan een brute-force aan kan, dus niet nodig om te blokkeren
 
         # still here --> re-render with error message
+
+        # de otpauth string bevat de issuer name
+        # laat deze terug komen in de pagina titel
+        # dan laat google authenticator automatisch de passende entries zien
+        context['site_name'] = settings.OTP_ISSUER_NAME
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Controle tweede factor')
+        )
+
         menu_dynamics(request, context)
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
