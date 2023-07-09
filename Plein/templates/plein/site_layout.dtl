@@ -41,8 +41,8 @@
             <nav class="nhb-grijs">
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
-                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
-                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="50" width="213" alt="KHSN logo" style="z-index:1">
+                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:1px; z-index:1">
+                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="62" width="264" alt="KHSN logo">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->
@@ -81,7 +81,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round nhb-rood-text">build</i>Admin site</a>
+                                <i class="notranslate material-icons-round nhb-blauw-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
 
@@ -114,7 +114,7 @@
 
             <!-- screen-size indicator labels -->
             {% if menu_toon_schermgrootte %}
-                <div style="position: fixed; left: 350px; top: 2px; font-size:10px">
+                <div style="position: fixed; left: 250px; top: 2px; font-size:10px">
                     <span class="hide-unless-small">Small</span>
                     <span class="hide-unless-medium">Medium</span>
                     <span class="hide-unless-large">Large</span>
@@ -150,7 +150,9 @@
             {% endblock %}
 
             <!-- echt pagina komt hier, vanuit de template -->
-            {% block pagina %}{% endblock %}
+            <main>
+                {% block pagina %}{% endblock %}
+            </main>
         </div>
 
         <script src="{% static 'materialize-new-13_min.js' %}"></script>

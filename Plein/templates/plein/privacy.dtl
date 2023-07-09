@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2022 Ramon van der Winkel.
+                Copyright (c) 2019-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Privacy<wbr>verklaring</h3>
-            <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan<br>de Nederlandse Handboog Bond via e-mail: <code>{{ email_bb }}</code></p>
+            <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan<br>de Koninklijke Handboogsport Nederland via e-mail: <code>{{ email_bb }}</code></p>
         </div>
     </div>
 
