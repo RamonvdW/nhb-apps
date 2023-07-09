@@ -99,7 +99,7 @@
                                             <input type="checkbox" class="filled-in" name="wil_in_team">
                                             <span class="black-text">Ik heb interesse om met een team te schieten</span>
                                         </label>
-                                        <p><i>Als je hier voor kiest dan kan jouw vereniging je in een team plaatsen.</i></p>
+                                        <p><i>Als je hier voor kiest dan kan jouw vereniging je in een team plaatsen tijdens de regiocompetitie.</i></p>
                                     </td>
                                 </tr>
                             {% endif %}
@@ -108,7 +108,7 @@
                                 <td>Kies of je na de regiocompetitie ook mee wilt doen aan de Rayonkampioenschappen:<br><br>
                                     <label style="margin-left: 20px">
                                         <input type="checkbox" class="filled-in" name="geen_rk">
-                                        <span class="black-text">Ik meld me alvast af voor de Rayonkampioenschappen</span>
+                                        <span class="black-text">Ik meld me alvast <b>af</b> voor de Rayonkampioenschappen</span>
                                     </label>
                                 </td>
                             </tr>
