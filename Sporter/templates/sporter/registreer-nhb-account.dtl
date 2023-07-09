@@ -15,7 +15,7 @@
         <div class="col s12">
             <h3 class="page-banner">Account aanmaken</h3>
             <p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
-            <p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mailadres bekend is bij de NHB.</p>
+            <p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mailadres bekend is bij de KHSN.</p>
         </div>
     </div>
 
@@ -69,7 +69,7 @@
     <div class="row-nhb-blauw">
         <div class="col s12 l10 offset-l1">
             <div class="white" style="padding:10px">
-                <p>Gebruik het e-mailadres wat bekend is bij de NHB. Tip: hier is je digitale bondspas heen gestuurd.</p>
+                <p>Gebruik het e-mailadres wat bekend is bij de KHSN. Tip: hier is je digitale bondspas heen gestuurd.</p>
                 <p>Om veiligheidsredenen is er geen manier om je e-mailadres op te vragen.</p>
                 <p>De secretaris van je handboogvereniging kan je verder helpen.</p>
             </div>

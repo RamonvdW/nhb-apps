@@ -42,19 +42,19 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
         # deze conversie beschermd ook tegen gevaarlijke invoer
         lid_nr = int(lid_nr_str)
     except ValueError:
-        raise AccountCreateError('Onbekend NHB nummer')
+        raise AccountCreateError('Onbekend bondsnummer')
 
     try:
         sporter = Sporter.objects.get(lid_nr=lid_nr)
     except Sporter.DoesNotExist:
-        raise AccountCreateError('Onbekend NHB nummer')
+        raise AccountCreateError('Onbekend bondsnummer')
 
     if not mailer_email_is_valide(sporter.email):
         raise SporterGeenEmail(sporter)
 
     # vergelijk e-mailadres hoofdletter ongevoelig
     if email.lower() != sporter.email.lower():
-        raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
+        raise AccountCreateError('De combinatie van bondsnummer en email worden niet herkend. Probeer het nog eens.')
 
     if not sporter.is_actief_lid or not sporter.bij_vereniging:
         raise SporterInactief()
@@ -91,9 +91,9 @@ class RegistreerNhbNummerView(TemplateView):
                 sporter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord)
             except SporterGeenEmail as exc:
                 schrijf_in_logboek(account=None,
-                                   gebruikte_functie="Registreer met NHB nummer",
-                                   activiteit='NHB lid %s heeft geen email adres.' % nhb_nummer)
-                my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (geen email)' % (from_ip, repr(nhb_nummer)))
+                                   gebruikte_functie="Registreer met bondsnummer",
+                                   activiteit='Lid %s heeft geen email adres.' % nhb_nummer)
+                my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (geen email)' % (from_ip, repr(nhb_nummer)))
 
                 # redirect naar een pagina met een uitgebreider duidelijk bericht
                 context = {'sec_email': '',
@@ -121,23 +121,23 @@ class RegistreerNhbNummerView(TemplateView):
 
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
-                                   gebruikte_functie="Registreer met NHB nummer",
+                                   gebruikte_functie="Registreer met bondsnummer",
                                    activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
-                my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
+                my_logger.info('%s REGISTREER Mislukt voor bondsnummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
             except SporterInactief:
                 # lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
                 schrijf_in_logboek(account=None,
-                                   gebruikte_functie="Registreer met NHB nummer",
-                                   activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
-                form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
-                my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (inactief)' % (from_ip, repr(nhb_nummer)))
+                                   gebruikte_functie="Registreer met bondsnummer",
+                                   activiteit='Lid %s is inactief (geblokkeerd van gebruik KHSN diensten).' % nhb_nummer)
+                form.add_error(None, 'Gebruik van KHSN diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+                my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (inactief)' % (from_ip, repr(nhb_nummer)))
                 # FUTURE: redirect naar een pagina met een uitgebreider duidelijk bericht
             else:
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
-                                   gebruikte_functie="Registreer met NHB nummer",
-                                   activiteit="Account aangemaakt voor NHB nummer %s vanaf IP %s" % (repr(nhb_nummer), from_ip))
-                my_logger.info('%s REGISTREER account aangemaakt voor NHB nummer %s' % (from_ip, repr(nhb_nummer)))
+                                   gebruikte_functie="Registreer met bondsnummer",
+                                   activiteit="Account aangemaakt voor bondsnummer %s vanaf IP %s" % (repr(nhb_nummer), from_ip))
+                my_logger.info('%s REGISTREER account aangemaakt voor bondsnummer %s' % (from_ip, repr(nhb_nummer)))
 
                 request.session['login_naam'] = nhb_nummer
                 request.session['partial_email'] = mailer_obfuscate_email(email)

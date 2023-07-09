@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" ondersteuning voor de leeftijdsklassen binnen de NHB applicaties """
+""" ondersteuning voor de leeftijdsklassen binnen de applicatie """
 
 from BasisTypen.definities import (GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
                                    ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA,
@@ -12,7 +12,7 @@ from BasisTypen.definities import (GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
 from BasisTypen.models import LeeftijdsKlasse, TemplateCompetitieIndivKlasse
 
 
-def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):
+def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit.
         wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
@@ -116,7 +116,7 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_j
 
 def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar, huidige_maand):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit
-        voor de bondscompetities van de NHB.
+        voor de bondscompetities van de KHSN.
         wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
         Retourneert:
@@ -406,9 +406,9 @@ def bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd, wedstrijdgeslacht):
     return gevonden_lkl.beschrijving
 
 
-def bereken_leeftijdsklasse_nhb(wedstrijdleeftijd, wedstrijdgeslacht):
+def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
     """
-        bepaal de meest exacte NHB leeftijdsklasse voor een sporter
+        bepaal de meest exacte KHSN leeftijdsklasse voor een sporter
         afhankelijk van zijn geboortejaar en wedstrijdgeslacht.
 
         Voorbeeld: Onder 12 Meisjes

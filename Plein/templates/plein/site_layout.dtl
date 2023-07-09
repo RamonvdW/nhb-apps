@@ -42,7 +42,7 @@
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
                     <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
-                        <img src="{% static 'plein/logo_with_text_nhb.png' %}" height="50" width="213" alt="NHB logo" style="z-index:1">
+                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="50" width="213" alt="KHSN logo" style="z-index:1">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->

@@ -116,7 +116,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
 
         resp = self.e2e_login_no_check(self.account_normaal, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB')
+        self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de KHSN')
         self.assertContains(resp, 'ni###e@test.com')
 
         # check niet ingelogd

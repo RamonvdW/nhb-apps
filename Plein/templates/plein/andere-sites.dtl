@@ -10,7 +10,7 @@
 
 <!-- hoofd site -->
 {% static 'plein/logo_nhb_192x192.png' as img_src %}
-{% include 'plein/card_logo.dtl' with title="Handboogsport NL" text="Hoofdwebsite van de NHB met informatie, publicaties en nieuws." img_src=img_src img_height=85 img_width=85 url="https://www.handboogsport.nl" extern_open=True %}
+{% include 'plein/card_logo.dtl' with title="Handboogsport NL" text="Hoofdwebsite van de KHSN met informatie, publicaties en nieuws." img_src=img_src img_height=85 img_width=85 url="https://www.handboogsport.nl" extern_open=True %}
 
 
 <!-- Lowlands Archery Series -->

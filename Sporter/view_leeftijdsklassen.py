@@ -14,7 +14,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
-                                      bereken_leeftijdsklassen_nhb,
+                                      bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,
                                       bereken_leeftijdsklassen_bondscompetitie)
 from Sporter.models import get_sporter_voorkeuren
@@ -26,6 +26,8 @@ TEMPLATE_LEEFTIJDSGROEPEN = 'sporter/leeftijdsgroepen.dtl'
 
 
 def redirect_leeftijdsklassen(request):
+    """ Deze functie wordt gebruikt om een oude URL om te leiden naar de nieuwe """
+    # TODO: verwijder in 2024
     url = reverse('Sporter:leeftijdsklassen')
     return HttpResponseRedirect(url)
 
@@ -75,7 +77,7 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
         context['lkl_wa'] = lkl_list
         context['lkl_wa_dit_jaar'] = lkl_dit_jaar
 
-        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst = bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, now.year)
+        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst = bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, now.year)
         context['lkl_nhb'] = lkl_lst
         spl = lkl_dit_jaar.split(' of ')
         context['lkl_nhb_dit_jaar_1'] = spl[0]

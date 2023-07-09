@@ -610,11 +610,11 @@
                             {{ sporter.bij_vereniging.plaats }}</td>
                     </tr>
                     <tr>
-                        <th>In NHB regio</th>
+                        <th>In regio</th>
                         <td>{{ sporter.bij_vereniging.regio }}</td>
                     </tr>
                     <tr>
-                        <th>In NHB rayon</th>
+                        <th>In rayon</th>
                         <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
                     </tr>
                 {% endif %}
@@ -852,7 +852,7 @@
                 </tr>
 
                 <tr>
-                    <td colspan="4">Voor alle overige vragen kan je contact opnemen met het bondsbureau van de NHB</td>
+                    <td colspan="4">Voor alle overige vragen kan je contact opnemen met het bondsbureau van de KHSN</td>
                 </tr>
 
             </table>

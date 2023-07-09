@@ -55,8 +55,8 @@
 
                             {% if akkoord_via_nhb %}
                                 <tr>
-                                    <th>Akkoord voor betalingen via NHB</th>
-                                    <td>Ja, betalingen aan jullie lopen via de NHB rekening</td>
+                                    <th>Akkoord voor betalingen via de KHSN</th>
+                                    <td>Ja, betalingen aan jullie lopen via de KHSN rekening</td>
                                 </tr>
                             {% endif %}
 

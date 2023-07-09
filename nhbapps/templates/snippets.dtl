@@ -65,11 +65,11 @@
                     <td>{{ sporter.bij_vereniging.plaats }}</td>
                 </tr>
                 <tr>
-                    <th>In NHB regio</th>
+                    <th>In regio</th>
                     <td>{{ sporter.bij_vereniging.regio }}</td>
                 </tr>
                 <tr>
-                    <th>In NHB rayon</th>
+                    <th>In rayon</th>
                     <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
                 </tr>
                 {% if sporter.para_classificatie %}

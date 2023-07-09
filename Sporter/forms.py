@@ -15,14 +15,14 @@ class RegistreerForm(forms.Form):
         met een NHB nummer.
     """
     nhb_nummer = forms.CharField(
-                        label='NHB nummer',
+                        label='Bondsnummer',
                         min_length=6,
                         max_length=6,
                         required=True,
                         widget=forms.TextInput(attrs={'autofocus': True}))
 
     email = forms.EmailField(
-                        label='E-mail adres zoals bekend bij de NHB',
+                        label='E-mail adres zoals bekend bij de KHSN',
                         required=True)
 
     nieuw_wachtwoord = forms.CharField(

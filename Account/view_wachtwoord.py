@@ -98,7 +98,7 @@ class WachtwoordVergetenView(TemplateView):
 
             except AccountEmail.DoesNotExist:
                 # email is niet bekend en past niet bij de inlog naam
-                context['foutmelding'] = 'Voer het e-mailadres en NHB nummer in van een bestaand account'
+                context['foutmelding'] = 'Voer het e-mailadres en bondsnummer in van een bestaand account'
                 # (niet te veel wijzer maken over de combi NHB nummer en e-mailadres)
 
         # we controleren hier niet of het account inactief is, dat doet login wel weer

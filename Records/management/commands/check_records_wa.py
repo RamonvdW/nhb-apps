@@ -108,7 +108,7 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
                 return self._cache_nhb[rec.pk]
         # for
 
-        self.stdout.write('[WARNING] Geen passend NHB record gevonden: soort=%s' % soort)
+        self.stdout.write('[WARNING] Geen passend KHSN record gevonden: soort=%s' % soort)
         self.stdout.write('          voor %s' % wa_rec)
         for rec in recs:
             self.stdout.write('          Kandidaat: %s' % rec)

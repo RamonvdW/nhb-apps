@@ -34,7 +34,7 @@ class Command(BaseCommand):
                     sporter = account.sporter_set.prefetch_related('bij_vereniging').all()[0]
                 except IndexError:
                     sporter = None
-                    let_op = 'LET OP: account heeft geen koppeling met NHB lid'
+                    let_op = 'LET OP: account heeft geen koppeling met lid'
                 else:
                     if not sporter.bij_vereniging or not sporter.is_actief_lid:
                         # deze melding komt na 15 januari

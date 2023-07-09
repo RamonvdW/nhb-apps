@@ -107,7 +107,7 @@
             {% include 'plein/card.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" icon="help" url=card_url %}
 
             {% url 'Sporter:registreer' as card_url %}
-            {% include 'plein/card.dtl' with title="Account aanmaken" text="Doorloop eenmalig de korte registratie procedure.<br><br>(<i>alleen voor NHB leden</i>)" icon="fingerprint" url=card_url %}
+            {% include 'plein/card.dtl' with title="Account aanmaken" text="Doorloop eenmalig de korte registratie procedure.<br><br>(<i>alleen voor KHSN leden</i>)" icon="fingerprint" url=card_url %}
         </div>
     </div>
 

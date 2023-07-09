@@ -17,7 +17,7 @@ class LoginForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     login_naam = forms.CharField(
-                        label='Inlog naam (NHB nummer of e-mailadres)',
+                        label='Inlog naam (Bondsnummer of e-mailadres)',
                         max_length=50,
                         required=False,
                         widget=forms.TextInput(attrs={'autofocus': True, 'autocomplete': 'username'}))

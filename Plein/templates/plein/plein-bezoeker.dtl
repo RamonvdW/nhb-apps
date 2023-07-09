@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022 Ramon van der Winkel.
+                Copyright (c) 2021-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -77,7 +77,7 @@
     <div class="row-nhb-blauw" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
             {% url 'Sporter:registreer' as card_url %}
-            {% include 'plein/card.dtl' with title="Account aanmaken" text="Doorloop eenmalig de korte registratie procedure.<br><br>(<i>alleen voor NHB leden</i>)" icon="fingerprint" url=card_url %}
+            {% include 'plein/card.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
         </div>
     </div>
 
@@ -85,7 +85,7 @@
     <div class="row center">
         <div class="col s12">
             <p>&nbsp;</p>
-            <h4>Andere sites van de NHB</h4>
+            <h4>Andere sites van de KHSN</h4>
             <p>De volgende websites zijn misschien ook interessant voor je</p>
         </div>
     </div>
@@ -93,7 +93,7 @@
     <!-- blauwe balk met links naar andere sites -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/andere-sites-van-de-nhb.dtl' %}
+            {% include 'plein/andere-sites.dtl' %}
         </div>
     </div>
 
