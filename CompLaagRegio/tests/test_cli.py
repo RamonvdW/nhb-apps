@@ -39,10 +39,10 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         comp.save()
         self.comp = Competitie.objects.get(pk=comp.pk)
 
-        dummy_functie = Functie.objects.filter(rol='RCL', nhb_regio__regio_nr=111)[0]
+        dummy_functie = Functie.objects.filter(rol='RCL', regio__regio_nr=111)[0]
         deelcomp = Regiocompetitie(
                             competitie=comp,
-                            nhb_regio=regio_111,
+                            regio=regio_111,
                             functie=dummy_functie)
         deelcomp.save()
 

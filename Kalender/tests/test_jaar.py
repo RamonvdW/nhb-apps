@@ -45,29 +45,29 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.sporter = sporter
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
-        self.nhbver2 = NhbVereniging(
+        self.ver2 = NhbVereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver2.save()
+        self.ver2.save()
 
         # voeg een locatie toe
         locatie = WedstrijdLocatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
-        locatie.verenigingen.add(self.nhbver1)
+        locatie.verenigingen.add(self.ver1)
 
         datum = timezone.now() + datetime.timedelta(days=30)
         if datum.day >= 29:     # pragma: no cover
@@ -79,7 +79,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
                         datum_einde=datum,
-                        organiserende_vereniging=self.nhbver1,
+                        organiserende_vereniging=self.ver1,
                         locatie=locatie)
         wedstrijd.save()
         self.wedstrijd = wedstrijd
@@ -90,7 +90,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
                         status=WEDSTRIJD_STATUS_GEANNULEERD,
                         datum_begin=datum,
                         datum_einde=datum + datetime.timedelta(days=1),
-                        organiserende_vereniging=self.nhbver1,
+                        organiserende_vereniging=self.ver1,
                         locatie=locatie)
         wedstrijd.save()
 
@@ -100,7 +100,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
                         datum_einde=datum + datetime.timedelta(days=3),
-                        organiserende_vereniging=self.nhbver1,
+                        organiserende_vereniging=self.ver1,
                         locatie=locatie)
         wedstrijd.save()
 
@@ -111,7 +111,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
                         datum_einde=datum + datetime.timedelta(days=7),
-                        organiserende_vereniging=self.nhbver1,
+                        organiserende_vereniging=self.ver1,
                         locatie=locatie)
         wedstrijd.save()
 
@@ -211,7 +211,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'nhb', 'auto'))
+            resp = self.client.get(self.url_kalender_jaar % (maand, jaar, 'khsn', 'auto'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('kalender/overzicht-jaar.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

@@ -42,7 +42,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         self.functie_rcl = maak_functie("RCL test", "RCL")
-        self.functie_rcl.nhb_regio = regio_111
+        self.functie_rcl.regio = regio_111
         self.functie_rcl.save()
 
         # maak een test vereniging
@@ -55,15 +55,15 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.ver1000 = ver
 
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak een test lid aan
@@ -88,13 +88,13 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         ver2.save()
 
         self.functie_sec2 = maak_functie("SEC test 2", "SEC")
-        self.functie_sec2.nhb_ver = ver2
+        self.functie_sec2.vereniging = ver2
         self.functie_sec2.save()
 
         self.functie_bko = maak_functie("BKO test", "BKO")
 
         self.functie_rko = maak_functie("RKO test", "RKO")
-        self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=1)
+        self.functie_rko.rayon = NhbRayon.objects.get(rayon_nr=1)
         self.functie_rko.save()
 
         self.functie_mo = maak_functie("MO test", "MO")
@@ -261,7 +261,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_accountwissel, urls)
 
     def test_bb(self):
-        # maak een BB die geen NHB lid is
+        # maak een BB die geen lid is
         self.account_geenlid.is_BB = True
         self.account_geenlid.save()
         self.e2e_account_accepteert_vhpg(self.account_geenlid)
@@ -333,8 +333,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_rcl(self):
-        self.functie_hwl.nhb_ver.plaats = ''
-        self.functie_hwl.nhb_ver.save(update_fields=['plaats'])
+        self.functie_hwl.vereniging.plaats = ''
+        self.functie_hwl.vereniging.save(update_fields=['plaats'])
 
         self.functie_rcl.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
@@ -617,7 +617,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         bko18.accounts.add(self.account_normaal)
 
         Sporter.objects.all().delete()
-        NhbVereniging.objects.all().delete()        # om lege nhbver_cache te raken
+        NhbVereniging.objects.all().delete()        # om lege ver_cache te raken
 
         # log in en wordt BKO
         self.e2e_account_accepteert_vhpg(self.account_normaal)
@@ -646,7 +646,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_html_ok(resp)       # checkt ook href's
 
     def test_bb_naar_sec(self):
-        # maak een BB die geen NHB lid is
+        # maak een BB die geen lid is
         self.account_geenlid.is_BB = True
         self.account_geenlid.save()
         self.e2e_account_accepteert_vhpg(self.account_geenlid)
@@ -682,7 +682,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         ver.save()
 
         functie_hwl = maak_functie('HWL ver 1001', 'HWL')
-        functie_hwl.nhb_ver = ver
+        functie_hwl.vereniging = ver
         functie_hwl.save()
 
         self.e2e_account_accepteert_vhpg(self.account_admin)
@@ -842,7 +842,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         deelkamp = Kampioenschap(
                         competitie=comp,
                         deel=DEEL_RK,
-                        nhb_rayon=self.functie_rko.nhb_rayon,
+                        rayon=self.functie_rko.rayon,
                         functie=self.functie_rko)
         deelkamp.save()
         deelkamp.rk_bk_matches.add(match)

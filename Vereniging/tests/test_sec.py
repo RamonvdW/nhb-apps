@@ -53,17 +53,17 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         # de functie is nodig zodat er BB er naartoe kan wisselen om schutterboog instellingen te doen
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak de SEC functie
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         # maak het lid aan dat SEC wordt
@@ -131,7 +131,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
@@ -149,8 +149,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100001.lid_nr,
                     sporter_naam=self.sporter_100001.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='R',
                     score1=10,
                     score2=20,
@@ -170,8 +170,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100002.lid_nr,
                     sporter_naam=self.sporter_100002.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='BB',
                     score1=10,
                     score2=20,
@@ -277,9 +277,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         regio100 = NhbRegio.objects.get(regio_nr=100)
         self.assertTrue(regio100.is_administratief)
 
-        # account_sec is SEC bij self.nhbver1
-        self.nhbver1.regio = regio100
-        self.nhbver1.save()
+        # account_sec is SEC bij self.ver1
+        self.ver1.regio = regio100
+        self.ver1.save()
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -327,7 +327,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         loc = WedstrijdLocatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
-        loc.verenigingen.add(self.nhbver1)
+        loc.verenigingen.add(self.ver1)
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -347,7 +347,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # corner case: SEC van de vereniging voor gast-accounts
 
         ver = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.beschrijving = 'SEC extern'
         self.functie_sec.save()
 

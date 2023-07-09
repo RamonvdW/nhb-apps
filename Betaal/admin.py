@@ -47,7 +47,7 @@ class BetaalInstellingenVerenigingAdmin(admin.ModelAdmin):
 
     search_fields = ('vereniging__ver_nr', 'vereniging__naam')
 
-    list_filter = (HeeftMollieKeyFilter, 'akkoord_via_nhb')
+    list_filter = (HeeftMollieKeyFilter, 'akkoord_via_bond')
 
 
 class BetaalMutatieAdmin(admin.ModelAdmin):

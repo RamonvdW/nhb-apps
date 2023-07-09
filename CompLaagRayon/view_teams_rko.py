@@ -79,7 +79,7 @@ class RayonTeamsTemplateView(TemplateView):
                 deelkamp_pks = (Kampioenschap
                                 .objects
                                 .filter(competitie=comp,
-                                        nhb_rayon=context['rayon'])
+                                        rayon=context['rayon'])
                                 .values_list('pk', flat=True))
 
             context['filters'] = filters = list()
@@ -123,7 +123,7 @@ class RayonTeamsTemplateView(TemplateView):
 
             open_inschrijving = comp.fase_teams <= 'G'
 
-            context['rayon'] = self.functie_nu.nhb_rayon
+            context['rayon'] = self.functie_nu.rayon
 
         if comp.afstand == '18':
             aantal_pijlen = 30

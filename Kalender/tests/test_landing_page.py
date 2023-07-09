@@ -31,14 +31,14 @@ class TestKalender(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
@@ -47,7 +47,7 @@ class TestKalender(E2EHelpers, TestCase):
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
-        locatie.verenigingen.add(self.nhbver1)
+        locatie.verenigingen.add(self.ver1)
 
         datum = timezone.now() + datetime.timedelta(days=30)
         wedstrijd = Wedstrijd(
@@ -55,7 +55,7 @@ class TestKalender(E2EHelpers, TestCase):
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
                         datum_einde=datum,
-                        organiserende_vereniging=self.nhbver1,
+                        organiserende_vereniging=self.ver1,
                         locatie=locatie)
         wedstrijd.save()
         self.wedstrijd = wedstrijd
@@ -67,7 +67,7 @@ class TestKalender(E2EHelpers, TestCase):
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
                         datum_einde=datum,
-                        organiserende_vereniging=self.nhbver1,
+                        organiserende_vereniging=self.ver1,
                         locatie=locatie)
         wedstrijd.save()
 

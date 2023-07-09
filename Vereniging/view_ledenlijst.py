@@ -9,7 +9,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_NHB, GESLACHT2STR
+from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_KHSN, GESLACHT2STR
 from BasisTypen.models import LeeftijdsKlasse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -59,7 +59,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
                     .objects
-                    .filter(organisatie=ORGANISATIE_NHB,
+                    .filter(organisatie=ORGANISATIE_KHSN,
                             min_wedstrijdleeftijd=0)    # exclude veel van de senioren klassen
                     .order_by('volgorde')):             # aspirant eerst
 
@@ -73,7 +73,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # sorteer op geboorte jaar en daarna naam
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=self.functie_nu.nhb_ver)
+                    .filter(bij_vereniging=self.functie_nu.vereniging)
                     .filter(geboorte_datum__year__gte=jeugdgrens)
                     .select_related('account')
                     .order_by('-geboorte_datum__year',
@@ -107,7 +107,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
-                    .objects.filter(organisatie=ORGANISATIE_NHB,
+                    .objects.filter(organisatie=ORGANISATIE_KHSN,
                                     max_wedstrijdleeftijd=0)    # skip jeugd klassen
                     .order_by('-volgorde')):                    # volgorde: veteraan, master, senior
 
@@ -119,7 +119,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         prev_wedstrijdleeftijd = 0
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=self.functie_nu.nhb_ver)
+                    .filter(bij_vereniging=self.functie_nu.vereniging)
                     .filter(geboorte_datum__year__lt=jeugdgrens)
                     .select_related('account')
                     .order_by('achternaam',
@@ -172,7 +172,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nhb_ver'] = self.functie_nu.nhb_ver
+        context['ver'] = self.functie_nu.vereniging
 
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()
@@ -258,7 +258,7 @@ class GastAccountsView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.nhb_ver.is_extern
+        return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -318,7 +318,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.nhb_ver.is_extern
+        return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

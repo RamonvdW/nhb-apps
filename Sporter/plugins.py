@@ -20,7 +20,7 @@ def sporter_login_plugin(request, from_ip, account):
     """ Deze functie wordt aangeroepen vanuit de Account login view
         (de koppeling wordt gelegd in Sporter.apps.ready)
 
-        Hier controleren we of het NHB lid wel in mag loggen
+        Hier controleren we of het lid wel in mag loggen
         ook zetten we het AccountEmail nieuwe_email veld indien nodig
 
         Return: None = mag wel inloggen
@@ -32,7 +32,7 @@ def sporter_login_plugin(request, from_ip, account):
 
         if not (account.is_staff or account.is_BB):  # beschermt management rollen tegen CRM ongelukken
             if not sporter.is_actief_lid:
-                # lid mag geen gebruik (meer) maken van de NHB faciliteiten
+                # lid mag geen gebruik (meer) maken van de faciliteiten
 
                 schrijf_in_logboek(account, 'Inloggen',
                                    'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip, repr(account.username)))

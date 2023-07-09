@@ -7,14 +7,14 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
-                                   ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA)
+                                   ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIE_WA)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_nhb,
                                       bereken_leeftijdsklassen_ifaa,
                                       bereken_leeftijdsklassen_bondscompetitie,
                                       bereken_leeftijdsklasse_wa,
-                                      bereken_leeftijdsklasse_nhb,
+                                      bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -87,7 +87,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_IFAA)
         self.assertEqual(n, 50)
 
-        # WA en NHB hanteren kijken het hele jaar naar de leeftijd die je bereikt
+        # WA en KHSN hanteren kijken het hele jaar naar de leeftijd die je bereikt
         n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_voor_verjaardag, ORGANISATIE_WA)
         self.assertEqual(n, 50)
         n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_op_verjaardag, ORGANISATIE_WA)
@@ -95,11 +95,11 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_WA)
         self.assertEqual(n, 50)
 
-        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_voor_verjaardag, ORGANISATIE_NHB)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_voor_verjaardag, ORGANISATIE_KHSN)
         self.assertEqual(n, 50)
-        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_op_verjaardag, ORGANISATIE_NHB)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_op_verjaardag, ORGANISATIE_KHSN)
         self.assertEqual(n, 50)
-        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_NHB)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_KHSN)
         self.assertEqual(n, 50)
 
     def test_leeftijdsklassen_wa(self):
@@ -301,73 +301,73 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
 
     def test_leeftijdsklasse_nhb(self):
         # Onder 12
-        tup = bereken_leeftijdsklasse_nhb(9, GESLACHT_MAN)
+        tup = bereken_leeftijdsklasse_khsn(9, GESLACHT_MAN)
         self.assertEqual(tup, 'Onder 12 Jongens')
 
-        tup = bereken_leeftijdsklasse_nhb(10, GESLACHT_VROUW)
+        tup = bereken_leeftijdsklasse_khsn(10, GESLACHT_VROUW)
         self.assertEqual(tup, 'Onder 12 Meisjes')
 
-        tup = bereken_leeftijdsklasse_nhb(11, GESLACHT_ANDERS)
+        tup = bereken_leeftijdsklasse_khsn(11, GESLACHT_ANDERS)
         self.assertEqual(tup, 'Onder 12 Gemengd')
 
         # Onder 14
-        tup = bereken_leeftijdsklasse_nhb(12, GESLACHT_MAN)
+        tup = bereken_leeftijdsklasse_khsn(12, GESLACHT_MAN)
         self.assertEqual(tup, 'Onder 14 Jongens')
 
-        tup = bereken_leeftijdsklasse_nhb(13, GESLACHT_VROUW)
+        tup = bereken_leeftijdsklasse_khsn(13, GESLACHT_VROUW)
         self.assertEqual(tup, 'Onder 14 Meisjes')
 
-        tup = bereken_leeftijdsklasse_nhb(13, GESLACHT_ANDERS)
+        tup = bereken_leeftijdsklasse_khsn(13, GESLACHT_ANDERS)
         self.assertEqual(tup, 'Onder 14 Gemengd')
 
         # Onder 18
-        tup = bereken_leeftijdsklasse_nhb(14, GESLACHT_MAN)
+        tup = bereken_leeftijdsklasse_khsn(14, GESLACHT_MAN)
         self.assertEqual(tup, 'Onder 18 Heren')
 
-        tup = bereken_leeftijdsklasse_nhb(15, GESLACHT_VROUW)
+        tup = bereken_leeftijdsklasse_khsn(15, GESLACHT_VROUW)
         self.assertEqual(tup, 'Onder 18 Dames')
 
-        tup = bereken_leeftijdsklasse_nhb(17, GESLACHT_ANDERS)
+        tup = bereken_leeftijdsklasse_khsn(17, GESLACHT_ANDERS)
         self.assertEqual(tup, 'Onder 18 Gemengd')
 
         # Onder 21
-        tup = bereken_leeftijdsklasse_nhb(18, GESLACHT_MAN)
+        tup = bereken_leeftijdsklasse_khsn(18, GESLACHT_MAN)
         self.assertEqual(tup, 'Onder 21 Heren')
 
-        tup = bereken_leeftijdsklasse_nhb(19, GESLACHT_VROUW)
+        tup = bereken_leeftijdsklasse_khsn(19, GESLACHT_VROUW)
         self.assertEqual(tup, 'Onder 21 Dames')
 
-        tup = bereken_leeftijdsklasse_nhb(20, GESLACHT_ANDERS)
+        tup = bereken_leeftijdsklasse_khsn(20, GESLACHT_ANDERS)
         self.assertEqual(tup, 'Onder 21 Gemengd')
 
         # 21+
-        tup = bereken_leeftijdsklasse_nhb(21, GESLACHT_MAN)
+        tup = bereken_leeftijdsklasse_khsn(21, GESLACHT_MAN)
         self.assertEqual(tup, 'Heren')
 
-        tup = bereken_leeftijdsklasse_nhb(30, GESLACHT_VROUW)
+        tup = bereken_leeftijdsklasse_khsn(30, GESLACHT_VROUW)
         self.assertEqual(tup, 'Dames')
 
-        tup = bereken_leeftijdsklasse_nhb(40, GESLACHT_ANDERS)
+        tup = bereken_leeftijdsklasse_khsn(40, GESLACHT_ANDERS)
         self.assertEqual(tup, 'Gemengd')
 
         # 50+
-        tup = bereken_leeftijdsklasse_nhb(50, GESLACHT_MAN)
+        tup = bereken_leeftijdsklasse_khsn(50, GESLACHT_MAN)
         self.assertEqual(tup, '50+ Heren')
 
-        tup = bereken_leeftijdsklasse_nhb(50, GESLACHT_VROUW)
+        tup = bereken_leeftijdsklasse_khsn(50, GESLACHT_VROUW)
         self.assertEqual(tup, '50+ Dames')
 
-        tup = bereken_leeftijdsklasse_nhb(50, GESLACHT_ANDERS)
+        tup = bereken_leeftijdsklasse_khsn(50, GESLACHT_ANDERS)
         self.assertEqual(tup, '50+ Gemengd')
 
         # 60+
-        tup = bereken_leeftijdsklasse_nhb(60, GESLACHT_MAN)
+        tup = bereken_leeftijdsklasse_khsn(60, GESLACHT_MAN)
         self.assertEqual(tup, '60+ Heren')
 
-        tup = bereken_leeftijdsklasse_nhb(60, GESLACHT_VROUW)
+        tup = bereken_leeftijdsklasse_khsn(60, GESLACHT_VROUW)
         self.assertEqual(tup, '60+ Dames')
 
-        tup = bereken_leeftijdsklasse_nhb(60, GESLACHT_ANDERS)
+        tup = bereken_leeftijdsklasse_khsn(60, GESLACHT_ANDERS)
         self.assertEqual(tup, '60+ Gemengd')
 
     def test_leeftijdsklassen_ifaa(self):
@@ -563,7 +563,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assert403(resp)
 
-        # inlog, geen NHB lid
+        # inlog, geen lid
         self.e2e_login(self.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_leeftijdsklassen)

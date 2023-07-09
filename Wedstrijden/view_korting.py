@@ -47,7 +47,7 @@ class KortingenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
@@ -134,7 +134,7 @@ class KiesNieuweKortingView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de HWL een nieuwe korting aan wil maken """
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
         toekomst = timezone.now().date() + datetime.timedelta(days=30)
 
         korting = WedstrijdKorting(
@@ -179,7 +179,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
         context = dict()
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
         context['ver'] = ver
 
         try:
@@ -256,7 +256,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'opslaan' gebruikt wordt door de HWL """
 
-        onze_ver = self.functie_nu.nhb_ver
+        onze_ver = self.functie_nu.vereniging
 
         try:
             korting_pk = kwargs['korting_pk'][:6]       # afkappen voor de veiligheid

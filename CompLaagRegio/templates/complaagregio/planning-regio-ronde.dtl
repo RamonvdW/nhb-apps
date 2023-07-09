@@ -27,11 +27,11 @@
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ ronde.regiocompetitie.nhb_regio.rayon }}</td>
+                    <td>{{ ronde.regiocompetitie.regio.rayon }}</td>
                 </tr>
                 <tr>
                     <th>Regio</th>
-                    <td>{{ ronde.regiocompetitie.nhb_regio }}</td>
+                    <td>{{ ronde.regiocompetitie.regio }}</td>
                 </tr>
                 {% if ronde.cluster %}
                     <tr>

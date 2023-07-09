@@ -115,7 +115,7 @@ class Command(BaseCommand):
                           .filter(kampioenschap__competitie__afstand='25',
                                   kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -158,7 +158,7 @@ class Command(BaseCommand):
                      .filter(kampioenschap__competitie__afstand='25',
                              kampioenschap__deel=DEEL_BK)
                      .select_related('kampioenschap',
-                                     'kampioenschap__nhb_rayon',
+                                     'kampioenschap__rayon',
                                      'vereniging',
                                      'team_type',
                                      'team_klasse')
@@ -168,6 +168,10 @@ class Command(BaseCommand):
             self.teams_cache.append(team)
             self.pk2team[team.pk] = team
             self.team_gekoppelde_pks[team.pk] = [deelnemer.pk for deelnemer in team.gekoppelde_leden.all()]
+
+            #print('team: %s' % team, team.team_klasse)
+            #for deelnemer in team.gekoppelde_leden.all():
+            #    print('  deelnemer: %s' % deelnemer)
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
@@ -230,7 +234,7 @@ class Command(BaseCommand):
         # for
 
         if not team_klasse:
-            self.stderr.write('[ERROR] Kan team klasse niet bepalen')
+            self.stderr.write('[ERROR] Kan team klasse niet bepalen (0 matches op team naam)')
             return None
 
         self.stdout.write('[INFO] Team klasse: %s' % team_klasse.beschrijving)
@@ -393,6 +397,8 @@ class Command(BaseCommand):
 
         self.dryrun = options['dryrun']
         self.verbose = options['verbose']
+
+        #print()
 
         # open de kopie, zodat we die aan kunnen passen
         fpath = options['bestand']

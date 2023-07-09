@@ -38,9 +38,9 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         deel1 = Kampioenschap.objects.filter(deel=DEEL_BK)[0]
         self.functie_bko1 = deel1.functie
         self.functie_bko2 = Kampioenschap.objects.filter(deel=DEEL_BK).exclude(pk=deel1.pk)[0].functie
-        self.functie_rko1 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=deel1.competitie, nhb_rayon=rayon_1)[0].functie
-        self.functie_rcl101 = Regiocompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_101)[0].functie
-        self.functie_rcl105 = Regiocompetitie.objects.filter(competitie=deel1.competitie, nhb_regio=regio_105)[0].functie
+        self.functie_rko1 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=deel1.competitie, rayon=rayon_1)[0].functie
+        self.functie_rcl101 = Regiocompetitie.objects.filter(competitie=deel1.competitie, regio=regio_101)[0].functie
+        self.functie_rcl105 = Regiocompetitie.objects.filter(competitie=deel1.competitie, regio=regio_105)[0].functie
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -48,18 +48,18 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = regio_105
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
     def _check_wijzigbaar(self, functie):

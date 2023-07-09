@@ -9,12 +9,13 @@ EXCLUDE+="|plein/site-layout"
 EXCLUDE+="|feedback/sidebar.dtl"
 EXCLUDE+="|plein/card"
 EXCLUDE+="|plein/ga-naar-live-server.dtl"
-EXCLUDE+="|plein/andere-sites-van-de-nhb.dtl"
+EXCLUDE+="|plein/andere-sites.dtl"
 EXCLUDE+="|logboek/common"
 EXCLUDE+="|competitie/menu.dtl"
 EXCLUDE+="|site_layout.dtl"
 EXCLUDE+="|site_layout_minimaal.dtl"
 EXCLUDE+="|webwinkel/card_product.dtl"
+EXCLUDE+="|vhpg-tekst.dtl"
 
 INCLUDES=$(grep '{% include' */templates/*/*dtl | grep -vE "$EXCLUDE")
 RES=$?

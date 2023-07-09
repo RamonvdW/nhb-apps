@@ -483,7 +483,7 @@
                             <tr>
                                 <td colspan="2" class="center">
                                     <h6 class="nhb-blauw-text">Wedstrijdklassen</h6>
-                                                         <!-- N = NHB -->
+                                                         <!-- N = KHSN -->
                                     {% if wed.organisatie == 'N' %}
                                         <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                                     {% endif %}
@@ -505,7 +505,7 @@
 
 
                         <div class="center">
-                                                 <!-- N = NHB -->
+                                                 <!-- N = KHSN -->
                             {% if wed.organisatie == 'N' and wedstrijd_is_a_status %}
                                 <p>Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</p>
                             {% endif %}

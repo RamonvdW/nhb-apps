@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -108,7 +108,7 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
                 return self._cache_nhb[rec.pk]
         # for
 
-        self.stdout.write('[WARNING] Geen passend NHB record gevonden: soort=%s' % soort)
+        self.stdout.write('[WARNING] Geen passend KHSN record gevonden: soort=%s' % soort)
         self.stdout.write('          voor %s' % wa_rec)
         for rec in recs:
             self.stdout.write('          Kandidaat: %s' % rec)

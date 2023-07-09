@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Deelnemers RK</h3>
-            <p>De lijst met kandidaat-deelnemers<br>voor de <b>Rayonkampioenschappen in {{ deelcomp_rk.nhb_rayon }}</b></p>
+            <p>De lijst met kandidaat-deelnemers<br>voor de <b>Rayonkampioenschappen in {{ deelcomp_rk.rayon }}</b></p>
             <p>Individuele sporters stromen door uit de regiocompetitie. Deelname aan het RK moet bevestigd worden.<br>Afmelden wordt op prijs gesteld zodat reserves alvast opgeroepen kunnen worden.</p>
         </div>
     </div>

@@ -141,7 +141,7 @@
                                         {% if deelcomp.is_ingeschreven %}
                                             {% if deelcomp.rk_inschrijving %}
                                                 <!-- is al doorgestroomd naar het RK -->
-                                                <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelcomp.rk_inschrijving.kampioenschap.nhb_rayon.rayon_nr }}</span>
+                                                <span>Je hebt je gekwalificeerd voor het RK in Rayon {{ deelcomp.rk_inschrijving.kampioenschap.rayon.rayon_nr }}</span>
                                                 {% if deelcomp.rk_inschrijving.rank > 0 %}
                                                     <br><span>Op de RK lijst sta je op plaats {{ deelcomp.rk_inschrijving.rank }}</span>
                                                 {% endif %}
@@ -650,11 +650,11 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <th>In NHB regio</th>
+                            <th>In regio</th>
                             <td>{{ sporter.bij_vereniging.regio }}</td>
                         </tr>
                         <tr>
-                            <th>In NHB rayon</th>
+                            <th>In rayon</th>
                             <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
                         </tr>
                     {% endif %}
@@ -896,7 +896,7 @@
                 </tr>
 
                 <tr>
-                    <td colspan="4">Voor alle overige vragen kan je contact opnemen met het bondsbureau van de NHB</td>
+                    <td colspan="4">Voor alle overige vragen kan je contact opnemen met het bondsbureau</td>
                 </tr>
 
             </table>

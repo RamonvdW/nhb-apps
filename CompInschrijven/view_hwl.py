@@ -70,11 +70,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         objs = list()
 
         # bepaal de inschrijfmethode voor deze regio
-        if self.functie_nu.nhb_ver.regio.is_administratief:
+        if self.functie_nu.vereniging.regio.is_administratief:
             # niemand van deze vereniging mag zich inschrijven
             return objs
 
-        hwl_ver = self.functie_nu.nhb_ver
+        hwl_ver = self.functie_nu.vereniging
 
         # bepaal de boogtypen die voorkomen in de competitie
         boogtype_dict = get_competitie_bogen(comp)
@@ -245,14 +245,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nhb_ver'] = hwl_ver = self.functie_nu.nhb_ver
+        context['ver'] = hwl_ver = self.functie_nu.vereniging
         # rol is HWL (zie test_func)
 
         try:
             deelcomp = (Regiocompetitie
                         .objects
                         .get(competitie=self.comp,
-                             nhb_regio=hwl_ver.regio))
+                             regio=hwl_ver.regio))
         except Regiocompetitie.DoesNotExist:
             regio_organiseert_teamcomp = False
         else:
@@ -278,15 +278,15 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['mag_team_schieten'] = self.comp.fase_indiv == 'C' and regio_organiseert_teamcomp
 
         # bepaal de inschrijfmethode voor deze regio
-        mijn_regio = self.functie_nu.nhb_ver.regio
+        mijn_regio = self.functie_nu.vereniging.regio
 
         if not mijn_regio.is_administratief:
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(competitie=self.comp,
-                             nhb_regio=mijn_regio))
+                             regio=mijn_regio))
 
             methode = deelcomp.inschrijf_methode
 
@@ -383,7 +383,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # rol is HWL (zie test_func)
 
         # bepaal de inschrijfmethode voor deze regio
-        hwl_regio = self.functie_nu.nhb_ver.regio
+        hwl_regio = self.functie_nu.vereniging.regio
 
         if hwl_regio.is_administratief:
             # niemand van deze vereniging mag meedoen aan wedstrijden
@@ -391,7 +391,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         # zoek de juiste DeelCompetitie erbij
         deelcomp = Regiocompetitie.objects.get(competitie=comp,
-                                               nhb_regio=hwl_regio)
+                                               regio=hwl_regio)
         methode = deelcomp.inschrijf_methode
 
         # zoek eerst de voorkeuren op
@@ -469,7 +469,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 sporter = sporterboog.sporter
 
                 # controleer lid bij vereniging HWL
-                if sporter.bij_vereniging != self.functie_nu.nhb_ver:
+                if sporter.bij_vereniging != self.functie_nu.vereniging:
                     # iemand loopt te klooien
                     raise PermissionDenied('Geen lid bij jouw vereniging')
 
@@ -609,7 +609,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                       'bij_vereniging',
                                       'indiv_klasse')
                       .filter(regiocompetitie=deelcomp,
-                              bij_vereniging=self.functie_nu.nhb_ver)
+                              bij_vereniging=self.functie_nu.vereniging)
                       .order_by('indiv_klasse__volgorde',
                                 'sporterboog__sporter__voornaam',
                                 'sporterboog__sporter__achternaam'))
@@ -654,7 +654,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nhb_ver'] = self.functie_nu.nhb_ver
+        context['ver'] = self.functie_nu.vereniging
 
         context['deelcomp'] = self.deelcomp
 
@@ -701,7 +701,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                 raise Http404('Deelnemer niet gevonden')
 
             ver = deelnemer.bij_vereniging
-            if ver and ver != self.functie_nu.nhb_ver:
+            if ver and ver != self.functie_nu.vereniging:
                 raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
 
             deelnemer.inschrijf_voorkeur_team = not deelnemer.inschrijf_voorkeur_team
@@ -722,7 +722,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                     raise Http404('Geen valide inschrijving')
 
                 # controleer dat deze inschrijving bij de vereniging hoort
-                if inschrijving.bij_vereniging != self.functie_nu.nhb_ver:
+                if inschrijving.bij_vereniging != self.functie_nu.vereniging:
                     raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
 
                 # schrijf de schutter uit

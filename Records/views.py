@@ -193,7 +193,7 @@ class RecordsZoekView(ListView):
                 filter_nr = 0
 
             if filter_nr and len(str(filter_nr)) == 6:
-                # zoek het NHB lid met dit nummer
+                # zoek het lid met dit nummer
                 try:
                     sporter = Sporter.objects.get(lid_nr=filter_nr)
                 except Sporter.DoesNotExist:

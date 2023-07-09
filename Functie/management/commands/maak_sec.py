@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,15 +30,15 @@ class Command(BaseCommand):
 
     def get_vereniging(self, ver_nr):
         try:
-            nhb_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
+            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
-            nhb_ver = None
-        return nhb_ver
+            ver = None
+        return ver
 
-    def get_functie_sec(self, nhb_ver):
+    def get_functie_sec(self, ver):
         try:
-            functie = Functie.objects.get(rol='SEC', nhb_ver=nhb_ver)
+            functie = Functie.objects.get(rol='SEC', vereniging=ver)
         except Functie.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
             functie = None
@@ -49,19 +49,19 @@ class Command(BaseCommand):
         account = self.get_account(username)
 
         ver_nr = options['ver_nr'][0]
-        nhb_ver = self.get_vereniging(ver_nr)
+        ver = self.get_vereniging(ver_nr)
 
-        if account and nhb_ver:
-            functie = self.get_functie_sec(nhb_ver)
+        if account and ver:
+            functie = self.get_functie_sec(ver)
 
             if functie:
                 if functie.accounts.filter(pk=account.pk).count():
-                    self.stdout.write('[WARNING] Account %s is al SEC van vereniging %s' % (repr(username), nhb_ver))
+                    self.stdout.write('[WARNING] Account %s is al SEC van vereniging %s' % (repr(username), ver))
                 else:
                     # maak dit account SEC
                     functie.accounts.add(account)
 
-                    activiteit = "Account %s is SEC gemaakt van vereniging %s" % (repr(username), nhb_ver)
+                    activiteit = "Account %s is SEC gemaakt van vereniging %s" % (repr(username), ver)
 
                     # schrijf in het logboek
                     schrijf_in_logboek(account=None,

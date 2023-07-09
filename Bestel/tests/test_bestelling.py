@@ -54,19 +54,19 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        ver_nhb = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+        ver_bond = NhbVereniging(
+                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                     naam='Bondsbureau',
                     plaats='Schietstad',
                     regio=NhbRegio.objects.get(regio_nr=100))
-        ver_nhb.save()
-        self.ver_nhb = ver_nhb
+        ver_bond.save()
+        self.ver_bond = ver_bond
 
         instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver_nhb,
+                            vereniging=ver_bond,
                             mollie_api_key='test_1234')
         instellingen.save()
-        self.instellingen_nhb = instellingen
+        self.instellingen_bond = instellingen
 
         ver = NhbVereniging(
                     ver_nr=1000,
@@ -82,7 +82,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
-                            akkoord_via_nhb=True)
+                            akkoord_via_bond=True)
         instellingen.save()
         self.instellingen = instellingen
 
@@ -324,7 +324,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
 
-    def test_geen_instellingen_nhb(self):
+    def test_geen_instellingen_bond(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
@@ -338,7 +338,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
 
         # verwijder de instellingen van de vereniging
-        self.instellingen_nhb.delete()
+        self.instellingen_bond.delete()
 
         # de bestelling wordt toch aangemaakt, zodat er handmatig betaald kan worden
         self.verwerk_bestel_mutaties()
@@ -467,7 +467,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert404(resp, 'Niet gevonden')
 
         # test met een bestelling aan van een ander account
-        account = self.e2e_create_account('user', 'user@nhb.not', 'User')
+        account = self.e2e_create_account('user', 'user@test.not', 'User')
         andere = Bestelling(bestel_nr=1234, account=account)
         andere.save()
 
@@ -987,7 +987,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
         # activeer bericht over "moet handmatig betalen"
-        self.instellingen.akkoord_via_nhb = False
+        self.instellingen.akkoord_via_bond = False
         self.instellingen.save()
 
         # zet het mandje om in een bestelling

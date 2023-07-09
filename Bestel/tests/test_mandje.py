@@ -36,21 +36,21 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        ver_nhb = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+        ver_bond = NhbVereniging(
+                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                     naam='Bondsbureau',
                     plaats='Schietstad',
                     regio=NhbRegio.objects.get(regio_nr=100))
-        ver_nhb.save()
-        self.ver_nhb = ver_nhb
+        ver_bond.save()
+        self.ver_bond = ver_bond
 
         instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver_nhb,
+                            vereniging=ver_bond,
                             mollie_api_key='test_1234')
         instellingen.save()
-        self.instellingen_nhb = instellingen
+        self.instellingen_bond = instellingen
 
-        self.assertEqual(settings.BETAAL_VIA_NHB_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
+        self.assertEqual(settings.BETAAL_VIA_BOND_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
 
         ver = NhbVereniging(
                     ver_nr=1000,
@@ -60,7 +60,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
-                            akkoord_via_nhb=True)
+                            akkoord_via_bond=True)
         instellingen.save()
         self.instellingen = instellingen
 
@@ -236,8 +236,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.inschrijving.save()
 
         # veroorzaak een uitzondering
-        self.instellingen_nhb.mollie_api_key = ''
-        self.instellingen_nhb.save()
+        self.instellingen_bond.mollie_api_key = ''
+        self.instellingen_bond.save()
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -259,7 +259,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         mandje.producten.add(product)
         self.assertTrue(str(mandje) != '')
 
-        self.instellingen.akkoord_via_nhb = False
+        self.instellingen.akkoord_via_bond = False
         self.instellingen.save()
 
         with self.assert_max_queries(20):

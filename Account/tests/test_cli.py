@@ -66,7 +66,7 @@ class TestAccountCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@nhb.test', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@test.not', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
         self.assertEqual(f2.getvalue(), "Aanmaken van account 'nieuwelogin' is gelukt\n")
 
@@ -77,13 +77,13 @@ class TestAccountCli(E2EHelpers, TestCase):
         self.assertTrue(account.is_active)
         self.assertFalse(account.is_staff)
         self.assertTrue(account.email_is_bevestigd)
-        self.assertEqual(account.bevestigde_email, 'nieuw@nhb.test')
+        self.assertEqual(account.bevestigde_email, 'nieuw@test.not')
         self.assertEqual(account.nieuwe_email, '')
 
         # exception cases
         f1 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@nhb.test', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@test.not', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account bestaat al\n')
 
         f1 = io.StringIO()

@@ -139,7 +139,7 @@ def render_email_template(context, email_template_name):
         Returns: email body in text, html + email_template_name
     """
 
-    context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_nhb.png')
+    context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_khsn.png')
     context['logo_width'] = 213
     context['logo_height'] = 50
 

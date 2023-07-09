@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import (GESLACHT_ALLE,
-                                   ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIES2SHORT_STR)
+                                   ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIES2SHORT_STR)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -47,7 +47,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
         context = dict()
-        context['ver'] = ver = self.functie_nu.nhb_ver
+        context['ver'] = ver = self.functie_nu.vereniging
 
         context['huidige_rol'] = rol_get_beschrijving(request)
 
@@ -129,14 +129,14 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
 
         account = request.user
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
         locaties = ver.wedstrijdlocatie_set.exclude(zichtbaar=False)
         aantal = locaties.count()
         if aantal > 0:
             # vereniging heeft een wedstrijdlocatie
 
             keuze = request.POST.get('keuze', '')
-            if keuze in ('wa', 'ifaa', 'nhb'):
+            if keuze in ('wa', 'ifaa', 'khsn'):
                 now = timezone.now()
 
                 # zet de wedstrijd minstens 2 maanden in de toekomst
@@ -152,14 +152,14 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
 
                 keuze2organisatie = {
                     'wa': ORGANISATIE_WA,
-                    'nhb': ORGANISATIE_NHB,
+                    'khsn': ORGANISATIE_KHSN,
                     'ifaa': ORGANISATIE_IFAA,
                 }
 
                 wed = Wedstrijd(
                             datum_begin=begin,
                             datum_einde=begin,
-                            organiserende_vereniging=self.functie_nu.nhb_ver,
+                            organiserende_vereniging=self.functie_nu.vereniging,
                             organisatie=keuze2organisatie[keuze],
                             locatie=locaties[0],
                             contact_naam=account.volledige_naam(),
@@ -177,7 +177,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
 
                 klassen = get_organisatie_klassen(wed.organisatie)
 
-                if wed.organisatie == ORGANISATIE_NHB:
+                if wed.organisatie == ORGANISATIE_KHSN:
                     # voorkom zowel gender-neutrale als man/vrouw klassen
                     klassen = klassen.exclude(leeftijdsklasse__wedstrijd_geslacht=GESLACHT_ALLE)
 

@@ -34,7 +34,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
         self.deelcomp103_18m = (Regiocompetitie
                                 .objects
                                 .get(competitie=self.comp_18m,
-                                     nhb_regio__regio_nr=103))
+                                     regio__regio_nr=103))
 
         self.indiv_klasse_bb = (CompetitieIndivKlasse
                                 .objects
@@ -55,7 +55,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                             geslacht="M",
                             voornaam='Gert',
                             achternaam="Pijlhaler",
-                            email="pijlhaler@nhb.test",
+                            email="pijlhaler@test.not",
                             geboorte_datum=date(year=1972, month=3, day=4),
                             sinds_datum=date(year=2010, month=11, day=12),
                             bij_vereniging=self.ver)
@@ -67,7 +67,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                                 voor_wedstrijd=True)
         self.sporterboog.save()
 
-        self.beheerder = self.e2e_create_account('100002', 'beheerder@nhb.not', 'Beheerdertje')
+        self.beheerder = self.e2e_create_account('100002', 'beheerder@test.not', 'Beheerdertje')
 
     def test_basis(self):
         with patch('django.utils.timezone.localtime') as mock_timezone:

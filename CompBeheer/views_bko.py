@@ -55,13 +55,13 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         regio_deelcomps = (Regiocompetitie
                            .objects
                            .filter(competitie=competitie)
-                           .select_related('nhb_regio',
-                                           'nhb_regio__rayon')
-                           .order_by('nhb_regio__regio_nr'))
+                           .select_related('regio',
+                                           'regio__rayon')
+                           .order_by('regio__regio_nr'))
 
         for obj in regio_deelcomps:
-            obj.regio_str = str(obj.nhb_regio.regio_nr)
-            obj.rayon_str = str(obj.nhb_regio.rayon.rayon_nr)
+            obj.regio_str = str(obj.regio.regio_nr)
+            obj.rayon_str = str(obj.regio.rayon.rayon_nr)
 
             if obj.is_afgesloten:
                 obj.status_str = "Afgesloten"

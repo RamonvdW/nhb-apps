@@ -1,0 +1,18 @@
+{% comment %}
+                Copyright (c) 2019-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Dit is de integrale tekst van de VHPG afspraak en wordt opgenomen in twee schermen:
+    - maken van de afspraak
+    - inzien van de gemaakte afspraken
+
+{% endcomment %}
+
+<p>De KHSN geeft jou via deze website toegang tot persoonsgegevens van leden van de KHSN. Deze gegevens blijven eigendom van de KHSN. Je mag de gegevens alleen gebruiken om je rol te vervullen.</p>
+<p>We spreken af dat je deze gegevens strikt vertrouwelijk behandelt en niet zal gebruiken voor andere doeleinden. Eventueel lokaal opgeslagen persoonsgegevens die niet meer nodig zijn, die verwijder je.</p>
+<p>We vragen je om te voorkomen dat andere mensen je login gebruiken. Overweeg zelf wanneer je uitlogt en wanneer je je wachtwoord wijzigt. Als je verdenkt dat je account misbruikt is, neem dan direct contact op met het bondsbureau.</p>
+<p>In het geval van een geconstateerd data-lek verleen je medewerking aan het onderzoek.</p>

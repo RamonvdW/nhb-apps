@@ -331,9 +331,9 @@ class UitslagenBKTeamsView(TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         account = self.request.user
         if account.is_authenticated:
-            if functie_nu and functie_nu.nhb_ver:
+            if functie_nu and functie_nu.vereniging:
                 # HWL, WL
-                toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
+                toon_team_leden_van_ver_nr = functie_nu.vereniging.ver_nr
             else:
                 # geen beheerder, dus sporter
                 sporter = Sporter.objects.filter(account=account).first()

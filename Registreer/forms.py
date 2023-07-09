@@ -10,7 +10,7 @@ from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Mailer.operations import mailer_email_is_valide
 
 
-class RegistreerNhbForm(forms.Form):
+class RegistreerNormaalForm(forms.Form):
     """
         Dit formulier wordt gebruikt om een nieuw account aan te maken
         met een bondsnummer.
@@ -23,7 +23,7 @@ class RegistreerNhbForm(forms.Form):
                         widget=forms.TextInput(attrs={'autofocus': True}))
 
     email = forms.EmailField(
-                        label='E-mail adres zoals bekend bij de NHB',
+                        label='E-mail adres zoals bekend bij de bond',
                         required=True)
 
     nieuw_wachtwoord = forms.CharField(

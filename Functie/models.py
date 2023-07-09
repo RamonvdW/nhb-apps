@@ -73,13 +73,13 @@ class Functie(models.Model):
     comp_type = models.CharField(max_length=2, default="", blank=True)
 
     # RKO only: rayon
-    nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT, null=True, blank=True)
+    rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT, null=True, blank=True)
 
     # RCL only: regio
-    nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT, null=True, blank=True)
+    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT, null=True, blank=True)
 
     # SEC/HWL/WL only: vereniging
-    nhb_ver = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE, null=True, blank=True)
+    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         """ Geef een string terug voor gebruik in de admin interface """

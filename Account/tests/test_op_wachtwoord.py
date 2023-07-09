@@ -17,7 +17,7 @@ class TestAccountOpWachtwoord(E2EHelpers, TestCase):
         res, msg = account_test_wachtwoord_sterkte('xx', '')
         self.assertEqual((res, msg), (False, "wachtwoord is te kort"))
 
-        res, msg = account_test_wachtwoord_sterkte('NHB123456', '123456')
+        res, msg = account_test_wachtwoord_sterkte('KHSN123456', '123456')
         self.assertEqual((res, msg), (False, "wachtwoord bevat een verboden reeks"))
 
         res, msg = account_test_wachtwoord_sterkte('xxxxxXXXXX', '123456')

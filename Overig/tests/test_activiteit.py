@@ -48,20 +48,20 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         account.save(update_fields=['email_is_bevestigd'])
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.sporter_100001 = Sporter(lid_nr=100001,
                                       voornaam='Norma',
                                       achternaam='de Schutter',
-                                      unaccented_naam='Norma de Schutter',      # hier wordt op gezocht
+                                      unaccented_naam='Norma de Schutter',  # hier wordt op gezocht
                                       account=self.account_100001,
                                       geboorte_datum='1980-01-08',
                                       sinds_datum='2008-01-08',
-                                      bij_vereniging=self.nhbver1)
+                                      bij_vereniging=self.ver1)
         self.sporter_100001.save()
 
         # maak nog een sporter aan die niet gekoppeld is aan een account

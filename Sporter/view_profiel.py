@@ -182,7 +182,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                           .objects
                           .select_related('kampioenschap',
                                           'kampioenschap__competitie',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog')
                           .filter(sporterboog__sporter=sporter))
 
@@ -197,7 +197,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                          .select_related('competitie')
                          .exclude(competitie__is_afgesloten=True)
                          .filter(competitie__pk__in=comp_pks,
-                                 nhb_regio=regio)
+                                 regio=regio)
                          .order_by('competitie__afstand')):
             comp = deelcomp.competitie
             comp.bepaal_fase()
@@ -256,7 +256,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                     obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                                                     kwargs={'comp_pk': kampioen.kampioenschap.competitie.pk,
                                                                             'comp_boog': afk.lower(),
-                                                                            'rayon_nr': kampioen.kampioenschap.nhb_rayon.rayon_nr})
+                                                                            'rayon_nr': kampioen.kampioenschap.rayon.rayon_nr})
                         # for
 
                     elif 'O' <= comp.fase_indiv < 'P':
@@ -369,9 +369,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         .objects
                         .prefetch_related('accounts')
                         .filter(Q(rol='RCL',
-                                  nhb_regio=regio) |
+                                  regio=regio) |
                                 Q(rol__in=('SEC', 'HWL'),
-                                  nhb_ver=sporter.bij_vereniging))
+                                  vereniging=sporter.bij_vereniging))
                         .all())
 
             for functie in functies:

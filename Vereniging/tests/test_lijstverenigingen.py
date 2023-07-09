@@ -38,7 +38,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         lid.geslacht = "M"
         lid.voornaam = voornaam
         lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
+        lid.email = voornaam.lower() + "@test.not"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = self._ver
@@ -62,11 +62,11 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
         self._ver = ver
-        self.nhb_ver1 = ver
+        self.ver1 = ver
 
         # maak HWL functie aan voor deze vereniging
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
@@ -80,8 +80,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         competities_aanmaken(jaar=2019)
 
         self.functie_bko = Kampioenschap.objects.filter(deel=DEEL_BK)[0].functie
-        self.functie_rko = Kampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2)[0].functie
-        self.functie_rcl = Regiocompetitie.objects.filter(nhb_regio=self.regio_101)[0].functie
+        self.functie_rko = Kampioenschap.objects.filter(deel=DEEL_RK, rayon=self.rayon_2)[0].functie
+        self.functie_rcl = Regiocompetitie.objects.filter(regio=self.regio_101)[0].functie
 
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)
@@ -99,7 +99,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         ver.clusters.add(cluster)
         cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='25').all()[2]
         ver.clusters.add(cluster)
-        self.nhb_ver2 = ver
+        self.ver2 = ver
 
     def test_anon(self):
         self.e2e_logout()
@@ -179,39 +179,39 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # verenigingen 1 en 2 horen beide bij regio 101
         # stop ze een voor een in een eigen cluster
 
-        # maak een cluster aan en stop nhb_ver1 erin
+        # maak een cluster aan en stop ver1 erin
         cluster = NhbCluster()
-        cluster.regio = self.nhb_ver1.regio
+        cluster.regio = self.ver1.regio
         cluster.letter = 'Y'
         cluster.naam = "Bovenlijns"
         cluster.gebruik = '18'
         cluster.save()
-        self.nhb_ver1.cluster = cluster
-        self.nhb_ver1.save()
+        self.ver1.cluster = cluster
+        self.ver1.save()
 
         with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
-        # stop nhb_ver2 in hetzelfde cluster
-        self.nhb_ver2.cluster = cluster
-        self.nhb_ver2.save()
+        # stop ver2 in hetzelfde cluster
+        self.ver2.cluster = cluster
+        self.ver2.save()
 
         with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
-        # stop nhb_ver2 in een apart cluster
+        # stop ver2 in een apart cluster
         cluster = NhbCluster()
-        cluster.regio = self.nhb_ver1.regio
+        cluster.regio = self.ver1.regio
         cluster.letter = 'Z'
         cluster.naam = "Onderlijns"
         cluster.gebruik = '18'
         cluster.save()
-        self.nhb_ver2.cluster = cluster
-        self.nhb_ver2.save()
+        self.ver2.cluster = cluster
+        self.ver2.save()
 
         with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)

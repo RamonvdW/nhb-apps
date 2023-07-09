@@ -69,7 +69,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
             try:
                 ver_nr = int(ver_nr)
                 functie = Functie.objects.get(rol='HWL',
-                                              nhb_ver__ver_nr=ver_nr)
+                                              vereniging__ver_nr=ver_nr)
             except (ValueError, TypeError, Functie.DoesNotExist):
                 # in plaats van een foutmelding, stuur door naar Wissel van Rol pagina
                 # raise Http404('Foute parameter (vereniging)')

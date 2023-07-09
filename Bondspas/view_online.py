@@ -18,7 +18,7 @@ from Opleidingen.models import OpleidingDiploma
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, get_sporter_voorkeuren
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
-                                      bereken_leeftijdsklasse_nhb,
+                                      bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
 from PIL import Image, ImageFont, ImageDraw
 from PIL.TiffImagePlugin import ImageFileDirectory_v2
@@ -126,20 +126,20 @@ def maak_bondspas_regels(lid_nr, jaar):
         # geslacht M/V of
         # geslacht X + keuze voor M/V gemaakt
         wedstrijdgeslacht = voorkeur.wedstrijd_geslacht
-        wedstrijdgeslacht_nhb = voorkeur.wedstrijd_geslacht
+        wedstrijdgeslacht_khsn = voorkeur.wedstrijd_geslacht
     else:
         # geslacht X, geen keuze gemaakt --> neem mannen
         wedstrijdgeslacht = 'M'
-        wedstrijdgeslacht_nhb = GESLACHT_ANDERS
+        wedstrijdgeslacht_khsn = GESLACHT_ANDERS
 
     regels.append(('Wedstrijdklassen', ''))
 
     lkl_wa = bereken_leeftijdsklasse_wa(wedstrijdleeftijd_wa, wedstrijdgeslacht)
     regels.append(("WA", lkl_wa))
 
-    lkl_nhb = bereken_leeftijdsklasse_nhb(wedstrijdleeftijd_wa, wedstrijdgeslacht_nhb)
-    if lkl_nhb != lkl_wa:
-        regels.append(("NHB", lkl_nhb))
+    lkl_khsn = bereken_leeftijdsklasse_khsn(wedstrijdleeftijd_wa, wedstrijdgeslacht_khsn)
+    if lkl_khsn != lkl_wa:
+        regels.append(("KHSN", lkl_khsn))
 
     lkl_ifaa_1 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_voor_verjaardag, wedstrijdgeslacht)
     lkl_ifaa_2 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_vanaf_verjaardag, wedstrijdgeslacht)

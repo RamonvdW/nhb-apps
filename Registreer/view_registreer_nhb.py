@@ -14,21 +14,21 @@ from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
-from Registreer.forms import RegistreerNhbForm
+from Registreer.forms import RegistreerNormaalForm
 from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
 from Vereniging.models import Secretaris
 import logging
 
 
-TEMPLATE_REGISTREER_NHB = 'registreer/registreer-nhb.dtl'
-TEMPLATE_REGISTREER_GEEN_EMAIL = 'registreer/registreer-nhb-geen-email.dtl'
-TEMPLATE_REGISTREER_AANGEMAAKT = 'registreer/registreer-nhb-aangemaakt.dtl'
+TEMPLATE_REGISTREER_KHSN = 'registreer/registreer-normaal.dtl'
+TEMPLATE_REGISTREER_GEEN_EMAIL = 'registreer/registreer-normaal-geen-email.dtl'
+TEMPLATE_REGISTREER_AANGEMAAKT = 'registreer/registreer-normaal-aangemaakt.dtl'
 
 my_logger = logging.getLogger('NHBApps.Registreer')
 
 
-def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
-    """ Maak een nieuw account aan voor een NHB lid
+def sporter_create_account_normaal(lid_nr_str, email, nieuw_wachtwoord):
+    """ Maak een nieuw account aan voor een lid
         raises AccountCreateError als:
             - het lidnummer niet valide is
             - het lidnummer niet bekend is in het CRM
@@ -40,7 +40,7 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
             - de sporter niet lid is bij een vereniging
         geeft de url terug die in de email verstuurd moet worden
     """
-    # zoek het e-mailadres van dit NHB lid erbij
+    # zoek het e-mailadres van dit lid erbij
     try:
         # deze conversie beschermd ook tegen gevaarlijke invoer
         lid_nr = int(lid_nr_str)
@@ -76,45 +76,45 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
     account_vraag_email_bevestiging(account, nhb_nummer=lid_nr_str, email=email)
 
 
-class RegistreerNhbLidView(TemplateView):
+class RegistreerNormaalView(TemplateView):
     """
-        Deze view wordt gebruikt om het bondsnummer en e-mailadres van een NHB lid en daarmee een account aan te maken.
+        Deze view wordt gebruikt om het bondsnummer en e-mailadres van een lid en daarmee een account aan te maken.
     """
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
         """
         # begin met een leeg formulier
-        form = RegistreerNhbForm()
+        form = RegistreerNormaalForm()
 
         context = {
             'form': form,
-            'url_aanmaken': reverse('Registreer:nhb'),
+            'url_aanmaken': reverse('Registreer:lid'),
             'kruimels': (
                 (reverse('Registreer:begin'), 'Account aanmaken'),
-                (None, 'NHB lid')),
+                (None, 'KHSN lid')),
         }
 
         menu_dynamics(request, context)
-        return render(request, TEMPLATE_REGISTREER_NHB, context)
+        return render(request, TEMPLATE_REGISTREER_KHSN, context)
 
     @staticmethod
     def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
-        form = RegistreerNhbForm(request.POST)
+        form = RegistreerNormaalForm(request.POST)
 
         context = {
             'form': form,
-            'url_aanmaken': reverse('Registreer:nhb'),
+            'url_aanmaken': reverse('Registreer:lid'),
             'sec_email': '',
             'sec_naam': '',
             'email_bb': settings.EMAIL_BONDSBUREAU,
             'verberg_login_knop': True,
             'kruimels': (
                 (reverse('Registreer:begin'), 'Account aanmaken'),
-                (None, 'NHB lid')),
+                (None, 'KHSN lid')),
         }
 
         menu_dynamics(request, context)
@@ -127,7 +127,7 @@ class RegistreerNhbLidView(TemplateView):
             from_ip = get_safe_from_ip(request)
 
             try:
-                sporter_create_account_nhb(nummer, email, nieuw_wachtwoord)
+                sporter_create_account_normaal(nummer, email, nieuw_wachtwoord)
 
             except SporterGeenEmail as exc:
                 schrijf_in_logboek(account=None,
@@ -148,7 +148,7 @@ class RegistreerNhbLidView(TemplateView):
                             sporter = sec.sporters.all()[0]
                             context['sec_naam'] = sporter.volledige_naam()
 
-                    functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
+                    functie = Functie.objects.get(rol='SEC', vereniging=ver)
                     context['sec_email'] = functie.bevestigde_email
 
                 return render(request, TEMPLATE_REGISTREER_GEEN_EMAIL, context)
@@ -166,14 +166,14 @@ class RegistreerNhbLidView(TemplateView):
                                 from_ip, repr(nummer), repr(email), str(exc)))
 
             except SporterInactief:
-                # lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
-                form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd.' +
+                # lid is mag niet gebruik maken van de diensten van de bond, inclusief deze website
+                form.add_error(None, 'Gebruik van KHSN diensten is geblokkeerd.' +
                                      ' Neem contact op met de secretaris van je vereniging.')
 
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met bondsnummer",
-                                   activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nummer)
+                                   activiteit='Lid %s is inactief (geblokkeerd van gebruik KHSN diensten).' % nummer)
                 my_logger.info('%s REGISTREER Geblokkeerd voor bondsnummer %s (inactief)' % (
                                   from_ip, repr(nummer)))
 
@@ -194,7 +194,7 @@ class RegistreerNhbLidView(TemplateView):
 
         # opnieuw
         context['toon_tip'] = True
-        return render(request, TEMPLATE_REGISTREER_NHB, context)
+        return render(request, TEMPLATE_REGISTREER_KHSN, context)
 
 
 # end of file

@@ -50,16 +50,16 @@ class TestSporterOperations(E2EHelpers, TestCase):
 
         # functies
         self.functie_hwl1000 = maak_functie('HWL ver 1000', 'HWL')
-        self.functie_hwl1000.nhb_ver = ver
-        self.functie_hwl1000.save(update_fields=['nhb_ver'])
+        self.functie_hwl1000.vereniging = ver
+        self.functie_hwl1000.save(update_fields=['vereniging'])
 
         self.functie_rcl111 = maak_functie('RCL regio 111', 'RCL')
-        self.functie_rcl111.nhb_regio = self.regio111
-        self.functie_rcl111.save(update_fields=['nhb_regio'])
+        self.functie_rcl111.regio = self.regio111
+        self.functie_rcl111.save(update_fields=['regio'])
 
         self.functie_rko2 = maak_functie('RKO rayon 2', 'RKO')
-        self.functie_rko2.nhb_rayon = self.rayon2
-        self.functie_rko2.save(update_fields=['nhb_rayon'])
+        self.functie_rko2.rayon = self.rayon2
+        self.functie_rko2.save(update_fields=['rayon'])
 
         self.functie_anders = maak_functie('Anders', 'MWW')
 

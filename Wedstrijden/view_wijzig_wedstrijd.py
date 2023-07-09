@@ -72,7 +72,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         context['wed'] = wedstrijd
@@ -396,7 +396,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         limit_edits = False
@@ -723,7 +723,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         # FUTURE: zet wijzigingen in het logboek, of begin een logboekje per wedstrijd
 
         if self.rol_nu == Rollen.ROL_HWL:
-            if wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+            if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
             next_url = reverse('Wedstrijden:vereniging')

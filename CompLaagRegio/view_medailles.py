@@ -160,7 +160,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                          .objects
                          .select_related('competitie')
                          .filter(competitie__afstand=self.functie_nu.comp_type,
-                                 nhb_regio__regio_nr=regio_nr)
+                                 regio__regio_nr=regio_nr)
                          .order_by('competitie__begin_jaar'))       # oudste eerst
 
             if deelcomps.count() < 1:

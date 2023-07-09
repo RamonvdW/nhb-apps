@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Account aanmaken</h3>
-            <p>NHB leden kunnen een account aanmaken met hun bondsnummer en het e-mailadres dat bekend is bij de NHB.</p>
+            <p>KHSN-leden kunnen een account aanmaken met hun bondsnummer en het e-mailadres dat bekend is bij de bond.</p>
             {% if gast_is_open %}
                 <p>Nog geen lid? Met een gast-account kun je begrensd gebruik maken deze site.</p>
             {% endif %}
@@ -26,7 +26,7 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- voor leden -->
-            {% include 'plein/card.dtl' with title="voor NHB leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_nhb %}
+            {% include 'plein/card.dtl' with title="voor KHSN leden" text="Doorloop eenmalig de korte registratie procedure en krijg toegang tot de hele site." icon="badge" url=url_registreer_nhb %}
 
             {% if gast_is_open %}
                 <!-- voor gast-account -->

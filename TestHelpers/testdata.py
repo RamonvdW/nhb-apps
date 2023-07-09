@@ -12,7 +12,7 @@ from django.utils import timezone
 from Account.models import Account
 from Account.operations.aanmaken import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
-                                   ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
+                                   ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
                                    MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_RESERVE
@@ -233,15 +233,15 @@ class TestData(object):
 
         self.afkorting2teamtype_nhb = dict()    # [team afkorting] = TeamType()
 
-        self.afkorting2boogtype_nhb = dict()    # [boog afkorting] = BoogType()
+        self.afkorting2boogtype_khsn = dict()   # [boog afkorting] = BoogType()
         self.afkorting2boogtype_ifaa = dict()   # [boog afkorting] = BoogType()
 
-        for teamtype in get_organisatie_teamtypen(ORGANISATIE_NHB):
+        for teamtype in get_organisatie_teamtypen(ORGANISATIE_KHSN):
             self.afkorting2teamtype_nhb[teamtype.afkorting] = teamtype
         # for
         del teamtype
-        for boogtype in get_organisatie_boogtypen(ORGANISATIE_NHB):
-            self.afkorting2boogtype_nhb[boogtype.afkorting] = boogtype
+        for boogtype in get_organisatie_boogtypen(ORGANISATIE_KHSN):
+            self.afkorting2boogtype_khsn[boogtype.afkorting] = boogtype
         # for
         for boogtype in get_organisatie_boogtypen(ORGANISATIE_IFAA):
             self.afkorting2boogtype_ifaa[boogtype.afkorting] = boogtype
@@ -316,7 +316,7 @@ class TestData(object):
         """
             Trigger de site om de teamronde van een specifieke competitie door te zetten naar de volgende ronde
         """
-        regio_nr = deelcomp.nhb_regio.regio_nr
+        regio_nr = deelcomp.regio.regio_nr
         if deelcomp.competitie.afstand == 18:                                   # pragma: no cover
             account = self.comp18_account_rcl[regio_nr]
             functie = self.comp18_functie_rcl[regio_nr]
@@ -606,7 +606,7 @@ class TestData(object):
         del lid_nr2account
 
         # maak voor elke Sporter nu de SporterBoog records aan
-        boogtypen = list(self.afkorting2boogtype_nhb.values())
+        boogtypen = list(self.afkorting2boogtype_khsn.values())
         if ook_ifaa_bogen:
             boogtypen += list(self.afkorting2boogtype_ifaa.values())
 
@@ -722,7 +722,7 @@ class TestData(object):
                             rol=rol,
                             # bevestigde_email=''
                             # nieuwe_email=''
-                            nhb_ver=ver)
+                            vereniging=ver)
 
                 if rol == 'SEC':
                     func.bevestigde_email = 'secretaris.club%s@testdata.zz' % ver.ver_nr
@@ -742,9 +742,9 @@ class TestData(object):
         # koppel de functies aan de accounts
         for functie in (Functie
                         .objects
-                        .select_related('nhb_ver')
+                        .select_related('vereniging')
                         .filter(rol__in=('SEC', 'HWL'))):
-            ver_nr = functie.nhb_ver.ver_nr
+            ver_nr = functie.vereniging.ver_nr
             if functie.rol == 'SEC':
                 self.functie_sec[ver_nr] = functie
                 try:
@@ -849,10 +849,10 @@ class TestData(object):
         for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie',
-                                         'nhb_regio')
+                                         'regio')
                          .all()):
             is_18 = deelcomp.competitie.afstand == '18'
-            regio_nr = deelcomp.nhb_regio.regio_nr
+            regio_nr = deelcomp.regio.regio_nr
             if is_18:
                 self.deelcomp18_regio[regio_nr] = deelcomp
             else:
@@ -863,7 +863,7 @@ class TestData(object):
         for deelkamp in (Kampioenschap
                          .objects
                          .select_related('competitie',
-                                         'nhb_rayon')
+                                         'rayon')
                          .all()):
             is_18 = deelkamp.competitie.afstand == '18'
 
@@ -874,7 +874,7 @@ class TestData(object):
                     self.deelkamp25_bk = deelkamp
 
             else:  # if deelkamp.deel == DEEL_RK:
-                rayon_nr = deelkamp.nhb_rayon.rayon_nr
+                rayon_nr = deelkamp.rayon.rayon_nr
                 if is_18:
                     self.deelkamp18_rk[rayon_nr] = deelkamp
                 else:
@@ -888,7 +888,7 @@ class TestData(object):
         if len(accounts) > 0:       # pragma: no branch
             for functie in (Functie
                             .objects
-                            .select_related('nhb_regio', 'nhb_rayon')
+                            .select_related('regio', 'rayon')
                             .filter(rol__in=('RCL', 'RKO', 'BKO'))):
 
                 is_18 = functie.comp_type == '18'
@@ -897,7 +897,7 @@ class TestData(object):
                 functie.accounts.add(account)
 
                 if functie.rol == 'RCL':
-                    regio_nr = functie.nhb_regio.regio_nr
+                    regio_nr = functie.regio.regio_nr
                     if is_18:
                         self.comp18_functie_rcl[regio_nr] = functie
                         self.comp18_account_rcl[regio_nr] = account
@@ -906,7 +906,7 @@ class TestData(object):
                         self.comp25_account_rcl[regio_nr] = account
 
                 elif functie.rol == 'RKO':
-                    rayon_nr = functie.nhb_rayon.rayon_nr
+                    rayon_nr = functie.rayon.rayon_nr
                     if is_18:
                         self.comp18_functie_rko[rayon_nr] = functie
                         self.comp18_account_rko[rayon_nr] = account

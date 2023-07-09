@@ -4,15 +4,15 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from BasisTypen.definities import ORGANISATIE_NHB, ORGANISATIE_WA
+from BasisTypen.definities import ORGANISATIE_KHSN, ORGANISATIE_WA
 from BasisTypen.models import BoogType, TeamType, KalenderWedstrijdklasse
 
 
 def get_organisatie_boogtypen(organisatie):
 
-    if organisatie == ORGANISATIE_NHB:
-        # nationaal is combinatie van WA en NHB
-        organisaties = (ORGANISATIE_WA, ORGANISATIE_NHB)
+    if organisatie == ORGANISATIE_KHSN:
+        # nationaal is combinatie van WA en KHSN
+        organisaties = (ORGANISATIE_WA, ORGANISATIE_KHSN)
     else:
         organisaties = (organisatie,)
 
@@ -27,9 +27,9 @@ def get_organisatie_boogtypen(organisatie):
 
 def get_organisatie_teamtypen(organisatie):
 
-    if organisatie == ORGANISATIE_NHB:
-        # nationaal is combinatie van WA en NHB
-        organisaties = (ORGANISATIE_WA, ORGANISATIE_NHB)
+    if organisatie == ORGANISATIE_KHSN:
+        # nationaal is combinatie van WA en KHSN
+        organisaties = (ORGANISATIE_WA, ORGANISATIE_KHSN)
     else:
         organisaties = (organisatie,)
 
@@ -44,9 +44,9 @@ def get_organisatie_teamtypen(organisatie):
 
 def get_organisatie_klassen(organisatie, filter_bogen=None):
 
-    if organisatie == ORGANISATIE_NHB:
-        # nationaal is combinatie van WA en NHB
-        organisaties = (ORGANISATIE_WA, ORGANISATIE_NHB)
+    if organisatie == ORGANISATIE_KHSN:
+        # nationaal is combinatie van WA en KHSN
+        organisaties = (ORGANISATIE_WA, ORGANISATIE_KHSN)
     else:
         organisaties = (organisatie,)
 

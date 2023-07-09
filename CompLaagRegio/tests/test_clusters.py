@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,13 +26,13 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
 
         # maak een RCL aan
         rcl = self.e2e_create_account('rcl111', 'rcl111@test.com', 'RCL', accepteer_vhpg=True)
-        rcl.nhb_regio = regio_111
+        rcl.regio = regio_111
         rcl.save()
         self.account_rcl111 = rcl
 
         # maak de HWL functie
         self.functie_rcl111 = maak_functie("RCL Regio 111 test", "RCL")
-        self.functie_rcl111.nhb_regio = regio_111
+        self.functie_rcl111.regio = regio_111
         self.functie_rcl111.comp_type = '18'
         self.functie_rcl111.save()
         self.functie_rcl111.accounts.add(self.account_rcl111)
@@ -43,28 +43,28 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         ver.ver_nr = "1001"
         ver.regio = regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         ver = NhbVereniging()
         ver.naam = "Tweede Club"
         ver.ver_nr = "1002"
         ver.regio = regio_111
         ver.save()
-        self.nhbver2 = ver
+        self.ver2 = ver
 
         ver = NhbVereniging()
         ver.naam = "Derde Club"
         ver.ver_nr = "1003"
         ver.regio = regio_111
         ver.save()
-        self.nhbver3 = ver
+        self.ver3 = ver
 
         # stop de verenigingen in een cluster
         self.cluster1 = NhbCluster.objects.get(gebruik='18', regio=regio_111, letter='a')     # standaard cluster
-        self.nhbver1.clusters.add(self.cluster1)
+        self.ver1.clusters.add(self.cluster1)
 
         self.cluster2 = NhbCluster.objects.get(gebruik='18', regio=regio_111, letter='b')     # standaard cluster
-        self.nhbver2.clusters.add(self.cluster2)
+        self.ver2.clusters.add(self.cluster2)
 
     def test_anon(self):
         # anon
@@ -86,9 +86,9 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # pas de naam van een cluster aan
-        # plaats nhbver1 in een ander cluster
-        # haal nhbver2 uit zijn cluster
-        # stop nhbver3 in een cluster
+        # plaats ver1 in een ander cluster
+        # haal ver2 uit zijn cluster
+        # stop ver3 in een cluster
         with self.assert_max_queries(23):
             resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
                                                         'ver_1001': self.cluster2.pk,

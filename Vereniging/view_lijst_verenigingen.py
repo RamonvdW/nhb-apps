@@ -50,15 +50,15 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
     def _get_verenigingen(self):
 
         # vul een kleine cache om vele database verzoeken te voorkomen
-        hwl_functies = dict()   # [nhb_ver] = Functie()
+        hwl_functies = dict()   # [ver_nr] = Functie()
         functie2count = dict()  # [functie.pk] = aantal
         for functie in (Functie
                         .objects
-                        .select_related('nhb_ver')
+                        .select_related('vereniging')
                         .annotate(accounts_count=Count('accounts'))
                         .all()):
             if functie.rol == 'HWL':
-                hwl_functies[functie.nhb_ver.ver_nr] = functie
+                hwl_functies[functie.vereniging.ver_nr] = functie
 
             functie2count[functie.pk] = functie.accounts_count
         # for
@@ -70,7 +70,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
-                    .filter(regio__rayon=self.functie_nu.nhb_rayon)
+                    .filter(regio__rayon=self.functie_nu.rayon)
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
@@ -109,7 +109,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             # het regionummer is verkrijgbaar via de regiocompetitie van de functie
             objs = (NhbVereniging
                     .objects
-                    .filter(regio=self.functie_nu.nhb_regio)
+                    .filter(regio=self.functie_nu.regio)
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
@@ -119,7 +119,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             # het regionummer is verkrijgbaar via de vereniging
             objs = (NhbVereniging
                     .objects
-                    .filter(regio=self.functie_nu.nhb_ver.regio)
+                    .filter(regio=self.functie_nu.vereniging.regio)
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
@@ -215,13 +215,13 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
         sec_email = dict()      # [ver_nr] = email
         for func in (Functie
                      .objects
-                     .select_related('nhb_ver')
+                     .select_related('vereniging')
                      .filter(rol__in=('SEC', 'HWL'))
-                     .exclude(nhb_ver__geen_wedstrijden=True)
+                     .exclude(vereniging__geen_wedstrijden=True)
                      .annotate(aantal_accounts=Count('accounts'))
-                     .order_by('nhb_ver__ver_nr')):
+                     .order_by('vereniging__ver_nr')):
 
-            ver = func.nhb_ver
+            ver = func.vereniging
             ver_nr = ver.ver_nr
             if func.rol == 'SEC':
                 sec_count[ver_nr] = func.aantal_accounts

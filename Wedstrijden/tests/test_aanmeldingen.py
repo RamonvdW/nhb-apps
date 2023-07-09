@@ -44,14 +44,14 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
@@ -60,7 +60,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         self.lid_nr = 123456
-        self.account = self.e2e_create_account(str(self.lid_nr), 'test@nhb.not', 'Voornaam')
+        self.account = self.e2e_create_account(str(self.lid_nr), 'test@test.not', 'Voornaam')
 
         self.boog_r = BoogType.objects.get(afkorting='R')
         self.boog_c = BoogType.objects.get(afkorting='C')
@@ -74,7 +74,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                     sinds_datum='2020-02-02',
                     adres_code='1234AB56',
                     account=self.account,
-                    bij_vereniging=self.nhbver1)
+                    bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
@@ -98,7 +98,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                     geboorte_datum='1966-06-04',
                     sinds_datum='2020-02-02',
                     adres_code='1234AB56',
-                    bij_vereniging=self.nhbver1)
+                    bij_vereniging=self.ver1)
         sporter2.save()
         self.sporter2 = sporter2
         get_sporter_voorkeuren(sporter2)
@@ -114,13 +114,13 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
-        locatie.verenigingen.add(self.nhbver1)
+        locatie.verenigingen.add(self.ver1)
 
         # wordt HWL en maak een wedstrijd aan
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
@@ -221,7 +221,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         korting = WedstrijdKorting(
                         geldig_tot_en_met='2099-12-31',
                         soort=WEDSTRIJD_KORTING_VERENIGING,
-                        uitgegeven_door=self.nhbver1,
+                        uitgegeven_door=self.ver1,
                         percentage=42)
         korting.save()
 
@@ -280,7 +280,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         # wordt SEC
         functie_sec = maak_functie('SEC Ver 1000', 'SEC')
-        functie_sec.nhb_ver = self.nhbver1
+        functie_sec.vereniging = self.ver1
         functie_sec.save()
         functie_sec.accounts.add(self.account_admin)
 
@@ -342,12 +342,12 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.inschrijving1c.save(update_fields=['status'])
 
         # verkeerde vereniging
-        nhbver2 = NhbVereniging(
+        ver2 = NhbVereniging(
                         ver_nr=2000,
                         naam="Andere Club",
                         regio=NhbRegio.objects.get(regio_nr=116))
-        nhbver2.save()
-        self.wedstrijd.organiserende_vereniging = nhbver2
+        ver2.save()
+        self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save(update_fields=['organiserende_vereniging'])
 
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -427,13 +427,13 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assert200_is_bestand_csv(resp)
 
         # als verkeerde HWL
-        nhbver2 = NhbVereniging(
+        ver2 = NhbVereniging(
                             ver_nr=2000,
                             naam="Extra Club",
                             regio=NhbRegio.objects.get(regio_nr=116))
-        nhbver2.save()
+        ver2.save()
 
-        self.wedstrijd.organiserende_vereniging = nhbver2
+        self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save(update_fields=['organiserende_vereniging'])
 
         resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)

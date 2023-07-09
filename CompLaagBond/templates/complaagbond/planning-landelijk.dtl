@@ -150,7 +150,7 @@
                             {% endif %}
                         </td>
 
-                        <td class="center">{{ deelkamp.nhb_rayon }}</td>
+                        <td class="center">{{ deelkamp.rayon }}</td>
 
                         <td class="center">
                             <a class="btn-nhb-rood" href="{% url 'CompLaagRayon:planning' deelkamp.pk %}">

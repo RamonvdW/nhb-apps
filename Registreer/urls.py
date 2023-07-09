@@ -18,9 +18,9 @@ urlpatterns = [
          view_begin.RegistreerBeginView.as_view(),
          name='begin'),
 
-    path('nhb-lid/',
-         view_registreer_nhb.RegistreerNhbLidView.as_view(),
-         name='nhb'),
+    path('lid/',
+         view_registreer_nhb.RegistreerNormaalView.as_view(),
+         name='lid'),
 
     path('gast/',
          view_registreer_gast.RegistreerGastView.as_view(),

@@ -44,14 +44,14 @@
         <div class="col s12">
             <div class="white" style="padding:10px">
                 {% if mag_aanmelden %}
-                    <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
                     <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
                     <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk op de rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
                     <p>Leden die aangegeven hebben niet mee te willen doen met de bondscompetities worden in grijs weergegeven.</p>
                 {% else %}
-                    <p>Deze pagina toont voor leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    <p>Deze pagina toont voor leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
 
                     <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten.</p>
 

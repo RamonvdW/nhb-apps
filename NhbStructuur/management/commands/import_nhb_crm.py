@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" importeer een JSON-file met data uit het CRM-systeem van de NHB """
+""" importeer een JSON-file met data uit het CRM-systeem van de bond """
 
 from django.conf import settings
 from django.utils import timezone
@@ -59,7 +59,7 @@ SKIP_VER_NR = (settings.EXTERN_VER_NR,)
 
 class Command(BaseCommand):
 
-    help = "Importeer een JSON file met data uit het CRM systeem van de NHB"
+    help = "Importeer een JSON file met data uit het CRM systeem van de bond"
 
     def __init__(self):
         super().__init__()
@@ -139,7 +139,7 @@ class Command(BaseCommand):
 
         for functie in (Functie
                         .objects
-                        .select_related('nhb_ver')
+                        .select_related('vereniging')
                         .prefetch_related('accounts')
                         .all()):
             tup = (functie.rol, functie.beschrijving)
@@ -682,9 +682,9 @@ class Command(BaseCommand):
 
                     updated = list()
 
-                    if functie.nhb_ver != obj:
-                        functie.nhb_ver = obj
-                        updated.append('nhb_ver')
+                    if functie.vereniging != obj:
+                        functie.vereniging = obj
+                        updated.append('vereniging')
 
                     if rol == 'SEC':
                         # secretaris functie krijgt email uit CRM
@@ -1552,8 +1552,8 @@ class Command(BaseCommand):
             if ver_nr in settings.CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE:
                 continue
 
-            nhb_ver = self._vind_vereniging(ver_nr)
-            if not nhb_ver:
+            ver = self._vind_vereniging(ver_nr)
+            if not ver:
                 continue
 
             # een vereniging zonder doel heeft een lege location_name
@@ -1570,8 +1570,8 @@ class Command(BaseCommand):
             if not adres:
                 # vereniging heeft geen adres meer
                 # verwijder de koppeling met wedstrijdlocatie uit crm
-                for obj in nhb_ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
-                    nhb_ver.wedstrijdlocatie_set.remove(obj)
+                for obj in ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
+                    ver.wedstrijdlocatie_set.remove(obj)
                     self.stdout.write('[INFO] Wedstrijdlocatie %s ontkoppeld voor vereniging %s' % (repr(obj.adres), ver_nr))
                     self._count_wijzigingen += 1
                 continue
@@ -1584,7 +1584,7 @@ class Command(BaseCommand):
                                     .get(adres=adres))
             except WedstrijdLocatie.MultipleObjectsReturned:            # pragma: no cover
                 # er is een ongelukje gebeurt
-                self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
+                self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % ver)
                 self._count_errors += 1
                 continue
             except WedstrijdLocatie.DoesNotExist:
@@ -1606,24 +1606,24 @@ class Command(BaseCommand):
 
             # adres van locatie mag niet wijzigen
             # dus als vereniging een ander adres heeft, ontkoppel dan de oude locatie
-            for obj in (nhb_ver
+            for obj in (ver
                         .wedstrijdlocatie_set
                         .exclude(adres_uit_crm=False)           # niet extern/buitenbaan
                         .exclude(pk=wedstrijdlocatie.pk)):
-                nhb_ver.wedstrijdlocatie_set.remove(obj)
-                self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (nhb_ver, repr(obj.adres)))
+                ver.wedstrijdlocatie_set.remove(obj)
+                self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (ver, repr(obj.adres)))
                 self._count_wijzigingen += 1
             # for
 
             if wedstrijdlocatie.verenigingen.filter(ver_nr=ver_nr).count() == 0:
                 # maak koppeling tussen vereniging en wedstrijdlocatie
-                wedstrijdlocatie.verenigingen.add(nhb_ver)
-                self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (nhb_ver, repr(adres)))
+                wedstrijdlocatie.verenigingen.add(ver)
+                self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (ver, repr(adres)))
                 self._count_toevoegingen += 1
 
             # zoek ook de buitenbaan van de vereniging erbij
             try:
-                buiten_locatie = (nhb_ver
+                buiten_locatie = (ver
                                   .wedstrijdlocatie_set
                                   .get(baan_type=BAAN_TYPE_BUITEN,
                                        zichtbaar=True))

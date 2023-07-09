@@ -66,7 +66,7 @@
 
                 {% for functie in alle %}
                     <tr>
-                        <td>{{ functie.nhb_ver }}</td>
+                        <td>{{ functie.vereniging }}</td>
                         <td>{{ functie.beschrijving }}</td>
                         <td>{{ functie.bevestigde_email }}</td>
                     </tr>

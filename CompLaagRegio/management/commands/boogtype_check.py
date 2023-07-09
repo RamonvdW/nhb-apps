@@ -57,7 +57,7 @@ class Command(BaseCommand):
             if not wil_str:
                 wil_str = '?'
             self.stdout.write('Regio %s   %-30s   %-30s   %-2s -> %s' % (
-                            deelcomp.nhb_regio.regio_nr,
+                            deelcomp.regio.regio_nr,
                             self.afkappen(str(deelnemer.bij_vereniging), 30),
                             self.afkappen(sporter.lid_nr_en_volledige_naam(), 40),
                             deelnemer.sporterboog.boogtype.afkorting,

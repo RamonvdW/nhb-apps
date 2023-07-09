@@ -63,7 +63,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                      .prefetch_related('indiv_klassen',
                                        'team_klassen')
                      .get(pk=match_pk,
-                          vereniging=self.functie_nu.nhb_ver))
+                          vereniging=self.functie_nu.vereniging))
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -261,7 +261,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                      .objects
                      .select_related('vereniging')
                      .get(pk=match_pk,
-                          vereniging=self.functie_nu.nhb_ver))
+                          vereniging=self.functie_nu.vereniging))
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -315,7 +315,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             ws_name = 'Wedstrijd'
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_individueel-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
+        fname = "rk-programma_individueel-rayon%s_" % deelkamp.rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsx'
 
@@ -336,7 +336,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # maak wijzigingen in het RK programma
         ws = prg[ws_name]
 
-        ws['C2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.nhb_rayon.rayon_nr, klasse.beschrijving)
+        ws['C2'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelkamp.rayon.rayon_nr, klasse.beschrijving)
 
         ws['D3'] = match.vereniging.naam     # organisatie
         ws['J3'] = "Datum: " + match.datum_wanneer.strftime('%Y-%m-%d')
@@ -481,7 +481,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                      .select_related('vereniging',
                                      'locatie')
                      .get(pk=match_pk,
-                          vereniging=self.functie_nu.nhb_ver))
+                          vereniging=self.functie_nu.vereniging))
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -520,7 +520,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         boog_pks = list(boog_typen.values_list('pk', flat=True))
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_teams-rayon%s_" % deelkamp.nhb_rayon.rayon_nr
+        fname = "rk-programma_teams-rayon%s_" % deelkamp.rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsx'
 
@@ -550,7 +550,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws = prg['Deelnemers en Scores']
 
-        ws['B2'] = 'RK Teams Rayon %s, %s, Klasse: %s' % (deelkamp.nhb_rayon.rayon_nr, comp.beschrijving, klasse_str)
+        ws['B2'] = 'RK Teams Rayon %s, %s, Klasse: %s' % (deelkamp.rayon.rayon_nr, comp.beschrijving, klasse_str)
         ws['B4'] = match.vereniging.naam     # organisatie
         if match.locatie:
             ws['F4'] = match.locatie.adres       # adres van de wedstrijdlocatie

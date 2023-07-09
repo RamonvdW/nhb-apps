@@ -41,14 +41,14 @@ class TestFunctieRol(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
     def test_maak_sec(self):
         self.assertEqual(self.functie_sec.accounts.count(), 0)
-        added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
+        added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
         self.assertTrue(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 
@@ -58,7 +58,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assert_consistent_email_html_text(mail)
 
         # opnieuw toevoegen heeft geen effect
-        added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
+        added = maak_account_vereniging_secretaris(self.ver1, self.account_normaal)
         self.assertFalse(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 

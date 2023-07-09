@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
+from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA
 from BasisTypen.models import (BoogType, TeamType, LeeftijdsKlasse,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                KalenderWedstrijdklasse)
@@ -125,15 +125,15 @@ class TestBasisTypen(TestCase):
 
     def test_operations(self):
         self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_WA).count(), 5)
-        self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_NHB).count(), 5)
+        self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_KHSN).count(), 5)
         self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_IFAA).count(), 12)
 
         self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_WA).count(), 3)
-        self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_NHB).count(), 5)
+        self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_KHSN).count(), 5)
         self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_IFAA).count(), 0)
 
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA).count(), 40)
-        self.assertEqual(get_organisatie_klassen(ORGANISATIE_NHB).count(), 105)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_KHSN).count(), 105)
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA).count(), 144)
 
         bogen_pks = [BoogType.objects.get(afkorting='R').pk]
@@ -145,7 +145,7 @@ class TestBasisTypen(TestCase):
         self.assertEqual(klassen.count(), 16)
 
         bogen_pks = BoogType.objects.filter(afkorting__in=('R', 'C')).values_list('pk', flat=True)
-        klassen = get_organisatie_klassen(ORGANISATIE_NHB, filter_bogen=bogen_pks)
+        klassen = get_organisatie_klassen(ORGANISATIE_KHSN, filter_bogen=bogen_pks)
         # for klasse in klassen:
         #     print(klasse)
         self.assertEqual(klassen.count(), 42)

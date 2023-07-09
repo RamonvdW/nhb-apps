@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.db.models import F
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
-from BasisTypen.definities import ORGANISATIE_NHB
+from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_BLANCO,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
@@ -83,7 +83,7 @@ class Command(BaseCommand):
                        geen sporters meer over hebben voor het LB team.
         """
 
-        for team_type in get_organisatie_teamtypen(ORGANISATIE_NHB):
+        for team_type in get_organisatie_teamtypen(ORGANISATIE_KHSN):
 
             self._team_boogtypen[team_type.pk] = boog_lijst = list()
 
@@ -784,7 +784,7 @@ class Command(BaseCommand):
         for deelcomp in (Regiocompetitie
                          .objects
                          .filter(competitie=competitie,
-                                 nhb_regio__rayon__rayon_nr=rayon_nr)):
+                                 regio__rayon__rayon_nr=rayon_nr)):
             pks.append(deelcomp.pk)
         # for
 
@@ -868,19 +868,19 @@ class Command(BaseCommand):
         rayon_nr2deelkamp = dict()
         for deelkamp in (Kampioenschap
                          .objects
-                         .select_related('nhb_rayon')
+                         .select_related('rayon')
                          .filter(competitie=comp,
                                  deel=DEEL_RK)):
-            rayon_nr2deelkamp[deelkamp.nhb_rayon.rayon_nr] = deelkamp
+            rayon_nr2deelkamp[deelkamp.rayon.rayon_nr] = deelkamp
         # for
 
         for deelkamp in (Kampioenschap
                          .objects
-                         .select_related('nhb_rayon')
+                         .select_related('rayon')
                          .filter(competitie=comp,
                                  deel=DEEL_RK)):
 
-            deelnemers = self._get_regio_sporters_rayon(comp, deelkamp.nhb_rayon.rayon_nr)
+            deelnemers = self._get_regio_sporters_rayon(comp, deelkamp.rayon.rayon_nr)
 
             # schrijf all deze sporters in voor het RK
             # kampioenen als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
@@ -921,10 +921,10 @@ class Command(BaseCommand):
 
         for deelkamp in (Kampioenschap
                          .objects
-                         .select_related('nhb_rayon')
+                         .select_related('rayon')
                          .filter(competitie=comp,
                                  deel=DEEL_RK)
-                         .order_by('nhb_rayon__rayon_nr')):
+                         .order_by('rayon__rayon_nr')):
 
             deelkamp.heeft_deelnemerslijst = True
             deelkamp.save(update_fields=['heeft_deelnemerslijst'])
@@ -948,7 +948,7 @@ class Command(BaseCommand):
                       log=taak_log)
 
             # schrijf in het logboek
-            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelkamp.nhb_rayon)
+            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelkamp.rayon)
             msg += '\nDe %s is geïnformeerd via een taak' % functie_rko
             schrijf_in_logboek(None, "Competitie", msg)
         # for
@@ -1092,7 +1092,7 @@ class Command(BaseCommand):
                          .exclude(deelname=DEELNAME_NEE)
                          .exclude(result_rank=0)
                          .select_related('kampioenschap',
-                                         'kampioenschap__nhb_rayon',
+                                         'kampioenschap__rayon',
                                          'indiv_klasse',
                                          'bij_vereniging',
                                          'sporterboog')):
@@ -1116,7 +1116,7 @@ class Command(BaseCommand):
                         gemiddelde_scores=gemiddelde_scores)
 
             if kampioen.result_rank == 1:
-                nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.nhb_rayon.naam
+                nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.rayon.naam
                 nieuw.deelname = DEELNAME_JA
 
             bulk.append(nieuw)
@@ -1331,7 +1331,7 @@ class Command(BaseCommand):
                                     aanvangsgemiddelde=ag)
 
                     if rk_team.result_rank == 1 and not is_verplaatst:
-                        bk_team.rk_kampioen_label = 'Kampioen %s' % rk_team.kampioenschap.nhb_rayon.naam
+                        bk_team.rk_kampioen_label = 'Kampioen %s' % rk_team.kampioenschap.rayon.naam
                         bk_team.deelname = DEELNAME_JA
 
                     bk_team.save()

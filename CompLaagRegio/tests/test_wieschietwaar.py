@@ -48,21 +48,21 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de SEC functie
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test 1000", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak de WL functie
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak het lid aan dat WL wordt
@@ -103,7 +103,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = ver
         sporter.save()
-        self.nhblid_100002 = sporter
+        self.sporter_100002 = sporter
 
         # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
         sporter = Sporter()
@@ -116,7 +116,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         sporter.sinds_datum = datetime.date(year=2010, month=10, day=10)
         sporter.bij_vereniging = ver
         sporter.save()
-        self.nhblid_100012 = sporter
+        self.sporter_100012 = sporter
 
         # maak het lid aan dat HWL wordt
         sporter = Sporter()
@@ -124,7 +124,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         sporter.geslacht = "V"
         sporter.voornaam = "Ramona"
         sporter.achternaam = "de Testerin"
-        sporter.email = "ramonatesterin@nhb.not"
+        sporter.email = "ramonatesterin@test.not"
         sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = ver
@@ -134,7 +134,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
         sporter.account = self.account_hwl
         sporter.save()
-        self.nhblid_100003 = sporter
+        self.sporter_100003 = sporter
 
         # maak het lid aan dat SEC wordt
         sporter = Sporter()
@@ -153,7 +153,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
         sporter.account = self.account_sec
         sporter.save()
-        self.nhblid_100004 = sporter
+        self.sporter_100004 = sporter
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
@@ -162,11 +162,11 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # maak de HWL functie
         self.functie_hwl2 = maak_functie("HWL test 1222", "HWL")
-        self.functie_hwl2.nhb_ver = ver2
+        self.functie_hwl2.vereniging = ver2
         self.functie_hwl2.save()
 
         # maak een lid aan bij deze tweede vereniging
@@ -180,7 +180,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         sporter.sinds_datum = datetime.date(year=2000, month=1, day=31)
         sporter.bij_vereniging = ver2
         sporter.save()
-        self.lid_120001 = sporter
+        self.sporter_120001 = sporter
 
         sporterboog = SporterBoog(sporter=sporter,
                                   boogtype=boog_tr,
@@ -206,7 +206,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
-        self.deelcomp_regio = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio = Regiocompetitie.objects.get(regio=self.regio_111,
                                                           competitie__afstand=18)
 
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
@@ -223,7 +223,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         for volgnr in range(3):
             match = CompetitieMatch(
                         competitie=self.deelcomp_regio.competitie,
-                        vereniging=self.nhbver1,
+                        vereniging=self.ver1,
                         datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
                         tijd_begin_wedstrijd=de_tijd)
 
@@ -248,7 +248,7 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
         match = CompetitieMatch(
                     competitie=self.deelcomp_regio.competitie,
-                    vereniging=self.nhbver1,
+                    vereniging=self.ver1,
                     datum_wanneer=datetime.date(year=2020, month=2, day=1),
                     tijd_begin_wedstrijd=de_tijd)
         match.save()

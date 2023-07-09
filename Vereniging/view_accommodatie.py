@@ -77,11 +77,11 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if functie_nu:
             if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
                 # HWL mag van zijn eigen vereniging wijzigen
-                if functie_nu.nhb_ver == ver:
+                if functie_nu.vereniging == ver:
                     return True
             elif rol_nu == Rollen.ROL_RCL:
                 # RCL mag van alle verenigingen in zijn regio de accommodatie instellingen wijzigen
-                if functie_nu.nhb_regio == ver.regio:
+                if functie_nu.regio == ver.regio:
                     return True
 
         return False
@@ -100,7 +100,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         context['locatie'] = binnen_locatie
         context['buiten_locatie'] = buiten_locatie
         context['externe_locaties'] = externe_locaties
-        context['nhbver'] = ver
+        context['ver'] = ver
 
         for locatie in externe_locaties:
             locatie.geen_naam = locatie.naam.strip() == ""
@@ -109,7 +109,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek de beheerders erbij
-        qset = Functie.objects.filter(nhb_ver=ver).prefetch_related('accounts')
+        qset = Functie.objects.filter(vereniging=ver).prefetch_related('accounts')
         try:
             functie_sec = qset.filter(rol='SEC')[0]
         except IndexError:                  # pragma: no cover
@@ -132,7 +132,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if len(context['sec_names']) == 0:
             context['geen_sec'] = True
             try:
-                sec = Secretaris.objects.prefetch_related('sporters').get(vereniging=functie_sec.nhb_ver)
+                sec = Secretaris.objects.prefetch_related('sporters').get(vereniging=functie_sec.vereniging)
             except Secretaris.DoesNotExist:
                 pass
             else:

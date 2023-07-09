@@ -148,10 +148,10 @@ class UitslagenRegioIndivView(TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -337,10 +337,10 @@ class UitslagenRegioTeamsView(TemplateView):
         try:
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 

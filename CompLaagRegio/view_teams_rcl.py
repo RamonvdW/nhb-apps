@@ -77,7 +77,7 @@ class RegioTeamsTemplateView(TemplateView):
                 if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
                     subset = 'alle'
                 elif self.rol_nu == Rollen.ROL_RKO:
-                    subset = str(self.functie_nu.nhb_rayon.rayon_nr)
+                    subset = str(self.functie_nu.rayon.rayon_nr)
                 else:
                     raise Http404('Selectie wordt niet ondersteund')
 
@@ -98,7 +98,7 @@ class RegioTeamsTemplateView(TemplateView):
                 deelcomp_pks = (Regiocompetitie
                                 .objects
                                 .filter(competitie=comp,
-                                        nhb_regio__rayon__rayon_nr=subset)
+                                        regio__rayon__rayon_nr=subset)
                                 .values_list('pk', flat=True))
 
             context['filters'] = filters = list()
@@ -143,8 +143,8 @@ class RegioTeamsTemplateView(TemplateView):
             comp.bepaal_fase()
 
             context['deelcomp'] = deelcomp
-            context['rayon'] = self.functie_nu.nhb_regio.rayon
-            context['regio'] = self.functie_nu.nhb_regio
+            context['rayon'] = self.functie_nu.regio.rayon
+            context['regio'] = self.functie_nu.regio
 
         if comp.afstand == '18':
             aantal_pijlen = 30
@@ -331,7 +331,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             # niet de beheerder
             raise PermissionDenied('Verkeerde beheerder')
 
-        regio_nr = deelcomp.nhb_regio.regio_nr
+        regio_nr = deelcomp.regio.regio_nr
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
@@ -443,9 +443,9 @@ class AGControleView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(competitie=comp_pk,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -689,12 +689,12 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk,
-                             nhb_regio=self.functie_nu.nhb_regio))
+                             regio=self.functie_nu.regio))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie bestaat niet')
 
         context['deelcomp'] = deelcomp
-        context['regio'] = self.functie_nu.nhb_regio
+        context['regio'] = self.functie_nu.regio
 
         # TODO: check competitie fase
 
@@ -783,7 +783,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(pk=deelcomp_pk,
-                             nhb_regio=self.functie_nu.nhb_regio))
+                             regio=self.functie_nu.regio))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie bestaat niet')
 

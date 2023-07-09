@@ -1013,7 +1013,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
-        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
             raise PermissionDenied('Wedstrijd van andere vereniging')
 
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
@@ -1172,7 +1172,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
             raise PermissionDenied('Wedstrijd van andere vereniging')
 
         sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid

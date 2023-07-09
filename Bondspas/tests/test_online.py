@@ -29,11 +29,11 @@ class TestBondspas(E2EHelpers, TestCase):
         now = datetime.datetime.now()
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.sporter = sporter = Sporter(
                                     lid_nr=self.lid_nr,
@@ -44,7 +44,7 @@ class TestBondspas(E2EHelpers, TestCase):
                                     geboorte_datum=datetime.date(year=now.year - 55, month=3, day=4),
                                     sinds_datum=datetime.date(year=2010, month=11, day=12),
                                     geslacht='M',
-                                    bij_vereniging=self.nhbver1,
+                                    bij_vereniging=self.ver1,
                                     lid_tot_einde_jaar=now.year)
         self.account = self.e2e_create_account(self.lid_nr, sporter.email, sporter.voornaam)
         sporter.account = self.account
@@ -110,7 +110,7 @@ class TestBondspas(E2EHelpers, TestCase):
         # speciaal geval: jarig op 1 januari
         # speciaal geval: geslacht X
         # speciaal geval: geen vereniging
-        # speciaal: NHB leeftijdsklassen die anders is dan WA: 60
+        # speciaal: KHSN leeftijdsklassen die anders is dan WA: 60
         # speciaal: para classificatie
         self.sporter.geboorte_datum = '%4d-01-01' % (now.year - 60)
         self.sporter.geslacht = GESLACHT_ANDERS

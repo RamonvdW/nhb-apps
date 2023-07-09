@@ -57,20 +57,20 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak de SEC functie
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         # maak het lid aan dat HWL wordt
@@ -100,7 +100,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         sporter.geslacht = "V"
         sporter.voornaam = "Ramona"
         sporter.achternaam = "de Jeugdschutter"
-        sporter.email = "nietleeg@nhb.not"
+        sporter.email = "nietleeg@test.not"
         sporter.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         sporter.bij_vereniging = ver
@@ -154,7 +154,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # maak een senior lid aan, om inactief te maken
         sporter = Sporter()
@@ -179,7 +179,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # fake een deelnemerslijst voor de RK
         deelkamp = Kampioenschap.objects.get(competitie=self.comp_25,
                                              deel=DEEL_RK,
-                                             nhb_rayon=self.regio_111.rayon)
+                                             rayon=self.regio_111.rayon)
         deelkamp.heeft_deelnemerslijst = True
         deelkamp.save()
         self.deelcomp_rk = deelkamp
@@ -193,7 +193,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         match = CompetitieMatch(
                         competitie=self.comp_25,
                         beschrijving='test',
-                        vereniging=self.nhbver1,
+                        vereniging=self.ver1,
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='00:00')
         match.save()
@@ -211,8 +211,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100001.lid_nr,
                     sporter_naam=self.sporter_100001.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='R',
                     score1=10,
                     score2=20,
@@ -232,8 +232,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100002.lid_nr,
                     sporter_naam=self.sporter_100002.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='BB',
                     score1=10,
                     score2=20,
@@ -257,7 +257,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio = Regiocompetitie.objects.get(regio=self.regio_111,
                                                           competitie__afstand=18)
         self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
         self.deelcomp_regio.save()
@@ -314,7 +314,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         zet_competitie_fase_regio_wedstrijden(self.comp_25)
         deelcomp = Regiocompetitie.objects.get(competitie=self.comp_25,
-                                               nhb_regio=self.regio_111)
+                                               regio=self.regio_111)
         deelcomp.regio_organiseert_teamcompetitie = False
         deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])
 
@@ -454,7 +454,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de sporterboog records gemaakt zijn (HWL had toestemming)
         # stoppen we 1 lid in een andere vereniging
-        self.sporter_100003.bij_vereniging = self.nhbver2
+        self.sporter_100003.bij_vereniging = self.ver2
         self.sporter_100003.save()
 
         with self.assert_max_queries(20):
@@ -468,7 +468,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         loc = WedstrijdLocatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
-        loc.verenigingen.add(self.nhbver1)
+        loc.verenigingen.add(self.ver1)
 
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)

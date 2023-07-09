@@ -445,7 +445,7 @@ class Regiocompetitie(models.Model):
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
     # regio, voor regiocompetitie
-    nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
 
     # welke beheerder hoort hier bij?
     functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
@@ -490,7 +490,7 @@ class Regiocompetitie(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        return "%s - %s" % (self.competitie, self.nhb_regio)
+        return "%s - %s" % (self.competitie, self.regio)
 
     objects = models.Manager()      # for the editor only
 
@@ -521,7 +521,7 @@ class RegiocompetitieRonde(models.Model):
         if self.cluster:
             msg = str(self.cluster)
         else:
-            msg = str(self.regiocompetitie.nhb_regio)
+            msg = str(self.regiocompetitie.regio)
 
         msg += " week %s" % self.week_nr
 
@@ -763,12 +763,9 @@ class Kampioenschap(models.Model):
     # hoort bij welke competitie?
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
-    # nhb_rayon is gezet voor het RK
-    # geen van beiden is gezet voor de BK
-
     # rayon, voor RK
-    nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
-                                  null=True, blank=True)    # optioneel want alleen voor RK
+    rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
+                              null=True, blank=True)    # optioneel want alleen voor RK
 
     # welke beheerder hoort hier bij?
     functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
@@ -788,8 +785,8 @@ class Kampioenschap(models.Model):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         deel2str = {code: beschrijving for code, beschrijving in self.DEEL}
         msg = deel2str[self.deel]
-        if self.nhb_rayon:
-            msg += ' Rayon %s' % self.nhb_rayon.rayon_nr
+        if self.rayon:
+            msg += ' Rayon %s' % self.rayon.rayon_nr
         return msg
 
     class Meta:
@@ -927,7 +924,7 @@ class KampioenschapSporterBoog(models.Model):
         if self.kampioenschap.deel == DEEL_BK:
             substr = "BK"
         else:
-            substr = "RK rayon %s" % self.kampioenschap.nhb_rayon.rayon_nr
+            substr = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
 
         substr += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
 
@@ -1057,7 +1054,7 @@ class CompetitieMutatie(models.Model):
 
     # door wie is de mutatie geïnitieerd
     # als het een account is, dan volledige naam + rol
-    # als er geen account is (sporter zonder account) dan NHB lid details
+    # als er geen account is (sporter zonder account) dan lid details
     door = models.CharField(max_length=50, default='')
 
     # op welke competitie heeft deze mutatie betrekking?

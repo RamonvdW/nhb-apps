@@ -59,7 +59,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         context['ver'] = ver = self.get_vereniging()
 
         context['readonly'] = True
-        if self.functie_nu and self.functie_nu.rol == 'HWL' and self.functie_nu.nhb_ver == ver:
+        if self.functie_nu and self.functie_nu.rol == 'HWL' and self.functie_nu.vereniging == ver:
             context['readonly'] = False
             context['url_toevoegen'] = reverse('Vereniging:externe-locaties',
                                                kwargs={'ver_nr': ver.ver_nr})
@@ -97,7 +97,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
         ver = self.get_vereniging()
 
-        if not self.functie_nu or self.functie_nu.rol != 'HWL' or self.functie_nu.nhb_ver != ver:
+        if not self.functie_nu or self.functie_nu.rol != 'HWL' or self.functie_nu.vereniging != ver:
             raise PermissionDenied('Alleen HWL mag een locatie toevoegen')
 
         locatie = WedstrijdLocatie(baan_type='E')      # externe locatie
@@ -152,7 +152,7 @@ class ExterneLocatieDetailsView(TemplateView):
 
         # controleer dat de gebruiker HWL is van deze vereniging
         readonly = True
-        if functie_nu and functie_nu.rol == 'HWL' and functie_nu.nhb_ver == ver:
+        if functie_nu and functie_nu.rol == 'HWL' and functie_nu.vereniging == ver:
             readonly = False
 
         return readonly

@@ -24,7 +24,7 @@ def init_gast_lid_nr(apps, _):
 
 
 def maak_vereniging_extern(apps, _):
-    """ maak de NHB vereniging voor gast sporters """
+    """ maak de vereniging voor gast sporters """
 
     ver_nr = settings.EXTERN_VER_NR
 

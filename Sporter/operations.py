@@ -20,17 +20,17 @@ def get_request_regio_nr(request, allow_admin_regio=True):
     rol_nu, functie_nu = rol_get_huidige_functie(request)
 
     if functie_nu:
-        if functie_nu.nhb_ver:
+        if functie_nu.vereniging:
             # HWL, WL
-            regio_nr = functie_nu.nhb_ver.regio.regio_nr
-        elif functie_nu.nhb_regio:
+            regio_nr = functie_nu.vereniging.regio.regio_nr
+        elif functie_nu.regio:
             # RCL
-            regio_nr = functie_nu.nhb_regio.regio_nr
-        elif functie_nu.nhb_rayon:
+            regio_nr = functie_nu.regio.regio_nr
+        elif functie_nu.rayon:
             # RKO
             regio = (NhbRegio
                      .objects
-                     .filter(rayon=functie_nu.nhb_rayon,
+                     .filter(rayon=functie_nu.rayon,
                              is_administratief=False)
                      .order_by('regio_nr'))[0]
             regio_nr = regio.regio_nr
@@ -41,8 +41,7 @@ def get_request_regio_nr(request, allow_admin_regio=True):
         if account.sporter_set.count() > 0:         # pragma: no branch
             sporter = account.sporter_set.select_related('bij_vereniging__regio').all()[0]
             if sporter.is_actief_lid and sporter.bij_vereniging:
-                nhb_ver = sporter.bij_vereniging
-                regio_nr = nhb_ver.regio.regio_nr
+                regio_nr = sporter.bij_vereniging.regio.regio_nr
 
     if regio_nr == 100 and not allow_admin_regio:
         regio_nr = 101
@@ -59,15 +58,15 @@ def get_request_rayon_nr(request):
     rol_nu, functie_nu = rol_get_huidige_functie(request)
 
     if functie_nu:
-        if functie_nu.nhb_ver:
+        if functie_nu.vereniging:
             # HWL, WL
-            rayon_nr = functie_nu.nhb_ver.regio.rayon.rayon_nr
-        elif functie_nu.nhb_regio:
+            rayon_nr = functie_nu.vereniging.regio.rayon.rayon_nr
+        elif functie_nu.regio:
             # RCL
-            rayon_nr = functie_nu.nhb_regio.rayon.rayon_nr
-        elif functie_nu.nhb_rayon:
+            rayon_nr = functie_nu.regio.rayon.rayon_nr
+        elif functie_nu.rayon:
             # RKO
-            rayon_nr = functie_nu.nhb_rayon.rayon_nr
+            rayon_nr = functie_nu.rayon.rayon_nr
 
     elif rol_nu == Rollen.ROL_SPORTER:
         account = request.user
@@ -75,8 +74,7 @@ def get_request_rayon_nr(request):
             if account.sporter_set.count() > 0:                         # pragma: no branch
                 sporter = account.sporter_set.all()[0]
                 if sporter.is_actief_lid and sporter.bij_vereniging:
-                    nhb_ver = sporter.bij_vereniging
-                    rayon_nr = nhb_ver.regio.rayon.rayon_nr
+                    rayon_nr = sporter.bij_vereniging.regio.rayon.rayon_nr
 
     return rayon_nr
 

@@ -32,14 +32,14 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.lid_nr = 123456
 
-        self.account_email = 'winkel@nhb.not'
+        self.account_email = 'winkel@test.not'
         self.account_normaal = self.e2e_create_account(self.lid_nr, self.account_email, 'Mgr', accepteer_vhpg=True)
 
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         sporter1 = Sporter(
                     lid_nr=self.lid_nr,
@@ -50,7 +50,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
                     sinds_datum='2020-07-07',
                     adres_code='1234AB56',
                     account=self.account_normaal,
-                    bij_vereniging=self.nhbver1,
+                    bij_vereniging=self.ver1,
                     postadres_1='Sporter straatnaam 1',
                     postadres_2='Sporter woonplaats',
                     postadres_3='Sporter land')
@@ -59,7 +59,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.functie_mww = Functie.objects.get(rol='MWW')
         self.functie_mww.accounts.add(self.account_normaal)
-        self.functie_mww.bevestigde_email = 'webshop@nhb.not'
+        self.functie_mww.bevestigde_email = 'webshop@test.not'
         self.functie_mww.save(update_fields=['bevestigde_email'])
 
         foto = WebwinkelFoto()

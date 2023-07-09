@@ -30,9 +30,9 @@ def get_sporter_ver_nr(request):
     if request.user.is_authenticated:
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        if functie_nu and functie_nu.nhb_ver:
+        if functie_nu and functie_nu.vereniging:
             # HWL, WL, SEC
-            ver_nr = functie_nu.nhb_ver.ver_nr
+            ver_nr = functie_nu.vereniging.ver_nr
 
         if ver_nr < 0:
             # pak de vereniging van de ingelogde gebruiker
@@ -88,10 +88,10 @@ class UitslagenVerenigingIndivView(TemplateView):
         try:
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except Regiocompetitie.DoesNotExist:     # pragma: no cover
             raise Http404('Competitie niet gevonden')
 
@@ -253,7 +253,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
                                                'team_type': teamtype.afkorting.lower(),
                                                'regio_nr': regio_nr})
 
-        context['deelcomp'] = deelcomp = Regiocompetitie.objects.get(competitie=comp, nhb_regio=ver.regio)
+        context['deelcomp'] = deelcomp = Regiocompetitie.objects.get(competitie=comp, regio=ver.regio)
 
         context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
 

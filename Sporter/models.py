@@ -101,10 +101,10 @@ class Sporter(models.Model):
     # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
 
-    # mag gebruik maken van NHB faciliteiten?
+    # mag gebruik maken van faciliteiten?
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
 
-    # datum van lidmaatschap NHB
+    # datum van lidmaatschap
     sinds_datum = models.DateField(validators=[validate_sinds_datum])
 
     # lid bij vereniging

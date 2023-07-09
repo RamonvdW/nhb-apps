@@ -55,7 +55,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(pk=deelcomp_pk))
 
         except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
@@ -72,7 +72,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # controleer dat regiocompetitie bij de juist regio hoort
         account = self.request.user     # ROL_SPORTER geeft bescherming tegen geen Sporter
         sporter = Sporter.objects.filter(account=account).first()
-        if sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio:
+        if sporterboog.sporter != sporter or deelcomp.regio != sporter.bij_vereniging.regio:
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
@@ -252,7 +252,7 @@ class RegiocompetitieAanmeldenView(View):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(pk=deelcomp_pk))
         except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
             # niet bestaand record(s)
@@ -266,7 +266,7 @@ class RegiocompetitieAanmeldenView(View):
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat regiocompetitie bij de juist regio hoort
-        if sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio:
+        if sporterboog.sporter != sporter or deelcomp.regio != sporter.bij_vereniging.regio:
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding

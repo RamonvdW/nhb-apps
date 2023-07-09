@@ -31,7 +31,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Accommodatie</h3>
-            <p>Details van de accommodatie van vereniging <b>{{ nhbver }}</b>.</p>
+            <p>Details van de accommodatie van vereniging <b>{{ ver }}</b>.</p>
         </div>
     </div>
 
@@ -166,8 +166,8 @@
                                         <tr>
                                             <th>Wordt ook gebruikt door vereniging</th>
                                             <td>
-                                                {% for nhbver in locatie.other_ver.all %}
-                                                    <span>{{ nhbver }}</span><br>
+                                                {% for ver in locatie.other_ver.all %}
+                                                    <span>{{ ver }}</span><br>
                                                 {% endfor %}
                                             </td>
                                         </tr>
@@ -370,14 +370,14 @@
                 <table class="white">
                     <tr>
                         <th>Regio</th>
-                        <td>{{ nhbver.regio }}</td>
+                        <td>{{ ver.regio }}</td>
                     </tr>
 
-                    {% if nhbver.sorted_cluster_names %}
+                    {% if ver.sorted_cluster_names %}
                         <tr>
                             <th>Cluster(s)</th>
                             <td>
-                                {% for cluster in nhbver.sorted_cluster_names %}
+                                {% for cluster in ver.sorted_cluster_names %}
                                     <span>{{ cluster }}</span><br>
                                 {% endfor %}
                             </td>
@@ -481,7 +481,7 @@
         <div class="modal" id="bevestig_verwijder_buitenbaan">
             <div class="modal-content center">
                 <h5>Verwijder buitenbaan?</h5>
-                <p>Wil je de buitenbaan van vereniging<br><b>{{ nhbver }}</b><br>verwijderen uit het systeem?</p>
+                <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
                 <form method="post" action="{{ url_verwijder_buitenbaan }}">
                     {% csrf_token %}
@@ -500,7 +500,7 @@
         </div>
     {% endif %}
 
-    {% if nhbver.regio.is_administratief %}
+    {% if ver.regio.is_administratief %}
         <p class="center">Deze gegevens kunnen worden aangepast door de secretaris.</p>
     {% else %}
         <p class="center">Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>

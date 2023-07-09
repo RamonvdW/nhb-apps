@@ -38,7 +38,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=data.comp18,
-                          boogtype=data.afkorting2boogtype_nhb['R'],
+                          boogtype=data.afkorting2boogtype_khsn['R'],
                           beschrijving__contains="Recurve klasse 6"))[0]
 
         # zet de cut op 16 voor de gekozen klasse

@@ -47,7 +47,7 @@
 
                 <tr>
                     <th>Regio</th>
-                    <td>{{ deelcomp.nhb_regio }}</td>
+                    <td>{{ deelcomp.regio }}</td>
                 </tr>
 
                 <tr>

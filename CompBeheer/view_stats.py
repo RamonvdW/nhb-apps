@@ -246,7 +246,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
 
             totaal1 = totaal2 = totaal3 = totaal4 = 0
             for rayon_nr in range(1, 4+1):
-                qset_rayon = qset.filter(kampioenschap__nhb_rayon__rayon_nr=rayon_nr)
+                qset_rayon = qset.filter(kampioenschap__rayon__rayon_nr=rayon_nr)
 
                 aantal = qset_rayon.count()
                 geplaatst_rk.append(aantal)
@@ -262,7 +262,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
 
                 totaal3 += aantal
 
-                aantal = qset_teams.filter(kampioenschap__nhb_rayon__rayon_nr=rayon_nr).count()
+                aantal = qset_teams.filter(kampioenschap__rayon__rayon_nr=rayon_nr).count()
                 teams_rk.append(aantal)
 
                 totaal4 += aantal

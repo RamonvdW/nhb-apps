@@ -149,7 +149,7 @@
 
                 {% for deelcomp in regio_deelcomps %}
                     <tr>
-                        <td>{{ deelcomp.nhb_regio }}</td>
+                        <td>{{ deelcomp.regio }}</td>
 
                         <td class="center">
                             {% if deelcomp.is_afgesloten %}

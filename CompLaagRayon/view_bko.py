@@ -186,7 +186,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                              .objects
                              .get(competitie=comp,
                                   deel=DEEL_RK,
-                                  nhb_rayon=ver.regio.rayon))
+                                  rayon=ver.regio.rayon))
         except Kampioenschap.DoesNotExist:
             raise Http404('Geen RK')
 
@@ -301,7 +301,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
                                           'sporterboog__sporter__bij_vereniging__regio',
                                           'sporterboog__sporter__bij_vereniging__regio__rayon',
                                           'indiv_klasse')
-                          .order_by('kampioenschap__nhb_rayon',
+                          .order_by('kampioenschap__rayon',
                                     'indiv_klasse__volgorde',
                                     'volgorde')):
 

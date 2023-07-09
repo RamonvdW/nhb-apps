@@ -63,7 +63,7 @@ class Command(BaseCommand):
                 # overschrijven naar andere regiocompetitie
                 if obj.bij_vereniging.regio != sporter.bij_vereniging.regio:
                     obj.regiocompetitie = Regiocompetitie.objects.get(competitie=obj.regiocompetitie.competitie,
-                                                                     nhb_regio=sporter.bij_vereniging.regio)
+                                                                      regio=sporter.bij_vereniging.regio)
                 obj.bij_vereniging = sporter.bij_vereniging
                 obj.save()
         # for

@@ -29,12 +29,12 @@ class TestFunctieCli(E2EHelpers, TestCase):
         ver.ver_nr = 1001
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
     def test_maak_hwl(self):
@@ -135,7 +135,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         with self.assert_max_queries(57):
             f1, f2 = self.run_management_command('check_beheerders')
         self.assertTrue(f1.getvalue() == '')
-        self.assertTrue("LET OP: account heeft geen koppeling met NHB lid" in f2.getvalue())
+        self.assertTrue("LET OP: account heeft geen koppeling met KHSN lid" in f2.getvalue())
 
         # maak account ook nhblid
         sporter = Sporter(
@@ -163,7 +163,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
                     ver_nr=1042,
                     naam="Andere club",
                     plaats="Overkantje",
-                    regio=self.nhbver1.regio)
+                    regio=self.ver1.regio)
         ver.save()
         sporter.is_actief_lid = True
         sporter.bij_vereniging = ver
@@ -175,7 +175,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         self.assertTrue("LET OP: geen lid bij deze vereniging" in f2.getvalue())
 
         # nu alles goed zetten
-        sporter.bij_vereniging = self.nhbver1
+        sporter.bij_vereniging = self.ver1
         sporter.account = self.account_normaal
         sporter.save()
 

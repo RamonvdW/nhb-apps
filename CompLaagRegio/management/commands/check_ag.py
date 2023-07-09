@@ -26,7 +26,7 @@ class Command(BaseCommand):
                             .objects
                             .filter(competitie__afstand=afstand,
                                     regio_organiseert_teamcompetitie=True)
-                            .order_by('nhb_regio__regio_nr')
+                            .order_by('regio__regio_nr')
                             .values_list('pk', flat=True))
 
             for deelnemer in (RegiocompetitieSporterBoog

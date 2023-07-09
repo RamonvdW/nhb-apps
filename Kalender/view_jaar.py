@@ -15,7 +15,7 @@ from Kalender.definities import MAANDEN, MAAND2URL
 from Kalender.view_maand import maak_soort_filter, maak_bogen_filter, maak_compacte_wanneer_str
 from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
-                                    ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_NHB,
+                                    ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
                                     WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
 from Wedstrijden.models import Wedstrijd
 from datetime import date, timedelta
@@ -135,8 +135,8 @@ class KalenderJaarView(TemplateView):
             wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_WA,
                                              wa_status=WEDSTRIJD_WA_STATUS_B)
 
-        elif gekozen_soort == 'nhb':
-            wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_NHB)
+        elif gekozen_soort == 'khsn':
+            wedstrijden = wedstrijden.filter(organisatie=ORGANISATIE_KHSN)
 
         # filter op bogen
         if gekozen_bogen != 'alle':

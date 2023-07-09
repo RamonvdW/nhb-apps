@@ -30,28 +30,28 @@ class TestAccountOpEmail(E2EHelpers, TestCase):
         # corner-cases van e-mail bevestiging ontvangen
         account = self.account_metmail
 
-        account.nieuwe_email = 'nieuwe@nhb.not'
-        account.bevestigde_email = 'oude@nhb.not'
+        account.nieuwe_email = 'nieuwe@test.not'
+        account.bevestigde_email = 'oude@test.not'
         account.email_is_bevestigd = True
         account_email_bevestiging_ontvangen(account)
         self.assertEqual(account.nieuwe_email, '')
-        self.assertEqual(account.bevestigde_email, 'nieuwe@nhb.not')
+        self.assertEqual(account.bevestigde_email, 'nieuwe@test.not')
         self.assertTrue(account.email_is_bevestigd)
 
         account.nieuwe_email = ''
-        account.bevestigde_email = 'oude@nhb.not'
+        account.bevestigde_email = 'oude@test.not'
         account.email_is_bevestigd = True
         account_email_bevestiging_ontvangen(account)
         self.assertEqual(account.nieuwe_email, '')
-        self.assertEqual(account.bevestigde_email, 'oude@nhb.not')
+        self.assertEqual(account.bevestigde_email, 'oude@test.not')
         self.assertTrue(account.email_is_bevestigd)
 
-        account.nieuwe_email = 'nieuwe@nhb.not'
+        account.nieuwe_email = 'nieuwe@test.not'
         account.bevestigde_email = ''
         account.email_is_bevestigd = False
         account_email_bevestiging_ontvangen(account)
         self.assertEqual(account.nieuwe_email, '')
-        self.assertEqual(account.bevestigde_email, 'nieuwe@nhb.not')
+        self.assertEqual(account.bevestigde_email, 'nieuwe@test.not')
         self.assertTrue(account.email_is_bevestigd)
 
 # end of file

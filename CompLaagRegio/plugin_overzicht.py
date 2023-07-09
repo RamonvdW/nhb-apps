@@ -91,14 +91,14 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
 
         # pak de regiocompetitie erbij
         try:
-            regiocomp = Regiocompetitie.objects.select_related('nhb_regio').get(competitie=comp, functie=functie_nu)
+            regiocomp = Regiocompetitie.objects.select_related('regio').get(competitie=comp, functie=functie_nu)
         except Regiocompetitie.DoesNotExist:
             # verkeerde RCL (Indoor / 25m1pijl mix-up)
             pass
         else:
             if regiocomp.is_afgesloten:
                 # toon het medailles kaartje
-                url = reverse('CompLaagRegio:medailles', kwargs={'regio': functie_nu.nhb_regio.regio_nr})
+                url = reverse('CompLaagRegio:medailles', kwargs={'regio': functie_nu.regio.regio_nr})
                 kaartje = SimpleNamespace(
                             prio=5,
                             titel="Medailles",
@@ -112,7 +112,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     url = reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': regiocomp.pk})
                     kaartje = SimpleNamespace(
                                 prio=3,
-                                titel="Planning Regio %s" % regiocomp.nhb_regio.regio_nr,
+                                titel="Planning Regio %s" % regiocomp.regio.regio_nr,
                                 icoon="pending_actions",
                                 tekst="Planning van de wedstrijden voor deze competitie.",
                                 url=url)
@@ -121,7 +121,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     # instellingen regiocompetitie teams
                     url = reverse('CompLaagRegio:regio-instellingen',
                                   kwargs={'comp_pk': comp.pk,
-                                          'regio_nr': functie_nu.nhb_regio.regio_nr})
+                                          'regio_nr': functie_nu.regio.regio_nr})
                     kaartje = SimpleNamespace(
                                 prio=9,
                                 titel="Instelling teams",
@@ -138,7 +138,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                 prio=2,
                                 titel="Scores",
                                 icoon="edit",
-                                tekst="Scores invoeren en aanpassen voor %s voor deze competitie." % regiocomp.nhb_regio.naam,
+                                tekst="Scores invoeren en aanpassen voor %s voor deze competitie." % regiocomp.regio.naam,
                                 url=url)
                     kaartjes_indiv.append(kaartje)
 
@@ -147,7 +147,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                     # AG controle
                     url = reverse('CompLaagRegio:regio-ag-controle',
                                   kwargs={'comp_pk': comp.pk,
-                                          'regio_nr': functie_nu.nhb_regio.regio_nr})
+                                          'regio_nr': functie_nu.regio.regio_nr})
                     kaartje = SimpleNamespace(
                                 prio=7,
                                 titel="AG controle",
@@ -192,7 +192,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 if comp.is_open_voor_inschrijven():
                     url = reverse('CompInschrijven:lijst-regiocomp-regio',
                                   kwargs={'comp_pk': comp.pk,
-                                          'regio_pk': functie_nu.nhb_regio.pk})
+                                          'regio_pk': functie_nu.regio.pk})
                     kaartje = SimpleNamespace(
                                     prio=5,
                                     titel="Inschrijvingen",
@@ -208,7 +208,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                                     prio=5,
                                     titel="Sluit Regiocompetitie",
                                     icoon="done_outline",
-                                    tekst="Bevestig eindstand %s voor de %s." % (regiocomp.nhb_regio.naam,
+                                    tekst="Bevestig eindstand %s voor de %s." % (regiocomp.regio.naam,
                                                                                  regiocomp.competitie.beschrijving),
                                     url=url)
                     kaartjes_indiv.append(kaartje)

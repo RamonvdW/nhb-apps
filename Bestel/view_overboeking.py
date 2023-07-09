@@ -44,7 +44,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         # TODO: optimaliseer het aantal queries naar 1
         for bestelling in (Bestelling
                            .objects
-                           .filter(ontvanger__vereniging__ver_nr=self.functie_nu.nhb_ver.ver_nr)
+                           .filter(ontvanger__vereniging__ver_nr=self.functie_nu.vereniging.ver_nr)
                            .prefetch_related('transacties')
                            .order_by('aangemaakt'))[:250]:
 
@@ -64,7 +64,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['ver'] = ver = self.functie_nu.nhb_ver
+        context['ver'] = ver = self.functie_nu.vereniging
 
         context['overboekingen'] = self._zoek_overboekingen()
         context['kenmerk'] = context['bedrag'] = ''
@@ -91,7 +91,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         context = dict()
 
-        context['ver'] = ver = self.functie_nu.nhb_ver
+        context['ver'] = ver = self.functie_nu.vereniging
         context['url_opslaan'] = url = reverse('Bestel:overboeking-ontvangen')
 
         actie = request.POST.get('actie', '')[:5]
@@ -123,7 +123,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
             context['bedrag'] = ("%.2f" % bedrag_euro).replace('.', ',')    # system --> regional
 
             if bestelling:
-                if bestelling.ontvanger.vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+                if bestelling.ontvanger.vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
                     context['fout_kenmerk'] = 'Bestelnummer is niet voor jullie vereniging'
 
                 elif bestelling.status == BESTELLING_STATUS_AFGEROND:

@@ -20,8 +20,8 @@ class TestTakenViews(E2EHelpers, TestCase):
     url_overzicht = '/taken/'
     url_details = '/taken/details/%s/'  # taak_pk
 
-    emailadres = 'taak@nhb.not'
-    emailadres2 = 'taak2@nhb.not'
+    emailadres = 'taak@test.not'
+    emailadres2 = 'taak2@test.not'
 
     @classmethod
     def setUpTestData(cls):

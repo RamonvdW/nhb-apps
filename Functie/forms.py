@@ -9,7 +9,7 @@ from django import forms
 
 class ZoekBeheerdersForm(forms.Form):
     """ definitie van het formulier waarmee de beheerder een zoekterm in kan voeren
-        om te zoeken naar een NHB lid.
+        om te zoeken naar een lid.
     """
 
     # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren

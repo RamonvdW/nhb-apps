@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -50,7 +50,7 @@
             {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van World Archery. Bij A-status kunnen records aangevraagd worden." img_height=112 img_src=img_src onclick="keuze('wa')" %}
 
             {% static 'plein/logo_nhb_192x192.png' as img_src %}
-            {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstijden." img_height=112 img_src=img_src onclick="keuze('nhb')" %}
+            {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstijden." img_height=112 img_src=img_src onclick="keuze('khsn')" %}
 
             {% static 'plein/logo_ifaa_128x200.png' as img_src %}
             {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA." img_height=132 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
@@ -83,7 +83,7 @@
                 <p>Disciplines: 3D</p>
 
                 <br>
-                <h5>NHB</h5>
+                <h5>KHSN</h5>
                 <p>Dezelfde boogtypen als World Archery</p>
                 <p>Zeven leeftijdsklassen: Onder 12, Onder 14, Onder 18, Onder 21, 21+, 50+ en 60+</p>
                 <p>Scheiding in Mannen en Vrouwen of genderneutrale klassen</p>

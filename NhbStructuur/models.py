@@ -103,7 +103,7 @@ class NhbCluster(models.Model):
 
 
 class NhbVereniging(models.Model):
-    """ Tabel waarin gegevens van de Verenigingen van de NHB staan """
+    """ Tabel waarin gegevens van de Verenigingen van de bond staan """
 
     # 4-cijferige nummer van de vereniging
     ver_nr = models.PositiveIntegerField(primary_key=True)

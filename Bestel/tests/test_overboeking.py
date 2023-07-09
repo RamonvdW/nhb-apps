@@ -44,19 +44,19 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
-                            akkoord_via_nhb=False)
+                            akkoord_via_bond=False)
         instellingen.save()
         self.instellingen = instellingen
 
         ver_webshop = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
         instellingen_webshop = BetaalInstellingenVereniging(
                                     vereniging=ver_webshop,
-                                    akkoord_via_nhb=False)
+                                    akkoord_via_bond=False)
         instellingen_webshop.save()
         self.instellingen_webshop = instellingen_webshop
 

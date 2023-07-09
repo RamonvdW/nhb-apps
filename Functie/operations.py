@@ -85,13 +85,13 @@ def functie_vraag_email_bevestiging(functie):
                        enforce_whitelist=False)
 
 
-def maak_account_vereniging_secretaris(nhb_ver, account):
+def maak_account_vereniging_secretaris(ver, account):
     """ Geeft het account rechten om als secretaris van de vereniging de site te gebruiken
         Retourneert True als het account aan de SEC-functie toegevoegd is
     """
 
     # zoek de SEC-functie van de vereniging erbij
-    functie = Functie.objects.get(rol='SEC', nhb_ver=nhb_ver)
+    functie = Functie.objects.get(rol='SEC', vereniging=ver)
 
     # kijk of dit lid al in de groep zit
     if functie.accounts.filter(pk=account.pk).count() == 0:

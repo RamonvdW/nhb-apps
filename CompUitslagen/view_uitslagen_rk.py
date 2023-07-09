@@ -113,12 +113,12 @@ class UitslagenRayonIndivView(TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .prefetch_related('rk_bk_matches')
                         .get(competitie__is_afgesloten=False,
                              competitie=comp,
                              deel=DEEL_RK,
-                             nhb_rayon__rayon_nr=rayon_nr))
+                             rayon__rayon_nr=rayon_nr))
         except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
@@ -178,7 +178,7 @@ class UitslagenRayonIndivView(TemplateView):
                             .objects
                             .filter(competitie__is_afgesloten=False,
                                     competitie=comp,
-                                    nhb_regio__rayon__rayon_nr=rayon_nr)
+                                    regio__rayon__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
             deelnemers = (RegiocompetitieSporterBoog
@@ -427,12 +427,12 @@ class UitslagenRayonTeamsView(TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .prefetch_related('rk_bk_matches')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              deel=DEEL_RK,
-                             nhb_rayon__rayon_nr=rayon_nr))
+                             rayon__rayon_nr=rayon_nr))
         except Kampioenschap.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -445,9 +445,9 @@ class UitslagenRayonTeamsView(TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         account = self.request.user
         if account.is_authenticated:
-            if functie_nu and functie_nu.nhb_ver:
+            if functie_nu and functie_nu.vereniging:
                 # HWL, WL
-                toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
+                toon_team_leden_van_ver_nr = functie_nu.vereniging.ver_nr
             else:
                 # geen beheerder, dus sporter
                 sporter = Sporter.objects.filter(account=account).first()

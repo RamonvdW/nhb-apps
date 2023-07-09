@@ -436,14 +436,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Secretaris 100001 is geen lid bij vereniging 2000" in f2.getvalue())
 
         ver = NhbVereniging.objects.get(ver_nr="1000")
-        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", vereniging=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
         secs = Secretaris.objects.prefetch_related('sporters').get(vereniging__ver_nr=2000)
         self.assertEqual(2, secs.sporters.count())
 
         ver = NhbVereniging.objects.get(ver_nr="2000")
-        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", vereniging=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
         # 100024 is nog geen SEC omdat ze geen account heeft
@@ -857,7 +857,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                     geslacht="M",
                     voornaam="Demo",
                     achternaam="Lid",
-                    email="demolid@nhb.not",
+                    email="demolid@test.not",
                     geboorte_datum=datetime.date(year=1970, month=3, day=4),
                     sinds_datum=datetime.date(year=2012, month=11, day=12),
                     bij_vereniging=ver)

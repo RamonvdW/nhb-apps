@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,17 +30,17 @@ class Command(BaseCommand):
 
     def get_vereniging(self, ver_nr):
         try:
-            nhb_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
+            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist as exc:
             self.stderr.write("[ERROR] Kan vereniging %s niet vinden" % ver_nr)
-            nhb_ver = None
-        return nhb_ver
+            ver = None
+        return ver
 
-    def get_functie_hwl(self, nhb_ver):
+    def get_functie_hwl(self, ver):
         try:
-            functie = Functie.objects.get(rol='HWL', nhb_ver=nhb_ver)
+            functie = Functie.objects.get(rol='HWL', vereniging=ver)
         except Functie.DoesNotExist as exc:
-            self.stderr.write("[ERROR] Kan HWL functie van vereniging %s niet vinden" % nhb_ver.ver_nr)
+            self.stderr.write("[ERROR] Kan HWL functie van vereniging %s niet vinden" % ver.ver_nr)
             functie = None
         return functie
 
@@ -49,20 +49,20 @@ class Command(BaseCommand):
         account = self.get_account(username)
 
         ver_nr = options['ver_nr'][0]
-        nhb_ver = self.get_vereniging(ver_nr)
+        ver = self.get_vereniging(ver_nr)
 
         activiteit = ""
-        if account and nhb_ver:
-            functie = self.get_functie_hwl(nhb_ver)
+        if account and ver:
+            functie = self.get_functie_hwl(ver)
 
             if functie:
                 if functie.accounts.filter(pk=account.pk).count():
-                    self.stdout.write('[WARNING] Account %s is al HWL van vereniging %s' % (repr(username), nhb_ver))
+                    self.stdout.write('[WARNING] Account %s is al HWL van vereniging %s' % (repr(username), ver))
                 else:
                     # maak dit account HWL
                     functie.accounts.add(account)
 
-                    activiteit = "Account %s is HWL gemaakt van vereniging %s" % (repr(username), nhb_ver)
+                    activiteit = "Account %s is HWL gemaakt van vereniging %s" % (repr(username), ver)
 
                     # schrijf in het logboek
                     schrijf_in_logboek(account=None,

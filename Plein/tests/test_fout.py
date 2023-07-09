@@ -88,7 +88,7 @@ class TestPleinFout(E2EHelpers, TestCase):
         func = Functie(
                     beschrijving="Test Functie 1234",
                     rol='RCL',
-                    nhb_regio=NhbRegio.objects.get(regio_nr=104))
+                    regio=NhbRegio.objects.get(regio_nr=104))
         func.save()
         func.accounts.add(self.testdata.account_bb)
 

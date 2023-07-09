@@ -92,7 +92,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             deelkamp_rk = (Kampioenschap
                            .objects
                            .select_related('competitie',
-                                           'nhb_rayon')
+                                           'rayon')
                            .get(deel=DEEL_RK,
                                 competitie=comp,
                                 functie=functie_nu,
@@ -106,9 +106,9 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                 url = reverse('CompLaagRayon:planning', kwargs={'deelkamp_pk': deelkamp_rk.pk})
                 kaartje = SimpleNamespace(
                             prio=3,
-                            titel="Planning %s" % deelkamp_rk.nhb_rayon.naam,
+                            titel="Planning %s" % deelkamp_rk.rayon.naam,
                             icoon="pending_actions",
-                            tekst="Planning voor %s voor deze competitie." % deelkamp_rk.nhb_rayon.naam,
+                            tekst="Planning voor %s voor deze competitie." % deelkamp_rk.rayon.naam,
                             url=url)
                 kaartjes_algemeen.append(kaartje)
 
@@ -142,7 +142,7 @@ def get_kaartjes_rayon(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
                             prio=4,
                             titel="RK teams",
                             icoon="api",
-                            tekst="Aangemelde teams voor de Rayonkampioenschappen in %s." % deelkamp_rk.nhb_rayon.naam,
+                            tekst="Aangemelde teams voor de Rayonkampioenschappen in %s." % deelkamp_rk.rayon.naam,
                             url=url)
                 kaartjes_teams.append(kaartje)
 

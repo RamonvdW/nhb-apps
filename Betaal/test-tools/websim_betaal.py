@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Kleine http server om echte transacties vanuit de NHB applicaties af te handelen tijdens een test.
+""" Kleine http server om echte transacties vanuit de applicatie af te handelen tijdens een test.
 
     Luistert op localhost poort 8125
 

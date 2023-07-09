@@ -51,29 +51,29 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
         self.sporterboog = sporterboog
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
-        self.nhbver2 = NhbVereniging(
+        self.ver2 = NhbVereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver2.save()
+        self.ver2.save()
 
         # voeg een locatie toe
         self.locatie = WedstrijdLocatie(
                             baan_type='E',      # externe locatie
                             naam='Test locatie')
         self.locatie.save()
-        self.locatie.verenigingen.add(self.nhbver1)
+        self.locatie.verenigingen.add(self.ver1)
 
         now = timezone.now()
         now_date = now.date()
@@ -82,21 +82,21 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
                                 titel='test wedstrijd 1',
                                 datum_begin=now_date,
                                 datum_einde=now_date,
-                                organiserende_vereniging=self.nhbver1,
+                                organiserende_vereniging=self.ver1,
                                 voorwaarden_a_status_when=now,
                                 locatie=self.locatie)
         self.wedstrijd2 = Wedstrijd(
                                 titel='test wedstrijd 2',
                                 datum_begin=now_date,
                                 datum_einde=now_date,
-                                organiserende_vereniging=self.nhbver1,
+                                organiserende_vereniging=self.ver1,
                                 voorwaarden_a_status_when=now,
                                 locatie=self.locatie)
         self.wedstrijd3 = Wedstrijd(
                                 titel='test wedstrijd 3',
                                 datum_begin=now_date,
                                 datum_einde=now_date,
-                                organiserende_vereniging=self.nhbver1,
+                                organiserende_vereniging=self.ver1,
                                 voorwaarden_a_status_when=now,
                                 locatie=self.locatie)
         self.wedstrijd1.save()
@@ -186,16 +186,16 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/wijzig-korting-combi.dtl', 'plein/site_layout.dtl'))
 
         # vul wat meer details in
-        self.assertEqual(korting_sporter.uitgegeven_door, self.nhbver1)
+        self.assertEqual(korting_sporter.uitgegeven_door, self.ver1)
         korting_sporter.voor_sporter = self.sporter
         korting_sporter.save(update_fields=['voor_sporter'])
         korting_sporter.voor_wedstrijden.add(self.wedstrijd2)
         self.assertTrue(str(korting_sporter) != '')
 
-        self.assertEqual(korting_ver.uitgegeven_door, self.nhbver1)
+        self.assertEqual(korting_ver.uitgegeven_door, self.ver1)
         korting_ver.voor_wedstrijden.add(self.wedstrijd2)
 
-        self.assertEqual(korting_combi.uitgegeven_door, self.nhbver1)
+        self.assertEqual(korting_combi.uitgegeven_door, self.ver1)
         korting_combi.voor_wedstrijden.add(self.wedstrijd1)
         korting_combi.voor_wedstrijden.add(self.wedstrijd3)
 

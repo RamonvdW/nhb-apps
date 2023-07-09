@@ -36,21 +36,21 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save(update_fields=['is_BB'])
 
-        ver_nhb = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+        ver_bond = NhbVereniging(
+                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                     naam='Bondsbureau',
                     plaats='Schietstad',
                     regio=NhbRegio.objects.get(regio_nr=100))
-        ver_nhb.save()
-        self.ver_nhb = ver_nhb
+        ver_bond.save()
+        self.ver_bond = ver_bond
 
         instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver_nhb,
+                            vereniging=ver_bond,
                             mollie_api_key='test_1234')
         instellingen.save()
-        self.instellingen_nhb = instellingen
+        self.instellingen_bond = instellingen
 
-        self.assertEqual(settings.BETAAL_VIA_NHB_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
+        self.assertEqual(settings.BETAAL_VIA_BOND_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
 
         ver = NhbVereniging(
                     ver_nr=1000,
@@ -66,7 +66,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
-                            akkoord_via_nhb=True)
+                            akkoord_via_bond=True)
         instellingen.save()
         self.instellingen = instellingen
 
@@ -176,7 +176,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         bestelling2 = Bestelling(
                         bestel_nr=1235,
                         account=self.account_admin,
-                        ontvanger=self.instellingen_nhb,
+                        ontvanger=self.instellingen_bond,
                         verkoper_naam='Ver naam',
                         verkoper_adres1='Ver adres 1',
                         verkoper_adres2='Ver adres 2',
@@ -202,7 +202,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
                     verkoper_adres1='Adres1',
                     verkoper_adres2='Adres2',
                     verkoper_kvk='Kvk',
-                    verkoper_email='test@nhb.not',
+                    verkoper_email='test@test.not',
                     verkoper_telefoon='telnr',
                     verkoper_iban='IBAN',
                     verkoper_bic='BICBIC',

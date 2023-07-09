@@ -44,10 +44,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         self.functie_hwl = maak_functie('HWL 1000', 'HWL')
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
         self.functie_hwl.accounts.add(self.account_hwl)
 
@@ -297,10 +297,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_geen_wedstrijden(self):
-        # self.account_normaal is lid bij self.nhbver1
+        # self.account_normaal is lid bij self.ver1
         # zet deze in de administratieve regio
-        self.nhbver1.geen_wedstrijden = True
-        self.nhbver1.save()
+        self.ver1.geen_wedstrijden = True
+        self.ver1.save()
 
         self.e2e_login(self.account_normaal)
 

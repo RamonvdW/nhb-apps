@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Ondersteuning voor de rollen binnen de NHB applicaties """
+""" Ondersteuning voor de rollen binnen de applicatie """
 
 from django.contrib.sessions.backends.db import SessionStore
 from Account.operations.otp import otp_is_controle_gelukt
@@ -30,7 +30,7 @@ SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
 
 
-def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
+def functie_expandeer_rol(functie_cache, ver_cache, rol_in, functie_in):
     """ Plug-in van de Functie.rol module om een groep/functie te expanderen naar onderliggende functies
         Voorbeeld: RKO rayon 3 --> RCL regios 109, 110, 111, 112
         Deze functie yield (rol, functie_pk)
@@ -88,7 +88,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # expandeer naar de RCL rollen binnen het rayon
             for pk, obj in functie_cache.items():
                 if obj.rol == 'RCL' and obj.comp_type == functie_in.comp_type:
-                    if obj.regio_rayon_nr == functie_in.nhb_rayon.rayon_nr:
+                    if obj.regio_rayon_nr == functie_in.rayon.rayon_nr:
                         yield Rollen.ROL_RCL, obj.pk
             # for
 
@@ -97,7 +97,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     .objects
                     .filter(competitie__afstand=functie_in.comp_type,
                             deel=DEEL_RK,
-                            nhb_rayon=functie_in.nhb_rayon)
+                            rayon=functie_in.rayon)
                     .prefetch_related('rk_bk_matches'))
             ver_nrs = list()
             for deelkamp in qset:
@@ -116,7 +116,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
         if functie_in.rol == "RCL":
             # expandeer naar de HWL rollen van de verenigingen binnen de regio
             # vind alle verenigingen in deze regio
-            if len(nhbver_cache) == 0:
+            if len(ver_cache) == 0:
                 for ver in (NhbVereniging
                             .objects
                             .select_related('regio')
@@ -125,17 +125,17 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     store.pk = ver.pk
                     store.ver_nr = ver.ver_nr
                     store.regio_nr = ver.regio.regio_nr
-                    nhbver_cache[store.ver_nr] = store
+                    ver_cache[store.ver_nr] = store
                 # for
 
                 # voorkom herhaaldelijke queries tijdens test zonder vereniging
-                if len(nhbver_cache) == 0:
-                    nhbver_cache[0] = 0
+                if len(ver_cache) == 0:
+                    ver_cache[0] = 0
 
             # zoek alle verenigingen in de regio van deze RCL
             verenigingen = list()
-            for ver_nr, ver in nhbver_cache.items():
-                if ver_nr != 0 and ver.regio_nr == functie_in.nhb_regio.regio_nr:
+            for ver_nr, ver in ver_cache.items():
+                if ver_nr != 0 and ver.regio_nr == functie_in.regio.regio_nr:
                     verenigingen.append(ver_nr)
             # for
 
@@ -148,17 +148,17 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
         if functie_in.rol == 'SEC':
             # secretaris mag HWL worden, binnen de vereniging
             for pk, obj in functie_cache.items():
-                if obj.rol == 'HWL' and obj.ver_nr == functie_in.nhb_ver.ver_nr:
+                if obj.rol == 'HWL' and obj.ver_nr == functie_in.vereniging.ver_nr:
                     yield Rollen.ROL_HWL, obj.pk
 
         if functie_in.rol == 'HWL':
             # expandeer naar de WL rollen binnen dezelfde vereniging
             for pk, obj in functie_cache.items():
-                if obj.rol == 'WL' and obj.ver_nr == functie_in.nhb_ver.ver_nr:
+                if obj.rol == 'WL' and obj.ver_nr == functie_in.vereniging.ver_nr:
                     yield Rollen.ROL_WL, obj.pk
 
 
-def rol_bepaal_hulp_rollen(functie_cache, nhbver_cache, rol, functie_pk):
+def rol_bepaal_hulp_rollen(functie_cache, ver_cache, rol, functie_pk):
     """ Deze functie roept alle geregistreerde expandeer functies aan
         om de afgeleide rollen van een functie te krijgen.
     """
@@ -168,7 +168,7 @@ def rol_bepaal_hulp_rollen(functie_cache, nhbver_cache, rol, functie_pk):
     if rol != Rollen.ROL_WL:
         functie = functie_cache[functie_pk].obj
         parent_tup = (rol, functie_pk)
-        for nwe_tup in functie_expandeer_rol(functie_cache, nhbver_cache, rol, functie):
+        for nwe_tup in functie_expandeer_rol(functie_cache, ver_cache, rol, functie):
             tup = (nwe_tup, parent_tup)
             nwe_functies.append(tup)
         # for
@@ -201,17 +201,17 @@ def rol_zet_sessionvars(account, request):
 
     for obj in (Functie
                 .objects
-                .select_related('nhb_rayon',
-                                'nhb_regio',
-                                'nhb_regio__rayon',
-                                'nhb_ver',
-                                'nhb_ver__regio')
+                .select_related('rayon',
+                                'regio',
+                                'regio__rayon',
+                                'vereniging',
+                                'vereniging__regio')
                 .only('rol', 'comp_type',
-                      'nhb_regio__regio_nr',
-                      'nhb_rayon__rayon_nr',
-                      'nhb_regio__rayon__rayon_nr',
-                      'nhb_ver__ver_nr',
-                      'nhb_ver__regio__regio_nr')):
+                      'regio__regio_nr',
+                      'rayon__rayon_nr',
+                      'regio__rayon__rayon_nr',
+                      'vereniging__ver_nr',
+                      'vereniging__regio__regio_nr')):
         func = SimpleNamespace()
         func.pk = obj.pk
         func.obj = obj
@@ -220,24 +220,24 @@ def rol_zet_sessionvars(account, request):
         if func.rol == "BKO":
             func.comp_type = obj.comp_type
         elif func.rol == "RKO":
-            func.rayon_nr = obj.nhb_rayon.rayon_nr
+            func.rayon_nr = obj.rayon.rayon_nr
             func.comp_type = obj.comp_type
         elif func.rol == "RCL":
-            func.regio_nr = obj.nhb_regio.regio_nr
-            func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
+            func.regio_nr = obj.regio.regio_nr
+            func.regio_rayon_nr = obj.regio.rayon.rayon_nr
             func.comp_type = obj.comp_type
             try:
                 functie_rcl[func.regio_nr].append(func.pk)
             except KeyError:
                 functie_rcl[func.regio_nr] = [func.pk]
         elif func.rol in ("HWL", "WL", "SEC"):
-            func.ver_nr = obj.nhb_ver.ver_nr
-            if func.rol == 'HWL' and obj.nhb_ver.regio.regio_nr == 100:
+            func.ver_nr = obj.vereniging.ver_nr
+            if func.rol == 'HWL' and obj.vereniging.regio.regio_nr == 100:
                 func.koppel_aan_bb = True
         functie_cache[obj.pk] = func
     # for
 
-    nhbver_cache = dict()          # wordt gevuld als er behoefte is
+    ver_cache = dict()          # wordt gevuld als er behoefte is
 
     if account.is_authenticated:        # pragma: no branch
         show_vhpg, _ = account_needs_vhpg(account)
@@ -245,7 +245,7 @@ def rol_zet_sessionvars(account, request):
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
                 parent_tup = (Rollen.ROL_BB, None)
-                for nwe_tup in functie_expandeer_rol(functie_cache, nhbver_cache, Rollen.ROL_BB, None):
+                for nwe_tup in functie_expandeer_rol(functie_cache, ver_cache, Rollen.ROL_BB, None):
                     tup = (nwe_tup, parent_tup)
                     rollen_functies.append(tup)
                 # for
@@ -298,7 +298,7 @@ def rol_zet_sessionvars(account, request):
                 next_doorzoeken = list()
                 for child_tup, parent_tup in te_doorzoeken:
                     # print("\n" + "expanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
-                    nwe_functies = rol_bepaal_hulp_rollen(functie_cache, nhbver_cache, *child_tup)
+                    nwe_functies = rol_bepaal_hulp_rollen(functie_cache, ver_cache, *child_tup)
 
                     # voorkom dupes (zoals expliciete koppeling en erven van een rol)
                     for nwe_tup in nwe_functies:
@@ -390,9 +390,9 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
                     functie_pk = int(functie_pk)
                     functie = (Functie
                                .objects
-                               .select_related('nhb_rayon',
-                                               'nhb_regio', 'nhb_regio__rayon',
-                                               'nhb_ver', 'nhb_ver__regio')
+                               .select_related('rayon',
+                                               'regio', 'regio__rayon',
+                                               'vereniging', 'vereniging__regio')
                                .get(pk=functie_pk))
                 except (ValueError, Functie.DoesNotExist):
                     # slecht getal of geen bestaande functie

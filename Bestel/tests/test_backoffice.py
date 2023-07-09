@@ -40,8 +40,8 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.functie_mww.save(update_fields=['bevestigde_email'])
 
         instellingen = BetaalInstellingenVereniging(
-                            vereniging=self.functie_mww.nhb_ver,
-                            akkoord_via_nhb=False)
+                            vereniging=self.functie_mww.vereniging,
+                            akkoord_via_bond=False)
         instellingen.save()
         self.instellingen = instellingen
 

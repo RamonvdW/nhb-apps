@@ -43,11 +43,11 @@ class TestPlein(E2EHelpers, TestCase):
         self.functie_bko = maak_functie('BKO Test', 'BKO')
 
         self.functie_rko = maak_functie('RKO Test', 'RKO')
-        self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=3)
+        self.functie_rko.rayon = NhbRayon.objects.get(rayon_nr=3)
         self.functie_rko.save()
 
         self.functie_rcl = maak_functie('RCL Test', 'RCL')
-        self.functie_rcl.nhb_regio = NhbRegio.objects.get(regio_nr=111)
+        self.functie_rcl.regio = NhbRegio.objects.get(regio_nr=111)
         self.functie_rcl.save()
 
         # maak een test vereniging
@@ -58,15 +58,15 @@ class TestPlein(E2EHelpers, TestCase):
         ver.save()
 
         self.functie_sec = maak_functie('Secretaris vereniging 1000', 'SEC')
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         self.functie_hwl = maak_functie('Hoofdwedstrijdleider 1000', 'HWL')
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie('Wedstrijdleider 1000', 'WL')
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak een test lid aan

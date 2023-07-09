@@ -24,7 +24,7 @@ def account_check_gewijzigde_email(account):
     if account.nieuwe_email:
         if account.nieuwe_email != account.bevestigde_email:
             # vraag om bevestiging van deze gewijzigde email
-            # e-mail kan eerder overgenomen zijn uit de NHB-administratie
+            # e-mail kan eerder overgenomen zijn uit het CRM systeem
             # of handmatig ingevoerd zijn
 
             # blokkeer inlog totdat dit nieuwe e-mailadres bevestigd is

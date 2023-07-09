@@ -21,8 +21,8 @@ class BetaalInstellingenVereniging(models.Model):
     # de API key van deze vereniging voor Mollie
     mollie_api_key = models.CharField(max_length=MOLLIE_API_KEY_MAXLENGTH, blank=True)
 
-    # mag deze vereniging betalingen ontvangen via de NHB?
-    akkoord_via_nhb = models.BooleanField(default=False)
+    # mag deze vereniging betalingen ontvangen via de bond
+    akkoord_via_bond = models.BooleanField(default=False)
 
     def obfuscated_mollie_api_key(self):
         # mollie key heeft een prefix live_ of test_ gevolgd door iets van 20 letters/cijfers
@@ -39,9 +39,9 @@ class BetaalInstellingenVereniging(models.Model):
 
     def moet_handmatig(self):
         # als deze vereniging een eigen Mollie sleutel ingesteld heeft
-        # of akkoord heeft om via de NHB betalingen te ontvangen
+        # of akkoord heeft om via de bond betalingen te ontvangen
         # dan hoeft het niet online
-        kan_online = self.mollie_api_key or self.akkoord_via_nhb
+        kan_online = self.mollie_api_key or self.akkoord_via_bond
         return not kan_online
 
     def __str__(self):
@@ -64,7 +64,7 @@ class BetaalActief(models.Model):
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # referentie naar de instellingen voor de vereniging waar de betaling bij hoort
-    # TODO: bij akkoord_via_nhb is dit niet de vereniging waar het heen moet!
+    # TODO: bij akkoord_via_bond is dit niet de vereniging waar het heen moet!
     ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT)
 
     # het nummer dat ooit teruggegeven is toen de transactie aangemaakt werd

@@ -73,10 +73,10 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         # for
 
         try:
-            instellingen_nhb = ver_nr2instellingen[settings.BETAAL_VIA_NHB_VER_NR]
+            instellingen_bond = ver_nr2instellingen[settings.BETAAL_VIA_BOND_VER_NR]
         except KeyError:
             # nog niet aangemaakt
-            instellingen_nhb = None
+            instellingen_bond = None
 
         try:
             mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
@@ -115,9 +115,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         # geen instellingen, dus kan geen betaling ontvangen
                         product.kan_afrekenen = False
                     else:
-                        if instellingen.akkoord_via_nhb:
-                            ver_nr = settings.BETAAL_VIA_NHB_VER_NR
-                            if instellingen_nhb is None or instellingen_nhb.mollie_api_key == '':
+                        if instellingen.akkoord_via_bond:
+                            ver_nr = settings.BETAAL_VIA_BOND_VER_NR
+                            if instellingen_bond is None or instellingen_bond.mollie_api_key == '':
                                 product.kan_afrekenen = False
 
                     try:

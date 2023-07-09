@@ -24,19 +24,19 @@
             <table class="white">
                 <tr>
                     <th>Verenigingsnummer</th>
-                    <td>{{ nhb_ver.ver_nr }}</td>
+                    <td>{{ ver.ver_nr }}</td>
                 </tr>
                 <tr>
                     <th>Naam</th>
-                    <td>{{ nhb_ver.naam }}</td>
+                    <td>{{ ver.naam }}</td>
                 </tr>
                 <tr>
                     <th>Plaats</th>
-                    <td>{{ nhb_ver.plaats }}</td>
+                    <td>{{ ver.plaats }}</td>
                 </tr>
                 <tr>
                     <th>Regio</th>
-                    <td>{{ nhb_ver.regio }}</td>
+                    <td>{{ ver.regio }}</td>
                 </tr>
                 {% if clusters.count > 0 %}
                     <tr>
@@ -52,8 +52,8 @@
                 <tr>
                     <th>Website</th>
                     <td>
-                        {% if nhb_ver.website %}
-                            <a class="email" href="{{ nhb_ver.website }}" target="_blank" rel="noopener noreferrer"><code>{{ nhb_ver.website }}</code></a>
+                        {% if ver.website %}
+                            <a class="email" href="{{ ver.website }}" target="_blank" rel="noopener noreferrer"><code>{{ ver.website }}</code></a>
                         {% else %}
                             <i>Geen</i>
                         {% endif %}
@@ -63,16 +63,16 @@
                 {% comment %}
                 <tr>
                     <th>Telefoonnummer</th>
-                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
+                    <td>{% if ver.telefoonnummer %}{{ ver.telefoonnummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
                 </tr>
 
                 <tr>
                     <th>KvK nummer</th>
-                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
+                    <td>{% if ver.kvk_nummer %}{{ ver.kvk_nummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
                 </tr>
                 {% endcomment %}
 
-                {% if nhb_ver.geen_wedstrijden %}
+                {% if ver.geen_wedstrijden %}
                     <tr>
                         <th>Speciale status</th>
                         <td>Geen wedstrijden</td>

@@ -54,7 +54,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         context['wed'] = wedstrijd
@@ -107,7 +107,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         if wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD and request.POST.get('nieuwe_sessie', ''):
@@ -233,7 +233,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         context['wedstrijd'] = wedstrijd
@@ -297,7 +297,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         try:

@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ deelkamp.nhb_rayon }}</td>
+                    <td>{{ deelkamp.rayon }}</td>
                 </tr>
                 <tr>
                     <th>Wedstrijdklassen</th>

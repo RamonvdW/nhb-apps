@@ -76,7 +76,7 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         self.sporter_100001 = sporter
 
         self.functie_hwl = maak_functie('HWL test', 'HWL')
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
         self.functie_hwl.accounts.add(self.account_lid)
 
@@ -401,20 +401,20 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # pas regio-instellingen aan
         deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=18,
-                                nhb_regio__regio_nr=101)
+                                regio__regio_nr=101)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
         deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=18,
-                                nhb_regio__regio_nr=105)
+                                regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = dagdelen_105_18
         deelcomp.save()
 
         deelcomp = Regiocompetitie.objects.get(
                                 competitie__afstand=25,
-                                nhb_regio__regio_nr=105)
+                                regio__regio_nr=105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = dagdelen_105_25
         deelcomp.save()
@@ -426,8 +426,8 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         # controleer dat de settings overgenomen zijn
         for deelcomp in (Regiocompetitie
                          .objects
-                         .select_related('competitie', 'nhb_regio')
-                         .filter(nhb_regio__regio_nr=101)):
+                         .select_related('competitie', 'regio')
+                         .filter(regio__regio_nr=101)):
             if deelcomp.competitie.afstand == '18':
                 self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_1)
             else:
@@ -436,8 +436,8 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         for deelcomp in (Regiocompetitie
                          .objects
-                         .select_related('competitie', 'nhb_regio')
-                         .filter(nhb_regio__regio_nr=105)):
+                         .select_related('competitie', 'regio')
+                         .filter(regio__regio_nr=105)):
             self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_3)
             if deelcomp.competitie.afstand == '18':
                 self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_18)

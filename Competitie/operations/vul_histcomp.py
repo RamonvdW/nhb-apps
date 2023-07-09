@@ -63,7 +63,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                       .objects
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
-                                      'regiocompetitie__nhb_regio',
+                                      'regiocompetitie__regio',
                                       'indiv_klasse')
                       .exclude(totaal=0)
                       .filter(regiocompetitie__competitie=comp,
@@ -73,7 +73,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
 
         regio_klasse2rank = dict()      # [regio_nr, indiv_klasse.pk] = (rank, totaal)
         for deelnemer in deelnemers:
-            regio_nr = deelnemer.regiocompetitie.nhb_regio.regio_nr
+            regio_nr = deelnemer.regiocompetitie.regio.regio_nr
             tup = (regio_nr, deelnemer.indiv_klasse.pk)
             try:
                 rank, prev_totaal = regio_klasse2rank[tup]
@@ -97,7 +97,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                         vereniging_nr=ver.ver_nr,
                         vereniging_naam=ver.naam,
                         vereniging_plaats=ver.plaats,
-                        regio_nr=deelnemer.regiocompetitie.nhb_regio.regio_nr,
+                        regio_nr=deelnemer.regiocompetitie.regio.regio_nr,
                         score1=deelnemer.score1,
                         score2=deelnemer.score2,
                         score3=deelnemer.score3,
@@ -119,7 +119,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                       .objects
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
-                                      'regiocompetitie__nhb_regio',
+                                      'regiocompetitie__regio',
                                       'indiv_klasse')
                       .exclude(totaal=0)
                       .filter(regiocompetitie__competitie=comp,
@@ -128,7 +128,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                       .order_by('-gemiddelde'))     # hoogste boven
 
         for deelnemer in deelnemers:
-            regio_nr = deelnemer.regiocompetitie.nhb_regio.regio_nr
+            regio_nr = deelnemer.regiocompetitie.regio.regio_nr
             tup = (regio_nr, deelnemer.indiv_klasse.pk)
             try:
                 rank, prev_totaal = regio_klasse2rank[tup]
@@ -152,7 +152,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                         vereniging_nr=ver.ver_nr,
                         vereniging_naam=ver.naam,
                         vereniging_plaats=ver.plaats,
-                        regio_nr=deelnemer.regiocompetitie.nhb_regio.regio_nr,
+                        regio_nr=deelnemer.regiocompetitie.regio.regio_nr,
                         score1=deelnemer.score1,
                         score2=deelnemer.score2,
                         score3=deelnemer.score3,
@@ -201,7 +201,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                       .prefetch_related('kampioenschapteam_feitelijke_leden')
                       .select_related('sporterboog__sporter',
                                       'sporterboog__boogtype',
-                                      'kampioenschap__nhb_rayon',
+                                      'kampioenschap__rayon',
                                       'bij_vereniging',
                                       'indiv_klasse')):
 
@@ -230,7 +230,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
                             vereniging_nr=ver.ver_nr,
                             vereniging_naam=ver.naam,
                             vereniging_plaats=ver.plaats,
-                            rayon_nr=kampioenschap.nhb_rayon.rayon_nr,
+                            rayon_nr=kampioenschap.rayon.rayon_nr,
                             rank_rk=deelnemer.result_rank,
                             titel_code_rk=titel_code,
                             rk_score_is_blanco=(deelnemer.result_rank == KAMP_RANK_BLANCO),
@@ -329,7 +329,7 @@ def uitslag_regio_teams_naar_histcomp(comp):
                   .filter(team__regiocompetitie__competitie=comp)
                   .select_related('team',
                                   'team__regiocompetitie',
-                                  'team__regiocompetitie__nhb_regio')
+                                  'team__regiocompetitie__regio')
                   .order_by('team',
                             'ronde_nr')):
 
@@ -355,7 +355,7 @@ def uitslag_regio_teams_naar_histcomp(comp):
                         vereniging_nr=ver.ver_nr,
                         vereniging_naam=ver.naam,
                         vereniging_plaats=ver.plaats,
-                        regio_nr=team.regiocompetitie.nhb_regio.regio_nr,
+                        regio_nr=team.regiocompetitie.regio.regio_nr,
                         team_nr=team.volg_nr)
             bulk.append(hist)
 
@@ -432,7 +432,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
                                  'team_type',
                                  'vereniging',
                                  'kampioenschap',
-                                 'kampioenschap__nhb_rayon')
+                                 'kampioenschap__rayon')
                  .prefetch_related('feitelijke_leden')):
 
         if team.result_rank > 0:
@@ -448,7 +448,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
             hist = HistKampTeam(
                         seizoen=hist_seizoen,
                         rk_of_bk=HISTCOMP_RK,
-                        rayon_nr=team.kampioenschap.nhb_rayon.rayon_nr,
+                        rayon_nr=team.kampioenschap.rayon.rayon_nr,
                         teams_klasse=team.team_klasse.beschrijving,
                         team_type=team_type,
                         vereniging_nr=ver.ver_nr,

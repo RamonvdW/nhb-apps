@@ -115,10 +115,10 @@ def _maak_regiocompetities(comp, regios, functies):
     for deelcomp in (Regiocompetitie
                      .objects
                      .select_related('competitie',
-                                     'nhb_regio')
+                                     'regio')
                      .filter(competitie__begin_jaar=comp.begin_jaar - 1,
                              competitie__afstand=comp.afstand)):
-        vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
+        vorige_deelcomps[deelcomp.regio.regio_nr] = deelcomp
     # for
 
     # deadline voor het inschrijven van de teams
@@ -129,7 +129,7 @@ def _maak_regiocompetities(comp, regios, functies):
     for obj in regios:
         functie = functies[("RCL", comp.afstand, obj.regio_nr)]
         deel = Regiocompetitie(competitie=comp,
-                               nhb_regio=obj,
+                               regio=obj,
                                functie=functie,
                                begin_fase_D=begin_fase_d)
         try:
@@ -161,7 +161,7 @@ def _maak_kampioenschappen(comp, rayons, functies):
         deelkamp = Kampioenschap(
                             deel=DEEL_RK,
                             competitie=comp,
-                            nhb_rayon=rayon,
+                            rayon=rayon,
                             functie=functie)
         bulk.append(deelkamp)
     # for
@@ -329,13 +329,13 @@ def competities_aanmaken(jaar=None):
     functies = dict()   # [rol, afstand, 0/rayon_nr/regio_nr] = functie
     for functie in (Functie
                     .objects
-                    .select_related('nhb_regio', 'nhb_rayon')
+                    .select_related('regio', 'rayon')
                     .filter(rol__in=('RCL', 'RKO', 'BKO'))):
         afstand = functie.comp_type
         if functie.rol == 'RCL':
-            nr = functie.nhb_regio.regio_nr
+            nr = functie.regio.regio_nr
         elif functie.rol == 'RKO':
-            nr = functie.nhb_rayon.rayon_nr
+            nr = functie.rayon.rayon_nr
         else:  # elif functie.rol == 'BKO':
             nr = 0
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,7 +32,7 @@ class Command(BaseCommand):
         try:
             functie = Functie.objects.get(rol='RCL',
                                           comp_type=afstand,
-                                          nhb_regio__regio_nr=regio_nr)
+                                          regio__regio_nr=regio_nr)
         except Functie.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
             functie = None

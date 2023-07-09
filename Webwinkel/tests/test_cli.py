@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,13 +22,13 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.lid_nr = 123456
 
-        self.account_normaal = self.e2e_create_account(self.lid_nr, 'winkel@nhb.not', 'Mgr', accepteer_vhpg=True)
+        self.account_normaal = self.e2e_create_account(self.lid_nr, 'winkel@test.not', 'Mgr', accepteer_vhpg=True)
 
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         sporter1 = Sporter(
                     lid_nr=self.lid_nr,
@@ -39,7 +39,7 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
                     sinds_datum='2020-07-07',
                     adres_code='1234AB56',
                     account=self.account_normaal,
-                    bij_vereniging=self.nhbver1)
+                    bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
 

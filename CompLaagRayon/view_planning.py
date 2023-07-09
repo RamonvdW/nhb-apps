@@ -65,14 +65,14 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
         except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
         context['deelkamp'] = deelkamp
-        context['rayon'] = deelkamp.nhb_rayon
+        context['rayon'] = deelkamp.rayon
 
         indiv_klasse2count = dict()
         team_klasse2count = dict()
@@ -196,7 +196,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         if len(context['wkl_niet_gebruikt']) == 0:
             del context['wkl_niet_gebruikt']
 
-        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.nhb_rayon == deelkamp.nhb_rayon:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.rayon == deelkamp.rayon:
             context['url_nieuwe_wedstrijd'] = reverse('CompLaagRayon:planning',
                                                       kwargs={'deelkamp_pk': deelkamp.pk})
 
@@ -214,10 +214,10 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomps = (Regiocompetitie
                      .objects
-                     .select_related('nhb_regio')
+                     .select_related('regio')
                      .filter(competitie=deelkamp.competitie,
-                             nhb_regio__rayon=deelkamp.nhb_rayon)
-                     .order_by('nhb_regio__regio_nr'))
+                             regio__rayon=deelkamp.rayon)
+                     .order_by('regio__regio_nr'))
         context['regio_deelcomps'] = deelcomps
 
         # zoek het aantal regiowedstrijden erbij
@@ -259,7 +259,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK,
-                             nhb_rayon=self.functie_nu.nhb_rayon))  # moet juiste rayon zijn
+                             rayon=self.functie_nu.rayon))  # moet juiste rayon zijn
         except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Kampioenschap niet gevonden')
 
@@ -455,7 +455,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         verenigingen = (NhbVereniging
                         .objects
-                        .filter(regio__rayon=deelkamp.nhb_rayon,
+                        .filter(regio__rayon=deelkamp.rayon,
                                 regio__is_administratief=False)
                         .prefetch_related('wedstrijdlocatie_set')
                         .order_by('ver_nr'))
@@ -543,11 +543,11 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # aanvang bestaat uit vier cijfers, zoals 0830
         weekdag = request.POST.get('weekdag', '')[:2]           # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
-        nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
+        ver_pk = request.POST.get('ver_pk', '')[:6]             # afkappen voor de veiligheid
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
 
         # let op: loc_pk='' is toegestaan
-        if weekdag == "" or nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
+        if weekdag == "" or ver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
             raise Http404('Incompleet verzoek')
 
         try:
@@ -576,30 +576,30 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         match.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
 
-        if nhbver_pk == 'geen':
+        if ver_pk == 'geen':
             match.vereniging = None
             match.locatie = None
         else:
             try:
-                nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
+                ver = NhbVereniging.objects.get(pk=ver_pk)
             except (NhbVereniging.DoesNotExist, ValueError):
                 raise Http404('Vereniging niet gevonden')
 
-            # check dat nhbver een van de aangeboden verenigingen is
-            if nhbver.regio.rayon != deelkamp.nhb_rayon or nhbver.regio.is_administratief:
+            # check dat dit een van de aangeboden verenigingen is
+            if ver.regio.rayon != deelkamp.rayon or ver.regio.is_administratief:
                 raise Http404('Geen valide rayon')
 
-            match.vereniging = nhbver
+            match.vereniging = ver
 
             if loc_pk:
                 try:
-                    loc = nhbver.wedstrijdlocatie_set.get(pk=loc_pk)
+                    loc = ver.wedstrijdlocatie_set.get(pk=loc_pk)
                 except WedstrijdLocatie.DoesNotExist:
                     raise Http404('Locatie niet gevonden')
             else:
                 # formulier stuurt niets als er niet gekozen hoeft te worden, of als er geen locatie is
                 loc = None
-                for ver_loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
+                for ver_loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
                     keep = False
                     if is_25m:
                         if ver_loc.banen_25m > 0 and (ver_loc.discipline_indoor or ver_loc.discipline_25m1pijl):

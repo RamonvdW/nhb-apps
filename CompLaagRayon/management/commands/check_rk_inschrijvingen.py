@@ -52,7 +52,7 @@ class Command(BaseCommand):
         rayon_nr = options['rayon']
         self.verbose = options['verbose']
 
-        kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, nhb_rayon__rayon_nr=rayon_nr)
+        kampioenschap = Kampioenschap.objects.get(competitie__afstand=afstand, rayon__rayon_nr=rayon_nr)
 
         klasse_pk2limiet = dict()       # [indiv_klasse.pk] = limiet
         for limiet in KampioenschapIndivKlasseLimiet.objects.filter(kampioenschap=kampioenschap):

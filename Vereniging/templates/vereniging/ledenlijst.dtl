@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Ledenlijst</h3>
-            <p>van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }}{% if nhb_ver.plaats %} te {{ nhb_ver.plaats }}{% endif %}</p>
+            <p>van vereniging [{{ ver.ver_nr }}] {{ ver.naam }}{% if ver.plaats %} te {{ ver.plaats }}{% endif %}</p>
         </div>
     </div>
 

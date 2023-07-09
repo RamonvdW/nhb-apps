@@ -229,7 +229,7 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = None
 
-        self._instellingen_via_nhb = None
+        self._instellingen_via_bond = None
         self._instellingen_verkoper_webwinkel = None
         self._instellingen_cache = dict()     # [ver_nr] = BetaalInstellingenVereniging
 
@@ -333,14 +333,14 @@ class Command(BaseCommand):
     def _clear_instellingen_cache(self):
         self._instellingen_cache = dict()
 
-        ver_nhb = NhbVereniging.objects.get(ver_nr=settings.BETAAL_VIA_NHB_VER_NR)
+        ver_bond = NhbVereniging.objects.get(ver_nr=settings.BETAAL_VIA_BOND_VER_NR)
 
-        self._instellingen_via_nhb, _ = (BetaalInstellingenVereniging
-                                         .objects
-                                         .select_related('vereniging')
-                                         .get_or_create(vereniging=ver_nhb))
+        self._instellingen_via_bond, _ = (BetaalInstellingenVereniging
+                                          .objects
+                                          .select_related('vereniging')
+                                          .get_or_create(vereniging=ver_bond))
 
-        self._instellingen_cache[settings.BETAAL_VIA_NHB_VER_NR] = self._instellingen_via_nhb
+        self._instellingen_cache[settings.BETAAL_VIA_BOND_VER_NR] = self._instellingen_via_bond
 
         # geen foutafhandeling: deze instelling moet gewoon goed staan
         self._instellingen_verkoper_webwinkel = (BetaalInstellingenVereniging
@@ -357,8 +357,8 @@ class Command(BaseCommand):
                                .select_related('vereniging')
                                .get_or_create(vereniging=ver))
 
-            if instellingen.akkoord_via_nhb:
-                instellingen = self._instellingen_via_nhb
+            if instellingen.akkoord_via_bond:
+                instellingen = self._instellingen_via_bond
 
             self._instellingen_cache[ver.ver_nr] = instellingen
 

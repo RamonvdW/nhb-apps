@@ -58,16 +58,16 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak de WL functie
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
@@ -97,7 +97,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                     geslacht="V",
                     voornaam="Ramona",
                     achternaam="de Jeugdschutter",
-                    email="nietleeg@nhb.not",
+                    email="nietleeg@test.not",
                     geboorte_datum=datetime.date(year=jaar-10, month=3, day=4),
                     sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
                     bij_vereniging=ver)
@@ -152,7 +152,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                     ver_nr="1222",
                     regio=self.regio_111)
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # maak een senior lid aan, om inactief te maken
         sporter = Sporter(
@@ -174,7 +174,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         # fake een deelnemerslijst voor de RK
         deelkamp_rk = Kampioenschap.objects.get(competitie=self.comp_25,
                                                 deel=DEEL_RK,
-                                                nhb_rayon=self.regio_111.rayon)
+                                                rayon=self.regio_111.rayon)
         deelkamp_rk.heeft_deelnemerslijst = True
         deelkamp_rk.save()
 
@@ -190,8 +190,8 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100001.lid_nr,
                     sporter_naam=self.sporter_100001.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='R',
                     score1=10,
                     score2=20,
@@ -211,8 +211,8 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100002.lid_nr,
                     sporter_naam=self.sporter_100002.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='BB',
                     score1=10,
                     score2=20,
@@ -236,7 +236,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio = Regiocompetitie.objects.get(regio=self.regio_111,
                                                           competitie__afstand=18)
 
     def _zet_sporter_voorkeuren(self, lid_nr):
@@ -289,7 +289,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # maak een aantal wedstrijden aan, als RCL van Regio 101
-        functie_rcl = Functie.objects.get(rol='RCL', comp_type='18', nhb_regio=self.deelcomp_regio.nhb_regio)
+        functie_rcl = Functie.objects.get(rol='RCL', comp_type='18', regio=self.deelcomp_regio.regio)
         self.e2e_wissel_naar_functie(functie_rcl)
 
         url = self.url_planning_regio % self.deelcomp_regio.pk
@@ -318,7 +318,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % match_pk
         with self.assert_max_queries(20):
-            resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver1.pk,
+            resp = self.client.post(url_wed, {'ver_pk': self.ver1.pk,
                                               'wanneer': '2020-12-11', 'aanvang': '12:34'})
         self.assert_is_redirect(resp, url_ronde)
 
@@ -344,7 +344,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_hwl)
 
         # pas de HWL aan naar de andere club
-        self.functie_hwl.nhb_ver = self.nhbver2
+        self.functie_hwl.vereniging = self.ver2
         self.functie_hwl.save()
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
@@ -353,7 +353,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_sporter_voorkeuren(102000)
 
         # herstel de HWL functie
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.save()
 
         # wordt HWL
@@ -574,14 +574,14 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         sporterboog.save()
 
         # probeer aan te melden met een lid dat niet van de vereniging van de HWL is
-        self.sporter_100002.bij_vereniging = self.nhbver2
+        self.sporter_100002.bij_vereniging = self.ver2
         self.sporter_100002.save()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'dagdeel': 'AV'})
         self.assert403(resp)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
-        self.sporter_100002.bij_vereniging = self.nhbver1
+        self.sporter_100002.bij_vereniging = self.ver1
         self.sporter_100002.save()
 
         # nu de POST om een paar leden aan te melden
@@ -716,7 +716,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # schrijf een schutter uit van een andere vereniging
         inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
-        inschrijving.bij_vereniging = self.nhbver2
+        inschrijving.bij_vereniging = self.ver2
         inschrijving.save()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
@@ -801,7 +801,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maak dit een administratieve regio waarvan de leden geen wedstrijden mogen schieten
-        regio = self.nhbver1.regio
+        regio = self.ver1.regio
         regio.is_administratief = True
         regio.save()
 

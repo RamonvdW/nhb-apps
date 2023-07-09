@@ -63,7 +63,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 raise Http404('Sporter niet gevonden')
 
             # laatste control: de sporter moet lid zijn bij de vereniging van de HWL
-            if sporter.bij_vereniging != functie_nu.nhb_ver:
+            if sporter.bij_vereniging != functie_nu.vereniging:
                 raise PermissionDenied('Geen sporter van jouw vereniging')
 
             return sporter

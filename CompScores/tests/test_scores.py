@@ -99,14 +99,14 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         self.client.post(self.url_planning_regio_ronde % ronde18.pk, {})
         match = CompetitieMatch.objects.all()[0]
-        match.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
+        match.vereniging = self.testdata.functie_hwl[self.ver_nr].vereniging
         match.save()
         match.indiv_klassen.set(indiv_klassen)
         self.match18_pk = match.pk
 
         self.client.post(self.url_planning_regio_ronde % ronde25.pk, {})
         match = CompetitieMatch.objects.all()[1]
-        match.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
+        match.vereniging = self.testdata.functie_hwl[self.ver_nr].vereniging
         match.save()
         match.indiv_klassen.set(indiv_klassen)
         self.wedstrijd25_pk = match.pk

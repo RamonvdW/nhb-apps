@@ -48,16 +48,16 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak de WL functie
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak het lid aan dat WL wordt
@@ -125,7 +125,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
@@ -143,8 +143,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100001.lid_nr,
                     sporter_naam=self.sporter_100001.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='R',
                     score1=10,
                     score2=20,
@@ -164,8 +164,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100002.lid_nr,
                     sporter_naam=self.sporter_100002.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='BB',
                     score1=10,
                     score2=20,
@@ -189,7 +189,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio = Regiocompetitie.objects.get(regio=self.regio_111,
                                                           competitie__afstand=18)
 
     def test_overzicht(self):
@@ -257,7 +257,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         loc = WedstrijdLocatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
-        loc.verenigingen.add(self.nhbver1)
+        loc.verenigingen.add(self.ver1)
 
         # login als WL
         self.e2e_login_and_pass_otp(self.account_wl)

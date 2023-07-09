@@ -58,7 +58,7 @@ my_logger = logging.getLogger('NHBApps.Registreer')
 
 class RegistreerGastView(TemplateView):
     """
-        Deze view wordt gebruikt om het bondsnummer en e-mailadres van een NHB lid en daarmee een account aan te maken.
+        Deze view wordt gebruikt om het bondsnummer en e-mailadres van een lid en daarmee een account aan te maken.
     """
 
     @staticmethod
@@ -461,7 +461,7 @@ class RegistreerGastVolgendeVraagView(View):
     @staticmethod
     def _informeer_sec(gast):
 
-        functie_sec = Functie.objects.get(rol='SEC', nhb_ver__ver_nr=settings.EXTERN_VER_NR)
+        functie_sec = Functie.objects.get(rol='SEC', vereniging__ver_nr=settings.EXTERN_VER_NR)
 
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
@@ -549,7 +549,7 @@ class RegistreerGastVolgendeVraagView(View):
             lid_nr = request.POST.get('lid_nr', '')[:25]   # afkappen voor extra veiligheid
 
             # land: Chad, Cuba, Iran, Fiji
-            # bond: Afkortingen, zoals NHB
+            # bond: Afkortingen, zoals RBA en DSB
             is_valid = len(land) >= 4 and len(bond) >= 3 and len(lid_nr) >= 3
 
             if not is_valid:

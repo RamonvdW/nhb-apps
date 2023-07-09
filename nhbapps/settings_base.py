@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-06-30'
+SITE_VERSIE = '2023-07-09'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -518,7 +518,7 @@ CRM_IMPORT_GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
 
 CRM_IMPORT_GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijden
 
-CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
+CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau
                                     1377)      # persoonlijk lid, geen wedstrijden
 
 # voorkom verwijderen bepaalde leden tijdens CRM import
@@ -532,9 +532,9 @@ TICKET_NUMMER_START__OPLEIDING = 3000000
 TICKET_NUMMER_START__WEDSTRIJD = 7000000
 
 
-# het verenigingsnummer van de NHB
-# wordt gebruikt als verenigingen via de NHB betalingen mogen ontvangen
-BETAAL_VIA_NHB_VER_NR = 1368
+# het verenigingsnummer van de bond
+# wordt gebruikt als verenigingen via de bond betalingen mogen ontvangen
+BETAAL_VIA_BOND_VER_NR = 1368
 
 # implementation uses this instead of built-in default, to allow override during testing
 BETAAL_API = 'https://api.mollie.com'

@@ -73,7 +73,7 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
         self.sporter_100001 = sporter
 
         self.functie_hwl = maak_functie('HWL test', 'HWL')
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
         self.functie_hwl.accounts.add(self.account_lid)
 

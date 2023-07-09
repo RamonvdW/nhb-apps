@@ -39,7 +39,7 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['ver'] = ver = self.functie_nu.nhb_ver
+        context['ver'] = ver = self.functie_nu.vereniging
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
@@ -47,8 +47,8 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
         if instellingen.mollie_api_key:
             context['huidige_api_key'] = instellingen.obfuscated_mollie_api_key()
 
-        if instellingen.akkoord_via_nhb:
-            context['akkoord_via_nhb'] = True
+        if instellingen.akkoord_via_bond:
+            context['akkoord_via_bond'] = True
 
         context['url_opslaan'] = reverse('Betaal:vereniging-instellingen')
 
@@ -64,7 +64,7 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de gebruiken op Opslaan drukt in het instellingenscherm. """
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
         apikey = request.POST.get('apikey', '')[:MOLLIE_API_KEY_MAXLENGTH]
 
         if apikey:

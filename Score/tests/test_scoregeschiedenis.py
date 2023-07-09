@@ -45,7 +45,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
                         datum_wanneer=datetime.date(year=2020, month=10, day=10),
                         tijd_begin_wedstrijd=uur_19,
                         uitslag=uitslag18,
-                        vereniging=self.nhbver1).save()
+                        vereniging=self.ver1).save()
 
         CompetitieMatch(competitie=comp,
                         beschrijving='Test wedstrijdje 25m',
@@ -120,10 +120,10 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         self.functie_hwl = maak_functie('HWL 1000', 'HWL')
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
         self.functie_hwl.accounts.add(self.account_hwl)
 

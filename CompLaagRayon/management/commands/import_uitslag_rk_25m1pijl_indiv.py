@@ -34,7 +34,7 @@ class Command(BaseCommand):
                           .filter(kampioenschap__competitie__afstand='25',
                                   kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):

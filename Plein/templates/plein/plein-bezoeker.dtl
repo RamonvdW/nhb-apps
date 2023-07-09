@@ -85,7 +85,7 @@
     <div class="row center">
         <div class="col s12">
             <p>&nbsp;</p>
-            <h4>Andere sites van de NHB</h4>
+            <h4>Andere sites van de KHSN</h4>
             <p>De volgende websites zijn misschien ook interessant voor je</p>
         </div>
     </div>
@@ -93,7 +93,7 @@
     <!-- blauwe balk met links naar andere sites -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/andere-sites-van-de-nhb.dtl' %}
+            {% include 'plein/andere-sites.dtl' %}
         </div>
     </div>
 

@@ -53,7 +53,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
         return
 
     if rol_nu == Rollen.ROL_SEC:
-        if functie.nhb_ver != functie_nu.nhb_ver:
+        if functie.vereniging != functie_nu.vereniging:
             # verkeerde vereniging
             raise PermissionDenied('Verkeerde vereniging')
 
@@ -65,7 +65,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
         return
 
     if rol_nu == Rollen.ROL_HWL:
-        if functie.nhb_ver != functie_nu.nhb_ver:
+        if functie.vereniging != functie_nu.vereniging:
             # verkeerde vereniging
             raise PermissionDenied('Verkeerde vereniging')
 
@@ -78,7 +78,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
 
     # RCL mag HWL en WL koppelen van vereniging binnen regio RCL
     if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
-        if functie_nu.nhb_regio != functie.nhb_ver.regio:
+        if functie_nu.regio != functie.vereniging.regio:
             raise PermissionDenied('Verkeerde regio')
         return
 
@@ -100,7 +100,7 @@ def mag_beheerder_wijzigen_of_403(request, functie):
             raise PermissionDenied('Niet de beheerder')
 
         # controleer of deze regio gewijzigd mag worden
-        if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
+        if functie.regio.rayon != functie_nu.rayon:
             raise PermissionDenied('Verkeerde rayon')
         return
 
@@ -138,7 +138,7 @@ def mag_email_wijzigen_of_403(request, functie):
     # SEC, HWL en WL mogen email van HWL en WL aanpassen
     if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
         # alleen binnen eigen vereniging
-        if functie_nu.nhb_ver != functie.nhb_ver:
+        if functie_nu.vereniging != functie.vereniging:
             raise PermissionDenied('Verkeerde vereniging')
 
         if functie.rol not in ('HWL', 'WL'):
@@ -158,7 +158,7 @@ def mag_email_wijzigen_of_403(request, functie):
 
     # RCL mag email van HWL en WL aanpassen van vereniging binnen regio RCL
     if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
-        if functie_nu.nhb_regio != functie.nhb_ver.regio:
+        if functie_nu.regio != functie.vereniging.regio:
             raise PermissionDenied('Verkeerde regio')
         return
 
@@ -179,7 +179,7 @@ def mag_email_wijzigen_of_403(request, functie):
             raise PermissionDenied('Niet de beheerder')
 
         # controleer of deze regio gewijzigd mag worden
-        if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
+        if functie.regio.rayon != functie_nu.rayon:
             raise PermissionDenied('Verkeerde rayon')
         return
 
@@ -376,7 +376,7 @@ class OntvangBeheerderWijzigingenView(View):
             rol_nu, functie_nu = rol_get_huidige_functie(request)
             if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
                 # stel zeker dat sporter lid is bij de vereniging van functie
-                if not sporter or sporter.bij_vereniging != functie.nhb_ver:
+                if not sporter or sporter.bij_vereniging != functie.vereniging:
                     raise PermissionDenied('Geen lid van jouw vereniging')
 
             functie.accounts.add(account)
@@ -452,7 +452,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 if not sporter.bij_vereniging:
                     # deze melding komt na 15 januari
                     account.let_op = 'LET OP: geen lid meer bij een vereniging'
-                elif self._functie.nhb_ver and sporter.bij_vereniging != self._functie.nhb_ver:
+                elif self._functie.vereniging and sporter.bij_vereniging != self._functie.vereniging:
                     # functie voor beheerder van een vereniging
                     # lid is overgestapt
                     account.let_op = 'LET OP: geen lid bij deze vereniging'
@@ -464,7 +464,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
             self._zoekterm = zoekterm
 
-            # let op: we koppelen een account, maar zoeken een NHB lid,
+            # let op: we koppelen een account, maar zoeken een lid,
             #         om te kunnen filteren op vereniging
             #         accounts die geen lid zijn worden hier niet gevonden
             qset = (Sporter
@@ -483,7 +483,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             is_vereniging_rol = (self._functie.rol in ('SEC', 'HWL', 'WL'))
             if is_vereniging_rol:
                 # alleen leden van de vereniging laten kiezen
-                qset = qset.filter(bij_vereniging=self._functie.nhb_ver)
+                qset = qset.filter(bij_vereniging=self._functie.vereniging)
 
             objs = list()
             for sporter in qset[:50]:

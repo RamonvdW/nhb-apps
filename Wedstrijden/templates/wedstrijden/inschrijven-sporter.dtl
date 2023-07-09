@@ -221,7 +221,7 @@
                     {% endif %}
 
                 {% else %}
-                                         <!-- N = NHB -->
+                                         <!-- N = KHSN -->
                     {% if wed.organisatie == 'N' %}
                         <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                     {% endif %}

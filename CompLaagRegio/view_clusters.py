@@ -54,7 +54,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # cluster namen
         objs = (NhbCluster
                 .objects
-                .filter(regio=functie_nu.nhb_regio, gebruik=gebruik_filter)
+                .filter(regio=functie_nu.regio, gebruik=gebruik_filter)
                 .select_related('regio')
                 .order_by('letter'))
         context['cluster_list'] = objs
@@ -81,7 +81,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # vereniging in de regio
         objs = (NhbVereniging
                 .objects
-                .filter(regio=functie_nu.nhb_regio)
+                .filter(regio=functie_nu.regio)
                 .prefetch_related('clusters')
                 .order_by('ver_nr'))
         context['object_list'] = objs
@@ -113,11 +113,11 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
-    def _swap_cluster(self, nhbver, gebruik):
+    def _swap_cluster(self, ver, gebruik):
         # vertaal de post value naar een NhbCluster object
         # checkt ook meteen dat het een valide cluster is voor deze regio
 
-        param_name = 'ver_' + str(nhbver.ver_nr)
+        param_name = 'ver_' + str(ver.ver_nr)
         post_param = self.request.POST.get(param_name, None)
 
         cluster_pk = None
@@ -134,27 +134,27 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 new_cluster = None
 
             try:
-                huidige = nhbver.clusters.get(gebruik=gebruik)
+                huidige = ver.clusters.get(gebruik=gebruik)
             except NhbCluster.DoesNotExist:
                 # vereniging zit niet in een cluster voor de 18m
                 # stop de vereniging in het gevraagde cluster
                 if new_cluster:
-                    nhbver.clusters.add(new_cluster)
-                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (nhbver, new_cluster)
+                    ver.clusters.add(new_cluster)
+                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (ver, new_cluster)
                     schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
                 return
 
             # vereniging zit al in een cluster voor dit gebruik
             if huidige != new_cluster:
                 # nieuwe keuze is anders, dus verwijder de vereniging uit dit cluster
-                nhbver.clusters.remove(huidige)
-                activiteit = "Vereniging %s verwijderd uit cluster %s" % (nhbver, huidige)
+                ver.clusters.remove(huidige)
+                activiteit = "Vereniging %s verwijderd uit cluster %s" % (ver, huidige)
                 schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
 
                 # stop de vereniging in het gevraagde cluster (if any)
                 if new_cluster:
-                    nhbver.clusters.add(new_cluster)
-                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (nhbver, new_cluster)
+                    ver.clusters.add(new_cluster)
+                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (ver, new_cluster)
                     schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
 
     def post(self, request, *args, **kwargs):
@@ -170,7 +170,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
 
         clusters = (NhbCluster
                     .objects
-                    .filter(regio=functie_nu.nhb_regio,
+                    .filter(regio=functie_nu.regio,
                             gebruik=gebruik_filter))
 
         # neem de cluster namen over
@@ -189,7 +189,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # neem de cluster keuzes voor de verenigingen over
         for obj in (NhbVereniging
                     .objects
-                    .filter(regio=functie_nu.nhb_regio)
+                    .filter(regio=functie_nu.regio)
                     .prefetch_related('clusters')):
 
             self._swap_cluster(obj, gebruik_filter)

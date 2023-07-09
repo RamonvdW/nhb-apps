@@ -109,7 +109,7 @@
         <div class="col s12">
             <h4>Zoeken</h4>
 
-            <p>Hieronder kan je een sporter zoeken op NHB bondsnummer.</p>
+            <p>Hieronder kan je een sporter zoeken op bondsnummer.</p>
             <p>Deze sporter kan je inschrijven door een wedstrijd sessie toe te voegen aan jouw winkelmandje en daarna de bestelling te voltooien.</p>
             <p>Let op: dit werkt alleen als de sporter een account heeft en onder zijn voorkeuren een boog heeft ingesteld welke past bij deze wedstrijd.</p>
         </div>
@@ -248,7 +248,7 @@
             <div class="row center">
                 <div class="col s12">
                     <h4>Kies een sessie</h4>
-                                         <!-- N = NHB -->
+                                         <!-- N = KHSN -->
                     {% if wed.organisatie == 'N' %}
                         <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                     {% endif %}

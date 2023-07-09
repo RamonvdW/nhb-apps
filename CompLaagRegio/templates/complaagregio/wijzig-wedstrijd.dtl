@@ -182,7 +182,7 @@
                             <tr>
                                 <th>Organiserende vereniging</th>
                                 <td>
-                                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
+                                    <select name="ver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
                                         {% for opt in verenigingen %}
                                             <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
                                         {% endfor %}

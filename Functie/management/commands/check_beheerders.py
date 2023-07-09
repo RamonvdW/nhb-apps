@@ -24,8 +24,8 @@ class Command(BaseCommand):
         for functie in (Functie
                         .objects
                         .prefetch_related('accounts')
-                        .select_related('nhb_ver')
-                        .order_by('nhb_ver', 'rol')):
+                        .select_related('vereniging')
+                        .order_by('vereniging', 'rol')):
 
             functie_getoond = False
             for account in functie.accounts.prefetch_related('sporter_set').all():
@@ -34,12 +34,12 @@ class Command(BaseCommand):
                     sporter = account.sporter_set.prefetch_related('bij_vereniging').all()[0]
                 except IndexError:
                     sporter = None
-                    let_op = 'LET OP: account heeft geen koppeling met NHB lid'
+                    let_op = 'LET OP: account heeft geen koppeling met KHSN lid'
                 else:
                     if not sporter.bij_vereniging or not sporter.is_actief_lid:
                         # deze melding komt na 15 januari
                         let_op = 'LET OP: geen lid meer bij een vereniging'
-                    elif functie.nhb_ver and sporter.bij_vereniging != functie.nhb_ver:
+                    elif functie.vereniging and sporter.bij_vereniging != functie.vereniging:
                         # functie voor beheerder van een vereniging
                         # lid is overgestapt
                         let_op = 'LET OP: geen lid bij deze vereniging'

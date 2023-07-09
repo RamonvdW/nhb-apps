@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,12 +22,12 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
-        self._nhbver_regio = None
+        self._ver_regio = None
 
     def get_object(self, request, object_id, from_field=None):          # pragma: no cover
         obj = super().get_object(request, object_id, from_field)
         if obj:
-            self._nhbver_regio = obj.regio
+            self._ver_regio = obj.regio
         return obj
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
@@ -35,7 +35,7 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
             regio_clusters = (NhbCluster
                               .objects
                               .select_related('regio')
-                              .filter(regio=self._nhbver_regio)
+                              .filter(regio=self._ver_regio)
                               .order_by('letter'))
             kwargs['queryset'] = regio_clusters
         return super().formfield_for_manytomany(db_field, request, **kwargs)

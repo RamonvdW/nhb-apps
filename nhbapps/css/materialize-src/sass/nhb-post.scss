@@ -16,24 +16,24 @@
 
 /* kleuren */
 .nhb-blauw {
-    background-color: $primary-color-dark;     /* NHB donker blauw */
+    background-color: $primary-color-dark;     /* donker blauw */
 }
 
 .nhb-blauw-hoofd {
-    background-color: $primary-color;          /* NHB medium blauw */
+    background-color: $primary-color;          /* medium blauw */
 }
 
 .nhb-blauw-steun {
-    background-color: $primary-color-light;    /* NHB lichtblauw */
+    background-color: $primary-color-light;    /* lichtblauw */
 }
 
 .nhb-rood {
-    background-color: $secondary-color;        /* NHB hoofdkleur oranje */
+    background-color: $secondary-color;        /* hoofdkleur oranje */
 }
 
 .nhb-grijs {
-    /* standaard NHB achtergrondkleur is wat te donker
-    background-color: #f5f5f5;      grey lighten-4 == NHB achtergrondkleur */
+    /* standaard achtergrondkleur is wat te donker
+    background-color: #f5f5f5;      grey lighten-4 == achtergrondkleur */
     background-color: #eee;      /* grey lighten-3 */
 }
 
@@ -233,7 +233,7 @@
 //
 .row-nhb-blauw {
   @extend .row;
-  background-color: $primary-color;          /* NHB medium blauw */
+  background-color: $primary-color;          /* medium blauw */
   color: white;
   text-align: center;
   padding: 50px;
@@ -403,11 +403,11 @@ a {
 del {
     text-decoration: line-through;
     text-decoration-style: double;
-    text-decoration-color: #0aa0e1;     /* NHB blauw default */
+    text-decoration-color: #0aa0e1;     /* blauw default */
 }
 
 .decorate-nhb-rood {
-    text-decoration-color: #f94137;     /* NHB rood */
+    text-decoration-color: #f94137;     /* rood */
 }
 
 /* voor wie-schiet-waar */

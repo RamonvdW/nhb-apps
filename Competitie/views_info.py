@@ -37,11 +37,11 @@ class InfoCompetitieView(TemplateView):
         if account and account.is_authenticated:
             sporter = Sporter.objects.filter(account=account).first()
             if sporter:
-                nhb_ver = sporter.bij_vereniging
-                if nhb_ver:
-                    context['mijn_vereniging'] = nhb_ver
+                ver = sporter.bij_vereniging
+                if ver:
+                    context['mijn_vereniging'] = ver
                     for obj in context['regios']:
-                        if obj == nhb_ver.regio:
+                        if obj == ver.regio:
                             obj.mijn_regio = True
                     # for
 

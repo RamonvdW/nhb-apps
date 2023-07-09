@@ -47,13 +47,13 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio',
-                                        'nhb_regio__rayon')
+                                        'regio',
+                                        'regio__rayon')
                         .get(pk=deelcomp_pk))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
+        if deelcomp.regio != self.functie_nu.regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
 
         context['deelcomp'] = deelcomp
@@ -62,7 +62,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
         context['readonly'] = readonly = (comp.fase_teams > 'D')
 
-        context['regio'] = deelcomp.nhb_regio
+        context['regio'] = deelcomp.regio
 
         poules = (RegiocompetitieTeamPoule
                   .objects
@@ -119,13 +119,13 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio',
-                                        'nhb_regio__rayon')
+                                        'regio',
+                                        'regio__rayon')
                         .get(pk=deelcomp_pk))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
+        if deelcomp.regio != self.functie_nu.regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
 
         comp = deelcomp.competitie
@@ -176,7 +176,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             poule = (RegiocompetitieTeamPoule
                      .objects
                      .select_related('regiocompetitie',
-                                     'regiocompetitie__nhb_regio',
+                                     'regiocompetitie__regio',
                                      'regiocompetitie__competitie')
                      .prefetch_related('teams')
                      .get(pk=poule_pk))
@@ -184,7 +184,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             raise Http404('Poule bestaat niet')
 
         deelcomp = poule.regiocompetitie
-        if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
+        if deelcomp.regio != self.functie_nu.regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
 
         comp = deelcomp.competitie
@@ -244,7 +244,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             raise Http404('Poule bestaat niet')
 
         deelcomp = poule.regiocompetitie
-        if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
+        if deelcomp.regio != self.functie_nu.regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
 
         comp = deelcomp.competitie

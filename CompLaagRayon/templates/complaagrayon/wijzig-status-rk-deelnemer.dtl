@@ -28,7 +28,7 @@
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ deelnemer.kampioenschap.nhb_rayon }}</td>
+                    <td>{{ deelnemer.kampioenschap.rayon }}</td>
                 </tr>
                 <tr>
                     <th>Klasse</th>

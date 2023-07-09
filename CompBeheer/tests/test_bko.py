@@ -65,10 +65,10 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                     geslacht="M",
                     voornaam=voornaam,
                     achternaam="Tester",
-                    email=voornaam.lower() + "@nhb.test",
+                    email=voornaam.lower() + "@test.not",
                     geboorte_datum=datetime.date(year=1972, month=3, day=4),
                     sinds_datum=datetime.date(year=2010, month=11, day=12),
-                    bij_vereniging=self.nhbver_101)
+                    bij_vereniging=self.ver_101)
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -91,7 +91,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.ver_nr = "1111"
         ver.regio = self.regio_112
         ver.save()
-        self.nhbver_112 = ver
+        self.ver_112 = ver
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -99,7 +99,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_101
         ver.save()
-        self.nhbver_101 = ver
+        self.ver_101 = ver
 
         loc = WedstrijdLocatie(banen_18m=1,
                                banen_25m=1,
@@ -110,7 +110,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # maak HWL functie aan voor deze vereniging
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
@@ -148,11 +148,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                                            deel=DEEL_BK)[0]
         self.deelkamp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
                                                                deel=DEEL_RK,
-                                                               nhb_rayon=self.rayon_1)[0]
+                                                               rayon=self.rayon_1)[0]
         self.deelcomp_regio_101 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                 nhb_regio=self.regio_101)[0]
+                                                                 regio=self.regio_101)[0]
         self.deelcomp_regio_105 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                 nhb_regio=self.regio_105)[0]
+                                                                 regio=self.regio_105)[0]
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
@@ -394,8 +394,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # klassengrenzen rk bk teams
 
         # maak een paar teams aan
-        self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.nhbver_101.ver_nr, ook_incomplete_teams=False)
-        self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.nhbver_101.ver_nr)
+        self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.ver_101.ver_nr, ook_incomplete_teams=False)
+        self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.ver_101.ver_nr)
 
         # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)

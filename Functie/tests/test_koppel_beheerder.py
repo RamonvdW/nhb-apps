@@ -53,9 +53,9 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
 
         self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
-        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', nhb_rayon=NhbRayon.objects.get(rayon_nr=3))
-        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', nhb_regio=NhbRegio.objects.get(regio_nr=111))
-        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', nhb_regio=NhbRegio.objects.get(regio_nr=101))
+        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', rayon=NhbRayon.objects.get(rayon_nr=3))
+        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=111))
+        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=101))
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -63,7 +63,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         sporter = Sporter()
         sporter.lid_nr = 100042
@@ -92,15 +92,15 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.sporter_100043 = sporter
 
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         self.regio_112 = NhbRegio.objects.get(regio_nr=112)
@@ -111,14 +111,14 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         ver2.ver_nr = "1900"
         ver2.regio = self.regio_112
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         self.functie_sec2 = maak_functie("SEC test 2", "SEC")
-        self.functie_sec2.nhb_ver = ver2
+        self.functie_sec2.vereniging = ver2
         self.functie_sec2.save()
 
         self.functie_hwl2 = maak_functie("HWL test 2", "HWL")
-        self.functie_hwl2.nhb_ver = ver2
+        self.functie_hwl2.vereniging = ver2
         self.functie_hwl2.save()
 
         sporter = Sporter()
@@ -477,7 +477,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, self.account_beh2.volledige_naam())
 
-        # poog een NHB lid te koppelen dat niet lid is van de vereniging
+        # poog een lid te koppelen dat niet lid is van de vereniging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_ander.pk})
         self.assert403(resp)
@@ -652,7 +652,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # maak de HWL lid bij een andere vereniging
         self.assertEqual(self.sporter_100042.account, self.account_beh2)
-        self.sporter_100042.bij_vereniging = self.nhbver2
+        self.sporter_100042.bij_vereniging = self.ver2
         self.sporter_100042.save()
 
         # haal de lijst met gekoppelde beheerder op

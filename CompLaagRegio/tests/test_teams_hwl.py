@@ -58,15 +58,15 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
@@ -97,7 +97,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         sporter.geslacht = "V"
         sporter.voornaam = "Ramona"
         sporter.achternaam = "de Jeugdschutter"
-        sporter.email = "nietleeg@nhb.not"
+        sporter.email = "nietleeg@test.not"
         sporter.geboorte_datum = datetime.date(year=jaar-12, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         sporter.bij_vereniging = ver
@@ -164,11 +164,11 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
-        self.account_rcl = self.e2e_create_account('rcl111', 'ercel@nhb.not', 'Ercel', accepteer_vhpg=True)
+        self.account_rcl = self.e2e_create_account('rcl111', 'ercel@test.not', 'Ercel', accepteer_vhpg=True)
         self.functie_rcl = maak_functie('RCL Regio 111 Indoor', 'RCL')
-        self.functie_rcl.nhb_regio = self.nhbver1.regio
+        self.functie_rcl.regio = self.ver1.regio
         self.functie_rcl.save()
         self.functie_rcl.accounts.add(self.account_rcl)
 
@@ -188,8 +188,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100001.lid_nr,
                     sporter_naam=self.sporter_100001.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='R',
                     score1=10,
                     score2=20,
@@ -209,8 +209,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                     rank=1,
                     sporter_lid_nr=self.sporter_100002.lid_nr,
                     sporter_naam=self.sporter_100002.volledige_naam(),
-                    vereniging_nr=self.nhbver1.ver_nr,
-                    vereniging_naam=self.nhbver1.naam,
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
                     boogtype='BB',
                     score1=10,
                     score2=20,
@@ -232,13 +232,13 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c(startjaar=2019)
 
-        self.deelcomp18_regio111 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp18_regio111 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                                competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
         self.deelcomp25_regio111 = Regiocompetitie.objects.get(competitie=self.comp_25,
-                                                               nhb_regio=self.regio_111)
+                                                               regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -439,10 +439,10 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
         team = RegiocompetitieTeam.objects.all()[0]
 
-        self.nhbver1 = NhbVereniging.objects.get(pk=self.nhbver1.pk)
+        self.ver1 = NhbVereniging.objects.get(pk=self.ver1.pk)
 
         self.assertEqual(team.regiocompetitie.pk, self.deelcomp18_regio111.pk)
-        self.assertEqual(team.vereniging, self.nhbver1)
+        self.assertEqual(team.vereniging, self.ver1)
         self.assertEqual(team.volg_nr, 1)
         self.assertEqual(team.team_type.afkorting, 'R2')
         self.assertTrue(team.maak_team_naam() != '')
@@ -713,7 +713,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect_not_plein(resp)
         team = RegiocompetitieTeam.objects.exclude(pk__in=pks).all()[0]
-        team.vereniging = self.nhbver2
+        team.vereniging = self.ver2
         team.save(update_fields=['vereniging'])
 
         with self.assert_max_queries(20):
@@ -793,7 +793,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Sporter niet gevonden')
 
         # bad case: lid van andere vereniging
-        self.deelnemer_100002_18.bij_vereniging = self.nhbver2
+        self.deelnemer_100002_18.bij_vereniging = self.ver2
         self.deelnemer_100002_18.save()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -815,8 +815,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/wijzig-team-ag.dtl', 'plein/site_layout.dtl'))
 
         # verkeerde regio
-        self.functie_rcl.nhb_regio = NhbRegio.objects.get(regio_nr=101)
-        self.functie_rcl.save(update_fields=['nhb_regio'])
+        self.functie_rcl.regio = NhbRegio.objects.get(regio_nr=101)
+        self.functie_rcl.save(update_fields=['regio'])
         self.e2e_wissel_naar_functie(self.functie_rcl)
 
         with self.assert_max_queries(20):

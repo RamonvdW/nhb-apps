@@ -85,7 +85,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl',))
 
     def test_overdracht_naam(self):
-        # controleer dat de naam van het NHB lid door de login overgenomen wordt in het account
+        # controleer dat de naam van het lid door de login overgenomen wordt in het account
         self.assertNotEqual(self.account_normaal.first_name, self.sporter_100001.voornaam)
         self.assertNotEqual(self.account_normaal.last_name, self.sporter_100001.achternaam)
         self.account_normaal.bevestigde_email = self.sporter_100001.email
@@ -115,7 +115,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
 
         resp = self.e2e_login_no_check(account, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB')
+        self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de KHSN')
         self.assertContains(resp, 'ni###e@test.com')
 
         # check niet ingelogd

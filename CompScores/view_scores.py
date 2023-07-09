@@ -141,12 +141,12 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
     """ controleer toestemming om scoreverwerking te doen voor deze wedstrijd """
     if (functie_nu.rol == 'RCL'
-            and functie_nu.nhb_regio == deelcomp.nhb_regio
+            and functie_nu.regio == deelcomp.regio
             and functie_nu.comp_type == deelcomp.competitie.afstand):
         # RCL van deze regiocompetitie
         return True
 
-    if functie_nu.rol in ('HWL', 'WL') and functie_nu.nhb_ver == wedstrijd.vereniging:
+    if functie_nu.rol in ('HWL', 'WL') and functie_nu.vereniging == wedstrijd.vereniging:
         # (H)WL van de organiserende vereniging
         return True
 

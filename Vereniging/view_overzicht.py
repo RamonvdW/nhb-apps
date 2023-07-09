@@ -45,7 +45,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nhb_ver'] = ver = self.functie_nu.nhb_ver
+        context['ver'] = ver = self.functie_nu.vereniging
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         context['clusters'] = ver.clusters.all()
@@ -87,14 +87,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 deelcomps = (Regiocompetitie
                              .objects
                              .filter(competitie__is_afgesloten=False,
-                                     nhb_regio=ver.regio)
+                                     regio=ver.regio)
                              .select_related('competitie'))
 
                 deelkamps_rk = (Kampioenschap
                                 .objects
                                 .filter(deel=DEEL_RK,
                                         competitie__is_afgesloten=False,
-                                        nhb_rayon=ver.regio.rayon)
+                                        rayon=ver.regio.rayon)
                                 .select_related('competitie'))
 
                 if (RegiocompetitieRonde
