@@ -333,13 +333,8 @@ def maak_bondspas_image(lid_nr, jaar, regels):
             wkl = True
     # for
 
-    # metadata = PngInfo()
-    # metadata.add_text("Copyright", "de Nederlandse Handboog Bonds (NHB)")
-    # metadata.add_text("Title", "Bondspas %s voor lid %s" % (jaar, lid_nr))
-    # image.save(output, format='PNG', pnginfo=metadata, optimize=True)
-
     ifd = ImageFileDirectory_v2()
-    ifd[EXIF_TAG_COPYRIGHT] = "Nederlandse Handboog Bonds (NHB)"
+    ifd[EXIF_TAG_COPYRIGHT] = "Koninklijke HandboogSport Nederland (KHSN)"
     ifd[EXIF_TAG_TITLE] = "Bondspas %s voor lid %s" % (jaar, lid_nr)
 
     exif_out = io.BytesIO()

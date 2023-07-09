@@ -68,7 +68,7 @@ class Command(BaseCommand):     # pragma: no cover
         lkl_ifaa_2 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_vanaf_verjaardag, wedstrijdgeslacht)
 
         c = canvas.Canvas(pdf_naam, pagesize=pagesizes.A6)
-        c.setAuthor("de Nederlandse Handboog Bonds (NHB) - www.handboogsport.nl")
+        c.setAuthor("Koninklijke HandboogSport Nederland (KHSN) - www.handboogsport.nl")
         c.setTitle("Bondspas %s" % jaar)
         c.setSubject("Bondspas %s voor lid %s" % (jaar, sporter.lid_nr))
         c.setCreator("%s - %s" % (settings.AFSCHRIFT_SITE_NAAM, settings.AFSCHRIFT_SITE_URL))

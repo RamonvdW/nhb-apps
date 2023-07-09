@@ -10,7 +10,7 @@ from BasisTypen.definities import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW
                                    ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIE_WA)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
-                                      bereken_leeftijdsklassen_nhb,
+                                      bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,
                                       bereken_leeftijdsklassen_bondscompetitie,
                                       bereken_leeftijdsklasse_wa,
@@ -189,7 +189,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
 
     def test_leeftijdsklassen_nhb(self):
         # Onder 12
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 9, GESLACHT_MAN, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 9, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 9,
                           'Onder 12 Gemengd of Onder 12 Jongens',
@@ -197,7 +197,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            'Onder 12 Gemengd of Onder 12 Jongens', 'Onder 12 Gemengd of Onder 12 Jongens',
                            'Onder 14 Gemengd of Onder 14 Jongens']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 9, GESLACHT_VROUW, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 9, GESLACHT_VROUW, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 9,
                           'Onder 12 Gemengd of Onder 12 Meisjes',
@@ -205,7 +205,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            'Onder 12 Gemengd of Onder 12 Meisjes', 'Onder 12 Gemengd of Onder 12 Meisjes',
                            'Onder 14 Gemengd of Onder 14 Meisjes']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 9, GESLACHT_ANDERS, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 9, GESLACHT_ANDERS, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 9,
                           'Onder 12 Gemengd',
@@ -213,7 +213,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            'Onder 12 Gemengd', 'Onder 14 Gemengd']))
 
         # Onder 14
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 13, GESLACHT_MAN, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 13, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 13,
                           'Onder 14 Gemengd of Onder 14 Jongens',
@@ -221,7 +221,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            'Onder 18 Gemengd of Onder 18 Heren', 'Onder 18 Gemengd of Onder 18 Heren',
                            'Onder 18 Gemengd of Onder 18 Heren']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 13, GESLACHT_VROUW, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 13, GESLACHT_VROUW, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 13,
                           'Onder 14 Gemengd of Onder 14 Meisjes',
@@ -229,7 +229,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            'Onder 18 Gemengd of Onder 18 Dames', 'Onder 18 Gemengd of Onder 18 Dames',
                            'Onder 18 Gemengd of Onder 18 Dames']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 13, GESLACHT_ANDERS, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 13, GESLACHT_ANDERS, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 13,
                           'Onder 14 Gemengd',
@@ -237,63 +237,63 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                            'Onder 18 Gemengd', 'Onder 18 Gemengd']))
 
         # 21+
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_MAN, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 21, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 21,
                           'Gemengd of Heren',
                           ['Onder 21 Gemengd of Onder 21 Heren', 'Gemengd of Heren', 'Gemengd of Heren',
                            'Gemengd of Heren', 'Gemengd of Heren']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_VROUW, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 21, GESLACHT_VROUW, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 21,
                           'Gemengd of Dames',
                           ['Onder 21 Gemengd of Onder 21 Dames', 'Gemengd of Dames', 'Gemengd of Dames',
                            'Gemengd of Dames', 'Gemengd of Dames']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_ANDERS, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 21, GESLACHT_ANDERS, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 21,
                           'Gemengd',
                           ['Onder 21 Gemengd', 'Gemengd', 'Gemengd', 'Gemengd', 'Gemengd']))
 
         # 50+
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_MAN, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 50, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 50,
                           '50+ Gemengd of 50+ Heren',
                           ['Gemengd of Heren', '50+ Gemengd of 50+ Heren', '50+ Gemengd of 50+ Heren',
                            '50+ Gemengd of 50+ Heren', '50+ Gemengd of 50+ Heren']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_VROUW, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 50, GESLACHT_VROUW, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 50,
                           '50+ Gemengd of 50+ Dames',
                           ['Gemengd of Dames', '50+ Gemengd of 50+ Dames', '50+ Gemengd of 50+ Dames',
                            '50+ Gemengd of 50+ Dames', '50+ Gemengd of 50+ Dames']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_ANDERS, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 50, GESLACHT_ANDERS, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 50,
                           '50+ Gemengd',
                           ['Gemengd', '50+ Gemengd', '50+ Gemengd', '50+ Gemengd', '50+ Gemengd']))
 
         # 60+
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 60, GESLACHT_MAN, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 60, GESLACHT_MAN, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 60,
                           '60+ Gemengd of 60+ Heren',
                           ['50+ Gemengd of 50+ Heren', '60+ Gemengd of 60+ Heren', '60+ Gemengd of 60+ Heren',
                            '60+ Gemengd of 60+ Heren', '60+ Gemengd of 60+ Heren']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 60, GESLACHT_VROUW, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 60, GESLACHT_VROUW, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 60,
                           '60+ Gemengd of 60+ Dames',
                           ['50+ Gemengd of 50+ Dames', '60+ Gemengd of 60+ Dames', '60+ Gemengd of 60+ Dames',
                            '60+ Gemengd of 60+ Dames', '60+ Gemengd of 60+ Dames']))
 
-        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 60, GESLACHT_ANDERS, self.huidige_jaar)
+        tup = bereken_leeftijdsklassen_khsn(self.huidige_jaar - 60, GESLACHT_ANDERS, self.huidige_jaar)
         self.assertEqual(tup,
                          (self.huidige_jaar, 60,
                           '60+ Gemengd',

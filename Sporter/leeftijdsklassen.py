@@ -12,7 +12,7 @@ from BasisTypen.definities import (GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
 from BasisTypen.models import LeeftijdsKlasse, TemplateCompetitieIndivKlasse
 
 
-def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):
+def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit.
         wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 

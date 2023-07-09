@@ -139,8 +139,8 @@
             <h4>Wedstrijden KHSN</h4>
             <p>De KHSN wedstrijdklassen zijn gebaseerd op World Archery, uitgebreid met extra klassen voor de jongsten en oudsten.</p>
             <p>Verder hebben KHSN wedstrijden de optie tot gender-neutrale wedstrijdklassen.</p>
-            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="nhb-rood-text">{{ lkl_nhb_dit_jaar_1 }}</b>
-                {% if lkl_nhb_dit_jaar_2 %}<span> of </span><b class="nhb-rood-text">{{ lkl_nhb_dit_jaar_2 }}</b>{% endif %}.</p>
+            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="nhb-rood-text">{{ lkl_khsn_dit_jaar_1 }}</b>
+                {% if lkl_khsn_dit_jaar_2 %}<span> of </span><b class="nhb-rood-text">{{ lkl_khsn_dit_jaar_2 }}</b>{% endif %}.</p>
         </div>
     </div>
 
@@ -171,31 +171,31 @@
                 <tr>
                     <td>{{ huidige_jaar|add:"-1" }}</td>
                     <td>{{ leeftijd|add:"-1" }}</td>
-                    <td>{{ lkl_nhb.0 }}</td>
+                    <td>{{ lkl_khsn.0 }}</td>
                 </tr>
 
                 <tr class="nhb-rood white-text">
                     <td>{{ huidige_jaar }}</td>
                     <td>{{ leeftijd }}</td>
-                    <td>{{ lkl_nhb.1 }}</td>
+                    <td>{{ lkl_khsn.1 }}</td>
                 </tr>
 
                 <tr>
                     <td>{{ huidige_jaar|add:"1" }}</td>
                     <td>{{ leeftijd|add:"1" }}</td>
-                    <td>{{ lkl_nhb.2 }}</td>
+                    <td>{{ lkl_khsn.2 }}</td>
                 </tr>
 
                 <tr>
                     <td>{{ huidige_jaar|add:"2" }}</td>
                     <td>{{ leeftijd|add:"2" }}</td>
-                    <td>{{ lkl_nhb.3 }}</td>
+                    <td>{{ lkl_khsn.3 }}</td>
                 </tr>
 
                 <tr>
                     <td>{{ huidige_jaar|add:"3" }}</td>
                     <td>{{ leeftijd|add:"3" }}</td>
-                    <td>{{ lkl_nhb.4 }}</td>
+                    <td>{{ lkl_khsn.4 }}</td>
                 </tr>
             </table>
 
