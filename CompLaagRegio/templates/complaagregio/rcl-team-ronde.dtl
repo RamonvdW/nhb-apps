@@ -203,7 +203,7 @@
             <!-- blauwe balk met kaartjes -->
             <div class="row-nhb-blauw">
                 <div class="col s12">
-                    {% include 'plein/card.dtl' with title="Team scores" text="Besluit welke individuele scores bij deze team ronde horen." icon="gavel" url=url_team_scores %}
+                    {% include 'plein/card_icon.dtl' with title="Team scores" text="Besluit welke individuele scores bij deze team ronde horen." icon="gavel" url=url_team_scores %}
                 </div>
             </div>
         {% endif %}

@@ -23,10 +23,10 @@
 
             <!-- betalingen doorgeven -->
             {% url 'Bestel:overboeking-ontvangen' as card_url %}
-            {% include 'plein/card.dtl' with title="Overboekingen" text="Geef de ontvangen betaling voor een MH bestelling door." icon="euro_symbol" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen betaling voor een MH bestelling door." icon="euro_symbol" url=card_url %}
 
             <!-- betalingen -->
-            {% include 'plein/card.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=bestellingen_url %}
+            {% include 'plein/card_icon.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=bestellingen_url %}
 
         </div>
     </div>

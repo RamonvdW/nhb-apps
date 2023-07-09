@@ -55,17 +55,17 @@
             <div class="col s12">
 
                 {% url 'Plein:plein' as card_url %}
-                {% include 'plein/card.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Het Plein" text="Naar de beginpagina." icon="hub" url=card_url %}
 
                 <!-- wedstrijdkalender -->
                 {% url 'Kalender:landing-page' as card_url %}
-                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
                 <!-- FUTURE: toon opleidingen -->
 
                 <!-- webwinkel -->
                 {% url 'Webwinkel:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
 
             </div>
         </div>
@@ -205,9 +205,9 @@
         <!-- blauwe balk met kaartjes -->
         <div class="row-nhb-blauw">
             <div class="col s12">
-                {% include 'plein/card.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
+                {% include 'plein/card_icon.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
 
-                {% include 'plein/card.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
+                {% include 'plein/card_icon.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
             </div>
         </div>
 

@@ -46,21 +46,21 @@
         <div class="col s12">
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
-            {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
 
             <!-- wedstrijdkalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
             <!-- opleidingen -->
             {% if toon_opleidingen %}
                 {% url 'Opleidingen:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
             {% endif %}
 
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records<br>van nederlandse sporters." icon="insights" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records<br>van nederlandse sporters." icon="insights" url=card_url %}
         </div>
     </div>
 
@@ -77,7 +77,7 @@
     <div class="row-nhb-blauw" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
             {% url 'Registreer:begin' as card_url %}
-            {% include 'plein/card.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
         </div>
     </div>
 

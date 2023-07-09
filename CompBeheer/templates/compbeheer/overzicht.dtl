@@ -31,7 +31,7 @@
             <div class="col s12">
 
                 {% for kaartje in kaartjes_algemeen %}
-                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
                 {% endfor %}
 
             </div>
@@ -56,7 +56,7 @@
             <div class="col s12">
 
                 {% for kaartje in kaartjes_indiv %}
-                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
                 {% endfor %}
 
             </div>
@@ -77,7 +77,7 @@
             <div class="col s12">
 
                 {% for kaartje in kaartjes_teams %}
-                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
                 {% endfor %}
 
             </div>

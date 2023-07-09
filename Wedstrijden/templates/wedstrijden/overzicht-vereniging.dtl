@@ -96,14 +96,14 @@
             <div class="col s12">
 
                 <!-- instellingen -->
-                {% include 'plein/card.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
+                {% include 'plein/card_icon.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
 
                 <!-- kortingen -->
                 {% url 'Wedstrijden:vereniging-kortingen' as card_url %}
-                {% include 'plein/card.dtl' with title="Kortingen" text="Kortingen aanmaken of aanpassen." icon="sell" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Kortingen" text="Kortingen aanmaken of aanpassen." icon="sell" url=card_url %}
 
                 <!-- betalingen doorgeven -->
-                {% include 'plein/card.dtl' with title="Overboekingen" text="Geef de ontvangen wedstrijd-gelden door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
+                {% include 'plein/card_icon.dtl' with title="Overboekingen" text="Geef de ontvangen wedstrijd-gelden door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
 
             </div>
         </div>
@@ -120,7 +120,7 @@
         <!-- blauwe balk met kaartjes -->
         <div class="row-nhb-blauw">
             <div class="col s12">
-                {% include 'plein/card.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
+                {% include 'plein/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
             </div>
         </div>
 

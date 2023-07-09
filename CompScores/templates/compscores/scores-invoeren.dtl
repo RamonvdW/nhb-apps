@@ -723,7 +723,7 @@
         <div class="col s12" style="margin-top:50px">
 
             <!-- waarschijnlijke deelnemers -->
-            {% include 'plein/card.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen(this)" %}
+            {% include 'plein/card_icon.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen(this)" %}
 
         </div>
 

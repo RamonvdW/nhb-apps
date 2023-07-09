@@ -42,29 +42,29 @@
         <div class="col s12">
             <!-- Mijn pagina -->
             {% url 'Sporter:profiel' as card_url %}
-            {% include 'plein/card.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
 
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
-            {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
 
             <!-- wedstrijdkalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
             <!-- opleidingen -->
             {% if toon_opleidingen %}
                 {% url 'Opleidingen:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
             {% endif %}
 
             <!-- webwinkel -->
             {% url 'Webwinkel:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
 
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
         </div>
     </div>
 
@@ -99,7 +99,7 @@
     <!-- blauwe balk met kaartje -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" extern_open=True url=url_email_support %}
+            {% include 'plein/card_icon.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" extern_open=True url=url_email_support %}
         </div>
     </div>
 

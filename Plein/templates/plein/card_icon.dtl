@@ -46,7 +46,7 @@
             {% endif %}
 
             <!-- icoon -->
-            <div style="margin-bottom:8px">
+            <div style="margin-bottom:8px{% if not icon_font_size %}; height:64px{% endif %}">
                 <i class="notranslate material-icons-round medium nhb-rood-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
             </div>
 

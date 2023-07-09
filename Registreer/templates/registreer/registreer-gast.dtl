@@ -83,7 +83,7 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             {% url 'Plein:privacy' as card_url %}
-            {% include 'plein/card.dtl' with title="Privacyverklaring" text="Lees hier om we omgaan met jouw privacy." icon="security" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Privacyverklaring" text="Lees hier om we omgaan met jouw privacy." icon="security" url=card_url %}
         </div>
     </div>
 

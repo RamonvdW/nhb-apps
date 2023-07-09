@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'materialize-new-135.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-137.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -212,7 +212,17 @@
             // anders zijn de tabellen niet meer gefiltreerd
             window.addEventListener("load", function()
             {
-                //console.log("load!")
+                // console.log("load!")
+
+                // de fonts zijn nu helemaal ingeladen, dus we kunnen de icons tonen
+                const icons = document.getElementsByClassName('material-icons-round')
+                Array.from(icons).forEach(icon => {
+                    icon.style.display = 'inline-block'
+                });
+
+                // zoek alle tabellen met een zoekveld en trigger de oninput method
+                // dit is noodzakelijk bij gebruik van de browser 'back' knop
+                // anders zijn de tabellen niet meer gefiltreerd
                 const tables = document.getElementsByTagName("table");
                 Array.from(tables).forEach(table => {
                     if (table.id !== "") {

@@ -21,9 +21,9 @@
     <!-- blauwe balk met informatie -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Verklaring openen" text="Hoe we omgaan met jouw privacy staat beschreven in een apart document." icon="article" extern_open=True url=url_privacyverklaring %}
+            {% include 'plein/card_icon.dtl' with title="Verklaring openen" text="Hoe we omgaan met jouw privacy staat beschreven in een apart document." icon="article" extern_open=True url=url_privacyverklaring %}
 
-            {% include 'plein/card.dtl' with title="Contact" text="Kies dit kaartje om je mailprogramma te starten." icon="email" extern_open=True url=url_email_bb %}
+            {% include 'plein/card_icon.dtl' with title="Contact" text="Kies dit kaartje om je mailprogramma te starten." icon="email" extern_open=True url=url_email_bb %}
         </div>
     </div>
 

@@ -21,11 +21,11 @@
     <!-- blauwe balk met informatie -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Voor leden" text="Introductie voor KHSN leden: account aanmaken, voorkeuren, inschrijven." icon="article" extern_open=True url=url_handleiding_leden %}
+            {% include 'plein/card_icon.dtl' with title="Voor leden" text="Introductie voor KHSN leden: account aanmaken, voorkeuren, inschrijven." icon="article" extern_open=True url=url_handleiding_leden %}
 
-            {% include 'plein/card.dtl' with title="Voor beheerders" text="Instructies voor beheerders: uitleg over de tweede factor en wissel-van-rol." icon="article" extern_open=True url=url_handleiding_beheerders %}
+            {% include 'plein/card_icon.dtl' with title="Voor beheerders" text="Instructies voor beheerders: uitleg over de tweede factor en wissel-van-rol." icon="article" extern_open=True url=url_handleiding_beheerders %}
 
-            {% include 'plein/card.dtl' with title="Voor verenigingen" text="Instructies voor verenigingen: instellingen, bondscompetities en wedstrijden organiseren." icon="article" extern_open=True url=url_handleiding_vereniging %}
+            {% include 'plein/card_icon.dtl' with title="Voor verenigingen" text="Instructies voor verenigingen: instellingen, bondscompetities en wedstrijden organiseren." icon="article" extern_open=True url=url_handleiding_vereniging %}
 
         </div>
     </div>

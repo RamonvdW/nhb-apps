@@ -104,10 +104,10 @@
     <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
             {% url 'Account:wachtwoord-vergeten' as card_url %}
-            {% include 'plein/card.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" icon="help" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" icon="help" url=card_url %}
 
             {% url 'Registreer:begin' as card_url %}
-            {% include 'plein/card.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
         </div>
     </div>
 

@@ -37,7 +37,7 @@
         <div class="row-nhb-blauw">
             <div class="col s12">
                 {% url 'Sporter:profiel' as card_url %}
-                {% include 'plein/card.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
             </div>
         </div>
 
@@ -64,7 +64,7 @@
             {% endfor %}
 
             {% url 'HistComp:top' as card_url %}
-            {% include 'plein/card.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="undo" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="undo" url=card_url %}
         </div>
     </div>
 
@@ -83,17 +83,17 @@
             <div class="col s12">
                 <!-- competities opstarten -->
                 {% if url_seizoen_opstarten %}
-                    {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=url_seizoen_opstarten %}
+                    {% include 'plein/card_icon.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=url_seizoen_opstarten %}
                 {% endif %}
 
                 {% if url_seizoen_afsluiten %}
-                    {% include 'plein/card.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
+                    {% include 'plein/card_icon.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
                 {% endif %}
 
                 {% url 'Functie:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
 
-                {% include 'plein/card.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
+                {% include 'plein/card_icon.dtl' with title="Statistiek" text="Toon statistiek over de inschrijvingen." icon="query_stats" url=url_statistiek %}
             </div>
         </div>
 
@@ -114,17 +114,17 @@
             <!-- toon en koppel beheerders -->
             {% if toon_beheerders_algemeen %}
                 {% url 'Functie:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
             {% endif %}
 
             <!-- algemene informatie over de competities -->
             {% url 'Competitie:info-competitie' as card_url %}
-            {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
             <!-- leeftijdsgroepen -->
             <!-- let op: kopie van dit kaartje op Wedstrijden / wedstrijd-details -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'plein/card.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
         </div>
     </div>
 

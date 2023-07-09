@@ -234,19 +234,19 @@
                 {% if kan_aanmelden and kan_inschrijven %}
 
                     <!-- inschrijven sporter -->
-                    {% include 'plein/card.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+                    {% include 'plein/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
 
                     <!-- inschrijven groepje -->
-                    {% include 'plein/card.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+                    {% include 'plein/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
 
                     <!-- inschrijven familie -->
-                    {% include 'plein/card.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+                    {% include 'plein/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
 
                 {% endif %}
 
 
                {% if wed.extern_beheerd and wed.contact_website %}
-                   {% include 'plein/card.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze wedstrijd gaat via de website van de organisatie" url=wed.contact_website %}
+                   {% include 'plein/card_icon.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze wedstrijd gaat via de website van de organisatie" url=wed.contact_website %}
                 {% endif %}
 
             </div>
@@ -269,7 +269,7 @@
             <!-- informatie over leeftijden -->
             <!-- let op: kopie van dit kaartje op Competitie / kies -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'plein/card.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
 
         </div>
     </div>
