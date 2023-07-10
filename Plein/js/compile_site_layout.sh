@@ -6,13 +6,14 @@
 
 # go to the directory of the script
 # because all paths in this script are relative to that location
-cd $(dirname $0)
+SCRIPT_DIR=$(dirname "$0")
+cd "$SCRIPT_DIR"
 
-OUT="$PWD/../compiled_static"
+OUT="$PWD/../static/js"
 INFILE="$PWD/site_layout.js"
 
 # source file to modify when the version number changes
-DTL_FILE="$PWD/../../Plein/templates/plein/site_layout.dtl"
+DTL_FILE="$PWD/../templates/plein/site_layout.dtl"
 
 if [ ! -e "$INFILE" ]
 then

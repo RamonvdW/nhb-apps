@@ -20,7 +20,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url({% static 'fonts/FiraSans-Medium-v16.ttf' %}) format('truetype');
+  src: url({% static 'fonts/FiraSans-Medium-v17.ttf' %}) format('truetype');
 }
 @font-face {
   font-family: 'Open Sans';
@@ -28,13 +28,13 @@
   font-weight: 400;
   font-stretch: normal;
   font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url({% static 'fonts/OpenSans-Regular-v34.ttf' %}) format('truetype');
+  src: url({% static 'fonts/OpenSans-Regular-v35.ttf' %}) format('truetype');
 }
 @font-face {
   font-family: 'Material Icons Round';
   font-style: normal;
   font-weight: 400;
-  font-display: block;  /* voorkomt verspringen door icon-selector-texts als het font nog niet geladen is */
+  font-display: block;  /* liever later tonen dan verspringende layout */
   src: url({% static 'fonts/Material-Icons-Round-v108.otf' %}) format('opentype');
 }
 </style>

@@ -4,14 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# set high performance
-#sudo cpupower frequency-set --governor performance > /dev/null
+STATIC_DIR="nhbapps/.static/"
+SETTINGS="nhbapps.settings_dev"
+BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
+DEBUG=1
 
 export PYTHONDONTWRITEBYTECODE=1
-BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
 
-DEBUG=1
-SETTINGS="nhbapps.settings_dev"
 if [ "$1" = "--nodebug" ]
 then
     DEBUG=0
@@ -21,7 +20,6 @@ fi
 ./manage.py check || exit 1
 
 echo "[INFO] Refreshing static files"
-STATIC_DIR="nhbapps/.static/"
 rm -rf "$STATIC_DIR"*
 ./manage.py collectstatic -l
 

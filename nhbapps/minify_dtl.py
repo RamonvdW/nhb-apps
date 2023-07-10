@@ -111,7 +111,7 @@ class Loader(AppDirectoriesLoader):
                 # deel = re.sub(r'}\n', '}', deel)       # breakt javascript als er een ; ontbreekt!
                 deel = re.sub(r';\n', ';', deel)
                 deel = re.sub(r',\n', ',', deel)
-                deel = re.sub(r'}\nelse', '}else', deel)
+                deel = re.sub(r'}\n', '}', deel)
                 deel = re.sub(r'\)\ncontinue', ')continue', deel)
 
                 # verwijder onnodige newlines aan het begin van het script
@@ -234,17 +234,19 @@ class Loader(AppDirectoriesLoader):
         # whitespace tussen laatste javascript statement en </script>
         contents = re.sub(r'\s+</script>', '</script>', contents)
 
-        new_contents = ''
-
         # optimize inside <style>
+        new_contents = ''
         pos = contents.find('<style>')
         if pos > 0:
             pos2 = contents.find('</style>')
             new_contents += contents[:pos+7]        # <style>
             new_contents += self._minify_css(contents[pos+7:pos2])
             contents = contents[pos2:]              # </style> and onwards
+        new_contents += contents
+        contents = new_contents
 
         # optimize in inline style=""
+        new_contents = ''
         pos = contents.find('style="')      # let op: neemt ook img_style="padding:10px" mee
         while pos > 0:
             new_contents += contents[:pos+7]
@@ -265,6 +267,28 @@ class Loader(AppDirectoriesLoader):
                 new_contents += style
 
             pos = contents.find('style="')
+        # while
+        new_contents += contents
+        contents = new_contents
+
+        # optimize in inline class=""
+        new_contents = ''
+        pos = contents.find(' class="')
+        while pos > 0:
+            new_contents += contents[:pos+8]
+            contents = contents[pos+8:]
+
+            pos = contents.find('"')
+            if pos > 0:                     # pragma: no branch
+                klass = contents[:pos]
+                contents = contents[pos:]
+
+                # remove extra spaces between class names
+                klass = klass.replace('  ', ' ')
+
+                new_contents += klass
+
+            pos = contents.find(' class="')
         # while
         new_contents += contents
 

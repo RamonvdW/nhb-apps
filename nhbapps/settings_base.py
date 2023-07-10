@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-07-09'
+SITE_VERSIE = '2023-07-10'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -181,7 +181,6 @@ ROOT_URLCONF = 'nhbapps.urls'
 STATIC_URL = '/static/'             # url
 STATIC_ROOT = 'nhbapps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
-    os.path.join(PROJ_DIR, "compiled_static"),
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),
 ]
 STATICFILES_FINDER = [

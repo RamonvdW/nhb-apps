@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'materialize-new-137.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-139.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -166,8 +166,8 @@
             </main>
         </div>
 
-        <script src="{% static 'materialize-new-13_min.js' %}"></script>
-        <script src="{% static 'site_layout-11_min.js' %}"></script>
+        <script src="{% static 'js/materialize-new-15_min.js' %}"></script>
+        <script src="{% static 'js/site_layout-12_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script type="application/javascript">
@@ -215,7 +215,7 @@
                 // console.log("load!")
 
                 // de fonts zijn nu helemaal ingeladen, dus we kunnen de icons tonen
-                const icons = document.getElementsByClassName('material-icons-round')
+                const icons = document.getElementsByClassName('material-icons-round');
                 Array.from(icons).forEach(icon => {
                     icon.style.display = 'inline-block'
                 });

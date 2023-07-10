@@ -20,8 +20,8 @@ EXT_ICONS=".otf"
 EXT_OPEN_SANS=".ttf"
 EXT_FIRA_SANS=".ttf"
 
-STYLE_DIR="$(dirname $0)"
-STATIC_DIR="$STYLE_DIR/../../Plein/static/fonts"
+STYLE_DIR=$(dirname "$0")
+STATIC_DIR="$STYLE_DIR/../static/fonts"
 WORK_DIR="/tmp/update_fonts.$$"
 
 KEEP_DOWNLOAD_DIR=0
@@ -35,7 +35,7 @@ update_fonts()
 
     echo "[INFO] Checking $FNAME"
 
-    DL_FILE1="$WORK_DIR/download_$FNAME"
+    DL_FILE1="$WORK_DIR/style_$FNAME"
     curl $CURL_OPTIONS -o "$DL_FILE1" $URL
 
     STYLE_FILE="$STYLE_DIR/$FNAME/style.css2"
@@ -63,9 +63,13 @@ update_fonts()
     then
         echo "[INFO] OK (no change)"
     else
+        # download the new file
+        DL_FILE2="$WORK_DIR/$NEW_NAME"
+        curl $CURL_OPTIONS -o "$DL_FILE2" $URL2
+    
         OLD_NAME=$(ls -1 "$STATIC_DIR/$FNAME"-v*"$EXT")
         echo "[WARNING] Found updated version"
-        echo "          NEW=$NEW_NAME"
+        echo "          NEW=$DL_FILE2"
         echo "          OLD=$OLD_NAME"
 
         KEEP_DOWNLOAD_DIR=1

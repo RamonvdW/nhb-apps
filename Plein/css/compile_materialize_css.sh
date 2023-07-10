@@ -1,20 +1,22 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # go to the directory of the script
 # because all paths in this script are relative to that location
-cd $(dirname $0)
 
-OUT="$PWD/../compiled_static"
+SCRIPT_DIR=$(dirname "$0")
+cd "$SCRIPT_DIR"
+
+OUT="$PWD/../static/css"
 INFILE="$PWD/materialize-src/sass/materialize.scss"
 MINIFY="--style compressed"
 
 # source file to modify when the version number changes
-DTL_FILE1="$PWD/../../Plein/templates/plein/site_layout.dtl"
-DTL_FILE2="$PWD/../../Plein/templates/plein/site_layout_minimaal.dtl"
+DTL_FILE1="$PWD/../templates/plein/site_layout.dtl"
+DTL_FILE2="$PWD/../templates/plein/site_layout_minimaal.dtl"
 
 if [ ! -e "$INFILE" ]
 then
