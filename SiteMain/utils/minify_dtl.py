@@ -295,7 +295,7 @@ class Loader(AppDirectoriesLoader):
         return new_contents
 
     def get_contents(self, origin):
-        """ Deze Loader methode lijkt aangeroepen """
+        """ laad een template """
         contents = super().get_contents(origin)
 
         # in our project we use .dtl for "django template language" files

@@ -8,7 +8,7 @@
     Django settings for the NhbApps project during development runs.
 """
 
-from nhbapps.settings_base import *
+from SiteMain.settings_base import *
 
 ENABLE_DEBUG_TOOLBAR = False
 ENABLE_DJANGO_EXTENSIONS = False
@@ -21,7 +21,7 @@ DEBUG = True
 
 # django-extensions
 #   very useful for show_urls:
-#     ./manage.py show_urls --settings=nhbapps.settings_dev --format table | cut -d\| -f1
+#     ./manage.py show_urls --settings=SiteMain.settings_dev --format table | cut -d\| -f1
 # ENABLE_DJANGO_EXTENSIONS = True
 
 

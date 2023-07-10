@@ -8,7 +8,7 @@
     Django settings for the NhbApps project during automated testing.
 """
 
-from nhbapps.settings_base import *         # noqa
+from SiteMain.settings_base import *         # noqa
 
 DEBUG = True
 ENABLE_DEBUG_TOOLBAR = False

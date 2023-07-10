@@ -18,7 +18,7 @@ import os
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
-from nhbapps.settings_local import *
+from SiteMain.settings_local import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,8 +30,8 @@ SITE_VERSIE = '2023-07-10'
 
 # modules van de site
 INSTALLED_APPS = [
-    'Plein.apps.PleinConfig',           # must go first: provides admin template override
-    'Beheer.apps.BeheerConfig',         # uitbreiding op admin interface
+    'Beheer.apps.BeheerConfig',         # must go first: provides admin template override
+    'Beheer.apps.BeheerAdminConfig',    # uitbreiding op admin interface
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
     'Bestel.apps.BestelConfig',
@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'NhbStructuur.apps.NhbStructuurConfig',
     'Opleidingen.apps.OpleidingenConfig',
     'Overig.apps.OverigConfig',
+    'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',
     'Registreer.apps.RegistreerConfig',
     'Score.apps.ScoreConfig',
@@ -126,7 +127,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
-                ('django.template.loaders.cached.Loader', ['nhbapps.minify_dtl.Loader']),
+                ('django.template.loaders.cached.Loader', ['SiteMain.utils.minify_dtl.Loader']),
             ],
         },
     },
@@ -134,7 +135,7 @@ TEMPLATES = [
 
 
 # point out location of WSGI application for django runserver command
-WSGI_APPLICATION = 'nhbapps.wsgi.application'
+WSGI_APPLICATION = 'SiteMain.wsgi.application'
 
 # let browsers remember to connect with https
 # security analysis recommends at least 180 days
@@ -173,13 +174,13 @@ USE_TZ = True
 
 
 # top-level URL verdeling naar apps
-ROOT_URLCONF = 'nhbapps.urls'
+ROOT_URLCONF = 'SiteMain.urls'
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 STATIC_URL = '/static/'             # url
-STATIC_ROOT = 'nhbapps/.static'     # relative to project top-dir
+STATIC_ROOT = 'SiteMain/.static'    # relative to project top-dir
 STATICFILES_DIRS = [
     ("webwinkel_fotos", WEBWINKEL_FOTOS_DIR),
 ]
@@ -214,7 +215,7 @@ BACKGROUND_SYNC__BETAAL_MUTATIES = BACKGROUND_SYNC_POORT + 4
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures
-TEST_RUNNER = 'nhbapps.app-hierarchy-testrunner.HierarchyRunner'
+TEST_RUNNER = 'SiteMain.utils.app-hierarchy-testrunner.HierarchyRunner'
 
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
@@ -549,7 +550,7 @@ WEDSTRIJDEN_KIES_UITVOERENDE_VERENIGING = (1368,)
 # let op: zonder DEBUG=True geen static files in dev omgeving!
 DEBUG = False
 
-# HTML validation using v.Nu (see Overig/e2ehelpers.py)
+# HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)
 TEST_VALIDATE_HTML = False
 
 # end of file

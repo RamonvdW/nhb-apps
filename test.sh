@@ -7,7 +7,7 @@
 ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
-TEST_DIR="./nhbapps/data_test"
+TEST_DIR="./SiteMain/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
@@ -139,7 +139,7 @@ python3 $PY_OPTS -m coverage erase
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
 # -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | python -u ./number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+tail -f "$LOG" --pid=$$ | python -u ./SiteMain/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
 
@@ -150,7 +150,7 @@ then
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
 
     # add coverage with no-debug
-    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
+    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=SiteMain.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
@@ -189,7 +189,7 @@ powerprofilesctl set performance
 # -v = verbose
 # note: double quotes not supported around $*
 echo "[INFO] Starting main test run" >>"$LOG"
-python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $ARGS &>>"$LOG"
+python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=SiteMain.settings_autotest -v 2 $ARGS &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1

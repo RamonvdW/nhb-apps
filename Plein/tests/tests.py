@@ -19,8 +19,8 @@ class TestPlein(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts_admin_en_bb()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def test_root_redirect(self):
         with self.assert_max_queries(20):
@@ -47,6 +47,6 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)
 
-        urls = self.extract_all_urls(resp)      # for coverage
+        self.extract_all_urls(resp)      # for coverage
 
 # end of file
