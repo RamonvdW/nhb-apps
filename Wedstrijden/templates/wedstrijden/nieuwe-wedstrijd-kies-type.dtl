@@ -49,7 +49,7 @@
             {% static 'plein/logo_world_archery_225x246.png' as img_src %}
             {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van World Archery. Bij A-status kunnen records aangevraagd worden." img_height=112 img_src=img_src onclick="keuze('wa')" %}
 
-            {% static 'plein/logo_nhb_192x192.png' as img_src %}
+            {% static 'plein/logo_khsn_192x192.png' as img_src %}
             {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstijden." img_height=112 img_src=img_src onclick="keuze('nhb')" %}
 
             {% static 'plein/logo_ifaa_128x200.png' as img_src %}

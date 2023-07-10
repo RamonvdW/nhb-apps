@@ -26,7 +26,7 @@
         {% block extra_header %}{% endblock %}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
-        <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+        <link rel="icon" href="{% static 'plein/logo_khsn_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="{% static 'materialize-new-128.css' %}">
     </head>

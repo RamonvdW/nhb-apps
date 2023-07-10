@@ -24,7 +24,7 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
-        <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+        <link rel="icon" href="{% static 'plein/logo_khsn_192x192.png' %}" sizes="192x192">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
