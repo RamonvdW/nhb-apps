@@ -227,6 +227,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-maand" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-jaar" %}
 
 {% endblock %}

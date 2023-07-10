@@ -6,8 +6,8 @@
 
 # helper to check the uniqueness of the "op_pagina" for the feedback form
 
-DTL_INCLUDES=$(echo "/menu.dtl /andere-sites-van-de-nhb.dtl /site_layout.dtl /site_layout_minimaal.dtl /site_layout_favicons /site_layout_fonts /fout_403.dtl /fout_404.dtl /fout_500.dtl /card.dtl /card_logo.dtl /card_nog-niet-beschikbaar /card_logo_nog-niet-beschikbaar /ga-naar-live-server.dtl /card_product.dtl" | tr ' ' '|')
-DTL_BEWUST_NIET=$(echo "/templates/email nhbapps/templates/snippets.dtl /plein-bezoeker.dtl /niet-ondersteund.dtl /feedback/ tijdelijkecodes/code- /Logboek/ /templates/plein/menu- /records_specifiek.dtl" | tr ' ' '|')
+DTL_INCLUDES=$(echo "/menu.dtl /andere-sites.dtl /site_layout.dtl /site_layout_minimaal.dtl /site_layout_favicons /site_layout_fonts /fout_403.dtl /fout_404.dtl /fout_500.dtl /card_icon.dtl /card_logo.dtl /card_icon_beschikbaar-vanaf /card_logo_beschikbaar-vanaf /ga-naar-live-server.dtl /card_product.dtl /card_niet-beschikbaar /tijdlijn.dtl /vhpg-tekst.dtl" | tr ' ' '|')
+DTL_BEWUST_NIET=$(echo "/templates/email nhbapps/templates/snippets.dtl /plein-bezoeker.dtl /niet-ondersteund.dtl /feedback/ tijdelijkecodes/code- /Logboek/ /records_specifiek.dtl /registreer-gast.dtl /registreer-normaal.dtl" | tr ' ' '|')
 
 DTL_FILES=$(find . -name \*.dtl | grep -vE "$DTL_BEWUST_NIET" | grep -vE "$DTL_INCLUDES")
 
@@ -21,11 +21,12 @@ grep "with op_pagina" $DTL_FILES | cut -d':' -f2 | tr ' ' '\n' | grep op_pagina 
 
 for dtl in $DTL_FILES;
 do
-  AppName=$(echo $dtl | cut -d/ -f2)
+  AppName=$(echo "$dtl" | cut -d/ -f2)
   app_name=${AppName,,}
   verwacht="op_pagina=\"$app_name-"
-  grep -q $verwacht $dtl
-  if [ $? -ne 0 ]
+  grep -q "$verwacht" "$dtl"
+  RES=$?
+  if [ $RES -ne 0 ]
   then
       echo "[WARNING] $verwacht niet gevonden in $dtl"
   fi

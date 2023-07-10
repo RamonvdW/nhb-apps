@@ -31,6 +31,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="functie-otp-koppelen-gelukt" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-otp-koppelen-gelukt" %}
 
 {% endblock %}
