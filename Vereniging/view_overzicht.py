@@ -156,9 +156,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
                 kaartje.url = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': comp.pk})
                 if comp.afstand == '18':
-                    kaartje.img = static('plein/badge_nhb_indoor.png')
+                    kaartje.img = static('static/plein/badge_discipline_indoor.png')
                 else:
-                    kaartje.img = static('plein/badge_nhb_25m1p.png')
+                    kaartje.img = static('static/plein/badge_discipline_25m1p.png')
                 if comp.fase_indiv < 'C':
                     kaartje.beschikbaar_vanaf = localize(comp.begin_fase_C)
                 kaartjes.append(kaartje)
@@ -243,9 +243,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.url = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
                         if comp.afstand == '18':
-                            kaartje.img = static('plein/badge_nhb_indoor.png')
+                            kaartje.img = static('static/plein/badge_discipline_indoor.png')
                         else:
-                            kaartje.img = static('plein/badge_nhb_25m1p.png')
+                            kaartje.img = static('static/plein/badge_discipline_25m1p.png')
                         kaartjes.append(kaartje)
 
                     # 5 - wie schiet waar
