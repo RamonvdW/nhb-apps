@@ -212,7 +212,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         sporter.save(update_fields=['is_actief_lid'])
 
         with self.assert_max_queries(55):
-            f1, f2 = self.run_management_command('check_beheerders')
+            f1, f2 = self.run_management_command('check_beheerders', '--otp_uit')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertFalse('[100042] Kees Pijlpunt' in f2.getvalue())
