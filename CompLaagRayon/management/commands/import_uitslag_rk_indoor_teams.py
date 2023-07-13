@@ -192,10 +192,7 @@ class Command(BaseCommand):
                 self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (
                                     row, ver_nr, repr(ver_naam), repr(team_naam)))
 
-            if ver_nr < 0:
-                continue
-
-            if team_naam is None:
+            if ver_nr < 0 or team_naam is None:
                 continue
 
             # zoek het team erbij
@@ -205,6 +202,11 @@ class Command(BaseCommand):
 
             if self.team_klasse is None:
                 self._zet_team_klasse(kamp_team.team_klasse)
+            else:
+                if self.team_klasse != kamp_team.team_klasse:
+                    self.stderr.write('[ERROR] Inconsistente team klasse op regel %s: %s (eerdere teams: %s)' % (
+                                        row_nr, kamp_team.team_klasse, self.team_klasse))
+                    continue
 
             self.deelnemende_teams[team_naam] = kamp_team
 

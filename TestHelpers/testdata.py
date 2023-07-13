@@ -66,7 +66,8 @@ class TestData(object):
     url_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'   # deelcomp_pk
 
     leden = [
-        # wedstrijdleeftijd, geslacht, voornaam, boogtype, flags: (account, voorkeur_rk/bk, para_code, voorwerpen, notitie)
+        # wedstrijdleeftijd, geslacht, voornaam, boogtype, flags:
+        #                                                  (account, voorkeur_rk/bk, para_code, voorwerpen, notitie)
         (10, 'M', 'Asp10',  'R',      (False, True,  '',    False, 0)),
         (10, 'V', 'Asp10',  'R',      (False, True,  '',    False, 0)),
         (11, 'M', 'Asp11',  'R',      (False, True,  '',    False, 0)),
@@ -74,7 +75,7 @@ class TestData(object):
         (13, 'M', 'Asp13',  'R',      (False, True,  '',    False, 0)),
         (14, 'M', 'Cad14',  'R',      (False, True,  '',    False, 0)),
         (14, 'M', 'Cad14b', 'C',      (False, True,  '',    False, 0)),
-        (14, 'M', 'Cad15',  'c',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur voor de competitie
+        (14, 'M', 'Cad15',  'c',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur competitie
         (15, 'V', 'Cad15',  'R',      (False, True,  '',    False, 0)),
         (15, 'M', 'Cad15b', 'BB',     (False, True,  '',    False, 0)),
         (15, 'V', 'Cad15b', 'C',      (False, True,  '',    False, 0)),
@@ -96,7 +97,7 @@ class TestData(object):
         (21, 'V', 'Sen21b', 'C',      (False, True,  'DIS', False, 0)),
         (22, 'M', 'Sen22',  'R',      (False, True,  'DIS', False, 1)),
         (22, 'M', 'Sen22b', 'C',      (False, True,  '',    False, 1)),
-        (22, 'M', 'Sen23',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur voor de competitie
+        (22, 'M', 'Sen23',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur competitie
         (31, 'V', 'Sen31',  'R',      (False, True,  '',    True,  1)),
         (32, 'M', 'Sen32',  'C',      (False, True,  '',    False, 0)),
         (32, 'M', 'Sen32b', 'BB',     (True,  True,  '',    False, 0)),       # account
@@ -118,7 +119,7 @@ class TestData(object):
         (50, 'M', 'Mas50',  'R',      (True,  True,  '',    False, 0)),       # Mas50 = SEC
         (51, 'V', 'Mas51',  'R',      (True,  True,  '',    False, 0)),       # account
         (51, 'V', 'Mas51b', 'C',      (False, True,  '',    False, 0)),
-        (51, 'V', 'Mas52',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur voor de competitie
+        (51, 'V', 'Mas52',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur competitie
         (59, 'M', 'Mas59',  'R',      (False, True,  '',    False, 0)),
         (59, 'M', 'Mas59b', 'LB',     (False, True,  '',    False, 0)),
         (60, 'V', 'Vet60',  'R',      (False, True,  '',    False, 0)),
@@ -1077,7 +1078,8 @@ class TestData(object):
 
         for deelnemer in deelnemers:
             if deelnemer.inschrijf_voorkeur_team:
-                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
+                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (
+                #           deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
                 afkorting = deelnemer.sporterboog.boogtype.afkorting
                 try:
                     deelnemers_per_boog[afkorting].append(deelnemer)
@@ -1246,7 +1248,10 @@ class TestData(object):
                             break
                     # for
 
-                    # print(sporterboog.sporter.bij_vereniging.ver_nr, sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting, "%.3f" % (ag/1000), deelnemer_klasse)
+                    # print(sporterboog.sporter.bij_vereniging.ver_nr,
+                    #       sporterboog.sporter.lid_nr,
+                    #       sporterboog.boogtype.afkorting,
+                    #       "%.3f" % (ag/1000), deelnemer_klasse)
                     if deelnemer_klasse:                                            # pragma: no branch
                         deelnemer = KampioenschapSporterBoog(
                                             kampioenschap=deelkamp,
@@ -1344,9 +1349,13 @@ class TestData(object):
         deelnemers_per_boog = dict()   # [boogtype.afkorting] = list(deelnemer)
 
         for deelnemer in deelnemers:
-            # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
+            # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer,
+            #                                                      deelnemer.ag_voor_indiv,
+            #                                                      deelnemer.ag_voor_team))
             if deelnemer.inschrijf_voorkeur_team and deelnemer.bij_vereniging.ver_nr == ver_nr:
-                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
+                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer,
+                #                                                      deelnemer.ag_voor_indiv,
+                #                                                      deelnemer.ag_voor_team))
                 afkorting = deelnemer.sporterboog.boogtype.afkorting
                 try:
                     deelnemers_per_boog[afkorting].append(deelnemer)
@@ -1488,7 +1497,9 @@ class TestData(object):
 
         for deelnemer in rk_deelnemers:
             if deelnemer.bij_vereniging.ver_nr == ver_nr:
-                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
+                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer,
+                #                                                      deelnemer.ag_voor_indiv,
+                #                                                      deelnemer.ag_voor_team))
                 boogtype_afkorting = deelnemer.sporterboog.boogtype.afkorting
 
                 # vertaal boogtype naar teamtype
@@ -1578,7 +1589,8 @@ class TestData(object):
 
         return locatie
 
-    def maak_uitslag_rk_indiv(self, afstand: int):
+    @staticmethod
+    def maak_uitslag_rk_indiv(afstand: int):
         nr = 1
         score1 = 200
         score2 = 150
@@ -1732,6 +1744,9 @@ class TestData(object):
             volgorde += 1
 
             ag = rk_team.result_teamscore / pijlen
+
+            # print('[%s] bk_team: %s, klasse=%s' % (afstand, rk_team.team_naam, rk_team.team_klasse))
+            # print('     team_leden: %s' % repr(rk_team_leden[tup]))
 
             bk_team = KampioenschapTeam(
                             kampioenschap=deelkamp_bk,

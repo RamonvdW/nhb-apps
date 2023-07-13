@@ -82,21 +82,27 @@ class Command(BaseCommand):
                                        'feitelijke_leden')):
 
             self.teams_cache.append(team)
-            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr for deelnemer in team.gekoppelde_leden.all()]
+            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr
+                                          for deelnemer in team.gekoppelde_leden.all()]
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
         gem = list()
         for lid_nr in lid_nrs:
-            deelnemer_all = [deelnemer for deelnemer in self.deelnemers[lid_nr] if deelnemer.sporterboog.boogtype.afkorting in self.toegestane_bogen]
+            deelnemer_all = [deelnemer
+                             for deelnemer in self.deelnemers[lid_nr]
+                             if deelnemer.sporterboog.boogtype.afkorting in self.toegestane_bogen]
 
-            if len(deelnemer_all) == 1:
-                deelnemer = deelnemer_all[0]
+            if len(deelnemer_all) == 0:
+                self.stderr.write('[ERROR] Sporter %s is geen deelnemer' % lid_nr)
             else:
-                self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer uit %s' % repr(deelnemer_all))
-                deelnemer = deelnemer_all[0]
-            tup = (deelnemer.gemiddelde, lid_nr)
-            gem.append(tup)
+                if len(deelnemer_all) == 1:
+                    deelnemer = deelnemer_all[0]
+                else:
+                    self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer uit %s' % repr(deelnemer_all))
+                    deelnemer = deelnemer_all[0]
+                tup = (deelnemer.gemiddelde, lid_nr)
+                gem.append(tup)
         # for
         gem.sort(reverse=True)
         return gem
@@ -136,8 +142,12 @@ class Command(BaseCommand):
                 # self.stdout.write('[DEBUG] cached team: %s' % repr(team))
                 if team.vereniging.ver_nr == ver_nr:
                     if team.team_naam.upper() in up_naam:
-                        self.stdout.write('[WARNING] Aangepast team naam: %s --> %s' % (
-                                            repr(team.team_naam), repr(team_naam)))
+                        if team.team_naam == team_naam:
+                            self.stdout.write('[WARNING] Team uit verkeerde klasse: naam=%s, klasse=%s' % (
+                                                repr(team_naam), team.team_klasse))
+                        else:
+                            self.stdout.write('[WARNING] Aangepaste team naam: %s --> %s' % (
+                                                repr(team.team_naam), repr(team_naam)))
                         if self.team_klasse is None or team.team_klasse == self.team_klasse:
                             sel_teams.append(team)
             # for
@@ -204,6 +214,8 @@ class Command(BaseCommand):
 
             # zoek het team erbij
             kamp_team = self._get_team(team_naam, ver_nr, row_nr)
+            if self.verbose:
+                self.stdout.write('[DEBUG] row_nr=%s, kamp_team=%s' % (row_nr, kamp_team))
             if kamp_team is None:
                 continue
 
@@ -229,6 +241,8 @@ class Command(BaseCommand):
                 row = str(row_nr)
 
                 lid_nr = ws[col_lid_nr + row].value
+                if self.verbose:
+                    self.stdout.write('[DEBUG] row_nr=%s, lid_nr=%s' % (row_nr, repr(lid_nr)))
                 if lid_nr is None:
                     break
                 if str(lid_nr) == '-':
@@ -260,10 +274,12 @@ class Command(BaseCommand):
             # haal de verwachte lid_nrs eruit
             feitelijke_lid_nrs = [lid_nr for lid_nr in gevonden_lid_nrs if lid_nr in team_lid_nrs]
             if self.verbose:
-                self.stdout.write('[DEBUG] feitelijke_lid_nrs van team [%s] %s: %s' % (ver_nr, team_naam, repr(feitelijke_lid_nrs)))
+                self.stdout.write('[DEBUG] feitelijke_lid_nrs van team [%s] %s: %s' % (
+                                        ver_nr, team_naam, repr(feitelijke_lid_nrs)))
 
             if len(feitelijke_lid_nrs) == 0:
-                self.stdout.write('[WARNING] Team %s van vereniging %s heeft niet meegedaan (geen scores)' % (ver_nr, team_naam))
+                self.stdout.write('[WARNING] Team %s van vereniging %s heeft niet meegedaan (geen scores)' % (
+                                        ver_nr, team_naam))
                 del self.deelnemende_teams[team_naam]
             else:
                 for lid_nr in feitelijke_lid_nrs:
@@ -277,7 +293,7 @@ class Command(BaseCommand):
                     afgekeurd = list()
 
                     if len(invallers) > len(uitvallers):
-                        self.stderr.write('[ERROR] Te veel invallers voor team %s met max %s sporters (vereniging %s)' % (
+                        self.stderr.write('[ERROR] Te veel invallers voor team %s met max %s sporters (ver: %s)' % (
                                             repr(team_naam), aantal_gekoppeld, ver_nr))
                         feitelijke_deelnemers = list()
                     else:
@@ -297,10 +313,13 @@ class Command(BaseCommand):
                                 uitvallers.pop(0)
                         # while
 
-                        feitelijke_deelnemers = [deelnemer for deelnemer in feitelijke_deelnemers if deelnemer.sporterboog.sporter.lid_nr not in afgekeurd]
+                        feitelijke_deelnemers = [deelnemer
+                                                 for deelnemer in feitelijke_deelnemers
+                                                 if deelnemer.sporterboog.sporter.lid_nr not in afgekeurd]
 
                 if len(feitelijke_deelnemers) < 3:
-                    self.stderr.write('[ERROR] Maar %s deelnemers in team %s' % (len(feitelijke_deelnemers), kamp_team.team_naam))
+                    self.stderr.write('[ERROR] Maar %s deelnemers in team %s' % (
+                                            len(feitelijke_deelnemers), kamp_team.team_naam))
 
                 if len(feitelijke_deelnemers) > 0:
                     deelnemer_totalen = list()
@@ -366,9 +385,11 @@ class Command(BaseCommand):
                 continue
 
             if self.verbose:
-                self.stdout.write('[DEBUG] Uitslag: ver_naam=%s, team_naam=%s, resultaat=%s' % (repr(ver_naam), repr(team_naam), repr(resultaat)))
+                self.stdout.write('[DEBUG] Uitslag: ver_naam=%s, team_naam=%s, resultaat=%s' % (
+                                    repr(ver_naam), repr(team_naam), repr(resultaat)))
 
             ver_nr = -1
+            ver_naam = str(ver_naam)
             try:
                 if ver_naam[0] == '[' and ver_naam[5:5+2] == '] ':
                     ver_nr = int(ver_naam[1:1+4])
@@ -466,20 +487,23 @@ class Command(BaseCommand):
         final_8 = list()
         for row_nr in (12, 14, 18, 20, 24, 26, 30, 32):
             team_naam = ws['B' + str(row_nr)].value
-            if team_naam in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam = ''
+            if team_naam in (None, 'n.v.t.', 'nvt', 'n.v.t'):
+                team_naam = ''
             if team_naam:
                 if team_naam in self.deelnemende_teams.keys():
                     final_8.append(team_naam)
                 elif team_naam != 'BYE':
-                    self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
+                    self.stdout.write('[WARNING] Kwartfinale team %s op finale blad niet herkend' % repr(team_naam))
         # for
         # self.stdout.write('final_8: %s' % repr(final_8))
 
         # gouden finale
         team_naam_1 = ws['T19'].value
-        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_1 = ''
+        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
+            team_naam_1 = ''
         team_naam_2 = ws['T21'].value
-        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_2 = ''
+        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
+            team_naam_2 = ''
         if ws['Z19'].value == '2e':
             goud = team_naam_2
             zilver = team_naam_1
@@ -489,9 +513,11 @@ class Command(BaseCommand):
 
         # bronzen finale
         team_naam_1 = ws['T31'].value
-        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_1 = ''
+        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
+            team_naam_1 = ''
         team_naam_2 = ws['T33'].value
-        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_2 = ''
+        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
+            team_naam_2 = ''
         if ws['Z31'].value == '3e':
             brons = team_naam_1
             vierde = team_naam_2
@@ -580,6 +606,9 @@ class Command(BaseCommand):
                     return
 
                 winnaar = ws['Z19'].value
+                if winnaar:
+                    self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
+                    self._importeer_finales_8(ws)
             else:
                 winnaar = None
 
@@ -601,9 +630,6 @@ class Command(BaseCommand):
 
                 self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
                 self._importeer_finales_4(ws)
-            else:
-                self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
-                self._importeer_finales_8(ws)
 
             result = list()
             gebruikte_volgorde = list()

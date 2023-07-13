@@ -19,6 +19,8 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
     url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     real_testfile_pdf_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-teams_pdf.pdf'
+    real_testfile_indoor = 'CompLaagBond/management/testfiles/test_bk-indoor-teams.xlsx'
+    real_testfile_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-teams.xlsx'
 
     testdata = None
     rayon_nr = 3
@@ -32,9 +34,8 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
         data.maak_bondscompetities()
 
         for ver_nr in cls.testdata.regio_ver_nrs[cls.regio_nr][:2]:
-            print('ver:', ver_nr)
+            # print('ver:', ver_nr)
             data.maak_rk_deelnemers(25, ver_nr, cls.regio_nr)
-            #data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
 
             per_team = 3 if ver_nr == 4092 else 4
             data.maak_rk_teams(25, ver_nr, per_team, limit_teamtypen=['C'])
@@ -49,94 +50,35 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
             deelnemer.save(update_fields=['deelname'])
         # for
 
-    def setUp(self):
+        for ver_nr in cls.testdata.regio_ver_nrs[cls.regio_nr][:2]:
+            # print('ver:', ver_nr)
+            data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
 
+            per_team = 3 if ver_nr == 4092 else 4
+            data.maak_rk_teams(18, ver_nr, per_team, limit_teamtypen=['C'])
+        # for
+
+    def setUp(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
+
+        # prep Indoor
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
         self.e2e_check_rol('BKO')
-
-        # zet de competitie in fase J (=vereiste vaststellen klassengrenzen)
-        #zet_competitie_fase_rk_prep(self.testdata.comp18)
-        zet_competitie_fase_rk_prep(self.testdata.comp25)
-
-        # stel de klassengrenzen vast
+        zet_competitie_fase_rk_prep(self.testdata.comp25)      # vereiste vaststellen klassengrenzen
         resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)
-
-        #resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
-        #self.assert_is_redirect_not_plein(resp)
-
         self.testdata.maak_bk_teams(25)
-
-        # zet de competities in fase P
-        #zet_competitie_fase_bk_wedstrijden(self.testdata.comp18)
         zet_competitie_fase_bk_wedstrijden(self.testdata.comp25)
 
-    # def test_excel_25m(self):
-    #     # bestand NOK
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv', 'bestand')
-    #     self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
-    #
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv',
-    #                                          self.real_testfile_excel_25m1pijl,
-    #                                          '--dryrun', '--verbose')
-    #     # print('\nf1: %s' % f1.getvalue())
-    #     # print('\nf2: %s' % f2.getvalue())
-    #     self.assertTrue('[ERROR] Probleem met scores op regel 26' in f1.getvalue())
-    #     self.assertTrue('[ERROR] Geen BK deelnemer op regel 24: 123456' in f1.getvalue())
-    #     self.assertTrue('[ERROR] Te hoge scores op regel 22: 251' in f1.getvalue())
-    #
-    #     # echte import
-    #     self.run_management_command('import_uitslag_bk_25m1pijl_indiv',
-    #                                 self.real_testfile_excel_25m1pijl)
-    #     # print('\nf1: %s' % f1.getvalue())
-    #     # print('\nf2: %s' % f2.getvalue())
-    #
-    # def test_excel_18m(self):
-    #     # file NOK
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', 'bestand')
-    #     self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
-    #
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv',
-    #                                          self.real_testfile_excel_indoor,
-    #                                          '--dryrun', '--verbose')
-    #     _ = (f1, f2)
-    #     # print('f1:', f1.getvalue())
-    #     # print('f2:', f2.getvalue())
-    #     self.assertTrue('hoort in klasse: Longbow klasse 2' in f1.getvalue())
-    #     self.assertTrue('[ERROR] Geen BK deelnemer op regel 25: 123456' in f1.getvalue())
-    #     self.assertTrue("[ERROR] Probleem met scores op regel 27: 'n/a' en 'n/a'" in f1.getvalue())
-    #     self.assertTrue("[INFO] Klasse: Recurve klasse 6" in f2.getvalue())
-    #     self.assertTrue("[WARNING] Regel 26 wordt overgeslagen (geen scores)" in f2.getvalue())
-    #     self.assertTrue("Volgorde=1, Rank=1, Q-scores=204, 228, deelnemer=[301849]" in f2.getvalue())
-    #
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_indoor_indiv', self.real_testfile_excel_indoor)
-    #     _ = (f1, f2)
-    #     # print('f1:', f1.getvalue())
-    #     # print('f2:', f2.getvalue())
-    #     kampioen = KampioenschapSporterBoog.objects.get(kampioenschap__competitie__afstand='18',
-    #                                                     sporterboog__sporter__lid_nr=301849)
-    #     self.assertEqual(kampioen.result_rank, 1)
-    #     self.assertEqual(kampioen.result_score_1, 204)
-    #     self.assertEqual(kampioen.result_score_2, 228)
-    #     self.assertEqual(kampioen.result_counts, '')        # alleen voor 25m1pijl
-    #
-    # def test_ianseo_html_25m(self):
-    #     # bestand NOK
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html', 'bestand')
-    #     self.assertTrue('[ERROR] Kan het html bestand niet openen' in f1.getvalue())
-    #
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html',
-    #                                          self.real_testfile_html_25m1pijl,
-    #                                          '--dryrun', '--verbose')
-    #     # print('f1:', f1.getvalue())
-    #     # print('f2:', f2.getvalue())
-    #
-    #     f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_indiv_ianseo-html',
-    #                                          self.real_testfile_html_25m1pijl)
-    #     # print('f1:', f1.getvalue())
-    #     # print('f2:', f2.getvalue())
-    #
+        # prep 25mp1ijl
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+        self.e2e_check_rol('BKO')
+        zet_competitie_fase_rk_prep(self.testdata.comp18)
+        resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
+        self.assert_is_redirect_not_plein(resp)
+        self.testdata.maak_bk_teams(18)
+        zet_competitie_fase_bk_wedstrijden(self.testdata.comp18)
+
     def test_ianseo_pdf_25m(self):
         # bestand NOK
         f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_teams_ianseo-pdf', 'bestand')
@@ -145,8 +87,33 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_teams_ianseo-pdf',
                                              self.real_testfile_pdf_25m1pijl,
                                              '--verbose')
-        print('f1:', f1.getvalue())
-        print('f2:', f2.getvalue())
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
+
+    def test_indoor(self):
+        # bestand NOK
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams', 'bestand')
+        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
+                                             self.real_testfile_indoor,
+                                             '--dryrun', '--verbose')
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
+
+        # zonder dryrun en verbose
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
+                                             self.real_testfile_indoor)
+
+    def test_25m1pijl(self):
+        # bestand NOK
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_teams', 'bestand')
+        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_teams',
+                                             self.real_testfile_25m1pijl,
+                                             '--dryrun', '--verbose')
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
 
 
