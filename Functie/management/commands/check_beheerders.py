@@ -16,10 +16,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--all', action='store_true', help="Toon alle")
+        parser.add_argument('--otp_uit', action='store_true', help="Zet 2FA uit waar niet meer nodig")
 
     def handle(self, *args, **options):
 
         toon_alle = options['all']
+        otp_uit = options['otp_uit']
 
         for functie in (Functie
                         .objects
@@ -55,6 +57,7 @@ class Command(BaseCommand):
 
         # zoek accounts zonder functie koppelen maar (nog) wel tweede factor actief
         self.stdout.write('\nActieve leden met 2FA maar niet meer gekoppeld aan een functie:')
+        count = 0
         for sporter in (Sporter
                         .objects
                         .select_related('account')
@@ -70,6 +73,15 @@ class Command(BaseCommand):
                 if not sporter.is_actief_lid:
                     let_op = 'LET OP: geen actief lid'
                 self.stdout.write('  %s  %s' % (sporter.lid_nr_en_volledige_naam(), let_op))
+                count += 1
+                if otp_uit:
+                    account.otp_is_actief = False
+                    account.save(update_fields=['otp_is_actief'])
         # for
+        if not count:
+            self.stdout.write('  Geen')
+        else:
+            if not otp_uit:
+                self.stdout.write('Gebruik --otp_uit om 2FA uit te zetten voor deze accounts')
 
 # end of file
