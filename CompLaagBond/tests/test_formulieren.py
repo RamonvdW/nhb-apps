@@ -22,8 +22,8 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko')
 
-    url_forms_indiv = '/bondscompetities/bk/formulieren/indiv/%s/'               # deelkamp_bk
-    url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_bk
+    url_forms_indiv = '/bondscompetities/bk/formulieren/indiv/%s/'               # deelkamp_pk
+    url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_pk
     url_forms_download_indiv = '/bondscompetities/bk/formulieren/indiv/download/%s/%s/'   # match_pk, klasse_pk
     url_forms_download_teams = '/bondscompetities/bk/formulieren/teams/download/%s/%s/'   # match_pk, klasse_pk
 
