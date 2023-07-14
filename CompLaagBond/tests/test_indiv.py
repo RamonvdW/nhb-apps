@@ -47,7 +47,7 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
         data.maak_bk_teams(18)
 
         # we hebben heel veel sporters in Recurve klasse 6
-        # (waarschijnlijk omdat de klassegrenzen niet vastgesteld zijn)
+        # (waarschijnlijk omdat de klassengrenzen niet vastgesteld zijn)
         grote_klasse = KampioenschapSporterBoog.objects.filter(kampioenschap=data.deelkamp18_bk, volgorde=20)[0].indiv_klasse
         KampioenschapIndivKlasseLimiet(kampioenschap=data.deelkamp18_bk, indiv_klasse=grote_klasse, limiet=8).save()
 

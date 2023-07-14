@@ -77,6 +77,7 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
 
         klasse2kort = list()        # [(prefix, replacement), ..]
         for boogtype in BoogType.objects.filter(organisatie=ORGANISATIE_WA):
+            # ("Recurve klasse", "R")
             tup = ("%s klasse" % boogtype.beschrijving, boogtype.afkorting)
             klasse2kort.append(tup)
         # for
@@ -102,8 +103,10 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
             try:
                 team.klasse_kort = kort_cache[team.klasse_str]
             except KeyError:
-                for prefix, afkorting in klasse2kort:
-                    if team.klasse_str.startswith(prefix):
+                for prefix, afkorting in klasse2kort:           # pragma: no branch
+                    # prefix = "Recurve klasse"
+                    if team.klasse_str.startswith(prefix):      # pragma: no branch
+                        # verwijder de prefix
                         team.klasse_kort = afkorting + team.klasse_str[len(prefix):]
                         kort_cache[team.klasse_str] = team.klasse_kort
                         break
