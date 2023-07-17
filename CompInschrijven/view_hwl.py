@@ -90,10 +90,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # sorteer jeugd op geboorte jaar en daarna naam
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=hwl_ver)
-                    .filter(geboorte_datum__year__gte=jeugdgrens)
+                    .filter(bij_vereniging=hwl_ver,
+                            geboorte_datum__year__gte=jeugdgrens)
+                    .exclude(is_actief_lid=False)
                     .order_by('-geboorte_datum__year',
-                              'achternaam', 'voornaam')):
+                              'achternaam',
+                              'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele seizoen
             wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
@@ -119,9 +121,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # sorteer volwassenen op naam
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=hwl_ver)
-                    .filter(geboorte_datum__year__lt=jeugdgrens)
-                    .order_by('achternaam', 'voornaam')):
+                    .filter(bij_vereniging=hwl_ver,
+                            geboorte_datum__year__lt=jeugdgrens)
+                    .exclude(is_actief_lid=False)
+                    .order_by('achternaam',
+                              'voornaam')):
             obj.leeftijdsklasse = None
             objs.append(obj)
         # for
@@ -193,6 +197,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 sporter = sporter_dict[sporterboog.sporter.lid_nr]
             except KeyError:
                 # sporterboog niet van deze vereniging
+                # TODO: beter filteren om minder vaak hier te komen
                 pass
             else:
                 # maak een kopie van de sporter en maak het uniek voor dit boogtype

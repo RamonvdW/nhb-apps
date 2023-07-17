@@ -52,7 +52,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from',
                         'para_code', 'address', 'postal_code', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private',
-                        'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id')
+                        'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
 SKIP_VER_NR = (settings.EXTERN_VER_NR,)
 
@@ -867,6 +867,7 @@ class Command(BaseCommand):
              'email',
              'gender':              'M' or 'V'
              'member_from':         string YYYY-MM-DD
+             'date_of_death':       string YYYY-MM-DD
              'para_code': None of string
              'address':             string with newlines
              'postal_code',
@@ -985,6 +986,17 @@ class Command(BaseCommand):
                     self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nr)
                     self._count_errors += 1
 
+            # datum overlijden
+            lid_overleden_datum = None
+            if member['date_of_death']:
+                try:
+                    lid_overleden_datum = datetime.datetime.strptime(member['date_of_death'], "%Y-%m-%d").date()  # YYYY-MM-DD
+                except (ValueError, TypeError):
+                    is_valid = False
+                    if not lid_blocked:         # pragma: no branch
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide datum van overlijden' % lid_nr)
+                        self._count_errors += 1
+
             lid_geslacht = member['gender']
             if lid_geslacht not in ('M', 'F', 'X'):
                 self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (
@@ -1070,7 +1082,6 @@ class Command(BaseCommand):
 
             # "educations": [
             #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
-            #    {"code": "031", "name": "WEDSTRIJDLEIDER INDOOR\/OUTDOOR", "date_start": "1990-01-01", "date_stop": "1990-01-01"}]
             lid_edus = list()
             try:
                 edus = member['educations']
@@ -1133,14 +1144,20 @@ class Command(BaseCommand):
                     self._count_errors += 1
                 else:
                     updated = list()
-                    if obj.lid_tot_einde_jaar != self.lidmaatschap_jaar:
-                        if lid_ver:
-                            # lid bij een vereniging, dus het geldt weer een jaar
-                            obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
-                            # noteer: geen log regel
-                            updated.append('lid_tot_einde_jaar')
-                        else:
-                            lid_blocked = True
+
+                    if obj.is_actief_lid and lid_overleden_datum:
+                        self.stdout.write('[INFO] Lid %s is overleden en wordt op inactief gezet' % lid_nr)
+                        lid_blocked = True
+
+                    if not lid_blocked:
+                        if obj.lid_tot_einde_jaar != self.lidmaatschap_jaar:
+                            if lid_ver:
+                                # lid bij een vereniging, dus het geldt weer een jaar
+                                obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
+                                # noteer: geen log regel
+                                updated.append('lid_tot_einde_jaar')
+                            else:
+                                lid_blocked = True
 
                     if not lid_email:
                         if not lid_blocked:
