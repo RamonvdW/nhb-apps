@@ -1166,8 +1166,9 @@ class Command(BaseCommand):
                 else:
                     updated = list()
 
-                    if obj.is_actief_lid and lid_overleden_datum:
-                        self.stdout.write('[INFO] Lid %s is overleden en wordt op inactief gezet' % lid_nr)
+                    if lid_overleden_datum:
+                        if obj.is_actief_lid:
+                            self.stdout.write('[INFO] Lid %s is overleden en wordt op inactief gezet' % lid_nr)
                         lid_blocked = True
 
                     if not lid_blocked:
