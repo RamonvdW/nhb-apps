@@ -26,6 +26,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
     url_loskoppelen = '/overig/otp-loskoppelen/'
 
     testdata = None
+    huidige_jaar = 2020
 
     @classmethod
     def setUpTestData(cls):
@@ -47,6 +48,9 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         account.email_is_bevestigd = True
         account.save(update_fields=['email_is_bevestigd'])
 
+        now = timezone.now()
+        self.huidige_jaar = now.year
+
         # maak een test vereniging
         self.ver1 = NhbVereniging(
                             ver_nr=1000,
@@ -56,23 +60,45 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
         self.sporter_100001 = Sporter(lid_nr=100001,
                                       voornaam='Norma',
-                                      achternaam='de Schutter',
-                                      unaccented_naam='Norma de Schutter',  # hier wordt op gezocht
+                                      achternaam='de Sporter',
+                                      unaccented_naam='Norma de Sporter',  # hier wordt op gezocht
                                       account=self.account_100001,
                                       geboorte_datum='1980-01-08',
                                       sinds_datum='2008-01-08',
+                                      lid_tot_einde_jaar=self.huidige_jaar,
                                       bij_vereniging=self.ver1)
         self.sporter_100001.save()
 
         # maak nog een sporter aan die niet gekoppeld is aan een account
         self.sporter_100002 = Sporter(lid_nr=100002,
                                       voornaam='Andere',
-                                      achternaam='Schutter',
-                                      unaccented_naam='Andere Schutter',
+                                      achternaam='Sporter',
+                                      unaccented_naam='Andere Sporter',
                                       account=self.account_100002,
                                       geboorte_datum='1980-01-09',
+                                      lid_tot_einde_jaar=self.huidige_jaar,
                                       sinds_datum='2008-01-09')
         self.sporter_100002.save()
+
+        # maak nog een sporter aan die in de toekomst pas lid wordt
+        Sporter(
+                lid_nr=100003,
+                voornaam='Speciaal',
+                achternaam='Toekomstig',
+                unaccented_naam='Speciaal Toekomstig',
+                geboorte_datum='1980-01-09',
+                sinds_datum='2080-01-09',
+                is_actief_lid=False).save()
+
+        # sporter die geen gebruik meer mag maken van MH
+        Sporter(
+                lid_nr=100004,
+                voornaam='Speciaal',
+                achternaam='Verlopen',
+                unaccented_naam='Speciaal Verlopen',
+                geboorte_datum='1980-01-09',
+                sinds_datum='2008-01-01',
+                is_actief_lid=False).save()
 
     def test_anon(self):
         # geen inlog = geen toegang
@@ -150,7 +176,21 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
         # zoek op naam --> 2 hits
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit, {'zoekterm': 'schutter'})
+            resp = self.client.get(self.url_activiteit, {'zoekterm': 'sporter'})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # status: actief vanaf
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit, {'zoekterm': '100003'})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # status: verlopen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit, {'zoekterm': '100004'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
@@ -191,7 +231,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
         # zoek op naam, 2 hits --> VHPG verlopen
         with self.assert_max_queries(25):
-            resp = self.client.get(self.url_activiteit, {'zoekterm': 'schutter'})
+            resp = self.client.get(self.url_activiteit, {'zoekterm': 'sporter'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
