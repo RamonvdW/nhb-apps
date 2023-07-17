@@ -267,7 +267,8 @@ class Command(BaseCommand):
             try:
                 keys.remove(key)
             except ValueError:
-                self.stderr.write("[ERROR] [FATAL] Verplichte sleutel %s niet aanwezig in de %s data" % (repr(key), repr(level)))
+                self.stderr.write("[ERROR] [FATAL] Verplichte sleutel %s niet aanwezig in de %s data" % (
+                                    repr(key), repr(level)))
                 self._exit_code = 2
                 has_error = True
         # for
@@ -334,7 +335,8 @@ class Command(BaseCommand):
                 self._count_errors += 1
             else:
                 if obj.naam != rayon_naam:
-                    self.stdout.write('[INFO] Wijziging naam rayon %s: %s --> %s' % (rayon_nr, repr(obj.naam), repr(rayon_naam)))
+                    self.stdout.write('[INFO] Wijziging naam rayon %s: %s --> %s' % (
+                                        rayon_nr, repr(obj.naam), repr(rayon_naam)))
                     self._count_wijzigingen += 1
                     obj.naam = rayon_naam
                     if not self.dryrun:
@@ -364,7 +366,8 @@ class Command(BaseCommand):
                 self._count_errors += 1
             else:
                 if obj.naam != regio_naam:
-                    self.stdout.write('[INFO] Wijziging naam regio %s: %s --> %s' % (regio_nr, repr(obj.naam), repr(regio_naam)))
+                    self.stdout.write('[INFO] Wijziging naam regio %s: %s --> %s' % (
+                                        regio_nr, repr(obj.naam), repr(regio_naam)))
                     self._count_wijzigingen += 1
                     obj.naam = regio_naam
                     if not self.dryrun:
@@ -453,7 +456,8 @@ class Command(BaseCommand):
                 self.stdout.write('[WARNING] Vereniging %s heeft geen KvK nummer' % ver_nr)
                 self._count_warnings += 1
             elif len(ver_kvk) != 8 or not ver_kvk.isdecimal():
-                self.stdout.write('[WARNING] Vereniging %s KvK nummer %s moet 8 cijfers bevatten' % (ver_nr, repr(ver_kvk)))
+                self.stdout.write('[WARNING] Vereniging %s KvK nummer %s moet 8 cijfers bevatten' % (
+                                    ver_nr, repr(ver_kvk)))
                 self._count_warnings += 1
 
             ver_website = club['website']
@@ -491,7 +495,8 @@ class Command(BaseCommand):
             else:
                 adres_spl = adres.strip().split('\n')
                 if len(adres_spl) != 2:
-                    self.stderr.write('[ERROR] Vereniging %s adres bestaat niet uit 2 regels: %s' % (ver_nr, repr(club['address'])))
+                    self.stderr.write('[ERROR] Vereniging %s adres bestaat niet uit 2 regels: %s' % (
+                                        ver_nr, repr(club['address'])))
                     self._count_errors += 1
                 if len(adres_spl) >= 2:
                     ver_adres1 = adres_spl[0]
@@ -561,76 +566,89 @@ class Command(BaseCommand):
                 if obj.regio.regio_nr != ver_regio:
                     regio_obj = self._vind_regio(ver_regio)
                     if regio_obj is None:
-                        self.stderr.write('[ERROR] Kan vereniging %s niet wijzigen naar onbekende regio %s' % (ver_nr, ver_regio))
+                        self.stderr.write('[ERROR] Kan vereniging %s niet wijzigen naar onbekende regio %s' % (
+                                            ver_nr, ver_regio))
                         self._count_errors += 1
                     else:
-                        self.stdout.write('[INFO] Wijziging van regio van vereniging %s: %s --> %s' % (ver_nr, obj.regio.regio_nr, ver_regio))
+                        self.stdout.write('[INFO] Wijziging van regio van vereniging %s: %s --> %s' % (
+                                                ver_nr, obj.regio.regio_nr, ver_regio))
                         self._count_wijzigingen += 1
                         obj.regio = regio_obj
                         updated.append('regio')
 
                 if obj.naam != ver_naam:
-                    self.stdout.write('[INFO] Wijziging van naam van vereniging %s: "%s" --> "%s"' % (ver_nr, obj.naam, ver_naam))
+                    self.stdout.write('[INFO] Wijziging van naam van vereniging %s: "%s" --> "%s"' % (
+                                        ver_nr, obj.naam, ver_naam))
                     self._count_wijzigingen += 1
                     obj.naam = ver_naam
                     updated.append('naam')
 
                 if obj.plaats != ver_plaats:
-                    self.stdout.write('[INFO] Wijziging van plaats van vereniging %s: "%s" --> "%s"' % (ver_nr, obj.plaats, ver_plaats))
+                    self.stdout.write('[INFO] Wijziging van plaats van vereniging %s: "%s" --> "%s"' % (
+                                        ver_nr, obj.plaats, ver_plaats))
                     self._count_wijzigingen += 1
                     obj.plaats = ver_plaats
                     updated.append('plaats')
 
                 if obj.geen_wedstrijden != ver_geen_wedstrijden:
-                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' van vereniging %s: %s --> %s" % (ver_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
+                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
                     self._count_wijzigingen += 1
                     obj.geen_wedstrijden = ver_geen_wedstrijden
                     updated.append('geen_wedstrijden')
 
                 if obj.kvk_nummer != ver_kvk:
-                    self.stdout.write("[INFO] Wijziging van KvK nummer van vereniging %s: %s --> %s" % (ver_nr, obj.kvk_nummer, ver_kvk))
+                    self.stdout.write("[INFO] Wijziging van KvK nummer van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.kvk_nummer, ver_kvk))
                     self._count_wijzigingen += 1
                     obj.kvk_nummer = ver_kvk
                     updated.append('kvk_nummer')
 
                 if obj.website != ver_website:
-                    self.stdout.write("[INFO] Wijziging van website van vereniging %s: %s --> %s" % (ver_nr, obj.website, ver_website))
+                    self.stdout.write("[INFO] Wijziging van website van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.website, ver_website))
                     self._count_wijzigingen += 1
                     obj.website = ver_website
                     updated.append('website')
 
                 if obj.contact_email != ver_email:
-                    self.stdout.write("[INFO] Wijziging van contact_email van vereniging %s: %s --> %s" % (ver_nr, obj.contact_email, ver_email))
+                    self.stdout.write("[INFO] Wijziging van contact_email van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.contact_email, ver_email))
                     self._count_wijzigingen += 1
                     obj.contact_email = ver_email
                     updated.append('contact_email')
 
                 if obj.telefoonnummer != ver_tel_nr:
-                    self.stdout.write("[INFO] Wijziging van telefoonnummer van vereniging %s: %s --> %s" % (ver_nr, obj.telefoonnummer, ver_tel_nr))
+                    self.stdout.write("[INFO] Wijziging van telefoonnummer van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.telefoonnummer, ver_tel_nr))
                     self._count_wijzigingen += 1
                     obj.telefoonnummer = ver_tel_nr
                     updated.append('telefoonnummer')
 
                 if obj.adres_regel1 != ver_adres1:
-                    self.stdout.write("[INFO] Wijziging van adres regel 1 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel1, ver_adres1))
+                    self.stdout.write("[INFO] Wijziging van adres regel 1 van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.adres_regel1, ver_adres1))
                     self._count_wijzigingen += 1
                     obj.adres_regel1 = ver_adres1
                     updated.append('adres_regel1')
 
                 if obj.adres_regel2 != ver_adres2:
-                    self.stdout.write("[INFO] Wijziging van adres regel 2 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel2, ver_adres2))
+                    self.stdout.write("[INFO] Wijziging van adres regel 2 van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.adres_regel2, ver_adres2))
                     self._count_wijzigingen += 1
                     obj.adres_regel2 = ver_adres2
                     updated.append('adres_regel2')
 
                 if obj.bank_iban != ver_iban:
-                    self.stdout.write("[INFO] Wijziging van IBAN van vereniging %s: %s --> %s" % (ver_nr, obj.bank_iban, ver_iban))
+                    self.stdout.write("[INFO] Wijziging van IBAN van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.bank_iban, ver_iban))
                     self._count_wijzigingen += 1
                     obj.bank_iban = ver_iban
                     updated.append('bank_iban')
 
                 if obj.bank_bic != ver_bic:
-                    self.stdout.write("[INFO] Wijziging van BIC van vereniging %s: %s --> %s" % (ver_nr, obj.bank_bic, ver_bic))
+                    self.stdout.write("[INFO] Wijziging van BIC van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.bank_bic, ver_bic))
                     self._count_wijzigingen += 1
                     obj.bank_bic = ver_bic
                     updated.append('bank_bic')
@@ -978,7 +996,8 @@ class Command(BaseCommand):
                                                 lid_nr, member['birthday']))
                         self._count_errors += 1
             try:
-                lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date()  # YYYY-MM-DD
+                lid_geboorte_datum = datetime.datetime.strptime(member['birthday'],
+                                                                "%Y-%m-%d").date()          # YYYY-MM-DD
             except (ValueError, TypeError):
                 lid_geboorte_datum = None
                 is_valid = False
@@ -990,11 +1009,13 @@ class Command(BaseCommand):
             lid_overleden_datum = None
             if member['date_of_death']:
                 try:
-                    lid_overleden_datum = datetime.datetime.strptime(member['date_of_death'], "%Y-%m-%d").date()  # YYYY-MM-DD
+                    lid_overleden_datum = datetime.datetime.strptime(member['date_of_death'],
+                                                                     "%Y-%m-%d").date()      # YYYY-MM-DD
                 except (ValueError, TypeError):
                     is_valid = False
                     if not lid_blocked:         # pragma: no branch
-                        self.stderr.write('[ERROR] Lid %s heeft geen valide datum van overlijden' % lid_nr)
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide datum van overlijden: %s' % (
+                                            lid_nr, repr(member['date_of_death'])))
                         self._count_errors += 1
 
             lid_geslacht = member['gender']
