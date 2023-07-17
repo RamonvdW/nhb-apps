@@ -4,14 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.urls import reverse
+from django.utils import timezone
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.timezone import make_aware, get_default_timezone
 from django.views.generic import TemplateView
 from django.utils.formats import date_format
 from django.db.models import F, Count
-from django.utils import timezone
-from django.urls import reverse
 from Account.models import Account, AccountEmail, AccountSessions
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
@@ -52,7 +52,15 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def tel_actieve_gebruikers():
-        return AccountSessions.objects.distinct('account').count()
+        # tel alle gebruikers die de afgelopen maand ingelogd hebben
+        een_maand_geleden = timezone.now() - datetime.timedelta(days=31)
+        user_list1 = Account.objects.filter(last_login__gt=een_maand_geleden).values_list('username', flat=True)
+
+        # sessies worden verwijderd als deze verlopen is; standaard 14 dagen (SESSION_COOKIE_AGE)
+        user_list2 = AccountSessions.objects.distinct('account').values_list('account__username', flat=True)
+
+        unique = set().union(user_list1, user_list2)
+        return len(unique)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

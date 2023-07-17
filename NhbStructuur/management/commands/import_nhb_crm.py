@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" importeer een JSON-file met data uit het CRM-systeem van de NHB """
+""" importeer een JSON-file met data uit het CRM-systeem van de bond """
 
 from django.conf import settings
 from django.utils import timezone
@@ -53,7 +53,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from',
                         'para_code', 'address', 'postal_code', 'location_name',
                         'phone_business', 'phone_mobile', 'phone_private',
-                        'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id')
+                        'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
 
 
@@ -866,6 +866,7 @@ class Command(BaseCommand):
              'email',
              'gender':              'M' or 'V'
              'member_from':         string YYYY-MM-DD
+             'date_of_death':       string YYYY-MM-DD
              'para_code': None of string
              'address':             string with newlines
              'postal_code',
@@ -983,6 +984,19 @@ class Command(BaseCommand):
                 if not lid_blocked:         # pragma: no branch
                     self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nr)
                     self._count_errors += 1
+
+            # datum overlijden
+            lid_overleden_datum = None
+            if member['date_of_death']:
+                try:
+                    lid_overleden_datum = datetime.datetime.strptime(member['date_of_death'],
+                                                                     "%Y-%m-%d").date()      # YYYY-MM-DD
+                except (ValueError, TypeError):
+                    is_valid = False
+                    if not lid_blocked:         # pragma: no branch
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide datum van overlijden: %s' % (
+                                            lid_nr, repr(member['date_of_death'])))
+                        self._count_errors += 1
 
             lid_geslacht = member['gender']
             if lid_geslacht not in ('M', 'F', 'X'):
@@ -1132,14 +1146,21 @@ class Command(BaseCommand):
                     self._count_errors += 1
                 else:
                     updated = list()
-                    if obj.lid_tot_einde_jaar != self.lidmaatschap_jaar:
-                        if lid_ver:
-                            # lid bij een vereniging, dus het geldt weer een jaar
-                            obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
-                            # noteer: geen log regel
-                            updated.append('lid_tot_einde_jaar')
-                        else:
-                            lid_blocked = True
+
+                    if lid_overleden_datum:
+                        if obj.is_actief_lid:
+                            self.stdout.write('[INFO] Lid %s is overleden en wordt op inactief gezet' % lid_nr)
+                        lid_blocked = True
+
+                    if not lid_blocked:
+                        if obj.lid_tot_einde_jaar != self.lidmaatschap_jaar:
+                            if lid_ver:
+                                # lid bij een vereniging, dus het geldt weer een jaar
+                                obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
+                                # noteer: geen log regel
+                                updated.append('lid_tot_einde_jaar')
+                            else:
+                                lid_blocked = True
 
                     if not lid_email:
                         if not lid_blocked:
@@ -1474,7 +1495,7 @@ class Command(BaseCommand):
 
         # for member
 
-        # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(lid_nrs), repr(lid_nrs)))
+        # self.stdout.write('[DEBUG] Volgende %s bondsnummers moeten verwijderd worden: %s' % (len(lid_nrs), repr(lid_nrs)))
         while len(lid_nrs) > 0:
             lid_nr = lid_nrs.pop(0)
             obj = self._vind_sporter(lid_nr)
