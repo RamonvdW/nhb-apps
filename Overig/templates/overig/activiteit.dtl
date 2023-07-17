@@ -101,10 +101,10 @@
                                 <div class="collapsible-body white">
                                     <div style="column-count: 2">
                                         <div>
-                                            <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Laatste inlog:<br>Tweede factor:<br>VHPG:<br>Lid bij vereniging:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
+                                            <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Laatste inlog:<br>Tweede factor:<br>VHPG:<br>Lid bij vereniging:<br>Status:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
                                         </div>
                                         <div>
-                                            <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.laatste_inlog_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}<br>{{ obj.ver_str }}<br>{% for functie in obj.functies %}{{ functie.beschrijving }}<br>{% empty %}-<br>{% endfor %}</span>
+                                            <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.laatste_inlog_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}<br>{{ obj.ver_str }}<br>{{ obj.status_str }}<br>{% for functie in obj.functies %}{{ functie.beschrijving }}<br>{% empty %}-<br>{% endfor %}</span>
                                         </div>
                                     </div>
                                     <div>

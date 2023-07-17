@@ -182,6 +182,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         to_tz = get_default_timezone()
         current_year_str = ' %s' % now.year
 
+        now_date = now.date()
+
         context['zoek_leden'] = list(sporters)
         for sporter in sporters:
             sporter.lid_nr_str = str(sporter.lid_nr)
@@ -196,6 +198,14 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 sporter.ver_str = str(sporter.bij_vereniging)
             else:
                 sporter.ver_str = 'Geen'
+
+            if sporter.is_actief_lid:
+                sporter.status_str = 'Actief voor heel %s' % sporter.lid_tot_einde_jaar
+            else:
+                if sporter.sinds_datum > now_date:
+                    sporter.status_str = 'Actief vanaf %s' % sporter.sinds_datum
+                else:
+                    sporter.status_str = 'Verlopen'
 
             if sporter.account:                     # pragma: no branch
                 account = sporter.account
