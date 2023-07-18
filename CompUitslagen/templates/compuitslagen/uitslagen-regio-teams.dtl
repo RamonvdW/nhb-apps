@@ -140,6 +140,7 @@
         <table class="white">
             {% for team in teams %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
+                    {% comment %}
                     <!-- forceer gelijkmatige layout in de Scores kolommen -->
                     <tr class="sv-table-hide-row">
                         <td class="sv-table-zijrand"></td>
@@ -162,6 +163,7 @@
                         <td class="right-align">{% if toon_punten %}88{% else %}-{% endif %}</td>
                         <td class="sv-table-zijrand"></td>
                     </tr>
+                    {% endcomment %}
                 {% endif %}
 
                 {% if team.break_poule %}

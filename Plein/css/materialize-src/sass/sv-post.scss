@@ -274,10 +274,11 @@
 
 // gebruik inhoud voor bepalen breedte van de kolom
 // maar niet tonen
+// TODO: broken!
 .sv-table-hide-row {
   visibility: collapse;
   line-height: 0;         // nodig voor Safari, anders row met volle hoogte
-  //border-bottom: 0;     // TODO: nodig?
+  border-bottom: none;
 }
 
 

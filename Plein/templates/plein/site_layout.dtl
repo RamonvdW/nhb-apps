@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-141.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-143.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 

@@ -430,6 +430,7 @@
                             <th class="center">Gemiddelde pijl</th>
                         </tr>
 
+                        {% comment %}
                         <tr class="sv-table-hide-row">
                             <td>18m Indoor</td>
                             <td>8888/8888</td>
@@ -437,6 +438,7 @@
                             <td>888, 888, 888, 888, 888, 888, 888</td>
                             <td class="center">8,888</td>
                         </tr>
+                        {% endcomment %}
 
                         {% for deelnemer in regiocomp_scores %}
                             <tr>
@@ -471,6 +473,7 @@
                         <th class="center">Gemiddelde pijl</th>
                     </tr>
 
+                    {% comment %}
                     <tr class="sv-table-hide-row">
                         <td>18m Indoor</td>
                         <td>8888/8888</td>
@@ -478,6 +481,7 @@
                         <td>888, 888, 888, 888, 888, 888, 888</td>
                         <td class="center">8,888</td>
                     </tr>
+                    {% endcomment %}
 
                     {% for obj in histcomp %}
                         <tr>

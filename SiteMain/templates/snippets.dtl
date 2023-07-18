@@ -226,6 +226,7 @@
     <table class="white">
         {% for obj in deelnemers %}
             {% if forloop.first %}
+                {% comment %}
                 <!-- forceer gelijkmatige layout in de Scores kolommen -->
                 <tr class="sv-table-hide-row">
                     <td class="sv-table-zijrand"></td>
@@ -243,6 +244,7 @@
                     <td class="right-align hide-on-small-only"><!-- totaal --></td>
                     <td class="sv-table-zijrand"></td>
                 </tr>
+                {% endcomment %}
             {% endif %}
 
             {% if obj.break_klasse %}

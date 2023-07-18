@@ -92,6 +92,7 @@
         <table class="white">
             {% for indiv in uitslag %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
+                    {% comment %}
                     <!-- forceer gelijkmatige layout in de Scores kolommen -->
                     <tr class="sv-table-hide-row">
                         <td class="sv-table-zijrand"></td>
@@ -109,6 +110,7 @@
                         <td class="right-align"><!-- totaal --></td>
                         <td class="sv-table-zijrand"></td>
                     </tr>
+                    {% endcomment %}
                 {% endif %}
 
                 {% if indiv.break_klasse %}

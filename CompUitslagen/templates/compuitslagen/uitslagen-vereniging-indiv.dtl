@@ -107,6 +107,7 @@
                 <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
             </tr>
 
+            {% comment %}
             <!-- forceer gelijkmatige layout in de Scores kolommen -->
             <tr class="sv-table-hide-row">
                 <td colspan="4"><!-- rank, sporter, wedstrijd, gemiddelde --></td>
@@ -118,6 +119,7 @@
                 <td class="right-align smal">888</td>
                 <td class="right-align smal">888</td>
             </tr>
+            {% endcomment %}
 
             {% for obj in deelnemers %}
                 <tr>

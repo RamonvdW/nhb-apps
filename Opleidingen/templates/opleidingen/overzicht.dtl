@@ -31,6 +31,7 @@
                     </tr>
                 </thead>
 
+                {% comment %}
                 <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
                 <tr class="sv-table-hide-row">
                     <td>Q1 2021</td>
@@ -38,6 +39,7 @@
                     <td>??</td>
                     <td><a class="btn-sv-rood" href="#">Details</a></td>
                 </tr>
+                {% endcomment %}
 
                 {% for opleiding in opleidingen %}
                     <tr>

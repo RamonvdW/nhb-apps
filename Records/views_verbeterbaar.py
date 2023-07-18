@@ -22,9 +22,9 @@ TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE = 'records/verbeterbaar.dtl'
 
 
 DISCIPLINE_TO_ICON = {
-    'OD': static('static/plein/badge_discipline_outdoor.png'),
-    '18': static('static/plein/badge_discipline_indoor.png'),
-    '25': static('static/plein/badge_discipline_25m1p.png')
+    'OD': static('plein/badge_discipline_outdoor.png'),
+    '18': static('plein/badge_discipline_indoor.png'),
+    '25': static('plein/badge_discipline_25m1p.png')
 }
 
 

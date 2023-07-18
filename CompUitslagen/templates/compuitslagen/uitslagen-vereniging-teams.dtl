@@ -131,6 +131,7 @@
 
                 {% for team in teams %}
                     {% if forloop.first %}
+                        {% comment %}
                         <!-- forceer gelijkmatige layout in de Scores kolommen -->
                         <tr class="sv-table-hide-row">
                             <td><!-- naam --></td>
@@ -144,6 +145,7 @@
                             <td><!-- spacing --></td>
                             <td><!-- klasse --></td>
                         </tr>
+                        {% endcomment %}
                     {% endif %}
 
                     <tr>

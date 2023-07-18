@@ -103,7 +103,7 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white" style="padding:10px">
                 <table>
-                    <tr style="border-bottom:0px">      <!-- verwijder de streep -->
+                    <tr style="border-bottom:none">      <!-- verwijder de streep -->
                         <th class="right-align">KvK nummer:<br>Naam:<br>Adres:<br><br>IBAN:<br>BIC:<br>E-mailadres:<br>Telefoonnummer:</th>
                         <td>{{ ver.kvk_nummer }}<br>{{ ver.naam }}<br>{{ ver.adres_regel1 }}<br>{{ ver.adres_regel2 }}<br>{{ ver.bank_iban }}<br>{{ ver.bank_bic }}<br>{{ ver.contact_email }}<br>{{ ver.telefoonnummer }}</td>
                     </tr>
