@@ -93,7 +93,7 @@
             {% for indiv in uitslag %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
                     <!-- forceer gelijkmatige layout in de Scores kolommen -->
-                    <tr style="visibility: collapse">
+                    <tr class="sv-table-hide-row">
                         <td class="sv-table-zijrand"></td>
                         <td colspan="2"><!-- rank, sporter --></td>
                         <td><!-- vereniging --></td>

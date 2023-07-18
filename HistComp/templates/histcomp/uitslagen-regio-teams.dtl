@@ -94,7 +94,7 @@
             {% for team in uitslag %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
                     <!-- forceer gelijkmatige layout in de Scores kolommen -->
-                    <tr style="visibility: collapse">
+                    <tr class="sv-table-hide-row">
                         <td class="sv-table-zijrand"></td>
                         <td colspan="3"><!-- rank, ver, team --></td>
                         <td class="right-align smal"><span class="hide-on-med-and-down">888</span></td>

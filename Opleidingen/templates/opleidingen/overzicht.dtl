@@ -32,7 +32,7 @@
                 </thead>
 
                 <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
-                <tr style="visibility:collapse">
+                <tr class="sv-table-hide-row">
                     <td>Q1 2021</td>
                     <td>Dit is de titel van een best wel lange opleiding</td>
                     <td>??</td>

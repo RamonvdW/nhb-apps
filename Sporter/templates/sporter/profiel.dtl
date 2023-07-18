@@ -430,7 +430,7 @@
                             <th class="center">Gemiddelde pijl</th>
                         </tr>
 
-                        <tr style="visibility: collapse">
+                        <tr class="sv-table-hide-row">
                             <td>18m Indoor</td>
                             <td>8888/8888</td>
                             <td>Instinctive Bow</td>
@@ -471,7 +471,7 @@
                         <th class="center">Gemiddelde pijl</th>
                     </tr>
 
-                    <tr style="visibility: collapse">
+                    <tr class="sv-table-hide-row">
                         <td>18m Indoor</td>
                         <td>8888/8888</td>
                         <td>Traditional</td>

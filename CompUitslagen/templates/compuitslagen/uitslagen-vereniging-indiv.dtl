@@ -108,7 +108,7 @@
             </tr>
 
             <!-- forceer gelijkmatige layout in de Scores kolommen -->
-            <tr style="visibility:collapse">
+            <tr class="sv-table-hide-row">
                 <td colspan="4"><!-- rank, sporter, wedstrijd, gemiddelde --></td>
                 <td class="right-align smal">888</td>
                 <td class="right-align smal">888</td>
