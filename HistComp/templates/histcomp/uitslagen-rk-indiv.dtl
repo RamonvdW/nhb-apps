@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -47,7 +47,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
@@ -62,7 +62,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -81,7 +81,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -96,7 +96,7 @@
                 {% if indiv.break_klasse %}
                     {% if not indiv.is_eerste_groep %}
                         <tr>
-                            <td colspan="6" class="nhb-table-onderrand"></td>
+                            <td colspan="6" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -106,8 +106,8 @@
                         </td>
                     </tr>
 
-                    <tr class="nhb-table-header">
-                        <td rowspan="{{ indiv.aantal_in_groep }}" class="nhb-table-zijrand"></td>
+                    <tr class="sv-table-header">
+                        <td rowspan="{{ indiv.aantal_in_groep }}" class="sv-table-zijrand"></td>
 
                         <th class="center">Plaats</th>  <!-- rank -->
                         <th>Sporter</th>
@@ -115,7 +115,7 @@
                         <th></th>   <!-- label: rayonkampioen -->
                         <th colspan="2">RK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
 
-                        <td rowspan="{{ indiv.aantal_in_groep }}" class="nhb-table-zijrand"></td>
+                        <td rowspan="{{ indiv.aantal_in_groep }}" class="sv-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
@@ -133,7 +133,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="6" class="nhb-table-onderrand"></td>
+                <td colspan="6" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

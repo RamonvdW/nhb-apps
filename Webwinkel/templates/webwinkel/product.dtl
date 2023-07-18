@@ -19,24 +19,24 @@
 
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 center">
             <!-- thumbnails boven de grote foto's
             <div>
                 {% for foto in fotos %}
-                    <img id="thumb1_{{ foto.volgorde }}" class="nhb-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
+                    <img id="thumb1_{{ foto.volgorde }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
                 {% endfor %}
             </div>
             -->
 
             {% for foto in fotos %}
-                <img id="img_{{ foto.volgorde }}" class="nhb-foto" src="{{ foto.img_src }}" hidden loading="lazy" alt="product foto {{ foto.volgorde }}">
+                <img id="img_{{ foto.volgorde }}" class="sv-foto" src="{{ foto.img_src }}" hidden loading="lazy" alt="product foto {{ foto.volgorde }}">
             {% endfor %}
 
             <!-- thumbnails onder de grote foto's -->
             <div>
                 {% for foto in fotos %}
-                    <img id="thumb2_{{ foto.volgorde }}" class="nhb-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
+                    <img id="thumb2_{{ foto.volgorde }}" class="sv-foto-thumb" src="{{ foto.thumb_src }}" onclick="kies_foto({{ foto.volgorde }})" alt="thumbnail {{ foto.volgorde }}">
                 {% endfor %}
             </div>
         </div>
@@ -66,12 +66,12 @@
                 let [volgorde, el_thumb2, el_img] = arr;
 
                 if (volgorde === nr) {
-                    // el_thumb1.classList.add("nhb-foto-thumb-selected")
-                    el_thumb2.classList.add("nhb-foto-thumb-selected")
+                    // el_thumb1.classList.add("sv-foto-thumb-selected")
+                    el_thumb2.classList.add("sv-foto-thumb-selected")
                     el_img.hidden = false;
                 } else {
-                    // el_thumb1.classList.remove("nhb-foto-thumb-selected")
-                    el_thumb2.classList.remove("nhb-foto-thumb-selected")
+                    // el_thumb1.classList.remove("sv-foto-thumb-selected")
+                    el_thumb2.classList.remove("sv-foto-thumb-selected")
                     el_img.hidden = true;
                 }
 
@@ -98,7 +98,7 @@
 
 
         <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3">
 
                 <!-- dialoog venster -->
@@ -120,7 +120,7 @@
 
                             <!-- button -->
                             <p class="center">
-                                <button class="btn-nhb-rood">Leg in mijn mandje</button>
+                                <button class="btn-sv-rood">Leg in mijn mandje</button>
                             </p>
 
                         </form>
@@ -141,7 +141,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 {% comment %}
@@ -183,7 +183,7 @@
         <!-- rood bordje -->
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                     <p>Je moet lid zijn bij de KHSN om een bestelling te kunnen plaatsen.</p>
                 </div>
             </div>

@@ -21,11 +21,11 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
-                    <th class="nhb-column-small">Bestelnummer</th>
+                    <th class="sv-table-col-small">Bestelnummer</th>
                     <td>{{ bestelling.mh_bestel_nr }}</td>
                 </tr>
                 <tr>
@@ -107,7 +107,7 @@
                                 // intern probleem
                                 const el = document.getElementById('id_bericht')
                                 el.innerText = "Er is een probleem opgetreden met deze bestelling"
-                                el.classList.add('nhb-rood-text')
+                                el.classList.add('sv-rood-text')
 
                                 retry = false;      // stop trying
                             }
@@ -151,7 +151,7 @@
             } else {
                 const el = document.getElementById('id_bericht')
                 el.innerText = "Het is op dit moment niet mogelijk om te betalen. Probeer het later nog eens"
-                el.classList.add('nhb-rood-text')
+                el.classList.add('sv-rood-text')
             }
         }
 

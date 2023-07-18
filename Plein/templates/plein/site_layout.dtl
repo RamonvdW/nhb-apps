@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-139.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-141.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -39,7 +39,7 @@
 
         <!-- top navbar -->
         <div class="navbar-fixed">
-            <nav class="nhb-grijs">
+            <nav class="sv-grijs">
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
                     <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:1px; z-index:1">
@@ -51,7 +51,7 @@
                         {% if menu_toon_mandje %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood" style="position:relative; z-index:2; margin-top:14px">
+                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; z-index:2; margin-top:14px">
                                     {% if menu_mandje_aantal %}
                                         <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
                                         <span>{{ menu_mandje_aantal }}</span>
@@ -65,14 +65,14 @@
                         {% if menu_voornaam %}
                             <li>
                                 <!-- position:relative + z-index=2: knop boven op het logo -->
-                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2; margin-top:14px">
+                                <a href="#" class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2; margin-top:14px">
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
                                     <i class="notranslate material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
                                     <i class="notranslate material-icons-round       hide-on-med-and-up" style="line-height:36px">expand_more</i>
                                 </a>
                             </li>
                         {% elif not verberg_login_knop %}
-                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood" style="position:relative; z-index:2">Inloggen</a></li>
+                            <li><a href="{% url 'Account:login' %}" class="btn-sv-rood" style="position:relative; z-index:2">Inloggen</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -83,7 +83,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_wissel_van_rol }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">people_alt</i>Wissel van rol</a>
+                                <i class="notranslate material-icons-round sv-rood-text">people_alt</i>Wissel van rol</a>
                         </li>
                     {% endif %}
 
@@ -91,7 +91,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round nhb-blauw-text">build</i>Admin site</a>
+                                <i class="notranslate material-icons-round sv-blauw-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
 
@@ -99,7 +99,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_taken }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+                                <i class="notranslate material-icons-round sv-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
                             </a>
                         </li>
                     {% endif %}
@@ -108,7 +108,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_profiel }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">portrait</i>Mijn pagina</a>
+                                <i class="notranslate material-icons-round sv-rood-text">portrait</i>Mijn pagina</a>
                         </li>
                     {% endif %}
 
@@ -116,7 +116,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_uitloggen }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">logout</i>Uitloggen</a>
+                                <i class="notranslate material-icons-round sv-rood-text">logout</i>Uitloggen</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -148,7 +148,7 @@
                         <div style="height:24px; margin-top:3px">
                             <a class="broodkruimels-link" href="{% url 'Plein:plein' %}">Plein</a>
                             {% for url, kruimel in kruimels %}
-                                <span class="nhb-blauw-text" style="margin-right:5px; font-weight:800">&rsaquo;</span>
+                                <span class="sv-blauw-text" style="margin-right:5px; font-weight:800">&rsaquo;</span>
                                 {% if not url %}
                                     <span class="broodkruimels-nolink">{{ kruimel }}</span>
                                 {% else %}

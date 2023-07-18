@@ -20,7 +20,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white left-align" style="padding:10px">
                 <p>Betekenis van de nummers:</p>
@@ -72,7 +72,7 @@
 
                         <td class="center">
                             {% if deelnemer.url_wijzig %}
-                                <a class="btn-nhb-rood" href="{{ deelnemer.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ deelnemer.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>

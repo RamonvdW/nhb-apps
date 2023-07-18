@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white center" style="padding:10px">
                 <p>Als BKO wil je de eindstand van de Bondskampioenschappen <b>teams</b> bevestigen.</p>
@@ -28,7 +28,7 @@
                     <br>
                     <form method="post" action="{{ url_doorzetten }}">
                         {% csrf_token %}
-                        <input class="btn-nhb-rood" name="doorzetten" type="submit" value="Doorzetten naar de volgende fase">
+                        <input class="btn-sv-rood" name="doorzetten" type="submit" value="Doorzetten naar de volgende fase">
                     </form>
                     <br>
                 {% endif %}

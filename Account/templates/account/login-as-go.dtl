@@ -24,7 +24,7 @@
     </div>
 
     <!-- blauwe balk met dialoog -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -34,7 +34,7 @@
                 <p>De knop moet binnen 60 seconden gebruikt worden.</p>
 
                 <p class="center" style="padding:30px">
-                    <a class="btn-nhb-blauw" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
+                    <a class="btn-sv-blauw" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
                         <i class="notranslate material-icons-round right">open_in_new</i>Inloggen</a>
                 </p>
 

@@ -1,0 +1,28 @@
+
+// Copyright (c) 2020-2023 Ramon van der Winkel.
+// All rights reserved.
+// Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+// Specific classes for our website
+
+$sv-blauw-color: #0aa0e1 !default;
+$sv-rood-color:  #f94137 !default;
+$sv-donkerblauw-color: #03628c !default;
+
+$sv-blauw-default: $sv-donkerblauw-color !default;
+$sv-blauw-focus: lighten($sv-blauw-default, 10%) !default;
+$sv-blauw-hover: lighten($sv-blauw-default, 10%) !default;
+
+$sv-rood-default: $sv-rood-color !default;
+$sv-rood-focus: lighten($sv-rood-color, 5%) !default;
+$sv-rood-hover: darken($sv-rood-color, 25%) !default;
+
+$sv-grijs: #eee;
+
+$sv-card-hover-background: #f5f5f5;
+//$sv-card-focus-border-color: $sv-blauw-color !default;
+$sv-card-focus-border-color: $sv-rood-color !default;
+$sv-collection-hover-background: $sv-card-hover-background;
+
+
+// end of file

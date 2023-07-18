@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -47,7 +47,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een team type:</b></p>
@@ -62,7 +62,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -81,7 +81,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -94,7 +94,7 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr>
-                            <td colspan="4" class="nhb-table-onderrand"></td>
+                            <td colspan="4" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -104,8 +104,8 @@
                         </td>
                     </tr>
 
-                    <tr class="nhb-table-header">
-                        <td rowspan="{{ team.aantal_in_groep }}" class="nhb-table-zijrand"></td>
+                    <tr class="sv-table-header">
+                        <td rowspan="{{ team.aantal_in_groep }}" class="sv-table-zijrand"></td>
                         <th></th>   <!-- rank -->
                         <th>
                             <span class="hide-on-med-and-up">Ver</span>
@@ -113,7 +113,7 @@
                         </th>
                         <th class="right-align" style="padding-right:10px">RK scores</th>
                         <th>Team</th>
-                        <td rowspan="{{ team.aantal_in_groep }}" class="nhb-table-zijrand"></td>
+                        <td rowspan="{{ team.aantal_in_groep }}" class="sv-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
@@ -149,7 +149,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="4" class="nhb-table-onderrand"></td>
+                <td colspan="4" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

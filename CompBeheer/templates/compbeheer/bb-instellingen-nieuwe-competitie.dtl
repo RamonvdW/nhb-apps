@@ -27,7 +27,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -43,8 +43,8 @@
                 {% for obj in indivklassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
-                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
-                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="sv-rood-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="sv-rood-text">Nee</span>{% endif %}</td>
                         <td>{{ obj.boogtype.beschrijving }}</td>
                         <td>
                             {% for lkl in obj.lkl_list %}
@@ -66,7 +66,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -81,8 +81,8 @@
                 {% for obj in teamklassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
-                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
-                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="nhb-rood-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_18m %}Ja{% else %}<span class="sv-rood-text">Nee</span>{% endif %}</td>
+                        <td class="center">{% if obj.gebruik_25m %}Ja{% else %}<span class="sv-rood-text">Nee</span>{% endif %}</td>
                         <td>
                             {% for boogtype in obj.boogtypen_list %}
                                 <span>{{ boogtype }}</span><br>
@@ -95,7 +95,7 @@
     </div>
 
     <p class="center">
-        <a class="btn-nhb-rood" href="{% url 'CompBeheer:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
+        <a class="btn-sv-rood" href="{% url 'CompBeheer:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
     </p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compbeheer-instellingen-nieuwe-competitie" %}

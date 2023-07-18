@@ -21,7 +21,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white center" style="padding:10px">
                 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
@@ -29,12 +29,12 @@
                 {% if show_login %}
                     <p>Je kan nu inloggen.</p>
                     <p>
-                        <a class="btn-nhb-rood" href="{% url 'Account:login' %}">
+                        <a class="btn-sv-rood" href="{% url 'Account:login' %}">
                             <i class="notranslate material-icons-round left">person</i>inloggen</a>
                     </p>
                 {% else %}
                     <p>
-                        <a class="btn-nhb-rood" href="{% url 'Plein:plein' %}">
+                        <a class="btn-sv-rood" href="{% url 'Plein:plein' %}">
                             <i class="notranslate material-icons-round left">close</i>Sluiten</a>
                     </p>
                 {% endif %}

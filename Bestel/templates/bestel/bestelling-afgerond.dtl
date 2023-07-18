@@ -21,31 +21,31 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
-                    <th class="nhb-column-small">Bestelnummer</th>
+                    <th class="sv-table-col-small">Bestelnummer</th>
                     <td colspan="2">{{ bestelling.mh_bestel_nr }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Aangemaakt&nbsp;op</th>
+                    <th class="sv-table-col-small">Aangemaakt&nbsp;op</th>
                     <td colspan="2">{{ bestelling.aangemaakt }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Koper</th>
+                    <th class="sv-table-col-small">Koper</th>
                     <td colspan="2">{{ bestelling.account }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Aan&nbsp;vereniging</th>
+                    <th class="sv-table-col-small">Aan&nbsp;vereniging</th>
                     <td colspan="2">{{ bestelling.ontvanger.vereniging }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Bedrag</th>
+                    <th class="sv-table-col-small">Bedrag</th>
                     <td colspan="2">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Ontvangen</th>
+                    <th class="sv-table-col-small">Ontvangen</th>
                     <td colspan="2">&euro;&nbsp;{{ ontvangen }}</td>
                 </tr>
                 <tr>
@@ -56,12 +56,12 @@
                         {% elif wacht_op_betaling %}
                             <i id="id_status">De betaling is (nog) niet ontvangen</i>
                         {% else %}
-                            <i class="nhb-rood-text">Er is een probleem opgetreden</i>
+                            <i class="sv-rood-text">Er is een probleem opgetreden</i>
                         {% endif %}
                     </td>
                     <td class="center">
                         {% if is_afgerond or wacht_op_betaling %}
-                            <a class="btn-nhb-rood" href="{{ url_afschrift }}" {% if wacht_op_betaling %}id="id_afschrift" style="display:none"{% endif %}>Toon afschrift</a>
+                            <a class="btn-sv-rood" href="{{ url_afschrift }}" {% if wacht_op_betaling %}id="id_afschrift" style="display:none"{% endif %}>Toon afschrift</a>
                         {% endif %}
                     </td>
                 </tr>

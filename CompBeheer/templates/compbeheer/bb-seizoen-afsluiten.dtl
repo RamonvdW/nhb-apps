@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white left-align center" style="padding:10px">
 
@@ -29,14 +29,14 @@
 
                     <form method="post" action="{{ url_afsluiten }}">
                         {% csrf_token %}
-                        <input class="btn-nhb-rood" name="afsluiten" type="submit" value="Seizoen afsluiten">
+                        <input class="btn-sv-rood" name="afsluiten" type="submit" value="Seizoen afsluiten">
                     </form>
 
                     <br>
 
                 {% else %}
 
-                    <p class="nhb-rood-text">Afsluiten kan pas als beide competities fase Q bereikt hebben</p>
+                    <p class="sv-rood-text">Afsluiten kan pas als beide competities fase Q bereikt hebben</p>
 
                 {% endif %}
 
@@ -53,7 +53,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
             <div class="white" style="padding:10px">
                 <table>

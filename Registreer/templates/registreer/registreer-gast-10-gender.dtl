@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -28,7 +28,7 @@
                     {% csrf_token %}
 
                     {% if foutmelding %}
-                        <p class="nhb-rood-text">Fout: {{ foutmelding }}</p>
+                        <p class="sv-rood-text">Fout: {{ foutmelding }}</p>
                         <p>&nbsp;</p>
                     {% endif %}
 
@@ -53,7 +53,7 @@
                     </div>
 
                     <p class="center">
-                        <button class="btn-nhb-rood" type="submit">
+                        <button class="btn-sv-rood" type="submit">
                             <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                     </p>
                 </form>

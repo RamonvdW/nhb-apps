@@ -32,7 +32,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -292,7 +292,7 @@
                     </table>
 
                     <div class="fixed-action-btn" style="display: none">
-                        <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                        <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                             <i class="notranslate material-icons-round left">check</i>Voorkeuren opslaan</button>
                     </div>
 
@@ -307,7 +307,7 @@
     {% if not geen_wedstrijden %}
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 l10 offset-l1">
                 <div class="white" style="padding:10px">
                     <h6 class="center-align">Uitleg 'Voorkeur voor eigen blazoen'</h6>

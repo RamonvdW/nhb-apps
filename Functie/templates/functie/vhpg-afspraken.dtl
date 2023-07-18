@@ -20,7 +20,7 @@
     </div>
 
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <!-- dialoog venster -->
@@ -29,7 +29,7 @@
 
                     <div class="row">
                         <div class="col s12">
-                            <h5 class="center nhb-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
+                            <h5 class="center sv-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
                             {% include 'functie/vhpg-tekst.dtl' %}
                         </div>
                     </div>

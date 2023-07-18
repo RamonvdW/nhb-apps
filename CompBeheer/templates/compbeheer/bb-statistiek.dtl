@@ -19,11 +19,11 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <table class="white">
                 <tr>
-                    <td colspan="4" class="center nhb-blauw-text"><h5>Deelnemers aantallen</h5></td>
+                    <td colspan="4" class="center sv-blauw-text"><h5>Deelnemers aantallen</h5></td>
                 </tr>
                 <tr>
                     <th>Aanmeldingen</th>
@@ -51,7 +51,7 @@
                 </tr>
 
                 <tr>
-                    <td colspan="4" class="center nhb-blauw-text"><h5>Regiocompetitie individueel</h5></td>
+                    <td colspan="4" class="center sv-blauw-text"><h5>Regiocompetitie individueel</h5></td>
                 </tr>
 
                 <tr>
@@ -84,7 +84,7 @@
 
 
                 <tr>
-                    <td colspan="4" class="center nhb-blauw-text"><h5>Regiocompetitie teams</h5></td>
+                    <td colspan="4" class="center sv-blauw-text"><h5>Regiocompetitie teams</h5></td>
                 </tr>
 
                 <tr>
@@ -96,7 +96,7 @@
 
                 {% if aantal_18m_teams_niet_af > 0 or aantal_25m_teams_niet_af > 0%}
                     <tr>
-                        <th class="nhb-rood-text">Aantal teams nog niet af</th>
+                        <th class="sv-rood-text">Aantal teams nog niet af</th>
                         <td></td>
                         <td class="right-align">{{ aantal_18m_teams_niet_af }}</td>
                         <td class="right-align" style="padding-right:15px">{{ aantal_25m_teams_niet_af }}</td>
@@ -105,7 +105,7 @@
 
 
                 <tr>
-                    <td colspan="4" class="center nhb-blauw-text"><h5>Rayonkampioenschappen individueel</h5></td>
+                    <td colspan="4" class="center sv-blauw-text"><h5>Rayonkampioenschappen individueel</h5></td>
                 </tr>
 
                 <tr>
@@ -139,7 +139,7 @@
 
 
                 <tr>
-                    <td colspan="4" class="center nhb-blauw-text"><h5>Rayonkampioenschappen teams</h5></td>
+                    <td colspan="4" class="center sv-blauw-text"><h5>Rayonkampioenschappen teams</h5></td>
                 </tr>
 
                 <tr>
@@ -151,7 +151,7 @@
 
 
                 <tr>
-                    <td colspan="4" class="center nhb-blauw-text"><h5>Bondskampioenschappen individueel</h5></td>
+                    <td colspan="4" class="center sv-blauw-text"><h5>Bondskampioenschappen individueel</h5></td>
                 </tr>
 
                 <tr>
@@ -169,7 +169,7 @@
                 </tr>
 
                 <tr>
-                    <td colspan="4" class="center nhb-blauw-text"><h5>Bondskampioenschappen teams</h5></td>
+                    <td colspan="4" class="center sv-blauw-text"><h5>Bondskampioenschappen teams</h5></td>
                 </tr>
 
                 <tr>

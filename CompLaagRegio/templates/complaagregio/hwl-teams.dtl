@@ -37,7 +37,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -58,24 +58,24 @@
                         <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
                         <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
                         <td>{{ team.team_naam }}</td>
-                        <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} nhb-rood-text{% endif %}">{{ team.aantal }}</td>
+                        <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} sv-rood-text{% endif %}">{{ team.aantal }}</td>
 
                         {% if team.team_klasse %}
                             <td class="hide-on-small-only">{{ team.ag_str }}</td>
                             <td>{{ team.team_klasse.beschrijving }}</td>
                         {% else %}
                             <td class="hide-on-small-only"></td>
-                            <td><i class="nhb-rood-text">team is niet compleet</i></td>
+                            <td><i class="sv-rood-text">team is niet compleet</i></td>
                         {% endif %}
 
                         <td>
                             {% if mag_wijzigen %}
-                                <a class="btn-nhb-rood" href="{{ team.url_koppelen }}">
+                                <a class="btn-sv-rood" href="{{ team.url_koppelen }}">
                                     <i class="notranslate material-icons-round">group</i></a>
                             {% endif %}
                             {% if team.url_wijzig %}
                                 <span>&nbsp;&nbsp;</span>
-                                <a class="btn-nhb-rood" href="{{ team.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ team.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>
@@ -94,7 +94,7 @@
                         <td colspan="6" class="center">
                             <form method="post" action="{{ url_nieuw_team }}">
                                 {% csrf_token %}
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>
@@ -115,7 +115,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -133,10 +133,10 @@
                         <td>{{ deelnemer.boog_str }}</td>
                         <td>{{ deelnemer.naam_str }}</td>
                         <td>{{ deelnemer.in_team_str }}</td>
-                        <td{% if deelnemer.rood_ag %} class="nhb-rood-text"{% endif %}>{{ deelnemer.ag_str }}</td>
+                        <td{% if deelnemer.rood_ag %} class="sv-rood-text"{% endif %}>{{ deelnemer.ag_str }}</td>
                         <td>
                             {% if deelnemer.url_wijzig_ag %}
-                                <a class="btn-nhb-rood" href="{{ deelnemer.url_wijzig_ag }}">
+                                <a class="btn-sv-rood" href="{{ deelnemer.url_wijzig_ag }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>

@@ -26,12 +26,12 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% for obj in object_list %}
-                <div class="nhb-card">
+                <div class="sv-card">
                     <a href="{{ obj.url }}">
-                        <div class="nhb-card-content center-align" style="font-size: 80%">
+                        <div class="sv-card-content center-align" style="font-size: 80%">
                             <span class="card-title">{{ obj.title_str }}</span>
                             {% if obj.para_str %}
                                 <p>{{ obj.para_str }}</p>
@@ -61,7 +61,7 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             {% url 'Records:indiv-verbeterbaar' as card_url %}
@@ -87,7 +87,7 @@
             </div>
 
             <!-- blauwe balk -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12">
         {% endif %}
 

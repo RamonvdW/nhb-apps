@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="white" style="padding:10px">
                 <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen wedstrijd.</p>
@@ -41,7 +41,7 @@
 
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- verder winkelen -->

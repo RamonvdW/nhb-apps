@@ -16,13 +16,13 @@
         <div class="col s12">
             <h3 class="page-banner">Wijzig e-mailadres</h3>
             <p>Voor beheerders gekoppeld aan de functie <b>{{ functie.beschrijving }}</b>.</p>
-            <p>Huidige (bevestigde) e-mailadres: {% if functie.bevestigde_email %}<code>{{ functie.bevestigde_email }}</code>{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</p>
+            <p>Huidige (bevestigde) e-mailadres: {% if functie.bevestigde_email %}<code>{{ functie.bevestigde_email }}</code>{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</p>
         </div>
     </div>
 
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
 
         {% if functie.nieuwe_email %}
             <!-- blauw balk met wit informatie veld -->
@@ -41,7 +41,7 @@
                     {% csrf_token %}
 
                     {% if form.errors %}
-                        <p class="nhb-rood-text">
+                        <p class="sv-rood-text">
                             <span>Fout: </span>
                             {% for error in form.non_field_errors %}
                                 <span>{{ error|escape }}</span>
@@ -58,7 +58,7 @@
 
                     <!-- button -->
                     <p class="center">
-                        <button class="btn-nhb-rood" type="submit">
+                        <button class="btn-sv-rood" type="submit">
                             <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                     </p>
 

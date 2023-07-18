@@ -21,7 +21,7 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white" id="table2">
@@ -56,7 +56,7 @@
                         </td>
 
                         <td>
-                            <a class="btn-nhb-rood" href="{{ obj.url_details }}">Details</a>
+                            <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>
                         </td>
                     </tr>
                 {% endfor %}

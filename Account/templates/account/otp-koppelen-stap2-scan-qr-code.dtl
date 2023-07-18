@@ -17,19 +17,19 @@
             <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
 
             <p>
-                <a class="btn-nhb-rood" href="{{ url_stap_1 }}"><i class="notranslate material-icons-round left">arrow_back_ios</i>Terug naar stap 1</a>
+                <a class="btn-sv-rood" href="{{ url_stap_1 }}"><i class="notranslate material-icons-round left">arrow_back_ios</i>Terug naar stap 1</a>
             </p>
         </div>
     </div>
 
 
     <!-- blauw balk met het stappenplan -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <div class="white left-align" style="padding:10px">
                 <h5>Stappenplan</h5>
                 <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
-                <p class="valign-wrapper nhb-rood-text"><i class="small notranslate material-icons-round">looks_two</i> <b>Scan een QR-code om de koppeling te maken met MijnHandboogsport.</b></p>
+                <p class="valign-wrapper sv-rood-text"><i class="small notranslate material-icons-round">looks_two</i> <b>Scan een QR-code om de koppeling te maken met MijnHandboogsport.</b></p>
                 <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
             </div>
         </div>
@@ -44,7 +44,7 @@
     </div>
 
     <!-- blauw balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white left-align" style="padding:10px">
                 <p>Open de applicatie op je mobiel en dan:</p>
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <div class="col s12 nhb-blauw-hoofd" style="padding:25px">
+        <div class="col s12 sv-blauw-hoofd" style="padding:25px">
         </div>
 
         <div class="col s12 l6 offset-l3">
@@ -65,7 +65,7 @@
 
                 <p>Als het gelukt is dan laat de applicatie de 6 cijfers zien onder het kopje "MijnHandboogsport".</p>
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_stap_3 }}">
+                    <a class="btn-sv-rood" href="{{ url_stap_3 }}">
                         <i class="notranslate material-icons-round right">arrow_forward_ios</i>Verder naar stap 3</a>
                 </p>
             </div>
@@ -81,14 +81,14 @@
     </div>
 
     <!-- blauw balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white left-align" style="padding:10px">
                 <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "Scan QR code". Markeer daarna met je muis de QR code op het scherm (teken een vierkant om het plaatje).</p>
             </div>
         </div>
 
-        <div class="col s12 nhb-blauw-hoofd" style="padding:25px">
+        <div class="col s12 sv-blauw-hoofd" style="padding:25px">
         </div>
 
         <div class="col s12">

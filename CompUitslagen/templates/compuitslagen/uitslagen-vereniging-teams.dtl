@@ -32,7 +32,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -55,7 +55,7 @@
                 {% if not deelcomp.regio_organiseert_teamcompetitie %}
                     <tr>
                         <td></td>
-                        <td class="nhb-rood-text">Deze regio organiseert geen team competitie</td>
+                        <td class="sv-rood-text">Deze regio organiseert geen team competitie</td>
                     </tr>
                 {% endif %}
 
@@ -73,7 +73,7 @@
         </div>
 
         <!-- blauwe balk met filters -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
                 <div class=" white left-align" style="padding:10px">
                     <p><b>Kies een team type:</b></p>
@@ -88,7 +88,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
+                        <a class="btn-sv-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
                     </p>
                 </div>
             </div>
@@ -108,15 +108,15 @@
 
         {% if not geen_teams %}
             <table class="white">
-                <tr class="nhb-table-header">
-                    <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+                <tr class="sv-table-header">
+                    <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
                     <th><!-- team --></th>
                     <th class="center-align" colspan="7">Ronde</th>
                     <th colspan="2"><!-- spacing + klasse --></th>
-                    <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+                    <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
                 </tr>
 
-                <tr class="nhb-table-header">
+                <tr class="sv-table-header">
                     <th>Team</th>
                     <th class="right-align smal">1</th>
                     <th class="right-align smal">2</th>
@@ -186,7 +186,7 @@
                 {% endfor %}
 
                 <tr>
-                    <td colspan="10" class="nhb-table-onderrand"></td>
+                    <td colspan="10" class="sv-table-onderrand"></td>
                 </tr>
             </table>
 

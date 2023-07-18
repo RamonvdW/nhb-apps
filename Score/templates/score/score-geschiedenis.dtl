@@ -21,7 +21,7 @@
     <!-- zoekformulier -->
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 white left-align z-depth-3">
 
             <!-- dialoog venster -->
@@ -36,7 +36,7 @@
 
                     <!-- button -->
                     <p class="center">
-                        <button class="btn-nhb-rood" type="submit">
+                        <button class="btn-sv-rood" type="submit">
                             <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </p>
                 </form>
@@ -54,7 +54,7 @@
         <div class="col s12">
             <h4>Resultaten</h4>
                 {% if niet_gevonden %}
-                    <p class="nhb-rood-text">Niets gevonden</p>
+                    <p class="sv-rood-text">Niets gevonden</p>
                 {% else %}
                     <p>Gevonden scores voor sporter<br><b>{{ sporter }}</b><br>van {{ sporter.bij_vereniging }} te {{ sporter.bij_vereniging.plaats }}<br>in {{ sporter.bij_vereniging.regio }}</p>
                 {% endif %}
@@ -68,12 +68,12 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h5 class="nhb-rood-text">Aanvangsgemiddelden voor afstand: {{ afstand }}m</h5>
+                    <h5 class="sv-rood-text">Aanvangsgemiddelden voor afstand: {{ afstand }}m</h5>
                 </div>
             </div>
 
             <!-- blauwe balk met informatie in een tabel -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12">
                     <table class="white">
                         <thead>
@@ -124,12 +124,12 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h5 class="nhb-rood-text">Scores voor afstand: {{ afstand }}m</h5>
+                    <h5 class="sv-rood-text">Scores voor afstand: {{ afstand }}m</h5>
                 </div>
             </div>
 
             <!-- blauwe balk met informatie in een tabel -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12">
                     <table class="white">
                         <thead>

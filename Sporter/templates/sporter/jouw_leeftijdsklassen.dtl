@@ -22,11 +22,11 @@
     <div class="row center">
         <div class="col s12">
             <h4>Wedstrijden World Archery</h4>
-            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="nhb-rood-text">{{ lkl_wa_dit_jaar }}</b></p>
+            <p>Dit jaar bereik je de leeftijd <b class="sv-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="sv-rood-text">{{ lkl_wa_dit_jaar }}</b></p>
         </div>
     </div>
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
 
         <!-- blauw balk met wit informatie veld -->
         <div class="col s12">
@@ -56,7 +56,7 @@
                     <td>{{ lkl_wa.0 }}</td>
                 </tr>
 
-                <tr class="nhb-rood white-text">
+                <tr class="sv-rood white-text">
                     <td>{{ huidige_jaar }}</td>
                     <td>{{ leeftijd }}</td>
                     <td>{{ lkl_wa.1 }}</td>
@@ -89,12 +89,12 @@
     <div class="row center">
         <div class="col s12">
             <h4>Wedstrijden IFAA</h4>
-            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b></p>
+            <p>Dit jaar bereik je de leeftijd <b class="sv-rood-text">{{ leeftijd }} jaar</b></p>
         </div>
     </div>
 
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
 
         <!-- blauw balk met wit informatie veld -->
         <div class="col s12">
@@ -120,7 +120,7 @@
                     </tr>
 
                     {% for jaar, kl1, kl2 in wlst_ifaa %}
-                        <tr{% if jaar == huidige_jaar %} class="nhb-rood white-text"{% endif %}>
+                        <tr{% if jaar == huidige_jaar %} class="sv-rood white-text"{% endif %}>
                             <td>{{ jaar }}</td>
                             <td>{{ kl1 }}</td>
                             <td>{{ kl2 }}</td>
@@ -139,12 +139,12 @@
             <h4>Wedstrijden KHSN</h4>
             <p>De KHSN wedstrijdklassen zijn gebaseerd op World Archery, uitgebreid met extra klassen voor de jongsten en oudsten.</p>
             <p>Verder hebben KHSN wedstrijden de optie tot gender-neutrale wedstrijdklassen.</p>
-            <p>Dit jaar bereik je de leeftijd <b class="nhb-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="nhb-rood-text">{{ lkl_khsn_dit_jaar_1 }}</b>
-                {% if lkl_khsn_dit_jaar_2 %}<span> of </span><b class="nhb-rood-text">{{ lkl_khsn_dit_jaar_2 }}</b>{% endif %}.</p>
+            <p>Dit jaar bereik je de leeftijd <b class="sv-rood-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="sv-rood-text">{{ lkl_khsn_dit_jaar_1 }}</b>
+                {% if lkl_khsn_dit_jaar_2 %}<span> of </span><b class="sv-rood-text">{{ lkl_khsn_dit_jaar_2 }}</b>{% endif %}.</p>
         </div>
     </div>
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
 
         <!-- blauw balk met wit informatie veld -->
         <div class="col s12">
@@ -174,7 +174,7 @@
                     <td>{{ lkl_khsn.0 }}</td>
                 </tr>
 
-                <tr class="nhb-rood white-text">
+                <tr class="sv-rood white-text">
                     <td>{{ huidige_jaar }}</td>
                     <td>{{ leeftijd }}</td>
                     <td>{{ lkl_khsn.1 }}</td>
@@ -209,15 +209,15 @@
             <h4>Bondscompetitie</h4>
             {% if is_gast %}
                 <p>Je moet lid zijn bij de KHSN om deel te nemen aan de bondscompetities.</p>
-                <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} zou je de bondscompetitie schieten als <b class="nhb-rood-text">{{ lkl_comp.1.tekst }}</b></p>
+                <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} zou je de bondscompetitie schieten als <b class="sv-rood-text">{{ lkl_comp.1.tekst }}</b></p>
             {% else %}
-                <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} schiet je de bondscompetitie als <b class="nhb-rood-text">{{ lkl_comp.1.tekst }}</b></p>
+                <p>Tijdens seizoen {{ lkl_comp.1.seizoen }} schiet je de bondscompetitie als <b class="sv-rood-text">{{ lkl_comp.1.tekst }}</b></p>
             {% endif %}
         </div>
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px; margin-bottom:50px">
                 <p>De bondscompetitie is gebaseerd op de wedstrijdklassen van de KHSN en gebruikt gender-neutrale klassen. De klassen 21+, 50+ en 60+ zijn samengevoegd.</p>
@@ -240,7 +240,7 @@
                     <td>{{ lkl_comp.0.tekst }}</td>
                 </tr>
 
-                <tr class="nhb-rood white-text">
+                <tr class="sv-rood white-text">
                     <td>{{ lkl_comp.1.seizoen }}</td>
                     <td>{{ lkl_comp.1.tekst }}</td>
                 </tr>

@@ -17,13 +17,13 @@
             <p>Wedstrijden gekozen door de sporters aangemeld voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> in <b>{{ regio }}</b></p>
 
             <p>Je kan onderstaande lijst ook downloaden, inclusief de keuzes van elke sporter.</p>
-            <a class="btn-nhb-rood" href="{{ url_download }}">
+            <a class="btn-sv-rood" href="{{ url_download }}">
                 <i class="notranslate material-icons-round left">download</i>Download lijst</a>
         </div>
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>

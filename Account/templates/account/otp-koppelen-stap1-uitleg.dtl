@@ -20,11 +20,11 @@
     </div>
 
     <!-- blauw balk met het stappenplan -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <div class="white left-align" style="padding:10px">
                 <h5>Stappenplan</h5>
-                <p class="valign-wrapper nhb-rood-text"><i class="small notranslate material-icons-round">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
+                <p class="valign-wrapper sv-rood-text"><i class="small notranslate material-icons-round">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
                 <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
                 <p class="valign-wrapper"><i class="small notranslate material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
             </div>
@@ -43,7 +43,7 @@
     </div>
 
     <!-- blauw balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% static 'plein/logo_freeotp_230x230.png' as img_src %}
             {% include 'plein/card_logo.dtl' with title="FreeOTP" text="Wikipedia artikel over FreeOTP Authenticator.<br>(engelstalig)" img_src=img_src img_height=85 img_width=85 url="https://en.wikipedia.org/wiki/FreeOTP" extern_open=True %}
@@ -55,7 +55,7 @@
         <div class="col s8 offset-s2 xl6 offset-xl3 white" style="margin-top:40px">
             <p>Als je een applicatie of plug-in ge&iuml;nstalleerd hebt, dan kan je door naar de volgende stap.</p>
             <p>
-                <a class="btn-nhb-rood" href="{{ url_stap_2 }}">
+                <a class="btn-sv-rood" href="{{ url_stap_2 }}">
                     <i class="notranslate material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</a>
             </p>
         </div>
@@ -73,7 +73,7 @@
     </div>
 
     <!-- blauw balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% static 'plein/logo_chrome_256x256.png' as img_src %}
             {% include 'plein/card_logo.dtl' with title="Chrome extensie" text="Authenticator extensie voor de Chrome browser." img_src=img_src img_height=85 img_width=85 url="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=nl-nl" extern_open=True %}

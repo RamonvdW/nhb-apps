@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -45,7 +45,7 @@
 
     <!-- zoekformulier -->
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -72,7 +72,7 @@
 
                     <!-- button -->
                     <p class="center" style="margin-top:50px">
-                        <button class="btn-nhb-rood" type="submit">
+                        <button class="btn-sv-rood" type="submit">
                             <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </p>
                 </form>
@@ -89,7 +89,7 @@
                 {% if bestellingen %}
                     <p>{{ bestellingen|length }} bestellingen gevonden</p>
                 {% else %}
-                    <p class="nhb-rood-text">Niets gevonden</p>
+                    <p class="sv-rood-text">Niets gevonden</p>
                 {% endif %}
             {% else %}
                 <h4>Recente bestellingen</h4>
@@ -101,7 +101,7 @@
     {% if bestellingen %}
 
         <!-- blauwe balk met informatie label : info -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2 left-align">
 
                 <ul class="collapsible">
@@ -149,7 +149,7 @@
                                                 <span class="grey-text">Nieuw | Te betalen | Afgerond | Mislukt | </span>
                                                 <span>Geannuleerd</span>
                                             {% else %}
-                                                <i class="nhb-rood-text">Onverwacht ({{ bestelling.status }})</i>
+                                                <i class="sv-rood-text">Onverwacht ({{ bestelling.status }})</i>
                                             {% endif %}
                                         </td>
                                     </tr>

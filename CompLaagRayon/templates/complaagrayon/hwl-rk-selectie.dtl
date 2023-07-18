@@ -20,7 +20,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <table class="white">
                 <tr>
@@ -34,8 +34,8 @@
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
-                    <td class="nhb-blauw-text">Onbekend</td>
+                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                    <td class="sv-blauw-text">Onbekend</td>
                     <td>{{ aantal_onbekend }}</td>
                 </tr>
 
@@ -63,7 +63,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -72,7 +72,7 @@
                     {% if obj.break_klasse %}
                         {% if not forloop.first %}
                             <tr>
-                                <td colspan="5" class="nhb-table-onderrand" style="height:50px"></td>
+                                <td colspan="5" class="sv-table-onderrand" style="height:50px"></td>
                             </tr>
                         {% endif %}
 
@@ -105,12 +105,12 @@
                             <td class="center"><i class="grey-text in-table-icon notranslate material-icons-round">block</i></td>
                         {% else %}
                             <!-- onbekend -->
-                            <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                            <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
                         {% endif %}
 
                         <td>
                             {% if obj.url_wijzig %}
-                                <a class="btn-nhb-rood" href="{{ obj.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ obj.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>

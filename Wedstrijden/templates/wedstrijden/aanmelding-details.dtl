@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -82,7 +82,7 @@
                         {% elif inschrijving.status == 'A' %}
                             <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Afgemeld</span>
                         {% else %}
-                            <span class="nhb-rood-text"><i>Onbekend!</i></span>
+                            <span class="sv-rood-text"><i>Onbekend!</i></span>
                         {% endif %}
                     </td>
                 </tr>
@@ -122,7 +122,7 @@
                     <tr>
                         <th>Afmelden</th>
                         <td>
-                            <a class="btn-nhb-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
+                            <a class="btn-sv-rood modal-trigger" href="#bevestig_afmelden_{{ inschrijving.pk }}">
                                 <i class="notranslate material-icons-round">delete</i></a>
                         </td>
                     </tr>
@@ -144,10 +144,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>

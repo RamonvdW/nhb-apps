@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -63,12 +63,12 @@
                 {% comment %}
                 <tr>
                     <th>Telefoonnummer</th>
-                    <td>{% if ver.telefoonnummer %}{{ ver.telefoonnummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
+                    <td>{% if ver.telefoonnummer %}{{ ver.telefoonnummer }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
                 </tr>
 
                 <tr>
                     <th>KvK nummer</th>
-                    <td>{% if ver.kvk_nummer %}{{ ver.kvk_nummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
+                    <td>{% if ver.kvk_nummer %}{{ ver.kvk_nummer }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
                 </tr>
                 {% endcomment %}
 
@@ -92,7 +92,7 @@
         </div>
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <!-- competitiewedstrijden -->
@@ -131,7 +131,7 @@
             </div>
 
             <!-- blauwe balk -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12">
 
         {% elif kaartje.einde_blok %}
@@ -173,7 +173,7 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- ledenlijst -->

@@ -20,7 +20,7 @@
             <h4>Welkom op</h4>
         </div>
 
-        <div class="col s12 nhb-rood-text">
+        <div class="col s12 sv-rood-text">
             <h1 class="hide-on-small-only" style="margin:0; font-weight:bold">MijnHandboogsport</h1>
             <h3 class="hide-on-med-and-up" style="margin:0; font-weight:bold">Mijn<wbr>Handboog<wbr>sport</h3>
         </div>
@@ -38,7 +38,7 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <!-- Mijn pagina -->
             {% url 'Sporter:profiel' as card_url %}
@@ -79,7 +79,7 @@
     </div>
 
     <!-- blauwe balk met links naar andere sites -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% include 'plein/andere-sites.dtl' %}
         </div>
@@ -97,7 +97,7 @@
     </div>
 
     <!-- blauwe balk met kaartje -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% include 'plein/card_icon.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" extern_open=True url=url_email_support %}
         </div>

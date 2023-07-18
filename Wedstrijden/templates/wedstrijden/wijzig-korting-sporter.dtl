@@ -43,7 +43,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -83,7 +83,7 @@
                                         {% if voor_sporter_str %}
                                             <tr>
                                                 <td>Gekozen sporter:</td>
-                                                <td class="nhb-blauw-text">{{ voor_sporter_str }}</td>
+                                                <td class="sv-blauw-text">{{ voor_sporter_str }}</td>
                                             </tr>
                                         {% endif %}
                                         <tr>
@@ -107,7 +107,7 @@
                         </table>
 
                         <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
                         </div>
 
@@ -125,7 +125,7 @@
     {% if url_verwijder %}
 
         <p style="margin-left:10px">
-            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_annuleer">Verwijderen</a>
+            <a class="btn-sv-blauw modal-trigger" href="#bevestig_annuleer">Verwijderen</a>
         </p>
 
         <div class="modal" id="bevestig_annuleer">
@@ -139,10 +139,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>

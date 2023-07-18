@@ -26,13 +26,13 @@
     {% if deelcomp.regio_organiseert_teamcompetitie %}
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 l10 offset-l1 xl8 offset-xl2">
                 <div class="white" style="padding:10px">
                     <p>Als HWL ben je verantwoordelijk om je teams compleet te houden.</p>
                     <p>Als iemand niet kan ("uitvalt") dan mag deze vervangen worden door een invaller.<br>Voor elke ronde moeten deze invallers opnieuw opgegeven worden.</p>
 
-                    <p>Hieronder kan {% if readonly %}<b>de HWL</b>{% else %}je als HWL{% endif %} de <i>invallers</i> opgeven voor <b class="nhb-rood-text">RONDE {{ deelcomp.huidige_team_ronde }}</b>.</p>
+                    <p>Hieronder kan {% if readonly %}<b>de HWL</b>{% else %}je als HWL{% endif %} de <i>invallers</i> opgeven voor <b class="sv-rood-text">RONDE {{ deelcomp.huidige_team_ronde }}</b>.</p>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
 
@@ -64,10 +64,10 @@
                             <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
                             <td>{{ team.team_naam }}</td>
                             <td>{% if team.team_klasse %}{{ team.team_klasse.beschrijving }}{% else %}??{% endif %}</td>
-                            <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} nhb-rood-text{% endif %}">{{ team.aantal }}</td>
+                            <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} sv-rood-text{% endif %}">{{ team.aantal }}</td>
                             <td class="center">
                                 {% if team.url_koppelen %}
-                                    <a class="btn-nhb-rood" href="{{ team.url_koppelen }}">Invallers koppelen</a>
+                                    <a class="btn-sv-rood" href="{{ team.url_koppelen }}">Invallers koppelen</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -94,7 +94,7 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
                     <thead>

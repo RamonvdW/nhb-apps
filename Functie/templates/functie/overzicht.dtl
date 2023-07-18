@@ -23,7 +23,7 @@
 
             {% if url_sec_hwl %}
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_sec_hwl }}">
+                    <a class="btn-sv-rood" href="{{ url_sec_hwl }}">
                         <i class="notranslate material-icons-round left">email</i>E-mailadressen van SEC en HWL</a>
                 </p>
             {% endif %}
@@ -34,7 +34,7 @@
     <!-- toon de functies met huidige beheerders in een tabel -->
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white" id="table1">
@@ -94,7 +94,7 @@
                                 <span>{{ beheerder }}</span>
                             {% empty %}
                                 {% if obj.wijzig_url %}
-                                    <i class="nhb-rood-text">Nog niet gekoppeld</i>
+                                    <i class="sv-rood-text">Nog niet gekoppeld</i>
                                 {% else %}
                                     <i class="grey-text">Nog niet gekoppeld</i>
                                 {% endif %}
@@ -102,7 +102,7 @@
 
                             {% if obj.wijzig_url %}
                                 <br><br>
-                                <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
+                                <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
                                     <i class="notranslate material-icons-round left">group_add</i>Wijzig beheerders</a>
                             {% endif %}
                         </td>
@@ -112,7 +112,7 @@
                                 <code>{{ obj.bevestigde_email }}</code>
                             {% else %}
                                 {% if obj.email_url %}
-                                    <i class="nhb-rood-text">Geen</i>
+                                    <i class="sv-rood-text">Geen</i>
                                 {% else %}
                                     <i class="grey-text">Geen</i>
                                 {% endif %}
@@ -127,7 +127,7 @@
 
                             {% if obj.email_url %}
                                 <br><br>
-                                <a class="btn-nhb-rood" href="{{ obj.email_url }}">
+                                <a class="btn-sv-rood" href="{{ obj.email_url }}">
                                     <i class="notranslate material-icons-round left">alternate_email</i>Wijzig e-mail</a>
                             {% endif %}
                         </td>

@@ -24,7 +24,7 @@
         <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         <p>
-            <a class="btn-nhb-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
+            <a class="btn-sv-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
                 <i class="notranslate material-icons-round left">open_in_new</i>Meer foto's</a>
         </p>
     </div>
@@ -39,7 +39,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -95,7 +95,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <table class="white">
                 <thead>
@@ -105,7 +105,7 @@
                     </tr>
                 </thead>
                 {% for regio in regios %}
-                    <tr {% if regio.mijn_regio %}class="nhb-rood white-text"{% endif %}>
+                    <tr {% if regio.mijn_regio %}class="sv-rood white-text"{% endif %}>
                         <td>{{ regio.rayon.naam }}</td>
                         <td>{{ regio.naam }}</td>
                     </tr>
@@ -126,7 +126,7 @@
         </div>
 
         <!-- blauwe balk met informatie label : info -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2">
                 <table class="white">
                     <tr>
@@ -167,7 +167,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
 
@@ -179,7 +179,7 @@ Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
 
                 <p>We hebben een aparte pagina waarop de leeftijdsgroepen uitgelegd staan:</p>
                 <p>
-                    <a class="btn-nhb-rood" href="{% url 'Sporter:leeftijdsgroepen' %}">Leeftijden</a>
+                    <a class="btn-sv-rood" href="{% url 'Sporter:leeftijdsgroepen' %}">Leeftijden</a>
                 </p>
 
                 <p>Sporters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
@@ -207,7 +207,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
 
@@ -218,12 +218,12 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                 <div class="row">
                     <div class="col s12 m10 offset-m1 l6 offset-l3">
                         <table class="centered">
-                            <tr class="nhb-table-header">
-                                <td rowspan="4" class="nhb-table-zijrand"></td>
+                            <tr class="sv-table-header">
+                                <td rowspan="4" class="sv-table-zijrand"></td>
                                 <th style="width:33%">Competitie</th>
                                 <th style="width:33%">Pijlen</th>
                                 <th style="width:33%">Knock-out finales</th>
-                                <td rowspan="4" class="nhb-table-zijrand"></td>
+                                <td rowspan="4" class="sv-table-zijrand"></td>
                             </tr>
 
                             <tr>
@@ -239,7 +239,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                             </tr>
 
                             <tr>
-                                <td colspan="3" class="nhb-table-onderrand"></td>
+                                <td colspan="3" class="sv-table-onderrand"></td>
                             </tr>
                         </table>
                     </div>
@@ -261,7 +261,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>Hieronder volgen voorbeelden van de belangrijkste blazoenen voor de competities.</p>
@@ -305,7 +305,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>De knock-out finales (alleen voor de Indoor competitie) begint met de beste 16 sporters, waarvan de 8 winnaars doorgaan naar de kwartfinale. Uit de kwartfinale gaan de 4 winnaars door naar de halve finale. Zie het schema hier onder.</p>
@@ -321,7 +321,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                     </tr>
 
                     <tr>
-                        <td class="center"><span class="nhb-blauw-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
+                        <td class="center"><span class="sv-blauw-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
                         <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
                         <td class="center" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
                         <td class="center" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
@@ -336,11 +336,11 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                         <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center"><span class="nhb-blauw-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
+                        <td class="center"><span class="sv-blauw-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
                     </tr>
 
                     <tr>
-                        <td class="center"><span class="nhb-blauw-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
+                        <td class="center"><span class="sv-blauw-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
                         <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
                         <td class="center" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
@@ -353,7 +353,7 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                         <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center"><span class="nhb-blauw-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
+                        <td class="center"><span class="sv-blauw-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
                     </tr>
 
                 </table>
@@ -386,7 +386,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>De bondskampioenschappen worden landelijk georganiseerd.</p>
@@ -408,7 +408,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>De winnaars in de hoogste wedstrijdklassen van het BK 25m 1pijl mogen zich Nederlands Kampioen noemen.</p>
@@ -425,7 +425,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
         </div>
     </div>
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>Als je voor het einde van de regiocompetitie begint met schieten, dan kan je individueel altijd nog aanmelden.</p>

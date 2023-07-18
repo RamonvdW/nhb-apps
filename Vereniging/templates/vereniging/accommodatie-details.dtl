@@ -57,7 +57,7 @@
                 </div>
 
                 <!-- blauwe balk met informatie in een tabel -->
-                <div class="row-nhb-blauw">
+                <div class="row-sv-blauw">
                     <div class="col s10 offset-s1 m12{% if not readonly %} white z-depth-3{% endif %}">
 
                         {% if not readonly %}
@@ -200,7 +200,7 @@
                     <div class="row center">
                         <div class="col s12">
                             <h4>Buitenbaan?</h4>
-                            <button form="form1" class="btn-nhb-rood wijzig_knop">Buitenbaan toevoegen</button>
+                            <button form="form1" class="btn-sv-rood wijzig_knop">Buitenbaan toevoegen</button>
                         </div>
                     </div>
 
@@ -218,7 +218,7 @@
                 </div>
 
                 <!-- blauwe balk met informatie in een tabel -->
-                <div class="row-nhb-blauw">
+                <div class="row-sv-blauw">
                     <div class="col s10 offset-s1 m12{% if not readonly %} white z-depth-3{% endif %}">
                         <table class="white">
 
@@ -238,7 +238,7 @@
                                     {% if readonly %}
                                         {% for sel, str, checked in disc %}
                                             {% if checked %}
-                                                <span class="nhb-rood-text">&check;&nbsp;</span><span>{{ str }}</span>
+                                                <span class="sv-rood-text">&check;&nbsp;</span><span>{{ str }}</span>
                                                 <!-- else: discipline niet noemen -->
                                             {% endif %}
                                             <!-- voeg een verstopte radiobutton toe die gecheckt kan worden door javascript -->
@@ -302,7 +302,7 @@
                             {% if url_verwijder_buitenbaan %}
                                 <tr>
                                     <td>
-                                        <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+                                        <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
                                     </td>
                                     <td></td>
                                 </tr>
@@ -324,7 +324,7 @@
                 </div>
 
                 <!-- blauwe balk met informatie in een tabel -->
-                <div class="row-nhb-blauw">
+                <div class="row-sv-blauw">
                     <div class="col s10 offset-s1 m12">
                         <table class="white">
                             <tr>
@@ -365,7 +365,7 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
                     <tr>
@@ -468,7 +468,7 @@
 
         {% if not readonly %}
             <div class="fixed-action-btn" style="display: none">
-                <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                     <i class="notranslate material-icons-round left">check</i>Wijzigingen opslaan</button>
             </div>
         {% endif %}
@@ -489,10 +489,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>

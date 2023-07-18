@@ -22,7 +22,7 @@
 
 <!-- zet breedte, hoogte en side-by-side layout -->
 <!-- bij mouse-over licht de rand op -->
-<div class="nhb-card">
+<div class="sv-card">
 
     <!-- de hele kaart is klikbaar -->
     {% if onclick %}
@@ -33,12 +33,12 @@
 
         {% if extern_open %}
             <div style="position:absolute; right:6px; top:6px">
-                <i class="notranslate material-icons-round nhb-blauw-text">open_in_new</i>
+                <i class="notranslate material-icons-round sv-blauw-text">open_in_new</i>
             </div>
         {% endif %}
 
         <!-- padding om bij de rand weg te blijven -->
-        <div class="nhb-card-content center-align">
+        <div class="sv-card-content center-align">
 
             <!-- titel -->
             {% if title %}
@@ -47,7 +47,7 @@
 
             <!-- icoon -->
             <div style="margin-bottom:8px{% if not icon_font_size %}; height:64px{% endif %}">
-                <i class="notranslate material-icons-round medium nhb-rood-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
+                <i class="notranslate material-icons-round medium sv-rood-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
             </div>
 
             <div>{{ text }}</div>

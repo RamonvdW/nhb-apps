@@ -20,10 +20,10 @@
 
 <!-- zet breedte, hoogte en side-by-side layout -->
 <!-- bij mouse-over licht de rand NIET op -->
-<div class="nhb-card-disabled">
+<div class="sv-card-disabled">
 
     <!-- padding om bij de rand weg te blijven -->
-    <div class="nhb-card-content">
+    <div class="sv-card-content">
 
         <!-- titel -->
         {% if title %}
@@ -39,7 +39,7 @@
 
     </div>
 
-    <div class="nhb-card-vanaf">{{ waarom|upper }}</div>
+    <div class="sv-card-vanaf">{{ waarom|upper }}</div>
 
 </div>
 

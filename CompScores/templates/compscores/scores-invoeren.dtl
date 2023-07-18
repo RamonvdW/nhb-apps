@@ -25,7 +25,7 @@
                     <p>
                         <form method="post" action="{{ url_geef_akkoord }}">
                             {% csrf_token %}
-                            <button class="btn-nhb-rood" type="submit">Ik geef akkoord voor deze uitslag</button>
+                            <button class="btn-sv-rood" type="submit">Ik geef akkoord voor deze uitslag</button>
                         </form>
                     </p>
                 {% endif %}
@@ -37,7 +37,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -584,7 +584,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <div class="white left-align z-depth-3">
@@ -669,7 +669,7 @@
                     </div>
 
                     <div style="display:inline-block; margin-left:100px">
-                        <button id="id_zoek_knop" class="btn-nhb-rood" onclick="opzoeken(this)" data-opzoeken="id_lid_nr" data-lid_nr="id_bondsnummer" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
+                        <button id="id_zoek_knop" class="btn-sv-rood" onclick="opzoeken(this)" data-opzoeken="id_lid_nr" data-lid_nr="id_bondsnummer" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
                             <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </div>
                 </div>
@@ -709,7 +709,7 @@
 
                     <!-- toevoegen knop -->
                     <p class="center">
-                        <button id="id_btn_toevoegen" class="btn-nhb-rood" onclick="toevoegen()" disabled>
+                        <button id="id_btn_toevoegen" class="btn-sv-rood" onclick="toevoegen()" disabled>
                             <i class="notranslate material-icons-round left">add</i>Toevoegen</button>
                     </p>
                 </div>
@@ -730,7 +730,7 @@
     </div>
 
     <div class="fixed-action-btn">
-        <button class="btn-nhb-rood" onclick="opslaan(this)">
+        <button class="btn-sv-rood" onclick="opslaan(this)">
             <i class="notranslate material-icons-round left">check</i>Opslaan</button>
     </div>
 

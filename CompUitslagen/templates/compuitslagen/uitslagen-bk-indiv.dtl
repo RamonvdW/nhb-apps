@@ -33,7 +33,7 @@
 
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -51,7 +51,7 @@
     {% if comp.bk_is_afgelast %}
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                     <p>{{ comp.bk_afgelast_bericht }}</p>
                 </div>
             </div>
@@ -67,7 +67,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
@@ -82,7 +82,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                    <a class="btn-sv-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
                 </p>
             </div>
         </div>
@@ -93,7 +93,7 @@
 
         <div class="row">
             <div style="padding:10px">
-                <p class="center nhb-rood-text">De rayonkampioenschappen zijn nog niet afgesloten</p>
+                <p class="center sv-rood-text">De rayonkampioenschappen zijn nog niet afgesloten</p>
                 <p class="center">Sporters worden in de lijst opgenomen als ze aan het RK deelgenomen hebben</p>
             </div>
         </div>
@@ -107,7 +107,7 @@
             <!-- rood bordje -->
             <div class="row">
                 <div style="padding:10px">
-                    <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                    <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                         <p>Deelnemers krijgen persoonlijk bericht met verdere instructies</p>
                         <!-- <p>Aanmelden of afmelden voor de BK wedstrijd kan bij het bondsbureau tot en met <b>{{ bevestig_tot_datum }}</b></p> -->
                     </div>
@@ -132,7 +132,7 @@
                 {% if obj.break_klasse %}
                     {% if not obj.is_eerste_break %}
                         <tr>
-                            <td colspan="6" class="nhb-table-onderrand"></td>
+                            <td colspan="6" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -150,8 +150,8 @@
                         </td>
                     </tr>
 
-                    <tr class="nhb-table-header">
-                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                    <tr class="sv-table-header">
+                        <td rowspan="{{ obj.aantal_regels }}" class="sv-table-zijrand"></td>
 
                         {% if obj.toon_uitslag %}
 
@@ -171,7 +171,7 @@
                             <th colspan="2">BK scores</th>
 
                         {% endif %}
-                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                        <td rowspan="{{ obj.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
@@ -179,7 +179,7 @@
 
                     {% if obj.toon_uitslag%}
 
-                        <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}<!-- <span class="nhb-blauw-text">/{{ obj.result_volgorde }}</span>--></td>
+                        <td class="center">{% if not obj.geen_rank %}{{ obj.result_rank }}{% endif %}<!-- <span class="sv-blauw-text">/{{ obj.result_volgorde }}</span>--></td>
                         <td>{% if obj.result_label %}<div class="hide-on-med-and-up"><b>{{ obj.result_label }}</b><br></div>{% endif %}{{ obj.naam_str }}</td>
                         <td class="hide-on-small-only">{{ obj.ver_str }}</td>
                         <td class="hide-on-small-only">{% if obj.result_rank == 1 %}{{ obj.indiv_klasse.titel_bk }}{% endif %}</td>
@@ -204,7 +204,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="6" class="nhb-table-onderrand"></td>
+                <td colspan="6" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

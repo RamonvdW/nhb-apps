@@ -60,7 +60,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <table class="white">
                 <tr>
@@ -97,7 +97,7 @@
         </div>
 
         <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
                 <!-- dialoog venster -->
@@ -111,7 +111,7 @@
                             </div>
 
                             <p class="center">
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round left">search</i>Zoek</button>
                             </p>
 
@@ -136,7 +136,7 @@
         </div>
 
         <!-- blauwe balk met informatie -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
                 <table class="white">
                     <thead>
@@ -155,7 +155,7 @@
                                     <i>Geselecteerd</i>
                                 {% endif %}
                                 {% if sporterboog.url_selecteer %}
-                                    <a class="btn-nhb-rood" href="{{ sporterboog.url_selecteer }}">Selecteer</a>
+                                    <a class="btn-sv-rood" href="{{ sporterboog.url_selecteer }}">Selecteer</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -179,7 +179,7 @@
         </div>
 
         <!-- blauwe balk met informatie -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 l10 offset-l1 xl8 offset-xl2">
                 <table class="white">
                     <tr>
@@ -189,7 +189,7 @@
 
                     <tr>
                         <th>Lid bij vereniging</th>
-                        <td>{% if geselecteerd.sporter.bij_vereniging %}{{ geselecteerd.sporter.bij_vereniging }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
+                        <td>{% if geselecteerd.sporter.bij_vereniging %}{{ geselecteerd.sporter.bij_vereniging }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
                     </tr>
 
                     <tr>
@@ -213,7 +213,7 @@
                     {% else %}
                         <tr>
                             <th>Mogelijke leeftijdsklassen voor deze wedstrijd</th>
-                            <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="nhb-rood-text">Geen match</span>{% endfor %}</td>
+                            <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="sv-rood-text">Geen match</span>{% endfor %}</td>
                         </tr>
                     {% endif %}
 
@@ -233,16 +233,16 @@
                     {% endif %}
 
                     {% if uitleg_geslacht %}
-                        <p class="nhb-rood-text">Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen.</p>
+                        <p class="sv-rood-text">Om in te kunnen schrijven op deze wedstrijd moet deze sporter eerst instellen om met de mannen of vrouwen mee te doen.</p>
                     {% endif %}
 
                     {% if not kan_aanmelden %}
-                        <p class="nhb-rood-text">Deze sporter kan niet ingeschreven worden op deze wedstrijd.<br>Dit kan komen door de leeftijd, geslacht of de ingestelde bogen.</p>
+                        <p class="sv-rood-text">Deze sporter kan niet ingeschreven worden op deze wedstrijd.<br>Dit kan komen door de leeftijd, geslacht of de ingestelde bogen.</p>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12">
                     <table class="white">
                         <tr>
@@ -265,7 +265,7 @@
                                         <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
                                         <td class="center">
                                             {% if sessie.kan_aanmelden %}
-                                                <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
+                                                <button class="btn-sv-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
                                                     <i class="notranslate material-icons-round">add</i></button>
                                             {% else %}
                                                 {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
@@ -296,7 +296,7 @@
         </div>
 
         <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
                 <!-- dialoog venster -->
@@ -310,7 +310,7 @@
                             </div>
 
                             <p class="center">
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round left">search</i>Zoek</button>
                             </p>
 

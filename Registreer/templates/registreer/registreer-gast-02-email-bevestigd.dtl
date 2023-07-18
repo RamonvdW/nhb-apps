@@ -20,7 +20,7 @@
     </div>
 
     <!-- blauw balk met wit informatie vlak -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white center" style="padding:10px">
                 <p>Je hebt laten zien dat je toegang hebt de opgegeven e-mail.</p>
@@ -29,7 +29,7 @@
                 <h4><b>{{ lid_nr }}</b></h4>
                 <br>
                 <p>Je kan nu een wachtwoord instellen.</p>
-                <p><a class="btn-nhb-rood" href="{{ url_volgende_vraag }}">Ga door</a></p>
+                <p><a class="btn-sv-rood" href="{{ url_volgende_vraag }}">Ga door</a></p>
                 <br>
                 <br>
                 <p>Tip: Indien nodig kan je inloggen met de 'wachtwoord vergeten' functie.</p>

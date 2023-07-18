@@ -27,7 +27,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m6 l4" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Boog type:</b></p>
@@ -42,7 +42,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -61,7 +61,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -80,7 +80,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -99,8 +99,8 @@
     {% if not lege_lijst %}
 
         <table class="white">
-            <tr class="nhb-table-header">
-                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+            <tr class="sv-table-header">
+                <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
                 <th>Soort record</th>
                 <th>Materiaal<wbr>klasse</th>
                 <th class="hide-on-small-only">Leeftijds<wbr>categorie</th>
@@ -110,7 +110,7 @@
                 <th>Geslacht</th>
                 <th>Score</th>
                 <th><!-- kolom voor de 'details' knop --></th>
-                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+                <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
             </tr>
 
             {% for obj in object_list %}
@@ -124,7 +124,7 @@
                     <td>{{ obj.geslacht_str }}</td>
                     <td>{{ obj.beste.score_str }}</td>
                     <td>
-                        <a class="btn-nhb-rood" href="{{ obj.url_details }}">
+                        <a class="btn-sv-rood" href="{{ obj.url_details }}">
                             <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
                         </a>
                     </td>
@@ -132,11 +132,11 @@
             {% endfor %}
 
             <tr>
-                <td class="hide-on-small-only nhb-table-onderrand"></td>
+                <td class="hide-on-small-only sv-table-onderrand"></td>
                 {% if toon_para_kolom %}
-                    <td class="nhb-table-onderrand"></td>
+                    <td class="sv-table-onderrand"></td>
                 {% endif %}
-                <td colspan="5" class="nhb-table-onderrand"></td>
+                <td colspan="5" class="sv-table-onderrand"></td>
             </tr>
         </table>
 
@@ -150,7 +150,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
 
@@ -161,10 +161,10 @@
 
                 <p>&nbsp;</p>
                 <p>Directe link naar het aanvraagformulier:
-                    <a class="btn-nhb-rood" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    <a class="btn-sv-rood" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
                         <i class="notranslate material-icons-round left">open_in_new</i>Openen</a></p>
                 <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures:
-                    <a class="btn-nhb-rood" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
+                    <a class="btn-sv-rood" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
                         <i class="notranslate material-icons-round left">open_in_new</i>Link</a></p>
 
             </div>

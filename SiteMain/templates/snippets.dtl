@@ -18,7 +18,7 @@
 
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- vereniging menu -->
@@ -30,13 +30,13 @@
 
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 
                 <p>
-                    <a class="btn-nhb-rood" href="{% url 'Plein:plein' %}">
+                    <a class="btn-sv-rood" href="{% url 'Plein:plein' %}">
                         <i class="notranslate material-icons-round left">close</i>Sluiten</a>
                 </p>
             </div>
@@ -45,7 +45,7 @@
 
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -84,7 +84,7 @@
 
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -94,7 +94,7 @@
                         {% csrf_token %}
 
                         {% if foutmelding %}
-                            <p class="nhb-rood-text">Fout: {{ foutmelding }}</p>
+                            <p class="sv-rood-text">Fout: {{ foutmelding }}</p>
                             <p>&nbsp;</p>
                         {% endif %}
 
@@ -114,7 +114,7 @@
 
                         <!-- button -->
                         <p class="center">
-                            <button class="btn-nhb-rood" type="submit">
+                            <button class="btn-sv-rood" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
@@ -127,7 +127,7 @@
 
 
     <!-- blauwe balk filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
 
         <!-- filter: xxx -->
         <div class="col s3" style="margin-bottom:15px">
@@ -144,7 +144,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -153,7 +153,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -178,7 +178,7 @@
                         {% if show_loc %}
                             <td>{{ obj.loc_str }}</td>
                         {% endif %}
-                        <td><a class="btn-nhb-rood" href="{{ obj.url }}">Details</a></td>
+                        <td><a class="btn-sv-rood" href="{{ obj.url }}">Details</a></td>
                     </tr>
                 {% endfor %}
             </table>
@@ -228,7 +228,7 @@
             {% if forloop.first %}
                 <!-- forceer gelijkmatige layout in de Scores kolommen -->
                 <tr style="visibility: collapse">
-                    <td class="nhb-table-zijrand"></td>
+                    <td class="sv-table-zijrand"></td>
                     <td colspan="2"><!-- rank, sporter --></td>
                     <td class="hide-on-small-only"><!-- vereniging --></td>
                     <td><!-- gemiddelde --></td>
@@ -241,20 +241,20 @@
                     <td class="right-align smal hide-on-small-only">888</td>
                     <td class="right-align smal hide-on-small-only">888</td>
                     <td class="right-align hide-on-small-only"><!-- totaal --></td>
-                    <td class="nhb-table-zijrand"></td>
+                    <td class="sv-table-zijrand"></td>
                 </tr>
             {% endif %}
 
             {% if obj.break_klasse %}
                 {% if not obj.is_eerste_groep %}
                     <tr>
-                        <td class="nhb-table-onderrand hide-on-small-only" colspan="13"></td>
-                        <td class="nhb-table-onderrand hide-on-med-and-up" colspan="4" ></td>
+                        <td class="sv-table-onderrand hide-on-small-only" colspan="13"></td>
+                        <td class="sv-table-onderrand hide-on-med-and-up" colspan="4" ></td>
                     </tr>
                 {% endif %}
 
-                <tr class="nhb-table-header">
-                    <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
+                <tr class="sv-table-header">
+                    <td class="sv-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                     <th><!-- rank --></th>
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
@@ -262,7 +262,7 @@
                     <th class="right-align hide-on-med-and-up">Scores</th>
                     <th class="center-align hide-on-small-only" colspan="7">Scores</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
-                    <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
+                    <td class="sv-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                 </tr>
             {% endif %}
 
@@ -292,14 +292,14 @@
         {% endfor %}
 
         <tr>            <!-- possibly add  data-tablefilter="stop"  when filter does not work -->
-            <td class="nhb-table-onderrand hide-on-small-only" colspan="13"></td>
-            <td class="nhb-table-onderrand hide-on-med-and-up" colspan="4" ></td>
+            <td class="sv-table-onderrand hide-on-small-only" colspan="13"></td>
+            <td class="sv-table-onderrand hide-on-med-and-up" colspan="4" ></td>
         </tr>
     </table>
 
 
     <!-- modal dialog -->
-    <a class="btn-nhb-rood modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+    <a class="btn-sv-rood modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
 
     <div class="modal" id="bevestig_verwijder_buitenbaan">
         <div class="modal-content center">
@@ -312,10 +312,10 @@
 
                 <div class="modal-footer" style="text-align:center; display:block">
                     <div style="display:inline-block; width:50%">
-                        <button class="btn-nhb-rood" type="submit">Ja</button>
+                        <button class="btn-sv-rood" type="submit">Ja</button>
                     </div>
                     <div style="display:inline-block; width:50%">
-                        <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                        <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                     </div>
                 </div>
             </form>
@@ -327,7 +327,7 @@
     <!-- rood bordje -->
     <div class="row">
         <div style="padding:10px">
-            <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+            <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                 <p>Er is besloten een uitzondering te maken voor deze competitie.<br>Om deel te mogen nemen aan de Rayonkampioenschappen moeten 5 scores neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de beste 5 scores</p>
             </div>
         </div>
@@ -337,7 +337,7 @@
 
     <!-- voorkom dubbele posts vanuit form -->
     <form ... method="post" onsubmit="submit_knop.disabled=true; return true;">
-       <button class="btn-nhb-rood" name="submit_knop">...</button>
+       <button class="btn-sv-rood" name="submit_knop">...</button>
     </form>
 
 

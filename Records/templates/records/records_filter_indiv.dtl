@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw" style="margin-bottom:0; padding-bottom:0">
+    <div class="row-sv-blauw" style="margin-bottom:0; padding-bottom:0">
 
         <!-- filter: para classificatie -->
         <div class="col s6 l3" style="margin-bottom:15px">
@@ -36,7 +36,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -57,7 +57,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
@@ -81,7 +81,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -102,7 +102,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 </div>
             </div>
@@ -112,7 +112,7 @@
 
     </div>
 
-    <div class="row-nhb-blauw hide-on-large-and-up" style="margin-bottom:0; padding-bottom:0; padding-top:15px">
+    <div class="row-sv-blauw hide-on-large-and-up" style="margin-bottom:0; padding-bottom:0; padding-top:15px">
 
         <!-- filter: materiaalklasse -->
         <div class="col s6 l3" style="margin-bottom:15px">
@@ -129,7 +129,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -150,14 +150,14 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 </div>
             </div>
         {% endif %}
     </div>
 
-    <div class="row-nhb-blauw" style="padding-top:15px">
+    <div class="row-sv-blauw" style="padding-top:15px">
 
         <!-- filter: geslacht -->
         <div class="col s6 l3">
@@ -174,7 +174,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -194,7 +194,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -215,7 +215,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
@@ -239,7 +239,7 @@
         </div>
 
         <!-- blauwe balk met informatie label : info -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2">
                 <table class="white">
                     <tr>
@@ -350,7 +350,7 @@
                     <tr>
                         <th>Nummer</th>
                         <td>
-                            <a class="btn-nhb-rood" href="{{ obj_record.url_specifiek }}">{{ obj_record.discipline }}-{{ obj_record.volg_nr }}</a>
+                            <a class="btn-sv-rood" href="{{ obj_record.url_specifiek }}">{{ obj_record.discipline }}-{{ obj_record.volg_nr }}</a>
                         </td>
                     </tr>
 
@@ -369,7 +369,7 @@
         </div>
 
         <!-- blauwe balk met informatie label : info -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2">
                 <table class="white">
                     <thead>
@@ -396,7 +396,7 @@
                                 {% if obj.is_specifieke_record %}
                                     <i>Wordt getoond</i>
                                 {% else %}
-                                    <a class="btn-nhb-rood" href="{{ obj.url }}">
+                                    <a class="btn-sv-rood" href="{{ obj.url }}">
                                         <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
                                     </a>
                                 {% endif %}
@@ -413,7 +413,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Record</h4>
-                <p class="nhb-rood-text">Geen records gevonden voor deze filter combinatie.</p>
+                <p class="sv-rood-text">Geen records gevonden voor deze filter combinatie.</p>
             </div>
         </div>
 

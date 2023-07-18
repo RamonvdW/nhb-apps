@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white">
@@ -38,7 +38,7 @@
                 </thead>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'A' %} nhb-rood white-text{% endif %}">A</td>
+                    <td class="center{% if comp.fase_indiv == 'A' %} sv-rood white-text{% endif %}">A</td>
                     <td>Clusters instellen (RCL)<br>Vaststellen aanvangsgemiddelden (BKO)<br>Vaststellen klassengrenzen (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'A' %}
@@ -53,7 +53,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'B' %} nhb-rood white-text{% endif %}">B</td>
+                    <td class="center{% if comp.fase_indiv == 'B' %} sv-rood white-text{% endif %}">B</td>
                     <td>Planning regiocompetitie wedstrijden invoeren (RCL)</td>
                     <td>
                         {% if comp.fase_indiv > 'B' %}
@@ -66,7 +66,7 @@
 
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'C' %} nhb-rood white-text{% endif %}">C</td>
+                    <td class="center{% if comp.fase_indiv == 'C' %} sv-rood white-text{% endif %}">C</td>
                     <td>Open voor aanmelden individueel (sporter/HWL)</td>
                     <td>
                         {% if comp.fase_indiv > 'C' %}
@@ -78,7 +78,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'F' %} nhb-rood white-text{% endif %}">F</td>
+                    <td class="center{% if comp.fase_indiv == 'F' %} sv-rood white-text{% endif %}">F</td>
                     <td>Regio wedstrijden (sporters)<br>Scores invoeren (HWL)<br>Publiceer tussenstand regiocompetitie (automatisch)<br>Publiceer voorlopige deelnemerslijst RK (automatisch)</td>
                     <td>
                         {% if comp.fase_indiv > 'F' %}
@@ -92,7 +92,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'G' %} nhb-rood white-text{% endif %}">G</td>
+                    <td class="center{% if comp.fase_indiv == 'G' %} sv-rood white-text{% endif %}">G</td>
                     <td>Vaststellen eindstand regiocompetitie (RCL)<br>Competitie doorzetten naar de RK fase (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'G' %}
@@ -107,7 +107,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'J' %} nhb-rood white-text{% endif %}">J</td>
+                    <td class="center{% if comp.fase_indiv == 'J' %} sv-rood white-text{% endif %}">J</td>
                     <td>Bevestig deelname RK individueel (HWL / RKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'J' %}
@@ -118,7 +118,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'K' %} nhb-rood white-text{% endif %}">K</td>
+                    <td class="center{% if comp.fase_indiv == 'K' %} sv-rood white-text{% endif %}">K</td>
                     <td>RK wedstrijd voorbereiden (HWL)<br>Afmelden bij vereniging (sporter)<br>Reserve sporters oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_indiv > 'K' %}
@@ -130,7 +130,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'L' %} nhb-rood white-text{% endif %}">L</td>
+                    <td class="center{% if comp.fase_indiv == 'L' %} sv-rood white-text{% endif %}">L</td>
                     <td>RK wedstrijden<br>RK programma met uitslag insturen (HWL)<br>RK uitslag inlezen en publiceren<br>Competitie doorzetten naar de BK fase (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'L' %}
@@ -147,7 +147,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'N' %} nhb-rood white-text{% endif %}">N</td>
+                    <td class="center{% if comp.fase_indiv == 'N' %} sv-rood white-text{% endif %}">N</td>
                     <td>Kleine BK klassen samenvoegen (BKO)<br>BK deelnemerslijst publiceren (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'N' %}
@@ -157,7 +157,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'O' %} nhb-rood white-text{% endif %}">O</td>
+                    <td class="center{% if comp.fase_indiv == 'O' %} sv-rood white-text{% endif %}">O</td>
                     <td>BK wedstrijden voorbereiden (HWL)<br>Afmeldingen bij vereniging (sporter)<br>Reserve sporters oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_indiv > 'O' %}
@@ -169,7 +169,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'P' %} nhb-rood white-text{% endif %}">P</td>
+                    <td class="center{% if comp.fase_indiv == 'P' %} sv-rood white-text{% endif %}">P</td>
                     <td>BK wedstrijden<br>BK programma met uitslag insturen (HWL)<br>BK uitslag inlezen en publiceren<br>Uitslag bevestigen (BKO)</td>
                     <td>
                         {% if comp.fase_indiv > 'P' %}
@@ -181,7 +181,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_indiv == 'Q' %} nhb-rood white-text{% endif %}">Q</td>
+                    <td class="center{% if comp.fase_indiv == 'Q' %} sv-rood white-text{% endif %}">Q</td>
                     <td>Afsluiten competitie seizoen (Bondsbureau)</td>
                     <td></td>
                 </tr>
@@ -198,7 +198,7 @@
         </div>
     </div>
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white">
@@ -211,7 +211,7 @@
                 </thead>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'A' %} nhb-rood white-text{% endif %}">A</td>
+                    <td class="center{% if comp.fase_teams == 'A' %} sv-rood white-text{% endif %}">A</td>
                     <td>Regio instellingen teamcompetitie (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'A' %}
@@ -226,7 +226,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'B' %} nhb-rood white-text{% endif %}">B</td>
+                    <td class="center{% if comp.fase_teams == 'B' %} sv-rood white-text{% endif %}">B</td>
                     <td>Regio instellingen teamcompetitie (RCL)<br>Planning regiocompetitie wedstrijden invoeren (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'B' %}
@@ -237,7 +237,7 @@
 
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'C' %} nhb-rood white-text{% endif %}">C</td>
+                    <td class="center{% if comp.fase_teams == 'C' %} sv-rood white-text{% endif %}">C</td>
                     <td>Aanmelden teams (HWL)<br>Handmatig AG invoeren (HWL)<br>Koppel leden aan teams (HWL)<br>AG controle (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'C' %}
@@ -249,7 +249,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'D' %} nhb-rood white-text{% endif %}">D</td>
+                    <td class="center{% if comp.fase_teams == 'D' %} sv-rood white-text{% endif %}">D</td>
                     <td>Alle teams in een poule plaatsen (RCL)<br>Niet complete teams verwijderen (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'D' %}
@@ -263,7 +263,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'F' %} nhb-rood white-text{% endif %}">F</td>
+                    <td class="center{% if comp.fase_teams == 'F' %} sv-rood white-text{% endif %}">F</td>
                     <td>Koppel team invallers voor elke ronde (HWL)<br>Koppel scores aan teams (RCL)<br>Bepaal team wedstrijdpunten (automatisch)<br>Publiceer tussenstand teamcompetitie (automatisch)<br>Doorzetten naar volgende ronde (RCL)</td>
                     <td>
                         {% if comp.fase_teams > 'F' %}
@@ -277,7 +277,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'G' %} nhb-rood white-text{% endif %}">G</td>
+                    <td class="center{% if comp.fase_teams == 'G' %} sv-rood white-text{% endif %}">G</td>
                     <td>Competitie doorzetten naar de RK fase (BKO)<br>Verwijder niet gerechtigde sporters uit RK teams (automatisch)</td>
                     <td>
                         {% if comp.fase_teams > 'G' %}
@@ -308,7 +308,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'J' %} nhb-rood white-text{% endif %}">J</td>
+                    <td class="center{% if comp.fase_teams == 'J' %} sv-rood white-text{% endif %}">J</td>
                     <td>RK teams compleet maken (HWL)<br>Verwijder niet complete RK teams (RKO)<br>Vaststellen klassengrenzen RK/BK team (BKO)</td>
                     <td>
                         {% if comp.fase_teams > 'J' %}
@@ -320,7 +320,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'K' %} nhb-rood white-text{% endif %}">K</td>
+                    <td class="center{% if comp.fase_teams == 'K' %} sv-rood white-text{% endif %}">K</td>
                     <td>RK wedstrijd voorbereiden (HWL)<br>Afmelden bij vereniging (sporters/team)<br>Reserve teams oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_teams > 'K' %}
@@ -332,7 +332,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'L' %} nhb-rood white-text{% endif %}">L</td>
+                    <td class="center{% if comp.fase_teams == 'L' %} sv-rood white-text{% endif %}">L</td>
                     <td>RK teams wedstrijden<br>RK programma met uitslag insturen (HWL)<br>Uitslag inlezen en publiceren<br>Competitie doorzetten naar de BK fase (BKO)</td>
                     <td>
                         {% if comp.fase_teams > 'L' %}
@@ -349,7 +349,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'N' %} nhb-rood white-text{% endif %}">N</td>
+                    <td class="center{% if comp.fase_teams == 'N' %} sv-rood white-text{% endif %}">N</td>
                     <td>Kleine BK klassen samenvoegen (BKO)<br>BK deelnemerslijst publiceren (BKO)</td>
                     <td>
                         {% if comp.fase_teams > 'N' %}
@@ -359,7 +359,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'O' %} nhb-rood white-text{% endif %}">O</td>
+                    <td class="center{% if comp.fase_teams == 'O' %} sv-rood white-text{% endif %}">O</td>
                     <td>BK wedstrijden voorbereiden (HWL)<br>Afmelden bij vereniging (sporter)<br>Reserve teams oproepen (HWL)</td>
                     <td>
                         {% if comp.fase_teams > 'O' %}
@@ -371,7 +371,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'P' %} nhb-rood white-text{% endif %}">P</td>
+                    <td class="center{% if comp.fase_teams == 'P' %} sv-rood white-text{% endif %}">P</td>
                     <td>BK wedstrijden<br>BK programma met uitslag insturen (HWL)<br>BK uitslag inlezen en publiceren<br>Uitslag bevestigen (BKO)</td>
                     <td>
                         {% if comp.fase_teams > 'P' %}
@@ -383,7 +383,7 @@
                 </tr>
 
                 <tr>
-                    <td class="center{% if comp.fase_teams == 'Q' %} nhb-rood white-text{% endif %}">Q</td>
+                    <td class="center{% if comp.fase_teams == 'Q' %} sv-rood white-text{% endif %}">Q</td>
                     <td>Afsluiten competitie seizoen (Bondsbureau)</td>
                     <td></td>
                 </tr>

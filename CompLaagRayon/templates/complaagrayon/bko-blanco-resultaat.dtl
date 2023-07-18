@@ -20,7 +20,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 xl10 offset-xl1">
             <table class="white">
                 {% for obj in kandidaten %}
@@ -44,15 +44,15 @@
                         <td>{{ obj.lid_nr_naam }}</td>
                         <td>
                             {% if obj.geen_ver %}
-                                <span class="nhb-rood-text">Geen vereniging</span>
+                                <span class="sv-rood-text">Geen vereniging</span>
                             {% else %}
                                 <span>{{ obj.ver }}</span>
                             {% endif %}
                         </td>
-                        <td class="center hide-on-small-only">{% if obj.geen_ver %}<span class="nhb-rood-text">-</span>{% else %}{{ obj.regio_nr }} (Rayon {{ obj.rayon_nr}}){% endif %}</td>
+                        <td class="center hide-on-small-only">{% if obj.geen_ver %}<span class="sv-rood-text">-</span>{% else %}{{ obj.regio_nr }} (Rayon {{ obj.rayon_nr}}){% endif %}</td>
                         <td class="right-align">
                             {% if obj.url %}
-                                <a class="btn-nhb-rood modal-trigger" href="#bevestig_{{ obj.pk }}">
+                                <a class="btn-sv-rood modal-trigger" href="#bevestig_{{ obj.pk }}">
                                     <i class="notranslate material-icons-round">fast_forward</i>
                                 </a>
                             {% endif %}
@@ -81,10 +81,10 @@
 
                         <div class="modal-footer" style="text-align:center; display:block">
                             <div style="display:inline-block; width:50%">
-                                <button class="btn-nhb-rood" type="submit">Ja</button>
+                                <button class="btn-sv-rood" type="submit">Ja</button>
                             </div>
                             <div style="display:inline-block; width:50%">
-                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                             </div>
                         </div>
                     </form>

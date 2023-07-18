@@ -34,7 +34,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 {% url 'Sporter:profiel' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
@@ -52,7 +52,7 @@
     {% endif %}
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <!-- de beschikbare competities -->
             {% for obj in competities %}
@@ -79,7 +79,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- competities opstarten -->
                 {% if url_seizoen_opstarten %}
@@ -109,7 +109,7 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <!-- toon en koppel beheerders -->
             {% if toon_beheerders_algemeen %}

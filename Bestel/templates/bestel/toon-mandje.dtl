@@ -51,7 +51,7 @@
         <!-- toon een paar keuzes om verder te gaan -->
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 {% url 'Plein:plein' as card_url %}
@@ -74,7 +74,7 @@
     {% else %}
 
         <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
                 <!-- dialoog venster -->
@@ -89,11 +89,11 @@
                                 <tr>
                                     <td class="hide-on-small-only">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}{% if not product.kan_afrekenen %}<br>{% endif %}</td>
                                     <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}
-                                        {% if not product.kan_afrekenen %}<i class="nhb-rood-text">Kan nog niet besteld worden</i>{% endif %}
+                                        {% if not product.kan_afrekenen %}<i class="sv-rood-text">Kan nog niet besteld worden</i>{% endif %}
                                     </td>
                                     <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
                                     <td class="right-align">
-                                        <button class="btn-nhb-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">
+                                        <button class="btn-sv-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">
                                             <i class="notranslate material-icons-round">delete</i></button>
                                     </td>
                                 </tr>
@@ -154,12 +154,12 @@
                         </table>
 
                         {% if bevat_fout %}
-                            <p class="center nhb-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
+                            <p class="center sv-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
                         {% else %}
                             <div class="center" style="margin-top:30px">
                                 <form action="{{ url_bestellen }}" method="post">
                                     {% csrf_token %}
-                                    <button id="id_bestellen" class="btn-nhb-rood">
+                                    <button id="id_bestellen" class="btn-sv-rood">
                                         <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
                                 </form>
                             </div>
@@ -181,7 +181,7 @@
             </div>
 
             <!-- blauw balk met wit informatie veld -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12 l10 offset-l1 xl8 offset-xl2">
                     <div class="white" style="padding:10px">
                         <p>De producten worden verstuurd naar jouw postadres:</p>
@@ -203,7 +203,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 {% include 'plein/card_icon.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
 

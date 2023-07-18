@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -51,7 +51,7 @@
                             {% if not uitslag_invoeren %}
                                 <td>
                                     {% if obj.url_lijst %}
-                                        <a class="btn-nhb-rood" href="{{ obj.url_lijst }}">{% if obj.is_rk %}RK programma{% elif obj.is_bk %}BK programma{% else %}Toon lijst{% endif %}</a>
+                                        <a class="btn-sv-rood" href="{{ obj.url_lijst }}">{% if obj.is_rk %}RK programma{% elif obj.is_bk %}BK programma{% else %}Toon lijst{% endif %}</a>
                                     {% endif %}
                                 </td>
                             {% endif %}
@@ -59,13 +59,13 @@
                             <!-- knop om uitslagen te zien / in te voeren -->
                             <td>
                                 {% if obj.url_uitslag_aanpassen %}
-                                    <a class="btn-nhb-rood" href="{{ obj.url_uitslag_aanpassen }}">
+                                    <a class="btn-sv-rood" href="{{ obj.url_uitslag_aanpassen }}">
                                         <i class="notranslate material-icons-round left">arrow_forward</i>Aanpassen</a>
                                 {% elif obj.url_score_invoeren %}
-                                    <a class="btn-nhb-rood" href="{{ obj.url_score_invoeren }}">
+                                    <a class="btn-sv-rood" href="{{ obj.url_score_invoeren }}">
                                         <i class="notranslate material-icons-round left">arrow_forward</i>Invoeren</a>
                                 {% elif obj.url_uitslag_bekijken %}
-                                    <a class="btn-nhb-rood" href="{{ obj.url_uitslag_bekijken }}">
+                                    <a class="btn-sv-rood" href="{{ obj.url_uitslag_bekijken }}">
                                         <i class="notranslate material-icons-round left">arrow_forward</i>Bekijken</a>
                                 {% endif %}
 

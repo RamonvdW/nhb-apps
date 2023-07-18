@@ -15,51 +15,51 @@
 }
 
 /* kleuren */
-.nhb-blauw {
+.sv-blauw {
     background-color: $primary-color-dark;     /* donker blauw */
 }
 
-.nhb-blauw-hoofd {
+.sv-blauw-hoofd {
     background-color: $primary-color;          /* medium blauw */
 }
 
-.nhb-blauw-steun {
+.sv-blauw-steun {
     background-color: $primary-color-light;    /* lichtblauw */
 }
 
-.nhb-rood {
+.sv-rood {
     background-color: $secondary-color;        /* hoofdkleur oranje */
 }
 
-.nhb-grijs {
+.sv-grijs {
     /* standaard achtergrondkleur is wat te donker
     background-color: #f5f5f5;      grey lighten-4 == achtergrondkleur */
     background-color: #eee;      /* grey lighten-3 */
 }
 
-.nhb-blauw-text {
+.sv-blauw-text {
     color: $primary-color;
 }
 
-.nhb-rood-text {
+.sv-rood-text {
     color: $secondary-color;
 }
 
 //-----------------------------------
 // blauwe button
 //
-.btn-nhb-blauw {
+.btn-sv-blauw {
   @extend .btn;
 
   //color: $button-raised-color;
-  background-color: $nhb-blauw-default;
+  background-color: $sv-blauw-default;
 
   &:focus {
-    background-color: $nhb-blauw-focus;
+    background-color: $sv-blauw-focus;
   }
 
   &:hover {
-    background-color: $nhb-blauw-hover;
+    background-color: $sv-blauw-hover;
   }
 }
 
@@ -67,18 +67,18 @@
 //-----------------------------------
 // rode button
 //
-.btn-nhb-rood {
+.btn-sv-rood {
   @extend .btn;
 
   //color: $button-raised-color;
-  background-color: $nhb-rood-default;
+  background-color: $sv-rood-default;
 
   &:focus {
-    background-color: $nhb-rood-focus;
+    background-color: $sv-rood-focus;
   }
 
   &:hover {
-    background-color: $nhb-rood-hover;
+    background-color: $sv-rood-hover;
   }
 }
 
@@ -86,8 +86,8 @@
 //-----------------------------------
 // download button
 //
-.btn-nhb-download {
-  @extend .btn-nhb-blauw;
+.btn-sv-download {
+  @extend .btn-sv-blauw;
 
   width: 30px;
   height: 30px;
@@ -97,9 +97,9 @@
 
 
 //-----------------------------------
-// nhb-card
+// sv-card
 //
-.nhb-card {
+.sv-card {
   @extend .card;
 
   // laat de kaartjes naast elkaar komen (in het display=block van de row)
@@ -119,11 +119,11 @@
   &:hover {
     border-width: 3px;
     border-style: solid;
-    border-color: $nhb-card-focus-border-color;
+    border-color: $sv-card-focus-border-color;
   }
 }
 
-.nhb-card-disabled {
+.sv-card-disabled {
   @extend .card;
 
   // laat de kaartjes naast elkaar komen (in het display=block van de row)
@@ -142,7 +142,7 @@
   // geen hover gedrag
 }
 
-.nhb-card-vanaf {
+.sv-card-vanaf {
   position:absolute;
   top: 110px;
   width: 244px;   // related to the 250px above
@@ -151,22 +151,22 @@
   color: white;
 }
 
-.nhb-card-webwinkel-titel {
-  @extend .nhb-card-vanaf;
+.sv-card-webwinkel-titel {
+  @extend .sv-card-vanaf;
   top: unset;
   bottom: 40px;
-  background-color: $nhb-donkerblauw-color;
+  background-color: $sv-donkerblauw-color;
   padding: 3px;
   opacity: 0.9;
 }
 
-.nhb-card-schuine-banner {
-  @extend .nhb-card-vanaf;
+.sv-card-schuine-banner {
+  @extend .sv-card-vanaf;
   transform: rotate(-30deg);
   padding: 3px;
 }
 
-.nhb-card-content {
+.sv-card-content {
   @extend .card-content;
 
   padding: 24px 24px 0 24px;
@@ -178,16 +178,16 @@
 
 //--------------------------------------
 // foto thumbnails
-.nhb-foto-thumb {
+.sv-foto-thumb {
   margin: 0 0 5px 0;
   padding: 0;
   border-radius: 5px;   // knoppen en kaartjes hebben afronding
   cursor: pointer;
-  border: 3px solid $nhb-blauw-color;
+  border: 3px solid $sv-blauw-color;
   height: 90px;
 
   &:hover {
-    border-color: $nhb-card-focus-border-color;
+    border-color: $sv-card-focus-border-color;
   }
 
   @media #{$small-and-down} {
@@ -196,7 +196,7 @@
 
 }
 
-.nhb-foto-thumb-selected {
+.sv-foto-thumb-selected {
   // enlarge from 90 to 100 px
   // remove bottom margin from 5px to 0 to simulate center-align
   height: 100px;
@@ -207,7 +207,7 @@
   }
 }
 
-.nhb-foto {
+.sv-foto {
   margin: 0;
   padding: 0;
   border-radius: 0;
@@ -231,7 +231,7 @@
 // blauw vlak op de witte achtergrond
 // voor het groeperen van content
 //
-.row-nhb-blauw {
+.row-sv-blauw {
   @extend .row;
   background-color: $primary-color;          /* medium blauw */
   color: white;
@@ -249,40 +249,35 @@
 // tabel decoration
 // blauw rand rondom + header
 //
-.nhb-table-header {
-  @extend .nhb-blauw-hoofd;
+.sv-table-header {
+  @extend .sv-blauw-hoofd;
   color: white;
 }
 
-.nhb-table-zijrand {
-  @extend .nhb-blauw-hoofd;
+.sv-table-zijrand {
+  @extend .sv-blauw-hoofd;
   padding: 0;
   width: 3px;
 }
 
-.nhb-table-onderrand {
-  @extend .nhb-blauw-hoofd;
+.sv-table-onderrand {
+  @extend .sv-blauw-hoofd;
   padding: 0px;
   height: 3px;
 }
 
 // zo smal mogelijke tabel kolom, zonder wrapping
-.nhb-column-small {
+.sv-table-col-small {
   width: 1px;
   white-space: nowrap;
 }
 
-
-
-//-----------------------------------
-// grote klikbare oppervlakten
-//
-// zoals collection-item
-//
-
-// voor in oppervlakte met a
-.nhb-klikbare-balk {
-    color: inherit;     // dit zorgt voor een zwarte tekst ipv <a> kleur
+// gebruik inhoud voor bepalen breedte van de kolom
+// maar niet tonen
+.sv-table-hide-row {
+  visibility: collapse;
+  line-height: 0;         // nodig voor Safari, anders row met volle hoogte
+  //border-bottom: 0;     // TODO: nodig?
 }
 
 
@@ -293,7 +288,7 @@
     @extend .collection-item;
 
     &:hover {
-        background-color: $nhb-collection-hover-background;
+        background-color: $sv-collection-hover-background;
     }
 }
 
@@ -319,8 +314,8 @@
   margin-right: 5px;
 
   &:hover, &:focus {
-    //border-color: $nhb-card-focus-border-color;
-    color: $nhb-card-focus-border-color;
+    //border-color: $sv-card-focus-border-color;
+    color: $sv-card-focus-border-color;
     background-color: transparent;
   }
 }
@@ -390,7 +385,7 @@ a {
 .handleiding_code {
     padding: 10px;
     color: #000;             /* donker zwart */
-    background-color: #eee;  /* nhb-grijs */
+    background-color: #eee;  /* sv-grijs */
 }
 
 /* gebruik: extra ruimte rond dicht op elkaar geplaatst buttons
@@ -406,7 +401,7 @@ del {
     text-decoration-color: #0aa0e1;     /* blauw default */
 }
 
-.decorate-nhb-rood {
+.decorate-sv-rood {
     text-decoration-color: #f94137;     /* rood */
 }
 
@@ -454,7 +449,7 @@ input.table-filter {
 
 /* een grijs kader om een witte tabel die in een wit vlak staat */
 .table-wrap-5 {
-    background-color: #eee;  /* nhb-grijs */
+    background-color: #eee;  /* sv-grijs */
     padding: 5px;
     border-radius: 2px;
 }

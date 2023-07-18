@@ -53,7 +53,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <table class="white">
                 <tr>
@@ -73,8 +73,8 @@
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
-                    <td class="nhb-blauw-text">Onbekend</td>
+                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                    <td class="sv-blauw-text">Onbekend</td>
                     <td class="center">{{ aantal_onbekend }}</td>
                 </tr>
 
@@ -86,8 +86,8 @@
 
                 {% if aantal_attentie %}
                     <tr>
-                        <td class="center"><i class="nhb-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
-                        <td class="nhb-rood-text">Attentie</td>
+                        <td class="center"><i class="sv-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
+                        <td class="sv-rood-text">Attentie</td>
                         <td class="center">{{ aantal_attentie }}</td>
                     </tr>
                 {% endif %}
@@ -104,7 +104,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white" id="table1">
@@ -142,7 +142,7 @@
                         <td>{{ team.status_str }}</td>
                         <td>
                             {% if url_wijzig %}
-                                <a class="btn-nhb-rood modal-trigger" href="#wijzig_{{ team.pk }}">Wijzig</a>
+                                <a class="btn-sv-rood modal-trigger" href="#wijzig_{{ team.pk }}">Wijzig</a>
                             {% endif %}
                         </td>
                     </tr>
@@ -164,30 +164,30 @@
 
                         {% if team.wijzig_toch_ja %}
                             <div style="display:inline-block; margin-right:30px">
-                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'toch_ja')">Toch deelnemen</button>
+                                <button class="btn-sv-rood" onclick="wijzig({{ team.pk }}, 'toch_ja')">Toch deelnemen</button>
                             </div>
                         {% endif %}
 
                         {% if team.wijzig_afmelden %}
                             <div style="display:inline-block; margin-right:30px">
-                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'afmelden')">Afmelden</button>
+                                <button class="btn-sv-rood" onclick="wijzig({{ team.pk }}, 'afmelden')">Afmelden</button>
                             </div>
                         {% endif %}
 
                         {% if team.wijzig_beschikbaar %}
                             <div style="display:inline-block; margin-right:30px">
-                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'beschikbaar')">Beschikbaar</button>
+                                <button class="btn-sv-rood" onclick="wijzig({{ team.pk }}, 'beschikbaar')">Beschikbaar</button>
                             </div>
                         {% endif %}
 
                         {% if team.wijzig_deelnemer %}
                             <div style="display:inline-block; margin-right:30px">
-                                <button class="btn-nhb-rood" onclick="wijzig({{ team.pk }}, 'maak_deelnemer')">Maak deelnemer</button>
+                                <button class="btn-sv-rood" onclick="wijzig({{ team.pk }}, 'maak_deelnemer')">Maak deelnemer</button>
                             </div>
                         {% endif %}
 
                         <div style="display:inline-block">
-                            <a href="#" class="btn-nhb-blauw modal-close">Niets wijzigen</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Niets wijzigen</a>
                         </div>
                     </div>
 

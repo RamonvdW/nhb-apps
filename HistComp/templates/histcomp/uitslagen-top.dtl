@@ -38,7 +38,7 @@
     {% if not geen_data %}
 
         <!-- blauwe balk filters -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
 
             <!-- filter: seizoen keuze -->
             <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
@@ -55,7 +55,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('seizoen')">Activeer</a>
+                        <a class="btn-sv-rood" onclick="keuze_gemaakt('seizoen')">Activeer</a>
                     </p>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('histcomp_type')">Activeer</a>
+                        <a class="btn-sv-rood" onclick="keuze_gemaakt('histcomp_type')">Activeer</a>
                     </p>
                 </div>
             </div>
@@ -89,7 +89,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
                 {% if url_regio_indiv %}
                     {% include 'plein/card_icon.dtl' with title="Regio individueel" text="Eindstand voor de regiocompetitie individueel" icon="view_compact" url=url_regio_indiv %}
@@ -119,7 +119,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
                 {% if url_regio_teams %}
                 {% include 'plein/card_icon.dtl' with title="Regio teams" text="Eindstand voor de regiocompetitie teams" icon="view_compact" url=url_regio_teams %}

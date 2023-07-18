@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauw balk met wit informatie vlak -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white center" style="padding:10px">
                 <p>We hebben eerder een e-mail gestuurd naar <b><code>{{ partial_email }}</code></b> om zeker te zijn dat we je kunnen bereiken.</p>

@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <table class="white">
                 <tr>
@@ -46,7 +46,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
             <table class="white">
                 {% for poule in poules %}
@@ -65,7 +65,7 @@
                         <td class="center">{{ poule.team_count }}</td>
                         <td class="center">
                             {% if poule.url_wijzig %}
-                                <a class="btn-nhb-rood" href="{{ poule.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ poule.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>
@@ -83,7 +83,7 @@
                             <form action="{{ url_nieuwe_poule }}" method="post">
                                 {% csrf_token %}
                                 <div class="center">
-                                    <button class="btn-nhb-rood">
+                                    <button class="btn-sv-rood">
                                         <i class="notranslate material-icons-round">add</i></button>
                                 </div>
                             </form>
@@ -109,7 +109,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -126,8 +126,8 @@
 
                     <tr>
                         <td>{{ team.team_naam }}</td>
-                        <td>{% if team.poule %}{{ team.poule.beschrijving }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
-                        <td>{% if team.team_klasse %}{{ team.team_klasse.beschrijving }}{% else %}<i>Onbekend</i><span class="nhb-rood-text">&nbsp;&nbsp;(team is niet compleet)</span>{% endif %}</td>
+                        <td>{% if team.poule %}{{ team.poule.beschrijving }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
+                        <td>{% if team.team_klasse %}{{ team.team_klasse.beschrijving }}{% else %}<i>Onbekend</i><span class="sv-rood-text">&nbsp;&nbsp;(team is niet compleet)</span>{% endif %}</td>
                     </tr>
                 {% endfor %}
 

@@ -24,7 +24,7 @@
 
     {% if toon_bondscompetities or rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_mww or rol_is_mo or rol_is_wl%}
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <!-- bondscompetities -->
                 {% if toon_bondscompetities %}
@@ -72,7 +72,7 @@
     {% endif %}
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <!-- vereniging menu -->
             {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
@@ -133,7 +133,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 {% if rol_is_bb %}
                     <!-- account activiteit -->

@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -46,7 +46,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
 
         <div class="col s12 m3 offset-m3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
@@ -62,7 +62,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -81,7 +81,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -95,7 +95,7 @@
                 {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
                     <!-- forceer gelijkmatige layout in de Scores kolommen -->
                     <tr style="visibility: collapse">
-                        <td class="nhb-table-zijrand"></td>
+                        <td class="sv-table-zijrand"></td>
                         <td colspan="3"><!-- rank, ver, team --></td>
                         <td class="right-align smal"><span class="hide-on-med-and-down">888</span></td>
                         <td class="left-align smal"><span class="hide-on-med-and-down">/ 10</span></td>
@@ -113,29 +113,29 @@
                         <td class="left-align smal"><span class="hide-on-med-and-down">/ 10</span></td>
                         <td class="right-align">8888</td>    <!-- score -->
                         <td class="right-align">88</td>                         <!-- punten -->
-                        <td class="nhb-table-zijrand"></td>
+                        <td class="sv-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
                 {% if team.break_klasse %}
                     {% if not team.is_eerste_groep %}
                         <tr>
-                            <td colspan="19" class="nhb-table-onderrand"></td>
+                            <td colspan="19" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
                         <td colspan="21" class="center"><h5>Klasse: {{ team.team_klasse }}</h5></td>
                     </tr>
-                    <tr class="nhb-table-header">
-                        <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
+                    <tr class="sv-table-header">
+                        <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
                         <th><!-- rank --></th>
                         <th>Vereniging</th>
                         <th class="center">Team</th>
                         <th class="center" colspan="14"><span class="hide-on-med-and-down">Scores / Punten</span></th>
                         <th class="right-align">Score</th>
                         <th class="right-align">Punten</th>
-                        <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
+                        <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
                     </tr>
                 {% endif %}
 
@@ -164,7 +164,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="19" class="nhb-table-onderrand"></td>
+                <td colspan="19" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -45,7 +45,7 @@
                         {% if week_actief %}
                             <span>{{ week_actief.week_nr }} ({{ week_actief.maandag|date:"l j F Y" }})</span>
                         {% else %}
-                            <i class="nhb-rood-text">Ongeldige week</i>
+                            <i class="sv-rood-text">Ongeldige week</i>
                         {% endif %}
                     </td>
                 </tr>
@@ -86,7 +86,7 @@
             </div>
 
             <!-- blauwe balk met dialoog venster -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12 m10 offset-m1 l6 offset-l3">
 
                     <!-- dialoog venster -->
@@ -120,7 +120,7 @@
 
                                 {% if not readonly %}
                                     <p class="center">
-                                        <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
+                                        <button id="opslaan_knop" class="btn-sv-rood disabled" type="submit">
                                             <i class="notranslate material-icons-round left">check</i>Instellingen opslaan</button>
                                     </p>
                                 {% endif %}
@@ -145,7 +145,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -170,13 +170,13 @@
                             {% if wedstrijd.vereniging %}
                                 <span>{{ wedstrijd.vereniging }}</span>
                             {% else %}
-                                <i class="nhb-rood-text">Vereniging onbekend</i>
+                                <i class="sv-rood-text">Vereniging onbekend</i>
                             {% endif %}
                             <br>
                             {% if wedstrijd.locatie %}
                                 <span>Locatie: {{ wedstrijd.locatie.plaats }}</span>
                             {% else %}
-                                <i class="nhb-rood-text">Locatie onbekend</i>
+                                <i class="sv-rood-text">Locatie onbekend</i>
                             {% endif %}
                         </td>
 
@@ -193,7 +193,7 @@
                         <!-- knop om wedstrijd te wijzigen -->
                         <td class="center">
                             {% if wedstrijd.url_wijzig %}
-                                <a class="btn-nhb-rood" href="{{ wedstrijd.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>
@@ -212,7 +212,7 @@
                         <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
                             <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                                 {% csrf_token %}
-                                <button class="btn-nhb-rood vertrek_knop" type="submit">
+                                <button class="btn-sv-rood vertrek_knop" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>
@@ -249,7 +249,7 @@
             </div>
 
             <!-- blauwe balk met dialoog venster -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12 m10 offset-m1 l6 offset-l3">
 
                     <!-- dialoog venster -->
@@ -283,7 +283,7 @@
 
                                 {% if not readonly %}
                                     <p class="center">
-                                        <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
+                                        <button id="opslaan_knop" class="btn-sv-rood disabled" type="submit">
                                             <i class="notranslate material-icons-round left">check</i>Instellingen opslaan</button>
                                     </p>
                                 {% endif %}
@@ -307,7 +307,7 @@
                     {% if heeft_wedstrijden %}
                         <p>Blok kan nu niet verwijderd worden<br>Verwijder eerst de wedstrijden</p>
                     {% else %}
-                        <a class="btn-nhb-rood modal-trigger vertrek_knop" href="#bevestig_verwijder_blok">Verwijder dit blok</a>
+                        <a class="btn-sv-rood modal-trigger vertrek_knop" href="#bevestig_verwijder_blok">Verwijder dit blok</a>
                     {% endif %}
                 </div>
             </div>
@@ -323,10 +323,10 @@
 
                         <div class="modal-footer" style="text-align:center; display:block">
                             <div style="display:inline-block; width:50%">
-                                <button class="btn-nhb-rood" type="submit">Ja</button>
+                                <button class="btn-sv-rood" type="submit">Ja</button>
                             </div>
                             <div style="display:inline-block; width:50%">
-                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                             </div>
                         </div>
                     </form>

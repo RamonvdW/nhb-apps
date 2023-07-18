@@ -22,12 +22,12 @@
             {% endif %}
 
             {% if contact_geen_beheerders %}
-                <p><a class="btn-nhb-rood" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
+                <p><a class="btn-sv-rood" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
             {% endif %}
         </div>
     </div>
 
-    <div class="nhb-blauw-hoofd" style="padding:3px">
+    <div class="sv-blauw-hoofd" style="padding:3px">
 
         <table class="white" id="table1">
             <thead>
@@ -56,7 +56,7 @@
                         <td colspan="2" class="hide-on-med-and-down"></td>
                     {% endif %}
                 </tr>
-                <tr class="nhb-table-header">
+                <tr class="sv-table-header">
                     {% if toon_rayon %}
                         <th class="center hide-on-med-and-down">Rayon</th>
                     {% endif %}
@@ -122,7 +122,7 @@
                             {% if obj.locatie.baan_type == 'X' %}
                                 <!-- ga er vanuit dat nog niets ingevuld is -->
                                 {% if not obj.heeft_externe_locaties %}
-                                    <i class="notranslate material-icons-round nhb-rood-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
+                                    <i class="notranslate material-icons-round sv-rood-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
                                     <br>
                                 {% endif %}
                             {% else %}
@@ -170,13 +170,13 @@
                     {% if toon_details %}
                         <td>
                             {% if obj.details_url %}
-                                <a class="btn-nhb-rood" href="{{ obj.details_url }}">Details</a>
+                                <a class="btn-sv-rood" href="{{ obj.details_url }}">Details</a>
                             {% endif %}
                         </td>
                     {% endif %}
 
                     {% if toon_ledental %}
-                        <td class="center{% if obj.aantal_leden >= 100 %} nhb-blauw-text{% endif %} hide-on-med-and-down">{{ obj.aantal_leden }}</td>
+                        <td class="center{% if obj.aantal_leden >= 100 %} sv-blauw-text{% endif %} hide-on-med-and-down">{{ obj.aantal_leden }}</td>
                         <td class="center hide-on-med-and-down">{{ obj.aantal_beheerders }}</td>
                     {% endif %}
                 </tr>

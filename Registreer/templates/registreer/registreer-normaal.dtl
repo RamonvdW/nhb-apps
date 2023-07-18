@@ -20,7 +20,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
             <!-- dialoog venster -->
@@ -44,13 +44,13 @@
 
                         {% if form.errors %}
                             {% for error in form.non_field_errors %}
-                                <p class="left-align nhb-rood-text">Fout: {{ error|escape }}</p>
+                                <p class="left-align sv-rood-text">Fout: {{ error|escape }}</p>
                             {% endfor %}
                             <p>&nbsp;</p>
                         {% endif %}
 
                         <div class="center-align">
-                            <input class="btn-nhb-rood" name="button_registreer" type="submit" value="Aanmaken">
+                            <input class="btn-sv-rood" name="button_registreer" type="submit" value="Aanmaken">
                         </div>
                     </form>
                 </div>
@@ -68,7 +68,7 @@
         </div>
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <div class="white" style="padding:10px">
                     <p>Je wachtwoord moet <b>9 tekens of langer</b> zijn en <b>5 verschillende</b> tekens bevatten.</p>
@@ -89,7 +89,7 @@
     </div>
 
     <!-- blauw balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1">
             <div class="white" style="padding:10px">
                 <p>Gebruik het e-mailadres wat bekend is bij de bond. Tip: hier is je digitale bondspas heen gestuurd.</p>
@@ -108,7 +108,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Plein:privacy' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Privacyverklaring" text="Lees hier om we omgaan met jouw privacy." icon="security" url=card_url %}

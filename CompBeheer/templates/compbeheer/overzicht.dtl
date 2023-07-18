@@ -27,7 +27,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
 
                 {% for kaartje in kaartjes_algemeen %}
@@ -52,7 +52,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
 
                 {% for kaartje in kaartjes_indiv %}
@@ -73,7 +73,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
 
                 {% for kaartje in kaartjes_teams %}

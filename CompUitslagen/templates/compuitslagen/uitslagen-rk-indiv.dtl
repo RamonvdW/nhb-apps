@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -41,7 +41,7 @@
     {% if comp.rk_is_afgelast %}
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                     <p>{{ comp.rk_afgelast_bericht }}</p>
                 </div>
             </div>
@@ -57,7 +57,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
@@ -72,7 +72,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -91,7 +91,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="filters_activate()">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -101,7 +101,7 @@
 
         <div class="row">
             <div style="padding:10px">
-                <p class="center nhb-rood-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen</p>
+                <p class="center sv-rood-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen</p>
                 <p class="center">Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben</p>
             </div>
         </div>
@@ -111,7 +111,7 @@
         <!-- rood bordje -->
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                     <p>Aanmelden of afmelden voor de RK wedstrijd kan bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                 {% if obj.break_klasse %}
                     {% if not obj.is_eerste_break %}
                         <tr>
-                            <td colspan="6" class="nhb-table-onderrand"></td>
+                            <td colspan="6" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -159,8 +159,8 @@
                         </td>
                     </tr>
 
-                    <tr class="nhb-table-header">
-                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                    <tr class="sv-table-header">
+                        <td rowspan="{{ obj.aantal_regels }}" class="sv-table-zijrand"></td>
 
                         {% if obj.toon_uitslag %}
 
@@ -179,7 +179,7 @@
                             <th colspan="2">RK scores</th>
 
                         {% endif %}
-                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                        <td rowspan="{{ obj.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
@@ -214,7 +214,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="6" class="nhb-table-onderrand"></td>
+                <td colspan="6" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

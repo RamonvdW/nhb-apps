@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>De clusters kunnen optioneel gebruikt worden om een regio op te delen in kleinere geografische gebieden.</p>
@@ -42,7 +42,7 @@
             </div>
 
             <!-- blauwe balk met dialoog venster -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
 
                     <!-- dialoog venster -->
@@ -50,7 +50,7 @@
 
                         {% comment %}
                         {% if foutmelding %}
-                            <p class="nhb-rood-text">Fout: {{ foutmelding }}</p>
+                            <p class="sv-rood-text">Fout: {{ foutmelding }}</p>
                             <p>&nbsp;</p>
                         {% endif %}
 
@@ -70,7 +70,7 @@
 
                         <!-- button -->
                         <p class="center">
-                            <button class="btn-nhb-rood" type="submit">
+                            <button class="btn-sv-rood" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
@@ -99,7 +99,7 @@
 
                         <p class="center">
                             <!-- TODO: make floating button -->
-                            <button class="btn-nhb-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                            <button class="btn-sv-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
                     </div>
@@ -120,7 +120,7 @@
 
 
                     <!-- blauwe balk met dialoog venster -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
 
                     <!-- dialoog venster -->
@@ -158,7 +158,7 @@
 
                         <p class="center">
                             <!-- TODO: make floating button -->
-                            <button class="btn-nhb-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                            <button class="btn-sv-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
                     </div>
@@ -174,14 +174,14 @@
         </div>
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <div class="white" style="padding:10px">
                     <p>Heb je meer clusters nodig?</p>
                     <p>Neem dan contact op met de Manager Competitiezaken van het bondsbureau om cluster(s) aan te laten maken:</p>
                     <p><code>{{ email_bondsbureau }}</code></p>
                     <p>
-                        <a class="btn-nhb-rood" href="mailto:{{ email_bondsbureau }}">
+                        <a class="btn-sv-rood" href="mailto:{{ email_bondsbureau }}">
                             <i class="notranslate material-icons-round">email</i></a>
                     </p>
                 </div>

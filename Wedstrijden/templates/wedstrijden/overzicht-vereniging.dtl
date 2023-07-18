@@ -17,7 +17,7 @@
             <p>Wedstrijden bij vereniging <b>{{ ver }}</b></p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
             {% if geen_locatie %}
-                <p class="nhb-rood-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>
+                <p class="sv-rood-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>
             {% endif %}
         </div>
     </div>
@@ -25,7 +25,7 @@
     {% if not geen_locatie %}
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white" id="tabel1">
                     <thead>
@@ -50,14 +50,14 @@
                             <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
                             <td>{{ wed.status_str }}</td>
                             <td>{{ wed.disc_str }}</td>
-                            <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="nhb-rood-text">Nog niet ingevuld</i>{% endif %}</td>
+                            <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="sv-rood-text">Nog niet ingevuld</i>{% endif %}</td>
                             <td>
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
-                                    <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
+                                    <a class="btn-sv-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="notranslate material-icons-round">edit</i></a>
-                                    <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
+                                    <a class="btn-sv-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="notranslate material-icons-round" style="font-size:33px">edit_note</i></a>
-                                    <a class="btn-nhb-rood" href="{{ wed.url_aanmeldingen }}" style="padding:0; width:35px">
+                                    <a class="btn-sv-rood" href="{{ wed.url_aanmeldingen }}" style="padding:0; width:35px">
                                         <i class="notranslate material-icons-round">people_alt</i>
                                     </a>
                                 </div>
@@ -72,7 +72,7 @@
                     {% if url_nieuwe_wedstrijd %}
                         <tr data-tablefilter="stop">
                             <td colspan="5" class="center">
-                                <a class="btn-nhb-rood" href="{{ url_nieuwe_wedstrijd }}">
+                                <a class="btn-sv-rood" href="{{ url_nieuwe_wedstrijd }}">
                                     <i class="notranslate material-icons-round">add</i></a>
                             </td>
                         </tr>
@@ -92,7 +92,7 @@
 
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <!-- instellingen -->
@@ -118,7 +118,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 {% include 'plein/card_icon.dtl' with title="Voorwaarden" text="De verkoopvoorwaarden staan beschreven in een apart document." icon="article" extern_open=True url=url_voorwaarden %}
             </div>

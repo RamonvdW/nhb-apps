@@ -30,7 +30,7 @@
     </script>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -48,7 +48,7 @@
 
                 {% if not deelnemer.ag_voor_team_mag_aangepast_worden %}
                     <tr>
-                        <td colspan="2"><i class="nhb-rood-text">Het aanvangsgemiddelde is automatisch vastgesteld en kan niet gewijzigd worden</i></td>
+                        <td colspan="2"><i class="sv-rood-text">Het aanvangsgemiddelde is automatisch vastgesteld en kan niet gewijzigd worden</i></td>
                     </tr>
                 {% else %}
                     {% if not url_opslaan %}
@@ -74,7 +74,7 @@
         </div>
 
         <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
                 <!-- dialoog venster -->
@@ -87,7 +87,7 @@
                             <input id="id_ag" name="nieuw_ag" type="number" placeholder="1.234" min="1.000" max="9.999" step="0.001" oninput="invoer()">
 
                             <div class="center" style="margin-top:30px">
-                                <button id="opslaan_knop" class="btn-nhb-rood" type="submit" disabled>
+                                <button id="opslaan_knop" class="btn-sv-rood" type="submit" disabled>
                                     <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                             </div>
 
@@ -110,7 +110,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>

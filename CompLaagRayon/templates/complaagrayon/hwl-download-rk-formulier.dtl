@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -66,7 +66,7 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
 
@@ -74,14 +74,14 @@
                         {% if deelnemer.break_before %}
                             {% if not forloop.first %}
                                 <tr>
-                                    <td colspan="6" class="nhb-table-onderrand" style="height:50px"></td>
+                                    <td colspan="6" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
                             <tr>
                                 <td colspan="6" class="center">
                                     <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     <br>
-                                    <a class="btn-nhb-rood" href="{{ deelnemer.url_download_indiv }}">
+                                    <a class="btn-sv-rood" href="{{ deelnemer.url_download_indiv }}">
                                         <i class="notranslate material-icons-round left">download</i>Download excel</a>
                                 </td>
                             </tr>
@@ -104,7 +104,7 @@
                             <td class="center">
                                 {% if deelnemer.deelname == 'J' %}<i class="notranslate material-icons-round green-text">check</i>
                                 {% elif deelnemer.deelname == 'N' %}<i class="notranslate material-icons-round grey-text">block</i>     <!-- are excluded -->
-                                {% else %}<i class="notranslate material-icons-round nhb-blauw-text">help</i>
+                                {% else %}<i class="notranslate material-icons-round sv-blauw-text">help</i>
                                 {% endif %}
                             </td>
                             <td>{{ deelnemer.kampioen_label|linebreaksbr }}</td>
@@ -136,14 +136,14 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
 
                     {% if geen_klassengrenzen %}
                         <tr class="white">
                             <td colspan="5">
-                                <i class="nhb-rood-text">De BKO heeft de teams klassengrenzen nog niet vastgesteld</i>
+                                <i class="sv-rood-text">De BKO heeft de teams klassengrenzen nog niet vastgesteld</i>
                             </td>
                         </tr>
                     {% endif %}
@@ -152,13 +152,13 @@
                         {% if team.break_before %}
                             {% if not forloop.first %}
                                 <tr>
-                                    <td colspan="5" class="nhb-table-onderrand" style="height:50px"></td>
+                                    <td colspan="5" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
                             <tr>
                                 <td colspan="5" class="center">
                                     <h5>{{ team.team_klasse.beschrijving }}</h5>
-                                    <a class="btn-nhb-rood" href="{{ team.url_download_teams }}">
+                                    <a class="btn-sv-rood" href="{{ team.url_download_teams }}">
                                         <i class="notranslate material-icons-round left">download</i>Download excel</a>
                                 </td>
                             </tr>

@@ -23,7 +23,7 @@
         <!-- rood bordje -->
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                     <p>Registratie van gast-accounts is op dit moment niet mogelijk. Probeer het later nog eens.</p>
                 </div>
             </div>
@@ -32,7 +32,7 @@
     {% else %}
 
         <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
                 <!-- dialoog venster -->
@@ -56,13 +56,13 @@
 
                             {% if form.errors %}
                                 {% for error in form.non_field_errors %}
-                                    <p class="left-align nhb-rood-text">Fout: {{ error|escape }}</p>
+                                    <p class="left-align sv-rood-text">Fout: {{ error|escape }}</p>
                                 {% endfor %}
                                 <p>&nbsp;</p>
                             {% endif %}
 
                             <div class="center-align">
-                                <input class="btn-nhb-rood" name="button_registreer" type="submit" value="Aanmaken">
+                                <input class="btn-sv-rood" name="button_registreer" type="submit" value="Aanmaken">
                             </div>
                         </form>
                     </div>
@@ -80,7 +80,7 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% url 'Plein:privacy' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Privacyverklaring" text="Lees hier om we omgaan met jouw privacy." icon="security" url=card_url %}

@@ -54,7 +54,7 @@
     </script>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             {% if mag_afmelden %}
@@ -135,9 +135,9 @@
                                         <td>{{ obj.team_ja_nee }}</td>
                                         <td>
                                             {% if obj.maak_ja %}
-                                                <a class="btn-nhb-rood" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Ja</a>
+                                                <a class="btn-sv-rood" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Ja</a>
                                             {% elif obj.maak_nee %}
-                                                <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Nee</a>
+                                                <a class="btn-sv-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Nee</a>
                                             {% endif %}
                                         </td>
                                     {% endif %}
@@ -155,7 +155,7 @@
 
                             {% if mag_afmelden %}
                                 <div class="fixed-action-btn">
-                                    <input class="btn-nhb-rood" type="submit" value="Geselecteerde leden afmelden">
+                                    <input class="btn-sv-rood" type="submit" value="Geselecteerde leden afmelden">
                                 </div>
                             {% endif %}
 

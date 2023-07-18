@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout_minimaal.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -23,11 +23,11 @@
     <p>We hebben redelijke moderne tools gekozen voor deze website. Dit vereist een redelijk moderne browser.</p>
     <p>Hieronder kan je zien welke populaire browsers we ondersteunen en vanaf welke versie:</p>
 
-    <div class="nhb-blauw-hoofd" style="padding:3px">
+    <div class="sv-blauw-hoofd" style="padding:3px">
         <table class="white">
 
             <thead>
-                <tr class="nhb-blauw-hoofd white-text">
+                <tr class="sv-blauw-hoofd white-text">
                     <th>Browser naam</th>
                     <th>Marktaandeel 2021</th>
                     <th>Minimum versie</th>

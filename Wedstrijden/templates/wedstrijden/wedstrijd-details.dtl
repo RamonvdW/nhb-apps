@@ -28,12 +28,12 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white" <!--style="table-layout:fixed"--> >
 
                 <tr>
-                    <td colspan="2" class="center nhb-blauw-text">
+                    <td colspan="2" class="center sv-blauw-text">
                         <h6>Informatie</h6>
                     </td>
                 </tr>
@@ -66,10 +66,10 @@
                         <td>
                             <span>{{ wed.inschrijven_voor }}</span>
                             {% if not kan_inschrijven %}
-                                <span class="nhb-rood-text"> (inschrijving is gesloten)</span>
+                                <span class="sv-rood-text"> (inschrijving is gesloten)</span>
                             {% else %}
                                 {% if wed.inschrijven_let_op %}
-                                    <span class="nhb-rood-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                                    <span class="sv-rood-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
                                 {% else %}
                                     <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
                                 {% endif %}
@@ -96,7 +96,7 @@
                         <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                         {% if url_map %}
                             <br><br>
-                            <a class="btn-nhb-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                            <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
                                 <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
                         {% endif %}
                     </td>
@@ -128,7 +128,7 @@
 
 
                 <tr>
-                    <td colspan="2" class="center nhb-blauw-text">
+                    <td colspan="2" class="center sv-blauw-text">
                         <h6>Contactgegevens organisatie</h6>
                     </td>
                 </tr>
@@ -154,7 +154,7 @@
                             <th>Website voor inschrijven</th>
                             <td>
                                 <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
-                                    <i class="notranslate material-icons-round left nhb-blauw-text">open_in_new</i>
+                                    <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
                                     <code>{{ wed.contact_website }}</code>
                                 </a>
                             </td>
@@ -164,7 +164,7 @@
 
 
                 <tr>
-                    <td colspan="2" class="center nhb-blauw-text">
+                    <td colspan="2" class="center sv-blauw-text">
                         <h6>Inschrijfgeld</h6>
                     </td>
                 </tr>
@@ -184,7 +184,7 @@
                 <ul id="sessies" class="collapsible expandable z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
                     <li>
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
-                            <h6 class="nhb-blauw-text">Sessies</h6>
+                            <h6 class="sv-blauw-text">Sessies</h6>
                             {% if wed.organisatie == 'N' %}
                                 <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                             {% endif %}
@@ -228,7 +228,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 {% if kan_aanmelden and kan_inschrijven %}
@@ -263,7 +263,7 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- informatie over leeftijden -->
