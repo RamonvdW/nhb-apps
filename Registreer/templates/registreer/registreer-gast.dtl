@@ -87,6 +87,6 @@
         </div>
     </div>
 
-    <!-- geen feedback: with op_pagina="sporter-registreer-nhb-account" -->
+    <!-- geen feedback: with op_pagina="registreer-gast" -->
 
 {% endblock %}
