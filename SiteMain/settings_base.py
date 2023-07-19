@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-07-18'
+SITE_VERSIE = '2023-07-19'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -127,7 +127,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
-                ('django.template.loaders.cached.Loader', ['SiteMain.utils.minify_dtl.Loader']),
+                ('django.template.loaders.cached.Loader', ['SiteMain.core.minify_dtl.Loader']),
             ],
         },
     },
@@ -135,7 +135,7 @@ TEMPLATES = [
 
 
 # point out location of WSGI application for django runserver command
-WSGI_APPLICATION = 'SiteMain.wsgi.application'
+WSGI_APPLICATION = 'SiteMain.core.wsgi.application'
 
 # let browsers remember to connect with https
 # security analysis recommends at least 180 days
@@ -174,7 +174,7 @@ USE_TZ = True
 
 
 # top-level URL verdeling naar apps
-ROOT_URLCONF = 'SiteMain.urls'
+ROOT_URLCONF = 'SiteMain.core.urls'
 
 
 # Static files (CSS, JavaScript, Images)

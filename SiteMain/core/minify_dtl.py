@@ -228,9 +228,6 @@ class Loader(AppDirectoriesLoader):
         # whitespace tussen een css-syntax puntkomma en een block
         contents = re.sub(r';\s+{%', ';{%', contents)
 
-        # whitespace tussen een endblock en </style>
-        contents = re.sub(r'%}\s+</style>', '%}</style>', contents)
-
         # whitespace tussen laatste javascript statement en </script>
         contents = re.sub(r'\s+</script>', '</script>', contents)
 
