@@ -171,7 +171,7 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         context['deelnemers'] = deelnemers = self._get_deelnemers(deelcomp, boogtype, ver_nr)
         context['aantal_deelnemers'] = len(deelnemers)
-        context['aantal_regels'] = len(deelnemers) + 3
+        context['aantal_regels'] = len(deelnemers) + 2
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -432,7 +432,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         context['geen_teams'] = (len(teams) == 0)
 
-        context['aantal_regels'] = len(teams) * 3 + 4       # team, team score, punten
+        context['aantal_regels'] = len(teams) * 3 + 3       # team, team score, punten
         for team in teams:
             context['aantal_regels'] += len(team.leden_lijst)
 
