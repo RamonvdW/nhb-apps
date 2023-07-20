@@ -164,7 +164,7 @@
                 {% endif %}
 
                 {% if obj.break_klasse %}
-                    {% if not obj.is_eerste_groep %}
+                    {% if obj.needs_closure %}
                         <tr>
                             <td class="sv-table-onderrand" colspan="13"></td>
                         </tr>

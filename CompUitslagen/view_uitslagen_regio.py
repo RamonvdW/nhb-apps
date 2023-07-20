@@ -91,7 +91,7 @@ class UitslagenRegioIndivView(TemplateView):
             context['ver_filters'] = vers
 
     @staticmethod
-    def _lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str):
+    def _lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, needs_closure, klasse_str):
         rank = 0
         aantal = 0
         is_first = True
@@ -107,11 +107,14 @@ class UitslagenRegioIndivView(TemplateView):
 
             if is_first:
                 obj.break_klasse = True
-                obj.is_eerste_groep = is_eerste_groep
+                obj.needs_closure = needs_closure
                 obj.klasse_str = klasse_str
                 obj.aantal_in_groep = 2 + len(objs1) + len(objs2)
                 is_first = False
         # for
+
+        needs_closure = not is_first
+        return needs_closure
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -184,12 +187,12 @@ class UitslagenRegioIndivView(TemplateView):
         objs2 = list()      # secundaire lijst (te weinig scores)
         klasse = -1
         klasse_str = None
-        is_eerste_groep = True
+        needs_closure = False
         for deelnemer in deelnemers:
 
             if klasse != deelnemer.indiv_klasse.volgorde:
-                self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
-                is_eerste_groep = False
+                if klasse_str:
+                    needs_closure = self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, needs_closure, klasse_str)
                 objs1 = list()
                 objs2 = list()
                 klasse_str = deelnemer.indiv_klasse.beschrijving
@@ -211,7 +214,7 @@ class UitslagenRegioIndivView(TemplateView):
                 objs1.append(deelnemer)
         # for
 
-        self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
+        self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, needs_closure, klasse_str)
 
         context['deelnemers'] = objs
         context['heeft_deelnemers'] = (len(objs) > 0)
