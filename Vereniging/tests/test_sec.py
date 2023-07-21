@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
@@ -397,10 +398,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # ophalen en aanpassen: zie test_accommodatie
 
-    def test_extern(self):
-        # corner case: SEC van de vereniging voor gast-accounts
-
-        # login als SEC
+    def test_sec_gast_accounts(self):
+        # wordt SEC van de vereniging voor gast-accounts
         self.e2e_login_and_pass_otp(self.account_sec)
         self.e2e_wissel_naar_functie(self.functie_sec_extern)
         self.e2e_check_rol('SEC')
@@ -419,7 +418,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
 
         # zet een last_login
-        self.account_800001.last_login = "2010-01-02 03:04"
+        self.account_800001.last_login = timezone.now()
         self.account_800001.save(update_fields=['last_login'])
 
         with self.assert_max_queries(20):
@@ -442,5 +441,25 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_gast_accounts)
+
+    def test_sec_gast_details(self):
+        # wordt SEC van de vereniging voor gast-accounts
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
+        self.e2e_check_rol('SEC')
+
+        # haal de details van een gast-account op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-account-details.dtl', 'plein/site_layout.dtl'))
+
+        # niet bestaand nummer
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % 999999)
+        self.assert404(resp, 'Slechte parameter')
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_gast_details % self.gast_800001.lid_nr)
 
 # end of file
