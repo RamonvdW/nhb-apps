@@ -248,9 +248,9 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         volg_nrs.append(0)
         next_nr = max(volg_nrs) + 1
 
-        if len(volg_nrs) > 10:
+        if len(volg_nrs) > 25:      # 10 is te weinig voor grote verenigingen
             # te veel teams
-            raise Http404('Maximum van 10 teams is bereikt')
+            raise Http404('Maximum van 25 teams is bereikt')
 
         # afkorting is optioneel, voornamelijk bedoeld voor de autotester
         afkorting = request.POST.get('team_type', 'R2')
