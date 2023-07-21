@@ -362,10 +362,23 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
         # print('urls als WL: %s' % urls)
         self.assertEqual(urls_expected, urls)
+
+        # maak dit een administratieve vereniging
+        self.ver1.regio = NhbRegio.objects.filter(is_administratief=True).first()
+        self.ver1.save(update_fields=['regio'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
