@@ -13,6 +13,8 @@ from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
+from Registreer.definities import REGISTRATIE_FASE_DONE
+from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -29,9 +31,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # <comp_pk>
-    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # <deelcomp_pk>
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                       # <sporter_pk>
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # comp_pk
+    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # deelcomp_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                       # sporter_pk
+    url_gast_accounts = '/vereniging/gast-accounts/'
+    url_gast_details = '/vereniging/gast-accounts/%s/details/'               # lid_nr
 
     testdata = None
 
@@ -86,41 +90,41 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.sporter_100001 = sporter
 
         # maak een jeugdlid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Jeugdschutter",
+                    email="",
+                    geboorte_datum=datetime.date(year=2010, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100002 = sporter
 
         # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
-        sporter = Sporter()
-        sporter.lid_nr = 100012
-        sporter.geslacht = "V"
-        sporter.voornaam = "Andrea"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=10, day=10)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100012,
+                    geslacht="V",
+                    voornaam="Andrea",
+                    achternaam="de Jeugdschutter",
+                    email="",
+                    geboorte_datum=datetime.date(year=2010, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=10, day=10),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100012 = sporter
 
         # maak een senior lid aan, om inactief te maken
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100003,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Testerin",
+                    email="",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100003 = sporter
 
@@ -136,6 +140,56 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
         self._create_competitie()
+
+        # maak een vereniging aan voor de gasten
+        self.ver_extern = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+
+        self.functie_sec_extern = maak_functie("SEC extern", "SEC")
+        self.functie_sec_extern.vereniging = self.ver_extern
+        self.functie_sec_extern.save()
+        self.functie_sec_extern.accounts.add(self.account_sec)
+
+        # maak een gast-account aan
+        gast = GastRegistratie(
+                    lid_nr=800001,
+                    fase=REGISTRATIE_FASE_DONE,
+                    email="een@gasten.not",
+                    email_is_bevestigd=True,
+                    voornaam="Een",
+                    achternaam="van de Gasten",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    geslacht="V",
+                    eigen_sportbond_naam="Eigen bond",
+                    eigen_lid_nummer="EB-1234",
+                    club="Eigen club",
+                    club_plaats="Eigen plaats",
+                    woonplaats="Eigen woonplaats",
+                    land="Eigen land",
+                    telefoon="+998877665544",
+                    wa_id="",
+                    logboek="")
+        gast.save()
+        self.gast_800001 = gast
+
+        self.account_800001 = self.e2e_create_account(gast.lid_nr, gast.email, gast.voornaam)
+
+        sporter = Sporter(
+                    lid_nr=gast.lid_nr,
+                    is_gast=True,
+                    geslacht=gast.geslacht,
+                    voornaam=gast.voornaam,
+                    achternaam=gast.achternaam,
+                    email=gast.email,
+                    geboorte_datum=gast.geboorte_datum,
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self.ver_extern,
+                    account=self.account_800001)
+        sporter.save()
+        self.sporter_800001 = sporter
+
+        gast.sporter = sporter
+        gast.account = self.account_800001
+        gast.save(update_fields=['sporter', 'account'])
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
@@ -343,17 +397,12 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # ophalen en aanpassen: zie test_accommodatie
 
-    def test_is_extern(self):
+    def test_extern(self):
         # corner case: SEC van de vereniging voor gast-accounts
-
-        ver = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
-        self.functie_sec.vereniging = ver
-        self.functie_sec.beschrijving = 'SEC extern'
-        self.functie_sec.save()
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
-        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
         self.e2e_check_rol('SEC')
 
         with self.assert_max_queries(20):
@@ -361,5 +410,37 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        # haal de gast-accounts ledenlijst op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+
+        # zet een last_login
+        self.account_800001.last_login = "2010-01-02 03:04"
+        self.account_800001.save(update_fields=['last_login'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+
+        # ontkoppel het account
+        self.sporter_800001.account = None
+        self.sporter_800001.save(update_fields=['account'])
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+
+        self.gast_800001.account = None
+        self.gast_800001.save(update_fields=['account'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_gast_accounts)
 
 # end of file

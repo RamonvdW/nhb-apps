@@ -50,6 +50,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['clusters'] = ver.clusters.all()
 
+        context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rollen.ROL_SEC
+
         if ver.is_extern:
             context['toon_wedstrijden'] = False
         else:
@@ -283,8 +285,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartje = SimpleNamespace()
             kaartje.einde_blok = True
             kaartjes.append(kaartje)
-
-        context['toon_gast_accounts'] = ver.is_extern and self.rol_nu == Rollen.ROL_SEC
 
         eval_open_taken(self.request)
 

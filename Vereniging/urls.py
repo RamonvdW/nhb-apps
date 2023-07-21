@@ -6,16 +6,20 @@
 
 from django.urls import path
 from Vereniging import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
-                        view_lijst_verenigingen)
+                        view_gast_accounts, view_lijst_verenigingen)
 
 app_name = 'Vereniging'
 
+# basis: /vereniging/
+
 urlpatterns = [
 
+    # overzicht
     path('',
          view_overzicht.OverzichtView.as_view(),
          name='overzicht'),
 
+    # ledenlijst - normaal
     path('leden-lijst/',
          view_ledenlijst.LedenLijstView.as_view(),
          name='ledenlijst'),
@@ -24,16 +28,16 @@ urlpatterns = [
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
+    # ledenlijst - gast-accounts
     path('gast-accounts/',
-         view_ledenlijst.GastAccountsView.as_view(),
+         view_gast_accounts.GastAccountsView.as_view(),
          name='gast-accounts'),
 
     path('gast-accounts/<lid_nr>/details/',
-         view_ledenlijst.GastAccountDetailsView.as_view(),
+         view_gast_accounts.GastAccountDetailsView.as_view(),
          name='gast-account-details'),
 
-
-    # Accommodatie (voor gebruik van buiten Beheer vereniging)
+    # accommodatie (voor gebruik van buiten Beheer vereniging)
     path('accommodaties/lijst/',
          view_lijst_verenigingen.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
@@ -47,8 +51,7 @@ urlpatterns = [
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 
-
-    # Wedstrijdlocaties
+    # wedstrijdlocaties
     path('externe-locaties/<ver_nr>/',
          view_externe_locaties.ExterneLocatiesView.as_view(),
          name='externe-locaties'),
