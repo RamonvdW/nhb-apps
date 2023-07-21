@@ -223,13 +223,16 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
                 if account.last_login:
                     if account.last_login.year == now.year:
-                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz),
+                                                                'j F Y H:i').replace(current_year_str, '')
 
                 do_vhpg = True
                 if account.otp_is_actief:
                     sporter.tweede_factor_str = 'Ja'
                     if account.otp_controle_gelukt_op:
-                        sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(account.otp_controle_gelukt_op.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                        sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(
+                                                            account.otp_controle_gelukt_op.astimezone(to_tz),
+                                                            'j F Y H:i').replace(current_year_str, '')
                     sporter.kan_loskoppelen = True
                 elif account.functie_set.count() == 0:
                     sporter.tweede_factor_str = 'n.v.t.'
@@ -251,14 +254,19 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         opnieuw = opnieuw.astimezone(to_tz)
                         now = timezone.now()
                         if opnieuw < now:
-                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F Y H:i').replace(current_year_str, '')
+                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(
+                                                    vhpg.acceptatie_datum,
+                                                    'j F Y H:i').replace(current_year_str, '')
                         else:
-                            sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                            sporter.vhpg_str = 'Ja (op %s)' % date_format(
+                                                    vhpg.acceptatie_datum.astimezone(to_tz),
+                                                    'j F Y H:i').replace(current_year_str, '')
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
 
-            sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
-                                                kwargs={'lid_nr': sporter.lid_nr})
+            if not sporter.is_gast:
+                sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
+                                                    kwargs={'lid_nr': sporter.lid_nr})
         # for
 
         context['url_reset_tweede_factor'] = reverse('Overig:otp-loskoppelen')
@@ -306,7 +314,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         if total > 0:
-            age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total)) for age, count in age_group_counts.items()]
+            age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total))
+                          for age, count in age_group_counts.items()]
             age_groups.sort()
             context['age_groups'] = age_groups
 

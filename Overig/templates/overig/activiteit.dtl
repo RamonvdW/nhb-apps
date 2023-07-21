@@ -116,11 +116,12 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <a class="btn-sv-rood" href="{{ obj.url_toon_bondspas }}" style="margin-top:15px; margin-right:20px" target="_blank" rel="noopener noreferrer">Toon Bondspas</a>
+                                        {% if url_toon_bondspas %}
+                                            <a class="btn-sv-rood" href="{{ obj.url_toon_bondspas }}" style="margin-top:15px; margin-right:20px" target="_blank" rel="noopener noreferrer">Toon Bondspas</a>
+                                        {% endif %}
                                         {% if obj.kan_loskoppelen %}
                                             <a class="btn-sv-blauw modal-trigger" href="#bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}" style="margin-top:15px">Tweede factor loskoppelen</a>
                                         {% endif %}
-
                                     </div>
                                 </div>
                             </li>

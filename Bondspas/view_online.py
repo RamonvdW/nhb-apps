@@ -36,12 +36,11 @@ EXIF_TAG_TITLE = 0x010D     # DocumentName
 # EXIF_TAG_TITLE = 0x010E     # ImageDescription
 
 
-def maak_bondspas_regels(lid_nr, jaar):
+def maak_bondspas_regels(sporter, jaar):
     """ Bepaal de regels tekst die op de bondspas moeten komen voor deze specifieke sporter
     """
     regels = list()
 
-    sporter = Sporter.objects.get(lid_nr=lid_nr)
     voorkeur = get_sporter_voorkeuren(sporter)
 
     regels.append(("lid_nr", str(sporter.lid_nr)))
@@ -209,7 +208,7 @@ def teken_barcode(lid_nr, draw, begin_x, end_y, font):
     # for
 
 
-def maak_bondspas_image(lid_nr, jaar, regels):
+def maak_bondspas_image(jaar, regels):
     fpath = os.path.join(settings.INSTALL_PATH, 'Bondspas', 'files', 'achtergrond_bondspas.jpg')
     image = Image.open(fpath)
     _, _, width, height = image.getbbox()
@@ -367,6 +366,11 @@ class ToonBondspasView(UserPassesTestMixin, View):
         # bondspas wordt opgehaald nadat de pagina getoond kan worden
         context['url_dynamic'] = reverse('Bondspas:dynamic-ophalen')
 
+        lid_nr = request.user.username
+        sporter = Sporter.objects.get(lid_nr=lid_nr)
+        if sporter.is_gast:
+           raise Http404('Geen bondspas voor gast-accounts')
+
         context['kruimels'] = (
             (None, 'Bondspas'),
         )
@@ -386,7 +390,8 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
         # gebruiker moet ingelogd zijn. Rol is niet belangrijk.
         return rol_get_huidige(self.request) != Rollen.ROL_NONE
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de webpagina via een stukje javascript de bondspas ophaalt
             nadat de hele HTML binnen is en de pagina getoond kan worden.
 
@@ -397,11 +402,13 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
         now = timezone.localtime(timezone.now())
         jaar = now.year
 
-        account = self.request.user
-        lid_nr = account.username
+        lid_nr = request.user.username
+        sporter = Sporter.objects.get(lid_nr=lid_nr)
+        if sporter.is_gast:
+            raise Http404('Geen bondspas voor gast-accounts')
 
-        regels = maak_bondspas_regels(lid_nr, jaar)
-        img_data = maak_bondspas_image(lid_nr, jaar, regels)
+        regels = maak_bondspas_regels(sporter, jaar)
+        img_data = maak_bondspas_image(jaar, regels)
 
         # base64 is nodig voor img in html
         # alternatief is javascript laten tekenen op een canvas en base64 maken met dataToUrl
@@ -428,16 +435,19 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
         try:
             lid_nr = kwargs['lid_nr'][:6]       # afkappen voor de veiligheid
             lid_nr = int(lid_nr)
-            _ = Sporter.objects.get(lid_nr=lid_nr)
+            sporter = Sporter.objects.get(lid_nr=lid_nr)
         except Sporter.DoesNotExist:
             raise Http404('Geen valide parameter')
+
+        if sporter.is_gast:
+            raise Http404('Geen bondspas voor gast-accounts')
 
         # bepaal het jaar voor de wedstrijdklasse
         now = timezone.localtime(timezone.now())
         jaar = now.year
 
-        regels = maak_bondspas_regels(lid_nr, jaar)
-        img_data = maak_bondspas_image(lid_nr, jaar, regels)
+        regels = maak_bondspas_regels(sporter, jaar)
+        img_data = maak_bondspas_image(jaar, regels)
 
         # base64 is nodig voor img in html
         context['bondspas_base64'] = base64.b64encode(img_data).decode()
