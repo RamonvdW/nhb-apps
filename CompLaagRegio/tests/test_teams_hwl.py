@@ -493,14 +493,14 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerd team type')
 
         # maak het maximum aantal teams aan
-        for lp in range(9):
+        for lp in range(25-1):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
             self.assert_is_redirect_not_plein(resp)
         # for
 
-        # er zijn al 10 teams. Maak #11 aan
+        # er zijn al 25 teams. Probeer nummer 26 aan te maken
         resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
-        self.assert404(resp, 'Maximum van 10 teams is bereikt')
+        self.assert404(resp, 'Maximum van 25 teams is bereikt')
 
         # haal het teams overzicht op
         with self.assert_max_queries(20):
