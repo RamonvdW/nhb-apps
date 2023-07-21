@@ -5,7 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # ga naar de directory waar het script staat
-cd $(dirname $0)
+SCRIPT_DIR=$(realpath "$0")             # volg links naar het echte script
+SCRIPT_DIR=$(dirname "$SCRIPT_DIR")     # directory van het script
+cd "$SCRIPT_DIR"
 
 for req in requirements requirements_dev
 do

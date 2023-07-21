@@ -7,7 +7,9 @@
 # go to the directory of the script
 # because all paths in this script are relative to that location
 
-SCRIPT_DIR=$(dirname "$0")
+# ga naar de directory waar het script staat
+SCRIPT_DIR=$(realpath "$0")             # volg links naar het echte script
+SCRIPT_DIR=$(dirname "$SCRIPT_DIR")     # directory van het script
 cd "$SCRIPT_DIR"
 
 OUT="$PWD/../static/css"

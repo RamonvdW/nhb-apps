@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,11 @@ then
     exit 1
 fi
 
-cd $(dirname $0)    # ga naar de directory van het script
+# ga naar de directory waar het script staat
+SCRIPT_DIR=$(realpath "$0")             # volg links naar het echte script
+SCRIPT_DIR=$(dirname "$SCRIPT_DIR")     # directory van het script
+cd "$SCRIPT_DIR"
+
 # move from Plein/cron/ to top-dir
 cd ../..
 

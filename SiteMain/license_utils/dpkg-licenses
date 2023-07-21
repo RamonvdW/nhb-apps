@@ -23,7 +23,10 @@
 
 set -e
 
-SCRIPTLIB=$(dirname $(readlink -f "$0"))/lib/
+SCRIPT_DIR=$(realpath "$0")             # volg links naar het echte script
+SCRIPT_DIR=$(dirname "$SCRIPT_DIR")     # directory van het script
+
+SCRIPTLIB="$SCRIPT_DIR"/lib/
 test -d "$SCRIPTLIB"
 
 format='%s-%s: %s\n'
