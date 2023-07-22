@@ -16,10 +16,12 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagBond applicatie, import van de BK uitslag """
 
-    url_klassengrenzen_teams_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
+    url_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     real_testfile_pdf_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-teams_pdf.pdf'
-    real_testfile_indoor = 'CompLaagBond/management/testfiles/test_bk-indoor-teams.xlsx'
+    real_testfile_indoor_f8 = 'CompLaagBond/management/testfiles/test_bk-indoor-teams_f8.xlsx'
+    real_testfile_indoor_f4_1234 = 'CompLaagBond/management/testfiles/test_bk-indoor-teams_f4_1234.xlsx'
+    real_testfile_indoor_f4_2143 = 'CompLaagBond/management/testfiles/test_bk-indoor-teams_f4_2143.xlsx'
     real_testfile_25m1pijl = 'CompLaagBond/management/testfiles/test_bk-25m1pijl-teams.xlsx'
 
     testdata = None
@@ -65,7 +67,7 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
         self.e2e_check_rol('BKO')
         zet_competitie_fase_rk_prep(self.testdata.comp25)      # vereiste vaststellen klassengrenzen
-        resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp25.pk)
+        resp = self.client.post(self.url_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)
         self.testdata.maak_bk_teams(25)
         zet_competitie_fase_bk_wedstrijden(self.testdata.comp25)
@@ -74,7 +76,7 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
         self.e2e_check_rol('BKO')
         zet_competitie_fase_rk_prep(self.testdata.comp18)
-        resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp18.pk)
+        resp = self.client.post(self.url_vaststellen % self.testdata.comp18.pk)
         self.assert_is_redirect_not_plein(resp)
         self.testdata.maak_bk_teams(18)
         zet_competitie_fase_bk_wedstrijden(self.testdata.comp18)
@@ -96,14 +98,27 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
         self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
         f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
-                                             self.real_testfile_indoor,
+                                             self.real_testfile_indoor_f4_1234,
+                                             '--dryrun', '--verbose')
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
+
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
+                                             self.real_testfile_indoor_f4_2143,
                                              '--dryrun', '--verbose')
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
 
         # zonder dryrun en verbose
         f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
-                                             self.real_testfile_indoor)
+                                             self.real_testfile_indoor_f8)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+
+        # geef een 25m1pijl blad aan de indoor importer
+        f1, f2 = self.run_management_command('import_uitslag_bk_indoor_teams',
+                                             self.real_testfile_25m1pijl)
+        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
+        self.assertTrue('[WARNING] Geen deelnemende teams, dus geen kampioen' in f2.getvalue())
 
     def test_25m1pijl(self):
         # bestand NOK
