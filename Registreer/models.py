@@ -5,13 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils import timezone
 from Account.models import Account
 from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MAN
-from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbVereniging
-from Registreer.definities import REGISTRATIE_FASE_BEGIN, REGISTRATIE_FASE2STR
+from Registreer.definities import REGISTRATIE_FASE_BEGIN, REGISTRATIE_FASE2STR, REGISTRATIE_FASE_DONE
 from Sporter.models import Sporter, validate_geboorte_datum
-
+import datetime
 
 GAST_LID_NUMMER_FIXED_PK = 1
 
@@ -149,7 +148,31 @@ class GastRegistratieRateTracker(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-# TODO: clean up old rate tracker database record
+def registreer_opschonen(stdout):
+    """ deze functie wordt typisch 1x per dag aangeroepen om de database
+        tabellen van deze applicatie op te kunnen schonen.
+
+        We verwijderen gast registratie die na 7 dagen nog niet voltooid zijn
+        We verwijderen rate tracker records die niet meer nodig zijn
+    """
+
+    now = timezone.now()
+    max_age = now - datetime.timedelta(days=7)
+
+    # TODO: activeer opschonen nadat wat ervaring opgedaan is
+    if GAST_LID_NUMMER_FIXED_PK < 1:        # aka: "never"
+        for obj in (GastRegistratie
+                    .objects
+                    .exclude(fase=REGISTRATIE_FASE_DONE)
+                    .filter(aangemaakt__lt=max_age)):
+
+            stdout.write('[INFO] Verwijder niet afgeronde gast-account registratie %s in fase %s' % (
+                            obj.lid_nr, repr(obj.fase)))
+            obj.delete()
+        # for
+
+        # alle rate trackers opruimen
+        GastRegistratieRateTracker.objects.all().delete()
 
 
 # end of file

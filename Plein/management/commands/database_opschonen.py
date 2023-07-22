@@ -13,6 +13,7 @@ from Beheer.views import beheer_opschonen
 from Feedback.models import feedback_opschonen
 from Logboek.models import logboek_opschonen
 from Mailer.models import mailer_opschonen
+from Registreer.models import registreer_opschonen
 from Taken.models import taken_opschonen
 from TijdelijkeCodes.models import tijdelijke_url_opschonen
 
@@ -29,6 +30,7 @@ class Command(BaseCommand):
         mailer_opschonen(self.stdout)
         taken_opschonen(self.stdout)
         tijdelijke_url_opschonen(self.stdout)
+        registreer_opschonen(self.stdout)
 
         self.stdout.write('Klaar')
 
