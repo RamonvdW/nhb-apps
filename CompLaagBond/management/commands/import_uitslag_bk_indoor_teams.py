@@ -493,6 +493,8 @@ class Command(BaseCommand):
             team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
             if team_naam in self.deelnemende_teams.keys():
                 final_8.append(team_naam)
+            else:
+                self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
         # for
         # self.stdout.write('final_8: %s' % repr(final_8))
 
