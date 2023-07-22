@@ -48,17 +48,20 @@ class MyQueryTracer(object):
         call['now'] = time_start
 
         call['stack'] = stack = list()
-        for fname, linenr, base, code in traceback.extract_stack():
-            if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and 'manage.py' not in fname:
-                stack.append((fname, linenr, base))
+        for fname, line_nr, base, code in traceback.extract_stack():
+            if (base != '__call__'
+                    and not fname.startswith('/usr/lib')
+                    and '/site-packages/' not in fname
+                    and 'manage.py' not in fname):
+                stack.append((fname, line_nr, base))
             elif base == 'render' and 'template/response.py' in fname:
-                stack.append((fname, linenr, base))
+                stack.append((fname, line_nr, base))
         # for
 
         if REPORT_QUERY_ORIGINS:                        # pragma: no cover
             msg = ''
-            for fname, linenr, base in stack:
-                msg += '\n         %s:%s %s' % (fname[-30:], linenr, base)
+            for fname, line_nr, base in stack:
+                msg += '\n         %s:%s %s' % (fname[-30:], line_nr, base)
             try:
                 self.stack_counts[msg] += 1
             except KeyError:
@@ -104,7 +107,11 @@ class E2EHelpers(TestCase):
 
     @staticmethod
     def _get_useful_template_name(response):
-        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms') and not tmpl.name.startswith('email_')]
+        lst = [tmpl.name
+               for tmpl in response.templates
+               if (tmpl.name not in included_templates
+                   and not tmpl.name.startswith('django/forms')
+                   and not tmpl.name.startswith('email_'))]
         if len(lst) == 0:       # pragma: no cover
             return 'no template!'
         if len(lst) > 1:        # pragma: no cover
@@ -174,7 +181,7 @@ class E2EHelpers(TestCase):
         'SEC': '/vereniging/',
         'HWL': '/vereniging/',
         'WL':  '/vereniging/',
-        'BKO': '/bondscompetities/##',
+        'BKO': '/bondscompetities/##',          # startswith = ##
         'RKO': '/bondscompetities/##',
         'RCL': '/bondscompetities/##',
         'MO':  '/opleidingen/manager/',
@@ -190,11 +197,6 @@ class E2EHelpers(TestCase):
             expected_url = self.WISSEL_VAN_ROL_EXPECTED_URL[functie.rol]
         except KeyError:        # pragma: no cover
             expected_url = 'functie ontbreekt'
-
-        # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
-        if functie.rol in ('BKO', 'RKO', 'RCL'):
-            if resp.status_code == 302 and not resp.url.startswith('/bondscompetities/'):
-                expected_url = '/functie/wissel-van-rol/'
 
         self.assert_is_redirect(resp, expected_url)
 
@@ -285,7 +287,7 @@ class E2EHelpers(TestCase):
         print("\n".join(long_msg))
         return
 
-    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
         if skip_menu:
@@ -451,14 +453,17 @@ class E2EHelpers(TestCase):
                     # filter out website-internal links
                     if link.find('href="/') < 0 and link.find('href="#') < 0:
                         if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
-                            self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
+                            self.fail(msg='Unexpected empty link %s on page %s' % (
+                                        link, template_name))
                         elif link.find('href="mailto:') < 0 and link.find('javascript:history.go(-1)') < 0:
                             # remainder must be links that leave the website
                             # these must target a blank window
                             if 'target="_blank"' not in link:            # pragma: no cover
-                                self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                                self.fail(msg='Missing target="_blank" in link %s on page %s' % (
+                                            link, template_name))
                             if not is_email and 'rel="noopener noreferrer"' not in link:  # pragma: no cover
-                                self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
+                                self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (
+                                            link, template_name))
             else:
                 content = ''
         # while
@@ -471,12 +476,12 @@ class E2EHelpers(TestCase):
             script = html[:pos+9]
 
             pos = script.find('console.log')
-            if pos >= 0:
-                self.fail(msg='Detected console.log usage in script from template %s' % template_name)   # pragma: no cover
+            if pos >= 0:        # pragma: no cover
+                self.fail(msg='Detected console.log usage in script from template %s' % template_name)
 
             pos = script.find('/*')
-            if pos >= 0:
-                self.fail(msg='Found block comment in script from template %s' % template_name)     # pragma: no cover
+            if pos >= 0:        # pragma: no cover
+                self.fail(msg='Found block comment in script from template %s' % template_name)
 
             html = html[pos+9:]
             pos = html.find('<script ')
@@ -579,7 +584,8 @@ class E2EHelpers(TestCase):
                 p1 = klass.find("col s10")
                 p2 = klass.find("white")
                 if p1 >= 0 and p2 >= 0:             # pragma: no cover
-                    msg = 'Found grid col s10 + white (too much unused space on small) --> use separate div.white + padding:10px) in %s' % dtl
+                    msg = 'Found grid col s10 + white (too much unused space on small)'
+                    msg += ' --> use separate div.white + padding:10px) in %s' % dtl
                     self.fail(msg)
 
             pos = text.find("class=")
@@ -603,7 +609,7 @@ class E2EHelpers(TestCase):
                     tag = part_spl[0]
                     # print('part_spl: %s' % repr(part_spl))
                     if tag not in ('value', 'autofocus') and part_spl[1] in ('""', "''"):       # pragma: no cover
-                        msg = 'Found input tag %s with empty value: %s' % (repr(tag), repr(inp))
+                        msg = 'Found input tag %s with empty value: %s in %s' % (repr(tag), repr(inp), repr(dtl))
                         self.fail(msg)
             # for
         # while
@@ -813,7 +819,8 @@ class E2EHelpers(TestCase):
         if resp.status_code == 200:                     # pragma: no branch
             self.fail(msg='Onverwacht ingelogd')        # pragma: no cover
 
-    def e2e_assert_other_http_commands_not_supported(self, url, get=False, post=True, delete=True, put=True, patch=True):
+    def e2e_assert_other_http_commands_not_supported(self, url,
+                                                     get=False, post=True, delete=True, put=True, patch=True):
         """ Test een aantal 'common' http methoden
             en controleer dat deze niet ondersteund zijn (status code 405 = not allowed)
             POST, DELETE, PATCH
@@ -946,8 +953,8 @@ class E2EHelpers(TestCase):
                     queries += self._reformat_sql(prefix, call['sql'])
                     queries += prefix + '%s µs' % call['duration_us']
                     queries += '\n'
-                    for fname, linenr, base in call['stack']:
-                        queries += prefix + '%s:%s   %s' % (fname, linenr, base)
+                    for fname, line_nr, base in call['stack']:
+                        queries += prefix + '%s:%s   %s' % (fname, line_nr, base)
                     # for
                     limit -= 1
                     if limit <= 0:
