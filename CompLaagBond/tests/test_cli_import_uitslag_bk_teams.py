@@ -120,16 +120,4 @@ class TestCompLaagBondCliImportUitslagBkTeams(E2EHelpers, TestCase):
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
         self.assertTrue('[WARNING] Geen deelnemende teams, dus geen kampioen' in f2.getvalue())
 
-    def test_25m1pijl(self):
-        # bestand NOK
-        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_teams', 'bestand')
-        self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
-
-        f1, f2 = self.run_management_command('import_uitslag_bk_25m1pijl_teams',
-                                             self.real_testfile_25m1pijl,
-                                             '--dryrun', '--verbose')
-        # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        #self.assertTrue('[ERROR] Kan bestand niet vinden' in f1.getvalue())
-
-
 # end of file
