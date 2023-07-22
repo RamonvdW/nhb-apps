@@ -24,6 +24,7 @@ html {
 
 body {
   margin: 0;
+  overflow-wrap: break-word;   /* lange woorden mogen afgebroken worden (voorkomt horizontaal scrollen) */
 }
 
 /**
