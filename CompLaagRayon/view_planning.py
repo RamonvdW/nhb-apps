@@ -205,13 +205,6 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                                                kwargs={'match_pk': wedstrijd.pk})
             # for
 
-        # TODO: url_bond wordt niet (meer) gebruikt?
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            deelcomp_bk = Kampioenschap.objects.get(deel=DEEL_BK,
-                                                    competitie=deelkamp.competitie)
-            context['url_bond'] = reverse('CompLaagBond:planning',
-                                          kwargs={'deelkamp_pk': deelcomp_bk.pk})
-
         deelcomps = (Regiocompetitie
                      .objects
                      .select_related('regio')
@@ -237,7 +230,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Planning RK')
         )
 

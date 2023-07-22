@@ -21,7 +21,7 @@ urlpatterns = [
          name='otp-loskoppelen'),
 
     # oude interface, voor backwards compatibility
-    # TODO: verwijder in v20 of later
+    # FUTURE: verwijder in v20 of later
     path('url/<code>/',
          view_tijdelijke_url.SiteTijdelijkeUrlView.as_view(),
          name='tijdelijke-url'),

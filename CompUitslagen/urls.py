@@ -79,7 +79,7 @@ urlpatterns = [
          view_uitslagen_bk.UitslagenBKIndivView.as_view(),
          name='uitslagen-bk-indiv'),
 
-    path('<comp_pk>/<comp_boog>/bond-individueel/',         # TODO: tijdelijk tot afsluiten seizoen 2022/2023
+    path('<comp_pk>/<comp_boog>/bond-individueel/',         # FUTURE: tijdelijk tot afsluiten seizoen 2022/2023
          view_uitslagen_bk.UitslagenBKIndivView.as_view(),
          name='uitslagen-bk-indiv-oud'),
 

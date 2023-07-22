@@ -16,7 +16,7 @@ class SiteTijdelijkeUrlView(View):
 
     @staticmethod
     def get(request, *args, **kwargs):
-        # TODO: verwijder deze tijdelijke backwards compatibiliteit in v20 of later
+        # FUTURE: verwijder deze tijdelijke backwards compatibiliteit in v20 of later
         url_code = kwargs['code']
         url = reverse('TijdelijkeCodes:tijdelijke-url', kwargs={'code': url_code})
         return HttpResponseRedirect(url)
