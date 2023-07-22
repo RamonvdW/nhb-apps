@@ -14,7 +14,7 @@ cachetools==5.3.1
     # via
     #   -r requirements.txt
     #   google-auth
-certifi==2023.5.7
+certifi==2023.7.22
     # via
     #   -r requirements.txt
     #   requests
@@ -41,9 +41,9 @@ google-api-core==2.11.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.92.0
+google-api-python-client==2.94.0
     # via -r requirements.txt
-google-auth==2.21.0
+google-auth==2.22.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -110,13 +110,13 @@ pyparsing==3.1.0
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==3.12.1
+pypdf==3.12.2
     # via -r requirements.txt
 pypng==0.20220715.0
     # via
     #   -r requirements.txt
     #   qrcode
-pyyaml==6.0
+pyyaml==6.0.1
     # via html5validator
 qrcode==7.4.2
     # via -r requirements.txt
