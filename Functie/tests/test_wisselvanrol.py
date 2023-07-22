@@ -10,7 +10,7 @@ from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
-from Functie.rol import rol_get_huidige_functie, rol_activeer_wissel_van_rol_menu_voor_account, SESSIONVAR_ROL_MAG_WISSELEN
+from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -37,7 +37,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         self.account_admin = self.e2e_create_account_admin(accepteer_vhpg=False)
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
+        self.account_geen_lid = self.e2e_create_account('geen_lid', 'geen_lid@test.com', 'Geen')
 
         regio_111 = NhbRegio.objects.get(regio_nr=111)
 
@@ -262,10 +262,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
     def test_bb(self):
         # maak een BB die geen lid is
-        self.account_geenlid.is_BB = True
-        self.account_geenlid.save()
-        self.e2e_account_accepteert_vhpg(self.account_geenlid)
-        self.e2e_login_and_pass_otp(self.account_geenlid)
+        self.account_geen_lid.is_BB = True
+        self.account_geen_lid.save()
+        self.e2e_account_accepteert_vhpg(self.account_geen_lid)
+        self.e2e_login_and_pass_otp(self.account_geen_lid)
 
         with self.assert_max_queries(25):
             resp = self.client.get(self.url_wissel_van_rol)
@@ -504,7 +504,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
 
-    def test_geen_rolwissel(self):
+    def test_geen_rol(self):
         # dit raakt de exceptie in Account.rol:rol_mag_wisselen
         self.e2e_logout()
         with self.assert_max_queries(20):
@@ -647,10 +647,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
     def test_bb_naar_sec(self):
         # maak een BB die geen lid is
-        self.account_geenlid.is_BB = True
-        self.account_geenlid.save()
-        self.e2e_account_accepteert_vhpg(self.account_geenlid)
-        self.e2e_login_and_pass_otp(self.account_geenlid)
+        self.account_geen_lid.is_BB = True
+        self.account_geen_lid.save()
+        self.e2e_account_accepteert_vhpg(self.account_geen_lid)
+        self.e2e_login_and_pass_otp(self.account_geen_lid)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
