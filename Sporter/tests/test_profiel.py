@@ -5,12 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils.dateparse import parse_date
-from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
+from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
 from Competitie.tijdlijn import (zet_competitie_fases,
                                  zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,

@@ -6,10 +6,10 @@
 
 from django.urls import reverse
 from django.conf import settings
-from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_BEVESTIG_FUNCTIE_EMAIL,
-                                        RECEIVER_BEVESTIG_GAST_EMAIL,
+from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_EMAIL_ACCOUNT, RECEIVER_BEVESTIG_EMAIL_FUNCTIE,
+                                        RECEIVER_BEVESTIG_EMAIL_REG_GAST, RECEIVER_BEVESTIG_EMAIL_REG_LID,
                                         RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN,
-                                        RECEIVER_KAMPIOENSCHAP_JA, RECEIVER_KAMPIOENSCHAP_NEE)
+                                        RECEIVER_DEELNAME_KAMPIOENSCHAP)
 from uuid import uuid5, NAMESPACE_URL
 
 
@@ -48,7 +48,7 @@ class TijdelijkeCodesDispatcher(object):
         return self._saver
 
 
-tijdelijkeurl_dispatcher = TijdelijkeCodesDispatcher()
+tijdelijke_code_dispatcher = TijdelijkeCodesDispatcher()
 
 
 def set_tijdelijke_codes_receiver(topic, func):
@@ -59,12 +59,12 @@ def set_tijdelijke_codes_receiver(topic, func):
             het object waar de url op van toepassing is (typisch account of functie)
         De functie moet de url terug geven voor een http-redirect
     """
-    tijdelijkeurl_dispatcher.set_receiver(topic, func)
+    tijdelijke_code_dispatcher.set_receiver(topic, func)
 
 
 def set_tijdelijke_code_saver(func):
     """ intern gebruik door Overig.models om de url-saver functie te registreren """
-    tijdelijkeurl_dispatcher.set_saver(func)
+    tijdelijke_code_dispatcher.set_saver(func)
 
 
 def _maak_unieke_code(**kwargs):
@@ -73,40 +73,52 @@ def _maak_unieke_code(**kwargs):
     return uuid5(uuid_namespace, repr(kwargs)).hex
 
 
-def maak_tijdelijke_code_account_email(account, **kwargs):
-    """ Maak een tijdelijke URL aan die gebruikt kan worden om een
-        account e-mail te bevestigen.
+def maak_tijdelijke_code_bevestig_email_account(account, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden om
+        toegang tot de (nieuwe) e-mail van een account te bevestigen.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
         url_code en waar deze voor bedoeld is.
         De volledige url wordt terug gegeven.
     """
     url_code = _maak_unieke_code(**kwargs, pk=account.pk)
-    func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_BEVESTIG_ACCOUNT_EMAIL, geldig_dagen=3, account=account)
+    func = tijdelijke_code_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_EMAIL_ACCOUNT, geldig_dagen=3, account=account)
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_registreer_gast_email(gast, **kwargs):
-    """ Maak een tijdelijke URL aan die gebruikt kan worden om een
-        gast-account registratie e-mail te bevestigen.
+def maak_tijdelijke_code_bevestig_email_registreer_lid(account, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden om
+        toegang tot de e-mail en het aanmaken van een account te bevestigen.
+        Een SiteTijdelijkeUrl record wordt in de database gezet met de
+        url_code en waar deze voor bedoeld is.
+        De volledige url wordt terug gegeven.
+    """
+    url_code = _maak_unieke_code(**kwargs, pk=account.pk)
+    func = tijdelijke_code_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_EMAIL_REG_LID, geldig_dagen=3, account=account)
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
+
+
+def maak_tijdelijke_code_bevestig_email_registreer_gast(gast, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden om
+        toegang tot de e-mail en het aanmaken van een gast-account te bevestigden.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
         url_code en waar deze voor bedoeld is.
         De volledige url wordt terug gegeven.
     """
     url_code = _maak_unieke_code(**kwargs, pk=gast.pk)
-    func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_BEVESTIG_GAST_EMAIL, geldig_dagen=3, gast=gast)
-    temp = reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
-    return settings.SITE_URL + temp  # reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
+    func = tijdelijke_code_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_EMAIL_REG_GAST, geldig_dagen=3, gast=gast)
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_code_functie_email(functie):
+def maak_tijdelijke_code_bevestig_email_functie(functie):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
-        functie e-mail te bevestigen.
+        toegang tot de (nieuwe) e-mail te bevestigen voor gebruik voor een functie.
     """
     url_code = _maak_unieke_code(pk=functie.pk, email=functie.nieuwe_email)
-    func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_BEVESTIG_FUNCTIE_EMAIL, geldig_dagen=3, functie=functie)
+    func = tijdelijke_code_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_EMAIL_FUNCTIE, geldig_dagen=3, functie=functie)
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
@@ -115,7 +127,7 @@ def maak_tijdelijke_code_accountwissel(account, **kwargs):
         in te loggen als het gekozen account.
     """
     url_code = _maak_unieke_code(**kwargs, pk=account.pk)
-    func = tijdelijkeurl_dispatcher.get_saver()
+    func = tijdelijke_code_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_ACCOUNT_WISSEL, geldig_seconden=60, account=account)
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
@@ -125,8 +137,18 @@ def maak_tijdelijke_code_wachtwoord_vergeten(account, **kwargs):
         account wachtwoord vergeten is.
     """
     url_code = _maak_unieke_code(**kwargs, pk=account.pk)
-    func = tijdelijkeurl_dispatcher.get_saver()
+    func = tijdelijke_code_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_WACHTWOORD_VERGETEN, geldig_dagen=7, account=account)
+    return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
+
+
+def maak_tijdelijke_code_deelname_kampioenschap(kampioen, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden om deelname aan een kampioenschap
+        door een specifieke KampioenschapSporterBoog te bevestigen of af te melden.
+    """
+    url_code = _maak_unieke_code(**kwargs, pk=kampioen.pk)
+    func = tijdelijke_code_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_DEELNAME_KAMPIOENSCHAP, geldig_dagen=7, kampioen=kampioen)
     return settings.SITE_URL + reverse('TijdelijkeCodes:tijdelijke-url', args=[url_code])
 
 
@@ -139,28 +161,27 @@ def do_dispatch(request, obj):
     redirect = None
 
     if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL,
-                           RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
+                           RECEIVER_BEVESTIG_EMAIL_ACCOUNT,
+                           RECEIVER_BEVESTIG_EMAIL_REG_LID,
                            RECEIVER_WACHTWOORD_VERGETEN):
         # referentie = Account
-        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
-        redirect = func(request, obj.hoortbij_account)
+        func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoort_bij_account)
 
-    elif obj.dispatch_to == RECEIVER_BEVESTIG_GAST_EMAIL:
+    elif obj.dispatch_to == RECEIVER_BEVESTIG_EMAIL_REG_GAST:
         # referentie = GastRegistratie
-        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
-        redirect = func(request, obj.hoortbij_gast)
+        func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoort_bij_gast_reg)
 
-    elif obj.dispatch_to == RECEIVER_BEVESTIG_FUNCTIE_EMAIL:
+    elif obj.dispatch_to == RECEIVER_BEVESTIG_EMAIL_FUNCTIE:
         # referentie = Functie
-        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
-        redirect = func(request, obj.hoortbij_functie)
+        func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoort_bij_functie)
 
-    elif obj.dispatch_to in (RECEIVER_KAMPIOENSCHAP_JA,
-                             RECEIVER_KAMPIOENSCHAP_NEE):
+    elif obj.dispatch_to == RECEIVER_DEELNAME_KAMPIOENSCHAP:
         # referentie = KampioenschapSchutterBoog
-        wil_meedoen = (obj.dispatch_to == RECEIVER_KAMPIOENSCHAP_JA)
-        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
-        redirect = func(request, obj.hoortbij_kampioenschap, wil_meedoen)
+        func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoort_bij_kampioen)
 
     return redirect
 
@@ -172,21 +193,21 @@ def beschrijving_activiteit(obj):
     if obj.dispatch_to == RECEIVER_ACCOUNT_WISSEL:
         return "in te loggen als een andere gebruiker"
 
-    if obj.dispatch_to in (RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
-                           RECEIVER_BEVESTIG_FUNCTIE_EMAIL):
+    if obj.dispatch_to in (RECEIVER_BEVESTIG_EMAIL_ACCOUNT,
+                           RECEIVER_BEVESTIG_EMAIL_FUNCTIE):
         return "een e-mailadres te bevestigen"
 
-    if obj.dispatch_to == RECEIVER_BEVESTIG_GAST_EMAIL:
+    if obj.dispatch_to == RECEIVER_BEVESTIG_EMAIL_REG_LID:
+        return "een account aan te maken"
+
+    if obj.dispatch_to == RECEIVER_BEVESTIG_EMAIL_REG_GAST:
         return "een gast-account aan te maken"
 
     if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:
         return "een nieuw wachtwoord in te stellen"
 
-    if obj.dispatch_to == RECEIVER_KAMPIOENSCHAP_JA:
-        return "je beschikbaarheid voor een kampioenschap te bevestigen"
-
-    if obj.dispatch_to == RECEIVER_KAMPIOENSCHAP_NEE:
-        return "je af te melden voor een kampioenschap"
+    if obj.dispatch_to == RECEIVER_DEELNAME_KAMPIOENSCHAP:
+        return "je beschikbaarheid voor een kampioenschap door te geven"
 
     return "????"
 

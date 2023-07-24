@@ -33,22 +33,22 @@ class TijdelijkeCode(models.Model):
     dispatch_to = models.CharField(max_length=20, default="")
 
     # extra velden voor de dispatcher
-    hoortbij_account = models.ForeignKey(
+    hoort_bij_account = models.ForeignKey(
                                 Account,
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)        # optional
 
-    hoortbij_gast = models.ForeignKey(
+    hoort_bij_gast_reg = models.ForeignKey(
                                 GastRegistratie,
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)  # optional
 
-    hoortbij_functie = models.ForeignKey(
+    hoort_bij_functie = models.ForeignKey(
                                 Functie,
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)        # optional
 
-    hoortbij_kampioenschap = models.ForeignKey(
+    hoort_bij_kampioen = models.ForeignKey(
                                 KampioenschapSporterBoog,
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)        # optioneel
@@ -61,21 +61,21 @@ class TijdelijkeCode(models.Model):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         msg = "(%s) bruikbaar tot %s; voor %s" % (self.pk, self.geldig_tot, self.dispatch_to)
         hoort_bij = list()
-        if self.hoortbij_account:
-            hoort_bij. append('account: %s' % self.hoortbij_account)
-        if self.hoortbij_gast:
-            hoort_bij. append('gast registratie: %s' % self.hoortbij_gast)
-        if self.hoortbij_functie:
-            hoort_bij.append('functie: %s' % self.hoortbij_functie)
-        if self.hoortbij_kampioenschap:
-            hoort_bij.append('kampioenschap: %s' % self.hoortbij_kampioenschap)
+        if self.hoort_bij_account:
+            hoort_bij. append('account: %s' % self.hoort_bij_account)
+        if self.hoort_bij_gast_reg:
+            hoort_bij. append('gast registratie: %s' % self.hoort_bij_gast_reg)
+        if self.hoort_bij_functie:
+            hoort_bij.append('functie: %s' % self.hoort_bij_functie)
+        if self.hoort_bij_kampioen:
+            hoort_bij.append('kampioen: %s' % self.hoort_bij_kampioen)
         msg += ' (%s)' % ", ".join(hoort_bij)
         return msg
 
 
 def save_tijdelijke_code(url_code, dispatch_to,
                          geldig_dagen=0, geldig_seconden=0,
-                         account=None, gast=None, functie=None):
+                         account=None, gast=None, functie=None, kampioen=None):
 
     if geldig_seconden > 0:
         delta = timedelta(seconds=geldig_seconden)
@@ -92,9 +92,10 @@ def save_tijdelijke_code(url_code, dispatch_to,
                             aangemaakt_op=now,
                             geldig_tot=now + delta,
                             dispatch_to=dispatch_to,
-                            hoortbij_account=account,
-                            hoortbij_gast=gast,
-                            hoortbij_functie=functie)
+                            hoort_bij_account=account,
+                            hoort_bij_gast_reg=gast,
+                            hoort_bij_functie=functie,
+                            hoort_bij_kampioen=kampioen)
     obj.save()
 
     return obj

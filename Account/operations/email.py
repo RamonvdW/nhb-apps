@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from Mailer.operations import mailer_queue_email, render_email_template
-from TijdelijkeCodes.operations import maak_tijdelijke_code_account_email
+from TijdelijkeCodes.operations import maak_tijdelijke_code_bevestig_email_account
 
 
 EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_account/bevestig-toegang-email.dtl'
@@ -34,34 +34,11 @@ def account_check_gewijzigde_email(account):
             # maak de url aan om het e-mailadres te bevestigen
             # extra parameters are just to make the url unique
             mailadres = account.nieuwe_email
-            url = maak_tijdelijke_code_account_email(account, username=account.username, email=mailadres)
+            url = maak_tijdelijke_code_bevestig_email_account(account, username=account.username, email=mailadres)
             return url, mailadres
 
     # geen gewijzigde email
     return None, None
-
-
-def account_vraag_email_bevestiging(account, **kwargs):
-    """ Stuur een mail naar het adres om te vragen om een bevestiging.
-        Gebruik een tijdelijke URL die, na het volgen, weer in deze module uit komt.
-    """
-
-    # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_code_account_email(account, **kwargs)
-
-    # TODO: omzetten naar een email template
-    text_body = ("Hallo!\n\n"
-                 + "Je hebt een account aangemaakt op " + settings.NAAM_SITE + ".\n"
-                 + "Klik op onderstaande link om dit te bevestigen.\n\n"
-                 + url + "\n\n"
-                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
-                 + "Veel plezier met de site!\n"
-                 + "Het bondsbureau\n")
-
-    mailer_queue_email(account.nieuwe_email,
-                       'Aanmaken account voltooien',
-                       text_body,
-                       enforce_whitelist=False)     # deze mails altijd doorlaten
 
 
 def account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url):

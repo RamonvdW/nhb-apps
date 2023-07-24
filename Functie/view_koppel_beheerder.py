@@ -23,7 +23,7 @@ from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_FUNCTIE_EMAIL
+from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_FUNCTIE
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
 
 
@@ -217,7 +217,7 @@ def receive_bevestiging_functie_email(request, functie):
     return render(request, TEMPLATE_EMAIL_BEVESTIGD, context)
 
 
-set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_FUNCTIE_EMAIL, receive_bevestiging_functie_email)
+set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_FUNCTIE, receive_bevestiging_functie_email)
 
 
 class WijzigEmailView(UserPassesTestMixin, View):

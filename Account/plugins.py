@@ -13,7 +13,7 @@ from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
-from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_ACCOUNT_EMAIL
+from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_ACCOUNT
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
 import logging
 
@@ -102,6 +102,6 @@ def receive_bevestiging_account_email(request, account):
     return render(request, TEMPLATE_EMAIL_BEVESTIGD, context)
 
 
-set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_account_email)
+set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_ACCOUNT, receive_bevestiging_account_email)
 
 # end of file

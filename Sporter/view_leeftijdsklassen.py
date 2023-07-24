@@ -27,7 +27,7 @@ TEMPLATE_LEEFTIJDSGROEPEN = 'sporter/leeftijdsgroepen.dtl'
 
 def redirect_leeftijdsklassen(request):
     """ Deze functie wordt gebruikt om een oude URL om te leiden naar de nieuwe """
-    # TODO: verwijder in 2024
+    # FUTURE: verwijder in 2024
     url = reverse('Sporter:leeftijdsgroepen-persoonlijk')
     return HttpResponseRedirect(url)
 

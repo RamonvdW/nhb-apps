@@ -51,7 +51,7 @@ def account_stuur_email_wachtwoord_vergeten(account, **kwargs):
     mailer_queue_email(account.bevestigde_email,
                        'Wachtwoord vergeten',
                        mail_body,
-                       enforce_whitelist=False)
+                       enforce_whitelist=False)         # deze mails altijd doorlaten
 
 
 class WachtwoordVergetenView(TemplateView):

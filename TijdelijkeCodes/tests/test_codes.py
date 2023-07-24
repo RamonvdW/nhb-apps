@@ -6,15 +6,25 @@
 
 from django.test import TestCase
 from django.http import HttpResponseRedirect
+from BasisTypen.models import BoogType
+from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog
 from Functie.models import Functie
-from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_ACCOUNT_WISSEL,
-                                        RECEIVER_WACHTWOORD_VERGETEN, RECEIVER_BEVESTIG_FUNCTIE_EMAIL)
+from NhbStructuur.models import NhbRayon
+from Sporter.models import SporterBoog, Sporter
+from Registreer.models import GastRegistratie
+from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_EMAIL_ACCOUNT, RECEIVER_BEVESTIG_EMAIL_FUNCTIE,
+                                        RECEIVER_BEVESTIG_EMAIL_REG_LID, RECEIVER_BEVESTIG_EMAIL_REG_GAST,
+                                        RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN,
+                                        RECEIVER_DEELNAME_KAMPIOENSCHAP)
 from TijdelijkeCodes.models import TijdelijkeCode, save_tijdelijke_code
-from TijdelijkeCodes.operations import (tijdelijkeurl_dispatcher, set_tijdelijke_codes_receiver,
-                                        maak_tijdelijke_code_account_email,
+from TijdelijkeCodes.operations import (tijdelijke_code_dispatcher, set_tijdelijke_codes_receiver,
+                                        maak_tijdelijke_code_bevestig_email_account,
+                                        maak_tijdelijke_code_bevestig_email_registreer_lid,
+                                        maak_tijdelijke_code_bevestig_email_registreer_gast,
                                         maak_tijdelijke_code_accountwissel,
                                         maak_tijdelijke_code_wachtwoord_vergeten,
-                                        maak_tijdelijke_code_functie_email)
+                                        maak_tijdelijke_code_bevestig_email_functie,
+                                        maak_tijdelijke_code_deelname_kampioenschap)
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from datetime import timedelta
@@ -35,7 +45,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-        tijdelijkeurl_dispatcher.test_backup()
+        tijdelijke_code_dispatcher.test_backup()
 
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
@@ -43,9 +53,9 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.account_normaal.save(update_fields=['nieuwe_email'])
 
     def tearDown(self):
-        tijdelijkeurl_dispatcher.test_restore()
+        tijdelijke_code_dispatcher.test_restore()
 
-    def test_nonexist(self):
+    def test_code_bestaat_niet(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_code % 'test')
         self.assertEqual(resp.status_code, 200)
@@ -99,9 +109,13 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/plein/')
 
+    def test_onbekend_topic(self):
+        with self.assertRaises(NotImplementedError):
+            tijdelijke_code_dispatcher.get_receiver('bestaat niet')
+
     def test_setup_dispatcher(self):
         set_tijdelijke_codes_receiver("my topic", "123")
-        self.assertEqual(tijdelijkeurl_dispatcher.get_receiver("my topic"), "123")
+        self.assertEqual(tijdelijke_code_dispatcher.get_receiver("my topic"), "123")
 
     def _my_receiver_func_email(self, request, hoortbij_account):
         # self.assertEqual(request, "request")
@@ -115,10 +129,16 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
             # return response
             return HttpResponseRedirect(url)
 
-    def test_account_email(self):
-        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, self._my_receiver_func_email)
+    def _my_receiver_func_1_arg(self, request, hoortbij):
+        # self.assertEqual(request, "request")
+        self.callback_count += 1
+        url = "/feedback/bedankt/"
+        return url
 
-        url = maak_tijdelijke_code_account_email(self.account_normaal, test="een")
+    def test_bevestig_email_account(self):
+        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_ACCOUNT, self._my_receiver_func_email)
+
+        url = maak_tijdelijke_code_bevestig_email_account(self.account_normaal, test="een")
         self.assertTrue(self.url_code_prefix in url)
         self.callback_count = 1
 
@@ -210,17 +230,11 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
         self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
-    def _my_receiver_func_functie(self, request, hoortbij_functie):
-        # self.assertEqual(request, "request")
-        self.callback_count += 1
-        url = "/feedback/bedankt/"
-        return url
+    def test_bevestig_email_functie(self):
+        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_FUNCTIE, self._my_receiver_func_1_arg)
 
-    def test_functie_email(self):
-        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_FUNCTIE_EMAIL, self._my_receiver_func_functie)
-
-        functie = Functie.objects.filter(rol='BKO').all()[0]
-        url = maak_tijdelijke_code_functie_email(functie)
+        functie = Functie.objects.filter(rol='BKO').first()
+        url = maak_tijdelijke_code_bevestig_email_functie(functie)
         self.assertTrue(self.url_code_prefix in url)
         self.callback_count = 0
 
@@ -251,15 +265,149 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_code % '0')
 
-    # TODO verwijder in v20 of later
+    def test_registreer_lid(self):
+        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_REG_LID, self._my_receiver_func_1_arg)
+
+        url = maak_tijdelijke_code_bevestig_email_registreer_lid(self.account_normaal, lid="een")
+        self.assertTrue(self.url_code_prefix in url)
+        self.callback_count = 0
+
+        # extra coverage
+        obj = TijdelijkeCode.objects.all()[0]
+        self.assertTrue(str(obj) != '')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        # print('urls: %s' % repr(urls))
+        self.assertEqual(1, len(urls))
+        url = urls[0]
+        self.assertTrue(self.url_code_prefix in url)
+        self.assertEqual(self.callback_count, 0)
+
+        # volg de 'ga door' knop
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.callback_count, 1)
+        # _my_receiver_func stuurt door naar de feedback-bedankt pagina
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+
+    def test_registreer_gast(self):
+        set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_REG_GAST, self._my_receiver_func_1_arg)
+
+        gast = GastRegistratie(lid_nr=123456)
+        gast.save()
+        url = maak_tijdelijke_code_bevestig_email_registreer_gast(gast)
+        self.assertTrue(self.url_code_prefix in url)
+        self.callback_count = 0
+
+        # extra coverage
+        obj = TijdelijkeCode.objects.all()[0]
+        self.assertTrue(str(obj) != '')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        # print('urls: %s' % repr(urls))
+        self.assertEqual(1, len(urls))
+        url = urls[0]
+        self.assertTrue(self.url_code_prefix in url)
+        self.assertEqual(self.callback_count, 0)
+
+        # volg de 'ga door' knop
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.callback_count, 1)
+        # _my_receiver_func stuurt door naar de feedback-bedankt pagina
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+
+    def test_kampioen(self):
+        set_tijdelijke_codes_receiver(RECEIVER_DEELNAME_KAMPIOENSCHAP, self._my_receiver_func_1_arg)
+
+        boog_r = BoogType.objects.get(afkorting='R')
+
+        sporter = Sporter(
+                    lid_nr=100000,
+                    voornaam='Ad',
+                    achternaam='de Admin',
+                    geboorte_datum='1966-06-06',
+                    sinds_datum='2020-02-02')
+        sporter.save()
+
+        sporterboog = SporterBoog(
+                            sporter=sporter,
+                            boogtype=boog_r,
+                            voor_wedstrijd=True)
+        sporterboog.save()
+
+        comp = Competitie(afstand=18, begin_jaar=2023)
+        comp.save()
+
+        klasse = CompetitieIndivKlasse(
+                    competitie=comp,
+                    volgorde=1,
+                    boogtype=boog_r,
+                    min_ag=0)
+        klasse.save()
+
+        kamp = Kampioenschap(
+                    competitie=comp,
+                    deel='RK',
+                    rayon=NhbRayon.objects.first(),
+                    functie=Functie.objects.filter(rol='RKO').first())
+        kamp.save()
+
+        kamp = KampioenschapSporterBoog(
+                    kampioenschap=kamp,
+                    sporterboog=sporterboog,
+                    indiv_klasse=klasse)
+        kamp.save()
+
+        url = maak_tijdelijke_code_deelname_kampioenschap(kamp)
+        self.assertTrue(self.url_code_prefix in url)
+        self.callback_count = 0
+
+        # extra coverage
+        obj = TijdelijkeCode.objects.all()[0]
+        self.assertTrue(str(obj) != '')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('tijdelijkecodes/code-goed.dtl', 'plein/site_layout.dtl'))
+
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        # print('urls: %s' % repr(urls))
+        self.assertEqual(1, len(urls))
+        url = urls[0]
+        self.assertTrue(self.url_code_prefix in url)
+        self.assertEqual(self.callback_count, 0)
+
+        # volg de 'ga door' knop
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.callback_count, 1)
+        # _my_receiver_func stuurt door naar de feedback-bedankt pagina
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
+
+    # FUTURE: verwijder in v20 of later
     def test_oude_url(self):
         # tijdelijke ondersteuning van de oude url
         code = 123456
         url = '/overig/url/%s/' % code
         resp = self.client.get(url)
         self.assert_is_redirect(resp, self.url_code % code)
-
-
-# FUTURE: tijdelijke URL horende bij kampioenschap
 
 # end of file

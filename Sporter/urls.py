@@ -24,7 +24,7 @@ urlpatterns = [
          name='voorkeuren'),
 
     path('leeftijdsklassen/',
-         view_leeftijdsklassen.redirect_leeftijdsklassen,       # TODO: verwijder in 2024
+         view_leeftijdsklassen.redirect_leeftijdsklassen,       # FUTURE: verwijder in 2024
          name='oud-leeftijdsklassen'),
 
     path('leeftijden/persoonlijk/',

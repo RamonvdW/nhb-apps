@@ -110,7 +110,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
         obj = TijdelijkeCode.objects.all()[0]
 
-        self.assertEqual(obj.hoortbij_account.bevestigde_email, 'normaal@test.com')
+        self.assertEqual(obj.hoort_bij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):
@@ -177,7 +177,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
         obj = TijdelijkeCode.objects.all()[0]
 
-        self.assertEqual(obj.hoortbij_account.nieuwe_email, 'nieuwe@test.com')
+        self.assertEqual(obj.hoort_bij_account.nieuwe_email, 'nieuwe@test.com')
 
     def test_dupe_email(self):
         # maak nog een account aan met hetzelfde e-mailadres
@@ -244,7 +244,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
         obj = TijdelijkeCode.objects.all()[0]
 
-        self.assertEqual(obj.hoortbij_account.bevestigde_email, 'normaal@test.com')
+        self.assertEqual(obj.hoort_bij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):

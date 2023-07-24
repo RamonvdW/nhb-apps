@@ -32,9 +32,8 @@ my_logger = logging.getLogger('NHBApps.Account')
 
 
 def receiver_account_wissel(request, account):
-    """ Met deze functie kan een geautoriseerd persoon tijdelijk inloggen op de site
-        als een andere gebruiker.
-            obj is een AccountEmail object.
+    """ Met deze functie kan een geautoriseerd persoon inloggen op de site als een andere gebruiker.
+            obj is een Account object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
         of een HttpResponse object.
     """
@@ -65,7 +64,6 @@ def receiver_account_wissel(request, account):
     account.last_login = old_last_login
     account.save(update_fields=['last_login'])
 
-    # gebruiker mag NIET aangemeld blijven
     # zorg dat de session-cookie snel verloopt --> nergens voor nodig
     # request.session.set_expiry(0)
 

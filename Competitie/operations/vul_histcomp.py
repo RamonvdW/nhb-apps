@@ -24,7 +24,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
     try:
         histcomps = HistCompSeizoen.objects.filter(seizoen=seizoen,
                                                    comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:
+    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
         pass
     else:
         # er bestaat al een uitslag - verwijder deze eerst
@@ -59,6 +59,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                                boogtype=boogtype)
                        .values_list('pk', flat=True))
 
+        # begin met de sporters met genoeg scores (>= aantal_beste_scores)
         deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('sporterboog__sporter',
@@ -115,6 +116,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                 bulk = list()
         # for
 
+        # aanvullen met sporters die niet genoeg scores hebben (< aantal_beste_scores)
         deelnemers = (RegiocompetitieSporterBoog
                       .objects
                       .select_related('sporterboog__sporter',
