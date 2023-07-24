@@ -91,7 +91,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         # volg de link om de email te bevestigen
         obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')         # coverage of __str__
-        self.assertEqual(obj.hoortbij_gast.pk, gast.pk)
+        self.assertEqual(obj.hoort_bij_gast_reg.pk, gast.pk)
         url = self.url_tijdelijk % obj.url_code
 
         # haal de pagina op - deze bevat een POST url
@@ -276,7 +276,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
         # volg de link om de email te bevestigen
         obj = TijdelijkeCode.objects.first()
-        self.assertEqual(obj.hoortbij_gast.pk, gast.pk)
+        self.assertEqual(obj.hoort_bij_gast_reg.pk, gast.pk)
         url = self.url_tijdelijk % obj.url_code
 
         # haal de pagina op - deze bevat een POST url

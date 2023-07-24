@@ -31,8 +31,8 @@ from Registreer.models import GastRegistratie, GastRegistratieRateTracker
 from Registreer.operations import registratie_gast_volgende_lid_nr, registratie_gast_is_open
 from Sporter.models import Sporter
 from Taken.operations import maak_taak
-from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_GAST_EMAIL,
-                                        maak_tijdelijke_code_registreer_gast_email)
+from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_EMAIL_REG_GAST,
+                                        maak_tijdelijke_code_bevestig_email_registreer_gast)
 import datetime
 import logging
 
@@ -51,7 +51,7 @@ TEMPLATE_REGISTREER_GAST_GENDER = 'registreer/registreer-gast-10-gender.dtl'
 TEMPLATE_REGISTREER_GAST_CONFIRM = 'registreer/registreer-gast-25-confirm.dtl'
 
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
-EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-lid-nr.dtl'
+EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-tijdelijk-bondsnummer.dtl'
 
 my_logger = logging.getLogger('NHBApps.Registreer')
 
@@ -189,11 +189,11 @@ class RegistreerGastView(TemplateView):
         my_logger.info('%s REGISTREER gast-account aanmaken; stuur e-mail' % from_ip)
 
         # maak de url aan om het e-mailadres te bevestigen
-        url = maak_tijdelijke_code_registreer_gast_email(gast,
-                                                         naam=voornaam + achternaam,
-                                                         stamp=stamp_str,
-                                                         from_ip=from_ip,
-                                                         gast_email=email)
+        url = maak_tijdelijke_code_bevestig_email_registreer_gast(gast,
+                                                                  naam=voornaam + achternaam,
+                                                                  stamp=stamp_str,
+                                                                  from_ip=from_ip,
+                                                                  gast_email=email)
 
         # maak de e-mail aan
         context = {
@@ -302,7 +302,7 @@ def receive_bevestiging_gast_email(request, gast):
     return render(request, TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD, context)
 
 
-set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_GAST_EMAIL, receive_bevestiging_gast_email)
+set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_REG_GAST, receive_bevestiging_gast_email)
 
 
 class RegistreerGastVervolgView(TemplateView):

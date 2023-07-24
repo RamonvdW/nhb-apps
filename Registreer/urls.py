@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Registreer import view_begin, view_registreer_nhb, view_registreer_gast
+from Registreer import view_begin, view_registreer_lid, view_registreer_gast
 
 
 app_name = 'Registreer'
@@ -19,7 +19,7 @@ urlpatterns = [
          name='begin'),
 
     path('lid/',
-         view_registreer_nhb.RegistreerNormaalView.as_view(),
+         view_registreer_lid.RegistreerLidView.as_view(),
          name='lid'),
 
     path('gast/',
