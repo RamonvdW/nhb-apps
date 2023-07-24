@@ -30,6 +30,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
 
     url_tijdelijk = '/tijdelijke-codes/%s/'
     url_sporter_profiel = '/sporter/'
+    url_plein = '/plein/'
 
     test_voornaam = 'Bågskytt'
     test_achternaam = 'från Utlandet'
@@ -491,6 +492,14 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(gast.club_plaats, 'Boogstad')
         self.assertEqual(gast.fase, REGISTRATIE_FASE_LAND)
 
+        # ga naar Het Plein - deze redirect meteen naar de meer-vragen pagina
+        resp = self.client.get(self.url_plein)
+        self.assert_is_redirect(resp, self.url_meer_vragen)
+
+        # ga naar Mijn Pagina - deze redirect meteen naar de meer-vragen pagina
+        resp = self.client.get(self.url_sporter_profiel)
+        self.assert_is_redirect(resp, self.url_meer_vragen)
+
         # vraag: land, bond, lidnummer
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_volgende_vraag)
@@ -695,6 +704,18 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_volgende_vraag)
         self.assert_is_redirect(resp, '/plein/')
+
+        # ga naar Het Plein - deze redirect niet meer naar de meer-vragen pagina
+        resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+
+        # ga naar Mijn Pagina - deze redirect niet meer naar de meer-vragen pagina
+        resp = self.client.get(self.url_sporter_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
         # niet bestaande fase
         gast.fase = 666
