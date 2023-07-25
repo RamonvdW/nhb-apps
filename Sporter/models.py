@@ -104,6 +104,9 @@ class Sporter(models.Model):
     # mag gebruik maken van faciliteiten?
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
 
+    # om overleden leden eenvoudig speciaal te kunnen behandelen hebben we dit veld als filter optie
+    is_overleden = models.BooleanField(default=False)
+
     # datum van lidmaatschap
     sinds_datum = models.DateField(validators=[validate_sinds_datum])
 

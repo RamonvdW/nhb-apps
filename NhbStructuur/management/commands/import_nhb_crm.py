@@ -1006,7 +1006,8 @@ class Command(BaseCommand):
                     self._count_errors += 1
 
             # datum overlijden
-            lid_overleden_datum = None
+            lid_is_overleden = False
+            lid_overleden_datum = '?'
             if member['date_of_death']:
                 try:
                     lid_overleden_datum = datetime.datetime.strptime(member['date_of_death'],
@@ -1017,6 +1018,8 @@ class Command(BaseCommand):
                         self.stderr.write('[ERROR] Lid %s heeft geen valide datum van overlijden: %s' % (
                                             lid_nr, repr(member['date_of_death'])))
                         self._count_errors += 1
+                else:
+                    lid_is_overleden = True
 
             lid_geslacht = member['gender']
             if lid_geslacht not in ('M', 'F', 'X'):
@@ -1166,9 +1169,12 @@ class Command(BaseCommand):
                 else:
                     updated = list()
 
-                    if lid_overleden_datum:
-                        if obj.is_actief_lid:
-                            self.stdout.write('[INFO] Lid %s is overleden en wordt op inactief gezet' % lid_nr)
+                    if lid_is_overleden:
+                        if not obj.is_overleden:
+                            self.stdout.write('[INFO] Lid %s is overleden op %s en wordt op inactief gezet' % (
+                                            repr(lid_nr), lid_overleden_datum))
+                            obj.is_overleden = True
+                            updated.append('is_overleden')
                         lid_blocked = True
 
                     if not lid_blocked:
@@ -1381,6 +1387,7 @@ class Command(BaseCommand):
                 obj.bij_vereniging = lid_ver
                 obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
                 obj.adres_code = lid_adres_code
+                obj.is_overleden = lid_is_overleden
                 if not lid_ver:
                     obj.lid_tot_einde_jaar -= 1
                     obj.is_actief_lid = False
