@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,7 +53,7 @@ EMAIL_SUPPORT = EMAIL_BONDSBUREAU
 
 URL_PDF_HANDLEIDING_LEDEN = 'https://yourstite/static/manual_members.pdf'
 URL_PDF_HANDLEIDING_BEHEERDERS = 'https://yoursite/static/manual_managers.pdf'
-URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursitestatic/manual-clubs.pdf'
+URL_PDF_HANDLEIDING_VERENIGINGEN = 'https://yoursitestatic/manual_clubs.pdf'
 
 
 # sending e-mail via Postmark
@@ -100,12 +100,12 @@ BONDSPAS_FONT_BOLD = '/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.
 
 # the full path to the installation directory where each app subdirectory is located
 # this is used to access resources like CompLaagRayon/files/template-excel-rk-teams.xls
-INSTALL_PATH = '/directory/on/server/nhbapps-venv/nhb-apps/'
+INSTALL_PATH = '/directory/on/server/nhbapps-venv/project/'
 
 # toon het kaartje Opleidingen?
 TOON_OPLEIDINGEN = True
 
-# bekende BIC codes
+# bekende BIC codes, voor controle rekeninggegevens tijdens import uit CRM
 BEKENDE_BIC_CODES = (
     'ABNANL2A',
     'FRBKNL2L',
