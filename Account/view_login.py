@@ -35,7 +35,6 @@ class LoginView(TemplateView):
         Het inloggen zelf gebeurt met een POST omdat de invoervelden dan in
         de http body meegestuurd worden
     """
-    # TODO: refactor deze view
 
     # class variables shared by all instances
     form_class = LoginForm

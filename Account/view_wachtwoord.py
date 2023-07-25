@@ -144,7 +144,7 @@ def receive_wachtwoord_vergeten(request, account):
     my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (
                         from_ip, repr(account.username)))
 
-    # TODO: als WW vergeten via Account.nieuwe_email ging, dan kunnen we die als bevestigd markeren
+    # FUTURE: als WW vergeten via Account.nieuwe_email ging, dan kunnen we die als bevestigd markeren
 
     for _, func, _ in account_plugins_login_gate:
         httpresp = func(request, from_ip, account)
