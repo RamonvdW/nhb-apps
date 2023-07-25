@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -61,6 +61,11 @@ def schrijf_in_logboek(account, gebruikte_functie, activiteit):
     obj.toegevoegd_op = timezone.now()
     obj.actie_door_account = account
     obj.gebruikte_functie = gebruikte_functie
+
+    # avoid exception while writing
+    if len(activiteit) > 500:
+        activiteit = activiteit[:500-2] + '..'
+
     obj.activiteit = activiteit
     obj.save()
 

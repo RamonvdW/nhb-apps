@@ -359,13 +359,18 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertContains(resp, 'Volledig overdekt')
 
+        lange_tekst = "Dit is een heel verhaal van minimaal 200 tekens zodat we de limiet van 500 tekens bereiken " + \
+                      "bij het schrijven naar het logboek. Het is namelijk een keer voorgekomen dat de notitie " + \
+                      "niet opgeslagen kon worden omdat deze te lang is. In het logboek schrijven we de oude en " + \
+                      "de nieuwe tekst."
+
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 0,
                                           'banen_25m': 0,
                                           'max_sporters_18m': 18,       # no change
                                           'max_sporters_25m': 25,       # no change
-                                          'notities': 'dit is een test'})
+                                          'notities': lange_tekst})
         self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'H')
@@ -377,7 +382,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'X',
                                           'banen_18m': 5,
                                           'banen_25m': 6,
-                                          'notities': 'dit is een test'})
+                                          'notities': lange_tekst + " en nog wat meer"})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
