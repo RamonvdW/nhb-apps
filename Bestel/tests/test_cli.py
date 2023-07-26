@@ -195,7 +195,7 @@ class TestBestelCli(E2EHelpers, TestCase):
         mandje = BestelMandje.objects.get(pk=self.mandje.pk)
         self.assertEqual(2, mandje.producten.count())
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             f1, f2, = self.run_management_command('bestel_mutaties', '--quick', '1')
 
         # print("\nf1: %s\nf2: %s" % (f1.getvalue(), f2.getvalue()))

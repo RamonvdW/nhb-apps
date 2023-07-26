@@ -77,7 +77,7 @@ class WebwinkelProduct(models.Model):
     onbeperkte_voorraad = models.BooleanField(default=False)
 
     # hoeveel producten mogen er nog verkocht worden?
-    # TODO: commando maken om met N te verhogen (zonder race met nieuwe verkopen)
+    # FUTURE: commando maken om met N te verhogen (zonder race met nieuwe verkopen)
     aantal_op_voorraad = models.PositiveSmallIntegerField(default=0)
 
     # hoeveel kunnen er besteld worden?

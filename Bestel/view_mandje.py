@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Bestel.definities import BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT_NVT
 from Bestel.models import BestelMandje
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
@@ -17,6 +18,7 @@ from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
+from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_DONE
 from decimal import Decimal
@@ -178,20 +180,22 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
-        if producten:
-            for product in producten:                           # pragma: no branch
-                if product.webwinkel_keuze:
-                    context['toon_postadres'] = True
-                    sporter = account.sporter_set.all()[0]
-                    context['koper_sporter'] = sporter
-                    break
-            # for
+        if mandje:
+            if mandje.transport == BESTEL_TRANSPORT_OPHALEN:
+                context['toon_transport'] = True
+                context['ophalen_ver'] = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+
+            elif mandje.transport == BESTEL_TRANSPORT_VERZEND:
+                context['toon_transport'] = True
+                sporter = account.sporter_set.all()[0]
+                context['koper_sporter'] = sporter
 
         context['mandje_is_leeg'] = mandje_is_leeg
         context['mandje'] = mandje
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
+        context['url_kies_transport'] = reverse('Bestel:kies-transport')
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 

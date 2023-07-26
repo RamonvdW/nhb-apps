@@ -27,6 +27,8 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
     url_bestellingen_overzicht = '/bestel/overzicht/'
     url_overboeking_ontvangen = '/bestel/vereniging/overboeking-ontvangen/'
 
+    url_meer_vragen = '/account/registreer/gast/meer-vragen/'
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -337,5 +339,19 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assertEqual(email.mail_to, self.account_email)
         self.assertTrue("Bevestiging aankoop via MijnHandboogsport (MH-100" in email.mail_subj)
         self.assertTrue("Betaalstatus: Voldaan" in email.mail_text)
+
+    def test_gast(self):
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wisselnaarrol_sporter()
+
+        # gast-account
+        self.account_normaal.is_gast = True
+        self.account_normaal.save(update_fields=['is_gast'])
+
+        url = self.url_webwinkel_product % self.product.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal': '1', 'snel': 1})
+
+        self.assert404(resp, 'Geen toegang')
 
 # end of file

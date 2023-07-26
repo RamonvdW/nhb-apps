@@ -115,6 +115,13 @@
                                     <td class="right-align">&euro;&nbsp;{{ mandje.verzendkosten_euro }}</td>
                                     <td><!-- knoppen --></td>
                                 </tr>
+                            {% elif mandje.transport == 'O' %}
+                                <!-- ophalen -->
+                                <tr>
+                                    <td colspan="2">Ophalen op het bondsbureau</td>
+                                    <td class="right-align">&euro;&nbsp;0,00</td>
+                                    <td><!-- knoppen --></td>
+                                </tr>
                             {% endif %}
 
                             <!-- btw -->
@@ -172,11 +179,12 @@
         </div>
 
 
-        {% if toon_postadres %}
+        {% if toon_transport %}
+
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h4>Afleveradres</h4>
+                    <h4>Levering</h4>
                 </div>
             </div>
 
@@ -184,9 +192,25 @@
             <div class="row-sv-blauw">
                 <div class="col s12 l10 offset-l1 xl8 offset-xl2">
                     <div class="white" style="padding:10px">
-                        <p>De producten worden verstuurd naar jouw postadres:</p>
-                        <p>{{ koper_sporter.postadres_1 }}<br>{{ koper_sporter.postadres_2 }}{% if koper_sporter.postadres_3 %}<br>{{ koper_sporter.postadres_3 }}{% endif %}</p>
-                        <p>Als dit adres niet klopt (of onvolledig is) vraag dan de secretaris van jouw vereniging om dit aan te passen.</p>
+
+                        {% if ophalen_ver %}
+
+                            <p>Je hebt gekozen om de producten op te halen op het bondsbureau:</p>
+                            <p>{{ ophalen_ver.adres_regel1 }}<br>{{ ophalen_ver.adres_regel2 }}</p>
+
+                        {% else %}
+
+                            <p>De producten worden verstuurd naar jouw postadres:</p>
+                            <p>{{ koper_sporter.postadres_1 }}<br>{{ koper_sporter.postadres_2 }}{% if koper_sporter.postadres_3 %}<br>{{ koper_sporter.postadres_3 }}{% endif %}</p>
+                            <p>Als dit adres niet klopt (of onvolledig is) vraag dan de secretaris van jouw vereniging om dit aan te passen.</p>
+
+                        {% endif %}
+
+                        <br>
+                        <p>
+                            <a class="btn-sv-blauw" href="{{ url_kies_transport }}">
+                                <i class="material-icons-round left notranslate">local_shipping</i>Andere opties</a>
+                        </p>
                     </div>
                 </div>
             </div>

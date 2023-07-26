@@ -21,7 +21,8 @@ from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WAC
                                BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_VERWIJDER,
                                BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                                BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD,
-                               BESTEL_MUTATIE_ANNULEER)
+                               BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT,
+                               BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT2STR)
 from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelHoogsteBestelNr, BestelMutatie
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
@@ -94,9 +95,15 @@ def _beschrijf_bestelling(bestelling):
 
         product = SimpleNamespace(
                         regel_nr=regel_nr,
-                        is_verzendkosten=True,                      # TODO: wordt niet gebruikt
                         beschrijving=[("Verzendkosten", "")],       # TODO: specialiseren in pakket/briefpost
                         prijs_euro=verzendkosten_euro_str)
+        producten.append(product)
+
+    if bestelling.transport == BESTEL_TRANSPORT_OPHALEN:
+        product = SimpleNamespace(
+                        regel_nr=regel_nr,
+                        beschrijving=[("Ophalen op het bondsbureau", "")],
+                        prijs_euro="0,00")
         producten.append(product)
 
     # voeg de eventuele BTW toe
@@ -149,7 +156,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
         'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'bestel_status': BESTELLING_STATUS2STR[status],
-        'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD)
+        'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD),
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
@@ -178,6 +185,7 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
         'totaal_euro_str': totaal_euro_str,
         'producten': producten,
         'transacties': transacties,
+        'wil_ophalen': bestelling.transport == BESTEL_TRANSPORT_OPHALEN,
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BETALING)
@@ -234,6 +242,9 @@ class Command(BaseCommand):
         self._instellingen_cache = dict()     # [ver_nr] = BetaalInstellingenVereniging
 
         self._emailadres_backoffice = Functie.objects.get(rol='MWW').bevestigde_email
+
+        ophalen_ver = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+        self._adres_backoffice = (ophalen_ver.adres_regel1, ophalen_ver.adres_regel2)
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -460,11 +471,18 @@ class Command(BaseCommand):
 
             webwinkel_plugin_bepaal_kortingen(self.stdout, mandje)
 
+            transport_oud = mandje.transport
+
             webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
 
             # bereken het totaal opnieuw
             self._mandje_bepaal_btw(mandje)
             mandje.bepaal_totaalprijs_opnieuw()
+
+            transport_nieuw = mandje.transport
+
+            self.stdout.write('[INFO] Transport: %s --> %s' % (BESTEL_TRANSPORT2STR[transport_oud],
+                                                               BESTEL_TRANSPORT2STR[transport_nieuw]))
         else:
             self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
@@ -506,6 +524,9 @@ class Command(BaseCommand):
                     handled = True
 
                 elif product.webwinkel_keuze:
+
+                    transport_oud = mandje.transport
+
                     mandje.producten.remove(product)
 
                     webwinkel_keuze = product.webwinkel_keuze
@@ -523,8 +544,12 @@ class Command(BaseCommand):
 
                     webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
 
-                    handled = True
+                    transport_nieuw = mandje.transport
 
+                    self.stdout.write('[INFO] Transport: %s --> %s' % (BESTEL_TRANSPORT2STR[transport_oud],
+                                                                       BESTEL_TRANSPORT2STR[transport_nieuw]))
+
+                    handled = True
                 else:
                     self.stderr.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
                                         product.pk, mandje.pk))
@@ -618,7 +643,7 @@ class Command(BaseCommand):
                 bestelling.save()
                 bestelling.producten.set(producten)
 
-                webwinkel_plugin_bepaal_verzendkosten_bestelling(self.stdout, bestelling)
+                webwinkel_plugin_bepaal_verzendkosten_bestelling(self.stdout, mandje.transport, bestelling)
 
                 self._bestelling_bepaal_btw(bestelling)
 
@@ -934,6 +959,30 @@ class Command(BaseCommand):
             webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
         # for
 
+    def _verwerk_mutatie_transport(self, mutatie):
+        """ Wijzig keuze voor transport tussen ophalen en verzender; alleen voor webwinkel aankopen """
+
+        mandje = self._get_mandje(mutatie)
+        if mandje:                                  # pragma: no branch
+
+            transport_oud = mandje.transport
+
+            mandje.transport = mutatie.transport
+            mandje.save(update_fields=['transport'])
+
+            webwinkel_plugin_bepaal_verzendkosten_mandje(self.stdout, mandje)
+
+            # bereken het totaal opnieuw
+            self._mandje_bepaal_btw(mandje)
+            mandje.bepaal_totaalprijs_opnieuw()
+
+            transport_nieuw = mandje.transport
+
+            self.stdout.write('[INFO] Transport: %s --> %s' % (BESTEL_TRANSPORT2STR[transport_oud],
+                                                               BESTEL_TRANSPORT2STR[transport_nieuw]))
+        else:
+            self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
@@ -972,6 +1021,10 @@ class Command(BaseCommand):
         elif code == BESTEL_MUTATIE_ANNULEER:
             self.stdout.write('[INFO] Verwerk mutatie %s: annuleer bestelling' % mutatie.pk)
             self._verwerk_mutatie_annuleer_bestelling(mutatie)
+
+        elif code == BESTEL_MUTATIE_TRANSPORT:
+            self.stdout.write('[INFO] Verwerk mutatie %s: wijzig transport' % mutatie.pk)
+            self._verwerk_mutatie_transport(mutatie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))

@@ -1138,11 +1138,15 @@ class E2EHelpers(TestCase):
 
         return f1, f2
 
-    def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False, fail_on_error=True):
+    def verwerk_bestel_mutaties(self, kosten_pakket=6.75, kosten_brief=4.04,
+                                show_warnings=True, show_all=False, fail_on_error=True):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        with override_settings(WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO=kosten_pakket,
+                               WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO=kosten_brief):
+            management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if fail_on_error:
             err_msg = f1.getvalue()
