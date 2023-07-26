@@ -13,6 +13,8 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie, BestelMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
+from Registreer.definities import REGISTRATIE_FASE_DONE
+from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_VERENIGING
@@ -28,6 +30,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
     url_mandje_toon = '/bestel/mandje/'
     url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk
     url_bestellingen_overzicht = '/bestel/overzicht/'
+
+    url_meer_vragen = '/account/registreer/gast/meer-vragen/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -274,6 +278,36 @@ class TestBestelMandje(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+    def test_gast(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # gast-account
+        self.account_admin.is_gast = True
+        self.account_admin.save(update_fields=['is_gast'])
+
+        gast = GastRegistratie(
+                    lid_nr=self.account_admin.username,
+                    voornaam=self.account_admin.first_name,
+                    achternaam=self.account_admin.last_name,
+                    email_is_bevestigd=True,
+                    email=self.account_admin.bevestigde_email,
+                    account=self.account_admin)
+        gast.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_mandje_toon)
+        self.assert_is_redirect(resp, self.url_meer_vragen)
+
+        gast.fase = REGISTRATIE_FASE_DONE
+        gast.save(update_fields=['fase'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_mandje_toon)
+        self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
