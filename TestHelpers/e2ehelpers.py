@@ -132,7 +132,7 @@ class E2EHelpers(TestCase):
         return account
 
     def e2e_create_account_admin(self, accepteer_vhpg=True):
-        account = self.e2e_create_account('admin', 'admin@test.com', 'Admin', accepteer_vhpg)
+        account = self.e2e_create_account('424242', 'admin@test.com', 'Admin', accepteer_vhpg)
         # zet de benodigde vlaggen om admin te worden
         account.is_staff = True         # toegang tot de admin site
         account.is_superuser = True     # alle rechten op alle database tabellen
