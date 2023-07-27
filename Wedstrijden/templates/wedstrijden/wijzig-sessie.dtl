@@ -15,12 +15,12 @@
 
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
-            if (!initialized) return
+            if (!initialized) return;
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("opslaan_knop");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
         }
     </script>
 
@@ -189,7 +189,7 @@
                 let options = {
                         twelveHour: false,
                         defaultTime: "{{ sessie.tijd_begin_str }}",
-                      }
+                      };
                 let inst = M.Timepicker.init(el1, options);
                 inst._updateTimeFromInput();
                 inst.done();

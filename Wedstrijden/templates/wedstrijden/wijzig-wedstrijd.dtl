@@ -607,20 +607,20 @@
 
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-                const minDate = new Date("{{ min_date|date:'Y-m-d' }}")
-                const maxDate = new Date("{{ max_date|date:'Y-m-d' }}")
+                const minDate = new Date("{{ min_date|date:'Y-m-d' }}");
+                const maxDate = new Date("{{ max_date|date:'Y-m-d' }}");
 
-                let el = document.querySelector('#id_datum')
+                let el = document.querySelector('#id_datum');
                 if (el) {
                     let options = { defaultDate: new Date("{{ wed.datum_begin|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
                                     format: "dddd d mmmm yyyy",
                                     minDate: minDate, maxDate: maxDate,
-                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]}
+                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]};
 
-                    M.Datepicker.init(el, options)
+                    M.Datepicker.init(el, options);
 
-                    datum_omzetten(true)
+                    datum_omzetten(true);
                 }
             })
     </script>

@@ -15,22 +15,22 @@
             // het formulier is aangepast en moet opgeslagen worden
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("opslaan_knop");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
         }
 
         let ignore_datum_changes = true;
 
         function datum_omzetten(is_initial=false) {
             // nieuwe datum gekozen met de datepicker
-            let el1 = document.querySelector('#id_datum_geldig')
-            let el2 = document.querySelector('#id_datum')
-            el1.value = el2.M_Datepicker.toString('yyyy-mm-dd')
+            let el1 = document.querySelector('#id_datum_geldig');
+            let el2 = document.querySelector('#id_datum');
+            el1.value = el2.M_Datepicker.toString('yyyy-mm-dd');
 
             // ignore calls tijdens initialisatie
-            if (!ignore_datum_changes) gewijzigd()
-            if (is_initial) ignore_datum_changes = false
+            if (!ignore_datum_changes) gewijzigd();
+            if (is_initial) ignore_datum_changes = false;
         }
     </script>
 
@@ -159,20 +159,20 @@
 
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-                const minDate = new Date("{{ min_date|date:'Y-m-d' }}")
-                const maxDate = new Date("{{ max_date|date:'Y-m-d' }}")
+                const minDate = new Date("{{ min_date|date:'Y-m-d' }}");
+                const maxDate = new Date("{{ max_date|date:'Y-m-d' }}");
 
-                let el = document.querySelector('#id_datum')
+                let el = document.querySelector('#id_datum');
                 if (el) {
                     let options = { defaultDate: new Date("{{ korting.geldig_tot_en_met|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
                                     format: "dddd d mmmm yyyy",
                                     minDate: minDate, maxDate: maxDate,
-                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]}
+                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]};
 
-                    M.Datepicker.init(el, options)
+                    M.Datepicker.init(el, options);
 
-                    datum_omzetten(true)
+                    datum_omzetten(true);
                 }
             })
     </script>

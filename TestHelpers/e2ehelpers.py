@@ -472,6 +472,8 @@ class E2EHelpers(TestCase):
     def _validate_javascript(self, script):
         """ use ESprima to validate the javascript / ecmascript """
 
+        issues = list()
+
         # strip <script src=".." type="..">
         script = script[script.find('>')+1:]
 
@@ -495,28 +497,31 @@ class E2EHelpers(TestCase):
                 # make "Error in line 1" more useful
                 script = script.replace(';', ';\n')
 
-                msg = ""
+                add_snippet = True
                 try:
                     result = esprima.parseScript(strict + script)
                 except esprima.Error as exc:
-                    msg = "Error in script: %s\n" % str(exc)
+                    issues.append("Exception in script: %s" % str(exc))
                 else:
                     if result.errors:
-                        msg = "Error in script: %s" % repr(result.errors)
+                        issues.append("Error in script: %s" % repr(result.errors))
                     else:
                         # no error in the readable script!
-                        self.fail(msg='Could not duplicate script error after making readable')
+                        issues.append('Could not duplicate script error after making readable')
+                        add_snippet = False
 
-                msg += "Snippet:\n"
-                # avoid empty line at end
-                if script[-1] == '\n':
-                    script = script[:-1]
-                nr = 0
-                for line in script.split('\n'):
-                    nr += 1
-                    msg += '  %s: %s\n' % (nr, line)
-                # for
-                self.fail(msg=msg)
+                if add_snippet:
+                    issues.append("Snippet:")
+                    # avoid empty line at end
+                    if script[-1] == '\n':
+                        script = script[:-1]
+                    nr = 0
+                    for line in script.split('\n'):
+                        nr += 1
+                        issues.append('  %s: %s' % (nr, line))
+                    # for
+
+        return issues
 
     def assert_scripts_clean(self, html, template_name):
         pos = html.find('<script ')
@@ -525,7 +530,13 @@ class E2EHelpers(TestCase):
             pos = html.find('</script>')
             script = html[:pos+9]
 
-            self._validate_javascript(script)
+            issues = self._validate_javascript(script)
+            if len(issues):
+                msg = 'Invalid script (template: %s):\n' % template_name
+                for issue in issues:
+                    msg += "    %s\n" % issue
+                # for
+                self.fail(msg=msg)
 
             pos = script.find('console.log')
             if pos >= 0:        # pragma: no cover
