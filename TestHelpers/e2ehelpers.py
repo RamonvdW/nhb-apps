@@ -20,6 +20,7 @@ import subprocess
 import traceback
 import datetime
 import tempfile
+import esprima
 import vnujar
 import pyotp
 import json
@@ -468,12 +469,63 @@ class E2EHelpers(TestCase):
                 content = ''
         # while
 
+    def _validate_javascript(self, script):
+        """ use ESprima to validate the javascript / ecmascript """
+
+        # strip <script src=".." type="..">
+        script = script[script.find('>')+1:]
+
+        # strip </script>
+        script = script[:script.find('</script>')]
+
+        if script:
+            # print('esprima: %s' % repr(script))
+            strict = '"use strict";'
+
+            failure = False
+            try:
+                result = esprima.parseScript(strict + script)
+            except esprima.Error as exc:
+                failure = True
+            else:
+                if result.errors:
+                    failure = True
+
+            if failure:
+                # make "Error in line 1" more useful
+                script = script.replace(';', ';\n')
+
+                msg = ""
+                try:
+                    result = esprima.parseScript(strict + script)
+                except esprima.Error as exc:
+                    msg = "Error in script: %s\n" % str(exc)
+                else:
+                    if result.errors:
+                        msg = "Error in script: %s" % repr(result.errors)
+                    else:
+                        # no error in the readable script!
+                        self.fail(msg='Could not duplicate script error after making readable')
+
+                msg += "Snippet:\n"
+                # avoid empty line at end
+                if script[-1] == '\n':
+                    script = script[:-1]
+                nr = 0
+                for line in script.split('\n'):
+                    nr += 1
+                    msg += '  %s: %s\n' % (nr, line)
+                # for
+                self.fail(msg=msg)
+
     def assert_scripts_clean(self, html, template_name):
         pos = html.find('<script ')
         while pos >= 0:
             html = html[pos:]
             pos = html.find('</script>')
             script = html[:pos+9]
+
+            self._validate_javascript(script)
 
             pos = script.find('console.log')
             if pos >= 0:        # pragma: no cover

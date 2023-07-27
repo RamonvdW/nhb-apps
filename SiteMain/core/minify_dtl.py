@@ -108,10 +108,9 @@ class Loader(AppDirectoriesLoader):
                 deel = re.sub(r'\n{', '{', deel)
                 deel = re.sub(r'{\n', '{', deel)
                 deel = re.sub(r'\n}', '}', deel)
-                # deel = re.sub(r'}\n', '}', deel)       # breakt javascript als er een ; ontbreekt!
+                deel = re.sub(r'}\n', '}', deel)       # breekt javascript als er een ; ontbreekt!
                 deel = re.sub(r';\n', ';', deel)
                 deel = re.sub(r',\n', ',', deel)
-                deel = re.sub(r'}\n', '}', deel)
                 deel = re.sub(r'\)\ncontinue', ')continue', deel)
 
                 # verwijder onnodige newlines aan het begin van het script

@@ -92,22 +92,21 @@
 
                             }  else if (status === "betaal") {
                                 // redirect naar de checkout_url
-                                const url = rsp["checkout_url"];
-                                window.location.href = url;
+                                window.location.href = rsp["checkout_url"];
                                 // won't get here
 
                             } else if (status === "mislukt") {
                                 // betaling is afgebroken / expired
-                                const el = document.getElementById('id_bericht')
-                                el.innerText = "De betaling is niet gelukt"
+                                const el = document.getElementById('id_bericht');
+                                el.innerText = "De betaling is niet gelukt";
 
                                 retry = false;      // stop trying
 
                             } else if (status === "error") {
                                 // intern probleem
-                                const el = document.getElementById('id_bericht')
-                                el.innerText = "Er is een probleem opgetreden met deze bestelling"
-                                el.classList.add('sv-rood-text')
+                                const el = document.getElementById('id_bericht');
+                                el.innerText = "Er is een probleem opgetreden met deze bestelling";
+                                el.classList.add('sv-rood-text');
 
                                 retry = false;      // stop trying
                             }
@@ -119,16 +118,16 @@
 
             if (retry) {
                 // over 1 seconde opnieuw proberen
-                setTimeout(check_status_bestelling, 1000)
+                setTimeout(check_status_bestelling, 1000);
             }
         }
 
         function status_ophalen_timeout(xhr) {
             // voorkom reactie bij ontvangst laat antwoord
-            xhr.abort()
+            xhr.abort();
 
             // doe de volgende status check over 1 seconde
-            setTimeout(check_status_bestelling, 1000)
+            setTimeout(check_status_bestelling, 1000);
         }
 
         function check_status_bestelling() {
@@ -136,22 +135,22 @@
             // als de checkout_url beschikbaar is, redirect dan daar naartoe
             // wacht anders 1 seconde en herhaal de check
             if (pogingen > 0) {
-                const el = document.getElementById('id_teller')
-                el.innerText = pogingen
+                const el = document.getElementById('id_teller');
+                el.innerText = pogingen;
                 pogingen -= 1;
 
                 // POST voorkomt caching
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", "{{ url_status_check }}", true);        // true = async
                 xhr.timeout = 5000;                                      // 5 sec
-                xhr.onloadend = function() { status_ophalen_klaar(xhr) }
-                xhr.ontimeout = function() { status_ophalen_timeout(xhr) }
+                xhr.onloadend = function(){ status_ophalen_klaar(xhr)};
+                xhr.ontimeout = function(){ status_ophalen_timeout(xhr)};
                 xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
                 xhr.send();     // no data
             } else {
-                const el = document.getElementById('id_bericht')
-                el.innerText = "Het is op dit moment niet mogelijk om te betalen. Probeer het later nog eens"
-                el.classList.add('sv-rood-text')
+                const el = document.getElementById('id_bericht');
+                el.innerText = "Het is op dit moment niet mogelijk om te betalen. Probeer het later nog eens";
+                el.classList.add('sv-rood-text');
             }
         }
 
@@ -159,8 +158,8 @@
         {
             // doe de eerste status check over 500ms
             // TODO: dit geeft mensen niet echt een kans om de tekst te lezen
-            setTimeout(check_status_bestelling, 500)
-        })
+            setTimeout(check_status_bestelling, 500);
+        });
     </script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="bestel-bestelling-afrekenen" %}
