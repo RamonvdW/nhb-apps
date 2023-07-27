@@ -328,7 +328,7 @@
                 focus_row.cells[4].firstChild.focus()
 
             // zoekveld weer leeg maken
-            document.getElementById('id_nhbnr').value = ""
+            document.getElementById('id_lid_nr').value = ""
 
             const el_naam = document.getElementById('id_naam')
             el_naam.innerHTML = "Naam van de sporter"
