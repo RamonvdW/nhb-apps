@@ -104,12 +104,12 @@
 
                                 if (status === "afgerond") {
                                     // toon de gebruiker dat de betaling binnen is
-                                    const el = document.getElementById("id_status")
-                                    el.innerText = "De betaling is gelukt"
+                                    const el = document.getElementById("id_status");
+                                    el.innerText = "De betaling is gelukt";
 
                                     // enable de knop 'Toon afschrift'
-                                    const el_knop = document.getElementById("id_afschrift")
-                                    el_knop.style.display = "inline-block"
+                                    const el_knop = document.getElementById("id_afschrift");
+                                    el_knop.style.display = "inline-block";
 
                                     // niet nodig om te blijven checken
                                     pogingen = 0;
@@ -117,8 +117,8 @@
                                 }
                                 else if (status === "mislukt") {
                                     // toon de gebruiker dat de betaling afgebroken/mislukt is
-                                    const el = document.getElementById("id_status")
-                                    el.innerText = "De betaling is niet gelukt"
+                                    const el = document.getElementById("id_status");
+                                    el.innerText = "De betaling is niet gelukt";
 
                                     // niet nodig om te blijven checken
                                     pogingen = 0;
@@ -132,16 +132,16 @@
 
                 if (retry) {
                     // over 1 seconde opnieuw proberen
-                    setTimeout(check_status_bestelling, 1000)
+                    setTimeout(check_status_bestelling, 1000);
                 }
             }
 
             function status_ophalen_timeout(xhr) {
                 // voorkom reactie bij ontvangst laat antwoord
-                xhr.abort()
+                xhr.abort();
 
                 // doe de volgende status check over 1 seconde
-                setTimeout(check_status_bestelling, 1000)
+                setTimeout(check_status_bestelling, 1000);
             }
 
             function check_status_bestelling() {
@@ -155,8 +155,8 @@
                     const xhr = new XMLHttpRequest();
                     xhr.open("POST", "{{ url_status_check }}", true);        // true = async
                     xhr.timeout = 5000;                                      // 5 sec
-                    xhr.onloadend = function() { status_ophalen_klaar(xhr) }
-                    xhr.ontimeout = function() { status_ophalen_timeout(xhr) }
+                    xhr.onloadend = function() { status_ophalen_klaar(xhr); };
+                    xhr.ontimeout = function() { status_ophalen_timeout(xhr); };
                     xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
                     xhr.send();     // no data
                 }
@@ -166,7 +166,7 @@
             {
                 // doe de eerste status check over 500ms
                 // TODO: dit geeft mensen niet echt een kans om de tekst te lezen
-                setTimeout(check_status_bestelling, 500)
+                setTimeout(check_status_bestelling, 500);
             })
         </script>
     {% endif %}

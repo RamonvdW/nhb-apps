@@ -182,6 +182,13 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assertTrue(betaal_actief.payment_id != '')
         self.assertEqual(betaal_actief.payment_status, 'open')
 
+        # haal de betaal status pagina op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
+
         # fake het gebruik van de CPSP checkout en de payment-status-changed callback
         count = BetaalMutatie.objects.count()
         resp = self.client.post(self.url_betaal_webhook, {'id': betaal_mutatie.payment_id})

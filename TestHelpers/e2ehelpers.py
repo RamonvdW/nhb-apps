@@ -469,7 +469,8 @@ class E2EHelpers(TestCase):
                 content = ''
         # while
 
-    def _validate_javascript(self, script):
+    @staticmethod
+    def _validate_javascript(script):
         """ use ESprima to validate the javascript / ecmascript """
 
         issues = list()

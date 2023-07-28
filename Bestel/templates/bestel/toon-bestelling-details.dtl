@@ -51,6 +51,13 @@
                         <td>Verzendkosten</td>
                         <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ bestelling.verzendkosten_euro }}</td>
                     </tr>
+                {% elif transport_ophalen %}
+                    <!-- ophalen -->
+                    <tr>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
+                        <td>Ophalen op het bondsbureau</td>
+                        <td class="right-align" style="padding-right:20px">&euro;&nbsp;0,00</td>
+                    </tr>
                 {% endif %}
 
                 <!-- btw -->
