@@ -366,6 +366,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['sportersboog'] = list(SporterBoog
                                        .objects
+                                       .exclude(sporter__is_overleden=True)
                                        .filter(sporter__lid_nr=lid_nr,
                                                sporter__is_actief_lid=True,              # moet actief lid zijn
                                                voor_wedstrijd=True,
@@ -522,6 +523,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         if zoek_lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=zoek_lid_nr,
                                                    sporter__is_actief_lid=True,
                                                    voor_wedstrijd=True,
@@ -538,6 +540,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         elif lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=lid_nr,
                                                    sporter__is_actief_lid=True,
                                                    voor_wedstrijd=True,
@@ -716,6 +719,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['familie'] = list(SporterBoog
                                   .objects
+                                  .exclude(sporter__is_overleden=True)
                                   .filter(sporter__adres_code=adres_code,
                                           sporter__is_actief_lid=True,
                                           voor_wedstrijd=True,
@@ -890,7 +894,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         inschrijving_open_of_404(wedstrijd)
 
-        if not sporterboog.sporter.is_actief_lid or not sporterboog.sporter.bij_vereniging:
+        sporter = sporterboog.sporter
+        if sporter.is_overleden or not sporter.is_actief_lid or not sporter.bij_vereniging:
             raise Http404('Niet actief lid')
 
         account_koper = request.user
@@ -1052,6 +1057,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         if zoek_lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=zoek_lid_nr,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
@@ -1062,6 +1068,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         elif lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=lid_nr,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
@@ -1198,6 +1205,9 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
         # TODO: check wedstrijd geslacht gekozen
         # TODO: check dat klasse bij sporterboog past
+        sporter = sporterboog.sporter
+        if sporter.is_overleden or not sporter.is_actief_lid or not sporter.bij_vereniging:
+            raise Http404('Niet actief lid')
 
         account_koper = request.user
 

@@ -93,6 +93,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     .filter(bij_vereniging=hwl_ver,
                             geboorte_datum__year__gte=jeugdgrens)
                     .exclude(is_actief_lid=False)
+                    .exclude(is_overleden=True)
                     .order_by('-geboorte_datum__year',
                               'achternaam',
                               'voornaam')):
@@ -124,6 +125,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     .filter(bij_vereniging=hwl_ver,
                             geboorte_datum__year__lt=jeugdgrens)
                     .exclude(is_actief_lid=False)
+                    .exclude(is_overleden=True)
                     .order_by('achternaam',
                               'voornaam')):
             obj.leeftijdsklasse = None
@@ -459,6 +461,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 try:
                     sporterboog = (SporterBoog
                                    .objects
+                                   .exclude(sporter__is_overleden=True)
                                    .select_related('sporter',
                                                    'boogtype')
                                    .get(sporter=sporter_pk,
