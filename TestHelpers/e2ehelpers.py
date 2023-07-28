@@ -487,13 +487,13 @@ class E2EHelpers(TestCase):
             failure = False
             try:
                 result = esprima.parseScript(strict + script)
-            except esprima.Error as exc:
+            except esprima.Error:                       # pragma: no cover
                 failure = True
             else:
-                if result.errors:
+                if result.errors:                       # pragma: no cover
                     failure = True
 
-            if failure:
+            if failure:                                 # pragma: no cover
                 # make "Error in line 1" more useful
                 script = script.replace(';', ';\n')
 
