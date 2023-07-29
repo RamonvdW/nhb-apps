@@ -259,4 +259,116 @@ function mirror_radio(src_name, dst_name) {
     dst_el.checked = true;
 }
 
+
+// verander het icon van een collapsible
+// hiermee zetten we het plus/min teken aan de rechter kant
+function set_collapsible_icon(li_el, new_icon) {
+    // li_el = the "li" element that was opened or closed
+    // first child element = the div with the header
+    const header_el = li_el.childNodes[0];
+    // search within the header for the element with the icon class
+    const icons = header_el.getElementsByClassName('material-icons-round');
+    if (icons.length > 0) {
+        const icon = icons[0];
+        icon.innerText = new_icon;
+    }
+}
+
+function uitklappen_klaar(id) {
+    set_collapsible_icon(id, 'remove');     // expand_less
+}
+function inklappen_klaar(id) {
+    set_collapsible_icon(id, 'add');        // expand_more
+}
+
+
+// initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, etc.
+// referentie in: Plein/templates/plein/site_layout.dtl
+function sitelayout_loaded() {
+    //console.log('loaded!');
+
+    let elems = document.querySelectorAll(".collapsible");
+    M.Collapsible.init(elems, { //inDuration: 100,    // default is 300
+                                //outDuration: 100,   // default is 300
+                                onOpenEnd: uitklappen_klaar,
+                                onCloseEnd: inklappen_klaar,
+                                });
+
+    elems = document.querySelectorAll(".collapsible-header .material-icons-round");
+    // console.log('header icons:', elems)
+    elems.forEach(icon => {icon.innerText = 'add';});    // gelijk houden aan inklappen_klaar
+
+    // dropdown menu
+    elems = document.querySelectorAll(".dropdown-trigger");
+    M.Dropdown.init(elems, {coverTrigger: false, constrainWidth: false});
+
+    // tooltips
+    elems = document.querySelectorAll(".tooltipped");
+    M.Tooltip.init(elems, { enterDelay: 1000 });
+
+    // rolgordijnen
+    elems = document.querySelectorAll("select");
+    M.FormSelect.init(elems, {});
+
+    // modals
+    elems = document.querySelectorAll(".modal");
+    M.Modal.init(elems, {'endingTop': '35%'});
+
+    // console.log('history.length:', history.length)
+    if (history.length < 2) {
+        // nothing to go back to
+        // typically happens when opening a manual page in a new window
+        const el = document.getElementById("id_kruimels_back");
+        // element bestaat niet als broodkruimels uitgezet zijn, zoals op het Plein zelf
+        if (el) el.style.display = "none";
+    }
+
+    // framework init, after everything has been loaded and instantiated
+    window.addEventListener("load", sitelayout_load);
+    window.addEventListener('resize', sitelayout_resize);
+}
+
+
+// page is fully loaded
+function sitelayout_load() {
+    //console.log("load!");
+
+    // de fonts zijn nu helemaal ingeladen, dus we kunnen de icons tonen
+    const icons = document.getElementsByClassName('material-icons-round');
+    Array.from(icons).forEach(icon => {
+        icon.style.display = 'inline-block'
+    });
+
+    // zoek alle tabellen met een zoekveld en trigger de oninput method
+    // dit is noodzakelijk bij gebruik van de browser 'back' knop
+    // anders zijn de tabellen niet meer gefiltreerd
+    const tables = document.getElementsByTagName("table");
+    Array.from(tables).forEach(table => {
+        if (table.id !== "") {
+            const inputs = table.getElementsByTagName("input");
+            if (inputs.length >= 1) myTableFilter(inputs[0], table.id);
+        }
+    });
+
+    // evalueer de posities van de labels van de forms
+    // zodat het label niet over het ingevulde input veld staat
+    M.updateTextFields();
+}
+
+
+// the document view (window) has been resized
+function sitelayout_resize() {
+
+    // dropdown menu automatisch dichtklappen
+    const elems = document.querySelectorAll(".dropdown-trigger");
+    Array.from(elems).forEach(elem => {
+        const instance = M.Dropdown.getInstance(elem);
+        if (instance.isOpen) {
+            instance.close();
+        }
+    });
+
+}
+
+
 // end of file
