@@ -197,14 +197,14 @@ class TestBeheer(E2EHelpers, TestCase):
     def test_admin_specials(self):
         self.e2e_login_and_pass_otp(self.account_admin)
 
-        # Betaal/admin.py: HeeftMollieKeyFilter
+        # Betaal
         resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=0')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
-        # Feedback/admin.py: IsAfgehandeldListFilter
+        # Feedback
         resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=0')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
@@ -214,16 +214,35 @@ class TestBeheer(E2EHelpers, TestCase):
         resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=-1')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
-        # Sporter/admin.py: HeeftWaIdFilter
+        # Sporter
         resp = self.client.get('/beheer/Sporter/sporter/?heeft_wa_id=Ja')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-        # Sporter/admin.py: HeeftAccountFilter
         resp = self.client.get('/beheer/Sporter/sporter/?heeft_account=Ja')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-        # Opleiding/admin.py: HeeftAccountFilter
+        # Opleiding
         resp = self.client.get('/beheer/Opleidingen/opleidingdiploma/?heeft_account=Ja')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        # Competitie
+        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=HWL')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=Zelf')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?TeamAG=Ontbreekt')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitieteam/?TeamType=R2')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=R2')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamVer=1350')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
 
 # end of file

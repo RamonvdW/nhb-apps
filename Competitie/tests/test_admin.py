@@ -51,78 +51,137 @@ class TestCompetitieAdmin(E2EHelpers, TestCase):
         factory = RequestFactory()
 
         # TeamAGListFilter
-        worker = admin.TeamAGListFilter(None, {'TeamAG': None}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
+        worker = admin.TeamAGListFilter(None,
+                                        {'TeamAG': None},
+                                        RegiocompetitieSporterBoog,
+                                        admin.RegiocompetitieSporterBoogAdmin)
+        _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
-        worker = admin.TeamAGListFilter(None, {'TeamAG': 'Ontbreekt'}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
+        worker = admin.TeamAGListFilter(None,
+                                        {'TeamAG': 'Ontbreekt'},
+                                        RegiocompetitieSporterBoog,
+                                        admin.RegiocompetitieSporterBoogAdmin)
+        _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         # ZelfstandigIngeschrevenListFilter
-        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': None}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
+        worker = admin.ZelfstandigIngeschrevenListFilter(None,
+                                                         {'Zelfstandig': None},
+                                                         RegiocompetitieSporterBoog,
+                                                         admin.RegiocompetitieSporterBoogAdmin)
+        _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
-        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': 'Zelf'}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
+        worker = admin.ZelfstandigIngeschrevenListFilter(None,
+                                                         {'Zelfstandig': 'Zelf'},
+                                                         RegiocompetitieSporterBoog,
+                                                         admin.RegiocompetitieSporterBoogAdmin)
+        _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
-        worker = admin.ZelfstandigIngeschrevenListFilter(None, {'Zelfstandig': 'HWL'}, RegiocompetitieSporterBoog, admin.RegiocompetitieSporterBoogAdmin)
-        qs = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
+        worker = admin.ZelfstandigIngeschrevenListFilter(None,
+                                                         {'Zelfstandig': 'HWL'},
+                                                         RegiocompetitieSporterBoog,
+                                                         admin.RegiocompetitieSporterBoogAdmin)
+        _ = worker.queryset(None, RegiocompetitieSporterBoog.objects.all())
 
         # IncompleetTeamFilter
-        worker = admin.IncompleetTeamFilter(None, {'incompleet': None}, KampioenschapTeam, admin.KampioenschapTeamAdmin)
-        qs = worker.queryset(None, KampioenschapTeam.objects.all())
+        worker = admin.IncompleetTeamFilter(None,
+                                            {'incompleet': None},
+                                            KampioenschapTeam,
+                                            admin.KampioenschapTeamAdmin)
+        _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
-        worker = admin.IncompleetTeamFilter(None, {'incompleet': 'incompleet'}, KampioenschapTeam, admin.KampioenschapTeamAdmin)
-        qs = worker.queryset(None, KampioenschapTeam.objects.all())
+        worker = admin.IncompleetTeamFilter(None,
+                                            {'incompleet': 'incompleet'},
+                                            KampioenschapTeam,
+                                            admin.KampioenschapTeamAdmin)
+        _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
-        worker = admin.IncompleetTeamFilter(None, {'incompleet': 'compleet'}, KampioenschapTeam, admin.KampioenschapTeamAdmin)
-        qs = worker.queryset(None, KampioenschapTeam.objects.all())
+        worker = admin.IncompleetTeamFilter(None,
+                                            {'incompleet': 'compleet'},
+                                            KampioenschapTeam,
+                                            admin.KampioenschapTeamAdmin)
+        _ = worker.queryset(None, KampioenschapTeam.objects.all())
 
         # TeamTypeFilter
-        worker = admin.TeamTypeFilter(None, {'TeamType': None}, RegiocompetitieTeam, admin.RegiocompetitieTeamAdmin)
+        worker = admin.TeamTypeFilter(None,
+                                      {'TeamType': None},
+                                      RegiocompetitieTeam,
+                                      admin.RegiocompetitieTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieTeam.objects.all())
         self.assertEqual(1, qs.count())
 
-        worker = admin.TeamTypeFilter(None, {'TeamType': 'R2'}, RegiocompetitieTeam, admin.RegiocompetitieTeamAdmin)
+        worker = admin.TeamTypeFilter(None,
+                                      {'TeamType': 'R2'},
+                                      RegiocompetitieTeam,
+                                      admin.RegiocompetitieTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieTeam.objects.all())
         self.assertEqual(0, qs.count())
 
-        worker = admin.TeamTypeFilter(None, {'TeamType': 'C'}, RegiocompetitieTeam, admin.RegiocompetitieTeamAdmin)
+        worker = admin.TeamTypeFilter(None,
+                                      {'TeamType': 'C'},
+                                      RegiocompetitieTeam,
+                                      admin.RegiocompetitieTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieTeam.objects.all())
         self.assertEqual(1, qs.count())
 
         # RondeTeamVerFilter
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/')
-        worker = admin.RondeTeamVerFilter(request, {'RondeTeamVer': self.team.pk}, RegiocompetitieRondeTeam, admin.RegiocompetitieRondeTeamAdmin)
+        worker = admin.RondeTeamVerFilter(request,
+                                          {'RondeTeamVer': self.team.pk},
+                                          RegiocompetitieRondeTeam,
+                                          admin.RegiocompetitieRondeTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
         self.assertEqual(1, qs.count())
 
-        request = factory.get('/beheer/Competitie/regiocompetitierondeteam/?team__regiocompetitie__competitie__id__exact=7')
-        worker = admin.RondeTeamVerFilter(request, {'RondeTeamVer': None}, RegiocompetitieRondeTeam, admin.RegiocompetitieRondeTeamAdmin)
-        qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
+        request = factory.get('/beheer/Competitie/regiocompetitierondeteam/' +
+                              '?team__regiocompetitie__competitie__id__exact=7')
+        worker = admin.RondeTeamVerFilter(request,
+                                          {'RondeTeamVer': None},
+                                          RegiocompetitieRondeTeam,
+                                          admin.RegiocompetitieRondeTeamAdmin)
+        _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
-        request = factory.get('/beheer/Competitie/regiocompetitierondeteam/?team__vereniging__regio__regio_nr__exact=101')
-        worker = admin.RondeTeamVerFilter(request, {'RondeTeamVer': None}, RegiocompetitieRondeTeam, admin.RegiocompetitieRondeTeamAdmin)
+        request = factory.get('/beheer/Competitie/regiocompetitierondeteam/' +
+                              '?team__vereniging__regio__regio_nr__exact=101')
+        worker = admin.RondeTeamVerFilter(request,
+                                          {'RondeTeamVer': None},
+                                          RegiocompetitieRondeTeam,
+                                          admin.RegiocompetitieRondeTeamAdmin)
         tups = worker.lookups(None, admin.RegiocompetitieRondeTeamAdmin)
         self.assertEqual(tups, [(self.team.pk, str(self.team))])
-        qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
+        _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
         request = factory.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=C')
-        worker = admin.RondeTeamVerFilter(request, {'RondeTeamVer': None}, RegiocompetitieRondeTeam, admin.RegiocompetitieRondeTeamAdmin)
-        qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
+        worker = admin.RondeTeamVerFilter(request,
+                                          {'RondeTeamVer': None},
+                                          RegiocompetitieRondeTeam,
+                                          admin.RegiocompetitieRondeTeamAdmin)
+        _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
         # RondeTeamTypeFilter
-        worker = admin.RondeTeamTypeFilter(None, {'RondeTeamType': 'C'}, RegiocompetitieRondeTeam, admin.RegiocompetitieRondeTeamAdmin)
+        worker = admin.RondeTeamTypeFilter(None,
+                                           {'RondeTeamType': 'C'},
+                                           RegiocompetitieRondeTeam,
+                                           admin.RegiocompetitieRondeTeamAdmin)
         qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
         self.assertEqual(1, qs.count())
 
-        worker = admin.RondeTeamTypeFilter(None, {'RondeTeamType': None}, RegiocompetitieRondeTeam, admin.RegiocompetitieRondeTeamAdmin)
-        qs = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
+        worker = admin.RondeTeamTypeFilter(None,
+                                           {'RondeTeamType': None},
+                                           RegiocompetitieRondeTeam,
+                                           admin.RegiocompetitieRondeTeamAdmin)
+        _ = worker.queryset(None, RegiocompetitieRondeTeam.objects.all())
 
         # KlasseLimietBoogTypeFilter
-        worker = admin.KlasseLimietBoogTypeFilter(None, {'BoogType': None}, KampioenschapIndivKlasseLimiet, admin.KampioenschapIndivKlasseLimietAdmin)
-        qs = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
+        worker = admin.KlasseLimietBoogTypeFilter(None,
+                                                  {'BoogType': None},
+                                                  KampioenschapIndivKlasseLimiet,
+                                                  admin.KampioenschapIndivKlasseLimietAdmin)
+        _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
 
-        worker = admin.KlasseLimietBoogTypeFilter(None, {'BoogType': 'TR'}, KampioenschapIndivKlasseLimiet, admin.KampioenschapIndivKlasseLimietAdmin)
-        qs = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
+        worker = admin.KlasseLimietBoogTypeFilter(None,
+                                                  {'BoogType': 'TR'},
+                                                  KampioenschapIndivKlasseLimiet,
+                                                  admin.KampioenschapIndivKlasseLimietAdmin)
+        _ = worker.queryset(None, KampioenschapIndivKlasseLimiet.objects.all())
 
 # end of file
