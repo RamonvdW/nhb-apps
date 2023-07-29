@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.definities import BESTEL_MUTATIE_VERWIJDER
+from Bestel.definities import BESTEL_MUTATIE_VERWIJDER, BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie, BestelMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
@@ -30,6 +30,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
     url_mandje_toon = '/bestel/mandje/'
     url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk
     url_bestellingen_overzicht = '/bestel/overzicht/'
+    url_kies_transport = '/bestel/mandje/transport/'
 
     url_meer_vragen = '/account/registreer/gast/meer-vragen/'
 
@@ -167,7 +168,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         keuze.save()
         self.keuze = keuze
 
-    def _vul_mandje(self, account):
+    def _vul_mandje(self, account, transport=BESTEL_TRANSPORT_VERZEND):
 
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)
 
@@ -186,6 +187,9 @@ class TestBestelMandje(E2EHelpers, TestCase):
         product2.save()
         mandje.producten.add(product2)
 
+        mandje.transport = transport
+        mandje.save(update_fields=['transport'])
+
         return product1, product2
 
     def test_anon(self):
@@ -201,25 +205,32 @@ class TestBestelMandje(E2EHelpers, TestCase):
     def test_bekijk_mandje(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
-        url = self.url_mandje_toon
 
         # leeg mandje
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(url, post=False)
+        self.e2e_assert_other_http_commands_not_supported(self.url_mandje_toon, post=False)
+
+        # controleer dat er geen knop is om transport in te stellen
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertFalse(self.url_kies_transport in urls)
 
         # vul het mandje
         product1, product2 = self._vul_mandje(self.account_admin)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat er nu wel een knop is om transport in te stellen
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertTrue(self.url_kies_transport in urls)
 
         # corner case: sporter zonder vereniging
         self.sporter.bij_vereniging = None
@@ -230,7 +241,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         product1.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
@@ -244,7 +255,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.instellingen_bond.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
@@ -267,7 +278,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.instellingen.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
@@ -276,7 +287,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         # veroorzaak een exception
         BetaalInstellingenVereniging.objects.all().delete()
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
@@ -325,6 +336,8 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         # vul het mandje
         product1, product2 = self._vul_mandje(self.account_admin)
+        # product1 = wedstrijd
+        # product2 = webwinkel
         self.assertTrue(str(product1) != '')
         self.assertTrue(product1.korte_beschrijving() != '')
 
@@ -430,6 +443,54 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         bestelling = Bestelling.objects.all()[0]
         self.assertTrue(str(bestelling) != '')
+
+    def test_transport(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # leeg mandje
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_mandje_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat er geen knop is om transport in te stellen
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertFalse(self.url_kies_transport in urls)
+
+        # vul het mandje
+        product1, product2 = self._vul_mandje(self.account_admin, BESTEL_TRANSPORT_OPHALEN)
+        # product1 = wedstrijd
+        # product2 = webwinkel
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_mandje_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat er nu wel een knop is om transport in te stellen
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertTrue(self.url_kies_transport in urls)
+
+        # verwijder het webwinkel product
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_mandje_verwijder % product2.pk, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_mandje_toon)
+
+        self.verwerk_bestel_mutaties()
+
+        # controleer dat de transport knop nu niet getoond wordt
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_mandje_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat er geen knop is om transport in te stellen
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertFalse(self.url_kies_transport in urls)
 
 
 # end of file

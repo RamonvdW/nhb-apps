@@ -100,6 +100,10 @@ def _beschrijf_bestelling(bestelling):
         producten.append(product)
 
     if bestelling.transport == BESTEL_TRANSPORT_OPHALEN:
+
+        # nieuwe regel op de bestelling
+        regel_nr += 1
+
         product = SimpleNamespace(
                         regel_nr=regel_nr,
                         beschrijving=[("Ophalen op het bondsbureau", "")],
@@ -112,6 +116,7 @@ def _beschrijf_bestelling(bestelling):
                                 (bestelling.btw_euro_cat3, bestelling.btw_percentage_cat3)]:
 
         if btw_euro > 0.001:
+
             product = SimpleNamespace(
                             regel_nr=0,     # geen nummer tonen
                             beschrijving=[(btw_tekst, "")],

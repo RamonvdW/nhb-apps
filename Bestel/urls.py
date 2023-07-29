@@ -9,6 +9,8 @@ from Bestel import view_mandje, view_bestelling, view_activiteit, view_overboeki
 
 app_name = 'Bestel'
 
+# basis = /bestel/
+
 urlpatterns = [
 
     path('mandje/verwijderen/<product_pk>/',
