@@ -92,7 +92,7 @@
                                 <a class="btn-sv-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
                                     <i class="notranslate material-icons-round">edit</i></a>
                                 <a class="btn-sv-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px">
-                                    <i class="notranslate material-icons-round" style="font-size:33px">edit_note</i></a>
+                                    <i class="notranslate material-icons-round">schedule</i></a>
                             </div>
                         </td>
                     </tr>
