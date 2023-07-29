@@ -30,8 +30,8 @@
 
                 {% for product in producten %}
                     <tr>
-                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</th>
-                        <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
+                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}<span>{{ hdr }}</span><br>{% endfor %}</th>
+                        <td>{% for hdr, lijn in product.beschrijving %}<span class="notranslate">{{ lijn }}</span><br>{% endfor %}</td>
                         <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ product.prijs_euro }}</td>
                     </tr>
 

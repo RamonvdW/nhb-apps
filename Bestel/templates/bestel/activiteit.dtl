@@ -109,7 +109,7 @@
                         <li>
                             <div class="collapsible-header white">
                                 <span>Bestel nummer {{ bestelling.bestel_nr_str|highlight:zoekterm }} ({{ bestelling.beschrijving_kort }})</span>
-                                <i class="material-icons-round sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
+                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
                             </div>
                             <div class="collapsible-body white">
                                 <table>
