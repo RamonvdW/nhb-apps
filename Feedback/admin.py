@@ -58,10 +58,12 @@ class FeedbackAdmin(admin.ModelAdmin):
     # filter mogelijkheid
     list_filter = (IsAfgehandeldListFilter,)
 
-    readonly_fields = ('toegevoegd_op', 'bevinding', 'gebruiker', 'in_rol', 'op_pagina', 'volledige_url', 'site_versie', 'email_adres')
+    readonly_fields = ('toegevoegd_op', 'bevinding', 'gebruiker', 'in_rol', 'email_adres', 'op_pagina',
+                       'volledige_url', 'site_versie')
 
     # volgorde van de velden
-    fields = ('toegevoegd_op', 'bevinding', 'is_afgehandeld', 'feedback', 'gebruiker', 'email_adres', 'op_pagina', 'volledige_url', 'site_versie')
+    fields = ('toegevoegd_op', 'bevinding', 'is_afgehandeld', 'feedback', 'gebruiker', 'email_adres', 'op_pagina',
+              'volledige_url', 'site_versie')
 
     @staticmethod
     def email_adres(obj):                             # pragma: no cover
