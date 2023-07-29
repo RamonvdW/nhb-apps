@@ -343,5 +343,23 @@
     </form>
 
 
+    <!-- collapsible / accordeon -->
+    <ul class="collapsible popout">
+        {% for x in y %}
+            <li>
+                <div class="collapsible-header white">
+                    <span>Header {{ x.korte_beschrijving }}</span>
+                    <i class="material-icons-round sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
+                </div>
+                <div class="collapsible-body white">
+                    <p>Lange {{ x.beschrijving }}</p>
+                    <p>Meer velden</p>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+
+
 {% include 'feedback/sidebar.dtl' with op_pagina="app-snippets" %}
 

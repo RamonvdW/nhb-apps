@@ -99,12 +99,13 @@
             <div class="row-sv-blauw">
                 <div class="col s12 l8 offset-l2 left-align">
 
-                    <ul class="collapsible">
+                    <ul class="collapsible popout">
                         {% for obj in zoek_leden %}
                             <!-- obj is Account -->
                             <li>
                                 <div class="collapsible-header white">
                                     <span>[{{ obj.lid_nr_str|highlight:zoekterm }}] {{ obj.volledige_naam|highlight:zoekterm }}</span>
+                                    <i class="material-icons-round sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
                                 </div>
                                 <div class="collapsible-body white">
                                     <div style="column-count: 2">
@@ -116,7 +117,7 @@
                                         </div>
                                     </div>
                                     <div>
-                                        {% if url_toon_bondspas %}
+                                        {% if obj.url_toon_bondspas %}
                                             <a class="btn-sv-rood" href="{{ obj.url_toon_bondspas }}" style="margin-top:15px; margin-right:20px" target="_blank" rel="noopener noreferrer">Toon Bondspas</a>
                                         {% endif %}
                                         {% if obj.kan_loskoppelen %}
