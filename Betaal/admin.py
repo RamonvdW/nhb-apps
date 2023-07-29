@@ -32,7 +32,7 @@ class HeeftMollieKeyFilter(admin.SimpleListFilter):
         keuze = self.value()
         if keuze is not None:
             # print('keuze: %s' % repr(keuze))
-            if keuze == '0':                                 # pragma: no cover
+            if keuze == '0':
                 # moet een mollie key hebben
                 queryset = queryset.exclude(mollie_api_key='')
 

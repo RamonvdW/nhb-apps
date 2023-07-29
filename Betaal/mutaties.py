@@ -56,7 +56,7 @@ def betaal_mutatieverzoek_start_ontvangst(bestelling, beschrijving, bedrag_euro,
                                         beschrijving=beschrijving,
                                         bedrag_euro=bedrag_euro,
                                         url_betaling_gedaan=url_betaling_gedaan)
-    except BetaalMutatie.objects.MultipleObjectsReturned:
+    except BetaalMutatie.objects.MultipleObjectsReturned:       # pragma: no cover
         # al meerdere verzoeken in de queue
         mutatie = None
     else:

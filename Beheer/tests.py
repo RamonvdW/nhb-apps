@@ -194,4 +194,14 @@ class TestBeheer(E2EHelpers, TestCase):
 
         settings.DEBUG = False
 
+    def test_admin_specials(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # Betaal/admin.py: HeeftMollieKeyFilter
+        resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=0')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
 # end of file
