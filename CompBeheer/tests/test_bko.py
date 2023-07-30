@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
+from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, DEELNAME_JA, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, Kampioenschap,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog)
 from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
@@ -244,15 +244,29 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                  sporterboog=self.sporterboog_1r,
                                  bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_r,
-                                 result_rank=45,
+                                 result_rank=1,                 # titel: BK
+                                 deelname=DEELNAME_JA).save()
+
+        # recurve, lid 2
+        KampioenschapSporterBoog(kampioenschap=kampioenschap,
+                                 sporterboog=self.sporterboog_1r,
+                                 bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                                 indiv_klasse=self.comp25_klasse_r,
                                  deelname=DEELNAME_NEE).save()
+
+        # recurve, lid 2
+        KampioenschapSporterBoog(kampioenschap=kampioenschap,
+                                 sporterboog=self.sporterboog_1r,
+                                 bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                                 indiv_klasse=self.comp25_klasse_r,
+                                 result_rank=2).save()
 
         # compound, lid 1
         KampioenschapSporterBoog(kampioenschap=kampioenschap,
                                  sporterboog=self.sporterboog_1c,
                                  bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
                                  indiv_klasse=self.comp25_klasse_c,
-                                 result_rank=1).save()
+                                 result_rank=1).save()          # titel: NK
 
         # compound, lid 2
         KampioenschapSporterBoog(kampioenschap=kampioenschap,

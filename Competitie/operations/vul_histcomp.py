@@ -272,13 +272,8 @@ def uitslag_bk_indiv_naar_histcomp(comp):
 
         if 0 < deelnemer.result_rank < KAMP_RANK_BLANCO:
             sporter = deelnemer.sporterboog.sporter
-
             boogtype = deelnemer.sporterboog.boogtype
             ver = deelnemer.bij_vereniging
-
-            if deelnemer.result_rank > KAMP_RANK_BLANCO:
-                # TOO: onmogelijk om te bereiken?
-                deelnemer.result_rank = 0                   # verwijder speciale codes (no show / reserve)
 
             titel_code = HISTCOMP_TITEL_NONE
             if deelnemer.result_rank == 1:
