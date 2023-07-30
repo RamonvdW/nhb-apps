@@ -26,9 +26,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, mutaties van RK/BK deelnemers lijsten """
 
-    url_lijst_rk_rko = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'                         # deelcomp_rk.pk
-    url_lijst_rk_hwl = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/vereniging/'              # deelcomp_rk.pk
-    url_wijzig_stat = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+    url_lijst_rk_rko = '/bondscompetities/rk/lijst/%s/'                            # deelcomp_rk.pk
+    url_lijst_rk_hwl = '/bondscompetities/rk/lijst/%s/vereniging/'                 # deelcomp_rk.pk
+    url_wijzig_stat = '/bondscompetities/rk/lijst/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
     url_wijzig_cut_rk = '/bondscompetities/rk/planning/%s/limieten/'                                  # deelcomp_rk.pk
 
     testdata = None

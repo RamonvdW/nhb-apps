@@ -34,9 +34,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
     url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                    # deelcomp_pk
     url_wijzig_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/wijzig/%s/'              # match_pk
     url_verwijder_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/verwijder/%s/'        # match_pk
-    url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'                       # deelcomp_pk
-    url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'          # deelcomp_pk
-    url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+    url_lijst_rk = '/bondscompetities/rk/lijst/%s/'                                             # deelcomp_pk
+    url_lijst_bestand = '/bondscompetities/rk/lijst/%s/bestand/'                                # deelcomp_pk
+    url_wijzig_status = '/bondscompetities/rk/lijst/wijzig-status-rk-deelnemer/%s/'             # deelnemer_pk
     url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'                            # deelcomp_pk
     url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'      # comp_pk
     url_doorzetten_rk_indiv = '/bondscompetities/beheer/%s/doorzetten/rk-indiv-naar-bk/'        # comp_pk
@@ -151,8 +151,10 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.client.logout()
 
         self.deelcomp_bond_18 = Kampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
-        self.deelkamp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, rayon=self.rayon_1)[0]
-        self.deelkamp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, rayon=self.rayon_2)[0]
+        self.deelkamp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18,
+                                                               rayon=self.rayon_1)[0]
+        self.deelkamp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18,
+                                                               rayon=self.rayon_2)[0]
         self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_101)[0]
         self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, regio=self.regio_101)[0]
         self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_112)[0]
