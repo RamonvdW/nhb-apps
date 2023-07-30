@@ -188,7 +188,7 @@ def uitslag_rk_indiv_naar_histcomp(comp):
 
     try:
         hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:
+    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
         return
 
     beschrijving2boogtype_pk = dict()
@@ -257,7 +257,7 @@ def uitslag_bk_indiv_naar_histcomp(comp):
 
     try:
         hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:
+    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
         return
 
     bulk = list()
@@ -320,7 +320,7 @@ def uitslag_regio_teams_naar_histcomp(comp):
 
     try:
         hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:
+    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
         return
 
     bulk = list()
@@ -417,7 +417,7 @@ def uitslag_rk_teams_naar_histcomp(comp):
 
     try:
         hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:
+    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
         return
 
     indiv_klasse_lid_nr2hist = dict()
@@ -516,7 +516,7 @@ def uitslag_bk_teams_naar_histcomp(comp):
 
     try:
         hist_seizoen = HistCompSeizoen.objects.get(seizoen=seizoen, comp_type=comp.afstand)
-    except HistCompSeizoen.DoesNotExist:
+    except HistCompSeizoen.DoesNotExist:        # pragma: no cover
         return
 
     indiv_klasse_lid_nr2hist = dict()

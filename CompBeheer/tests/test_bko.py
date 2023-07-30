@@ -7,12 +7,13 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Competitie.definities import DEEL_RK, DEEL_BK
+from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, Kampioenschap,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog)
 from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
                                        zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
+from HistComp.models import HistCompSeizoen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -134,13 +135,39 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.boog_r = BoogType.objects.get(afkorting='R')
         self.boog_c = BoogType.objects.get(afkorting='C')
 
-        self.sporterboog_1 = SporterBoog(sporter=self.lid_sporter_1,
-                                         boogtype=self.boog_r,
-                                         voor_wedstrijd=True)
-        self.sporterboog_1.save()
+        self.sporterboog_1r = SporterBoog(sporter=self.lid_sporter_1,
+                                          boogtype=self.boog_r,
+                                          voor_wedstrijd=True)
+        self.sporterboog_1r.save()
+
+        self.sporterboog_1c = SporterBoog(sporter=self.lid_sporter_1,
+                                          boogtype=self.boog_c,
+                                          voor_wedstrijd=True)
+        self.sporterboog_1c.save()
+
+        self.sporterboog_2c = SporterBoog(sporter=self.lid_sporter_2,
+                                          boogtype=self.boog_c,
+                                          voor_wedstrijd=True)
+        self.sporterboog_2c.save()
+
+        # compound, lid 3
+        self.sporterboog_3c = SporterBoog(sporter=self.lid_sporter_3,
+                                          boogtype=self.boog_c,
+                                          voor_wedstrijd=True)
+        self.sporterboog_3c.save()
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
+
+        self.comp18_klasse_r = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                                    boogtype__afkorting='R',
+                                                                    is_onbekend=False,
+                                                                    is_ook_voor_rk_bk=True).first()
+
+        self.comp18_klasse_c = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                                    boogtype__afkorting='C',
+                                                                    is_onbekend=False,
+                                                                    is_ook_voor_rk_bk=True).first()
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -177,64 +204,68 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
 
-    def _regioschutters_inschrijven(self):
-
-        klasse_r = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
-                                                        boogtype__afkorting='R',
-                                                        is_onbekend=False,
-                                                        is_ook_voor_rk_bk=True)[0]
-
-        klasse_c = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
-                                                        boogtype__afkorting='C',
-                                                        is_onbekend=False,
-                                                        is_ook_voor_rk_bk=True)[0]
-
+    def _inschrijven_regio_indiv(self):
         # recurve, lid 1
         RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
-                                   sporterboog=self.sporterboog_1,
-                                   bij_vereniging=self.sporterboog_1.sporter.bij_vereniging,
-                                   indiv_klasse=klasse_r,
+                                   sporterboog=self.sporterboog_1r,
+                                   bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                                   indiv_klasse=self.comp18_klasse_r,
                                    aantal_scores=7,
                                    totaal=102).save()
 
         # compound, lid 1
-        sporterboog_1c = SporterBoog(sporter=self.lid_sporter_1,
-                                     boogtype=self.boog_c,
-                                     voor_wedstrijd=True)
-        sporterboog_1c.save()
-
         RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
-                                   sporterboog=sporterboog_1c,
-                                   bij_vereniging=sporterboog_1c.sporter.bij_vereniging,
-                                   indiv_klasse=klasse_c,
+                                   sporterboog=self.sporterboog_1c,
+                                   bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
+                                   indiv_klasse=self.comp18_klasse_c,
                                    aantal_scores=6,
                                    totaal=101).save()
 
         # compound, lid 2
-        sporterboog_2c = SporterBoog(sporter=self.lid_sporter_2,
-                                     boogtype=self.boog_c,
-                                     voor_wedstrijd=True)
-        sporterboog_2c.save()
-
         RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
-                                   sporterboog=sporterboog_2c,
-                                   bij_vereniging=sporterboog_2c.sporter.bij_vereniging,
-                                   indiv_klasse=klasse_c,
+                                   sporterboog=self.sporterboog_2c,
+                                   bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                                   indiv_klasse=self.comp18_klasse_c,
                                    aantal_scores=6,
                                    totaal=101).save()       # zelfde score als andere sporter in deze klasse
 
         # compound, lid 3
-        sporterboog_3c = SporterBoog(sporter=self.lid_sporter_3,
-                                     boogtype=self.boog_c,
-                                     voor_wedstrijd=True)
-        sporterboog_3c.save()
-
         RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
-                                   sporterboog=sporterboog_3c,
-                                   bij_vereniging=sporterboog_3c.sporter.bij_vereniging,
-                                   indiv_klasse=klasse_c,
+                                   sporterboog=self.sporterboog_3c,
+                                   bij_vereniging=self.sporterboog_3c.sporter.bij_vereniging,
+                                   indiv_klasse=self.comp18_klasse_c,
                                    aantal_scores=4,     # te weinig scores
                                    totaal=300).save()
+
+    def _inschrijven_kamp_indiv(self, kampioenschap):
+        # recurve, lid 1
+        KampioenschapSporterBoog(kampioenschap=kampioenschap,
+                                 sporterboog=self.sporterboog_1r,
+                                 bij_vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                                 indiv_klasse=self.comp18_klasse_r,
+                                 result_rank=45,
+                                 deelname=DEELNAME_NEE).save()
+
+        # compound, lid 1
+        KampioenschapSporterBoog(kampioenschap=kampioenschap,
+                                 sporterboog=self.sporterboog_1c,
+                                 bij_vereniging=self.sporterboog_1c.sporter.bij_vereniging,
+                                 indiv_klasse=self.comp18_klasse_c,
+                                 result_rank=1).save()
+
+        # compound, lid 2
+        KampioenschapSporterBoog(kampioenschap=kampioenschap,
+                                 sporterboog=self.sporterboog_2c,
+                                 bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                                 indiv_klasse=self.comp18_klasse_c,
+                                 result_rank=KAMP_RANK_BLANCO).save()
+
+        # compound, lid 2
+        KampioenschapSporterBoog(kampioenschap=kampioenschap,
+                                 sporterboog=self.sporterboog_2c,
+                                 bij_vereniging=self.sporterboog_2c.sporter.bij_vereniging,
+                                 indiv_klasse=self.comp18_klasse_c,
+                                 result_rank=KAMP_RANK_NO_SHOW).save()         # komt niet in aanmerking
 
     def test_bad(self):
         # moet BKO zijn
@@ -364,7 +395,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
 
         # nu echt doorzetten
-        self._regioschutters_inschrijven()
+        self._inschrijven_regio_indiv()
 
         self.assertEqual(4, RegiocompetitieSporterBoog.objects.count())
         self.assertEqual(0, KampioenschapSporterBoog.objects.count())
@@ -387,7 +418,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        self._regioschutters_inschrijven()
+        self._inschrijven_regio_indiv()
 
         self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
         self.assertEqual(0, KampioenschapSporterBoog.objects.count())
@@ -468,7 +499,11 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        # TODO: maak RK deelnemers met resultaten aan, voor een betere test
+        comp = self.comp_18
+        seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+        HistCompSeizoen(seizoen=seizoen, comp_type=comp.afstand).save()
+
+        self._inschrijven_kamp_indiv(self.deelkamp_rayon1_18)
 
         url = self.url_doorzetten_rk_naar_bk_indiv % self.comp_18.pk
 
@@ -501,10 +536,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.deelkamp_bk_18) != '')
 
-        deelkamp_bk_18 = Kampioenschap.objects.get(competitie=self.comp_18,
-                                                   deel=DEEL_BK)
-        objs = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk_18)
-        self.assertEqual(objs.count(), 0)       # worden nog niet gemaakt, dus 0
+        objs = KampioenschapSporterBoog.objects.filter(kampioenschap=self.deelkamp_bk_18)
+        self.assertEqual(objs.count(), 2)
 
     def test_doorzetten_2b(self):
         # rk naar bk teams
@@ -613,6 +646,12 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
+        comp = self.comp_18
+        seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+        HistCompSeizoen(seizoen=seizoen, comp_type=comp.afstand).save()
+
+        self._inschrijven_kamp_indiv(self.deelkamp_bk_18)
+
         url = self.url_bevestig_eindstand_bk_indiv % self.comp_18.pk
 
         # pagina ophalen in de verkeerde fase
@@ -645,7 +684,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)
 
-        # achtergrond taak wordt niet gebruikt
+        # kietel de achtergrondtaak
+        self.verwerk_regiocomp_mutaties(show_warnings=False)
 
         # check nieuwe fase
         self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
@@ -689,7 +729,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_competitie_beheer % self.comp_18.pk)
 
-        # achtergrond taak wordt niet gebruikt
+        # kietel de achtergrondtaak
+        self.verwerk_regiocomp_mutaties(show_warnings=False)
 
         # check nieuwe fase
         self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
