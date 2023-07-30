@@ -53,6 +53,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
 
     bulk = list()
     for boogtype in comp.boogtypen.all():
+
         klassen_pks = (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=comp,
@@ -111,7 +112,7 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                         gemiddelde=deelnemer.gemiddelde)
 
             bulk.append(hist)
-            if len(bulk) >= 500:
+            if len(bulk) >= 500:            # pragma: no cover
                 HistCompRegioIndiv.objects.bulk_create(bulk)
                 bulk = list()
         # for
@@ -167,14 +168,14 @@ def uitslag_regio_indiv_naar_histcomp(comp):
                         gemiddelde=deelnemer.gemiddelde)
 
             bulk.append(hist)
-            if len(bulk) >= 500:
+            if len(bulk) >= 500:            # pragma: no cover
                 HistCompRegioIndiv.objects.bulk_create(bulk)
                 bulk = list()
         # for
 
     # for
 
-    if len(bulk):
+    if len(bulk):       # pragma: no branch
         HistCompRegioIndiv.objects.bulk_create(bulk)
 
 

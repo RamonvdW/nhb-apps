@@ -21,22 +21,23 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompBeheerBKO(E2EHelpers, TestCase):
+class TestCompBeheerBko(E2EHelpers, TestCase):
 
     """ tests voor de CompBeheer applicatie, module BKO """
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    url_competitie_beheer = '/bondscompetities/beheer/%s/'                                          # comp_pk
-    url_doorzetten_regio_naar_rk = '/bondscompetities/beheer/%s/doorzetten/regio-naar-rk/'          # comp_pk
-    url_doorzetten_rk_naar_bk_indiv = '/bondscompetities/beheer/%s/doorzetten/rk-indiv-naar-bk/'    # comp_pk
-    url_doorzetten_rk_naar_bk_teams = '/bondscompetities/beheer/%s/doorzetten/rk-teams-naar-bk/'    # comp_pk
-    url_doorzetten_bk_kleine_indiv = '/bondscompetities/beheer/%s/doorzetten/bk-indiv-kleine-klassen-zijn-samengevoegd/'     # comp_pk
-    url_doorzetten_bk_kleine_teams = '/bondscompetities/beheer/%s/doorzetten/bk-teams-kleine-klassen-zijn-samengevoegd/'     # comp_pk
-    url_bevestig_eindstand_bk_indiv = '/bondscompetities/beheer/%s/doorzetten/bk-indiv-eindstand-bevestigen/'   # comp_pk
-    url_bevestig_eindstand_bk_teams = '/bondscompetities/beheer/%s/doorzetten/bk-teams-eindstand-bevestigen/'   # comp_pk
-    url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'                  # comp_pk
-    url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
+    url_competitie_beheer = '/bondscompetities/beheer/%s/'                                      # comp_pk
+    url_klassengrenzen_vaststellen = url_competitie_beheer + 'klassengrenzen-vaststellen/'
+    url_doorzetten = url_competitie_beheer + 'doorzetten/'
+    url_doorzetten_regio_naar_rk = url_doorzetten + 'regio-naar-rk/'
+    url_doorzetten_rk_naar_bk_indiv = url_doorzetten + 'rk-indiv-naar-bk/'
+    url_doorzetten_rk_naar_bk_teams = url_doorzetten + 'rk-teams-naar-bk/'
+    url_doorzetten_bk_kleine_indiv = url_doorzetten + 'bk-indiv-kleine-klassen-zijn-samengevoegd/'
+    url_doorzetten_bk_kleine_teams = url_doorzetten + 'bk-teams-kleine-klassen-zijn-samengevoegd/'
+    url_bevestig_eindstand_bk_indiv = url_doorzetten + 'bk-indiv-eindstand-bevestigen/'
+    url_bevestig_eindstand_bk_teams = url_doorzetten + 'bk-teams-eindstand-bevestigen/'
+    url_teams_klassengrenzen_vaststellen = url_doorzetten + 'rk-bk-teams-klassengrenzen-vaststellen/'
 
     regio_nr = 101
     ver_nr = 0      # wordt in setUpTestData ingevuld
@@ -121,18 +122,22 @@ class TestCompBeheerBKO(E2EHelpers, TestCase):
         self.account_rcl101_18 = self._prep_beheerder_lid('RCL101')
         self.account_rcl101_25 = self._prep_beheerder_lid('RCL101-25')
         self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
-        self.account_schutter = self._prep_beheerder_lid('Schutter')
-        self.lid_sporter_1 = Sporter.objects.get(lid_nr=self.account_schutter.username)
 
-        self.account_schutter2 = self._prep_beheerder_lid('Schutter2')
-        self.lid_sporter_2 = Sporter.objects.get(lid_nr=self.account_schutter2.username)
+        self.account_sporter1 = self._prep_beheerder_lid('Sporter1')
+        self.account_sporter2 = self._prep_beheerder_lid('Sporter2')
+        self.account_sporter3 = self._prep_beheerder_lid('Sporter3')
+
+        self.lid_sporter_1 = Sporter.objects.get(lid_nr=self.account_sporter1.username)
+        self.lid_sporter_2 = Sporter.objects.get(lid_nr=self.account_sporter2.username)
+        self.lid_sporter_3 = Sporter.objects.get(lid_nr=self.account_sporter3.username)
 
         self.boog_r = BoogType.objects.get(afkorting='R')
+        self.boog_c = BoogType.objects.get(afkorting='C')
 
-        self.sporterboog = SporterBoog(sporter=self.lid_sporter_1,
-                                       boogtype=self.boog_r,
-                                       voor_wedstrijd=True)
-        self.sporterboog.save()
+        self.sporterboog_1 = SporterBoog(sporter=self.lid_sporter_1,
+                                         boogtype=self.boog_r,
+                                         voor_wedstrijd=True)
+        self.sporterboog_1.save()
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -145,20 +150,20 @@ class TestCompBeheerBKO(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         self.deelkamp_bk_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
-                                                           deel=DEEL_BK)[0]
+                                                           deel=DEEL_BK).first()
         self.deelkamp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
                                                                deel=DEEL_RK,
-                                                               rayon=self.rayon_1)[0]
-        self.deelcomp_regio_101 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                 regio=self.regio_101)[0]
-        self.deelcomp_regio_105 = Regiocompetitie.objects.filter(competitie=self.comp_18,
-                                                                 regio=self.regio_105)[0]
+                                                               rayon=self.rayon_1).first()
+        self.regiocomp18_101 = Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                              regio=self.regio_101).first()
+        self.regiocomp18_105 = Regiocompetitie.objects.filter(competitie=self.comp_18,
+                                                              regio=self.regio_105).first()
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
 
         self.deelkamp_bk_25 = Kampioenschap.objects.filter(competitie=self.comp_25,
-                                                           deel=DEEL_BK)[0]
+                                                           deel=DEEL_BK).first()
         self.functie_bko_25 = self.deelkamp_bk_25.functie
         self.functie_bko_25.accounts.add(self.account_bko_25)
 
@@ -174,46 +179,62 @@ class TestCompBeheerBKO(E2EHelpers, TestCase):
 
     def _regioschutters_inschrijven(self):
 
-        boog_c = BoogType.objects.get(afkorting='C')
-
-        klasse_r = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='R',
+        klasse_r = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                        boogtype__afkorting='R',
                                                         is_onbekend=False,
                                                         is_ook_voor_rk_bk=True)[0]
 
-        klasse_c = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='C',
+        klasse_c = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                        boogtype__afkorting='C',
                                                         is_onbekend=False,
                                                         is_ook_voor_rk_bk=True)[0]
 
         # recurve, lid 1
-        RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_101,
-                                   sporterboog=self.sporterboog,
-                                   bij_vereniging=self.sporterboog.sporter.bij_vereniging,
+        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
+                                   sporterboog=self.sporterboog_1,
+                                   bij_vereniging=self.sporterboog_1.sporter.bij_vereniging,
                                    indiv_klasse=klasse_r,
-                                   aantal_scores=7).save()
+                                   aantal_scores=7,
+                                   totaal=102).save()
 
         # compound, lid 1
-        sporterboog = SporterBoog(sporter=self.lid_sporter_1,
-                                  boogtype=boog_c,
-                                  voor_wedstrijd=True)
-        sporterboog.save()
+        sporterboog_1c = SporterBoog(sporter=self.lid_sporter_1,
+                                     boogtype=self.boog_c,
+                                     voor_wedstrijd=True)
+        sporterboog_1c.save()
 
-        RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_101,
-                                   sporterboog=sporterboog,
-                                   bij_vereniging=sporterboog.sporter.bij_vereniging,
+        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
+                                   sporterboog=sporterboog_1c,
+                                   bij_vereniging=sporterboog_1c.sporter.bij_vereniging,
                                    indiv_klasse=klasse_c,
-                                   aantal_scores=6).save()
+                                   aantal_scores=6,
+                                   totaal=101).save()
 
-        # compound, lid2
-        sporterboog = SporterBoog(sporter=self.lid_sporter_2,
-                                  boogtype=boog_c,
-                                  voor_wedstrijd=True)
-        sporterboog.save()
+        # compound, lid 2
+        sporterboog_2c = SporterBoog(sporter=self.lid_sporter_2,
+                                     boogtype=self.boog_c,
+                                     voor_wedstrijd=True)
+        sporterboog_2c.save()
 
-        RegiocompetitieSporterBoog(regiocompetitie=self.deelcomp_regio_101,
-                                   sporterboog=sporterboog,
-                                   bij_vereniging=sporterboog.sporter.bij_vereniging,
+        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
+                                   sporterboog=sporterboog_2c,
+                                   bij_vereniging=sporterboog_2c.sporter.bij_vereniging,
                                    indiv_klasse=klasse_c,
-                                   aantal_scores=6).save()
+                                   aantal_scores=6,
+                                   totaal=101).save()       # zelfde score als andere sporter in deze klasse
+
+        # compound, lid 3
+        sporterboog_3c = SporterBoog(sporter=self.lid_sporter_3,
+                                     boogtype=self.boog_c,
+                                     voor_wedstrijd=True)
+        sporterboog_3c.save()
+
+        RegiocompetitieSporterBoog(regiocompetitie=self.regiocomp18_101,
+                                   sporterboog=sporterboog_3c,
+                                   bij_vereniging=sporterboog_3c.sporter.bij_vereniging,
+                                   indiv_klasse=klasse_c,
+                                   aantal_scores=4,     # te weinig scores
+                                   totaal=300).save()
 
     def test_bad(self):
         # moet BKO zijn
@@ -312,12 +333,12 @@ class TestCompBeheerBKO(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl', 'plein/site_layout.dtl'))
 
         # zet een regiocompetitie die geen team competitie organiseert
-        self.deelcomp_regio_101.regio_organiseert_teamcompetitie = False
-        self.deelcomp_regio_101.save(update_fields=['regio_organiseert_teamcompetitie'])
+        self.regiocomp18_101.regio_organiseert_teamcompetitie = False
+        self.regiocomp18_101.save(update_fields=['regio_organiseert_teamcompetitie'])
 
         # zet een regiocompetitie team ronde > 7
-        self.deelcomp_regio_105.huidige_team_ronde = 8
-        self.deelcomp_regio_105.save(update_fields=['huidige_team_ronde'])
+        self.regiocomp18_105.huidige_team_ronde = 8
+        self.regiocomp18_105.save(update_fields=['huidige_team_ronde'])
 
         # status ophalen
         with self.assert_max_queries(20):
@@ -345,7 +366,7 @@ class TestCompBeheerBKO(E2EHelpers, TestCase):
         # nu echt doorzetten
         self._regioschutters_inschrijven()
 
-        self.assertEqual(3, RegiocompetitieSporterBoog.objects.count())
+        self.assertEqual(4, RegiocompetitieSporterBoog.objects.count())
         self.assertEqual(0, KampioenschapSporterBoog.objects.count())
 
         with self.assert_max_queries(20):
@@ -428,7 +449,8 @@ class TestCompBeheerBKO(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp,
-                                  ('compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl', 'plein/site_layout.dtl'))
+                                  ('compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl',
+                                   'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk

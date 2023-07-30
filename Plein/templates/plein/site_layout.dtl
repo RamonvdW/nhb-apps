@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-146.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-147.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -42,8 +42,8 @@
             <nav class="sv-grijs">
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
-                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:1px; z-index:1">
-                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="62" width="264" alt="KHSN logo">
+                    <a href="/plein/" class="brand-logo" style="z-index:1;padding-top:1px">
+                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="62" width="264" alt="KHSN logo" style="padding-left:7px">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->

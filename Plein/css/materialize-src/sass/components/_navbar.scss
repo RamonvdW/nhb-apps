@@ -60,7 +60,8 @@ nav {
   .brand-logo {
     position: absolute;
     color: $navbar-font-color;
-    display: inline-block;
+    //display: inline-block;
+    display: flex;      // inline-block because clickable area below the logo overlapping broodkruimels
     font-size: $navbar-brand-font-size;
     padding: 0;
 
