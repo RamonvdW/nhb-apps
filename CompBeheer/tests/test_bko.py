@@ -10,8 +10,8 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, Kampioenschap,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog)
-from Competitie.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
-                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
+from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
+                                       zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -21,7 +21,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompetitiePlanningBond(E2EHelpers, TestCase):
+class TestCompBeheerBKO(E2EHelpers, TestCase):
 
     """ tests voor de CompBeheer applicatie, module BKO """
 

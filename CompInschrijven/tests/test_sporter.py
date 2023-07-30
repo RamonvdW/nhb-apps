@@ -9,7 +9,7 @@ from django.utils import timezone
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieRonde, CompetitieMatch)
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tests.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging

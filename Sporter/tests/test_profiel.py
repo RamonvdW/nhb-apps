@@ -11,11 +11,10 @@ from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
-from Competitie.tijdlijn import (zet_competitie_fases,
-                                 zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
-                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,
-                                 zet_competitie_fase_rk_prep,
-                                 zet_competitie_fase_afsluiten)
+from Competitie.tests.tijdlijn import (zet_competitie_fases,
+                                       zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
+                                       zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,
+                                       zet_competitie_fase_rk_prep, zet_competitie_fase_afsluiten)
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging

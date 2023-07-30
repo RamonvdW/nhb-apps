@@ -9,8 +9,8 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import (zet_test_datum, zet_competitie_fases,
-                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven)
+from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                       zet_competitie_fase_regio_inschrijven)
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -22,7 +22,7 @@ import datetime
 
 class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
-    """ tests voor de CompLaagRegio applicatie, Teams functie """
+    """ tests voor de CompLaagRegio applicatie, Instellingen functie """
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
@@ -117,7 +117,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
-        zet_test_datum('2019-08-01')
+        evaluatie_datum.zet_test_datum('2019-08-01')
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

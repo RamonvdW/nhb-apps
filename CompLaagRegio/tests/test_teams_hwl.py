@@ -10,8 +10,8 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
-from Competitie.tijdlijn import (zet_test_datum, zet_competitie_fases,
-                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven)
+from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                       zet_competitie_fase_regio_inschrijven)
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
@@ -88,7 +88,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100001 = sporter
 
-        zet_test_datum('2019-09-01')
+        evaluatie_datum.zet_test_datum('2019-09-01')
         jaar = 2019
 
         # maak een aspirant aan

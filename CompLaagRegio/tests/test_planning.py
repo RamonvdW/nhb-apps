@@ -11,7 +11,7 @@ from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieRonde, CompetitieMatch, RegiocompetitieSporterBoog, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten
+from Competitie.tests.tijdlijn import zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging

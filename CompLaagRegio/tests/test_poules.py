@@ -11,7 +11,8 @@ from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum, zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten
+from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                       zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -119,7 +120,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
-        zet_test_datum('2019-09-01')
+        evaluatie_datum.zet_test_datum('2019-09-01')
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

@@ -9,7 +9,7 @@ from django.utils import timezone
 from Competitie.definities import DEELNAME_NEE, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tests.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 

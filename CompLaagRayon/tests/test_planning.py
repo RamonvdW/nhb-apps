@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                KampioenschapIndivKlasseLimiet, RegiocompetitieSporterBoog,
                                CompetitieMutatie)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten
+from Competitie.tests.tijdlijn import evaluatie_datum, zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Uitslag
@@ -136,7 +136,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
-        zet_test_datum('2019-08-01')
+        evaluatie_datum.zet_test_datum('2019-08-01')
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

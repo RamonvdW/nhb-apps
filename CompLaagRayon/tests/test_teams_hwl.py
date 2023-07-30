@@ -11,7 +11,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.definities import DEEL_RK
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
-from Competitie.tijdlijn import zet_test_datum, zet_competitie_fase_regio_wedstrijden
+from Competitie.tests.tijdlijn import evaluatie_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
@@ -341,7 +341,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert404(resp, 'Competitie is niet in de juiste fase 1')
 
         # zet competitie in fase F
-        zet_test_datum('')
+        evaluatie_datum.zet_test_datum('')
         zet_competitie_fase_regio_wedstrijden(self.comp_18)
 
         # competitie in de verkeerde fase

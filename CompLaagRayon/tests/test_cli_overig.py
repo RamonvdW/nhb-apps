@@ -8,7 +8,7 @@ from django.test import TestCase
 from Competitie.definities import MUTATIE_INITIEEL
 from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
-from Competitie.tijdlijn import zet_competitie_fase_rk_prep
+from Competitie.tests.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 

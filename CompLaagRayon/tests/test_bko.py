@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
-from Competitie.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten
+from Competitie.tests.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 

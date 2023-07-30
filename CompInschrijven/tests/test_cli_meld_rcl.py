@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, ORGANISATIE_WA
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fase_regio_wedstrijden
+from Competitie.tests.tijdlijn import zet_competitie_fase_regio_wedstrijden
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak

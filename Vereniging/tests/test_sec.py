@@ -10,7 +10,7 @@ from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
-from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv

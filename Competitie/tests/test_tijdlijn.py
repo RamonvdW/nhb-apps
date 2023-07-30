@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tests.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -136,4 +136,6 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
             fase_teams = bepaal_fase_teams(comp)
             self.assertEqual(fase_teams, fase)
         # for
+
+
 # end of file
