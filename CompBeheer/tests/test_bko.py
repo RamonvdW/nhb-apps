@@ -119,10 +119,6 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.account_bko_18 = self._prep_beheerder_lid('BKO')
         self.account_bko_25 = self._prep_beheerder_lid('BKO')
         self.account_rko1_25 = self._prep_beheerder_lid('RKO1')
-        #self.account_rko2_25 = self._prep_beheerder_lid('RKO2')
-        #self.account_rcl101_18 = self._prep_beheerder_lid('RCL101')
-        #self.account_rcl101_25 = self._prep_beheerder_lid('RCL101-25')
-        #self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
 
         self.account_sporter1 = self._prep_beheerder_lid('Sporter1')
         self.account_sporter2 = self._prep_beheerder_lid('Sporter2')
@@ -451,7 +447,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         # laat de mutatie verwerken
         f1, f2 = self.verwerk_regiocomp_mutaties(show_warnings=False)
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[WARNING] Sporter 100005 - Compound is geen RK deelnemer want heeft geen vereniging" in f2.getvalue())
+        self.assertTrue(
+            "[WARNING] Sporter 100005 - Compound is geen RK deelnemer want heeft geen vereniging" in f2.getvalue())
 
         # het lid zonder vereniging komt NIET in de RK selectie
         self.assertEqual(2, KampioenschapSporterBoog.objects.count())
@@ -607,7 +604,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-3a-bk-kleine-klassen-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-3a-bk-kleine-klassen-indiv.dtl',
+                                         'plein/site_layout.dtl'))
 
         # nu echt doorzetten
         with self.assert_max_queries(20):
@@ -640,7 +638,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-3b-bk-kleine-klassen-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-3b-bk-kleine-klassen-teams.dtl',
+                                         'plein/site_layout.dtl'))
 
         # nu echt doorzetten
         with self.assert_max_queries(20):
@@ -686,7 +685,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4a-bevestig-eindstand-bk-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4a-bevestig-eindstand-bk-indiv.dtl',
+                                         'plein/site_layout.dtl'))
 
         # verkeerde BKO
         self.e2e_wissel_naar_functie(self.functie_bko_18)
@@ -731,7 +731,8 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4b-bevestig-eindstand-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/bko-doorzetten-4b-bevestig-eindstand-bk-teams.dtl',
+                                         'plein/site_layout.dtl'))
 
         # verkeerde BKO
         self.e2e_wissel_naar_functie(self.functie_bko_25)
