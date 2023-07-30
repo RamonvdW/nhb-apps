@@ -8,9 +8,8 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME_JA, DEELNAME_ONBEKEND, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, Kampioenschap, KampioenschapSporterBoog,
-                               KampioenschapIndivKlasseLimiet, RegiocompetitieSporterBoog,
-                               CompetitieMutatie)
+                               Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap, KampioenschapSporterBoog,
+                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet, CompetitieMutatie)
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import evaluatie_datum, zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten
 from Functie.operations import maak_functie
@@ -697,6 +696,12 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         limiet.save()
         self.assertTrue(str(limiet) != "")      # coverage only
 
+        limiet = KampioenschapTeamKlasseLimiet(kampioenschap=self.deelkamp_rayon1_18,
+                                               team_klasse=self.klasse_r_ere,
+                                               limiet=20)
+        limiet.save()
+        self.assertTrue(str(limiet) != '')
+
         # nu nog een keer, met een RK deelnemerslijst
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
@@ -1001,33 +1006,34 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagrayon/wijzig-limieten-rk.dtl', 'plein/site_layout.dtl'))
 
-        sel = 'isel_%s' % self.klasse_r.pk
+        isel = 'isel_%s' % self.klasse_r.pk
+        tsel = 'tsel_%s' % self.klasse_r_ere.pk
 
         # limiet op default zetten
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 0)
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 24, 'snel': 1})
+            resp = self.client.post(url, {isel: 24, tsel: 12, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 0)
 
         # limiet zetten
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 0)
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 20, 'snel': 1})
+            resp = self.client.post(url, {isel: 20, tsel: 10, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.verwerk_regiocomp_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 1)
 
         # limiet opnieuw zetten, geen wijziging
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 20, 'snel': 1})
+            resp = self.client.post(url, {isel: 20, tsel: 10, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.verwerk_regiocomp_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 1)
 
         # limiet aanpassen
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 16, 'snel': 1})
+            resp = self.client.post(url, {isel: 16, tsel: 8, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.verwerk_regiocomp_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 1)
@@ -1042,7 +1048,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         # limiet verwijderen, zonder 'snel'
         time.sleep = self._dummy_sleep
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 24})
+            resp = self.client.post(url, {isel: 24})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.verwerk_regiocomp_mutaties()
         self.assertEqual(KampioenschapIndivKlasseLimiet.objects.count(), 0)
@@ -1057,7 +1063,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         aantal = CompetitieMutatie.objects.count()
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 4, 'snel': 1})
+            resp = self.client.post(url, {isel: 4, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.verwerk_regiocomp_mutaties()
         self.assertEqual(CompetitieMutatie.objects.count(), aantal + 1)

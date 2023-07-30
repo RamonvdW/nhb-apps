@@ -759,11 +759,6 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.cut) != '')
 
-        team_klasse = CompetitieTeamKlasse.objects.all()[0]
-        temp = KampioenschapTeamKlasseLimiet(kampioenschap=self.deelkamp_rk,
-                                             team_klasse=team_klasse)
-        self.assertTrue(str(temp) != '')
-
         # verplaats de cut naar 8
         url = self.url_wijzig_cut_rk % self.deelkamp_rk.pk
         sel = 'sel_%s' % self.cut.indiv_klasse.pk
