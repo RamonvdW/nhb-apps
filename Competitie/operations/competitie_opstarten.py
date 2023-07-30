@@ -213,10 +213,14 @@ def _maak_competitieklassen(comp):
                 klasse.blazoen1_regio = template.blazoen1_18m_regio
                 klasse.blazoen2_regio = template.blazoen2_18m_regio
                 klasse.blazoen_rk_bk = template.blazoen_18m_rk_bk
+                if klasse.is_ook_voor_rk_bk:
+                    klasse.titel_bk = template.titel_bk_18m
             else:
                 klasse.blazoen1_regio = template.blazoen1_25m_regio
                 klasse.blazoen2_regio = template.blazoen2_25m_regio
                 klasse.blazoen_rk_bk = template.blazoen_25m_rk_bk
+                if klasse.is_ook_voor_rk_bk:
+                    klasse.titel_bk = template.titel_bk_25m
 
             bulk.append(klasse)
 
@@ -341,11 +345,6 @@ def competities_aanmaken(jaar=None):
 
         functies[(functie.rol, afstand, nr)] = functie
     # for
-
-    # now = timezone.now()
-    # if now.month == 12 and now.day == 31:               # pragma: no cover
-    #     # avoid failing test cases one day per year
-    #     yearend = date(year=jaar+1, month=1, day=1)     # 31 december + 1 day
 
     # maak de Competitie aan voor 18m en 25m
     for afstand, beschrijving in AFSTANDEN:
