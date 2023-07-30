@@ -9,7 +9,7 @@
 from BasisTypen.definities import (GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
                                    ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIE_WA,
                                    BOOGTYPE_AFKORTING_RECURVE)
-from BasisTypen.models import LeeftijdsKlasse, TemplateCompetitieIndivKlasse
+from BasisTypen.models import Leeftijdsklasse, TemplateCompetitieIndivKlasse
 
 
 def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_jaar):
@@ -38,7 +38,7 @@ def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_
         alle_lkl = list()
         prev_lkl = None
         min_wedstrijdleeftijd = 0
-        for lkl in (LeeftijdsKlasse
+        for lkl in (Leeftijdsklasse
                     .objects
                     .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_KHSN),
                             wedstrijd_geslacht=GESLACHT_ALLE)
@@ -72,7 +72,7 @@ def bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, huidige_
         alle_lkl = list()
         prev_lkl = None
         min_wedstrijdleeftijd = 0
-        for lkl in (LeeftijdsKlasse
+        for lkl in (Leeftijdsklasse
                     .objects
                     .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_KHSN),
                             wedstrijd_geslacht__in=wedstrijdgeslacht_nhb)
@@ -156,7 +156,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
 
     alle_lkl = list()
     min_wedstrijdleeftijd = 0
-    for lkl in (LeeftijdsKlasse
+    for lkl in (Leeftijdsklasse
                 .objects
                 .filter(pk__in=lkl_pks,
                         wedstrijd_geslacht__in=(wedstrijdgeslacht_nhb, GESLACHT_ALLE))
@@ -232,7 +232,7 @@ def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar):
     alle_lkl = list()
     prev_lkl = None
     min_wedstrijdleeftijd = 0
-    for lkl in (LeeftijdsKlasse
+    for lkl in (Leeftijdsklasse
                 .objects
                 .filter(organisatie=ORGANISATIE_WA,
                         wedstrijd_geslacht=wedstrijdgeslacht)
@@ -287,7 +287,7 @@ def bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht, huidige_jaar
     """
 
     # haal alle leeftijdsklassen op en vul de min/max leeftijden aan
-    alle_lkl = (LeeftijdsKlasse
+    alle_lkl = (Leeftijdsklasse
                 .objects
                 .filter(organisatie=ORGANISATIE_IFAA,
                         wedstrijd_geslacht=wedstrijdgeslacht)
@@ -342,7 +342,7 @@ def bereken_leeftijdsklasse_wa(wedstrijdleeftijd, wedstrijdgeslacht):
     gevonden_lkl = None
 
     # selecteer een geslacht-specifieke wedstrijdklasse
-    for lkl in (LeeftijdsKlasse
+    for lkl in (Leeftijdsklasse
                 .objects
                 .filter(organisatie=ORGANISATIE_WA,
                         wedstrijd_geslacht=wedstrijdgeslacht)
@@ -382,7 +382,7 @@ def bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd, wedstrijdgeslacht):
 
     # selecteer een geslacht-specifieke wedstrijdklasse
     prev_lkl = None
-    for lkl in (LeeftijdsKlasse
+    for lkl in (Leeftijdsklasse
                 .objects
                 .filter(organisatie=ORGANISATIE_IFAA,
                         wedstrijd_geslacht=wedstrijdgeslacht)
@@ -419,7 +419,7 @@ def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
 
     # eerste poging: selecteer een geslacht-specifieke wedstrijdklasse
     prev_lkl = None
-    for lkl in (LeeftijdsKlasse
+    for lkl in (Leeftijdsklasse
                 .objects
                 .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_KHSN),
                         wedstrijd_geslacht=wedstrijdgeslacht)
@@ -439,7 +439,7 @@ def bereken_leeftijdsklasse_khsn(wedstrijdleeftijd, wedstrijdgeslacht):
     if not gevonden_lkl:
         # tweede poging: selecteer een gender-neutrale wedstrijdklasse
         prev_lkl = None
-        for lkl in (LeeftijdsKlasse
+        for lkl in (Leeftijdsklasse
                     .objects
                     .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_KHSN),
                             wedstrijd_geslacht=GESLACHT_ALLE)

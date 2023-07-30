@@ -102,7 +102,7 @@ class TeamType(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class LeeftijdsKlasse(models.Model):
+class Leeftijdsklasse(models.Model):
     """ definitie van een leeftijdsklasse """
 
     # WA, IFAA of nationaal
@@ -194,7 +194,7 @@ class TemplateCompetitieIndivKlasse(models.Model):
     volgorde = models.PositiveIntegerField()
 
     # de leeftijdsklassen: Onder 12 Jongens/Meisjes, Onder 14 Jongens/Meisjes, Onder 18, Onder 21, 21+
-    leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
+    leeftijdsklassen = models.ManyToManyField(Leeftijdsklasse)
 
     # wedstrijdklasse wel/niet meenemen naar de RK/BK
     # staat op True voor aspiranten klassen
@@ -317,7 +317,7 @@ class KalenderWedstrijdklasse(models.Model):
     boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
 
     # de leeftijdsklassen: mannen/vrouwen en aspirant, cadet, junior, senior, master, veteraan
-    leeftijdsklasse = models.ForeignKey(LeeftijdsKlasse, on_delete=models.PROTECT)
+    leeftijdsklasse = models.ForeignKey(Leeftijdsklasse, on_delete=models.PROTECT)
 
     # volgende voor gebruik bij het presenteren van een lijst van klassen
     volgorde = models.PositiveIntegerField()

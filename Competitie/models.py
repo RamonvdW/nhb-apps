@@ -7,7 +7,7 @@
 from django.db import models
 from Account.models import Account
 from BasisTypen.definities import BLAZOEN_CHOICES, BLAZOEN_40CM
-from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType,
+from BasisTypen.models import (BoogType, Leeftijdsklasse, TeamType,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse)
 from Competitie.definities import (AFSTANDEN,
                                    DEEL_BK, DEEL_RK,
@@ -244,7 +244,7 @@ class CompetitieIndivKlasse(models.Model):
 
     # de leeftijdsklassen: aspirant, cadet, junior, senior en mannen/vrouwen
     # typisch zijn twee klassen: mannen en vrouwen
-    leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
+    leeftijdsklassen = models.ManyToManyField(Leeftijdsklasse)
 
     # is dit bedoeld als klasse onbekend?
     # bevat typische ook "Klasse Onbekend" in de titel

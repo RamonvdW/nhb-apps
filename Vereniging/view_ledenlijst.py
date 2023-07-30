@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_KHSN
-from BasisTypen.models import LeeftijdsKlasse
+from BasisTypen.models import Leeftijdsklasse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -53,7 +53,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # deel 1: jeugd
 
         lkls = list()
-        for lkl in (LeeftijdsKlasse  # pragma: no branch
+        for lkl in (Leeftijdsklasse  # pragma: no branch
                     .objects
                     .filter(organisatie=ORGANISATIE_KHSN,
                             min_wedstrijdleeftijd=0)    # exclude veel van de senioren klassen
@@ -102,7 +102,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # deel 2: volwassenen
 
         lkls = list()
-        for lkl in (LeeftijdsKlasse  # pragma: no branch
+        for lkl in (Leeftijdsklasse  # pragma: no branch
                     .objects.filter(organisatie=ORGANISATIE_KHSN,
                                     max_wedstrijdleeftijd=0)    # skip jeugd klassen
                     .order_by('-volgorde')):                    # volgorde: veteraan, master, senior

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA
-from BasisTypen.models import (BoogType, TeamType, LeeftijdsKlasse,
+from BasisTypen.models import (BoogType, TeamType, Leeftijdsklasse,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                KalenderWedstrijdklasse)
 from BasisTypen.admin import BasisTypenTemplateCompetitieIndivKlasseAdmin
@@ -24,7 +24,7 @@ class TestBasisTypen(TestCase):
         pass
 
     def test_basics(self):
-        obj = LeeftijdsKlasse()
+        obj = Leeftijdsklasse()
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
         obj.min_wedstrijdleeftijd = 0
@@ -73,7 +73,7 @@ class TestBasisTypen(TestCase):
         self.assertTrue(html.count('<p>') == obj.leeftijdsklassen.count())
 
     def test_max_wedstrijdleeftijd(self):
-        lkl = LeeftijdsKlasse(
+        lkl = Leeftijdsklasse(
                     wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
@@ -84,7 +84,7 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.leeftijd_is_compatible(30))
         self.assertFalse(lkl.leeftijd_is_compatible(31))
 
-        lkl = LeeftijdsKlasse(
+        lkl = Leeftijdsklasse(
                     wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=0)
@@ -96,7 +96,7 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.leeftijd_is_compatible(100))
 
     def test_geslacht(self):
-        lkl = LeeftijdsKlasse(
+        lkl = Leeftijdsklasse(
                     wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
@@ -105,7 +105,7 @@ class TestBasisTypen(TestCase):
         self.assertFalse(lkl.geslacht_is_compatible('V'))
         self.assertFalse(lkl.geslacht_is_compatible('X'))
 
-        lkl = LeeftijdsKlasse(
+        lkl = Leeftijdsklasse(
                     wedstrijd_geslacht='V',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
@@ -114,7 +114,7 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.geslacht_is_compatible('V'))
         self.assertFalse(lkl.geslacht_is_compatible('X'))
 
-        lkl = LeeftijdsKlasse(
+        lkl = Leeftijdsklasse(
                     wedstrijd_geslacht='A',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)

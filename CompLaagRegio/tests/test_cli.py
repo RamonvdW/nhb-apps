@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
+from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, Leeftijdsklasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
@@ -51,7 +51,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         indiv_tr = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_tr)[0]
         indiv_bb = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_bb)[0]
 
-        lkl_sa = LeeftijdsKlasse.objects.get(afkorting='SA')
+        lkl_sa = Leeftijdsklasse.objects.get(afkorting='SA')
 
         # TODO: leeftijdsklassen nodig?
         klasse_r1 = CompetitieIndivKlasse(
