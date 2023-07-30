@@ -301,7 +301,9 @@
 
 
     <!-- modal dialog -->
-    <a class="btn-sv-rood modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+    <p style="margin-left:10px">
+        <a class="btn-sv-rood modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+    </p>
 
     <div class="modal" id="bevestig_verwijder_buitenbaan">
         <div class="modal-content center">
