@@ -21,7 +21,8 @@ from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, 
                                    MUTATIE_REGIO_TEAM_RONDE, MUTATIE_EXTRA_RK_DEELNEMER,
                                    MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
-                                   MUTATIE_KLEINE_KLASSE_INDIV)
+                                   MUTATIE_KLEINE_KLASSE_INDIV,
+                                   MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieTeamKlasse,
                                Regiocompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
@@ -1060,12 +1061,16 @@ class Command(BaseCommand):
             # RK teams opzetten en RK deelnemers koppelen
             self._converteer_rk_teams(comp)
 
-            # eindstand regio in historie uitslag zetten (nodig voor AG's nieuwe competitie)
+            # eindstand individuele regiocompetitie naar historisch uitslag overzetten
+            # (ook nodig voor AG's nieuwe competitie)
             uitslag_regio_indiv_naar_histcomp(comp)
 
-            # maak taken aan voor de HWL's om deelname RK voor sporters van eigen vereniging door te geven
+            # eindstand teamcompetitie regio naar historische uitslag overzetten
+            uitslag_regio_teams_naar_histcomp(comp)
 
-            # versturen e-mails uitnodigingen naar de deelnemers gebeurt tijdens opstarten elk uur
+            # FUTURE: maak taken aan voor de HWL's om deelname RK voor sporters van eigen vereniging door te geven
+
+            # FUTURE: versturen e-mails uitnodigingen naar de deelnemers gebeurt tijdens opstarten elk uur
 
     def _maak_deelnemerslijst_bk_indiv(self, comp):
         """ bepaal de individuele deelnemers van het BK
@@ -1359,6 +1364,8 @@ class Command(BaseCommand):
         # controleer dat de competitie in fase N is
         if not comp.rk_teams_afgesloten:
 
+            uitslag_rk_teams_naar_histcomp(comp)
+
             # individuele deelnemers vaststellen
             self._maak_deelnemerslijst_bk_teams(comp)
 
@@ -1386,6 +1393,32 @@ class Command(BaseCommand):
             # stel de deelnemerslijst van de nieuwe klasse opnieuw op
             deelkamp = deelnemer.kampioenschap
             self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse)
+
+    @staticmethod
+    def _verwerk_mutatie_afsluiten_bk_indiv(comp):
+        """ BK individueel afsluiten """
+
+        # controleer dat de competitie in fase P is
+        if not comp.bk_indiv_afgesloten:
+
+            uitslag_bk_indiv_naar_histcomp(comp)
+
+            # ga door naar fase Q
+            comp.bk_indiv_afgesloten = True
+            comp.save(update_fields=['bk_indiv_afgesloten'])
+
+    @staticmethod
+    def _verwerk_mutatie_afsluiten_bk_teams(comp):
+        """ BK teams afsluiten"""
+
+        # controleer dat de competitie in fase N is
+        if not comp.bk_teams_afgesloten:
+
+            uitslag_bk_teams_naar_histcomp(comp)
+
+            # ga door naar fase Q
+            comp.bk_teams_afgesloten = True
+            comp.save(update_fields=['bk_teams_afgesloten'])
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
@@ -1447,6 +1480,14 @@ class Command(BaseCommand):
         elif code == MUTATIE_KLEINE_KLASSE_INDIV:
             self.stdout.write('[INFO] Verwerk mutatie %s: kleine klassen indiv' % mutatie.pk)
             self._verwerk_mutatie_klein_klassen_indiv(mutatie.deelnemer, mutatie.indiv_klasse)
+
+        elif code == MUTATIE_KAMP_INDIV_AFSLUITEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten BK indiv' % mutatie.pk)
+            self._verwerk_mutatie_afsluiten_bk_indiv(mutatie.competitie)
+
+        elif code == MUTATIE_KAMP_TEAMS_AFSLUITEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten BK teams' % mutatie.pk)
+            self._verwerk_mutatie_afsluiten_bk_teams(mutatie.competitie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))

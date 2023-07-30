@@ -12,7 +12,8 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
-                                   MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK)
+                                   MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
+                                   MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
 from Competitie.models import Competitie, Regiocompetitie, CompetitieMutatie, CompetitieTeamKlasse, KampioenschapTeam
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -492,6 +493,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         mutatie_ping.ping()
 
         # we wachten niet tot deze verwerkt is
+        # noteer: hierdoor geeft de test ook geen dekking voor de achtergrondtaak
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
@@ -500,7 +502,6 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
         self.doorzetten(request.user, comp)
 
-        # url = reverse('Competitie:kies')
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         return HttpResponseRedirect(url)
 
@@ -563,11 +564,7 @@ class BevestigEindstandBKIndivView(DoorzettenBasisView):
     expected_fase = 'P'
     check_indiv_fase = True
     url_name = 'bko-bevestig-eindstand-bk-indiv'
-
-    def doorzetten(self, account, comp):
-        # TODO: zet ook deelkamp.is_klaar_indiv = True
-        comp.bk_indiv_afgesloten = True
-        comp.save(update_fields=['bk_indiv_afgesloten'])
+    mutatie_code = MUTATIE_KAMP_INDIV_AFSLUITEN
 
 
 class BevestigEindstandBKTeamsView(DoorzettenBasisView):
@@ -578,11 +575,7 @@ class BevestigEindstandBKTeamsView(DoorzettenBasisView):
     expected_fase = 'P'
     check_indiv_fase = False
     url_name = 'bko-bevestig-eindstand-bk-teams'
-
-    def doorzetten(self, account, comp):
-        # TODO: zet ook deelkamp.is_klaar_teams = True
-        comp.bk_teams_afgesloten = True
-        comp.save(update_fields=['bk_teams_afgesloten'])
+    mutatie_code = MUTATIE_KAMP_TEAMS_AFSLUITEN
 
 
 # end of file
