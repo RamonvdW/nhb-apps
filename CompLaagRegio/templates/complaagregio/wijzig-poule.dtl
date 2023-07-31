@@ -113,7 +113,7 @@
                 <h5>Verwijderen poule?</h5>
                 <p>Heb je deze poule niet meer nodig en wil je 'm verwijderen?</p>
 
-                <form method="post" action="{{ url_verwijder_buitenbaan }}">
+                <form method="post" action="{{ url_opslaan }}">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder_poule" value="ja">
 

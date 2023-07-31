@@ -550,7 +550,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.assertTrue(str(self.deelkamp_bk_25) != '')
 
         objs = KampioenschapSporterBoog.objects.filter(kampioenschap=self.deelkamp_bk_25)
-        self.assertEqual(objs.count(), 2)
+        self.assertEqual(objs.count(), 4)
 
     def test_doorzetten_2b(self):
         # rk naar bk teams
@@ -735,7 +735,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                          'plein/site_layout.dtl'))
 
         # verkeerde BKO
-        self.e2e_wissel_naar_functie(self.functie_bko_25)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
         resp = self.client.get(url)
         self.assert403(resp)
         resp = self.client.post(url)
