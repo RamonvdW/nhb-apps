@@ -7,6 +7,7 @@
 from django.test import TestCase
 from Account.models import Account
 from Functie.models import Functie
+from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -140,7 +141,8 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'de combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
+        self.assertFormError(resp.context['form'], None,
+                             'de combinatie van bondsnummer en e-mailadres worden niet herkend. Probeer het nog eens.')
 
         # zwak wachtwoord: te kort
         with self.assert_max_queries(20):
@@ -251,6 +253,10 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'normaal@test.com')
         self.assertContains(resp, 'l@test.com')     # iets van n####l@test.com
 
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
+
         # controleer dat de volledige naam meteen al overgenomen is
         account = Account.objects.get(username='100001')
         self.assertEqual(account.volledige_naam(), 'Ramon de Tester')
@@ -329,7 +335,9 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'Gebruik van KHSN diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+        self.assertFormError(resp.context['form'], None,
+                             'Gebruik van KHSN diensten is geblokkeerd.' +
+                             ' Neem contact op met de secretaris van je vereniging.')
 
     def test_sec(self):
         # lid dat zich registreert, is secretaris van een vereniging
@@ -375,7 +383,9 @@ class TestRegistreerLid(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-lid.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp.context['form'], None, 'Gebruik van KHSN diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+        self.assertFormError(resp.context['form'], None,
+                             'Gebruik van KHSN diensten is geblokkeerd.' +
+                             ' Neem contact op met de secretaris van je vereniging.')
 
 
 # end of file

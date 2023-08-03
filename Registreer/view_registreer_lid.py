@@ -24,7 +24,7 @@ import logging
 
 TEMPLATE_REGISTREER_LID = 'registreer/registreer-lid.dtl'
 TEMPLATE_REGISTREER_GEEN_EMAIL = 'registreer/registreer-lid-fout-geen-email.dtl'
-TEMPLATE_REGISTREER_AANGEMAAKT = 'registreer/registreer-lid-01-bevestig-email.dtl'
+TEMPLATE_REGISTREER_BEVESTIG_EMAIL = 'registreer/registreer-lid-01-bevestig-email.dtl'
 TEMPLATE_REGISTREER_EMAIL_BEVESTIGD = 'registreer/registreer-lid-02-email-bevestigd.dtl'
 EMAIL_TEMPLATE_REGISTREER_LID_BEVESTIG = 'email_registreer/lid-bevestig-toegang-email.dtl'
 
@@ -245,7 +245,7 @@ class RegistreerLidView(TemplateView):
 
                 context['login_naam'] = nummer
                 context['partial_email'] = mailer_obfuscate_email(email)
-                return render(request, TEMPLATE_REGISTREER_AANGEMAAKT, context)
+                return render(request, TEMPLATE_REGISTREER_BEVESTIG_EMAIL, context)
 
         # opnieuw
         context['toon_tip'] = True
