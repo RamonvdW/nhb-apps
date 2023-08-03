@@ -1029,7 +1029,8 @@ class TestData(object):
                                           'bij_vereniging',
                                           'indiv_klasse')
                           .filter(regiocompetitie__competitie=comp,
-                                  sporterboog__pk__in=pks))
+                                  sporterboog__pk__in=pks)
+                          .order_by('sporterboog__sporter__lid_nr'))        # consistente volgorde
 
         deelnemers.extend(new_deelnemers)
 
