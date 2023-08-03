@@ -27,7 +27,7 @@
                     {% if obj.break_klasse %}
 
                         <tr>
-                            <td colspan="6" class="center">
+                            <td colspan="4" class="center">
                                 <h5>{{ obj.indiv_klasse.beschrijving }}</h5>
                             </td>
                         </tr>
