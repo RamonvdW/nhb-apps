@@ -24,7 +24,7 @@ charset-normalizer==3.2.0
     #   requests
 coverage==7.2.7
     # via -r requirements_dev.in
-django==4.2.3
+django==4.2.4
     # via
     #   -r requirements.txt
     #   django-debug-toolbar
@@ -55,7 +55,7 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-googleapis-common-protos==1.59.1
+googleapis-common-protos==1.60.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -95,7 +95,7 @@ protobuf==4.23.4
     #   -r requirements.txt
     #   google-api-core
     #   googleapis-common-protos
-psycopg==3.1.9
+psycopg==3.1.10
     # via -r requirements.txt
 pyasn1==0.5.0
     # via
@@ -106,13 +106,13 @@ pyasn1-modules==0.3.0
     # via
     #   -r requirements.txt
     #   google-auth
-pyotp==2.8.0
+pyotp==2.9.0
     # via -r requirements.txt
-pyparsing==3.1.0
+pyparsing==3.1.1
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==3.13.0
+pypdf==3.14.0
     # via -r requirements.txt
 pypng==0.20220715.0
     # via
