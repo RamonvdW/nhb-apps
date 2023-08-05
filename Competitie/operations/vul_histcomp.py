@@ -328,12 +328,13 @@ def uitslag_regio_teams_naar_histcomp(comp):
                   .select_related('team',
                                   'team__regiocompetitie',
                                   'team__regiocompetitie__regio')
-                  .order_by('team',
+                  .order_by('team__vereniging',
+                            'team__volg_nr',
                             'ronde_nr')):
 
         if ronde.team != prev_team:
             if hist:
-                if hist.totaal_punten == 0:
+                if hist.totaal_score == 0:
                     # helemaal geen scores niet opnemen in de uitslag
                     bulk.remove(hist)
                 else:
@@ -384,6 +385,15 @@ def uitslag_regio_teams_naar_histcomp(comp):
             hist.ronde_7_score = ronde.team_score
             hist.ronde_7_punten = ronde.team_punten
     # for
+
+    # laatste team toevoegen
+    if hist:
+        if hist.totaal_score == 0:
+            # helemaal geen scores niet opnemen in de uitslag
+            bulk.remove(hist)
+        else:
+            tup = (hist.regio_nr, hist.totaal_punten, hist.totaal_score, len(unsorted), hist)
+            unsorted.append(tup)
 
     klasse_regio2rank = dict()
     unsorted.sort(reverse=True)     # hoogste punten eerst

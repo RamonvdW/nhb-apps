@@ -8,12 +8,14 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, DEELNAME_NEE, DEELNAME_JA, KAMP_RANK_BLANCO, KAMP_RANK_NO_SHOW
-from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetitie, Kampioenschap,
-                               RegiocompetitieSporterBoog, KampioenschapSporterBoog)
+from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               RegiocompetitieSporterBoog, KampioenschapSporterBoog,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
                                        zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
-from HistComp.models import HistCompSeizoen
+from HistComp.models import HistCompSeizoen, HistCompRegioTeam
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -165,6 +167,16 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                                                  is_ook_voor_rk_bk=True,
                                                                  volgorde=1200)     # klasse 1, titel: NK
 
+        self.comp25_teamklasse_regio_ere_r = CompetitieTeamKlasse.objects.get(
+                                                                competitie=self.comp_25,
+                                                                is_voor_teams_rk_bk=False,
+                                                                volgorde=15)      # klasse 15 = R, ERE
+
+        self.comp25_teamklasse_regio_ere_c = CompetitieTeamKlasse.objects.get(
+                                                                competitie=self.comp_25,
+                                                                is_voor_teams_rk_bk=False,
+                                                                volgorde=20)      # klasse 20 = C, ERE
+
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
@@ -233,6 +245,58 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
                                    indiv_klasse=self.comp25_klasse_c,
                                    aantal_scores=4,     # te weinig scores
                                    totaal=300).save()
+
+    def _inschrijven_regio_teams(self):
+        team = RegiocompetitieTeam(
+                    regiocompetitie=self.regiocomp25_101,
+                    vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    volg_nr=1,
+                    team_type=self.testdata.afkorting2teamtype_nhb['R2'],
+                    team_naam='Test test 1',
+                    aanvangsgemiddelde="26.5",
+                    team_klasse=self.comp25_teamklasse_regio_ere_r)
+        team.save()
+        # team.leden = models.ManyToManyField(RegiocompetitieSporterBoog, blank=True)  # mag leeg zijn
+
+        for ronde_nr in range(8):       # begin op 0, dat is goed
+            RegiocompetitieRondeTeam(
+                    team=team,
+                    ronde_nr=ronde_nr,
+                    team_score=123,
+                    team_punten=2).save()
+        # deelnemers_geselecteerd = models.ManyToManyField(RegiocompetitieSporterBoog,
+        # deelnemers_feitelijk = models.ManyToManyField(RegiocompetitieSporterBoog,
+        # scores_feitelijk = models.ManyToManyField(Score,
+        # scorehist_feitelijk = models.ManyToManyField(ScoreHist,
+
+        # team zonder scores (wordt niet opgenomen in HistComp)
+        team = RegiocompetitieTeam(
+                    regiocompetitie=self.regiocomp25_101,
+                    vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    volg_nr=2,
+                    team_type=self.testdata.afkorting2teamtype_nhb['C'],
+                    team_naam='Test test 2',
+                    aanvangsgemiddelde="29.8",
+                    team_klasse=self.comp25_teamklasse_regio_ere_c)
+        team.save()
+        # team.leden = models.ManyToManyField(RegiocompetitieSporterBoog, blank=True)  # mag leeg zijn
+
+        team = RegiocompetitieTeam(
+                    regiocompetitie=self.regiocomp25_101,
+                    vereniging=self.sporterboog_1r.sporter.bij_vereniging,
+                    volg_nr=3,
+                    team_type=self.testdata.afkorting2teamtype_nhb['R2'],
+                    team_naam='Test test 2',
+                    aanvangsgemiddelde="25.5",
+                    team_klasse=self.comp25_teamklasse_regio_ere_r)
+        team.save()
+        # team.leden = models.ManyToManyField(RegiocompetitieSporterBoog, blank=True)  # mag leeg zijn
+
+        RegiocompetitieRondeTeam(
+                team=team,
+                ronde_nr=1,
+                team_score=90,
+                team_punten=0).save()
 
     def _inschrijven_kamp_indiv(self, kampioenschap):
         # recurve, lid 1
@@ -407,9 +471,11 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
 
         # nu echt doorzetten
         self._inschrijven_regio_indiv()
+        self._inschrijven_regio_teams()
 
         self.assertEqual(4, RegiocompetitieSporterBoog.objects.count())
         self.assertEqual(0, KampioenschapSporterBoog.objects.count())
+        self.assertEqual(0, HistCompRegioTeam.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
@@ -419,6 +485,7 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.verwerk_regiocomp_mutaties()
 
         self.assertEqual(3, KampioenschapSporterBoog.objects.count())
+        self.assertEqual(2, HistCompRegioTeam.objects.count())
 
         # verkeerde competitie/BKO
         resp = self.client.get(self.url_doorzetten_regio_naar_rk % self.comp_18.pk)
