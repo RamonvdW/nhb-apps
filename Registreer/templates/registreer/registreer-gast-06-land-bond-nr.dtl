@@ -57,6 +57,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-land-bond-lidnr" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-land-bond-nr" %}
 
 {% endblock %}
