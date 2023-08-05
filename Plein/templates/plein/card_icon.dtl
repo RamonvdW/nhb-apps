@@ -6,7 +6,7 @@
 
 {% comment %}
 
-    Deze file formateert een kaartje aan de hand van de vier parameters:
+    Deze file formatteert een kaartje aan de hand van de vier parameters:
 
         title       = "Account activiteit"
         icon        = "recent_actors"

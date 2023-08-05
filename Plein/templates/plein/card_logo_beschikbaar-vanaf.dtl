@@ -6,7 +6,7 @@
 
 {% comment %}
 
-    Deze file formateert een kaartje aan de hand van deze parameters:
+    Deze file formatteert een kaartje aan de hand van deze parameters:
 
         title = "Account activiteit"
         img   = plaatje om te tonen
