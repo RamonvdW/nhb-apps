@@ -183,8 +183,12 @@
         <!-- rood bordje -->
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
-                    <p>Je moet lid zijn bij de KHSN om een bestelling te kunnen plaatsen.</p>
+                <div class="col s12 m8 offset-m2 l6 offset-l3 sv-rood white-text z-depth-3 center">
+                    {% if moet_inloggen %}
+                        <p>Je moet inloggen om een bestelling te kunnen plaatsen.</p>
+                    {% else %}
+                        <p>Je moet lid zijn bij de KHSN om een bestelling te kunnen plaatsen.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

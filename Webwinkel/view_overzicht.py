@@ -144,9 +144,12 @@ class ProductView(TemplateView):
             context['heeft_fotos'] = True
         # for
 
-        account = self.request.user
-        if account.is_authenticated and not account.is_gast:
-            context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+        if not self.request.user.is_authenticated:
+            context['moet_inloggen'] = True
+        else:
+            account = self.request.user
+            if not account.is_gast:
+                context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
 
         context['menu_toon_mandje'] = True
 

@@ -58,6 +58,10 @@
                 {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
             {% endif %}
 
+            <!-- webwinkel -->
+            {% url 'Webwinkel:overzicht' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
+
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records<br>van nederlandse sporters." icon="insights" url=card_url %}
