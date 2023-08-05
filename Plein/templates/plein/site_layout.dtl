@@ -42,7 +42,7 @@
             <nav class="sv-grijs">
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
-                    <a href="/plein/" class="brand-logo" style="z-index:1;padding-top:1px">
+                    <a href="/plein/" style="z-index:1;padding-top:1px">
                         <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="62" width="264" alt="KHSN logo" style="padding-left:7px">
                     </a>
 
