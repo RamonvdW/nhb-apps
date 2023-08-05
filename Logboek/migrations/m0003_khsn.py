@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 def hernoem_gebruikte_functie(apps, _):

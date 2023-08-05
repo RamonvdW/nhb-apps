@@ -11,7 +11,7 @@ from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTE
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                                    MUTATIE_KAMP_CUT, MUTATIE_KAMP_AFMELDEN,
                                    DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
-from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMutatie, KampioenschapSporterBoog)
 from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,

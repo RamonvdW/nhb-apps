@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.definities import BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT_NVT
+from Bestel.definities import BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
 from Bestel.models import BestelMandje
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,

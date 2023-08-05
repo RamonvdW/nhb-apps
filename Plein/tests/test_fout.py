@@ -20,8 +20,8 @@ class TestPleinFout(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts_admin_en_bb()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def test_403(self):
         # niet ingelogd

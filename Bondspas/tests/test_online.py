@@ -11,7 +11,6 @@ from Opleidingen.models import OpleidingDiploma
 from Sporter.models import Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
-import json
 
 
 class TestBondspas(E2EHelpers, TestCase):

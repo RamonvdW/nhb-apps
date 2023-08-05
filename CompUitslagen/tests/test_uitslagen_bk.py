@@ -6,7 +6,6 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.definities import KAMP_RANK_BLANCO
 from Competitie.models import CompetitieIndivKlasse, CompetitieMatch, KampioenschapIndivKlasseLimiet
 from Competitie.tests.tijdlijn import zet_competitie_fase_bk_prep
 from TestHelpers.e2ehelpers import E2EHelpers

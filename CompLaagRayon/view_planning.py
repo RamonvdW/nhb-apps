@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_1, MUTATIE_KAMP_CUT, DEELNAME_NEE
+from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, MUTATIE_KAMP_CUT, DEELNAME_NEE
 from Competitie.models import (Regiocompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,

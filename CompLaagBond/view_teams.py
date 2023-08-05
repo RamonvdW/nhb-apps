@@ -6,21 +6,18 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.definities import (DEEL_BK, MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN,
-                                   DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND)
-from Competitie.models import (Kampioenschap, KampioenschapTeam, CompetitieMutatie)
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import Kampioenschap, KampioenschapTeam
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-import time
-
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
 

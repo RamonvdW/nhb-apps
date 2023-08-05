@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from Feedback.models import Feedback, feedback_opschonen
 from Feedback.operations import store_feedback
 from Taken.models import Taak

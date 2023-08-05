@@ -18,7 +18,7 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
 from reportlab.pdfgen import canvas
-from reportlab.lib import pagesizes, colors
+from reportlab.lib import pagesizes
 import datetime
 
 

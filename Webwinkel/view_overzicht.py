@@ -11,11 +11,9 @@ from django.utils.formats import localize
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
 

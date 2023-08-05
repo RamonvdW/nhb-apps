@@ -33,8 +33,8 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts_admin_en_bb()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr

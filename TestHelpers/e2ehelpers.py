@@ -531,7 +531,7 @@ class E2EHelpers(TestCase):
             script = html[:pos+9]
 
             issues = self._validate_javascript(script)
-            if len(issues):
+            if len(issues):     # pragma: no cover
                 msg = 'Invalid script (template: %s):\n' % template_name
                 for issue in issues:
                     msg += "    %s\n" % issue

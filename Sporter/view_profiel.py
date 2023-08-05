@@ -18,7 +18,7 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE2STR
-from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
+from HistComp.models import HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
