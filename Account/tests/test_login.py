@@ -176,8 +176,9 @@ class TestAccountLogin(E2EHelpers, TestCase):
         account.nieuwe_email = 'meer_normaal@test.com'
         account.save(update_fields=['nieuwe_email'])
 
-        url = maak_tijdelijke_code_bevestig_email_account(account, test="hallo")
-        code = url.split('/')[-2]
+        # onderstaande resulteert in dubbele tijdelijke codes
+        # url = maak_tijdelijke_code_bevestig_email_account(account, test="hallo")
+        # code = url.split('/')[-2]
 
         # probeer opnieuw in te loggen
         with self.assert_max_queries(20):

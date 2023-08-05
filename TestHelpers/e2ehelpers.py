@@ -106,8 +106,7 @@ class E2EHelpers(TestCase):
             html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
         return html
 
-    @staticmethod
-    def _get_useful_template_name(response):
+    def _get_useful_template_name(self, response):
         lst = [tmpl.name
                for tmpl in response.templates
                if (tmpl.name not in included_templates
@@ -116,7 +115,7 @@ class E2EHelpers(TestCase):
         if len(lst) == 0:       # pragma: no cover
             return 'no template!'
         if len(lst) > 1:        # pragma: no cover
-            print('[WARNING] e2ehelpers._get_useful_template_name: too many choices!!! %s' % repr(lst))
+            self.fail('Too many choices for template name: %s' % repr(lst))
         return lst[0]
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):

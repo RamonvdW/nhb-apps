@@ -164,7 +164,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                     eigen_lid_nummer="EB-1234",
                     club="Eigen club",
                     club_plaats="Eigen plaats",
-                    woonplaats="Eigen woonplaats",
                     land="Eigen land",
                     telefoon="+998877665544",
                     wa_id="",

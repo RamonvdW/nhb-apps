@@ -48,7 +48,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         cls.testdata.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[cls.regio_nr])
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def test_ver_indiv(self):
         # anon

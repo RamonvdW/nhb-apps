@@ -61,7 +61,7 @@ class TestCompLaagBondIndiv(E2EHelpers, TestCase):
 
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def setUp(self):
         """ eenmalige setup voor alle tests

@@ -46,7 +46,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         data.maak_rk_deelnemers(18, ver_nr, cls.regio_nr)
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def test_indiv(self):
         self.testdata.geef_regio_deelnemers_genoeg_scores_voor_rk(18)
