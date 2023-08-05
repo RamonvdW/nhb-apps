@@ -137,14 +137,16 @@
                             </td>
                         </tr>
 
-                        <tr>
-                            <td colspan="2">
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Voorkeur voor de bondscompetities (Indoor en 25m1pijl)</span>
-                                </label>
-                            </td>
-                        </tr>
+                        {% if toon_bondscompetities %}
+                            <tr>
+                                <td colspan="2">
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">Voorkeur voor de bondscompetities (Indoor en 25m1pijl)</span>
+                                    </label>
+                                </td>
+                            </tr>
+                        {% endif %}
 
                         {% if toon_geslacht %}
                             <tr>

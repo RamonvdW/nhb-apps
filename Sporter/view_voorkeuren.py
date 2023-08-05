@@ -318,16 +318,15 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # for
 
         if self.rol_nu == Rollen.ROL_HWL:
-            actief = 'vereniging'
             context['sporter_pk'] = sporter.pk
             context['is_hwl'] = True
         else:
-            # niet de HWL maar de sporter zelf
-            actief = 'sporter-profiel'
+            # niet de HWL, dus de sporter zelf
             if rol_mag_wisselen(self.request):
                 # sporter is beheerder, dus toon opt-out opties
                 context['account'] = sporter.account
 
+        context['toon_bondscompetities'] = not sporter.is_gast
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
 
         if self.rol_nu == Rollen.ROL_HWL:
