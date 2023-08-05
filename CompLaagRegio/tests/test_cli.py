@@ -477,5 +477,13 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue('Verwijder alle data voor deelnemer 123456' in f2.getvalue())
         self.assertTrue(' 3 deelnemers' in f2.getvalue())
 
+    def test_check_ag(self):
+        deelnemer = RegiocompetitieSporterBoog.objects.first()
+        deelnemer.ag_voor_team_mag_aangepast_worden = True
+        deelnemer.inschrijf_voorkeur_team = True
+        deelnemer.save(update_fields=['ag_voor_team_mag_aangepast_worden', 'inschrijf_voorkeur_team'])
+
+        self.run_management_command('check_ag')
+
 
 # end of file
