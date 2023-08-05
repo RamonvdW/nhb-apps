@@ -48,8 +48,8 @@ OUTFILE="$OUT/site_layout-${NEW_NR}_min.js"
 
 # run the minify tool
 python3 ./minify_js.py "$INFILE" "$OUTFILE"
-
-if [ $? -ne 0 ]
+RES=$?
+if [ $RES -ne 0 ]
 then
     echo "[ERROR] Detected compilation error - keeping current file"
     exit 1

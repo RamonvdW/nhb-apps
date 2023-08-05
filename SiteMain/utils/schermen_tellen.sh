@@ -16,8 +16,9 @@ EXCLUDE+="|site_layout.dtl"
 EXCLUDE+="|site_layout_minimaal.dtl"
 EXCLUDE+="|webwinkel/card_product.dtl"
 EXCLUDE+="|vhpg-tekst.dtl"
+EXCLUDE+="|snippets.dtl"
 
-INCLUDES=$(grep '{% include' */templates/*/*dtl | grep -vE "$EXCLUDE")
+INCLUDES=$(grep -- '{% include' */templates/*/*dtl | grep -vE "$EXCLUDE")
 RES=$?
 if [ $RES -eq 0 ]
 then
@@ -28,8 +29,8 @@ then
     exit
 fi
 
-SCHERMEN=$(ls -1 */templates/*/*dtl | grep -vE "$EXCLUDE")
-AANTAL=$(echo $SCHERMEN | wc -w)
+SCHERMEN=$(find ./*/templates -name \*dtl | grep -vE "$EXCLUDE")
+AANTAL=$(echo "$SCHERMEN" | wc -w)
 
 NR=0
 for scherm in $SCHERMEN
