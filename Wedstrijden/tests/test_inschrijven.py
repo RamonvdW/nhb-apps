@@ -115,7 +115,6 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         locatie.verenigingen.add(self.ver1)
 
         # wordt HWL en maak een wedstrijd aan
-        self.e2e_login_and_pass_otp(self.account_admin)     # TODO: niet nodig?
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
