@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from Bestel.definities import BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT_NVT
 from Bestel.models import BestelMandje, BestelProduct
@@ -86,72 +86,73 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
-        # geen mandje
-        # BestelMandje.objects.filter(account=self.account_admin).delete()
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kies_transport)
-        self.assert404(resp, 'Mandje is leeg')
+        with override_settings(WEBWINKEL_TRANSPORT_OPHALEN_MAG=True):
+            # geen mandje
+            # BestelMandje.objects.filter(account=self.account_admin).delete()
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_kies_transport)
+            self.assert404(resp, 'Mandje is leeg')
 
-        # leeg mandje
-        mandje, is_created = BestelMandje.objects.get_or_create(account=self.account_admin)
-        mandje.transport = BESTEL_TRANSPORT_NVT
-        mandje.save(update_fields=['transport'])
+            # leeg mandje
+            mandje, is_created = BestelMandje.objects.get_or_create(account=self.account_admin)
+            mandje.transport = BESTEL_TRANSPORT_NVT
+            mandje.save(update_fields=['transport'])
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kies_transport)
-        self.assert404(resp, 'Niet van toepassing')
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_kies_transport)
+            self.assert404(resp, 'Niet van toepassing')
 
-        # mandje is nog steeds leeg
-        mandje.transport = BESTEL_TRANSPORT_VERZEND
-        mandje.save(update_fields=['transport'])
+            # mandje is nog steeds leeg
+            mandje.transport = BESTEL_TRANSPORT_VERZEND
+            mandje.save(update_fields=['transport'])
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kies_transport)
-        self.assert404(resp, 'Niet van toepassing')
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_kies_transport)
+            self.assert404(resp, 'Niet van toepassing')
 
-        # voeg een webwinkel product toe aan het mandje
-        product = BestelProduct(
-                        webwinkel_keuze=self.keuze,
-                        prijs_euro=Decimal(1.23))
-        product.save()
-        mandje.producten.add(product)
+            # voeg een webwinkel product toe aan het mandje
+            product = BestelProduct(
+                            webwinkel_keuze=self.keuze,
+                            prijs_euro=Decimal(1.23))
+            product.save()
+            mandje.producten.add(product)
 
-        # nu kan er wel een keuze gemaakt worden
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kies_transport)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestel/kies-transport.dtl', 'plein/site_layout.dtl'))
+            # nu kan er wel een keuze gemaakt worden
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_kies_transport)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('bestel/kies-transport.dtl', 'plein/site_layout.dtl'))
 
-        # maak een wijziging (POST)
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kies_transport, {'snel': 1})
-        self.assert404(resp, 'Verkeerde parameter')
+            # maak een wijziging (POST)
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_kies_transport, {'snel': 1})
+            self.assert404(resp, 'Verkeerde parameter')
 
-        # maak een wijziging (POST)
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'wat hier dan ook moet staan'})
-        self.assert404(resp, 'Verkeerde parameter')
+            # maak een wijziging (POST)
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'wat hier dan ook moet staan'})
+            self.assert404(resp, 'Verkeerde parameter')
 
-        # wijzig naar ophalen
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
-        self.assert_is_redirect(resp, self.url_mandje_toon)
+            # wijzig naar ophalen
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'ophalen'})
+            self.assert_is_redirect(resp, self.url_mandje_toon)
 
-        self.verwerk_bestel_mutaties()
+            self.verwerk_bestel_mutaties()
 
-        mandje = BestelMandje.objects.get(pk=mandje.pk)
-        self.assertEqual(mandje.transport, BESTEL_TRANSPORT_OPHALEN)
+            mandje = BestelMandje.objects.get(pk=mandje.pk)
+            self.assertEqual(mandje.transport, BESTEL_TRANSPORT_OPHALEN)
 
-        # wijzig naar verzenden
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'verzend'})
-        self.assert_is_redirect(resp, self.url_mandje_toon)
+            # wijzig naar verzenden
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_kies_transport, {'snel': 1, 'keuze': 'verzend'})
+            self.assert_is_redirect(resp, self.url_mandje_toon)
 
-        self.verwerk_bestel_mutaties()
+            self.verwerk_bestel_mutaties()
 
-        mandje = BestelMandje.objects.get(pk=mandje.pk)
-        self.assertEqual(mandje.transport, BESTEL_TRANSPORT_VERZEND)
+            mandje = BestelMandje.objects.get(pk=mandje.pk)
+            self.assertEqual(mandje.transport, BESTEL_TRANSPORT_VERZEND)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_kies_transport, post=False)
 

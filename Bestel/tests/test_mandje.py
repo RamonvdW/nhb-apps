@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
@@ -33,6 +33,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
     url_kies_transport = '/bestel/mandje/transport/'
 
     url_meer_vragen = '/account/registreer/gast/meer-vragen/'
+    url_plein = '/plein/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -206,6 +207,16 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
+        # begin met Het Plein, want die gebruik eval_mandje_inhoud
+        resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+
+        # tweede keer is de timestamp gezet
+        resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
+
         # leeg mandje
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_mandje_toon)
@@ -222,8 +233,9 @@ class TestBestelMandje(E2EHelpers, TestCase):
         # vul het mandje
         product1, product2 = self._vul_mandje(self.account_admin)
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_mandje_toon)
+        with override_settings(WEBWINKEL_TRANSPORT_OPHALEN_MAG=True):
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
