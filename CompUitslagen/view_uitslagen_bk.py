@@ -195,7 +195,7 @@ class UitslagenBKIndivView(TemplateView):
                         deelnemer.scores_str_1 = "-"
                         deelnemer.scores_str_2 = ""
 
-                    elif deelnemer.result_rank < 100:
+                    else:
                         deelnemer.scores_str_1 = "%s (%s+%s)" % (deelnemer.result_score_1 + deelnemer.result_score_2,
                                                                  deelnemer.result_score_1,
                                                                  deelnemer.result_score_2)
