@@ -1549,7 +1549,7 @@ class Command(BaseCommand):
                 # lid echt verwijderen
                 #
                 # echt verwijderen van een lid is een groot risico gezien aangezien het verwijderen
-                # van gerelateerde records tot onrepareerbare schade kan lijden.
+                # van gerelateerde records tot niet herstelbare schade kan lijden.
                 #
                 # de database structuur is beveiligd tegen het verwijderen van records die nog in gebruik zijn
                 # daarnaast hebben we ook altijd nog de backups.
