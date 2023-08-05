@@ -30,18 +30,23 @@
 
                         <p><b>Keuze voor transport:</b></p>
                         <ul>
+
                             <li>
                                 <label class="black-text" for="id_keuze_1">
                                     <input class="with-gap" type="radio" name="keuze" value="verzend" required id="id_keuze_1" {% if not wil_ophalen %}checked{% endif %}>
                                     <span>Verzend naar mijn postadres</span>
                                 </label>
                             </li>
-                            <li>
-                                <label class="black-text" for="id_keuze_2">
-                                    <input class="with-gap" type="radio" name="keuze" value="ophalen" required id="id_keuze_2" {% if wil_ophalen %}checked{% endif %}>
-                                    <span>Ophalen op het bondsbureau (Papendal)</span>
-                                </label>
-                            </li>
+
+                            {% if mag_ophalen %}
+                                <li>
+                                    <label class="black-text" for="id_keuze_2">
+                                        <input class="with-gap" type="radio" name="keuze" value="ophalen" required id="id_keuze_2" {% if wil_ophalen %}checked{% endif %}>
+                                        <span>Ophalen op het bondsbureau (Papendal)</span>
+                                    </label>
+                                </li>
+                            {% endif %}
+
                         </ul>
 
                         <br>

@@ -59,6 +59,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet van toepassing')
 
         context['wil_ophalen'] = (mandje.transport == BESTEL_TRANSPORT_OPHALEN)
+        context['mag_ophalen'] = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG
 
         context['ophalen_ver'] = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
 
@@ -87,7 +88,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
         if keuze == 'verzend':
             bestel_mutatieverzoek_transport(account, BESTEL_TRANSPORT_VERZEND, snel == '1')
 
-        elif keuze == 'ophalen':
+        elif keuze == 'ophalen' and settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG:
             bestel_mutatieverzoek_transport(account, BESTEL_TRANSPORT_OPHALEN, snel == '1')
 
         else:

@@ -186,8 +186,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 context['ophalen_ver'] = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
 
             elif mandje.transport == BESTEL_TRANSPORT_VERZEND:
-                context['toon_transport'] = True
-                sporter = account.sporter_set.all()[0]
+                context['toon_transport'] = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG
+                sporter = account.sporter_set.first()
                 context['koper_sporter'] = sporter
 
         context['mandje_is_leeg'] = mandje_is_leeg
