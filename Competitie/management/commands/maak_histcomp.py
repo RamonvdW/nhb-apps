@@ -28,24 +28,24 @@ class Command(BaseCommand):
             return
 
         comp = comps[0]     # neem de oudste
-        print('[INFO] Competitie: %s' % comp)
+        self.stdout.write('[INFO] Competitie: %s' % comp)
 
-        print('[INFO] Regio indiv')
+        self.stdout.write('[INFO] Regio indiv')
         uitslag_regio_indiv_naar_histcomp(comp)
 
-        print('[INFO] Regio teams')
+        self.stdout.write('[INFO] Regio teams')
         uitslag_regio_teams_naar_histcomp(comp)
 
-        print('[INFO] RK indiv')
+        self.stdout.write('[INFO] RK indiv')
         uitslag_rk_indiv_naar_histcomp(comp)
 
-        print('[INFO] RK teams')
+        self.stdout.write('[INFO] RK teams')
         uitslag_rk_teams_naar_histcomp(comp)
 
-        print('[INFO] BK indiv')
+        self.stdout.write('[INFO] BK indiv')
         uitslag_bk_indiv_naar_histcomp(comp)
 
-        print('[INFO] BK teams')
+        self.stdout.write('[INFO] BK teams')
         uitslag_bk_teams_naar_histcomp(comp)
 
         self.stdout.write('[INFO] Done')
