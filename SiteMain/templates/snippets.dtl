@@ -129,6 +129,16 @@
     <!-- blauwe balk filters -->
     <div class="row-sv-blauw">
 
+        {% comment %}
+            context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'comp_boog': '~1',
+                                                     'regio_nr': '~2'})
+
+            Voor elke ~1, ~2 etc. moet er een input zijn met name="filter_1", "filter_2", etc.
+
+        {% endcomment %}
+
         <!-- filter: xxx -->
         <div class="col s3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
@@ -137,7 +147,7 @@
                     {% for filter in xxx_filters %}
                         <li>
                             <label class="black-text" for="id_{{ filter.sel }}">
-                                <input class="with-gap" type="radio" name="xxx" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <input class="with-gap" type="radio" name="filter_##" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
                                 <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>

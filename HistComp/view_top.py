@@ -14,7 +14,7 @@ from HistComp.models import HistCompSeizoen
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
-TEMPLATE_HISTCOMP_ALLEJAREN = 'histcomp/uitslagen-top.dtl'
+TEMPLATE_HISTCOMP_TOP = 'histcomp/uitslagen-top.dtl'
 
 
 def maak_filter_seizoen(context, seizoenen):
@@ -28,12 +28,11 @@ def maak_filter_seizoen(context, seizoenen):
     context['filter_seizoenen'] = list()
     for opt in seizoenen:
         opt_url = opt.replace('/', '-')
-        url = reverse('HistComp:seizoen-top', kwargs={'seizoen': opt_url, 'histcomp_type': histcomp_type_url})
         obj = SimpleNamespace(
-            beschrijving='Seizoen %s' % opt,
-            sel=opt_url,
-            selected=(opt == seizoen),
-            zoom_url=url)
+                    beschrijving='Seizoen %s' % opt,
+                    sel=opt_url,
+                    selected=(opt == seizoen),
+                    url_part=opt_url)
         context['filter_seizoenen'].append(obj)
     # for
 
@@ -49,12 +48,11 @@ def maak_filter_histcomp_type(context, **kwargs):
     context['filter_histcomp_type'] = list()
     for opt_sel, opt_descr in HISTCOMP_TYPE:
         opt_url = HISTCOMP_TYPE2URL[opt_sel]
-        url = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': opt_url})
         obj = SimpleNamespace(
-            beschrijving=opt_descr,
-            sel=opt_sel,
-            selected=(opt_url == histcomp_type_url),
-            zoom_url=url)
+                    beschrijving=opt_descr,
+                    sel=opt_sel,
+                    selected=(opt_url == histcomp_type_url),
+                    url_part=opt_url)
         context['filter_histcomp_type'].append(obj)
     # for
 
@@ -62,7 +60,7 @@ def maak_filter_histcomp_type(context, **kwargs):
 class HistCompTop(TemplateView):
 
     # class variables shared by all instances
-    template_name = TEMPLATE_HISTCOMP_ALLEJAREN
+    template_name = TEMPLATE_HISTCOMP_TOP
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -103,6 +101,10 @@ class HistCompTop(TemplateView):
 
             maak_filter_seizoen(context, seizoenen)
             maak_filter_histcomp_type(context)
+
+            context['url_filters'] = reverse('HistComp:seizoen-top',
+                                             kwargs={'seizoen': '~1',
+                                                     'histcomp_type': '~2'})
 
             default_boog_url = HIST_BOOG2URL[HIST_BOOG_DEFAULT]
             default_team_url = HIST_TEAM2URL[HIST_TEAM_DEFAULT]
