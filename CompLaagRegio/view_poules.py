@@ -279,7 +279,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                             # nog niet in te een poule, dus mag gekozen worden
                             kies = True
                         else:
-                            if team.regiocompetitieteampoule_set.first().pk == poule.pk:
+                            if team.regiocompetitieteampoule_set.all()[0].pk == poule.pk:
                                 # herverkozen in dezelfde poule
                                 kies = True
 
