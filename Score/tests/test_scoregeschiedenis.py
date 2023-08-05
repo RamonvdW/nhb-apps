@@ -180,7 +180,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
 
-        uitslag = Uitslag.objects.all()[0]
+        uitslag = Uitslag.objects.first()
         self.assertTrue(str(uitslag) != '')
         uitslag.is_bevroren = True
         self.assertTrue(str(uitslag) != '')
@@ -202,14 +202,14 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.assertContains(resp, 'Aanvangsgemiddelde')
         self.assertContains(resp, 'test melding')
 
-        score = Score.objects.all()[0]
+        score = Score.objects.first()
         self.assertTrue(str(score) != '')
 
         score.type = SCORE_TYPE_GEEN
         score.sporterboog = None
         self.assertTrue('(geen score)' in str(score))
 
-        hist = ScoreHist.objects.all()[0]
+        hist = ScoreHist.objects.first()
         self.assertTrue(str(hist) != '')
 
         hist = ScoreHist.objects.filter(score__sporterboog__sporter=self.sporter_100001)[0]

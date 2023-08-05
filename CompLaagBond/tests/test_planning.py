@@ -208,7 +208,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         self.assertTrue(1, CompetitieMatch.objects.count())
-        match = CompetitieMatch.objects.all()[0]
+        match = CompetitieMatch.objects.first()
         self.assert_is_redirect(resp, self.url_wijzig_wedstrijd % match.pk)
 
         # get met deze nieuwe wedstrijd

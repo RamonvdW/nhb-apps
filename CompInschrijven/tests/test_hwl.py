@@ -313,7 +313,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
 
-        match_pk = CompetitieMatch.objects.all()[0].pk
+        match_pk = CompetitieMatch.objects.first().pk
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % match_pk
@@ -386,7 +386,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertEqual(inschrijving.sporterboog.sporter.lid_nr, 100004)
         self.assertTrue('Onder 18' in inschrijving.indiv_klasse.beschrijving)
         inschrijving.delete()
@@ -707,7 +707,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # schrijf de schutters weer uit
-        pk = RegiocompetitieSporterBoog.objects.all()[0].pk
+        pk = RegiocompetitieSporterBoog.objects.first().pk
         url = self.url_ingeschreven % 0
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'pk_%s' % pk: 'on'})
@@ -715,7 +715,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)    # 1 schutter
 
         # schrijf een schutter uit van een andere vereniging
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         inschrijving.bij_vereniging = self.ver2
         inschrijving.save()
         with self.assert_max_queries(20):

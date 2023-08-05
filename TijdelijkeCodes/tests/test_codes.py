@@ -143,7 +143,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.callback_count = 1
 
         # extra coverage
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
@@ -175,7 +175,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.callback_count = 0
 
         # extra coverage
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
@@ -206,7 +206,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.callback_count = 0
 
         # extra coverage
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
@@ -239,7 +239,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.callback_count = 0
 
         # extra coverage
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
@@ -273,7 +273,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.callback_count = 0
 
         # extra coverage
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
@@ -307,7 +307,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.callback_count = 0
 
         # extra coverage
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
@@ -378,7 +378,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         self.callback_count = 0
 
         # extra coverage
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):

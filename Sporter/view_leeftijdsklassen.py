@@ -51,7 +51,7 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
 
         # gegarandeerd ingelogd door test_func()
         account = self.request.user
-        sporter = account.sporter_set.all()[0]
+        sporter = account.sporter_set.first()
         voorkeur = get_sporter_voorkeuren(sporter)
 
         context['is_gast'] = sporter.is_gast

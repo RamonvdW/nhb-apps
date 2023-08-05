@@ -204,7 +204,7 @@ def stuur_email_webwinkel_backoffice(bestelling, email_backoffice):
     """ Stuur een e-mail om de betaalde bestelling te bevestigen """
 
     account = bestelling.account
-    sporter = account.sporter_set.all()[0]
+    sporter = account.sporter_set.first()
 
     producten = _beschrijf_bestelling(bestelling)
     transacties = _beschrijf_transacties(bestelling)
@@ -297,7 +297,7 @@ class Command(BaseCommand):
 
             wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
 
-            mandje = product.bestelmandje_set.all()[0]
+            mandje = product.bestelmandje_set.first()
             if mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
 
@@ -323,7 +323,7 @@ class Command(BaseCommand):
             # geef de reservering op de producten weer vrij
             webwinkel_plugin_verwijder_reservering(self.stdout, keuze)
 
-            mandje = product.bestelmandje_set.all()[0]
+            mandje = product.bestelmandje_set.first()
             if mandje.pk not in mandje_pks:
                 mandje_pks.append(mandje.pk)
 

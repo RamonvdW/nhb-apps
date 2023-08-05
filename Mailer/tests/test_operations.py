@@ -64,13 +64,13 @@ class TestMailerOperations(TestCase):
         with override_settings(EMAIL_ADDRESS_WHITELIST=('een.test@test.not',)):
             mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
+            mail = MailQueue.objects.first()
             self.assertTrue(mail.is_blocked)
             mail.delete()
 
             mailer_queue_email('een.test@test.not', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
+            mail = MailQueue.objects.first()
             self.assertFalse(mail.is_blocked)
         # with
 

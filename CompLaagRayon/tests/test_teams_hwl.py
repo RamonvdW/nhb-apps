@@ -390,7 +390,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
-            team = KampioenschapTeam.objects.all()[0]
+            team = KampioenschapTeam.objects.first()
 
             # coverage
             self.assertTrue(str(team) != "")
@@ -473,7 +473,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
-            team = KampioenschapTeam.objects.all()[0]
+            team = KampioenschapTeam.objects.first()
             url = self.url_rk_teams_koppelen % team.pk
 
             with self.assert_max_queries(20):
@@ -512,7 +512,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
-            team = KampioenschapTeam.objects.all()[0]
+            team = KampioenschapTeam.objects.first()
             url = self.url_rk_teams_koppelen % team.pk
 
             with self.assert_max_queries(20):

@@ -95,7 +95,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
         # stop de vereniging in clusters
-        cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='18').all()[0]
+        cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='18').first()
         ver.clusters.add(cluster)
         cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='25').all()[2]
         ver.clusters.add(cluster)

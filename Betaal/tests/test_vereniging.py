@@ -71,7 +71,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # zet de "akkoord via bond" optie
-        instellingen = BetaalInstellingenVereniging.objects.all()[0]
+        instellingen = BetaalInstellingenVereniging.objects.first()
         self.assertEqual(instellingen.mollie_api_key, 'test_12345')
         instellingen.akkoord_via_bond = True
         instellingen.save()

@@ -113,7 +113,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         self.assertTrue(str(wedstrijd) != '')
 
         url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
@@ -373,7 +373,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
 
         # wijzig velden via de 'post' interface
@@ -442,7 +442,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         url = self.url_wedstrijden_zet_status % wedstrijd.pk
 
         with self.assert_max_queries(20):
@@ -547,12 +547,12 @@ class TestWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         url = self.url_wedstrijden_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, WedstrijdSessie.objects.count())
-        sessie = WedstrijdSessie.objects.all()[0]
+        sessie = WedstrijdSessie.objects.first()
         self.assertTrue(str(sessie) != '')
 
         # wijzig de wedstrijd datum en controleer dat de sessie mee gaat
@@ -578,7 +578,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)
 
@@ -609,7 +609,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
         self.assertEqual(2, WedstrijdSessie.objects.count())
-        sessie = WedstrijdSessie.objects.all()[0]
+        sessie = WedstrijdSessie.objects.first()
         sessie2 = WedstrijdSessie.objects.all()[1]
 
         wkl = wedstrijd.wedstrijdklassen.get(volgorde=111)  # Recurve 50+ Heren
@@ -659,7 +659,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         self.assertTrue(str(wedstrijd) != '')
 
         url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
@@ -680,7 +680,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         self.assertTrue(str(wedstrijd) != '')
 
         url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
@@ -742,7 +742,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
             self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
             self.assertEqual(1, Wedstrijd.objects.count())
-            wedstrijd = Wedstrijd.objects.all()[0]
+            wedstrijd = Wedstrijd.objects.first()
             self.assertIsNone(wedstrijd.uitvoerende_vereniging)
             url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
 
@@ -811,7 +811,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         self.assertFalse(wedstrijd.is_ter_info)
 
         url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk

@@ -127,7 +127,7 @@ def maak_bogen_filter(request, context, gekozen_bogen):
     account = request.user
     if account.is_authenticated:                                    # pragma: no branch
         if account.sporter_set.count() > 0:                         # pragma: no branch
-            sporter = account.sporter_set.all()[0]
+            sporter = account.sporter_set.first()
             if sporter.is_actief_lid:
                 boog_pks = list(SporterBoog
                                 .objects

@@ -121,7 +121,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
-        self.wedstrijd = Wedstrijd.objects.all()[0]
+        self.wedstrijd = Wedstrijd.objects.first()
 
         # maak een R sessie aan
         sessie = WedstrijdSessie(

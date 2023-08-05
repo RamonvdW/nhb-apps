@@ -18,10 +18,10 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
 
     @staticmethod
     def _maak_twee_klassen(comp):
-        indiv = TemplateCompetitieIndivKlasse.objects.all()[0]
+        indiv = TemplateCompetitieIndivKlasse.objects.first()
         CompetitieIndivKlasse(competitie=comp, volgorde=1, boogtype=indiv.boogtype, min_ag=0.0).save()
 
-        teamtype = TeamType.objects.all()[0]
+        teamtype = TeamType.objects.first()
         CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
 
     @staticmethod

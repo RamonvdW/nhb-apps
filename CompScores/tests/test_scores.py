@@ -86,7 +86,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp18_regio[101].pk)
         with self.assert_max_queries(20):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp25_regio[101].pk)
-        ronde18 = RegiocompetitieRonde.objects.all()[0]
+        ronde18 = RegiocompetitieRonde.objects.first()
         ronde25 = RegiocompetitieRonde.objects.all()[1]
 
         # maak een cluster planning aan
@@ -98,7 +98,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         indiv_klassen = CompetitieIndivKlasse.objects.values_list('pk', flat=True)
 
         self.client.post(self.url_planning_regio_ronde % ronde18.pk, {})
-        match = CompetitieMatch.objects.all()[0]
+        match = CompetitieMatch.objects.first()
         match.vereniging = self.testdata.functie_hwl[self.ver_nr].vereniging
         match.save()
         match.indiv_klassen.set(indiv_klassen)
@@ -643,7 +643,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         uitslag.scores.add(score)
 
         ronde = RegiocompetitieRonde.objects.filter(regiocompetitie=self.testdata.deelcomp18_regio[101])[0]
-        match = ronde.matches.all()[0]
+        match = ronde.matches.first()
         match.uitslag = uitslag
         match.save()
 

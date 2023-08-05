@@ -70,7 +70,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         # fallback naar ingelogde gebruiker
         account = request.user
-        sporter = account.sporter_set.all()[0]  # ROL_SPORTER geeft bescherming tegen geen sporter
+        sporter = account.sporter_set.first()  # ROL_SPORTER geeft bescherming tegen geen sporter
 
         return sporter
 

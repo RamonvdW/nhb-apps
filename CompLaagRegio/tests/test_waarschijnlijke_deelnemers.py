@@ -489,7 +489,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        match = CompetitieMatch.objects.all()[0]
+        match = CompetitieMatch.objects.first()
         match.beschrijving = 'Hallo'
         match.save(update_fields=['beschrijving'])
 
@@ -574,7 +574,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # cluster
-        self.ver1.clusters.add(NhbCluster.objects.all()[0])
+        self.ver1.clusters.add(NhbCluster.objects.first())
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk
         with self.assert_max_queries(20):

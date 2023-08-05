@@ -155,7 +155,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertEqual(str(inschrijving.ag_voor_indiv), "8.180")
         self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
         self.assertFalse(inschrijving.ag_voor_team_mag_aangepast_worden)
@@ -336,7 +336,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog_18.pk))
         self.assert_is_redirect(resp, self.url_profiel)
-        inschrijving_18 = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving_18 = RegiocompetitieSporterBoog.objects.first()
 
         # aanmelden voor de 25m BB, zonder AG
         sporterboog_25 = SporterBoog.objects.get(boogtype__afkorting='BB')
@@ -361,7 +361,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert404(resp, 'Inschrijving niet gevonden')
 
         # sporterboog hoort niet bij gebruiker
-        inschrijving_25 = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving_25 = RegiocompetitieSporterBoog.objects.first()
         self.client.logout()
         self.e2e_login(self.account_twee)
         with self.assert_max_queries(20):
@@ -388,7 +388,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, sporterboog_18.pk))
         self.assert_is_redirect(resp, self.url_profiel)
-        inschrijving_18 = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving_18 = RegiocompetitieSporterBoog.objects.first()
 
         # voorkeur boogtype uitzetten
         sporterboog_18.voor_wedstrijd = False
@@ -426,7 +426,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertEqual(str(inschrijving.ag_voor_indiv), "8.180")
         self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
         self.assertFalse(inschrijving.ag_voor_team_mag_aangepast_worden)
@@ -449,7 +449,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 2)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.filter(sporterboog=sporterboog).all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.filter(sporterboog=sporterboog).first()
         self.assertEqual(inschrijving.inschrijf_notitie, 'ben ik oud genoeg?')
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
 
@@ -509,7 +509,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertTrue(inschrijving.inschrijf_voorkeur_team)
         self.assertTrue(len(inschrijving.inschrijf_notitie) > 480)
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'ZAT')
@@ -570,7 +570,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
         self.assertEqual(inschrijving.inschrijf_notitie, '')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'AV')
@@ -620,7 +620,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertEqual(inschrijving.regiocompetitie, deelcomp)
         self.assertEqual(inschrijving.sporterboog, sporterboog)
 
@@ -676,7 +676,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
 
-        match_pk = CompetitieMatch.objects.all()[0].pk
+        match_pk = CompetitieMatch.objects.first().pk
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % match_pk
@@ -871,7 +871,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertEqual(str(inschrijving.ag_voor_indiv), "0.000")
         self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
         self.assertTrue(inschrijving.ag_voor_team_mag_aangepast_worden)

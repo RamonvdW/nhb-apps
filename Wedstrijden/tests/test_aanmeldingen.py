@@ -124,7 +124,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        self.wedstrijd = Wedstrijd.objects.all()[0]
+        self.wedstrijd = Wedstrijd.objects.first()
 
         # maak een R sessie aan
         sessie = WedstrijdSessie(
@@ -191,7 +191,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
-        self.inschrijving1r = WedstrijdInschrijving.objects.all()[0]
+        self.inschrijving1r = WedstrijdInschrijving.objects.first()
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,

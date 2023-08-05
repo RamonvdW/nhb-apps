@@ -255,7 +255,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # hak het https deel eraf
         tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         obj.geldig_tot = timezone.now() - datetime.timedelta(seconds=1)
         obj.save()
 

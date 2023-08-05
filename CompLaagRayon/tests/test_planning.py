@@ -269,7 +269,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        wedstrijd_r1_pk = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk).rk_bk_matches.all()[0].pk
+        wedstrijd_r1_pk = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk).rk_bk_matches.first().pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
         with self.assert_max_queries(22):
@@ -314,7 +314,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagrayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
 
         # haal de wedstrijd op
-        wedstrijd_r1 = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk).rk_bk_matches.all()[0]
+        wedstrijd_r1 = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk).rk_bk_matches.first()
         url_w = self.url_wijzig_rk_wedstrijd % wedstrijd_r1.pk
         with self.assert_max_queries(27):
             resp = self.client.get(url_w)
@@ -371,7 +371,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assertEqual(self.deelkamp_rayon1_18.rk_bk_matches.count(), 1)
 
         # bevries de uitslag
-        wedstrijd = self.deelkamp_rayon1_18.rk_bk_matches.all()[0]
+        wedstrijd = self.deelkamp_rayon1_18.rk_bk_matches.first()
         url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
 
         self.deelkamp_rayon1_18.rk_bk_matches.clear()
@@ -421,7 +421,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
 
         self.deelkamp_rayon1_18 = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk)
-        wedstrijd = self.deelkamp_rayon1_18.rk_bk_matches.all()[0]
+        wedstrijd = self.deelkamp_rayon1_18.rk_bk_matches.first()
 
         # verwijder bad pk
         url = self.url_verwijder_rk_wedstrijd % 999999
@@ -458,7 +458,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
         # haal de wedstrijd op
         # hierbij lukt het niet om de wedstrijd.vereniging in te vullen
-        wedstrijd_r2_pk = Kampioenschap.objects.get(pk=self.deelkamp_rayon2_18.pk).rk_bk_matches.all()[0].pk
+        wedstrijd_r2_pk = Kampioenschap.objects.get(pk=self.deelkamp_rayon2_18.pk).rk_bk_matches.first().pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r2_pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -544,7 +544,7 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        wedstrijd_r1_pk = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk).rk_bk_matches.all()[0].pk
+        wedstrijd_r1_pk = Kampioenschap.objects.get(pk=self.deelkamp_rayon1_18.pk).rk_bk_matches.first().pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
         # wijzig de wedstrijd

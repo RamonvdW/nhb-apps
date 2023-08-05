@@ -863,7 +863,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
         # slechte mutatie code
         mutatie = CompetitieMutatie(mutatie=0,
-                                    deelnemer=KampioenschapSporterBoog.objects.all()[0],
+                                    deelnemer=KampioenschapSporterBoog.objects.first(),
                                     door='Tester')
         mutatie.save()
 
@@ -883,7 +883,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         # mutatie die al verwerkt is
         CompetitieMutatie(mutatie=0,
                           is_verwerkt=True,
-                          deelnemer=KampioenschapSporterBoog.objects.all()[0],
+                          deelnemer=KampioenschapSporterBoog.objects.first(),
                           door='Tester').save()
 
         # mutatie nieuw record van 24 wordt niet opgeslagen

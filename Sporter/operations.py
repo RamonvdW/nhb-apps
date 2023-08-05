@@ -39,7 +39,7 @@ def get_request_regio_nr(request, allow_admin_regio=True):
         # sporter
         account = request.user
         if account.sporter_set.count() > 0:         # pragma: no branch
-            sporter = account.sporter_set.select_related('bij_vereniging__regio').all()[0]
+            sporter = account.sporter_set.select_related('bij_vereniging__regio').first()
             if sporter.is_actief_lid and sporter.bij_vereniging:
                 regio_nr = sporter.bij_vereniging.regio.regio_nr
 
@@ -72,7 +72,7 @@ def get_request_rayon_nr(request):
         account = request.user
         if account.is_authenticated:                                    # pragma: no branch
             if account.sporter_set.count() > 0:                         # pragma: no branch
-                sporter = account.sporter_set.all()[0]
+                sporter = account.sporter_set.first()
                 if sporter.is_actief_lid and sporter.bij_vereniging:
                     rayon_nr = sporter.bij_vereniging.regio.rayon.rayon_nr
 

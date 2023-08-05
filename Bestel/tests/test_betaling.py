@@ -159,7 +159,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
 
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # TODO: betere url kiezen
@@ -228,7 +228,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         # controleer dat een e-mailbevestiging van de betaling aangemaakt is
         self.assertEqual(1, MailQueue.objects.count())
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 

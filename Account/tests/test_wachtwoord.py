@@ -103,12 +103,12 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
 
         self.assertEqual(obj.hoort_bij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code
@@ -170,12 +170,12 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
 
         self.assertEqual(obj.hoort_bij_account.nieuwe_email, 'nieuwe@test.com')
 
@@ -207,7 +207,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/wachtwoord-vergeten-email.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
             resp = self.client.post(url)
@@ -242,7 +242,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
         self.assertEqual(TijdelijkeCode.objects.count(), 1)
-        obj = TijdelijkeCode.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
 
         self.assertEqual(obj.hoort_bij_account.bevestigde_email, 'normaal@test.com')
         url = self.url_tijdelijk % obj.url_code

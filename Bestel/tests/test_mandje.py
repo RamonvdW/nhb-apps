@@ -145,7 +145,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         korting.voor_wedstrijden.add(wedstrijd)
         self.korting = korting
 
-        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+        self.functie_mww = Functie.objects.filter(rol='MWW').first()
 
         product = WebwinkelProduct(
                         omslag_titel='Test titel 1',
@@ -425,7 +425,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assertEqual(1, BestelMutatie.objects.count())
         self.assertEqual(0, Bestelling.objects.count())
 
-        mutatie = BestelMutatie.objects.all()[0]
+        mutatie = BestelMutatie.objects.first()
         self.assertTrue(str(mutatie) != '')
         mutatie.code = 99999
         mutatie.is_verwerkt = True
@@ -441,7 +441,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         self.assertEqual(1, Bestelling.objects.count())
 
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertTrue(str(bestelling) != '')
 
     def test_transport(self):

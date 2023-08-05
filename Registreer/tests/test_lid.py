@@ -368,7 +368,7 @@ class TestRegistreerLid(E2EHelpers, TestCase):
 
         # sporter is wel gekoppeld aan Secretaris
         self.assertEqual(sec.sporters.count(), 1)
-        self.assertEqual(sec.sporters.all()[0], self.sporter_100001)
+        self.assertEqual(sec.sporters.first(), self.sporter_100001)
 
     def test_geen_ver(self):
         self.sporter_100001.bij_vereniging = None

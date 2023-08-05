@@ -796,7 +796,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Lid 100001 heeft een dubbele opleiding: code 042" in f2.getvalue())
 
         self.assertEqual(OpleidingDiploma.objects.count(), 1)
-        diploma = OpleidingDiploma.objects.all()[0]
+        diploma = OpleidingDiploma.objects.first()
 
         self.assertEqual(diploma.code, '042')
         self.assertEqual(diploma.sporter.lid_nr, 100001)
@@ -832,7 +832,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue('datum_einde' in f2.getvalue())
 
         self.assertEqual(OpleidingDiploma.objects.count(), 1)
-        diploma = OpleidingDiploma.objects.all()[0]
+        diploma = OpleidingDiploma.objects.first()
         self.assertEqual(diploma.code, '042')
         self.assertEqual(diploma.sporter.lid_nr, 100001)
         self.assertEqual(diploma.beschrijving, 'Test code 42')

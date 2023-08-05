@@ -381,7 +381,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 if functie.rol == 'SEC':
                     # nog geen account aangemaakt, dus haal de naam op van de secretaris volgens CRM
                     if len(namen) == 0 and sporter.bij_vereniging.secretaris_set.count() > 0:
-                        sec = sporter.bij_vereniging.secretaris_set.all()[0]
+                        sec = sporter.bij_vereniging.secretaris_set.first()
                         namen = [sporter.volledige_naam() for sporter in sec.sporters.all()]
                     context['sec_namen'] = namen
                     context['sec_email'] = functie.bevestigde_email

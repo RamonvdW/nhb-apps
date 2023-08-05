@@ -53,7 +53,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 
         self.assertEqual(MailQueue.objects.count(), 1)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 

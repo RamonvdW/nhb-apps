@@ -587,7 +587,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         # met geslacht X, geen keuze gemaakt
         self.sporter1.geslacht = GESLACHT_ANDERS
         self.sporter1.save(update_fields=['geslacht'])
-        voorkeur = self.sporter1.sportervoorkeuren_set.all()[0]
+        voorkeur = self.sporter1.sportervoorkeuren_set.first()
         voorkeur.wedstrijd_geslacht_gekozen = False
         voorkeur.save(update_fields=['wedstrijd_geslacht_gekozen'])
 

@@ -24,13 +24,13 @@ class TestMailerGoodBase(TestCase):
         mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
 
         # probeer te versturen
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertFalse(obj.is_verstuurd)
         self.assertEqual(obj.aantal_pogingen, 0)
 
         send_mail(obj)
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertTrue(obj.is_verstuurd)
 
@@ -44,13 +44,13 @@ class TestMailerGoodBase(TestCase):
                            ('body\ndoei!\n', '<html>body</html>', 'template-used'))
 
         # probeer te versturen
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertFalse(obj.is_verstuurd)
         self.assertEqual(obj.aantal_pogingen, 0)
 
         send_mail(obj)
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertFalse(obj.is_verstuurd)
 
@@ -61,13 +61,13 @@ class TestMailerGoodBase(TestCase):
         with override_settings(EMAIL_ADDRESS_WHITELIST=('een.test@test.not',)):
             mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
+            mail = MailQueue.objects.first()
             self.assertTrue(mail.is_blocked)
             mail.delete()
 
             mailer_queue_email('een.test@test.not', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
+            mail = MailQueue.objects.first()
             self.assertFalse(mail.is_blocked)
         # with
 
@@ -88,11 +88,11 @@ class TestMailerBadBase(TestCase):
         mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
 
         # probeer te versturen
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertFalse(obj.is_verstuurd)
         self.assertEqual(obj.aantal_pogingen, 0)
         send_mail(obj)
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 1)
 
     def test_send_mail_limit(self):
@@ -105,7 +105,7 @@ class TestMailerBadBase(TestCase):
         mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
 
         # controleer dat we ophouden te proberen na 25 pogingen
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertFalse(obj.is_verstuurd)
         self.assertEqual(obj.aantal_pogingen, 0)
         # 24 naar 25
@@ -113,12 +113,12 @@ class TestMailerBadBase(TestCase):
         obj.save()
         send_mail(obj)
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 25)
         old_log = obj.log
         # 25 blijft 25
         send_mail(obj)
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 25)
         self.assertEqual(obj.log, old_log)
 

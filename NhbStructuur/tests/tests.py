@@ -35,7 +35,7 @@ class TestNhbStructuur(TestCase):
         self.assertIsNotNone(str(regio))
 
     def test_vereniging(self):
-        ver = NhbVereniging.objects.all()[0]
+        ver = NhbVereniging.objects.first()
         self.assertIsNotNone(str(ver))
         ver.clean_fields()      # run validators
         ver.clean()             # run model validator

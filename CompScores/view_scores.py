@@ -303,7 +303,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             team.naam_str = team.maak_team_naam_kort()
         context['teams'] = teams
 
-        # plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        # plan = wedstrijd.competitiewedstrijdenplan_set.first()
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if self.rol_nu == Rollen.ROL_RCL:

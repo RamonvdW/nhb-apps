@@ -97,7 +97,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         needs_vhpg, _ = account_needs_vhpg(self.testdata.account_admin)
         self.assertFalse(needs_vhpg)
 
-        obj = VerklaringHanterenPersoonsgegevens.objects.all()[0]
+        obj = VerklaringHanterenPersoonsgegevens.objects.first()
         self.assertTrue(str(obj) != "")
 
         self.e2e_assert_other_http_commands_not_supported(self.url_acceptatie, post=False)

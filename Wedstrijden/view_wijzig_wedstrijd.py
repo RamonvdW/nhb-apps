@@ -434,7 +434,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 akkoord = request.POST.get('akkoord_verkoop', '')
                 if akkoord:
                     account = request.user
-                    sporter = account.sporter_set.all()[0]
+                    sporter = account.sporter_set.first()
                     wedstrijd.verkoopvoorwaarden_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     wedstrijd.verkoopvoorwaarden_status_when = timezone.now()
                     wedstrijd.verkoopvoorwaarden_status_acceptatie = True
@@ -494,7 +494,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     akkoord = request.POST.get('akkoord_a_status', '')
                     if akkoord:
                         account = request.user
-                        sporter = account.sporter_set.all()[0]
+                        sporter = account.sporter_set.first()
                         wedstrijd.voorwaarden_a_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                         wedstrijd.voorwaarden_a_status_when = timezone.now()
                         wedstrijd.voorwaarden_a_status_acceptatie = True

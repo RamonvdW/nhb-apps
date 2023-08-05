@@ -28,7 +28,7 @@ def sporter_login_plugin(request, from_ip, account):
 
     # zoek het Sporter record dat bij dit account hoort
     if account.sporter_set.all().count() == 1:
-        sporter = account.sporter_set.all()[0]
+        sporter = account.sporter_set.first()
 
         if not (account.is_staff or account.is_BB):  # beschermt management rollen tegen CRM ongelukken
             if not sporter.is_actief_lid:

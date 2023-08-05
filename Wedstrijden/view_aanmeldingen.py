@@ -551,7 +551,7 @@ class AfmeldenView(UserPassesTestMixin, View):
 
         if inschrijving.status == INSCHRIJVING_STATUS_RESERVERING_MANDJE:
             if inschrijving.bestelproduct_set.count() > 0:
-                product = inschrijving.bestelproduct_set.all()[0]
+                product = inschrijving.bestelproduct_set.first()
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')

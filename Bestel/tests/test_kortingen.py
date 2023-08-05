@@ -383,7 +383,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
 
         # verwijder de inschrijving voor de 1e wedstrijd
         # krijg ver korting i.p.v. combi-korting
-        product = inschrijving1.bestelproduct_set.all()[0]
+        product = inschrijving1.bestelproduct_set.first()
         bestel_mutatieverzoek_verwijder_product_uit_mandje(self.account_sporter1, product, snel=True)
         self.verwerk_bestel_mutaties()
 

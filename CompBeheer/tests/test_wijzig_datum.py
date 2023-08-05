@@ -136,7 +136,7 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
         competities_aanmaken(jaar=expected_year)
         # nu in fase A
 
-        comp = Competitie.objects.all()[0]
+        comp = Competitie.objects.first()
 
         now = timezone.now()
         if now.month == expected_month and now.day == expected_day:     # pragma: no cover

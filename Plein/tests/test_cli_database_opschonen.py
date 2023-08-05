@@ -47,7 +47,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
         # maak een mail aan die lang geleden verstuurd is
         mailer_queue_email('ergens@nergens.niet', 'Test', 'Test', enforce_whitelist=False)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         mail.toegevoegd_op -= datetime.timedelta(days=92)
         mail.save()
 
@@ -56,7 +56,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
         # maak een oude, afgehandelde site feedback aan
         store_feedback('mij', 'rol', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')
-        feedback = Feedback.objects.all()[0]
+        feedback = Feedback.objects.first()
         feedback.toegevoegd_op -= datetime.timedelta(days=92)
         feedback.is_afgehandeld = True
         feedback.save()

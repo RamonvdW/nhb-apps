@@ -168,7 +168,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.rec = rec
 
     def test_create(self):
-        rec = IndivRecord.objects.all()[0]
+        rec = IndivRecord.objects.first()
         rec.clean_fields()      # run field validators
         rec.clean()             # run model validator
         self.assertIsNotNone(str(rec))      # use the __str__ method (only used by admin interface)

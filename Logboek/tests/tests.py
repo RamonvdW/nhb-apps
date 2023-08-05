@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -67,7 +67,7 @@ class TestLogboek(E2EHelpers, TestCase):
 
     def test_str(self):
         # gebruik de str functie op de Logboek class
-        log = LogboekRegel.objects.all()[0]
+        log = LogboekRegel.objects.first()
         self.assertTrue(str(log) != "")
 
     def test_users_forbidden(self):

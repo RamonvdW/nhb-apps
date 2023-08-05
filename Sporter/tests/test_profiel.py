@@ -558,7 +558,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
 
         self.assertEqual(1, RegiocompetitieSporterBoog.objects.count())
-        deelnemer = RegiocompetitieSporterBoog.objects.all()[0]
+        deelnemer = RegiocompetitieSporterBoog.objects.first()
 
         # ingeschreven en geen knop meer voor aanmelden
         with self.assert_max_queries(27):

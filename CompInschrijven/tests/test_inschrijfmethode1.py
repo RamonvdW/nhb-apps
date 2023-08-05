@@ -209,7 +209,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         # doorloop de 2 verenigingen in deze regio
         for ver in NhbVereniging.objects.filter(regio=self.regio_101):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
 
             post_params = dict()

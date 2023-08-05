@@ -633,8 +633,8 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         # maak de competities aan
         competities_aanmaken()
-        comp_18 = Competitie.objects.filter(afstand=18).all()[0]
-        comp_25 = Competitie.objects.filter(afstand=25).all()[0]
+        comp_18 = Competitie.objects.filter(afstand=18).first()
+        comp_25 = Competitie.objects.filter(afstand=25).first()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_klassengrenzen_tonen % comp_18.pk)

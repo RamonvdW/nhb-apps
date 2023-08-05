@@ -211,7 +211,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
-        poule = RegiocompetitieTeamPoule.objects.all()[0]
+        poule = RegiocompetitieTeamPoule.objects.first()
 
         # coverage
         self.assertTrue(str(poule) != "")
@@ -347,7 +347,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
-        poule = RegiocompetitieTeamPoule.objects.all()[0]
+        poule = RegiocompetitieTeamPoule.objects.first()
 
         # maak 9 teams aan
         type_r = TeamType.objects.get(afkorting='R2')

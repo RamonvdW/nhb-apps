@@ -139,7 +139,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         # doorloop de 2 verenigingen in deze regio
         for ver in NhbVereniging.objects.filter(regio=self.regio_101):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
 
             # maak 3 leden aan
@@ -201,7 +201,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         # doorloop de 2 verenigingen in deze regio
         for ver in NhbVereniging.objects.filter(regio=self.regio_101):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
 
             post_params = dict()
@@ -338,7 +338,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         # TODO: add WL
 
         # coverage voor models __str__
-        obj = RegiocompetitieSporterBoog.objects.all()[0]
+        obj = RegiocompetitieSporterBoog.objects.first()
         self.assertTrue(str(obj) != '')
 
 # end of file

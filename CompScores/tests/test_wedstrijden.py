@@ -400,7 +400,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        match = CompetitieMatch.objects.all()[0]
+        match = CompetitieMatch.objects.first()
         match.beschrijving = 'Hallo'
         match.save(update_fields=['beschrijving'])
 

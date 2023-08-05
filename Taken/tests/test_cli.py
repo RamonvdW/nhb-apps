@@ -41,7 +41,7 @@ class TestTakenCLI(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Geen e-mailadres bekend voor functie Manager Wedstrijdzaken" in f2.getvalue())
 
         self.assertEqual(1, Taak.objects.count())
-        taak = Taak.objects.all()[0]
+        taak = Taak.objects.first()
         self.assertEqual(str(taak.deadline), '2020-02-03')
         self.assertEqual(taak.toegekend_aan_functie, functie)
         self.assertIsNone(taak.aangemaakt_door)
@@ -58,7 +58,7 @@ class TestTakenCLI(E2EHelpers, TestCase):
         self.assertTrue('Taak aangemaakt door normal voor functie Manager Wedstrijdzaken met deadline 2020-02-03' in f2.getvalue())
 
         self.assertEqual(1, Taak.objects.count())
-        taak = Taak.objects.all()[0]
+        taak = Taak.objects.first()
         self.assertEqual(str(taak.deadline), '2020-02-03')
         self.assertEqual(taak.aangemaakt_door, account)
         self.assertEqual(taak.toegekend_aan_functie, functie)

@@ -50,7 +50,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         # maak een regioplanning aan met 2 wedstrijden
         self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-        ronde = RegiocompetitieRonde.objects.all()[0]
+        ronde = RegiocompetitieRonde.objects.first()
 
         # maak 7 wedstrijden aan
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})

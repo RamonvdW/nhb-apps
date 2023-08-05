@@ -169,7 +169,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)
         self.mandje = mandje
 
-        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+        self.functie_mww = Functie.objects.filter(rol='MWW').first()
         self.functie_mww.bevestigde_email = 'mww@bond.tst'
         self.functie_mww.save(update_fields=['bevestigde_email'])
 
@@ -241,12 +241,12 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
 
-        bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
+        bestelling = Bestelling.objects.prefetch_related('producten').first()
         self.assertEqual(2, bestelling.producten.count())
-        product1 = bestelling.producten.filter(webwinkel_keuze=None).all()[0]
+        product1 = bestelling.producten.filter(webwinkel_keuze=None).first()
 
         self.assertEqual(1, MailQueue.objects.count())
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 
@@ -351,7 +351,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # bestel wedstrijddeelname
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
 
-        mutatie = BestelMutatie.objects.all()[0]
+        mutatie = BestelMutatie.objects.first()
         mutatie.account = None
         mutatie.save(update_fields=['account'])
 
@@ -374,7 +374,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         url = self.url_bestelling_afrekenen % bestelling.bestel_nr
@@ -447,7 +447,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # er moet nu een mail in de MailQueue staan
         self.assertEqual(MailQueue.objects.count(), 1)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 
@@ -512,10 +512,10 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
 
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
 
         # fake de korting: persoonlijk
-        product = bestelling.producten.all()[0]
+        product = bestelling.producten.first()
         inschrijving = product.wedstrijd_inschrijving
         korting = inschrijving.korting
         korting.soort = WEDSTRIJD_KORTING_SPORTER
@@ -544,7 +544,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         url = self.url_bestelling_afrekenen % bestelling.bestel_nr
@@ -620,7 +620,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
 
         url = self.url_bestelling_afrekenen % bestelling.bestel_nr
         with self.assert_max_queries(20):
@@ -678,7 +678,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
 
         url = self.url_bestelling_afrekenen % bestelling.bestel_nr
         with self.assert_max_queries(20):
@@ -775,7 +775,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue(' wordt meteen afgerond' in f2.getvalue())
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         # TODO: niet af?
 
     def test_mutatie(self):
@@ -822,7 +822,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
@@ -862,7 +862,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
@@ -926,7 +926,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
@@ -995,7 +995,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         url = self.url_na_de_betaling % bestelling.bestel_nr
@@ -1085,7 +1085,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
 
-        bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
+        bestelling = Bestelling.objects.prefetch_related('producten').first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         MailQueue.objects.all().delete()
@@ -1111,7 +1111,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(bestelling.status, BESTELLING_STATUS_GEANNULEERD)
 
         self.assertEqual(1, MailQueue.objects.count())
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 
@@ -1167,7 +1167,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
 
-        bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
+        bestelling = Bestelling.objects.prefetch_related('producten').first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         url = self.url_check_status % bestelling.bestel_nr

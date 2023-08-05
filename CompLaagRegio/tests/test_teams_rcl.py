@@ -773,7 +773,7 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         # laat de laatste mutatie (doorzetten ronde 7) nog een keer verwerken
         self.assertEqual(1, CompetitieMutatie.objects.count())
-        mutatie = CompetitieMutatie.objects.all()[0]
+        mutatie = CompetitieMutatie.objects.first()
         mutatie.is_verwerkt = False
         mutatie.save(update_fields=['is_verwerkt'])
         # laat deze herstelde mutatie verwerken

@@ -117,7 +117,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
+        actief = BetaalActief.objects.first()
         self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
 
         # genereer het payment status-changed event
@@ -171,7 +171,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
+        actief = BetaalActief.objects.first()
         self.assertEqual(actief.ontvanger.pk, instellingen_bond.pk)
 
     def test_exceptions(self):
@@ -263,7 +263,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
+        actief = BetaalActief.objects.first()
         self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
 
         # genereer het payment status-changed event
@@ -304,7 +304,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
+        actief = BetaalActief.objects.first()
         self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
 
         # genereer het payment status-changed event

@@ -108,7 +108,7 @@ class TestSporterModels(TestCase):
 
         obj = SporterBoog(
                     sporter=None,
-                    boogtype=BoogType.objects.all()[0])
+                    boogtype=BoogType.objects.first())
         self.assertTrue(str(obj) != '')
         obj.sporter = self.sporter1
         self.assertTrue(str(obj) != '')

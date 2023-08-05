@@ -57,7 +57,7 @@ class TestBasisTypen(TestCase):
         obj.team_type = team_obj
         self.assertIsNotNone(str(obj))
 
-        boog_obj = BoogType.objects.all()[0]
+        boog_obj = BoogType.objects.first()
         self.assertIsNotNone(str(boog_obj))
 
         obj = TemplateCompetitieIndivKlasse(beschrijving="Test", boogtype=boog_obj)

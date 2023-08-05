@@ -119,7 +119,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assertEqual(count_pre + 2, count_post)
 
         # volg de tijdelijke URL in de email
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         url = self._get_tijdelijke_code_url_from_mail_text(mail.mail_text)
 
         with self.assert_max_queries(20):
@@ -285,7 +285,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         # check dat een mail aangemaakt is
         self.assertEqual(MailQueue.objects.count(), 1)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 

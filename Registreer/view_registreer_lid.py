@@ -200,7 +200,7 @@ class RegistreerLidView(TemplateView):
                         pass
                     else:
                         if sec.sporters.count() > 0:                # pragma: no branch
-                            sporter = sec.sporters.all()[0]
+                            sporter = sec.sporters.first()
                             context['sec_naam'] = sporter.volledige_naam()
 
                     functie = Functie.objects.get(rol='SEC', vereniging=ver)

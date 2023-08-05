@@ -113,7 +113,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
 
             # zoek de taak op en controleer de inhoud
             self.assertEqual(1, Taak.objects.count())
-            taak = Taak.objects.all()[0]
+            taak = Taak.objects.first()
             self.assertTrue('[100001] Gert Pijlhaler' in taak.beschrijving)
             self.assertTrue(' zelfstandig aangemeld' in taak.beschrijving)
 
@@ -142,7 +142,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             self.assertTrue('[INFO] RCL Regio 103 Indoor: 1 nieuwe aanmeldingen' in f2.getvalue())
             self.assertEqual(2, Taak.objects.count())
 
-            taak2 = Taak.objects.exclude(pk=taak.pk).all()[0]
+            taak2 = Taak.objects.exclude(pk=taak.pk).first()
             # print(taak2.beschrijving)
             self.assertTrue(' aangemeld door: Beheerdertje (100002)' in taak2.beschrijving)
 

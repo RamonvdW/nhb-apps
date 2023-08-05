@@ -148,7 +148,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         korting.voor_wedstrijden.add(wedstrijd)
         self.korting = korting
 
-        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+        self.functie_mww = Functie.objects.filter(rol='MWW').first()
 
         product = WebwinkelProduct(
                         omslag_titel='Test titel 1',

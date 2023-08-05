@@ -233,7 +233,7 @@ class RegiocompetitieAanmeldenView(View):
         account = request.user
         if account.is_authenticated:
             if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.all()[0]
+                sporter = account.sporter_set.first()
                 if not (sporter.is_actief_lid and sporter.bij_vereniging):
                     sporter = None
         if not sporter:
@@ -397,7 +397,7 @@ class RegiocompetitieAfmeldenView(View):
         account = request.user
         if account.is_authenticated:
             if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.all()[0]
+                sporter = account.sporter_set.first()
                 if not (sporter.is_actief_lid and sporter.bij_vereniging):
                     sporter = None
         if not sporter:

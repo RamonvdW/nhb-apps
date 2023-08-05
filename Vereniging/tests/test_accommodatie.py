@@ -588,7 +588,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
     def test_cluster(self):
         # stop de vereniging in een cluster
-        cluster = NhbCluster.objects.filter(regio=self.ver2.regio, gebruik='18').all()[0]
+        cluster = NhbCluster.objects.filter(regio=self.ver2.regio, gebruik='18').first()
         self.ver2.clusters.add(cluster)
         cluster = NhbCluster.objects.filter(regio=self.ver2.regio, gebruik='25').all()[2]
         self.ver2.clusters.add(cluster)
@@ -643,7 +643,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'maak_buiten_locatie': 'on'})
         self.assert_is_redirect(resp, url)
         self.assertEqual(2, self.ver2.wedstrijdlocatie_set.count())
-        buiten_locatie = self.ver2.wedstrijdlocatie_set.filter(baan_type='B').all()[0]
+        buiten_locatie = self.ver2.wedstrijdlocatie_set.filter(baan_type='B').first()
 
         # maak de buiten locatie nog een keer aan
         with self.assert_max_queries(20):
@@ -995,7 +995,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
     def test_externe_accommodatie(self):
         # accommodatie bestaat niet of heeft geen banen
         # functie wordt overgenomen door externe locatie
-        loc = self.ver2.wedstrijdlocatie_set.all()[0]
+        loc = self.ver2.wedstrijdlocatie_set.first()
         loc.plaats = "Wil je niet zien!"
         loc.save()
 
@@ -1013,7 +1013,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
 
-        loc = self.ver2.wedstrijdlocatie_set.all()[0]
+        loc = self.ver2.wedstrijdlocatie_set.first()
         loc.plaats = "Dit moet je bekijken!"
         loc.save()
 

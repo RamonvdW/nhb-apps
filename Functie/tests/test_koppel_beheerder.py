@@ -246,7 +246,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assertTrue(settings.URL_PDF_HANDLEIDING_BEHEERDERS in mail.mail_html)
         self.assert_consistent_email_html_text(mail)
@@ -317,7 +317,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rko3.accounts.count(), 1)
 
         # controleer correctheid toevoeging in het logboek
-        regel = LogboekRegel.objects.all()[0]
+        regel = LogboekRegel.objects.first()
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
         self.assertEqual(regel.activiteit, 'Sporter 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
 
@@ -365,7 +365,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
 
         # controleer correctheid toevoeging in het logboek
-        regel = LogboekRegel.objects.all()[0]
+        regel = LogboekRegel.objects.first()
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
         # beh1 is geen nhb lid
         self.assertEqual(regel.activiteit, 'Account Beheerder1 (testbeheerder1) is beheerder gemaakt voor functie RCL Regio 111 Indoor')
@@ -673,7 +673,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
                             {'login_naam': self.account_beh1.username,
                              'wachtwoord': self.WACHTWOORD})
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
-        session_key_beh1 = AccountSessions.objects.all()[0].session.session_key
+        session_key_beh1 = AccountSessions.objects.first().session.session_key
 
         session = SessionStore(session_key_beh1)
         self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)

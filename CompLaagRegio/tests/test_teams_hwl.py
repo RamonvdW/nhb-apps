@@ -437,7 +437,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
-        team = RegiocompetitieTeam.objects.all()[0]
+        team = RegiocompetitieTeam.objects.first()
 
         self.ver1 = NhbVereniging.objects.get(pk=self.ver1.pk)
 
@@ -515,7 +515,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
-        # team = RegiocompetitieTeam.objects.all()[0]
+        # team = RegiocompetitieTeam.objects.first()
 
         # voorbij einddatum aanmaken / wijzigen teams
         now = timezone.now()
@@ -712,7 +712,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect_not_plein(resp)
-        team = RegiocompetitieTeam.objects.exclude(pk__in=pks).all()[0]
+        team = RegiocompetitieTeam.objects.exclude(pk__in=pks).first()
         team.vereniging = self.ver2
         team.save(update_fields=['vereniging'])
 
@@ -843,7 +843,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
-        team = RegiocompetitieTeam.objects.all()[0]
+        team = RegiocompetitieTeam.objects.first()
         self.assertEqual(team.team_type.afkorting, 'R2')        # default = recurve team
 
         self.deelnemer_100003_18.inschrijf_voorkeur_team = True

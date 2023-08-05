@@ -143,7 +143,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         # doorloop de 2 verenigingen in deze regio
         for ver in NhbVereniging.objects.filter(regio=self.regio_101):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
 
             post_params = dict()
@@ -208,7 +208,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         # for
 
     def test_overzicht_anon(self):
-        comp = Competitie.objects.all()[0]
+        comp = Competitie.objects.first()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_alles % comp.pk)
@@ -225,7 +225,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
-        comp = Competitie.objects.all()[0]
+        comp = Competitie.objects.first()
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
         self.e2e_wisselnaarrol_bb()
 
@@ -277,7 +277,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie fase')
 
         # coverage voor models __str__
-        obj = RegiocompetitieSporterBoog.objects.all()[0]
+        obj = RegiocompetitieSporterBoog.objects.first()
         self.assertTrue(str(obj) != '')
 
     def test_overzicht_bko(self):
@@ -445,7 +445,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
                                                   regio=self.regio_101).functie
         self.e2e_wissel_naar_functie(functie_rcl)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
         naam_str = "[" + str(inschrijving.sporterboog.sporter.lid_nr) + "] " + inschrijving.sporterboog.sporter.volledige_naam()
         ver_str = str(self._ver)            # [ver_nr] Vereniging
 

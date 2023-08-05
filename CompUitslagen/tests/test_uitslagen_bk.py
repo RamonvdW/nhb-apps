@@ -119,7 +119,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
 
         # ingelogd geeft teamleden van eigen vereniging
         functie_hwl = list(self.testdata.functie_hwl.values())[5]
-        account = functie_hwl.accounts.all()[0]
+        account = functie_hwl.accounts.first()
         self.e2e_login_and_pass_otp(account)
 
         url = self.url_uitslagen_bond_teams % (self.testdata.comp25.pk, 'TR')

@@ -129,7 +129,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.bestelling = Bestelling.objects.get(pk=self.bestelling.pk)
         self.assertEqual(self.bestelling.status, BESTELLING_STATUS_AFGEROND)
         self.assertEqual(1, self.bestelling.transacties.count())
-        transactie = self.bestelling.transacties.all()[0]
+        transactie = self.bestelling.transacties.first()
 
         self.assertEqual(2, MailQueue.objects.count())
 

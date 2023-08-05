@@ -152,7 +152,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         # doorloop de 2 verenigingen in deze regio
         for ver in NhbVereniging.objects.filter(regio=self.regio_101).order_by('ver_nr'):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
             self.e2e_check_rol('HWL')
 
@@ -222,7 +222,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         # for
 
     def test_anon(self):
-        comp = Competitie.objects.all()[0]
+        comp = Competitie.objects.first()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3 % (comp.pk, self.regio_101.pk))
@@ -259,7 +259,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = NhbRegio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 
@@ -270,7 +270,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
 
     def test_behoefte3_25(self):
-        comp = Competitie.objects.filter(afstand='25').all()[0]
+        comp = Competitie.objects.filter(afstand='25').first()
         functie_rcl = Regiocompetitie.objects.get(competitie=comp, regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
@@ -296,7 +296,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = NhbRegio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 

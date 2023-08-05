@@ -307,7 +307,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
 
         # koppel feitelijke leden
         team.feitelijke_leden.set(team.gekoppelde_leden.order_by('sporterboog__sporter__lid_nr')[:3])
-        deelnemer = team.feitelijke_leden.all()[0]
+        deelnemer = team.feitelijke_leden.first()
         deelnemer.result_rk_teamscore_1 = 100
         deelnemer.result_rk_teamscore_2 = 110
         deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
@@ -353,7 +353,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-rk-teams.dtl', 'plein/site_layout.dtl'))
 
         # corner case: sporter is niet meer actief
-        sporter = self.testdata.account_hwl[self.ver_nr].sporter_set.all()[0]
+        sporter = self.testdata.account_hwl[self.ver_nr].sporter_set.first()
         sporter.is_actief_lid = False
         sporter.save(update_fields=['is_actief_lid'])
 

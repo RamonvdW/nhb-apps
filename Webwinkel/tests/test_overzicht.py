@@ -256,7 +256,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.assertEqual(2, WebwinkelKeuze.objects.count())
 
-        keuze = WebwinkelKeuze.objects.all()[0]
+        keuze = WebwinkelKeuze.objects.first()
         self.assertTrue(keuze.korte_beschrijving() != '')
         self.assertTrue(str(keuze) != '')
 
@@ -269,11 +269,11 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         self.assertEqual(1, MailQueue.objects.count())
-        email = MailQueue.objects.all()[0]
+        email = MailQueue.objects.first()
 
         # print(email.mail_text)
 
@@ -311,7 +311,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
         self.verwerk_bestel_mutaties()
 
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
 
         # koper en backoffice krijgen mails
@@ -334,7 +334,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         email.delete()
 
-        email = MailQueue.objects.all()[0]
+        email = MailQueue.objects.first()
 
         self.assertEqual(email.mail_to, self.account_email)
         self.assertTrue("Bevestiging aankoop via MijnHandboogsport (MH-100" in email.mail_subj)

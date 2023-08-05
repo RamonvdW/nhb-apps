@@ -159,7 +159,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         ver2.save()
         self.ver2 = ver2
 
-        self.functie_mww = Functie.objects.filter(rol='MWW').all()[0]
+        self.functie_mww = Functie.objects.filter(rol='MWW').first()
 
         product = WebwinkelProduct(
                         omslag_titel='Test titel 1',
@@ -297,7 +297,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.bestelling = Bestelling.objects.get(pk=self.bestelling.pk)
         self.assertEqual(self.bestelling.status, BESTELLING_STATUS_AFGEROND)
         self.assertEqual(1, self.bestelling.transacties.count())
-        transactie = self.bestelling.transacties.all()[0]
+        transactie = self.bestelling.transacties.first()
 
         # bestelling is al afgerond
         with self.assert_max_queries(20):

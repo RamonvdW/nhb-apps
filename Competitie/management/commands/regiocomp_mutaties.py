@@ -60,7 +60,7 @@ class Command(BaseCommand):
 
         self.stop_at = datetime.datetime.now()
 
-        self.taken = CompetitieTaken.objects.all()[0]
+        self.taken = CompetitieTaken.objects.first()
 
         self.pk2scores = dict()         # [RegioCompetitieSporterBoog.pk] = [tup, ..] with tup = (afstand, score)
         self.pk2scores_alt = dict()
