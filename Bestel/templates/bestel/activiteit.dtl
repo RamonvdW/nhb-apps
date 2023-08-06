@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -45,7 +45,7 @@
 
     <!-- zoekformulier -->
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -56,9 +56,23 @@
                         {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
                     </div>
 
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in" name="wedstrijden"{% if zoekform.wedstrijden.value %} checked{% endif %}>
+                            <span class="black-text">{{ zoekform.wedstrijden.label }}</span>
+                        </label>
+                    </p>
+
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in" name="webwinkel"{% if zoekform.webwinkel.value %} checked{% endif %}>
+                            <span class="black-text">{{ zoekform.webwinkel.label }}</span>
+                        </label>
+                    </p>
+
                     <!-- button -->
-                    <p class="center">
-                        <button class="btn-nhb-rood" type="submit">
+                    <p class="center" style="margin-top:50px">
+                        <button class="btn-sv-rood" type="submit">
                             <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </p>
                 </form>
@@ -75,7 +89,7 @@
                 {% if bestellingen %}
                     <p>{{ bestellingen|length }} bestellingen gevonden</p>
                 {% else %}
-                    <p class="nhb-rood-text">Niets gevonden</p>
+                    <p class="sv-rood-text">Niets gevonden</p>
                 {% endif %}
             {% else %}
                 <h4>Recente bestellingen</h4>
@@ -87,14 +101,15 @@
     {% if bestellingen %}
 
         <!-- blauwe balk met informatie label : info -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m10 offset-m1 l8 offset-l2 left-align">
 
-                <ul class="collapsible">
+                <ul class="collapsible popout">
                     {% for bestelling in bestellingen %}
                         <li>
                             <div class="collapsible-header white">
                                 <span>Bestel nummer {{ bestelling.bestel_nr_str|highlight:zoekterm }} ({{ bestelling.beschrijving_kort }})</span>
+                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
                             </div>
                             <div class="collapsible-body white">
                                 <table>
@@ -135,7 +150,7 @@
                                                 <span class="grey-text">Nieuw | Te betalen | Afgerond | Mislukt | </span>
                                                 <span>Geannuleerd</span>
                                             {% else %}
-                                                <i class="nhb-rood-text">Onverwacht ({{ bestelling.status }})</i>
+                                                <i class="sv-rood-text">Onverwacht ({{ bestelling.status }})</i>
                                             {% endif %}
                                         </td>
                                     </tr>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,15 +13,15 @@ from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
-from Account.models import Account, AccountEmail
-from Account.rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
-from Account.view_login import account_plugins_login
-from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
-                                   RECEIVER_ACCOUNT_WISSEL,
-                                   maak_tijdelijke_url_accountwissel)
-from Plein.menu import menu_dynamics
+from Account.models import Account
+from Account.operations.otp import otp_zet_controle_gelukt, otp_zet_control_niet_gelukt
+from Account.view_login import account_plugins_login_gate
+from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
+from Plein.menu import menu_dynamics
+from TijdelijkeCodes.definities import RECEIVER_ACCOUNT_WISSEL
+from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_accountwissel
 import logging
 
 
@@ -31,14 +31,12 @@ TEMPLATE_LOGIN_AS_GO = 'account/login-as-go.dtl'
 my_logger = logging.getLogger('NHBApps.Account')
 
 
-def receiver_account_wissel(request, obj):
-    """ Met deze functie kan een geautoriseerd persoon tijdelijk inloggen op de site
-        als een andere gebruiker.
-            obj is een AccountEmail object.
-        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
+def receiver_account_wissel(request, account):
+    """ Met deze functie kan een geautoriseerd persoon inloggen op de site als een andere gebruiker.
+            obj is een Account object.
+        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
+        of een HttpResponse object.
     """
-    account = obj.account
-
     old_last_login = account.last_login
 
     # integratie met de authenticatie laag van Django
@@ -47,7 +45,7 @@ def receiver_account_wissel(request, obj):
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog met account %s' % (from_ip, repr(account.username)))
 
-    for _, func, skip in account_plugins_login:
+    for _, func, skip in account_plugins_login_gate:
         if not skip:
             httpresp = func(request, from_ip, account)
             if httpresp:
@@ -58,15 +56,14 @@ def receiver_account_wissel(request, obj):
 
     if account.otp_is_actief:
         # fake de OTP passage
-        account_rechten_otp_controle_gelukt(request)
+        otp_zet_controle_gelukt(request)
     else:
-        account_rechten_login_gelukt(request)
+        otp_zet_control_niet_gelukt(request)
 
     # herstel de last_login van de echte gebruiker
     account.last_login = old_last_login
     account.save(update_fields=['last_login'])
 
-    # gebruiker mag NIET aangemeld blijven
     # zorg dat de session-cookie snel verloopt --> nergens voor nodig
     # request.session.set_expiry(0)
 
@@ -75,10 +72,13 @@ def receiver_account_wissel(request, obj):
                        gebruikte_functie="Inloggen",
                        activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username), from_ip))
 
+    # zorg dat de rollen meteen beschikbaar zijn
+    rol_bepaal_beschikbare_rollen(request, account)
+
     return reverse('Plein:plein')
 
 
-set_tijdelijke_url_receiver(RECEIVER_ACCOUNT_WISSEL, receiver_account_wissel)
+set_tijdelijke_codes_receiver(RECEIVER_ACCOUNT_WISSEL, receiver_account_wissel)
 
 
 class LoginAsZoekView(UserPassesTestMixin, ListView):
@@ -160,24 +160,23 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         account_pk = form.cleaned_data.get('selecteer')
 
         try:
-            accountemail = AccountEmail.objects.get(account__pk=account_pk)
-        except AccountEmail.DoesNotExist:
+            account = Account.objects.get(pk=account_pk)
+        except Account.DoesNotExist:
             raise Http404('Account heeft geen e-mail')
 
         # prevent upgrade
-        if accountemail.account.is_staff:
+        if account.is_staff:
             raise PermissionDenied()
 
-        context = dict()
-        context['account'] = accountemail.account
+        context = {'account': account}
 
         # schrijf de intentie in het logboek
         schrijf_in_logboek(account=self.request.user,
                            gebruikte_functie="Inloggen",
-                           activiteit="Wissel naar account %s" % repr(accountemail.account.username))
+                           activiteit="Wissel naar account %s" % repr(account.username))
 
         # maak een tijdelijke URL aan waarmee de inlog gedaan kan worden
-        url = maak_tijdelijke_url_accountwissel(accountemail, naar_account=accountemail.account.username)
+        url = maak_tijdelijke_code_accountwissel(account, naar_account=account.username)
         context['login_as_url'] = url
 
         context['kruimels'] = (

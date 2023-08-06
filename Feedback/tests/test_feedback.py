@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from Feedback.models import Feedback, feedback_opschonen
 from Feedback.operations import store_feedback
 from Taken.models import Taak
@@ -113,7 +113,7 @@ class TestFeedback(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
         self.assertEqual(Feedback.objects.count(), 1)
-        obj = Feedback.objects.all()[0]
+        obj = Feedback.objects.first()
         descr = str(obj)
         self.assertGreater(len(descr), 0)
 
@@ -170,7 +170,7 @@ class TestFeedback(E2EHelpers, TestCase):
                                      'feedback': 'Just testing'})
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
 
-        obj = Feedback.objects.all()[0]
+        obj = Feedback.objects.first()
         self.assertFalse(obj.is_afgehandeld)
         obj.is_afgehandeld = True
         obj.save()
@@ -259,7 +259,7 @@ class TestFeedback(E2EHelpers, TestCase):
 
         # maak een oude, afgehandelde site feedback aan
         store_feedback('mij', 'rol', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')
-        feedback = Feedback.objects.all()[0]
+        feedback = Feedback.objects.first()
         feedback.toegevoegd_op -= datetime.timedelta(days=92)
         feedback.is_afgehandeld = True
         feedback.save()

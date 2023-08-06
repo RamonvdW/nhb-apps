@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.urls import reverse
+from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.formats import localize
@@ -17,13 +17,16 @@ from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporte
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.definities import HISTCOMP_TYPE2STR
+from HistComp.models import HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
+from Registreer.definities import REGISTRATIE_FASE_DONE
 from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
+from Sporter.operations import get_sporter_gekozen_bogen
 import logging
 import copy
 
@@ -46,6 +49,20 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
         return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
 
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if request.user.is_authenticated:
+            account = request.user
+            if account.is_gast:
+                gast = account.gastregistratie_set.first()
+                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                    # registratie is nog niet voltooid
+                    # dwing terug naar de lijst met vragen
+                    return redirect('Registreer:gast-meer-vragen')
+
+        return super().dispatch(request, *args, **kwargs)
+
     @staticmethod
     def _find_histcomp_scores(sporter, alle_bogen):
         """ Zoek alle scores van deze sporter """
@@ -55,19 +72,19 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
 
         objs = list()
-        for obj in (HistCompetitieIndividueel
+        for obj in (HistCompRegioIndiv
                     .objects
                     .filter(sporter_lid_nr=sporter.lid_nr)
                     .exclude(totaal=0)
-                    .select_related('histcompetitie')
-                    .order_by('histcompetitie__comp_type',      # 18/25
-                              '-histcompetitie__seizoen')):     # jaartal, aflopend
-            obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
-            obj.seizoen_str = obj.histcompetitie.seizoen
+                    .select_related('seizoen')
+                    .order_by('seizoen__comp_type',      # 18/25
+                              '-seizoen__seizoen')):     # jaartal, aflopend
+            obj.competitie_str = HISTCOMP_TYPE2STR[obj.seizoen.comp_type]
+            obj.seizoen_str = obj.seizoen.seizoen
             try:
-                obj.boog_str = boogtype2str[obj.boogtype]
+                obj.beschrijving = boogtype2str[obj.boogtype]
             except KeyError:
-                obj.boog_str = "?"
+                obj.beschrijving = "?"
 
             scores = list()
             for score in (obj.score1, obj.score2, obj.score3, obj.score4, obj.score5, obj.score6, obj.score7):
@@ -128,7 +145,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     comp.fase_str = 'Regiocompetitie'
 
                     if comp.fase_indiv == 'C':
-                        # TODO: 15 augustus opslaan in Competitie
+                        # TODO: 15 augustus opslaan in Competitie --> fase D?
                         comp.inschrijven = 'De inschrijving is open tot 15 augustus'  # % localize(comp.datum_einde_inschrijvingen)
                     elif comp.fase_indiv <= 'F':
                         # tijdens de hele wedstrijden fase kan er aangemeld worden
@@ -139,7 +156,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return comps
 
     @staticmethod
-    def _find_regiocompetities(comps, sporter, voorkeuren, alle_bogen):
+    def _find_regiocompetities(comps, sporter, voorkeuren, alle_bogen, boogafk2sporterboog, boog_afkorting_wedstrijd):
         """ Zoek regiocompetities waar de sporter zich op aan kan melden """
 
         # stel vast welke boogtypen de sporter mee wil schieten (opt-in)
@@ -148,20 +165,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             boog_dict[boogtype.afkorting] = boogtype
         # for
 
-        boog_afkorting_wedstrijd = list()
-        boogafk2sporterboog = dict()       # [boog_afkorting] = SporterBoog()
-        # typische 0 tot 5 records
-        for sporterboog in (sporter
-                            .sporterboog_set
-                            .select_related('boogtype')
-                            .order_by('boogtype__volgorde')):
-            if sporterboog.voor_wedstrijd:
-                afkorting = sporterboog.boogtype.afkorting
-                boog_afkorting_wedstrijd.append(afkorting)
-                boogafk2sporterboog[afkorting] = sporterboog
-        # for
-
-        moet_bogen_kiezen = (len(boogafk2sporterboog) == 0)
         gebruik_knoppen = False
 
         # zoek alle inschrijvingen van deze sporter erbij
@@ -173,13 +176,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         if not voorkeuren.voorkeur_meedoen_competitie:
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
-                return None, moet_bogen_kiezen, gebruik_knoppen
+                return None, gebruik_knoppen
 
         kampioenen = list(KampioenschapSporterBoog
                           .objects
                           .select_related('kampioenschap',
                                           'kampioenschap__competitie',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog')
                           .filter(sporterboog__sporter=sporter))
 
@@ -194,7 +197,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                          .select_related('competitie')
                          .exclude(competitie__is_afgesloten=True)
                          .filter(competitie__pk__in=comp_pks,
-                                 nhb_regio=regio)
+                                 regio=regio)
                          .order_by('competitie__afstand')):
             comp = deelcomp.competitie
             comp.bepaal_fase()
@@ -253,7 +256,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                     obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                                                     kwargs={'comp_pk': kampioen.kampioenschap.competitie.pk,
                                                                             'comp_boog': afk.lower(),
-                                                                            'rayon_nr': kampioen.kampioenschap.nhb_rayon.rayon_nr})
+                                                                            'rayon_nr': kampioen.kampioenschap.rayon.rayon_nr})
                         # for
 
                     elif 'O' <= comp.fase_indiv < 'P':
@@ -281,7 +284,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 gebruik_knoppen = True
         # for
 
-        return objs, moet_bogen_kiezen, gebruik_knoppen
+        return objs, gebruik_knoppen
 
     @staticmethod
     def _find_gemiddelden(sporter, alle_bogen):
@@ -366,9 +369,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         .objects
                         .prefetch_related('accounts')
                         .filter(Q(rol='RCL',
-                                  nhb_regio=regio) |
+                                  regio=regio) |
                                 Q(rol__in=('SEC', 'HWL'),
-                                  nhb_ver=sporter.bij_vereniging))
+                                  vereniging=sporter.bij_vereniging))
                         .all())
 
             for functie in functies:
@@ -378,7 +381,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 if functie.rol == 'SEC':
                     # nog geen account aangemaakt, dus haal de naam op van de secretaris volgens CRM
                     if len(namen) == 0 and sporter.bij_vereniging.secretaris_set.count() > 0:
-                        sec = sporter.bij_vereniging.secretaris_set.all()[0]
+                        sec = sporter.bij_vereniging.secretaris_set.first()
                         namen = [sporter.volledige_naam() for sporter in sec.sporters.all()]
                     context['sec_namen'] = namen
                     context['sec_email'] = functie.bevestigde_email
@@ -460,20 +463,32 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         alle_bogen = BoogType.objects.all()
 
+        if sporter.bij_vereniging:
+            is_administratief = sporter.bij_vereniging.regio.is_administratief      # dus helemaal geen wedstrijden
+            is_extern = sporter.bij_vereniging.is_extern                            # dus geen bondscompetities
+        else:
+            is_administratief = False
+            is_extern = False
+
         context['sporter'] = sporter
         context['records'], context['show_loc'] = self._find_records(sporter)
-        context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
-        context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
+
+        if not sporter.is_gast:
+            context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
+
+        boog_afk2sporterboog, boog_afkorting_wedstrijd = get_sporter_gekozen_bogen(sporter, alle_bogen)
+        context['moet_bogen_kiezen'] = len(boog_afkorting_wedstrijd) == 0
 
         context['toon_bondscompetities'] = False
-        if sporter.bij_vereniging and not sporter.bij_vereniging.geen_wedstrijden:
+        if sporter.bij_vereniging and not sporter.bij_vereniging.geen_wedstrijden and not (is_extern or is_administratief):
             context['toon_bondscompetities'] = True
+
+            context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
 
             context['competities'] = comps = self._find_competities(voorkeuren)
 
-            regiocomps, moet_bogen_kiezen, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen)
+            regiocomps, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen, boog_afk2sporterboog, boog_afkorting_wedstrijd)
             context['regiocompetities'] = regiocomps
-            context['moet_bogen_kiezen'] = moet_bogen_kiezen
             context['gebruik_knoppen'] = gebruik_knoppen
 
             context['regiocomp_scores'] = self._find_scores(sporter)
@@ -487,6 +502,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             context['speelsterktes'] = self._find_speelsterktes(sporter)
             context['diplomas'] = self._find_diplomas(sporter)
+
+        if sporter.is_gast:
+            context['gast'] = sporter.gastregistratie_set.first()
 
         if Bestelling.objects.filter(account=account).count() > 0:
             context['toon_bestellingen'] = True

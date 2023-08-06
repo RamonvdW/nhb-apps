@@ -102,7 +102,7 @@ class TeamType(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class LeeftijdsKlasse(models.Model):
+class Leeftijdsklasse(models.Model):
     """ definitie van een leeftijdsklasse """
 
     # WA, IFAA of nationaal
@@ -194,7 +194,7 @@ class TemplateCompetitieIndivKlasse(models.Model):
     volgorde = models.PositiveIntegerField()
 
     # de leeftijdsklassen: Onder 12 Jongens/Meisjes, Onder 14 Jongens/Meisjes, Onder 18, Onder 21, 21+
-    leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
+    leeftijdsklassen = models.ManyToManyField(Leeftijdsklasse)
 
     # wedstrijdklasse wel/niet meenemen naar de RK/BK
     # staat op True voor aspiranten klassen
@@ -206,6 +206,11 @@ class TemplateCompetitieIndivKlasse(models.Model):
 
     # is dit een klasse voor aspiranten?
     is_aspirant_klasse = models.BooleanField(default=False)
+
+    # welke titel krijgt de hoogst geëindigde sport in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk_18m = models.CharField(max_length=30, default='Bondskampioen')
+    titel_bk_25m = models.CharField(max_length=30, default='Bondskampioen')
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
@@ -255,6 +260,11 @@ class TemplateCompetitieTeamKlasse(models.Model):
 
     # voorbeeld: Recurve klasse ERE
     beschrijving = models.CharField(max_length=80)
+
+    # welke titel krijgt het hoogst geëindigde team in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk_18m = models.CharField(max_length=30, default='Bondskampioen')
+    titel_bk_25m = models.CharField(max_length=30, default='Bondskampioen')
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
@@ -307,7 +317,7 @@ class KalenderWedstrijdklasse(models.Model):
     boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
 
     # de leeftijdsklassen: mannen/vrouwen en aspirant, cadet, junior, senior, master, veteraan
-    leeftijdsklasse = models.ForeignKey(LeeftijdsKlasse, on_delete=models.PROTECT)
+    leeftijdsklasse = models.ForeignKey(Leeftijdsklasse, on_delete=models.PROTECT)
 
     # volgende voor gebruik bij het presenteren van een lijst van klassen
     volgorde = models.PositiveIntegerField()

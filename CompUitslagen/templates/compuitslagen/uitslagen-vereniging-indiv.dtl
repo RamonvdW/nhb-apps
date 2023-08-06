@@ -32,7 +32,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
             <div class=" white left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
@@ -78,7 +78,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                    <a class="btn-sv-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
                 </p>
             </div>
         </div>
@@ -94,8 +94,8 @@
 
     {% if aantal_deelnemers > 0 %}
         <table class="white">
-            <tr class="nhb-table-header">
-                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+            <tr class="sv-table-header">
+                <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
                 <th></th>   <!-- rank -->
                 <th>Sporter</th>
                 <th>Wedstrijd<wbr>klasse</th>
@@ -104,11 +104,12 @@
                     <span class="hide-on-large-only">Gem.</span>
                 </th>
                 <th colspan="7" class="center">Scores</th>
-                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+                <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
             </tr>
 
+            {% comment %}
             <!-- forceer gelijkmatige layout in de Scores kolommen -->
-            <tr style="visibility:collapse">
+            <tr class="sv-table-hide-row">
                 <td colspan="4"><!-- rank, sporter, wedstrijd, gemiddelde --></td>
                 <td class="right-align smal">888</td>
                 <td class="right-align smal">888</td>
@@ -118,6 +119,7 @@
                 <td class="right-align smal">888</td>
                 <td class="right-align smal">888</td>
             </tr>
+            {% endcomment %}
 
             {% for obj in deelnemers %}
                 <tr>
@@ -137,7 +139,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="11" class="nhb-table-onderrand"></td>
+                <td colspan="11" class="sv-table-onderrand"></td>
             </tr>
         </table>
     {% endif %}

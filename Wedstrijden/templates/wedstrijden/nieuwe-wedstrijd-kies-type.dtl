@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -44,13 +44,13 @@
     </script>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% static 'plein/logo_world_archery_225x246.png' as img_src %}
             {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van World Archery. Bij A-status kunnen records aangevraagd worden." img_height=112 img_src=img_src onclick="keuze('wa')" %}
 
             {% static 'plein/logo_khsn_192x192.png' as img_src %}
-            {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstijden." img_height=112 img_src=img_src onclick="keuze('nhb')" %}
+            {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstijden." img_height=112 img_src=img_src onclick="keuze('khsn')" %}
 
             {% static 'plein/logo_ifaa_128x200.png' as img_src %}
             {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA." img_height=132 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
@@ -66,7 +66,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <h5>World Archery</h5>

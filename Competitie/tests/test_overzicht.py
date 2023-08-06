@@ -6,9 +6,8 @@
 
 from django.utils import timezone
 from django.test import TestCase
-from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
-from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
-from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_prep
+from Competitie.models import Competitie
+from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_prep
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.definities import Rollen
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -22,14 +21,6 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
     test_after = ('Competitie.tests.test_tijdlijn',)
 
     url_overzicht = '/bondscompetities/%s/'
-
-    @staticmethod
-    def _maak_twee_klassen(comp):
-        indiv = TemplateCompetitieIndivKlasse.objects.all()[0]
-        CompetitieIndivKlasse(competitie=comp, volgorde=1, boogtype=indiv.boogtype, min_ag=0.0).save()
-
-        teamtype = TeamType.objects.all()[0]
-        CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
 
     def test_openbaar(self):
         einde_jaar = datetime.date(year=2000, month=12, day=31)

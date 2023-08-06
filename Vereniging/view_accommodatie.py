@@ -41,25 +41,25 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                           Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
 
     @staticmethod
-    def _get_locaties_nhbver_or_404(**kwargs):
+    def _get_vereniging_locaties_or_404(**kwargs):
         try:
-            nhbver_pk = int(kwargs['vereniging_pk'][:6])    # afkappen voor de veiligheid
-            nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
+            ver_nr = int(kwargs['ver_nr'][:6])    # afkappen voor de veiligheid
+            ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist:
             raise Http404('Geen valide vereniging')
 
         clusters = list()
-        for cluster in nhbver.clusters.order_by('letter').all():
+        for cluster in ver.clusters.order_by('letter').all():
             clusters.append(str(cluster))
         # for
         if len(clusters) > 0:
-            nhbver.sorted_cluster_names = clusters
+            ver.sorted_cluster_names = clusters
 
         # zoek de locaties erbij
         binnen_locatie = None
         buiten_locatie = None
         externe_locaties = list()
-        for loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False):
+        for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
             if loc.baan_type == BAAN_TYPE_EXTERN:
                 externe_locaties.append(loc)
             elif loc.baan_type == BAAN_TYPE_BUITEN:
@@ -69,19 +69,19 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 binnen_locatie = loc
         # for
 
-        return binnen_locatie, buiten_locatie, externe_locaties, nhbver
+        return binnen_locatie, buiten_locatie, externe_locaties, ver
 
     @staticmethod
-    def _mag_wijzigen(nhbver, rol_nu, functie_nu):
+    def _mag_wijzigen(ver, rol_nu, functie_nu):
         """ Controleer of de huidige rol de instellingen van de accommodatie mag wijzigen """
         if functie_nu:
             if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
                 # HWL mag van zijn eigen vereniging wijzigen
-                if functie_nu.nhb_ver == nhbver:
+                if functie_nu.vereniging == ver:
                     return True
             elif rol_nu == Rollen.ROL_RCL:
                 # RCL mag van alle verenigingen in zijn regio de accommodatie instellingen wijzigen
-                if functie_nu.nhb_regio == nhbver.regio:
+                if functie_nu.regio == ver.regio:
                     return True
 
         return False
@@ -94,13 +94,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        binnen_locatie, buiten_locatie, externe_locaties, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        binnen_locatie, buiten_locatie, externe_locaties, ver = self._get_vereniging_locaties_or_404(**kwargs)
         if buiten_locatie and not buiten_locatie.zichtbaar:
             buiten_locatie = None
         context['locatie'] = binnen_locatie
         context['buiten_locatie'] = buiten_locatie
         context['externe_locaties'] = externe_locaties
-        context['nhbver'] = nhbver
+        context['ver'] = ver
 
         for locatie in externe_locaties:
             locatie.geen_naam = locatie.naam.strip() == ""
@@ -109,14 +109,22 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek de beheerders erbij
-        qset = Functie.objects.filter(nhb_ver=nhbver).prefetch_related('accounts')
+        qset = Functie.objects.filter(vereniging=ver).prefetch_related('accounts')
         try:
             functie_sec = qset.filter(rol='SEC')[0]
-            functie_hwl = qset.filter(rol='HWL')[0]
-            functie_wl = qset.filter(rol='WL')[0]
         except IndexError:                  # pragma: no cover
             # only in autotest environment
             raise Http404('Rol ontbreekt')
+
+        if ver.is_extern:
+            functie_hwl = functie_wl = None
+        else:
+            try:
+                functie_hwl = qset.filter(rol='HWL')[0]
+                functie_wl = qset.filter(rol='WL')[0]
+            except IndexError:                  # pragma: no cover
+                # only in autotest environment
+                raise Http404('Rol ontbreekt')
 
         context['sec_names'] = self.get_all_names(functie_sec)
         context['sec_email'] = functie_sec.bevestigde_email
@@ -124,7 +132,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if len(context['sec_names']) == 0:
             context['geen_sec'] = True
             try:
-                sec = Secretaris.objects.prefetch_related('sporters').get(vereniging=functie_sec.nhb_ver)
+                sec = Secretaris.objects.prefetch_related('sporters').get(vereniging=functie_sec.vereniging)
             except Secretaris.DoesNotExist:
                 pass
             else:
@@ -132,11 +140,19 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                     context['sec_names'] = [sporter.volledige_naam() for sporter in sec.sporters.all()]
                     context['geen_sec'] = False
 
-        context['hwl_names'] = self.get_all_names(functie_hwl)
-        context['hwl_email'] = functie_hwl.bevestigde_email
+        if functie_hwl:
+            context['toon_hwl'] = True
+            context['hwl_names'] = self.get_all_names(functie_hwl)
+            context['hwl_email'] = functie_hwl.bevestigde_email
+        else:
+            context['toon_hwl'] = False
 
-        context['wl_names'] = self.get_all_names(functie_wl)
-        context['wl_email'] = functie_wl.bevestigde_email
+        if functie_wl:
+            context['toon_wl'] = True
+            context['wl_names'] = self.get_all_names(functie_wl)
+            context['wl_email'] = functie_wl.bevestigde_email
+        else:
+            context['toon_wl'] = False
 
         if binnen_locatie:
             # beschrijving voor de template
@@ -146,7 +162,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             context['banen'] = [nr for nr in range(2, 24+1)]          # 1 baan = handmatig in .dtl
 
             # lijst van verenigingen voor de template
-            binnen_locatie.other_ver = binnen_locatie.verenigingen.exclude(ver_nr=nhbver.ver_nr).order_by('ver_nr')
+            binnen_locatie.other_ver = binnen_locatie.verenigingen.exclude(ver_nr=ver.ver_nr).order_by('ver_nr')
 
         if buiten_locatie:
             # aantal banen waar uit gekozen kan worden, voor gebruik in de template
@@ -179,11 +195,11 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
         if binnen_locatie or buiten_locatie:
             context['opslaan_url'] = reverse(opslaan_urlconf,
-                                             kwargs={'vereniging_pk': nhbver.pk})
+                                             kwargs={'ver_nr': ver.ver_nr})
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        if self._mag_wijzigen(nhbver, rol_nu, functie_nu):
+        if self._mag_wijzigen(ver, rol_nu, functie_nu):
             context['readonly'] = False
 
             if buiten_locatie:
@@ -198,11 +214,11 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de gebruik op de 'opslaan' knop drukt
             op het accommodatie-details formulier.
         """
-        binnen_locatie, buiten_locatie, _, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        binnen_locatie, buiten_locatie, _, ver = self._get_vereniging_locaties_or_404(**kwargs)
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        if not self._mag_wijzigen(nhbver, rol_nu, functie_nu):
+        if not self._mag_wijzigen(ver, rol_nu, functie_nu):
             raise PermissionDenied('Wijzigen niet toegestaan')
 
         if request.POST.get('verwijder_buitenbaan', None):
@@ -213,7 +229,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 urlconf = 'Vereniging:vereniging-accommodatie-details'
             else:
                 urlconf = 'Vereniging:accommodatie-details'
-            url = reverse(urlconf, kwargs={'vereniging_pk': nhbver.pk})
+            url = reverse(urlconf, kwargs={'ver_nr': ver.ver_nr})
             return HttpResponseRedirect(url)
 
         if request.POST.get('maak_buiten_locatie', None):
@@ -229,13 +245,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                                 plaats=binnen_locatie.plaats,
                                 notities='')
                 buiten.save()
-                buiten.verenigingen.add(nhbver)
+                buiten.verenigingen.add(ver)
 
             if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
                 urlconf = 'Vereniging:vereniging-accommodatie-details'
             else:
                 urlconf = 'Vereniging:accommodatie-details'
-            url = reverse(urlconf, kwargs={'vereniging_pk': nhbver.pk})
+            url = reverse(urlconf, kwargs={'ver_nr': ver.ver_nr})
             return HttpResponseRedirect(url)
 
         form = AccommodatieDetailsForm(request.POST)
@@ -270,12 +286,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             data_25 = form.cleaned_data.get('max_sporters_25m')
             if data_18 is not None and data_25 is not None:
                 if binnen_locatie.max_sporters_18m != data_18 or binnen_locatie.max_sporters_25m != data_25:
-                    msgs.append("Max sporters 18m/25m aangepast van %s/%s naar %s/%s" % (binnen_locatie.max_sporters_18m, binnen_locatie.max_sporters_25m, data_18, data_25))
+                    msgs.append("Max sporters 18m/25m aangepast van %s/%s naar %s/%s" % (
+                                binnen_locatie.max_sporters_18m, binnen_locatie.max_sporters_25m, data_18, data_25))
                     binnen_locatie.max_sporters_18m = data_18
                     binnen_locatie.max_sporters_25m = data_25
 
             if len(msgs) > 0:
-                activiteit = "Aanpassingen aan binnen locatie van vereniging %s: %s" % (nhbver, "; ".join(msgs))
+                activiteit = "Aanpassingen aan binnen locatie van vereniging %s: %s" % (ver, "; ".join(msgs))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 binnen_locatie.save()
 
@@ -291,7 +308,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             disc_new = binnen_locatie.disciplines_str()
             if disc_old != disc_new:
                 activiteit = "Aanpassing disciplines van binnen locatie van vereniging %s: [%s] (was [%s])" % (
-                                nhbver, disc_new, disc_old)
+                                ver, disc_new, disc_old)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 binnen_locatie.save()
 
@@ -299,7 +316,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             data = data.replace('\r\n', '\n')
             if binnen_locatie.notities != data:
                 activiteit = "Aanpassing bijzonderheden van binnen locatie van vereniging %s: %s (was %s)" % (
-                                nhbver,
+                                ver,
                                 repr(data.replace('\n', ' / ')),
                                 repr(binnen_locatie.notities.replace('\n', ' / ')))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -323,7 +340,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 updated.append('buiten_max_afstand')
 
             if len(msgs) > 0:
-                activiteit = "Aanpassingen aan buiten locatie van vereniging %s: %s" % (nhbver, "; ".join(msgs))
+                activiteit = "Aanpassingen aan buiten locatie van vereniging %s: %s" % (ver, "; ".join(msgs))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
 
             buiten_locatie.save(update_fields=updated)
@@ -332,7 +349,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             data = data.replace('\r\n', '\n')
             if buiten_locatie.notities != data:
                 activiteit = "Aanpassing notitie van buiten locatie van vereniging %s: %s (was %s)" % (
-                                    nhbver,
+                                    ver,
                                     repr(data.replace('\n', ' / ')),
                                     repr(buiten_locatie.notities.replace('\n', ' / ')))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -350,7 +367,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             disc_new = buiten_locatie.disciplines_str()
             if disc_old != disc_new:
                 activiteit = "Aanpassing disciplines van buiten locatie van vereniging %s: [%s] (was [%s])" % (
-                                nhbver, disc_new, disc_old)
+                                ver, disc_new, disc_old)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 buiten_locatie.save()
 

@@ -26,12 +26,12 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% for obj in object_list %}
-                <div class="nhb-card">
+                <div class="sv-card">
                     <a href="{{ obj.url }}">
-                        <div class="nhb-card-content center-align" style="font-size: 80%">
+                        <div class="sv-card-content center-align" style="font-size: 80%">
                             <span class="card-title">{{ obj.title_str }}</span>
                             {% if obj.para_str %}
                                 <p>{{ obj.para_str }}</p>
@@ -61,17 +61,17 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             {% url 'Records:indiv-verbeterbaar' as card_url %}
-            {% include 'plein/card.dtl' with title="Verbeterbaar" text="Vind met een paar kliks de records die verbeterd kunnen worden." icon="leaderboard" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Verbeterbaar" text="Vind eenvoudig records die verbeterd kunnen worden." icon="leaderboard" url=card_url %}
 
             {% url 'Records:indiv' as card_url %}
-            {% include 'plein/card.dtl' with title="Filteren" text="Vind records van interesse door te filteren op boog, klasse, etc." icon="filter_alt" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Filteren" text="Vind records van interesse door te filteren op boog, klasse, etc." icon="filter_alt" url=card_url %}
 
             {% url 'Records:zoek' as card_url %}
-            {% include 'plein/card.dtl' with title="Zoeken" text="Zoek in de records op naam van de sporter of een vereniging." icon="search" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Zoeken" text="Zoek in de records op naam van de sporter of een vereniging." icon="search" url=card_url %}
 
         </div>
     </div>
@@ -87,11 +87,11 @@
             </div>
 
             <!-- blauwe balk -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12">
         {% endif %}
 
-        {% include 'plein/card.dtl' with title=ander.titel text=ander.tekst icon=ander.icoon url=ander.url extern_open=True %}
+        {% include 'plein/card_icon.dtl' with title=ander.titel text=ander.tekst icon=ander.icoon url=ander.url extern_open=True %}
 
         {% if forloop.last %}
                 </div>

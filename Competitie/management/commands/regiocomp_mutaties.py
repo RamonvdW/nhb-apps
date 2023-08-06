@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.db.models import F
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
-from BasisTypen.definities import ORGANISATIE_NHB
+from BasisTypen.definities import ORGANISATIE_KHSN
 from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_BLANCO,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
@@ -21,14 +21,17 @@ from Competitie.definities import (DEEL_RK, DEEL_BK, DEELNAME_JA, DEELNAME_NEE, 
                                    MUTATIE_REGIO_TEAM_RONDE, MUTATIE_EXTRA_RK_DEELNEMER,
                                    MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
-                                   MUTATIE_KLEINE_KLASSE_INDIV)
-from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                                   MUTATIE_KLEINE_KLASSE_INDIV,
+                                   MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
+from Competitie.models import (CompetitieMutatie, Competitie, CompetitieTeamKlasse,
                                Regiocompetitie, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam, CompetitieTaken)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
-                                   aanvangsgemiddelden_vaststellen_voor_afstand)
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+                                   aanvangsgemiddelden_vaststellen_voor_afstand,
+                                   uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,
+                                   uitslag_rk_indiv_naar_histcomp, uitslag_rk_teams_naar_histcomp,
+                                   uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
@@ -57,7 +60,7 @@ class Command(BaseCommand):
 
         self.stop_at = datetime.datetime.now()
 
-        self.taken = CompetitieTaken.objects.all()[0]
+        self.taken = CompetitieTaken.objects.first()
 
         self.pk2scores = dict()         # [RegioCompetitieSporterBoog.pk] = [tup, ..] with tup = (afstand, score)
         self.pk2scores_alt = dict()
@@ -81,7 +84,7 @@ class Command(BaseCommand):
                        geen sporters meer over hebben voor het LB team.
         """
 
-        for team_type in get_organisatie_teamtypen(ORGANISATIE_NHB):
+        for team_type in get_organisatie_teamtypen(ORGANISATIE_KHSN):
 
             self._team_boogtypen[team_type.pk] = boog_lijst = list()
 
@@ -772,83 +775,6 @@ class Command(BaseCommand):
         deelcomp.save(update_fields=['huidige_team_ronde'])
 
     @staticmethod
-    def _eindstand_regio_indiv_naar_histcomp(comp):
-        """ maak de HistComp aan vanuit een regiocompetitie eindstand """
-
-        seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
-        try:
-            objs = HistCompetitie.objects.filter(seizoen=seizoen,
-                                                 comp_type=comp.afstand,
-                                                 is_team=False)
-        except HistCompetitieIndividueel.DoesNotExist:
-            pass
-        else:
-            # er bestaat al een uitslag - verwijder deze eerst
-            # dit verwijderd ook alle gekoppelde scores (individueel en team)
-            # elk 'klasse' heeft een eigen instantie - typisch Recurve, Compound, etc.
-            objs.delete()
-
-        bulk = list()
-        for boogtype in comp.boogtypen.all():
-            histcomp = HistCompetitie(seizoen=seizoen,
-                                      comp_type=comp.afstand,
-                                      boog_str=boogtype.beschrijving,   # 'Recurve'
-                                      is_team=False,
-                                      is_openbaar=False)                # nog niet laten zien
-            histcomp.save()
-
-            klassen_pks = (CompetitieIndivKlasse
-                           .objects
-                           .filter(competitie=comp,
-                                   boogtype=boogtype)
-                           .values_list('pk', flat=True))
-
-            deelnemers = (RegiocompetitieSporterBoog
-                          .objects
-                          .select_related('sporterboog__sporter',
-                                          'bij_vereniging')
-                          .filter(regiocompetitie__competitie=comp,
-                                  indiv_klasse__in=klassen_pks)
-                          .order_by('-gemiddelde'))     # hoogste boven
-
-            rank = 0
-            for deelnemer in deelnemers:
-                # skip sporters met helemaal geen scores
-                if deelnemer.totaal > 0:
-                    rank += 1
-                    sporter = deelnemer.sporterboog.sporter
-                    ver = deelnemer.bij_vereniging
-                    hist = HistCompetitieIndividueel(
-                                histcompetitie=histcomp,
-                                rank=rank,
-                                sporter_lid_nr=sporter.lid_nr,
-                                sporter_naam=sporter.volledige_naam(),
-                                boogtype=boogtype.afkorting,
-                                vereniging_nr=ver.ver_nr,
-                                vereniging_naam=ver.naam,
-                                score1=deelnemer.score1,
-                                score2=deelnemer.score2,
-                                score3=deelnemer.score3,
-                                score4=deelnemer.score4,
-                                score5=deelnemer.score5,
-                                score6=deelnemer.score6,
-                                score7=deelnemer.score7,
-                                laagste_score_nr=deelnemer.laagste_score_nr,
-                                totaal=deelnemer.totaal,
-                                gemiddelde=deelnemer.gemiddelde)
-
-                    bulk.append(hist)
-                    if len(bulk) >= 500:
-                        HistCompetitieIndividueel.objects.bulk_create(bulk)
-                        bulk = list()
-            # for
-
-        # for
-
-        if len(bulk):
-            HistCompetitieIndividueel.objects.bulk_create(bulk)
-
-    @staticmethod
     def _get_regio_sporters_rayon(competitie, rayon_nr):
         """ geeft een lijst met deelnemers terug
             en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
@@ -859,7 +785,7 @@ class Command(BaseCommand):
         for deelcomp in (Regiocompetitie
                          .objects
                          .filter(competitie=competitie,
-                                 nhb_regio__rayon__rayon_nr=rayon_nr)):
+                                 regio__rayon__rayon_nr=rayon_nr)):
             pks.append(deelcomp.pk)
         # for
 
@@ -943,19 +869,19 @@ class Command(BaseCommand):
         rayon_nr2deelkamp = dict()
         for deelkamp in (Kampioenschap
                          .objects
-                         .select_related('nhb_rayon')
+                         .select_related('rayon')
                          .filter(competitie=comp,
                                  deel=DEEL_RK)):
-            rayon_nr2deelkamp[deelkamp.nhb_rayon.rayon_nr] = deelkamp
+            rayon_nr2deelkamp[deelkamp.rayon.rayon_nr] = deelkamp
         # for
 
         for deelkamp in (Kampioenschap
                          .objects
-                         .select_related('nhb_rayon')
+                         .select_related('rayon')
                          .filter(competitie=comp,
                                  deel=DEEL_RK)):
 
-            deelnemers = self._get_regio_sporters_rayon(comp, deelkamp.nhb_rayon.rayon_nr)
+            deelnemers = self._get_regio_sporters_rayon(comp, deelkamp.rayon.rayon_nr)
 
             # schrijf all deze sporters in voor het RK
             # kampioenen als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
@@ -996,10 +922,10 @@ class Command(BaseCommand):
 
         for deelkamp in (Kampioenschap
                          .objects
-                         .select_related('nhb_rayon')
+                         .select_related('rayon')
                          .filter(competitie=comp,
                                  deel=DEEL_RK)
-                         .order_by('nhb_rayon__rayon_nr')):
+                         .order_by('rayon__rayon_nr')):
 
             deelkamp.heeft_deelnemerslijst = True
             deelkamp.save(update_fields=['heeft_deelnemerslijst'])
@@ -1010,9 +936,10 @@ class Command(BaseCommand):
             # stuur de RKO een taak ('ter info')
             functie_rko = deelkamp.functie
             now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             taak_deadline = now
             taak_tekst = "Ter info: De deelnemerslijst voor jouw Rayonkampioenschappen zijn zojuist vastgesteld door de BKO"
-            taak_log = "[%s] Taak aangemaakt" % now
+            taak_log = "[%s] Taak aangemaakt" % stamp_str
 
             # maak een taak aan voor deze BKO
             maak_taak(toegekend_aan_functie=functie_rko,
@@ -1022,7 +949,7 @@ class Command(BaseCommand):
                       log=taak_log)
 
             # schrijf in het logboek
-            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelkamp.nhb_rayon)
+            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelkamp.rayon)
             msg += '\nDe %s is geïnformeerd via een taak' % functie_rko
             schrijf_in_logboek(None, "Competitie", msg)
         # for
@@ -1134,12 +1061,16 @@ class Command(BaseCommand):
             # RK teams opzetten en RK deelnemers koppelen
             self._converteer_rk_teams(comp)
 
-            # eindstand regio in historische uitslag zetten (nodig voor AG's nieuwe competitie)
-            self._eindstand_regio_indiv_naar_histcomp(comp)
+            # eindstand individuele regiocompetitie naar historisch uitslag overzetten
+            # (ook nodig voor AG's nieuwe competitie)
+            uitslag_regio_indiv_naar_histcomp(comp)
 
-            # maak taken aan voor de HWL's om deelname RK voor sporters van eigen vereniging door te geven
+            # eindstand teamcompetitie regio naar historische uitslag overzetten
+            uitslag_regio_teams_naar_histcomp(comp)
 
-            # versturen e-mails uitnodigingen naar de deelnemers gebeurt tijdens opstarten elk uur
+            # FUTURE: maak taken aan voor de HWL's om deelname RK voor sporters van eigen vereniging door te geven
+
+            # FUTURE: versturen e-mails uitnodigingen naar de deelnemers gebeurt tijdens opstarten elk uur
 
     def _maak_deelnemerslijst_bk_indiv(self, comp):
         """ bepaal de individuele deelnemers van het BK
@@ -1166,7 +1097,7 @@ class Command(BaseCommand):
                          .exclude(deelname=DEELNAME_NEE)
                          .exclude(result_rank=0)
                          .select_related('kampioenschap',
-                                         'kampioenschap__nhb_rayon',
+                                         'kampioenschap__rayon',
                                          'indiv_klasse',
                                          'bij_vereniging',
                                          'sporterboog')):
@@ -1190,7 +1121,7 @@ class Command(BaseCommand):
                         gemiddelde_scores=gemiddelde_scores)
 
             if kampioen.result_rank == 1:
-                nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.nhb_rayon.naam
+                nieuw.kampioen_label = 'Kampioen %s' % kampioen.kampioenschap.rayon.naam
                 nieuw.deelname = DEELNAME_JA
 
             bulk.append(nieuw)
@@ -1219,6 +1150,8 @@ class Command(BaseCommand):
 
         # controleer dat de competitie in fase N is
         if not comp.rk_indiv_afgesloten:
+
+            uitslag_rk_indiv_naar_histcomp(comp)
 
             # individuele deelnemers vaststellen
             self._maak_deelnemerslijst_bk_indiv(comp)
@@ -1403,7 +1336,7 @@ class Command(BaseCommand):
                                     aanvangsgemiddelde=ag)
 
                     if rk_team.result_rank == 1 and not is_verplaatst:
-                        bk_team.rk_kampioen_label = 'Kampioen %s' % rk_team.kampioenschap.nhb_rayon.naam
+                        bk_team.rk_kampioen_label = 'Kampioen %s' % rk_team.kampioenschap.rayon.naam
                         bk_team.deelname = DEELNAME_JA
 
                     bk_team.save()
@@ -1430,6 +1363,8 @@ class Command(BaseCommand):
 
         # controleer dat de competitie in fase N is
         if not comp.rk_teams_afgesloten:
+
+            uitslag_rk_teams_naar_histcomp(comp)
 
             # individuele deelnemers vaststellen
             self._maak_deelnemerslijst_bk_teams(comp)
@@ -1458,6 +1393,32 @@ class Command(BaseCommand):
             # stel de deelnemerslijst van de nieuwe klasse opnieuw op
             deelkamp = deelnemer.kampioenschap
             self._verwerk_mutatie_initieel_klasse_indiv(deelkamp, deelnemer.indiv_klasse)
+
+    @staticmethod
+    def _verwerk_mutatie_afsluiten_bk_indiv(comp):
+        """ BK individueel afsluiten """
+
+        # controleer dat de competitie in fase P is
+        if not comp.bk_indiv_afgesloten:
+
+            uitslag_bk_indiv_naar_histcomp(comp)
+
+            # ga door naar fase Q
+            comp.bk_indiv_afgesloten = True
+            comp.save(update_fields=['bk_indiv_afgesloten'])
+
+    @staticmethod
+    def _verwerk_mutatie_afsluiten_bk_teams(comp):
+        """ BK teams afsluiten"""
+
+        # controleer dat de competitie in fase N is
+        if not comp.bk_teams_afgesloten:
+
+            uitslag_bk_teams_naar_histcomp(comp)
+
+            # ga door naar fase Q
+            comp.bk_teams_afgesloten = True
+            comp.save(update_fields=['bk_teams_afgesloten'])
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
@@ -1519,6 +1480,14 @@ class Command(BaseCommand):
         elif code == MUTATIE_KLEINE_KLASSE_INDIV:
             self.stdout.write('[INFO] Verwerk mutatie %s: kleine klassen indiv' % mutatie.pk)
             self._verwerk_mutatie_klein_klassen_indiv(mutatie.deelnemer, mutatie.indiv_klasse)
+
+        elif code == MUTATIE_KAMP_INDIV_AFSLUITEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten BK indiv' % mutatie.pk)
+            self._verwerk_mutatie_afsluiten_bk_indiv(mutatie.competitie)
+
+        elif code == MUTATIE_KAMP_TEAMS_AFSLUITEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten BK teams' % mutatie.pk)
+            self._verwerk_mutatie_afsluiten_bk_teams(mutatie.competitie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))

@@ -6,21 +6,18 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from Competitie.definities import (DEEL_BK, MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN,
-                                   DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND)
-from Competitie.models import (Kampioenschap, KampioenschapTeam, CompetitieMutatie)
+from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE
+from Competitie.models import Kampioenschap, KampioenschapTeam
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-import time
-
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
 
@@ -77,6 +74,7 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
 
         klasse2kort = list()        # [(prefix, replacement), ..]
         for boogtype in BoogType.objects.filter(organisatie=ORGANISATIE_WA):
+            # ("Recurve klasse", "R")
             tup = ("%s klasse" % boogtype.beschrijving, boogtype.afkorting)
             klasse2kort.append(tup)
         # for
@@ -102,8 +100,10 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
             try:
                 team.klasse_kort = kort_cache[team.klasse_str]
             except KeyError:
-                for prefix, afkorting in klasse2kort:
-                    if team.klasse_str.startswith(prefix):
+                for prefix, afkorting in klasse2kort:           # pragma: no branch
+                    # prefix = "Recurve klasse"
+                    if team.klasse_str.startswith(prefix):      # pragma: no branch
+                        # verwijder de prefix
                         team.klasse_kort = afkorting + team.klasse_str[len(prefix):]
                         kort_cache[team.klasse_str] = team.klasse_kort
                         break

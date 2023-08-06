@@ -1,0 +1,81 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Transport{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Keuze transport</h3>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div class="form-padding">
+                    <form action="{{ url_opslaan }}" method="post">
+                        {% csrf_token %}
+
+                        <p><b>Keuze voor transport:</b></p>
+                        <ul>
+
+                            <li>
+                                <label class="black-text" for="id_keuze_1">
+                                    <input class="with-gap" type="radio" name="keuze" value="verzend" required id="id_keuze_1" {% if not wil_ophalen %}checked{% endif %}>
+                                    <span>Verzend naar mijn postadres</span>
+                                </label>
+                            </li>
+
+                            {% if mag_ophalen %}
+                                <li>
+                                    <label class="black-text" for="id_keuze_2">
+                                        <input class="with-gap" type="radio" name="keuze" value="ophalen" required id="id_keuze_2" {% if wil_ophalen %}checked{% endif %}>
+                                        <span>Ophalen op het bondsbureau (Papendal)</span>
+                                    </label>
+                                </li>
+                            {% endif %}
+
+                        </ul>
+
+                        <br>
+                        <!-- button -->
+                        <p class="center">
+                            <button class="btn-sv-rood" type="submit">
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                        </p>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 xl8 offset-xl2">
+            <div class="white" style="padding:10px">
+                <p>Dit zijn de mogelijkheden:</p>
+                <p><b>1.</b> Verzending naar jouw postadres (zoals bekend bij de bond).<br>Hiervoor worden kosten voor briefpost of pakketpost in rekening gebracht.</p>
+                <p><b>2.</b> Je haalt de bestelling op bij het bondsbureau op Papendal ({{ ophalen_ver.adres_regel1 }}, {{ ophalen_ver.adres_regel2 }}).<br>Hierbij vervallen de verzendkosten.</p>
+                <p>De keuze kan niet meer aangepast worden nadat de de bestelling is afgerond en de betaling opgestart wordt.</p>
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-kies-transport" %}
+
+{% endblock %}

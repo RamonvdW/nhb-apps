@@ -47,14 +47,14 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         pks1 = list(RegiocompetitieRonde
                     .objects
                     .filter(regiocompetitie__is_afgesloten=False,
-                            matches__vereniging=self.functie_nu.nhb_ver)
+                            matches__vereniging=self.functie_nu.vereniging)
                     .values_list('matches', flat=True))
 
         if self.toon_rk_bk:
             pks2 = list(Kampioenschap
                         .objects
                         .filter(is_afgesloten=False,
-                                rk_bk_matches__vereniging=self.functie_nu.nhb_ver)
+                                rk_bk_matches__vereniging=self.functie_nu.vereniging)
                         .exclude(rk_bk_matches=None)                # excludes when ManyToMany is empty
                         .values_list('rk_bk_matches', flat=True))
         else:
@@ -143,7 +143,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             context['geen_wedstrijden'] = False
         # for
 
-        context['vereniging'] = self.functie_nu.nhb_ver
+        context['vereniging'] = self.functie_nu.vereniging
         context['huidige_rol'] = rol_get_beschrijving(self.request)
         context['wedstrijden'] = matches
         context['uitslag_invoeren'] = self.uitslag_invoeren

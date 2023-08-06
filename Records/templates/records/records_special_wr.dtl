@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -45,7 +45,7 @@
                         <!-- <td>{{ obj.para_klasse }}</td> -->
                         <td>{{ obj.score_str }}</td>
                         <td>
-                            <a class="btn-nhb-rood" href="{{ obj.url_details }}">
+                            <a class="btn-sv-rood" href="{{ obj.url_details }}">
                                 <i class="notranslate material-icons-round">visibility</i></a>
                         </td>
                     </tr>

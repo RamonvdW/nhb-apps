@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ class TestMailerOperations(TestCase):
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
 
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
 
         # valideer dat de mail nu in de queue staat
         objs = MailQueue.objects.all()
@@ -27,7 +27,7 @@ class TestMailerOperations(TestCase):
         # validate de velden van de mail
         self.assertFalse(obj.is_verstuurd)
         self.assertEqual(obj.aantal_pogingen, 0)
-        self.assertEqual(obj.mail_to, 'schutter@nhb.test')
+        self.assertEqual(obj.mail_to, 'schutter@test.not')
         self.assertEqual(obj.mail_subj, 'onderwerp')
         self.assertEqual(obj.mail_text, 'body\ndoei!\n')
         self.assertTrue("onderwerp" in str(obj))
@@ -48,29 +48,29 @@ class TestMailerOperations(TestCase):
         self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
 
     def test_email_is_valide(self):
-        self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
+        self.assertTrue(mailer_email_is_valide('test@test.not'))
+        self.assertTrue(mailer_email_is_valide('jan.de.tester@test.not'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
         self.assertTrue(mailer_email_is_valide('r@hb.nl'))
         self.assertFalse(mailer_email_is_valide('tester@nhb'))
-        self.assertFalse(mailer_email_is_valide('test er@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ter@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
+        self.assertFalse(mailer_email_is_valide('test er@test.not'))
+        self.assertFalse(mailer_email_is_valide('test\ter@test.not'))
+        self.assertFalse(mailer_email_is_valide('test\ner@test.not'))
 
     def test_whitelist(self):
         # controleer dat de whitelist zijn werk doet
         self.assertEqual(0, MailQueue.objects.count())
 
-        with override_settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
-            mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        with override_settings(EMAIL_ADDRESS_WHITELIST=('een.test@test.not',)):
+            mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
+            mail = MailQueue.objects.first()
             self.assertTrue(mail.is_blocked)
             mail.delete()
 
-            mailer_queue_email('een.test@nhb.not', 'onderwerp', 'body\ndoei!\n')
+            mailer_queue_email('een.test@test.not', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
+            mail = MailQueue.objects.first()
             self.assertFalse(mail.is_blocked)
         # with
 

@@ -52,7 +52,7 @@ class OpleidingDeelnemer(models.Model):
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT)
 
     # wanneer is deze aanmelding gedaan?
-    wanneer_aangemeld = models.DateTimeField(auto_now=True)
+    wanneer_aangemeld = models.DateTimeField(auto_now=True)     # TODO: verander in auto_now_add ?
 
     # wie was de koper?
     koper = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)

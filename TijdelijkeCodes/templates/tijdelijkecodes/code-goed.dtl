@@ -1,0 +1,40 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Eenmalig verzoek{% endblock %}
+
+{% block broodkruimels %}<!-- geen! -->{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Eenmalig verzoek</h3>
+        </div>
+    </div>
+
+    <!-- blauw balk -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="white" style="padding:10px">
+                <p>Je hebt verzocht om {{ activiteit }}.</p>
+                <p>Als dit klopt, druk dan op onderstaande knop.</p>
+
+                <form method="post" action="{{ url }}" style="padding:30px">
+                    {% csrf_token %}
+                    <button class="btn-sv-rood" type="submit" value="Ga door">
+                        <i class="notranslate material-icons-round left">check</i>Ga door</button>
+                </form>
+
+                <p>Klopt er helemaal niets van? Sluit dan gewoon dit venster.</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

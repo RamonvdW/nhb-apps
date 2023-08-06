@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 # alle klassen zijn hard-coded
-from BasisTypen.models import (BoogType, TeamType, LeeftijdsKlasse,
+from BasisTypen.models import (BoogType, TeamType, Leeftijdsklasse,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                KalenderWedstrijdklasse)
 
@@ -38,7 +38,7 @@ class BoogTypeAdmin(BasisTypenReadonlyAdmin):
     list_filter = ('organisatie', 'buiten_gebruik')
 
 
-class BasisTypenLeeftijdsKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
+class BasisTypenLeeftijdsklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
     list_filter = ('organisatie', 'wedstrijd_geslacht',)
 
@@ -56,7 +56,8 @@ class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgorde
     # record weergave
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'boogtype', 'gebruik_18m', 'gebruik_25m')}),
-        ('Details', {'fields': ('leeftijdsklassen', 'is_aspirant_klasse', 'is_onbekend', 'niet_voor_rk_bk', )}),
+        ('Details', {'fields': ('leeftijdsklassen', 'is_aspirant_klasse', 'is_onbekend', 'niet_voor_rk_bk')}),
+        ('Titels', {'fields': ('titel_bk_18m', 'titel_bk_25m')}),
         ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen_18m_rk_bk')}),
         ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
     )
@@ -85,6 +86,7 @@ class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeA
     # record weergave
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'team_type', 'gebruik_18m', 'gebruik_25m')}),
+        ('Titels', {'fields': ('titel_bk_18m', 'titel_bk_25m')}),
         ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen_18m_rk_bk')}),
         ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
     )
@@ -104,7 +106,7 @@ class BasisTypenKalenderWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin)
 
 admin.site.register(BoogType, BoogTypeAdmin)
 admin.site.register(TeamType, BasisTypenReadonlyMetVolgordeAdmin)
-admin.site.register(LeeftijdsKlasse, BasisTypenLeeftijdsKlasseAdmin)
+admin.site.register(Leeftijdsklasse, BasisTypenLeeftijdsklasseAdmin)
 admin.site.register(TemplateCompetitieIndivKlasse, BasisTypenTemplateCompetitieIndivKlasseAdmin)
 admin.site.register(TemplateCompetitieTeamKlasse, BasisTypenTemplateCompetitieTeamKlasseAdmin)
 admin.site.register(KalenderWedstrijdklasse, BasisTypenKalenderWedstrijdklasseAdmin)

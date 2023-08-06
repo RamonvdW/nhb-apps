@@ -44,7 +44,7 @@ class Command(BaseCommand):
                       .objects
                       .filter(regiocompetitie__regio_team_punten_model=TEAM_PUNTEN_MODEL_FORMULE1)
                       .order_by('regiocompetitie__competitie',
-                                'regiocompetitie__nhb_regio__regio_nr',
+                                'regiocompetitie__regio__regio_nr',
                                 'beschrijving')):
 
             self.deelcomp_poule_msg = "%s poule %s: %s" % (poule.regiocompetitie, poule.pk, poule)

@@ -62,7 +62,7 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         # zoek alle rollen binnen deze vereniging
-        objs = Functie.objects.filter(nhb_ver=functie_nu.nhb_ver)
+        objs = Functie.objects.filter(vereniging=functie_nu.vereniging)
 
         # zet beheerders en wijzig_url
         for obj in objs:
@@ -159,9 +159,9 @@ class OverzichtView(UserPassesTestMixin, ListView):
         sort_me = list()
         for obj in objs:
             if obj.rol == 'RKO':
-                deel = obj.nhb_rayon.rayon_nr
+                deel = obj.rayon.rayon_nr
             elif obj.rol == 'RCL':
-                deel = obj.nhb_regio.regio_nr
+                deel = obj.regio.regio_nr
             else:
                 deel = 0
 
@@ -184,7 +184,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
             wijzigbare_functie_rol = 'RKO'
         elif self.rol_nu == Rollen.ROL_RKO:
             wijzigbare_functie_rol = 'RCL'
-            rko_rayon_nr = self.functie_nu.nhb_rayon.rayon_nr
+            rko_rayon_nr = self.functie_nu.rayon.rayon_nr
         else:
             # beheerder kan niets wijzigen, maar inzien mag wel
             wijzigbare_functie_rol = "niets"
@@ -198,7 +198,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
                     obj.wijzig_url = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': obj.pk})
 
                     # verdere begrenzing RKO: alleen 'zijn' Regio's
-                    if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
+                    if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.regio.rayon.rayon_nr != rko_rayon_nr:
                         obj.wijzig_url = None
         # for
 
@@ -209,7 +209,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
             wijzigbare_email_rol = 'RKO'
         elif self.rol_nu == Rollen.ROL_RKO:
             wijzigbare_email_rol = 'RCL'
-            rko_rayon_nr = self.functie_nu.nhb_rayon.rayon_nr
+            rko_rayon_nr = self.functie_nu.rayon.rayon_nr
         else:
             # beheerder kan niets wijzigen, maar inzien mag wel
             wijzigbare_email_rol = 'niets'
@@ -226,7 +226,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
                     obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
 
                     # verdere begrenzing RKO: alleen 'zijn' Regio's
-                    if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
+                    if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.regio.rayon.rayon_nr != rko_rayon_nr:
                         obj.email_url = None
         # for
 
@@ -248,15 +248,15 @@ class OverzichtView(UserPassesTestMixin, ListView):
             # toon alleen de hierarchy vanuit deze vereniging omhoog
             functie_hwl = self.functie_nu
             objs = (Functie.objects
-                    .filter(Q(rol='RCL', nhb_regio=functie_hwl.nhb_ver.regio) |
-                            Q(rol='RKO', nhb_rayon=functie_hwl.nhb_ver.regio.rayon) |
+                    .filter(Q(rol='RCL', regio=functie_hwl.vereniging.regio) |
+                            Q(rol='RKO', rayon=functie_hwl.vereniging.regio.rayon) |
                             Q(rol='BKO'))
-                    .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
+                    .select_related('rayon', 'regio', 'regio__rayon')
                     .prefetch_related('accounts'))
         else:
             objs = (Functie.objects
                     .filter(rol__in=('BKO', 'RKO', 'RCL', 'MWZ', 'MWW', 'SUP', 'MO'))
-                    .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
+                    .select_related('rayon', 'regio', 'regio__rayon')
                     .prefetch_related('accounts'))
 
         objs = self._sorteer_functies(objs)
@@ -335,44 +335,44 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
                     .objects
                     .filter(rol__in=('HWL', 'SEC'))
                     .exclude(bevestigde_email='')
-                    .select_related('nhb_ver')
-                    .order_by('nhb_ver__ver_nr',
+                    .select_related('vereniging')
+                    .order_by('vereniging__ver_nr',
                               'rol'))
 
         elif self.rol_nu == Rollen.ROL_RKO:
-            rayon_nr = self.functie_nu.nhb_rayon.rayon_nr
+            rayon_nr = self.functie_nu.rayon.rayon_nr
             context['geo_str'] = ' in Rayon %s' % rayon_nr
             emails = (Functie
                       .objects
                       .filter(rol__in=('HWL', 'SEC'),
-                              nhb_ver__regio__rayon__rayon_nr=rayon_nr)
+                              vereniging__regio__rayon__rayon_nr=rayon_nr)
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
             alle = (Functie
                     .objects
                     .filter(rol__in=('HWL', 'SEC'),
-                            nhb_ver__regio__rayon__rayon_nr=rayon_nr)
+                            vereniging__regio__rayon__rayon_nr=rayon_nr)
                     .exclude(bevestigde_email='')
-                    .select_related('nhb_ver')
-                    .order_by('nhb_ver__ver_nr',
+                    .select_related('vereniging')
+                    .order_by('vereniging__ver_nr',
                               'rol'))
 
         else:  # elif self.rol_nu == Rollen.ROL_RCL:
-            regio_nr = self.functie_nu.nhb_regio.regio_nr
+            regio_nr = self.functie_nu.regio.regio_nr
             context['geo_str'] = ' in regio %s' % regio_nr
             emails = (Functie
                       .objects
                       .filter(rol__in=('HWL', 'SEC'),
-                              nhb_ver__regio__regio_nr=regio_nr)
+                              vereniging__regio__regio_nr=regio_nr)
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
             alle = (Functie
                     .objects
                     .filter(rol__in=('HWL', 'SEC'),
-                            nhb_ver__regio__regio_nr=regio_nr)
+                            vereniging__regio__regio_nr=regio_nr)
                     .exclude(bevestigde_email='')
-                    .select_related('nhb_ver')
-                    .order_by('nhb_ver__ver_nr',
+                    .select_related('vereniging')
+                    .order_by('vereniging__ver_nr',
                               'rol'))
 
         context['aantal'] = len(emails)

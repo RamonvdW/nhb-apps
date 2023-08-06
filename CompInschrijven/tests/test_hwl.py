@@ -13,8 +13,9 @@ from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHOD
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog,
                                Kampioenschap, RegiocompetitieRonde, CompetitieMatch)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -43,7 +44,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -57,15 +58,16 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
+        # maak de WL functie
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
@@ -84,83 +86,84 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_hwl)
 
         sporter.account = self.account_hwl
-        sporter.save()
+        sporter.save(update_fields=['account'])
         self.sporter_100001 = sporter
 
         jaar = timezone.now().year
 
         # maak een jeugdlid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = "nietleeg@nhb.not"
-        sporter.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Jeugdschutter",
+                    email="nietleeg@test.not",
+                    geboorte_datum=datetime.date(year=jaar-10, month=3, day=4),
+                    sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter.save(update_fields=['account'])
         self.sporter_100002 = sporter
 
         # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
-        sporter = Sporter()
-        sporter.lid_nr = 100012
-        sporter.geslacht = "V"
-        sporter.voornaam = "Andrea"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100012,
+                    geslacht="V",
+                    voornaam="Andrea",
+                    achternaam="de Jeugdschutter",
+                    email="",
+                    geboorte_datum=datetime.date(year=jaar-10, month=3, day=4),
+                    sinds_datum=datetime.date(year=jaar-3, month=10, day=10),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100012 = sporter
 
         # maak een jeugd lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100004
-        sporter.geslacht = "M"
-        sporter.voornaam = "Cadet"
-        sporter.achternaam = "de Jeugd"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=jaar-13, month=3, day=4)    # 13=asp, maar 14 in 2e jaar competitie!
-        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100004,
+                    geslacht="M",
+                    voornaam="Cadet",
+                    achternaam="de Jeugd",
+                    email="",
+                    geboorte_datum=datetime.date(year=jaar-13, month=3, day=4),    # 13=asp, maar 14 in 2e jaar competitie!
+                    sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100004 = sporter
 
         # maak een senior lid aan, om inactief te maken
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100003,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Testerin",
+                    email="",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=jaar-4, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100003 = sporter
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = self.regio_111
+        ver2 = NhbVereniging(
+                    naam="Andere Club",
+                    ver_nr="1222",
+                    regio=self.regio_111)
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # maak een senior lid aan, om inactief te maken
-        sporter = Sporter()
-        sporter.lid_nr = 102000
-        sporter.geslacht = "M"
-        sporter.voornaam = "Andre"
-        sporter.achternaam = "Club"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        sporter.bij_vereniging = ver2
+        sporter = Sporter(
+                    lid_nr=102000,
+                    geslacht="M",
+                    voornaam="Andre",
+                    achternaam="Club",
+                    email="",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=jaar-4, month=11, day=12),
+                    bij_vereniging=ver2)
         sporter.save()
         self.sporter_102000 = sporter
 
@@ -171,58 +174,55 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         # fake een deelnemerslijst voor de RK
         deelkamp_rk = Kampioenschap.objects.get(competitie=self.comp_25,
                                                 deel=DEEL_RK,
-                                                nhb_rayon=self.regio_111.rayon)
+                                                rayon=self.regio_111.rayon)
         deelkamp_rk.heeft_deelnemerslijst = True
         deelkamp_rk.save()
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
-        histcomp = HistCompetitie()
-        histcomp.seizoen = '2018/2019'
-        histcomp.comp_type = '18'
-        histcomp.boog_str = 'Testcurve1'
-        histcomp.is_team = False
-        histcomp.save()
+        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18,
+                                       indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
+        hist_seizoen.save()
 
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100001.lid_nr
-        rec.sporter_naam = self.sporter_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'R'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100001.lid_nr,
+                    sporter_naam=self.sporter_100001.volledige_naam(),
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
+                    boogtype='R',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
         # record voor het jeugdlid
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100002.lid_nr
-        rec.sporter_naam = self.sporter_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'BB'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100002.lid_nr,
+                    sporter_naam=self.sporter_100002.volledige_naam(),
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
+                    boogtype='BB',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
     def _create_competitie(self):
@@ -236,7 +236,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_regio = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio = Regiocompetitie.objects.get(regio=self.regio_111,
                                                           competitie__afstand=18)
 
     def _zet_sporter_voorkeuren(self, lid_nr):
@@ -289,7 +289,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # maak een aantal wedstrijden aan, als RCL van Regio 101
-        functie_rcl = Functie.objects.get(rol='RCL', comp_type='18', nhb_regio=self.deelcomp_regio.nhb_regio)
+        functie_rcl = Functie.objects.get(rol='RCL', comp_type='18', regio=self.deelcomp_regio.regio)
         self.e2e_wissel_naar_functie(functie_rcl)
 
         url = self.url_planning_regio % self.deelcomp_regio.pk
@@ -313,12 +313,12 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
 
-        match_pk = CompetitieMatch.objects.all()[0].pk
+        match_pk = CompetitieMatch.objects.first().pk
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % match_pk
         with self.assert_max_queries(20):
-            resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver1.pk,
+            resp = self.client.post(url_wed, {'ver_pk': self.ver1.pk,
                                               'wanneer': '2020-12-11', 'aanvang': '12:34'})
         self.assert_is_redirect(resp, url_ronde)
 
@@ -344,7 +344,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_hwl)
 
         # pas de HWL aan naar de andere club
-        self.functie_hwl.nhb_ver = self.nhbver2
+        self.functie_hwl.vereniging = self.ver2
         self.functie_hwl.save()
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
@@ -353,7 +353,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_sporter_voorkeuren(102000)
 
         # herstel de HWL functie
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.save()
 
         # wordt HWL
@@ -386,7 +386,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
         self.assertEqual(inschrijving.sporterboog.sporter.lid_nr, 100004)
         self.assertTrue('Onder 18' in inschrijving.indiv_klasse.beschrijving)
         inschrijving.delete()
@@ -574,14 +574,14 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         sporterboog.save()
 
         # probeer aan te melden met een lid dat niet van de vereniging van de HWL is
-        self.sporter_100002.bij_vereniging = self.nhbver2
+        self.sporter_100002.bij_vereniging = self.ver2
         self.sporter_100002.save()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'dagdeel': 'AV'})
         self.assert403(resp)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
-        self.sporter_100002.bij_vereniging = self.nhbver1
+        self.sporter_100002.bij_vereniging = self.ver1
         self.sporter_100002.save()
 
         # nu de POST om een paar leden aan te melden
@@ -707,7 +707,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # schrijf de schutters weer uit
-        pk = RegiocompetitieSporterBoog.objects.all()[0].pk
+        pk = RegiocompetitieSporterBoog.objects.first().pk
         url = self.url_ingeschreven % 0
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'pk_%s' % pk: 'on'})
@@ -715,8 +715,8 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)    # 1 schutter
 
         # schrijf een schutter uit van een andere vereniging
-        inschrijving = RegiocompetitieSporterBoog.objects.all()[0]
-        inschrijving.bij_vereniging = self.nhbver2
+        inschrijving = RegiocompetitieSporterBoog.objects.first()
+        inschrijving.bij_vereniging = self.ver2
         inschrijving.save()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
@@ -801,7 +801,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maak dit een administratieve regio waarvan de leden geen wedstrijden mogen schieten
-        regio = self.nhbver1.regio
+        regio = self.ver1.regio
         regio.is_administratief = True
         regio.save()
 

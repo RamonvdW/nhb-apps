@@ -206,7 +206,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                                       .objects
                                       .filter(deel=DEEL_RK,
                                               competitie=deelkamp.competitie)
-                                      .order_by('nhb_rayon__rayon_nr',
+                                      .order_by('rayon__rayon_nr',
                                                 'deel'))
 
         comp = deelkamp.competitie
@@ -517,11 +517,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # aanvang bestaat uit vier cijfers, zoals 0830
         weekdag = request.POST.get('weekdag', '')[:2]           # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
-        nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
+        ver_pk = request.POST.get('ver_pk', '')[:6]             # afkappen voor de veiligheid
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
 
         # let op: loc_pk='' is toegestaan
-        if weekdag == "" or nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
+        if weekdag == "" or ver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
             raise Http404('Incompleet verzoek')
 
         try:
@@ -548,26 +548,26 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         match.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
 
-        if nhbver_pk == 'geen':
+        if ver_pk == 'geen':
             match.vereniging = None
             match.locatie = None
         else:
             try:
-                nhbver = NhbVereniging.objects.get(pk=nhbver_pk, regio__is_administratief=False)
+                ver = NhbVereniging.objects.get(pk=ver_pk, regio__is_administratief=False)
             except (NhbVereniging.DoesNotExist, ValueError):
                 raise Http404('Vereniging niet gevonden')
 
-            match.vereniging = nhbver
+            match.vereniging = ver
 
             if loc_pk:
                 try:
-                    loc = nhbver.wedstrijdlocatie_set.get(pk=loc_pk)
+                    loc = ver.wedstrijdlocatie_set.get(pk=loc_pk)
                 except WedstrijdLocatie.DoesNotExist:
                     raise Http404('Locatie niet gevonden')
             else:
                 # formulier stuurt niets als er niet gekozen hoeft te worden, of als er geen locatie is
                 loc = None
-                for ver_loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
+                for ver_loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
                     keep = False
                     if is_25m:
                         if ver_loc.banen_25m > 0 and (ver_loc.discipline_indoor or ver_loc.discipline_25m1pijl):

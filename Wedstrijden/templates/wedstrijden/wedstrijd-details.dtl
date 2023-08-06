@@ -28,12 +28,12 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
-            <table class="white" <!--style="table-layout:fixed"--> >
+            <table class="white">        <!--style="table-layout:fixed"-->
 
                 <tr>
-                    <td colspan="2" class="center nhb-blauw-text">
+                    <td colspan="2" class="center sv-blauw-text">
                         <h6>Informatie</h6>
                     </td>
                 </tr>
@@ -66,10 +66,10 @@
                         <td>
                             <span>{{ wed.inschrijven_voor }}</span>
                             {% if not kan_inschrijven %}
-                                <span class="nhb-rood-text"> (inschrijving is gesloten)</span>
+                                <span class="sv-rood-text"> (inschrijving is gesloten)</span>
                             {% else %}
                                 {% if wed.inschrijven_let_op %}
-                                    <span class="nhb-rood-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                                    <span class="sv-rood-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
                                 {% else %}
                                     <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
                                 {% endif %}
@@ -96,7 +96,7 @@
                         <span>{{ wed.locatie.adres|linebreaksbr }}</span>
                         {% if url_map %}
                             <br><br>
-                            <a class="btn-nhb-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                            <a class="btn-sv-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
                                 <i class="notranslate material-icons-round left">open_in_new</i>Toon op de kaart</a>
                         {% endif %}
                     </td>
@@ -128,7 +128,7 @@
 
 
                 <tr>
-                    <td colspan="2" class="center nhb-blauw-text">
+                    <td colspan="2" class="center sv-blauw-text">
                         <h6>Contactgegevens organisatie</h6>
                     </td>
                 </tr>
@@ -154,7 +154,7 @@
                             <th>Website voor inschrijven</th>
                             <td>
                                 <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
-                                    <i class="notranslate material-icons-round left nhb-blauw-text">open_in_new</i>
+                                    <i class="notranslate material-icons-round left sv-blauw-text">open_in_new</i>
                                     <code>{{ wed.contact_website }}</code>
                                 </a>
                             </td>
@@ -164,7 +164,7 @@
 
 
                 <tr>
-                    <td colspan="2" class="center nhb-blauw-text">
+                    <td colspan="2" class="center sv-blauw-text">
                         <h6>Inschrijfgeld</h6>
                     </td>
                 </tr>
@@ -177,14 +177,16 @@
                     <th>Tot 18 jaar</th>
                     <td>&euro;&nbsp;{{ wed.prijs_euro_onder18 }}</td>
                 </tr>
+
             </table>
 
             {% if toon_sessies %}
 
-                <ul id="sessies" class="collapsible expandable z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
+                                        <!-- not: popout !! -->
+                <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
                     <li>
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
-                            <h6 class="nhb-blauw-text">Sessies</h6>
+                            <h6 class="sv-blauw-text">Sessies</h6>
                             {% if wed.organisatie == 'N' %}
                                 <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                             {% endif %}
@@ -195,11 +197,13 @@
                         <li>
                             <div class="collapsible-header white center" style="display:block">
                                 {% if sessie.beschrijving %}<span>{{ sessie.beschrijving }}</span><br>{% endif %}
-                                <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b><br>
+                                <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b>
+                                <br>
                                 {% if kan_inschrijven %}
                                     <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
                                 {% endif %}
                                 <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
+                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
                             </div>
                             <div class="collapsible-body white center">
                                 <span>
@@ -228,25 +232,25 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 {% if kan_aanmelden and kan_inschrijven %}
 
                     <!-- inschrijven sporter -->
-                    {% include 'plein/card.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+                    {% include 'plein/card_icon.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
 
                     <!-- inschrijven groepje -->
-                    {% include 'plein/card.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+                    {% include 'plein/card_icon.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
 
                     <!-- inschrijven familie -->
-                    {% include 'plein/card.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+                    {% include 'plein/card_icon.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
 
                 {% endif %}
 
 
                {% if wed.extern_beheerd and wed.contact_website %}
-                   {% include 'plein/card.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze wedstrijd gaat via de website van de organisatie" url=wed.contact_website %}
+                   {% include 'plein/card_icon.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze wedstrijd gaat via de website van de organisatie" url=wed.contact_website %}
                 {% endif %}
 
             </div>
@@ -263,13 +267,13 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- informatie over leeftijden -->
             <!-- let op: kopie van dit kaartje op Competitie / kies -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'plein/card.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
 
         </div>
     </div>

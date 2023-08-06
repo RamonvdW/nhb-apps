@@ -20,7 +20,7 @@
 
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -79,7 +79,7 @@
                                                         </label>
                                                     </td>
                                                     <td>{{ team.team_naam }}</td>
-                                                    <td><i>Onbekend</i><span class="nhb-rood-text">&nbsp;&nbsp;&nbsp;(team is niet compleet)</span></td>
+                                                    <td><i>Onbekend</i><span class="sv-rood-text">&nbsp;&nbsp;&nbsp;(team is niet compleet)</span></td>
                                                 </tr>
                                             {% endif %}
                                         {% endfor %}
@@ -90,7 +90,7 @@
                         </table>
 
                         <div class="center" style="margin-top:30px">
-                            <button class="btn-nhb-rood" type="submit">
+                            <button class="btn-sv-rood" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </div>
 
@@ -103,23 +103,31 @@
 
 
     {% if mag_koppelen %}
-        <p>&nbsp;</p>
-        <form method="post" action="{{ url_opslaan }}">
-            {% csrf_token %}
-            <input type="hidden" name="verwijder_poule" value="ja">
-            <ul class="collapsible">
-                <li>
-                    <div class="collapsible-header white">
-                        <span>Klik eerst hier als je deze poule wilt verwijderen</span>
+        <p style="margin-left:10px">
+            <a class="btn-sv-blauw modal-trigger" href="#verwijder_poule">Verwijder poule</a>
+        </p>
+
+        <!-- modal dialog -->
+        <div class="modal" id="verwijder_poule">
+            <div class="modal-content center">
+                <h5>Verwijderen poule?</h5>
+                <p>Heb je deze poule niet meer nodig en wil je 'm verwijderen?</p>
+
+                <form method="post" action="{{ url_opslaan }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="verwijder_poule" value="ja">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-sv-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
+                        </div>
                     </div>
-                    <div class="collapsible-body white">
-                        <p>Heb je deze poule echt niet meer nodig?</p>
-                        <button class="btn-nhb-rood" type="submit">
-                            <i class="notranslate material-icons-round left">delete</i>Verwijder deze poule</button>
-                    </div>
-                </li>
-            </ul>
-        </form>
+                </form>
+            </div>
+        </div>
     {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-wijzig-poule" %}

@@ -27,11 +27,11 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
 
                 {% for kaartje in kaartjes_algemeen %}
-                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
                 {% endfor %}
 
             </div>
@@ -52,11 +52,11 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
 
                 {% for kaartje in kaartjes_indiv %}
-                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
                 {% endfor %}
 
             </div>
@@ -73,11 +73,11 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s12">
 
                 {% for kaartje in kaartjes_teams %}
-                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
+                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icoon url=kaartje.url %}
                 {% endfor %}
 
             </div>

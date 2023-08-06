@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import forms
+from django.urls import resolve, Resolver404
 
 
 class LoginForm(forms.Form):
@@ -17,7 +18,7 @@ class LoginForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     login_naam = forms.CharField(
-                        label='Inlog naam (Bondsnummer of e-mailadres)',
+                        label='Inlog naam (bondsnummer of e-mailadres)',
                         max_length=50,
                         required=False,
                         widget=forms.TextInput(attrs={'autofocus': True, 'autocomplete': 'username'}))
@@ -32,9 +33,32 @@ class LoginForm(forms.Form):
                         initial=False,
                         required=False)     # avoids form validation failure when not checked
 
-    next = forms.CharField(
+    next_url = forms.CharField(
                         required=False,
                         widget=forms.HiddenInput())
+
+    def _validate_inlog_velden(self, valid):
+        if valid:
+            login_naam = self.cleaned_data.get("login_naam")
+            wachtwoord = self.cleaned_data.get("wachtwoord")
+            # print("cleaned_data: %s" % repr(self.cleaned_data))
+            if login_naam == "" or wachtwoord == "":
+                self.add_error(None, 'niet alle velden zijn ingevuld')
+                valid = False
+        return valid
+
+    # def _validate_next_url(self, valid):
+    #     if valid:
+    #         next_url = self.cleaned_data.get('next_url')
+    #         if next_url:
+    #             if next_url[-1] != '/':
+    #                 next_url += '/'
+    #             try:
+    #                 resolve(next_url)
+    #             except Resolver404:
+    #                 # cancel this invalid URL
+    #                 valid = False
+    #     return valid
 
     def is_valid(self):
         """
@@ -45,16 +69,11 @@ class LoginForm(forms.Form):
             die door login.dtl in het formulier getoond worden aan de gebruiker.
         """
         valid = super(forms.Form, self).is_valid()
-        if valid:
-            login_naam = self.cleaned_data.get("login_naam")
-            wachtwoord = self.cleaned_data.get("wachtwoord")
-            # print("cleaned_data: %s" % repr(self.cleaned_data))
-            if login_naam == "" or wachtwoord == "":
-                self.add_error(None, 'Niet alle velden zijn ingevuld')
-                valid = False
+        valid = self._validate_inlog_velden(valid)
 
-            # 'next' is checked when used, not here
-
+        # controle wordt gedaan bij gebruik
+        # en stuurt naar plein voor onbekende urls
+        # valid = self._validate_next_url(valid)
         return valid
 
 
@@ -76,6 +95,56 @@ class KiesAccountForm(forms.Form):
         van het verborgen formulier
     """
     selecteer = forms.IntegerField(required=False)
+
+
+class OTPControleForm(forms.Form):
+    """ Dit formulier wordt gebruikt om de OTP code te ontvangen van de gebruiker """
+
+    otp_code = forms.CharField(
+                        label='Code',
+                        min_length=6,
+                        max_length=6,
+                        required=True,
+                        widget=forms.TextInput(attrs={'autofocus': True, 'autocomplete': 'off'}))
+
+    next_url = forms.CharField(
+                        required=False,
+                        widget=forms.HiddenInput())
+
+    def _validate_otp_code(self, valid):
+        if valid:
+            otp_code = self.cleaned_data.get('otp_code')
+            try:
+                code = int(otp_code)
+                # prevent negative numbers
+                if code < 0 or code > 999999:
+                    raise ValueError()
+            except ValueError:
+                self.add_error(None, 'voer de vereiste code in')
+                valid = False
+        return valid
+
+    def _validate_next_url(self, valid):
+        if valid:
+            next_url = self.cleaned_data.get('next_url')
+            if next_url:
+                if next_url[-1] != '/':
+                    next_url += '/'
+                try:
+                    resolve(next_url)
+                except Resolver404:
+                    # cancel this invalid URL
+                    valid = False
+        return valid
+
+    def is_valid(self):
+        valid = super(forms.Form, self).is_valid()
+        valid = self._validate_otp_code(valid)
+        valid = self._validate_next_url(valid)
+
+        if not valid:
+            self.add_error(None, 'de gegevens worden niet geaccepteerd')
+        return valid
 
 
 # end of file

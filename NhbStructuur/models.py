@@ -34,7 +34,7 @@ class NhbRayon(models.Model):
 class NhbRegio(models.Model):
     """ Tabel waarin de Regio definities """
 
-    # 3-cijferige NHB nummer van deze regio
+    # 3-cijferige nummer van deze regio
     regio_nr = models.PositiveIntegerField(primary_key=True)
 
     # beschrijving van de regio
@@ -103,20 +103,20 @@ class NhbCluster(models.Model):
 
 
 class NhbVereniging(models.Model):
-    """ Tabel waarin gegevens van de Verenigingen van de NHB staan """
+    """ Tabel waarin gegevens van de Verenigingen van de bond staan """
 
     # 4-cijferige nummer van de vereniging
     ver_nr = models.PositiveIntegerField(primary_key=True)
 
     # naam van de vereniging
-    naam = models.CharField(max_length=200)
+    naam = models.CharField(max_length=50)
 
     # adres van "het bedrijf"
-    adres_regel1 = models.CharField(max_length=100, default='', blank=True)
-    adres_regel2 = models.CharField(max_length=100, default='', blank=True)
+    adres_regel1 = models.CharField(max_length=50, default='', blank=True)
+    adres_regel2 = models.CharField(max_length=50, default='', blank=True)
 
     # locatie van het doel van de vereniging
-    plaats = models.CharField(max_length=100, blank=True)
+    plaats = models.CharField(max_length=35, blank=True)
 
     # de regio waarin de vereniging zit
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
@@ -128,6 +128,9 @@ class NhbVereniging(models.Model):
     # er is een vereniging voor persoonlijk lidmaatschap
     # deze leden mogen geen wedstrijden schieten
     geen_wedstrijden = models.BooleanField(default=False)
+
+    # is dit deze vereniging voor gast-accounts?
+    is_extern = models.BooleanField(default=False)
 
     # KvK-nummer - wordt gebruikt bij verkoop wedstrijd/opleiding
     kvk_nummer = models.CharField(max_length=15, default='', blank=True)

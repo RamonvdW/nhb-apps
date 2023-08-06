@@ -6,7 +6,8 @@
 
 from django.conf import settings
 from django.shortcuts import reverse
-from Account.rechten import account_rechten_is_otp_verified
+from django.utils.safestring import mark_safe
+from Account.operations.otp import otp_is_controle_gelukt
 from Functie.definities import Rollen
 from Functie.rol import rol_mag_wisselen, rol_get_huidige
 from Bestel.operations.mandje import cached_aantal_in_mandje_get
@@ -42,7 +43,7 @@ def menu_dynamics(request, context):
             context['menu_url_wissel_van_rol'] = reverse('Functie:wissel-van-rol')
 
             if request.user.is_staff:
-                if account_rechten_is_otp_verified(request):
+                if otp_is_controle_gelukt(request):
                     context['menu_url_admin_site'] = reverse('admin:index')
 
             rol = rol_get_huidige(request)
@@ -62,5 +63,15 @@ def menu_dynamics(request, context):
     # het label met de schermgrootte boven aan het scherm
     context['menu_toon_schermgrootte'] = settings.DEBUG
 
+    if 'kruimels' in context.keys():
+        kruimels = list()
+        for url, tekst in context['kruimels']:
+            # insert line-break opportunities
+            if tekst == 'Bondscompetities':
+                tekst = mark_safe('Bonds<wbr>competities')
+            tup = (url, tekst)
+            kruimels.append(tup)
+        # for
+        context['kruimels'] = kruimels
 
 # end of file

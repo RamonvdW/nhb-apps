@@ -36,8 +36,8 @@
         </div>
 
         <table class="white">
-            <tr class="row-nhb-blauw">
-                <td class="nhb-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
+            <tr class="row-sv-blauw">
+                <td class="sv-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
                 <th>Materiaalklasse</th>
                 <th class="center">Minimaal aanvangs<wbr>gemiddelde</th>
                 {% if toon_aantal %}
@@ -45,7 +45,7 @@
                 {% endif %}
                 <th class="hide-on-small-only">Blazoen regio</th>
                 <th class="hide-on-small-only">Blazoen RK/BK</th>
-                <td class="nhb-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
+                <td class="sv-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
             </tr>
 
             {% for klasse in indiv_klassen %}
@@ -65,11 +65,11 @@
 
             <!-- blauwe onderrand -->
             <tr>
-                <td colspan="2"  class="nhb-table-onderrand"></td>
+                <td colspan="2"  class="sv-table-onderrand"></td>
                 {% if toon_aantal %}
-                    <td  class="nhb-table-onderrand"></td>
+                    <td  class="sv-table-onderrand"></td>
                 {% endif %}
-                <td colspan="2" class="hide-on-small-only nhb-table-onderrand"></td>
+                <td colspan="2" class="hide-on-small-only sv-table-onderrand"></td>
             </tr>
         </table>
 
@@ -84,8 +84,8 @@
         </div>
 
         <table class="white">
-            <tr class="row-nhb-blauw">
-                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
+            <tr class="row-sv-blauw">
+                <td class="sv-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
                 <th>Materiaalklasse</th>
                 <th class="center">Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
@@ -93,7 +93,7 @@
                 {% endif %}
                 <th class="hide-on-small-only">Blazoen regio</th>
                 <th class="hide-on-small-only">Blazoen RK/BK</th>
-                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
+                <td class="sv-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
             </tr>
 
             {% for klasse in team_klassen %}
@@ -115,11 +115,11 @@
 
             <!-- blauwe onderrand -->
             <tr>
-                <td colspan="2"  class="nhb-table-onderrand"></td>
+                <td colspan="2"  class="sv-table-onderrand"></td>
                 {% if toon_aantal %}
-                    <td  class="nhb-table-onderrand"></td>
+                    <td  class="sv-table-onderrand"></td>
                 {% endif %}
-                <td colspan="2" class="hide-on-small-only nhb-table-onderrand"></td>
+                <td colspan="2" class="hide-on-small-only sv-table-onderrand"></td>
             </tr>
 
         </table>
@@ -137,8 +137,8 @@
         </div>
 
         <table class="white">
-            <tr class="row-nhb-blauw">
-                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
+            <tr class="row-sv-blauw">
+                <td class="sv-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
                 <th>Materiaalklasse</th>
                 <th class="center">Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
@@ -146,7 +146,7 @@
                 {% endif %}
                 <th class="hide-on-small-only"></th>
                 <th class="hide-on-small-only">Blazoen RK/BK</th>
-                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
+                <td class="sv-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
             </tr>
 
             {% for klasse in team_klassen %}
@@ -176,11 +176,11 @@
 
             <!-- blauwe onderrand -->
             <tr>
-                <td colspan="2"  class="nhb-table-onderrand"></td>
+                <td colspan="2"  class="sv-table-onderrand"></td>
                 {% if toon_aantal %}
-                    <td  class="nhb-table-onderrand"></td>
+                    <td  class="sv-table-onderrand"></td>
                 {% endif %}
-                <td colspan="2" class="hide-on-small-only nhb-table-onderrand"></td>
+                <td colspan="2" class="hide-on-small-only sv-table-onderrand"></td>
             </tr>
 
         </table>

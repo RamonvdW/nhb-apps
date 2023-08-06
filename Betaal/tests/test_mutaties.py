@@ -35,11 +35,11 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                     naam="Grote Club",
                     regio=self.regio_111)
         ver.save()
-        self.nhbver = ver
+        self.ver = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         instellingen = BetaalInstellingenVereniging(
@@ -117,7 +117,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
+        actief = BetaalActief.objects.first()
         self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
 
         # genereer het payment status-changed event
@@ -129,22 +129,22 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertEqual(actief.payment_status, 'paid')
 
-    def test_betaal_via_nhb(self):
-        # start ontvangst met betaling via de NHB
+    def test_betaal_via_bond(self):
+        # start ontvangst met betaling via de bond
 
-        # maak de instellingen van de NHB aan
+        # maak de instellingen van de bond aan
         ver = NhbVereniging(
-                        ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
-                        naam="De NHB",
+                        ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
+                        naam="De bond",
                         regio=self.regio_100)
         ver.save()
-        instellingen_nhb = BetaalInstellingenVereniging(
+        instellingen_bond = BetaalInstellingenVereniging(
                                 vereniging=ver,
-                                mollie_api_key='test_1234nhb')
-        instellingen_nhb.save()
+                                mollie_api_key='test_1234bond')
+        instellingen_bond.save()
 
-        self.instellingen.akkoord_via_nhb = True
-        self.instellingen.save(update_fields=['akkoord_via_nhb'])
+        self.instellingen.akkoord_via_bond = True
+        self.instellingen.save(update_fields=['akkoord_via_bond'])
 
         bestelling = Bestelling(
                             bestel_nr=1,
@@ -171,8 +171,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
-        self.assertEqual(actief.ontvanger.pk, instellingen_nhb.pk)
+        actief = BetaalActief.objects.first()
+        self.assertEqual(actief.ontvanger.pk, instellingen_bond.pk)
 
     def test_exceptions(self):
         bestelling = Bestelling(
@@ -263,7 +263,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
+        actief = BetaalActief.objects.first()
         self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
 
         # genereer het payment status-changed event
@@ -304,7 +304,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
-        actief = BetaalActief.objects.all()[0]
+        actief = BetaalActief.objects.first()
         self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
 
         # genereer het payment status-changed event
@@ -602,20 +602,20 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         f1, f2 = self._run_achtergrondtaak()
         self.assertTrue('Unexpected exception from Mollie set API key' in f1.getvalue())
 
-    def test_status_changed_via_nhb(self):
-        # maak de instellingen van de NHB aan
+    def test_status_changed_via_bond(self):
+        # maak de instellingen van de bond aan
         ver = NhbVereniging(
-                        ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
-                        naam="De NHB",
+                        ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
+                        naam="De bond",
                         regio=self.regio_100)
         ver.save()
-        instellingen_nhb = BetaalInstellingenVereniging(
+        instellingen_bond = BetaalInstellingenVereniging(
                                 vereniging=ver,
-                                mollie_api_key='test_1234nhb')
-        instellingen_nhb.save()
+                                mollie_api_key='test_1234bond')
+        instellingen_bond.save()
 
-        self.instellingen.akkoord_via_nhb = True
-        self.instellingen.save(update_fields=['akkoord_via_nhb'])
+        self.instellingen.akkoord_via_bond = True
+        self.instellingen.save(update_fields=['akkoord_via_bond'])
 
         bestelling = Bestelling(
                             bestel_nr=1,

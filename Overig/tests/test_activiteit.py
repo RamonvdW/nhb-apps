@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Account.models import Account
 from Functie.operations import maak_functie
+from Mailer.models import MailQueue
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -17,18 +18,20 @@ import datetime
 
 class TestOverigActiviteit(E2EHelpers, TestCase):
 
-    """ tests voor de Overig applicatie; module Account Activiteit """
+    """ tests voor de Overig applicatie; module Activiteit """
 
     test_after = ('Account.tests.test_login',)
 
     url_activiteit = '/overig/activiteit/'
+    url_loskoppelen = '/overig/otp-loskoppelen/'
 
     testdata = None
+    huidige_jaar = 2020
 
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -36,46 +39,75 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Norma de Schutter')
         self.account_100002 = self.e2e_create_account('100002', 'nhb100002@test.com', 'Pilla de Schutter')
 
-        self.account_100001.last_login = timezone.now() - datetime.timedelta(days=1)
-        self.account_100001.otp_controle_gelukt_op = self.account_100001.last_login + datetime.timedelta(seconds=30)
-        self.account_100001.save(update_fields=['last_login', 'otp_controle_gelukt_op'])
+        account = self.account_100001
+        account.otp_controle_gelukt_op = account.last_login = timezone.now() - datetime.timedelta(days=1)
+        account.otp_controle_gelukt_op += datetime.timedelta(seconds=30)
+        account.save(update_fields=['last_login', 'otp_controle_gelukt_op'])
 
-        email = self.account_100002.accountemail_set.all()[0]
-        email.email_is_bevestigd = True
-        email.save(update_fields=['email_is_bevestigd'])
+        account = self.account_100002
+        account.email_is_bevestigd = True
+        account.save(update_fields=['email_is_bevestigd'])
+
+        now = timezone.now()
+        self.huidige_jaar = now.year
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.sporter_100001 = Sporter(lid_nr=100001,
                                       voornaam='Norma',
-                                      achternaam='de Schutter',
-                                      unaccented_naam='Norma de Schutter',      # hier wordt op gezocht
+                                      achternaam='de Sporter',
+                                      unaccented_naam='Norma de Sporter',  # hier wordt op gezocht
                                       account=self.account_100001,
                                       geboorte_datum='1980-01-08',
                                       sinds_datum='2008-01-08',
-                                      bij_vereniging=self.nhbver1)
+                                      lid_tot_einde_jaar=self.huidige_jaar,
+                                      bij_vereniging=self.ver1)
         self.sporter_100001.save()
 
         # maak nog een sporter aan die niet gekoppeld is aan een account
         self.sporter_100002 = Sporter(lid_nr=100002,
                                       voornaam='Andere',
-                                      achternaam='Schutter',
-                                      unaccented_naam='Andere Schutter',
+                                      achternaam='Sporter',
+                                      unaccented_naam='Andere Sporter',
                                       account=self.account_100002,
                                       geboorte_datum='1980-01-09',
+                                      lid_tot_einde_jaar=self.huidige_jaar,
                                       sinds_datum='2008-01-09')
         self.sporter_100002.save()
+
+        # maak nog een sporter aan die in de toekomst pas lid wordt
+        Sporter(
+                lid_nr=100003,
+                voornaam='Speciaal',
+                achternaam='Toekomstig',
+                unaccented_naam='Speciaal Toekomstig',
+                geboorte_datum='1980-01-09',
+                sinds_datum='2080-01-09',
+                is_actief_lid=False).save()
+
+        # sporter die geen gebruik meer mag maken van MH
+        Sporter(
+                lid_nr=100004,
+                voornaam='Speciaal',
+                achternaam='Verlopen',
+                unaccented_naam='Speciaal Verlopen',
+                geboorte_datum='1980-01-09',
+                sinds_datum='2008-01-01',
+                is_actief_lid=False).save()
 
     def test_anon(self):
         # geen inlog = geen toegang
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit)
+        self.assert403(resp)
+
+        resp = self.client.post(self.url_loskoppelen)
         self.assert403(resp)
 
     def test_normaal(self):
@@ -144,24 +176,38 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
         # zoek op naam --> 2 hits
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit, {'zoekterm': 'schutter'})
+            resp = self.client.get(self.url_activiteit, {'zoekterm': 'sporter'})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # status: actief vanaf
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit, {'zoekterm': '100003'})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # status: verlopen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit, {'zoekterm': '100004'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
         # maak wat wijzigingen
-        email = self.account_100001.accountemail_set.all()[0]
-        email.email_is_bevestigd = False
-        email.save()
+        account = self.account_100001
+        account.email_is_bevestigd = False
+        account.save(update_fields=['email_is_bevestigd'])
 
         self.e2e_account_accepteert_vhpg(self.account_100001)
 
-        self.account_100001 = Account.objects.get(pk=self.account_100001.pk)
-        self.account_100001.otp_is_actief = False
-        self.account_100001.last_login -= datetime.timedelta(days=720)
-        self.account_100001.save(update_fields=['otp_is_actief', 'last_login'])
+        account = self.account_100001 = Account.objects.get(pk=self.account_100001.pk)
+        account.otp_is_actief = False
+        account.last_login -= datetime.timedelta(days=720)
+        account.save(update_fields=['otp_is_actief', 'last_login'])
 
-        # zoek op nhb nummer  --> geen functies, dus geen 2FA nodig
+        # zoek op bondsnummer  --> geen functies, dus geen 2FA nodig
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -172,7 +218,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         functie = maak_functie('Test functie', 'HWL')
         functie.accounts.add(self.account_100001)
 
-        # zoek op nhb nummer --> wel functie, dus wel 2FA nodig
+        # zoek op bondsnummer --> wel functie, dus wel 2FA nodig
         with self.assert_max_queries(23):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -185,7 +231,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
         # zoek op naam, 2 hits --> VHPG verlopen
         with self.assert_max_queries(25):
-            resp = self.client.get(self.url_activiteit, {'zoekterm': 'schutter'})
+            resp = self.client.get(self.url_activiteit, {'zoekterm': 'sporter'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
@@ -193,7 +239,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         # maak nog wat wijzigingen
         vhpg.delete()
 
-        # zoek op nhb nummer --> geen VHPG record
+        # zoek op bondsnummer --> geen VHPG record
         with self.assert_max_queries(23):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -302,5 +348,57 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
+    def test_loskoppelen(self):
+        self.testdata.account_admin.otp_is_actief = True
+        self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
+        self.testdata.account_admin.save()
+
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        # loskoppelen via POST
+
+        # bad input: geen parameters
+        resp = self.client.post(self.url_loskoppelen, {})
+        self.assert_is_redirect(resp, '/overig/activiteit/')
+
+        # bad input: geen login parameter
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: niet bestaande login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': 'Jantje'})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: rare tekens in login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': '###'})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: geen login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': ''})
+        self.assert404(resp, 'Niet gevonden')
+
+        # echt loskoppelen
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': self.testdata.account_admin.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
+
+        # controleer losgekoppeld
+        account = Account.objects.get(username=self.testdata.account_admin.username)
+        self.assertFalse(account.otp_is_actief)
+
+        # er moet nu een mail in de MailQueue staan met een single-use url
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
+
+        # al losgekoppeld
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': self.testdata.account_admin.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
 
 # end of file

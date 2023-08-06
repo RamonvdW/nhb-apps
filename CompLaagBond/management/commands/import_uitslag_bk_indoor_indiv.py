@@ -43,7 +43,7 @@ class Command(BaseCommand):
                                   kampioenschap__deel=DEEL_BK,
                                   volgorde__lte=48)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):

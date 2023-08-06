@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.tests.test_otp')
+    test_after = ('Account.tests.test_otp_controle',)
 
     url_overzicht = '/functie/overzicht/'
     url_overzicht_lid_nrs = '/functie/overzicht/alle-lid-nrs/sec-hwl/'
@@ -40,9 +40,9 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
 
         self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
-        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', nhb_rayon=NhbRayon.objects.get(rayon_nr=3))
-        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', nhb_regio=NhbRegio.objects.get(regio_nr=111))
-        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', nhb_regio=NhbRegio.objects.get(regio_nr=101))
+        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', rayon=NhbRayon.objects.get(rayon_nr=3))
+        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=111))
+        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=101))
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -65,15 +65,15 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.sporter_100042 = sporter
 
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak nog een test vereniging
@@ -84,7 +84,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         ver2.save()
 
         self.functie_hwl2 = maak_functie("HWL test 2", "HWL")
-        self.functie_hwl2.nhb_ver = ver2
+        self.functie_hwl2.vereniging = ver2
         self.functie_hwl2.save()
 
         sporter = Sporter()

@@ -13,6 +13,7 @@ from Bestel.operations.mandje import eval_mandje_inhoud
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
 from Plein.menu import menu_dynamics
+from Registreer.definities import REGISTRATIE_FASE_DONE
 from Taken.operations import eval_open_taken
 
 
@@ -65,6 +66,21 @@ class PleinView(View):
     """ Django class-based view voor het Plein """
 
     # class variables shared by all instances
+    # (geen)
+
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if request.user.is_authenticated:
+            account = request.user
+            if account.is_gast:
+                gast = account.gastregistratie_set.first()
+                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                    # registratie is nog niet voltooid
+                    # dwing terug naar de lijst met vragen
+                    return redirect('Registreer:gast-meer-vragen')
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -129,7 +145,9 @@ class PleinView(View):
                 if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
                     context['toon_manager_sectie'] = True
 
-                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL):
+                if rol_nu in (Rollen.ROL_BB,
+                              Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                              Rollen.ROL_HWL, Rollen.ROL_WL):
                     context['toon_bondscompetities'] = True
 
                 context['huidige_rol'] = rol_get_beschrijving(request)

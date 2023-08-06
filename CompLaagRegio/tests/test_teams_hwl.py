@@ -10,10 +10,11 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
-from Competitie.tijdlijn import (zet_test_datum, zet_competitie_fases,
-                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven)
+from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                       zet_competitie_fase_regio_inschrijven)
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Sporter.models import Sporter, SporterBoog
 from Score.definities import AG_NUL
 from Score.operations import score_indiv_ag_opslaan
@@ -43,7 +44,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -57,15 +58,15 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
@@ -87,7 +88,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100001 = sporter
 
-        zet_test_datum('2019-09-01')
+        evaluatie_datum.zet_test_datum('2019-09-01')
         jaar = 2019
 
         # maak een aspirant aan
@@ -96,7 +97,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         sporter.geslacht = "V"
         sporter.voornaam = "Ramona"
         sporter.achternaam = "de Jeugdschutter"
-        sporter.email = "nietleeg@nhb.not"
+        sporter.email = "nietleeg@test.not"
         sporter.geboorte_datum = datetime.date(year=jaar-12, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         sporter.bij_vereniging = ver
@@ -163,11 +164,11 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
-        self.account_rcl = self.e2e_create_account('rcl111', 'ercel@nhb.not', 'Ercel', accepteer_vhpg=True)
+        self.account_rcl = self.e2e_create_account('rcl111', 'ercel@test.not', 'Ercel', accepteer_vhpg=True)
         self.functie_rcl = maak_functie('RCL Regio 111 Indoor', 'RCL')
-        self.functie_rcl.nhb_regio = self.nhbver1.regio
+        self.functie_rcl.regio = self.ver1.regio
         self.functie_rcl.save()
         self.functie_rcl.accounts.add(self.account_rcl)
 
@@ -177,52 +178,49 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
-        histcomp = HistCompetitie()
-        histcomp.seizoen = '2018/2019'
-        histcomp.comp_type = '18'
-        histcomp.boog_str = 'Testcurve1'
-        histcomp.is_team = False
-        histcomp.save()
+        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18,
+                                       indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
+        hist_seizoen.save()
 
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100001.lid_nr
-        rec.sporter_naam = self.sporter_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'R'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100001.lid_nr,
+                    sporter_naam=self.sporter_100001.volledige_naam(),
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
+                    boogtype='R',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
         # record voor het jeugdlid
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100002.lid_nr
-        rec.sporter_naam = self.sporter_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'BB'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100002.lid_nr,
+                    sporter_naam=self.sporter_100002.volledige_naam(),
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
+                    boogtype='BB',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
     def _create_competitie(self):
@@ -234,13 +232,13 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c(startjaar=2019)
 
-        self.deelcomp18_regio111 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp18_regio111 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                                competitie__afstand=18)
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
         self.deelcomp25_regio111 = Regiocompetitie.objects.get(competitie=self.comp_25,
-                                                               nhb_regio=self.regio_111)
+                                                               regio=self.regio_111)
 
     def _zet_schutter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -439,12 +437,12 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
-        team = RegiocompetitieTeam.objects.all()[0]
+        team = RegiocompetitieTeam.objects.first()
 
-        self.nhbver1 = NhbVereniging.objects.get(pk=self.nhbver1.pk)
+        self.ver1 = NhbVereniging.objects.get(pk=self.ver1.pk)
 
         self.assertEqual(team.regiocompetitie.pk, self.deelcomp18_regio111.pk)
-        self.assertEqual(team.vereniging, self.nhbver1)
+        self.assertEqual(team.vereniging, self.ver1)
         self.assertEqual(team.volg_nr, 1)
         self.assertEqual(team.team_type.afkorting, 'R2')
         self.assertTrue(team.maak_team_naam() != '')
@@ -517,7 +515,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('complaagregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
-        # team = RegiocompetitieTeam.objects.all()[0]
+        # team = RegiocompetitieTeam.objects.first()
 
         # voorbij einddatum aanmaken / wijzigen teams
         now = timezone.now()
@@ -714,8 +712,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect_not_plein(resp)
-        team = RegiocompetitieTeam.objects.exclude(pk__in=pks).all()[0]
-        team.vereniging = self.nhbver2
+        team = RegiocompetitieTeam.objects.exclude(pk__in=pks).first()
+        team.vereniging = self.ver2
         team.save(update_fields=['vereniging'])
 
         with self.assert_max_queries(20):
@@ -795,7 +793,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Sporter niet gevonden')
 
         # bad case: lid van andere vereniging
-        self.deelnemer_100002_18.bij_vereniging = self.nhbver2
+        self.deelnemer_100002_18.bij_vereniging = self.ver2
         self.deelnemer_100002_18.save()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -817,8 +815,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/wijzig-team-ag.dtl', 'plein/site_layout.dtl'))
 
         # verkeerde regio
-        self.functie_rcl.nhb_regio = NhbRegio.objects.get(regio_nr=101)
-        self.functie_rcl.save(update_fields=['nhb_regio'])
+        self.functie_rcl.regio = NhbRegio.objects.get(regio_nr=101)
+        self.functie_rcl.save(update_fields=['regio'])
         self.e2e_wissel_naar_functie(self.functie_rcl)
 
         with self.assert_max_queries(20):
@@ -845,7 +843,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
-        team = RegiocompetitieTeam.objects.all()[0]
+        team = RegiocompetitieTeam.objects.first()
         self.assertEqual(team.team_type.afkorting, 'R2')        # default = recurve team
 
         self.deelnemer_100003_18.inschrijf_voorkeur_team = True

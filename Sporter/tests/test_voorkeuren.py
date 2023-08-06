@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Account.models import Account
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Functie.operations import maak_functie
@@ -28,7 +29,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -43,10 +44,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         self.functie_hwl = maak_functie('HWL 1000', 'HWL')
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
         self.functie_hwl.accounts.add(self.account_hwl)
 
@@ -60,7 +61,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = ver
         sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter.email = sporter.account.bevestigde_email
         sporter.save()
         self.sporter1 = sporter
 
@@ -145,7 +146,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
 
-        voorkeuren = SporterVoorkeuren.objects.all()[0]
+        voorkeuren = SporterVoorkeuren.objects.first()
         self.assertTrue(voorkeuren.voorkeur_eigen_blazoen)
         self.assertFalse(voorkeuren.voorkeur_meedoen_competitie)
         self.assertEqual(voorkeuren.sporter, self.sporter1)
@@ -172,7 +173,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
 
-        voorkeuren = SporterVoorkeuren.objects.all()[0]
+        voorkeuren = SporterVoorkeuren.objects.first()
         self.assertFalse(voorkeuren.voorkeur_eigen_blazoen)
 
         # voorkeur competitie weer aan zetten
@@ -180,7 +181,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        voorkeuren = SporterVoorkeuren.objects.all()[0]
+        voorkeuren = SporterVoorkeuren.objects.first()
         self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
 
         with self.assert_max_queries(20):
@@ -296,10 +297,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_geen_wedstrijden(self):
-        # self.account_normaal is lid bij self.nhbver1
+        # self.account_normaal is lid bij self.ver1
         # zet deze in de administratieve regio
-        self.nhbver1.geen_wedstrijden = True
-        self.nhbver1.save()
+        self.ver1.geen_wedstrijden = True
+        self.ver1.save()
 
         self.e2e_login(self.account_normaal)
 
@@ -323,7 +324,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
 
         nieuw_ww = 'GratisNieuwGheim'
 
@@ -332,15 +333,15 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Huidige wachtwoord komt niet overeen')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
+        self.assert_template_used(resp, ('account/wachtwoord-wijzigen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'wachtwoord bevat te veel gelijke tekens')
 
         # wijzig het wachtwoord
         with self.assert_max_queries(20):
@@ -361,7 +362,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # check the initiële voorkeuren: alle disciplines actief
-        voorkeuren = SporterVoorkeuren.objects.all()[0]
+        voorkeuren = SporterVoorkeuren.objects.first()
         self.assertTrue(voorkeuren.voorkeur_discipline_25m1pijl)
         self.assertTrue(voorkeuren.voorkeur_discipline_outdoor)
         self.assertTrue(voorkeuren.voorkeur_discipline_indoor)
@@ -453,35 +454,35 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # check de defaults
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertFalse(email.optout_nieuwe_taak)
-        self.assertFalse(email.optout_herinnering_taken)
+        account = self.account_hwl
+        self.assertFalse(account.optout_nieuwe_taak)
+        self.assertFalse(account.optout_herinnering_taken)
 
         # wijzig zonder opt-out te doen
         with self.assert_max_queries(25):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertFalse(email.optout_nieuwe_taak)
-        self.assertFalse(email.optout_herinnering_taken)
+        account = Account.objects.get(pk=account.pk)
+        self.assertFalse(account.optout_nieuwe_taak)
+        self.assertFalse(account.optout_herinnering_taken)
 
         # wijzig met opt-out
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'optout_nieuwe_taak': 'ja'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertTrue(email.optout_nieuwe_taak)
-        self.assertFalse(email.optout_herinnering_taken)
+        account = Account.objects.get(pk=account.pk)
+        self.assertTrue(account.optout_nieuwe_taak)
+        self.assertFalse(account.optout_herinnering_taken)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'optout_herinnering_taken': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        email = self.account_hwl.accountemail_set.all()[0]
-        self.assertFalse(email.optout_nieuwe_taak)
-        self.assertTrue(email.optout_herinnering_taken)
+        account = Account.objects.get(pk=account.pk)
+        self.assertFalse(account.optout_nieuwe_taak)
+        self.assertTrue(account.optout_herinnering_taken)
 
     def test_geslacht_anders(self):
 
@@ -494,7 +495,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # controleer de voorkeuren
-        voorkeur = self.sporter_100002.sportervoorkeuren_set.all()[0]
+        voorkeur = self.sporter_100002.sportervoorkeuren_set.first()
         self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
         self.assertEqual(self.sporter_100002.geslacht, voorkeur.wedstrijd_geslacht)
 
@@ -508,7 +509,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_voorkeuren, {'wedstrijd_mv': 'V'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        voorkeur = self.sporter_100002.sportervoorkeuren_set.all()[0]
+        voorkeur = self.sporter_100002.sportervoorkeuren_set.first()
         self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
         self.assertEqual(self.sporter_100002.geslacht, voorkeur.wedstrijd_geslacht)
 
@@ -529,7 +530,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         resp = self.client.post(self.url_voorkeuren)
         self.assert_is_redirect(resp, self.url_profiel)
 
-        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.first()
         self.assertFalse(voorkeur.wedstrijd_geslacht_gekozen)
 
         # pas het wedstrijdgeslacht aan naar vrouw
@@ -537,7 +538,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_voorkeuren, {'wedstrijd_mv': 'V'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.first()
         self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
         self.assertEqual(voorkeur.wedstrijd_geslacht, 'V')
 
@@ -546,7 +547,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_voorkeuren, {'wedstrijd_mv': 'M'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.first()
         self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
         self.assertEqual(voorkeur.wedstrijd_geslacht, 'M')
 
@@ -555,7 +556,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_voorkeuren)
         self.assert_is_redirect(resp, self.url_profiel)
 
-        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.first()
         self.assertFalse(voorkeur.wedstrijd_geslacht_gekozen)
 
 

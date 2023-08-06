@@ -47,7 +47,7 @@
     </script>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             {% if mag_wijzigen %}
@@ -104,7 +104,7 @@
                                         <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
 
                                         {% if not deelnemers.count %}
-                                            <td colspan="3"><i class="nhb-rood-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                                            <td colspan="3"><i class="sv-rood-text">Geen sporters gevonden met toegestaan boog type</i></td>
                                         {% else %}
                                             <td>
                                                 <table class="striped">
@@ -162,7 +162,7 @@
 
             {% if mag_wijzigen %}
                             <div class="fixed-action-btn" style="display: none">
-                                <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                                     <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                             </div>
                         </form>

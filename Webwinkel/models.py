@@ -77,7 +77,7 @@ class WebwinkelProduct(models.Model):
     onbeperkte_voorraad = models.BooleanField(default=False)
 
     # hoeveel producten mogen er nog verkocht worden?
-    # TODO: commando maken om met N te verhogen (zonder race met nieuwe verkopen)
+    # FUTURE: commando maken om met N te verhogen (zonder race met nieuwe verkopen)
     aantal_op_voorraad = models.PositiveSmallIntegerField(default=0)
 
     # hoeveel kunnen er besteld worden?
@@ -121,7 +121,7 @@ class WebwinkelKeuze(models.Model):
     # hoeveel moet er betaald worden voor het aantal gekozen producten?
     totaal_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))       # max 9999,99
 
-    # hoeveel is ontvangen?         # TODO: waarom tracken we dit hier? Dit hoort bij Betalen
+    # hoeveel is ontvangen?         # TODO: waarom hier bijhouden? Dit hoort bij Betalen
     # (wordt ingevuld als de bestelling volledig betaald is)
     ontvangen_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 

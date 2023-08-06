@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.core import management
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from Account.models import Account, AccountEmail
+from Account.models import Account
 from Logboek.models import LogboekRegel
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -24,7 +24,7 @@ class TestAccountCli(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
+        usermodel.objects.create_user('admin', 'admin@test.com', 'wachtwoord')
         self.account_admin = Account.objects.get(username='admin')
         self.account_normaal = Account.objects.get(username='normaal')
 
@@ -66,29 +66,24 @@ class TestAccountCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@nhb.test', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@test.not', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
         self.assertEqual(f2.getvalue(), "Aanmaken van account 'nieuwelogin' is gelukt\n")
-        obj = Account.objects.get(username='nieuwelogin')
-        self.assertEqual(obj.username, 'nieuwelogin')
-        self.assertEqual(obj.first_name, 'Voornaam')
-        self.assertEqual(obj.email, '')
-        self.assertTrue(obj.is_active)
-        self.assertFalse(obj.is_staff)
-        self.assertFalse(obj.is_superuser)
 
-        mail = AccountEmail.objects.get(account=obj)
-        self.assertTrue(mail.email_is_bevestigd)
-        self.assertEqual(mail.bevestigde_email, 'nieuw@nhb.test')
-        self.assertEqual(mail.nieuwe_email, '')
-
-        # coverage voor AccountEmail.__str__()
-        self.assertEqual(str(mail), "E-mail voor account 'nieuwelogin' (nieuw@nhb.test)")
+        account = Account.objects.get(username='nieuwelogin')
+        self.assertEqual(account.username, 'nieuwelogin')
+        self.assertEqual(account.first_name, 'Voornaam')
+        self.assertEqual(account.email, '')
+        self.assertTrue(account.is_active)
+        self.assertFalse(account.is_staff)
+        self.assertTrue(account.email_is_bevestigd)
+        self.assertEqual(account.bevestigde_email, 'nieuw@test.not')
+        self.assertEqual(account.nieuwe_email, '')
 
         # exception cases
         f1 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@nhb.test', stderr=f1, stdout=f2)
+            management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@test.not', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account bestaat al\n')
 
         f1 = io.StringIO()

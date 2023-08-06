@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -28,7 +28,7 @@
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ deelnemer.kampioenschap.nhb_rayon }}</td>
+                    <td>{{ deelnemer.kampioenschap.rayon }}</td>
                 </tr>
                 <tr>
                     <th>Klasse</th>
@@ -48,7 +48,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
 
             <!-- dialoog venster -->
@@ -58,20 +58,20 @@
                     <p>
                         <span>De status van deelname voor deze sporter is: </span>
                         {% if not deelnemer.bij_vereniging %}
-                            <span class="nhb-rood-text">ATTENTIE</span>
+                            <span class="sv-rood-text">ATTENTIE</span>
                         {% elif deelnemer.deelname == 'N' %}
                             <span class="grey-text">AFGEMELD</span>
                         {% elif deelnemer.deelname == 'J' %}
                             <span class="green-text">DEELNAME BEVESTIGD</span>
                         {% else %}
-                            <span class="nhb-blauw-text"><i>ONBEKEND</i></span>
+                            <span class="sv-blauw-text"><i>ONBEKEND</i></span>
                         {% endif %}
                     </p>
 
                     {% if not deelnemer.bij_vereniging %}
 
                         <p>
-                            <span class="nhb-rood-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.</span>
+                            <span class="sv-rood-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.</span>
                             <br>
                             <br>
                             <span>Laat het bondsbureau uitzoeken of dit een niet-afgeronde overschrijving is.</span>
@@ -89,7 +89,7 @@
                             <form method="post" action="{{ url_wijzig }}">
                                 {% csrf_token %}
                                 <input name="bevestig" type="hidden" value="1">
-                                <button class="btn-nhb-blauw" type="submit">
+                                <button class="btn-sv-blauw" type="submit">
                                     <i class="notranslate material-icons-round left">thumb_up</i>Bevestig deelname</button>
                             </form>
                         {% endif %}
@@ -100,7 +100,7 @@
                             <form method="post" action="{{ url_wijzig }}">
                                 {% csrf_token %}
                                 <input name="afmelden" type="hidden" value="1">
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round left">report_problem</i>Afmelden</button>
                             </form>
                         {% endif %}

@@ -49,6 +49,7 @@
       "gender": "M",
       "email": null,
       "birthday": null,
+      "date_of_death": null,
       "birthplace": null,
       "member_from": null,
       "para_code": null,

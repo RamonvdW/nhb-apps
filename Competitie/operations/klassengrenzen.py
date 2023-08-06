@@ -277,7 +277,7 @@ def bepaal_klassengrenzen_teams(comp):
     else:
         aantal_pijlen = 25
 
-    # eenmalig de wedstrijdleeftijd van elke nhblid berekenen in het vorige seizoen
+    # eenmalig de wedstrijdleeftijd van elke lid berekenen in het vorige seizoen
     # hiermee kunnen we de aspiranten scores eruit filteren
     jaar = comp.begin_jaar      # gelijk aan tweede jaar vorig seizoen
 
@@ -405,7 +405,7 @@ def bepaal_klassengrenzen_teams(comp):
 
 
 class KlasseBepaler(object):
-    """ deze klasse helpt met het bepalen van de CompetitieIndivKlasse voor een deelnemer """
+    """ deze klasse helpt met het kiezen van de CompetitieIndivKlasse voor een deelnemer """
 
     def __init__(self, comp):
         self.competitie = comp

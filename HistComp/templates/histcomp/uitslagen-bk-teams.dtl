@@ -1,0 +1,156 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Uitslag BK teams{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Uitslagen BK teams</h3>
+            <p>Eindstand van de bonds<wbr>kampioenschappen teams</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ comp_beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Team type</th>
+                    <td>{{ team_beschrijving }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met filters -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m6 offset-m3 l4 offset-l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een team type:</b></p>
+                <ul>
+                    {% for filter in teamtype_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- uitleg over tijdstippen -->
+    {% if not comp.bk_is_afgelast and comp.fase_teams >= 'N' and comp.fase_teams <= 'P'%}
+
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 center">
+                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% if heeft_teams %}
+
+        <table class="white">
+            {% for team in uitslag %}
+                {% if team.break_klasse %}
+                    {% if not forloop.first %}
+                        <tr>
+                            <td colspan="5" class="sv-table-onderrand"></td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td colspan="7" class="center">
+                            <h5>{{ team.teams_klasse }}</h5>
+                        </td>
+                    </tr>
+
+                    <tr class="sv-table-header">
+                        <td rowspan="{{ team.aantal_in_groep }}" class="sv-table-zijrand"></td>
+                        <th></th>   <!-- rank -->
+                        <th>
+                            <span class="hide-on-med-and-up">Ver</span>
+                            <span class="hide-on-small-only">Vereniging</span>
+                        </th>
+                        <th class="right-align" style="padding-right:10px">BK scores</th>
+                        <th>Team</th>
+                        <th><!-- titel --></th>
+                        <td rowspan="{{ team.aantal_in_groep }}" class="sv-table-zijrand"></td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <!-- rank -->
+                    <td class="center">{{ team.rank }}</td>
+
+                    <!-- vereniging -->
+                    <td>
+                        <span class="hide-on-med-and-up">{{ team.vereniging_nr }}</span>
+                        <span class="hide-on-small-only">{{ team.ver_str }}</span>
+                    </td>
+
+                    <!-- BK scores -->
+                    <td class="right-align" style="padding-right:10px">
+                        <b>{{ team.team_score }}</b>
+                        {% for deelnemer in team.deelnemers %}
+                            <br>
+                            <span>{{ deelnemer.team_score }}</span>
+                        {% endfor %}
+                    </td>
+
+                    <!-- team nummer + team leden -->
+                    <td>
+                        <!-- <b>{{ team.team_nr }}</b> -->
+                        {% for deelnemer in team.deelnemers %}
+                            <br><span>{{ deelnemer.naam_str }}</span>
+                        {% endfor %}
+                    </td>
+
+                    <td>
+                        <span class="hide-on-small-only">{{ team.titel }}</span>
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            <tr>
+                <td colspan="5" class="sv-table-onderrand"></td>
+            </tr>
+        </table>
+
+    {% else %}
+        <p class="center"><i>Geen teams gevonden voor deze combinatie van filters</i></p>
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp-uitslagen-bk-teams" %}
+
+{% endblock %}

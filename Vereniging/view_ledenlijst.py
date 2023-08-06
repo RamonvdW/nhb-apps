@@ -5,16 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.utils import timezone
-from Plein.menu import menu_dynamics
+from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_KHSN
+from BasisTypen.models import Leeftijdsklasse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_NHB
-from BasisTypen.models import LeeftijdsKlasse
+from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog
-
 
 TEMPLATE_LEDENLIJST = 'vereniging/ledenlijst.dtl'
 TEMPLATE_LEDEN_VOORKEUREN = 'vereniging/leden-voorkeuren.dtl'
@@ -54,9 +53,9 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # deel 1: jeugd
 
         lkls = list()
-        for lkl in (LeeftijdsKlasse  # pragma: no branch
+        for lkl in (Leeftijdsklasse  # pragma: no branch
                     .objects
-                    .filter(organisatie=ORGANISATIE_NHB,
+                    .filter(organisatie=ORGANISATIE_KHSN,
                             min_wedstrijdleeftijd=0)    # exclude veel van de senioren klassen
                     .order_by('volgorde')):             # aspirant eerst
 
@@ -70,7 +69,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # sorteer op geboorte jaar en daarna naam
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=self.functie_nu.nhb_ver)
+                    .filter(bij_vereniging=self.functie_nu.vereniging)
                     .filter(geboorte_datum__year__gte=jeugdgrens)
                     .select_related('account')
                     .order_by('-geboorte_datum__year',
@@ -103,8 +102,8 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # deel 2: volwassenen
 
         lkls = list()
-        for lkl in (LeeftijdsKlasse  # pragma: no branch
-                    .objects.filter(organisatie=ORGANISATIE_NHB,
+        for lkl in (Leeftijdsklasse  # pragma: no branch
+                    .objects.filter(organisatie=ORGANISATIE_KHSN,
                                     max_wedstrijdleeftijd=0)    # skip jeugd klassen
                     .order_by('-volgorde')):                    # volgorde: veteraan, master, senior
 
@@ -116,7 +115,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         prev_wedstrijdleeftijd = 0
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=self.functie_nu.nhb_ver)
+                    .filter(bij_vereniging=self.functie_nu.vereniging)
                     .filter(geboorte_datum__year__lt=jeugdgrens)
                     .select_related('account')
                     .order_by('achternaam',
@@ -169,7 +168,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nhb_ver'] = self.functie_nu.nhb_ver
+        context['ver'] = self.functie_nu.vereniging
 
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()

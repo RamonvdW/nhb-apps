@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -43,7 +43,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -64,7 +64,7 @@
                             {% if wedstrijd.vereniging %}
                                 <span>{{ wedstrijd.vereniging }}</span>
                             {% else %}
-                                <i class="nhb-rood-text">Nog niet bekend</i>
+                                <i class="sv-rood-text">Nog niet bekend</i>
                             {% endif %}
                         </td>
 
@@ -75,7 +75,7 @@
                         </td>
 
                         <td>
-                            <span{% if wedstrijd.is_overbelast %} class="nhb-rood-text"{% endif %}>Nodig: {{ wedstrijd.schutters_count }}</span>
+                            <span{% if wedstrijd.is_overbelast %} class="sv-rood-text"{% endif %}>Nodig: {{ wedstrijd.schutters_count }}</span>
                             <br>
                             <span>Maximum: {{ wedstrijd.capaciteit }}</span>
                         </td>
@@ -83,7 +83,7 @@
                         <!-- knop om wedstrijd te wijzigen -->
                         <td>
                             {% if wedstrijd.url_wijzig %}
-                                <a class="btn-nhb-rood" href="{{ wedstrijd.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>
@@ -102,7 +102,7 @@
                         <td colspan="4" class="center">
                             <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                                 {% csrf_token %}
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>
@@ -134,7 +134,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -149,7 +149,7 @@
 
                 {% for deelcomp in regio_deelcomps %}
                     <tr>
-                        <td>{{ deelcomp.nhb_regio }}</td>
+                        <td>{{ deelcomp.regio }}</td>
 
                         <td class="center">
                             {% if deelcomp.is_afgesloten %}
@@ -165,7 +165,7 @@
 
                         <!-- knop naar de details van de regioplanning -->
                         <td class="center">
-                            <a class="btn-nhb-rood" href="{% url 'CompLaagRegio:regio-planning' deelcomp.pk %}">
+                            <a class="btn-sv-rood" href="{% url 'CompLaagRegio:regio-planning' deelcomp.pk %}">
                                 <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
                             </a>
                         </td>

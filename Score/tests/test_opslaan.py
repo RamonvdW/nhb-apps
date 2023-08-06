@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,14 +53,14 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(res, True)
 
         self.assertEqual(Aanvangsgemiddelde.objects.count(), 1)
-        ag = Aanvangsgemiddelde.objects.all()[0]
+        ag = Aanvangsgemiddelde.objects.first()
         self.assertEqual(ag.afstand_meter, afstand)
         self.assertEqual(ag.waarde, gemiddelde)
         self.assertEqual(ag.sporterboog, self.sporterboog)
         self.assertTrue(str(ag) != "")
 
         self.assertEqual(AanvangsgemiddeldeHist.objects.count(), 1)
-        ag_hist = AanvangsgemiddeldeHist.objects.all()[0]
+        ag_hist = AanvangsgemiddeldeHist.objects.first()
         self.assertEqual(ag_hist.oude_waarde, 0)
         self.assertEqual(ag_hist.nieuwe_waarde, gemiddelde)
         self.assertEqual(ag_hist.door_account, account)
@@ -79,13 +79,13 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(res, True)
 
         self.assertEqual(Aanvangsgemiddelde.objects.count(), 1)
-        ag = Aanvangsgemiddelde.objects.all()[0]
+        ag = Aanvangsgemiddelde.objects.first()
         self.assertEqual(ag.afstand_meter, afstand)
         self.assertEqual(ag.waarde, gemiddelde2)
         self.assertEqual(ag.sporterboog, self.sporterboog)
 
         self.assertEqual(AanvangsgemiddeldeHist.objects.count(), 2)
-        ag_hist = AanvangsgemiddeldeHist.objects.exclude(pk=ag_hist.pk).all()[0]
+        ag_hist = AanvangsgemiddeldeHist.objects.exclude(pk=ag_hist.pk).first()
         self.assertEqual(ag_hist.oude_waarde, gemiddelde)
         self.assertEqual(ag_hist.nieuwe_waarde, gemiddelde2)
         self.assertEqual(ag_hist.door_account, account)

@@ -7,7 +7,7 @@
 from django.db import models
 from Account.models import Account
 from BasisTypen.definities import BLAZOEN_CHOICES, BLAZOEN_40CM
-from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType,
+from BasisTypen.models import (BoogType, Leeftijdsklasse, TeamType,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse)
 from Competitie.definities import (AFSTANDEN,
                                    DEEL_BK, DEEL_RK,
@@ -179,7 +179,8 @@ class Competitie(models.Model):
         """ bepaalde huidige fase van de competitie en zet self.fase_indiv en self.fase_teams """
         self.fase_indiv = bepaal_fase_indiv(self)
         self.fase_teams = bepaal_fase_teams(self)
-        # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (self.afstand, self.fase_indiv, self.fase_teams))
+        # print('competitie: afstand=%s, fase_indiv=%s, fase_teams=%s' % (
+        #           self.afstand, self.fase_indiv, self.fase_teams))
 
     def is_open_voor_inschrijven(self):
         if not hasattr(self, 'fase_indiv'):
@@ -243,7 +244,7 @@ class CompetitieIndivKlasse(models.Model):
 
     # de leeftijdsklassen: aspirant, cadet, junior, senior en mannen/vrouwen
     # typisch zijn twee klassen: mannen en vrouwen
-    leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
+    leeftijdsklassen = models.ManyToManyField(Leeftijdsklasse)
 
     # is dit bedoeld als klasse onbekend?
     # bevat typische ook "Klasse Onbekend" in de titel
@@ -256,6 +257,10 @@ class CompetitieIndivKlasse(models.Model):
     # staat op False voor aspiranten klassen en klassen 'onbekend'
     is_ook_voor_rk_bk = models.BooleanField(default=False)
 
+    # welke titel krijgt de hoogst geëindigde sport in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk = models.CharField(max_length=30, default='')
+
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
     blazoen1_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
@@ -267,6 +272,7 @@ class CompetitieIndivKlasse(models.Model):
     # TODO: standaard limiet toevoegen voor elke klasse: 24
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
         if self.is_ook_voor_rk_bk:
             msg += ' regio+RK'
@@ -304,6 +310,8 @@ class CompetitieTeamKlasse(models.Model):
     # voorbeeld: Recurve klasse ERE
     beschrijving = models.CharField(max_length=80)
 
+    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
+
     # R/R2/C/BB/BB2/IB/TR/LB
     team_afkorting = models.CharField(max_length=3)
 
@@ -319,6 +327,10 @@ class CompetitieTeamKlasse(models.Model):
     # niet van toepassing op individuele klassen
     is_voor_teams_rk_bk = models.BooleanField(default=False)
 
+    # welke titel krijgt de hoogst geëindigde sport in deze klasse?
+    # (regio: Regiokampioen, RK: Rayonkampioen, BK: Bondskampioen of Nederlands Kampioen)
+    titel_bk = models.CharField(max_length=30, default='')
+
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
     blazoen1_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
@@ -327,11 +339,10 @@ class CompetitieTeamKlasse(models.Model):
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
-    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
-
     # TODO: standaard limiet toevoegen voor elke klasse: ERE=12, rest=8
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = self.beschrijving + ' [' + self.team_afkorting + '] (%.3f)' % self.min_ag
         if self.is_voor_teams_rk_bk:
             msg += ' (RK/BK)'
@@ -413,6 +424,7 @@ class CompetitieMatch(models.Model):
                                 blank=True, null=True)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         extra = ""
         if self.vereniging:
             extra = " bij %s" % self.vereniging
@@ -433,7 +445,7 @@ class Regiocompetitie(models.Model):
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
     # regio, voor regiocompetitie
-    nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
 
     # welke beheerder hoort hier bij?
     functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
@@ -478,7 +490,7 @@ class Regiocompetitie(models.Model):
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
-        return "%s - %s" % (self.competitie, self.nhb_regio)
+        return "%s - %s" % (self.competitie, self.regio)
 
     objects = models.Manager()      # for the editor only
 
@@ -509,7 +521,7 @@ class RegiocompetitieRonde(models.Model):
         if self.cluster:
             msg = str(self.cluster)
         else:
-            msg = str(self.regiocompetitie.nhb_regio)
+            msg = str(self.regiocompetitie.regio)
 
         msg += " week %s" % self.week_nr
 
@@ -599,6 +611,7 @@ class RegiocompetitieSporterBoog(models.Model):
     aangemeld_door = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         # deze naam wordt gebruikt in de admin interface, dus kort houden
         return "%s (%s)" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
                             self.sporterboog.boogtype.beschrijving)
@@ -664,6 +677,7 @@ class RegiocompetitieTeam(models.Model):
         return self.maak_team_naam()
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.maak_team_naam()
 
     class Meta:
@@ -686,6 +700,7 @@ class RegiocompetitieTeamPoule(models.Model):
                                    blank=True)      # mag leeg zijn
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.beschrijving
 
 
@@ -733,6 +748,7 @@ class RegiocompetitieRondeTeam(models.Model):
     logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforced, so can be removed
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "Ronde %s, team %s" % (self.ronde_nr, self.team)
 
 
@@ -747,20 +763,15 @@ class Kampioenschap(models.Model):
     # hoort bij welke competitie?
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
-    # nhb_rayon is gezet voor het RK
-    # geen van beiden is gezet voor de BK
-
     # rayon, voor RK
-    nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
-                                  null=True, blank=True)    # optioneel want alleen voor RK
+    rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
+                              null=True, blank=True)    # optioneel want alleen voor RK
 
     # welke beheerder hoort hier bij?
     functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
 
     # is de beheerder klaar?
-    is_klaar_indiv = models.BooleanField(default=False)     # TODO: wordt niet gebruikt
-    is_klaar_teams = models.BooleanField(default=False)     # TODO: wordt niet gebruikt
-    is_afgesloten = models.BooleanField(default=False)      # TODO: wordt niet gebruikt
+    is_afgesloten = models.BooleanField(default=False)
 
     # wedstrijden
     rk_bk_matches = models.ManyToManyField(CompetitieMatch, blank=True)
@@ -772,8 +783,8 @@ class Kampioenschap(models.Model):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         deel2str = {code: beschrijving for code, beschrijving in self.DEEL}
         msg = deel2str[self.deel]
-        if self.nhb_rayon:
-            msg += ' Rayon %s' % self.nhb_rayon.rayon_nr
+        if self.rayon:
+            msg += ' Rayon %s' % self.rayon.rayon_nr
         return msg
 
     class Meta:
@@ -798,6 +809,7 @@ class KampioenschapIndivKlasseLimiet(models.Model):
     limiet = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "%s - %s: %s" % (self.kampioenschap, self.indiv_klasse.beschrijving, self.limiet)
 
     class Meta:
@@ -820,6 +832,7 @@ class KampioenschapTeamKlasseLimiet(models.Model):
     limiet = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = "%s : " % self.limiet
         msg += "%s - " % self.team_klasse.beschrijving
         msg += "%s" % self.kampioenschap
@@ -853,10 +866,10 @@ class KampioenschapSporterBoog(models.Model):
     # kampioenen hebben een label
     kampioen_label = models.CharField(max_length=50, default='', blank=True)
 
-    # Positie van deze sporter in de lijst zoals vastgesteld aan het begin van het RK
-    # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt de sporter zich af.
-    # Wordt gebruikt om de sporters in originele volgorde te tonen aan de RKO, inclusief afmeldingen
-    # bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
+    # Positie van deze sporter in de lijst zoals vastgesteld aan het begin van het RK/BK.
+    # Dit is de originele volgorde, welke nooit meer wijzigt ook al meldt de sporter zich af.
+    # Wordt gebruikt om de sporters in originele volgorde te tonen aan de RKO/BKO, inclusief afmeldingen.
+    # Bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
     volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
 
     # deelname positie van de sporter in de meest up-to-date lijst
@@ -897,18 +910,19 @@ class KampioenschapSporterBoog(models.Model):
     # scores worden hier bijgehouden
 
     # resultaat van de RK teams deelname van deze sporter
-    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
-    result_teamscore_2 = models.PositiveSmallIntegerField(default=0)
+    result_rk_teamscore_1 = models.PositiveSmallIntegerField(default=0)         # max = 32767
+    result_rk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     # resultaat van de BK teams deelname van deze sporter
     result_bk_teamscore_1 = models.PositiveSmallIntegerField(default=0)         # max = 32767
     result_bk_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         if self.kampioenschap.deel == DEEL_BK:
             substr = "BK"
         else:
-            substr = "RK rayon %s" % self.kampioenschap.nhb_rayon.rayon_nr
+            substr = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
 
         substr += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
 
@@ -1012,6 +1026,7 @@ class KampioenschapTeam(models.Model):
     result_teamscore = models.PositiveSmallIntegerField(default=0)          # max = 32767
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return "%s: %s (deelname=%s, rank=%s, volgorde=%s)" % (self.vereniging,
                                                                self.team_naam,
                                                                self.deelname,
@@ -1037,7 +1052,7 @@ class CompetitieMutatie(models.Model):
 
     # door wie is de mutatie geïnitieerd
     # als het een account is, dan volledige naam + rol
-    # als er geen account is (sporter zonder account) dan NHB lid details
+    # als er geen account is (sporter zonder account) dan lid details
     door = models.CharField(max_length=50, default='')
 
     # op welke competitie heeft deze mutatie betrekking?
@@ -1076,6 +1091,7 @@ class CompetitieMutatie(models.Model):
         verbose_name = "Competitie mutatie"
 
     def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         msg = "[%s]" % self.when
         if not self.is_verwerkt:
             msg += " (nog niet verwerkt)"

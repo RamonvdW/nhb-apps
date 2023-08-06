@@ -181,7 +181,6 @@ class LogboekRestView(LogboekBasisView):
                          Q(gebruikte_functie='Inlog geblokkeerd') |
                          Q(gebruikte_functie='OTP controle') |
                          Q(gebruikte_functie='Bevestig e-mail') |
-                         Q(gebruikte_functie='Registreer met NHB nummer') |
                          Q(gebruikte_functie='Registreer met bondsnummer') |
                          Q(gebruikte_functie='Registreer gast-account') |
                          Q(gebruikte_functie='Rollen') |            # Rollen
@@ -232,7 +231,6 @@ class LogboekAccountsView(LogboekBasisView):
                         Q(gebruikte_functie='Inlog geblokkeerd') |
                         Q(gebruikte_functie='OTP controle') |
                         Q(gebruikte_functie='Bevestig e-mail') |
-                        Q(gebruikte_functie='Registreer met NHB nummer') |
                         Q(gebruikte_functie='Registreer met bondsnummer') |
                         Q(gebruikte_functie='Registreer gast-account') |
                         Q(gebruikte_functie='Wachtwoord'))

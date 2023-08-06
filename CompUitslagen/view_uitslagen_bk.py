@@ -15,37 +15,12 @@ from Competitie.models import (Competitie, CompetitieMatch,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Sporter.models import Sporter
 from types import SimpleNamespace
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_BK_INDIV = 'compuitslagen/uitslagen-bk-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_BK_TEAMS = 'compuitslagen/uitslagen-bk-teams.dtl'
-
-
-# TODO: vervangen door klasse.titel
-def get_label_eerste_plek_bk(afstand, klasse):
-    """
-        Retourneer het label 'Bondskampioen' of 'Nederlands Kampioen'
-        
-        afstand: '18' of '25'
-        klasse: een CompetitieIndivKlasse of CompetitieTeamKlasse 
-    """
-
-    # individueel klasse 1
-    if 'klasse 1' in klasse.beschrijving:
-        if afstand == '18':
-            return 'Bondskampioen'
-        return 'Nederlands Kampioen'
-
-    # teams ERE klasse
-    if 'klasse ERE' in klasse.beschrijving:
-        return 'Nederlands Kampioen'
-
-    # aspiranten klassen
-    if ' klasse ' not in klasse.beschrijving:
-        return 'Nederlands Kampioen'
-
-    return ''
 
 
 class UitslagenBKIndivView(TemplateView):
@@ -205,7 +180,7 @@ class UitslagenBKIndivView(TemplateView):
                 deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                 deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
-                deelnemer.geen_deelname_risico = deelnemer.sporterboog.sporter.bij_vereniging != deelnemer.bij_vereniging
+                deelnemer.geen_deelname_risico = sporter.bij_vereniging != deelnemer.bij_vereniging
 
                 deelnemer.rk_score = round(deelnemer.gemiddelde * aantal_pijlen)
 
@@ -220,16 +195,11 @@ class UitslagenBKIndivView(TemplateView):
                         deelnemer.scores_str_1 = "-"
                         deelnemer.scores_str_2 = ""
 
-                    elif deelnemer.result_rank < 100:
+                    else:
                         deelnemer.scores_str_1 = "%s (%s+%s)" % (deelnemer.result_score_1 + deelnemer.result_score_2,
                                                                  deelnemer.result_score_1,
                                                                  deelnemer.result_score_2)
                         deelnemer.scores_str_2 = deelnemer.result_counts        # 25m1pijl only
-
-                    if deelnemer.result_rank == 1:
-                        deelnemer.result_label = get_label_eerste_plek_bk(comp.afstand, deelnemer.indiv_klasse)
-                    else:
-                        deelnemer.result_label = ''
 
                 curr_teller.aantal_regels += 1
             # for
@@ -239,7 +209,8 @@ class UitslagenBKIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen BK individueel')
         )
 
@@ -360,15 +331,14 @@ class UitslagenBKTeamsView(TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         account = self.request.user
         if account.is_authenticated:
-            if functie_nu and functie_nu.nhb_ver:
+            if functie_nu and functie_nu.vereniging:
                 # HWL, WL
-                toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
+                toon_team_leden_van_ver_nr = functie_nu.vereniging.ver_nr
             else:
                 # geen beheerder, dus sporter
-                if account.sporter_set.count() > 0:         # pragma: no branch
-                    sporter = account.sporter_set.all()[0]
-                    if sporter.is_actief_lid and sporter.bij_vereniging:
-                        toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
+                sporter = Sporter.objects.filter(account=account).first()
+                if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
+                    toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
@@ -443,7 +413,7 @@ class UitslagenBKTeamsView(TemplateView):
                         except KeyError:
                             pass
                     else:
-                        teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+                        teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
 
                 totaal_lijst.extend(klasse_teams_done)
                 totaal_lijst.extend(klasse_teams_plan)
@@ -517,12 +487,7 @@ class UitslagenBKTeamsView(TemplateView):
                 # for
 
                 unsorted.sort(reverse=True)       # hoogste eerst
-                team.deelnemers = list()
-                for _, _, voor_uitslag in unsorted:
-                    if voor_uitslag.result_totaal < 10:
-                        voor_uitslag.result_totaal = '-'
-                    team.deelnemers.append(voor_uitslag)
-                # for
+                team.deelnemers = [voor_uitslag for _, _, voor_uitslag in unsorted]
 
                 klasse_teams_done.append(team)
             else:
@@ -571,7 +536,8 @@ class UitslagenBKTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen BK teams')
         )
 

@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.tijdlijn import zet_competitie_fase_bk_prep
+from Competitie.models import CompetitieIndivKlasse, CompetitieMatch, KampioenschapIndivKlasseLimiet
+from Competitie.tests.tijdlijn import zet_competitie_fase_bk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -21,7 +22,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
     url_uitslagen_bond_teams = '/bondscompetities/uitslagen/%s/%s/bk-teams/'           # comp_pk, team_type
 
     regio_nr = 101
-    ver_nr = 0      # wordt in setupTestData ingevuld
+    ver_nr = 0      # wordt in setUpTestData ingevuld
 
     testdata = None
 
@@ -29,18 +30,24 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
     def setUpTestData(cls):
         print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
-        cls.testdata = TestData()
-        cls.testdata.maak_accounts()
-        cls.testdata.maak_clubs_en_sporters()
-        cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
-        cls.testdata.maak_bondscompetities()
-        cls.testdata.maak_rk_deelnemers(18, cls.ver_nr, cls.regio_nr)
-        cls.testdata.maak_rk_teams(18, cls.ver_nr)
-        # TODO: uitslag RK indiv + doorstromen naar BK indiv
-        # TODO: uitslag RK teams + doorstromen naar BK teams
+        cls.testdata = data = TestData()
+        data.maak_accounts_admin_en_bb()
+        data.maak_clubs_en_sporters()
+        cls.ver_nr = data.regio_ver_nrs[cls.regio_nr][2]
+        data.maak_bondscompetities()
+        data.maak_rk_deelnemers(18, cls.ver_nr, cls.regio_nr)
+        data.maak_rk_teams(18, cls.ver_nr, zet_klasse=True)
+        data.maak_bk_deelnemers(18)
+        data.maak_bk_teams(18)
+
+        KampioenschapIndivKlasseLimiet(
+                kampioenschap=data.deelkamp18_bk,
+                indiv_klasse=data.comp18_klassen_indiv['R'][0],
+                limiet=4).save()
+
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def test_bk_indiv(self):
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'R')
@@ -50,8 +57,53 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
+        # maak een wedstrijdlocatie aan
+        locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
+
+        # maak een RK match aan
+        indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, is_ook_voor_rk_bk=True)[0]
+
+        match = CompetitieMatch(
+                    competitie=self.testdata.comp18,
+                    beschrijving='test match 1',
+                    vereniging=self.testdata.vereniging[self.ver_nr],
+                    locatie=locatie,
+                    datum_wanneer="2000-01-01",
+                    tijd_begin_wedstrijd="10:00")
+        match.save()
+        match.indiv_klassen.add(indiv_klasse)
+
+        self.testdata.deelkamp18_bk.rk_bk_matches.add(match)
+
         # fase O
         zet_competitie_fase_bk_prep(self.testdata.comp18)
+        self.testdata.deelkamp18_bk.heeft_deelnemerslijst = True
+        self.testdata.deelkamp18_bk.save(update_fields=['heeft_deelnemerslijst'])
+
+        url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'R')
+        #with self.assert_max_queries(20):
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_uitslagen_bond_indiv % (self.testdata.comp25.pk, 'R')
+        #with self.assert_max_queries(20):
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
+
+        # zet een paar resultaten
+        kamp = self.testdata.comp18_bk_deelnemers[0]
+        kamp.result_rank = 1
+        kamp.save(update_fields=['result_rank'])
+
+        kamp = self.testdata.comp18_bk_deelnemers[2]
+        kamp.rank = 25       # boven de limiet (24), onder de cut-off (48)
+        kamp.save(update_fields=['rank'])
+
+        # nogmaals ophalen, nu met resultaten
         url = self.url_uitslagen_bond_indiv % (self.testdata.comp18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -92,7 +144,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
 
         # ingelogd geeft teamleden van eigen vereniging
         functie_hwl = list(self.testdata.functie_hwl.values())[5]
-        account = functie_hwl.accounts.all()[0]
+        account = functie_hwl.accounts.first()
         self.e2e_login_and_pass_otp(account)
 
         url = self.url_uitslagen_bond_teams % (self.testdata.comp25.pk, 'TR')

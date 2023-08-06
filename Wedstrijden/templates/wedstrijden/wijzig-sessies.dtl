@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -53,7 +53,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -82,7 +82,7 @@
                         </td>
                         -->
                         <td class="center">
-                            <a class="btn-nhb-rood" href="{{ sessie.url_wijzig }}">
+                            <a class="btn-sv-rood" href="{{ sessie.url_wijzig }}">
                                 <i class="notranslate material-icons-round">edit</i></a>
                         </td>
                     </tr>
@@ -100,7 +100,7 @@
                             <form action="{{ url_nieuwe_sessie }}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="nieuwe_sessie" value="1">
-                                <button class="btn-nhb-rood">
+                                <button class="btn-sv-rood">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>

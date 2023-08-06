@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>Als BKO heb je de kleine klassen van het BK teams samengevoegd en wil je de deelnemerslijst nu openbaar maken.</p>
@@ -28,7 +28,7 @@
                     <div style="margin:30px">
                         <form method="post" action="{{ url_doorzetten }}">
                             {% csrf_token %}
-                            <input class="btn-nhb-rood" name="button_afsluiten" type="submit" value="Doorzetten naar de volgende fase">
+                            <input class="btn-sv-rood" name="button_afsluiten" type="submit" value="Doorzetten naar de volgende fase">
                         </form>
                     </div>
 
@@ -48,7 +48,7 @@
         </div>
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
                 <div class="white" style="padding:10px">
 

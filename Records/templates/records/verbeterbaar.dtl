@@ -1,0 +1,176 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Verbeterbare Records{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Verbeterbare Records</h3>
+            <p>Nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b>.</p>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met filters -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m6 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Boog type:</b></p>
+                <ul>
+                    {% for filter in makl_filter %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Leeftijdsklasse:</b></p>
+                <ul>
+                    {% for filter in lcat_filter %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Geslacht:</b></p>
+                <ul>
+                    {% for filter in gesl_filter %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_3" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="center">
+        {% if is_alles %}
+            <p>Hieronder volgen alle <b>{{ object_list.count }}</b> records die verbeterbaar zijn.</p>
+        {% elif lege_lijst %}
+            <p>Geen verbeterbare records gevonden voor deze combinatie van filters.</p>
+        {% else %}
+            <p>Hieronder volgen <b>{{ object_list.count }}</b> van de records die verbeterbaar zijn.</p>
+        {% endif %}
+    </div>
+
+    {% if not lege_lijst %}
+
+        <table class="white">
+            <tr class="sv-table-header">
+                <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
+                <th>Soort record</th>
+                <th>Materiaal<wbr>klasse</th>
+                <th class="hide-on-small-only">Leeftijds<wbr>categorie</th>
+                {% if toon_para_kolom %}
+                    <th>Para klasse</th>
+                {% endif %}
+                <th>Geslacht</th>
+                <th>Score</th>
+                <th><!-- kolom voor de 'details' knop --></th>
+                <td rowspan="{{ aantal_regels }}" class="sv-table-zijrand"></td>
+            </tr>
+
+            {% for obj in object_list %}
+                <tr>
+                    <td>{{ obj.soort_record }}</td>
+                    <td>{{ obj.materiaalklasse_str }}</td>
+                    <td class="hide-on-small-only">{{ obj.leeftijdscategorie_str }}</td>
+                    {% if toon_para_kolom %}
+                        <td>{{ obj.para_klasse }}</td>
+                    {% endif %}
+                    <td>{{ obj.geslacht_str }}</td>
+                    <td>{{ obj.beste.score_str }}</td>
+                    <td>
+                        <a class="btn-sv-rood" href="{{ obj.url_details }}">
+                            <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+
+            <tr>
+                <td class="hide-on-small-only sv-table-onderrand"></td>
+                {% if toon_para_kolom %}
+                    <td class="sv-table-onderrand"></td>
+                {% endif %}
+                <td colspan="5" class="sv-table-onderrand"></td>
+            </tr>
+        </table>
+
+    {% endif %}     <!-- not lege_lijst -->
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Nieuw record aanvragen?</h4>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+
+                <p>Om een nieuw record aan te vragen moet je de volgende stappen doorlopen:</p>
+                <p>&nbsp;1. Wedstrijd moet de A-status hebben;</p>
+                <p>&nbsp;2. Scorebriefje door de scheidsrechter laten controleren en ondertekenen;</p>
+                <p>&nbsp;3. Aanvraagformulier invullen en samen met de scorebriefjes naar het bondsbureau sturen.</p>
+
+                <p>&nbsp;</p>
+                <p>Directe link naar het aanvraagformulier:
+                    <a class="btn-sv-rood" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                        <i class="notranslate material-icons-round left">open_in_new</i>Openen</a></p>
+                <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures:
+                    <a class="btn-sv-rood" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
+                        <i class="notranslate material-icons-round left">open_in_new</i>Link</a></p>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-alle-verbeterbaar" %}
+
+{% endblock %}

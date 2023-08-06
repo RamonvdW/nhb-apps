@@ -1,0 +1,90 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Details{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Details gast-account</h3>
+            <p>Hieronder tonen we alle persoonsgegevens gerelateerd aan het gast-account met het tijdelijke bondsnummer <b>{{ gast.lid_nr }}</b>.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <table>
+                    <tr>
+                        <td colspan="2"><h5 class="sv-blauw-text center">Persoonsgegevens</h5></td>
+                    </tr>
+                    <tr>
+                        <th>Voornaam</th>
+                        <td class="notranslate">{{ gast.voornaam }}</td>
+                    </tr>
+                    <tr>
+                        <th>Achternaam</th>
+                        <td class="notranslate">{{ gast.achternaam }}</td>
+                    </tr>
+                    <tr>
+                        <th>Geslacht</th>
+                        <td>{{ gast.geslacht_str }}</td>
+                    </tr>
+                    <tr>
+                        <th>Geboortedatum</th>
+                        <td>{{ gast.geboorte_datum }}</td>
+                    </tr>
+                    <tr>
+                        <th>E-mailadres</th>
+                        <td><code>{{ gast.email }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Telefoonnummer</th>
+                        <td>{{ gast.telefoon }}</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2"><h5 class="sv-blauw-text center">Lidmaatschap</h5></td>
+                    </tr>
+                    <tr>
+                        <th>Club</th>
+                        <td class="notranslate">{{ gast.club }}</td>
+                    </tr>
+                    <tr>
+                        <th>Plaats</th>
+                        <td class="notranslate">{{ gast.club_plaats }}</td>
+                    </tr>
+                    <tr>
+                        <th>Land</th>
+                        <td>{{ gast.land }}</td>
+                    </tr>
+                    <tr>
+                        <th>Sportbond</th>
+                        <td class="notranslate">{{ gast.eigen_sportbond_naam }}</td>
+                    </tr>
+                    <tr>
+                        <th>Lid nummer</th>
+                        <td>{{ gast.eigen_lid_nummer }}</td>
+                    </tr>
+                    <tr>
+                        <th>World Archery ID</th>
+                        <td>{{ gast.wa_id }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-gast-account-details" %}
+
+{% endblock %}

@@ -34,9 +34,9 @@
             const el = document.getElementById('submit')
             el.disabled = (count > 7)
             if (count > 7) {
-                el_aantal.classList.add('nhb-rood-text')
+                el_aantal.classList.add('sv-rood-text')
             } else {
-                el_aantal.classList.remove('nhb-rood-text')
+                el_aantal.classList.remove('sv-rood-text')
             }
         }
 
@@ -55,7 +55,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -88,7 +88,7 @@
 
                                 {% if wedstrijden_2 %}
                                     <tr id="id_wedstrijden_2_knop">
-                                        <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
+                                        <td><button class="btn-sv-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
                                     </tr>
 
                                     <tr id="id_wedstrijden_2" class="hide">
@@ -108,7 +108,7 @@
 
                             <div class="center">
                                 <p>Je mag maximaal 7 keuzes opgeven. <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span></p>
-                                <input class="btn-nhb-rood" type="submit" value="Opslaan" id="submit">
+                                <input class="btn-sv-rood" type="submit" value="Opslaan" id="submit">
                             </div>
                         </form>
                 </div>

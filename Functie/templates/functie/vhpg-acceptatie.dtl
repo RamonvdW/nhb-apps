@@ -14,13 +14,12 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Omgaan met persoons<wbr>gegevens</h3>
-            <p>De Nederlandse Handboog Bond heeft jou een rol toegekend op deze website.<br>
-Voordat je aan de slag kan vragen we je onderstaande tekst goed door te lezen en akkoord te geven.</p>
+            <p>De KHSN heeft jou een rol toegekend op deze website.<br>Voordat je aan de slag kan vragen we je onderstaande tekst goed door te lezen en akkoord te geven.</p>
         </div>
     </div>
 
 
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <!-- dialoog venster -->
@@ -29,27 +28,24 @@ Voordat je aan de slag kan vragen we je onderstaande tekst goed door te lezen en
 
                     <div class="row">
                         <div class="col s12">
-                            <h5 class="center nhb-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
+                            <h5 class="center sv-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
                             <form action="{% url 'Functie:vhpg-acceptatie' %}" method="post">
                                 {% csrf_token %}
 
-                                <p>De KHSN geeft jou via deze website toegang tot persoonsgegevens van leden van de KHSN. Deze gegevens blijven eigendom van de KHSN. Je mag de gegevens alleen gebruiken om je rol te vervullen.</p>
-                                <p>We spreken af dat je deze gegevens strikt vertrouwelijk behandelt en niet zal gebruiken voor andere doeleinden. Eventueel lokaal opgeslagen persoonsgegevens die niet meer nodig zijn, die verwijder je.</p>
-                                <p>We vragen je om te voorkomen dat andere mensen je login gebruiken. Overweeg zelf wanneer je uitlogt en wanneer je je wachtwoord wijzigt. Als je verdenkt dat je account misbruikt is, neem dan direct contact op met het bondsbureau.</p>
-                                <p>In het geval van een geconstateerd data-lek verleen je medewerking aan het onderzoek.</p>
+                                {% include 'functie/vhpg-tekst.dtl' %}
 
                                 <div class="row">
                                     <div class="col s12 center-align">
                                         <label for="{{ form.accepteert.id_for_label }}">
                                             <input type="checkbox" class="filled-in" id="id_accepteert" name="accepteert" />
-                                            <span class="black-text">Ik accepteer bovenstaande {% if form.accepteert.errors %}<span class="nhb-rood-text"> (verplicht)</span>{% endif %}</span>
+                                            <span class="black-text">Ik accepteer bovenstaande {% if form.accepteert.errors %}<span class="sv-rood-text"> (verplicht)</span>{% endif %}</span>
                                         </label>
                                     </div>
                                 </div>
 
                                 <div class="row" style="margin-bottom:0">
                                     <div class="col s12 center-align">
-                                        <input class="btn-nhb-rood" type="submit" value="Verstuur"/>
+                                        <input class="btn-sv-rood" type="submit" value="Verstuur"/>
                                     </div>
                                 </div>
 

@@ -1,0 +1,35 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wachtwoord vergeten{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wachtwoord vergeten</h3>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie vlak -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <div class="white center" style="padding:10px">
+                <p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
+
+                <p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>
+
+                <p>Deze pagina kan je sluiten.</p>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-wachtwoord-vergeten-email" %}
+
+{% endblock %}

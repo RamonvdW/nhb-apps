@@ -11,7 +11,8 @@ from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fases, zet_test_datum, zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten
+from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                       zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -37,7 +38,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr
@@ -48,10 +49,10 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         sporter.geslacht = "M"
         sporter.voornaam = voornaam
         sporter.achternaam = "Tester"
-        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.email = voornaam.lower() + "@test.not"
         sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = self.nhbver_101
+        sporter.bij_vereniging = self.ver_101
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -74,7 +75,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         ver.ver_nr = 1111
         ver.regio = self.regio_112
         ver.save()
-        self.nhbver_112 = ver
+        self.ver_112 = ver
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -82,7 +83,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         ver.ver_nr = 1000
         ver.regio = self.regio_101
         ver.save()
-        self.nhbver_101 = ver
+        self.ver_101 = ver
 
         loc = WedstrijdLocatie(banen_18m=1,
                                banen_25m=1,
@@ -93,11 +94,11 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # maak HWL functie aan voor deze vereniging
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL Vereniging %s" % ver.ver_nr, "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
@@ -119,7 +120,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
-        zet_test_datum('2019-09-01')
+        evaluatie_datum.zet_test_datum('2019-09-01')
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -155,11 +156,11 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
                                         .all())[0]
 
         self.deelcomp_bond_18 = Kampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, nhb_regio=self.regio_112)[0]
+        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, rayon=self.rayon_2)[0]
+        self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_112)[0]
 
         self.cluster_101a_18 = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
         self.cluster_101e_25 = NhbCluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
@@ -210,7 +211,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
-        poule = RegiocompetitieTeamPoule.objects.all()[0]
+        poule = RegiocompetitieTeamPoule.objects.first()
 
         # coverage
         self.assertTrue(str(poule) != "")
@@ -346,7 +347,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
-        poule = RegiocompetitieTeamPoule.objects.all()[0]
+        poule = RegiocompetitieTeamPoule.objects.first()
 
         # maak 9 teams aan
         type_r = TeamType.objects.get(afkorting='R2')
@@ -355,7 +356,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
             # team zonder sporters maar wel in een klasse is genoeg voor een poule
             RegiocompetitieTeam(
                     regiocompetitie=deelcomp,
-                    vereniging=self.nhbver_112,
+                    vereniging=self.ver_112,
                     volg_nr=lp + 1,
                     team_type=type_r,
                     team_naam='Recurve Testers %s' % (lp + 1),
@@ -368,7 +369,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         klasse_c_ere = CompetitieTeamKlasse.objects.filter(team_type=type_c).order_by('volgorde')[0]
         team_c = RegiocompetitieTeam(
                         regiocompetitie=deelcomp,
-                        vereniging=self.nhbver_112,
+                        vereniging=self.ver_112,
                         volg_nr=1,
                         team_type=type_c,
                         team_naam='Compound Testers 9',

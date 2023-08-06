@@ -270,19 +270,19 @@ class TestBestelKortingen(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        ver_nhb = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+        ver_bond = NhbVereniging(
+                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                     naam='Bondsbureau',
                     plaats='Schietstad',
                     regio=NhbRegio.objects.get(regio_nr=100))
-        ver_nhb.save()
-        self.ver_nhb = ver_nhb
+        ver_bond.save()
+        self.ver_bond = ver_bond
 
         instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver_nhb,
+                            vereniging=ver_bond,
                             mollie_api_key='test_1234')
         instellingen.save()
-        self.instellingen_nhb = instellingen
+        self.instellingen_bond = instellingen
 
         ver = NhbVereniging(
                     ver_nr=1000,
@@ -312,7 +312,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
-                            akkoord_via_nhb=True)
+                            akkoord_via_bond=True)
         instellingen.save()
         self.instellingen = instellingen
 
@@ -383,7 +383,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
 
         # verwijder de inschrijving voor de 1e wedstrijd
         # krijg ver korting i.p.v. combi-korting
-        product = inschrijving1.bestelproduct_set.all()[0]
+        product = inschrijving1.bestelproduct_set.first()
         bestel_mutatieverzoek_verwijder_product_uit_mandje(self.account_sporter1, product, snel=True)
         self.verwerk_bestel_mutaties()
 

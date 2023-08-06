@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetiti
                                RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch,
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tests.tijdlijn import zet_competitie_fases
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist
@@ -41,7 +41,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         competitie_klassengrenzen_vaststellen(comp_25)
 
         self.deelcomp_r101 = Regiocompetitie.objects.filter(competitie=self.comp,
-                                                            nhb_regio=self.regio_101)[0]
+                                                            regio=self.regio_101)[0]
 
         # login als BB
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -50,7 +50,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         # maak een regioplanning aan met 2 wedstrijden
         self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-        ronde = RegiocompetitieRonde.objects.all()[0]
+        ronde = RegiocompetitieRonde.objects.first()
 
         # maak 7 wedstrijden aan
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
@@ -88,7 +88,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.geslacht = "M"
         sporter.voornaam = "Ramon"
         sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@nhb.not"
+        sporter.email = "rdetester@test.not"
         sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = self.ver
@@ -105,7 +105,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.geslacht = "M"
         sporter.voornaam = "Ramon"
         sporter.achternaam = "het Testertje"
-        sporter.email = "rdetestertje@nhb.not"
+        sporter.email = "rdetestertje@test.not"
         sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
         sporter.bij_vereniging = self.ver
@@ -122,7 +122,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.geslacht = "M"
         sporter.voornaam = "Geen"
         sporter.achternaam = "Vereniging"
-        sporter.email = "geenver@nhb.not"
+        sporter.email = "geenver@test.not"
         sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
         # lid.bij_vereniging =
@@ -134,7 +134,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.geslacht = "V"
         sporter.voornaam = "Juf"
         sporter.achternaam = "de Schutter"
-        sporter.email = "jufschut@nhb.not"
+        sporter.email = "jufschut@test.not"
         sporter.geboorte_datum = datetime.date(year=1988, month=12, day=4)
         sporter.sinds_datum = datetime.date(year=2015, month=7, day=15)
         sporter.bij_vereniging = self.ver
@@ -150,7 +150,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.geslacht = "V"
         sporter.voornaam = "Jans"
         sporter.achternaam = "de Schutter"
-        sporter.email = "jufschut@nhb.not"
+        sporter.email = "jufschut@test.not"
         sporter.geboorte_datum = datetime.date(year=1977, month=12, day=4)
         sporter.sinds_datum = datetime.date(year=2015, month=7, day=15)
         sporter.bij_vereniging = self.ver

@@ -7,7 +7,7 @@
 from django.db import models
 from Account.models import Account
 from Bestel.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS2STR,
-                               BESTEL_MUTATIE_TO_STR)
+                               BESTEL_MUTATIE_TO_STR, BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_OPTIES)
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
 from Webwinkel.models import WebwinkelKeuze
 from Wedstrijden.models import WedstrijdInschrijving
@@ -82,6 +82,7 @@ class BestelMandje(models.Model):
     producten = models.ManyToManyField(BestelProduct)
 
     # verzendkosten
+    transport = models.CharField(max_length=1, default=BESTEL_TRANSPORT_NVT, choices=BESTEL_TRANSPORT_OPTIES)
     verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 
     # belasting in verschillende categorieën: leeg = niet gebruikt
@@ -130,7 +131,7 @@ class Bestelling(models.Model):
 
     # wanneer aangemaakt?
     # hiermee kunnen onbetaalde bestellingen na een tijdje opgeruimd worden
-    aangemaakt = models.DateTimeField(auto_now=True)
+    aangemaakt = models.DateTimeField(auto_now=True)        # TODO: verander in auto_now_add ?
 
     # van wie is deze bestelling
     account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
@@ -158,6 +159,7 @@ class Bestelling(models.Model):
     producten = models.ManyToManyField(BestelProduct)
 
     # verzendkosten
+    transport = models.CharField(max_length=1, default=BESTEL_TRANSPORT_NVT, choices=BESTEL_TRANSPORT_OPTIES)
     verzendkosten_euro = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal(0))    # max 9999,99
 
     # belasting in verschillende categorieën: leeg = niet gebruikt
@@ -261,6 +263,9 @@ class BestelMutatie(models.Model):
 
     # het ontvangen of betaalde bedrag
     bedrag_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
+
+    # nieuwe transport keuze
+    transport = models.CharField(max_length=1, default=BESTEL_TRANSPORT_NVT, choices=BESTEL_TRANSPORT_OPTIES)
 
     class Meta:
         verbose_name = "Bestel mutatie"

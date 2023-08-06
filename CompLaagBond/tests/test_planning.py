@@ -39,14 +39,14 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities()
 
         #data.maak_rk_deelnemers()
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr
@@ -57,10 +57,10 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                     geslacht="M",
                     voornaam=voornaam,
                     achternaam="Tester",
-                    email=voornaam.lower() + "@nhb.test",
+                    email=voornaam.lower() + "@test.not",
                     geboorte_datum=datetime.date(year=1972, month=3, day=4),
                     sinds_datum=datetime.date(year=2010, month=11, day=12),
-                    bij_vereniging=self.nhbver_101)
+                    bij_vereniging=self.ver_101)
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -78,10 +78,10 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.regio_112 = self.testdata.regio[112]
 
         ver_nr = self.testdata.regio_ver_nrs[112][0]
-        self.nhbver_112 = self.testdata.vereniging[ver_nr]
+        self.ver_112 = self.testdata.vereniging[ver_nr]
 
         ver_nr = self.testdata.regio_ver_nrs[101][0]
-        self.nhbver_101 = ver = self.testdata.vereniging[ver_nr]
+        self.ver_101 = ver = self.testdata.vereniging[ver_nr]
 
         loc = WedstrijdLocatie(banen_18m=1,
                                banen_25m=1,
@@ -92,7 +92,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # maak HWL functie aan voor deze vereniging
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
@@ -109,7 +109,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.account_schutter2 = self._prep_beheerder_lid('Schutter2')
         self.lid_sporter_2 = Sporter.objects.get(lid_nr=self.account_schutter2.username)
 
-        self.boog_r = self.testdata.afkorting2boogtype_nhb['R']
+        self.boog_r = self.testdata.afkorting2boogtype_khsn['R']
 
         self.sporterboog = SporterBoog(sporter=self.lid_sporter_1,
                                        boogtype=self.boog_r,
@@ -127,11 +127,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                                            deel=DEEL_BK)[0]
         self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.testdata.comp18,
                                                                deel=DEEL_RK,
-                                                               nhb_rayon=self.rayon_1)[0]
+                                                               rayon=self.rayon_1)[0]
         self.deelcomp_regio_101 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                 nhb_regio=self.regio_101)[0]
+                                                                 regio=self.regio_101)[0]
         self.deelcomp_regio_105 = Regiocompetitie.objects.filter(competitie=self.testdata.comp18,
-                                                                 nhb_regio=self.regio_105)[0]
+                                                                 regio=self.regio_105)[0]
 
         self.functie_bko_18 = self.deelkamp_bk_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
@@ -208,7 +208,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         self.assertTrue(1, CompetitieMatch.objects.count())
-        match = CompetitieMatch.objects.all()[0]
+        match = CompetitieMatch.objects.first()
         self.assert_is_redirect(resp, self.url_wijzig_wedstrijd % match.pk)
 
         # get met deze nieuwe wedstrijd
@@ -260,49 +260,49 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assert404(resp, 'Incompleet verzoek')
 
-        resp = self.client.post(url, {'weekdag': 'x', 'aanvang': '10:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        resp = self.client.post(url, {'weekdag': 'x', 'aanvang': '10:00', 'ver_pk': '1', 'loc_pk': '1'})
         self.assert404(resp, 'Geen valide verzoek')
 
-        resp = self.client.post(url, {'weekdag': '-1', 'aanvang': '10:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        resp = self.client.post(url, {'weekdag': '-1', 'aanvang': '10:00', 'ver_pk': '1', 'loc_pk': '1'})
         self.assert404(resp, 'Geen valide verzoek')
 
-        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '24:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '24:00', 'ver_pk': '1', 'loc_pk': '1'})
         self.assert404(resp, 'Geen valide verzoek')
 
-        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:60', 'nhbver_pk': '1', 'loc_pk': '1'})
+        resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:60', 'ver_pk': '1', 'loc_pk': '1'})
         self.assert404(resp, 'Geen valide tijdstip')
 
         # standaard duurt fase P 7 dagen
-        resp = self.client.post(url, {'weekdag': '20', 'aanvang': '10:00', 'nhbver_pk': '1', 'loc_pk': '1'})
+        resp = self.client.post(url, {'weekdag': '20', 'aanvang': '10:00', 'ver_pk': '1', 'loc_pk': '1'})
         self.assert404(resp, 'Geen valide datum')
 
         resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00',
-                                      'nhbver_pk': 'geen', 'loc_pk': '1',
+                                      'ver_pk': 'geen', 'loc_pk': '1',
                                       'wkl_indiv_#': 1, 'wkl_team_#': 1})
         self.assert_is_redirect(resp, url_redir_expected)
 
         resp = self.client.post(url, {'weekdag': '1', 'aanvang': '10:00',
-                                      'nhbver_pk': '99999', 'loc_pk': '1'})
+                                      'ver_pk': '99999', 'loc_pk': '1'})
         self.assert404(resp, 'Vereniging niet gevonden')
 
         resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
-                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '1'})
+                                      'ver_pk': self.ver_112.ver_nr, 'loc_pk': '1'})
         self.assert404(resp, 'Locatie niet gevonden')
 
         resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
-                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '',
+                                      'ver_pk': self.ver_112.ver_nr, 'loc_pk': '',
                                       'wkl_indiv_999999': 1, 'wkl_team_999999': 1})
         self.assert_is_redirect(resp, url_redir_expected)
 
         resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
-                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '',
+                                      'ver_pk': self.ver_112.ver_nr, 'loc_pk': '',
                                       'wkl_indiv_%s' % self.klasse_indiv_r0.pk: '1',
                                       'wkl_team_%s' % self.klasse_team_c0.pk: '1'})
         self.assert_is_redirect(resp, url_redir_expected)
 
         # nog een keer dezelfde wedstrijdklassen zetten
         resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
-                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': '',
+                                      'ver_pk': self.ver_112.ver_nr, 'loc_pk': '',
                                       'wkl_indiv_%s' % self.klasse_indiv_r0.pk: '1',
                                       'wkl_team_%s' % self.klasse_team_c0.pk: '1'})
         self.assert_is_redirect(resp, url_redir_expected)
@@ -315,7 +315,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # wedstrijdklassen weer verwijderen
         resp = self.client.post(url, {'weekdag': 0, 'aanvang': '10:00',
-                                      'nhbver_pk': self.nhbver_112.ver_nr, 'loc_pk': ''})
+                                      'ver_pk': self.ver_112.ver_nr, 'loc_pk': ''})
         self.assert_is_redirect(resp, url_redir_expected)
 
         # verkeerde deelcomp

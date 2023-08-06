@@ -24,7 +24,7 @@ BESTELLING_STATUS_CHOICES = (
 BESTELLING_STATUS2STR = {
     BESTELLING_STATUS_NIEUW: 'Nieuw',
     BESTELLING_STATUS_WACHT_OP_BETALING: 'Te betalen',
-    BESTELLING_STATUS_AFGEROND: 'Afgerond',
+    BESTELLING_STATUS_AFGEROND: 'Voltooid',     # 'Afgerond' vertaalt naar 'rounded'
     BESTELLING_STATUS_MISLUKT: 'Mislukt',
     BESTELLING_STATUS_GEANNULEERD: 'Geannuleerd',
 }
@@ -39,6 +39,7 @@ BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN = 6        # overboeking ontvangen
 BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
 BESTEL_MUTATIE_WEBWINKEL_KEUZE = 8              # keuze uit webwinkel
 BESTEL_MUTATIE_ANNULEER = 9                     # annuleer een bestelling
+BESTEL_MUTATIE_TRANSPORT = 10                   # wijzig transport keuze
 
 BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
@@ -49,8 +50,25 @@ BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
     BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN: "Overboeking ontvangen",
     BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",
-    BESTEL_MUTATIE_ANNULEER: "Annuleer bestelling"
+    BESTEL_MUTATIE_ANNULEER: "Annuleer bestelling",
+    BESTEL_MUTATIE_TRANSPORT: "Wijzig transport keuze",
 }
 
+
+BESTEL_TRANSPORT_NVT = 'N'
+BESTEL_TRANSPORT_VERZEND = 'V'
+BESTEL_TRANSPORT_OPHALEN = 'O'
+
+BESTEL_TRANSPORT_OPTIES = (
+    (BESTEL_TRANSPORT_NVT, 'Niet van toepassing'),
+    (BESTEL_TRANSPORT_VERZEND, 'Verzend'),
+    (BESTEL_TRANSPORT_OPHALEN, 'Ophalen'),
+)
+
+BESTEL_TRANSPORT2STR = {
+    BESTEL_TRANSPORT_NVT: "Niet van toepassing",
+    BESTEL_TRANSPORT_VERZEND: "Verzend",
+    BESTEL_TRANSPORT_OPHALEN: "Ophalen",
+}
 
 # end of file

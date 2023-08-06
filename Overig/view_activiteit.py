@@ -5,14 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.timezone import make_aware, get_default_timezone
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.utils.formats import date_format
 from django.db.models import F, Count
-from Account.models import Account, AccountEmail, AccountSessions
+from Account.models import Account, AccountSessions
+from Account.operations.otp import otp_loskoppelen, otp_stuur_email_losgekoppeld
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol_get_huidige
@@ -66,13 +68,12 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nieuwe_accounts'] = (AccountEmail
+        context['nieuwe_accounts'] = (Account
                                       .objects
-                                      .select_related('account')
                                       .all()
-                                      .order_by('-account__date_joined')[:50])
+                                      .order_by('-date_joined')[:50])
 
-        nieuwste = context['nieuwe_accounts'][0].account    # kost losse database access
+        nieuwste = context['nieuwe_accounts'][0]
         jaar = nieuwste.date_joined.year
         maand = nieuwste.date_joined.month
         deze_maand = make_aware(datetime.datetime(year=jaar, month=maand, day=1))
@@ -82,24 +83,29 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                        .order_by('-date_joined')
                                        .filter(date_joined__gte=deze_maand)
                                        .count())
+        context['deze_maand_count_gast'] = (Account
+                                            .objects
+                                            .order_by('-date_joined')
+                                            .filter(date_joined__gte=deze_maand,
+                                                    is_gast=True)
+                                            .count())
         context['deze_maand'] = deze_maand
 
         context['totaal'] = Account.objects.count()
+        context['totaal_gast'] = Account.objects.filter(is_gast=True).count()
 
         context['aantal_actieve_gebruikers'] = self.tel_actieve_gebruikers()
 
-        context['recente_activiteit'] = (AccountEmail
+        context['recente_activiteit'] = (Account
                                          .objects
-                                         .filter(account__last_login__isnull=False)
-                                         .select_related('account')
-                                         .order_by('-account__last_login')[:50])
+                                         .filter(last_login__isnull=False)
+                                         .order_by('-last_login')[:50])
 
-        context['inlog_pogingen'] = (AccountEmail
+        context['inlog_pogingen'] = (Account
                                      .objects
-                                     .select_related('account')
-                                     .filter(account__laatste_inlog_poging__isnull=False)
-                                     .filter(account__last_login__lt=F('account__laatste_inlog_poging'))
-                                     .order_by('-account__laatste_inlog_poging')[:50])
+                                     .filter(laatste_inlog_poging__isnull=False)
+                                     .filter(last_login__lt=F('laatste_inlog_poging'))
+                                     .order_by('-laatste_inlog_poging')[:50])
 
         # hulp nodig
         now = timezone.now()
@@ -107,8 +113,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         for functie in (Functie
                         .objects
                         .prefetch_related('accounts',
-                                          'accounts__vhpg',
-                                          'accounts__accountemail_set')
+                                          'accounts__vhpg')
                         .annotate(aantal=Count('accounts'))
                         .filter(aantal__gt=0)):
 
@@ -211,21 +216,23 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 account = sporter.account
                 sporter.inlog_naam_str = account.username
 
-                email = account.accountemail_set.all()[0]
-                if email.email_is_bevestigd:
+                if account.email_is_bevestigd:
                     sporter.email_is_bevestigd_str = 'Ja'
                 else:
                     sporter.email_is_bevestigd_str = 'Nee'
 
                 if account.last_login:
                     if account.last_login.year == now.year:
-                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz),
+                                                                'j F Y H:i').replace(current_year_str, '')
 
                 do_vhpg = True
                 if account.otp_is_actief:
                     sporter.tweede_factor_str = 'Ja'
                     if account.otp_controle_gelukt_op:
-                        sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(account.otp_controle_gelukt_op.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                        sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(
+                                                            account.otp_controle_gelukt_op.astimezone(to_tz),
+                                                            'j F Y H:i').replace(current_year_str, '')
                     sporter.kan_loskoppelen = True
                 elif account.functie_set.count() == 0:
                     sporter.tweede_factor_str = 'n.v.t.'
@@ -247,17 +254,22 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         opnieuw = opnieuw.astimezone(to_tz)
                         now = timezone.now()
                         if opnieuw < now:
-                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F Y H:i').replace(current_year_str, '')
+                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(
+                                                    vhpg.acceptatie_datum,
+                                                    'j F Y H:i').replace(current_year_str, '')
                         else:
-                            sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                            sporter.vhpg_str = 'Ja (op %s)' % date_format(
+                                                    vhpg.acceptatie_datum.astimezone(to_tz),
+                                                    'j F Y H:i').replace(current_year_str, '')
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
 
-            sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
-                                                kwargs={'lid_nr': sporter.lid_nr})
+            if not sporter.is_gast:
+                sporter.url_toon_bondspas = reverse('Bondspas:toon-bondspas-van',
+                                                    kwargs={'lid_nr': sporter.lid_nr})
         # for
 
-        context['url_reset_tweede_factor'] = reverse('Functie:otp-loskoppelen')
+        context['url_reset_tweede_factor'] = reverse('Overig:otp-loskoppelen')
 
         # toon sessies
         if not context:     # aka "never without complains"     # pragma: no cover
@@ -302,7 +314,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         if total > 0:
-            age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total)) for age, count in age_group_counts.items()]
+            age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total))
+                          for age, count in age_group_counts.items()]
             age_groups.sort()
             context['age_groups'] = age_groups
 
@@ -312,6 +325,43 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
+
+
+class OTPLoskoppelenView(UserPassesTestMixin, View):
+
+    """ Deze view levert een POST-functie om de tweede factor los te kunnen koppelen
+        voor een gekozen gebruiken. Dit kan alleen de BB.
+    """
+
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        url = reverse('Overig:activiteit')
+
+        if request.POST.get("reset_tweede_factor", None):
+            inlog_naam = request.POST.get("inlog_naam", '')[:6]     # afkappen voor de veiligheid
+
+            try:
+                account = Account.objects.get(username=inlog_naam)
+            except Account.DoesNotExist:
+                raise Http404('Niet gevonden')
+
+            url += '?zoekterm=%s' % account.username
+
+            # doe het feitelijke loskoppelen + in logboek schrijven
+            is_losgekoppeld = otp_loskoppelen(request, account)
+
+            if is_losgekoppeld:
+                otp_stuur_email_losgekoppeld(account)
+
+        return HttpResponseRedirect(url)
 
 
 # end of file

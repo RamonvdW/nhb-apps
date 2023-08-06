@@ -19,13 +19,13 @@
     </div>
 
     <!-- blauw balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         {% if geen_histcomp %}
 
             <!-- wit informatie veld -->
             <div class="col s12">
                 <div class="white" style="padding:10px">
-                    <p class="nhb-rood-text">Er is GEEN HISTORISCHE UITSLAG data beschikbaar, dus deze actie kan nog niet uitgevoerd worden.</p>
+                    <p class="sv-rood-text">Er is GEEN HISTORISCHE UITSLAG data beschikbaar, dus deze actie kan nog niet uitgevoerd worden.</p>
                 </div>
             </div>
 
@@ -43,7 +43,7 @@
             <!-- wit informatie veld -->
             <div class="col s12 m10 offset-m1" style="margin-top:50px; margin-bottom:50px">
                 <div class="white" style="padding:10px">
-                    <h5 class="nhb-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
+                    <h5 class="sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
                     <p>Gebruik uitslag <b>seizoen {{ seizoen }}</b>, afstand <b>{{ afstand }}m</b>.</p>
                     <p>Aantal scores: <b>minstens {{ aantal_scores }}</b>.</p>
                 </div>
@@ -56,7 +56,7 @@
 
                     <form method="post" action="{{ url_vaststellen }}">
                         {% csrf_token %}
-                        <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
+                        <input class="btn-sv-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
                     </form>
 
                     <br>

@@ -15,7 +15,7 @@
 
     <!-- banner om mensen weg te sturen van de test server -->
     {% if is_test_server %}
-        <div class="row nhb-rood white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row sv-rood white-text center" style="padding-top:50px; padding-bottom:50px">
             <div class="col s10 offset-s1 m8 offset-m2">
                 {% include 'plein/ga-naar-live-server.dtl' %}
             </div>
@@ -29,7 +29,7 @@
             <h4>Welkom op</h4>
         </div>
 
-        <div class="col s12 nhb-rood-text">
+        <div class="col s12 sv-rood-text">
             <h1 class="hide-on-small-only" style="margin:0; font-weight:bold">MijnHandboogsport</h1>
             <h3 class="hide-on-med-and-up" style="margin:0; font-weight:bold">Mijn<wbr>Handboog<wbr>sport</h3>
         </div>
@@ -41,26 +41,30 @@
     </div>
 
     <!-- blauwe balk met kaartjes bondscompetities en records -->
-    <!--<div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">-->
-    <div class="row-nhb-blauw">
+    <!--<div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">-->
+    <div class="row-sv-blauw">
         <div class="col s12">
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
-            {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
 
             <!-- wedstrijdkalender -->
             {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
             <!-- opleidingen -->
             {% if toon_opleidingen %}
                 {% url 'Opleidingen:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
+                {% include 'plein/card_icon.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
             {% endif %}
+
+            <!-- webwinkel -->
+            {% url 'Webwinkel:overzicht' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Bekijk onze webwinkel." icon="local_mall" url=card_url %}
 
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records<br>van nederlandse sporters." icon="insights" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records<br>van nederlandse sporters." icon="insights" url=card_url %}
         </div>
     </div>
 
@@ -74,10 +78,10 @@
     </div>
 
     <!-- blauwe balk met account aanmaken -->
-    <div class="row-nhb-blauw" style="padding-top:50px; padding-bottom:50px">
+    <div class="row-sv-blauw" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
-            {% url 'Sporter:registreer' as card_url %}
-            {% include 'plein/card.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
+            {% url 'Registreer:begin' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
         </div>
     </div>
 
@@ -91,7 +95,7 @@
     </div>
 
     <!-- blauwe balk met links naar andere sites -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             {% include 'plein/andere-sites.dtl' %}
         </div>

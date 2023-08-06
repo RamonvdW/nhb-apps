@@ -37,7 +37,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -51,21 +51,21 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de SEC functie
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak de WL functie
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak het lid aan dat WL wordt
@@ -130,7 +130,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         sporter.geslacht = "V"
         sporter.voornaam = "Ramona"
         sporter.achternaam = "de Testerin"
-        sporter.email = "ramonatesterin@nhb.not"
+        sporter.email = "ramonatesterin@test.not"
         sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = ver
@@ -168,7 +168,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # BB worden
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -186,10 +186,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
-        self.deelcomp_regio_18 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio_18 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                              competitie__afstand='18')
 
-        self.deelcomp_regio_25 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio_25 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                              competitie__afstand='25')
 
     def _maak_wedstrijden(self):
@@ -205,7 +205,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         for volgnr in range(3):
             match = CompetitieMatch(
                         competitie=self.comp_18,
-                        vereniging=self.nhbver1,
+                        vereniging=self.ver1,
                         datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
                         tijd_begin_wedstrijd=de_tijd)
 
@@ -233,7 +233,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
         match = CompetitieMatch(
                     competitie=self.comp_18,
-                    vereniging=self.nhbver1,
+                    vereniging=self.ver1,
                     datum_wanneer=datetime.date(year=2020, month=2, day=1),
                     tijd_begin_wedstrijd=de_tijd)
         match.save()
@@ -377,7 +377,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # een 18m recurve team, dus met 2 verschillende blazoenen
         team = RegiocompetitieTeam(
                     regiocompetitie=self.deelcomp_regio_18,
-                    vereniging=self.nhbver1,
+                    vereniging=self.ver1,
                     volg_nr=1,
                     team_type=teamtype_r,
                     team_naam='Test team R 18',
@@ -388,7 +388,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # een 18m compound team, dus met maar 1 soort blazoen
         team = RegiocompetitieTeam(
                     regiocompetitie=self.deelcomp_regio_18,
-                    vereniging=self.nhbver1,
+                    vereniging=self.ver1,
                     volg_nr=2,
                     team_type=teamtype_c,
                     team_naam='Test team C 18',
@@ -399,7 +399,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # een 18m barebow team, dus met maar 1 soort blazoen
         team = RegiocompetitieTeam(
                     regiocompetitie=self.deelcomp_regio_18,
-                    vereniging=self.nhbver1,
+                    vereniging=self.ver1,
                     volg_nr=3,
                     team_type=teamtype_bb,
                     team_naam='Test team BB 18',
@@ -423,7 +423,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # 1 team zonder team klasse
         RegiocompetitieTeam(
                 regiocompetitie=self.deelcomp_regio_25,
-                vereniging=self.nhbver1,
+                vereniging=self.ver1,
                 volg_nr=1,
                 team_type=teamtype_r,
                 team_naam='Test team R geen klasse 25',
@@ -432,7 +432,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # recurve team
         RegiocompetitieTeam(
                 regiocompetitie=self.deelcomp_regio_25,
-                vereniging=self.nhbver1,
+                vereniging=self.ver1,
                 volg_nr=2,
                 team_type=teamtype_r,
                 team_naam='Test team R 25',
@@ -441,7 +441,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # compound team
         RegiocompetitieTeam(
                 regiocompetitie=self.deelcomp_regio_25,
-                vereniging=self.nhbver1,
+                vereniging=self.ver1,
                 volg_nr=3,
                 team_type=teamtype_c,
                 team_naam='Test team C 25',
@@ -489,7 +489,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        match = CompetitieMatch.objects.all()[0]
+        match = CompetitieMatch.objects.first()
         match.beschrijving = 'Hallo'
         match.save(update_fields=['beschrijving'])
 
@@ -574,7 +574,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # cluster
-        self.nhbver1.clusters.add(NhbCluster.objects.all()[0])
+        self.ver1.clusters.add(NhbCluster.objects.first())
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk
         with self.assert_max_queries(20):
@@ -596,7 +596,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         # 25m1pijl wedstrijd
         self.ronde.matches.clear()
-        self.deelcomp_regio_18 = Regiocompetitie.objects.get(nhb_regio=self.regio_111,
+        self.deelcomp_regio_18 = Regiocompetitie.objects.get(regio=self.regio_111,
                                                              competitie__afstand=25)
         ronde = maak_regiocompetitie_ronde(self.deelcomp_regio_18)
         ronde.matches.add(self.wedstrijden[0])

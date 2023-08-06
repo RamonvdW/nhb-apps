@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Ledenlijst</h3>
-            <p>van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}</p>
+            <p>van vereniging [{{ ver.ver_nr }}] {{ ver.naam }}{% if ver.plaats %} te {{ ver.plaats }}{% endif %}</p>
         </div>
     </div>
 
@@ -28,7 +28,7 @@
         </div>
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <table class="white" id="table1">
@@ -39,7 +39,7 @@
                             </td>
                             <td colspan="3"></td>
                         </tr>
-                        <tr> <!-- class="nhb-table-header" -->
+                        <tr> <!-- class="sv-table-header" -->
                             <th data-filter="on">Bonds<wbr>nummer</th>
                             <th>M/V/X</th>
                             <th data-filter="on">Voor<wbr>naam</th>
@@ -85,7 +85,7 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white" id="table2">
@@ -138,7 +138,7 @@
         </div>
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <table class="white">

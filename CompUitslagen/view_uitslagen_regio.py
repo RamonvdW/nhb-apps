@@ -12,10 +12,9 @@ from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegiocompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
+from Sporter.operations import get_request_regio_nr
 from types import SimpleNamespace
 
 
@@ -23,50 +22,16 @@ TEMPLATE_COMPUITSLAGEN_REGIO_INDIV = 'compuitslagen/uitslagen-regio-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
 
 
-def get_request_regio_nr(request):
-    """ Geeft het regionummer van de ingelogde sporter terug,
-        of 101 als er geen regio vastgesteld kan worden
-    """
-    regio_nr = 101
-
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-    if functie_nu:
-        if functie_nu.nhb_ver:
-            # HWL, WL
-            regio_nr = functie_nu.nhb_ver.regio.regio_nr
-        elif functie_nu.nhb_regio:
-            # RCL
-            regio_nr = functie_nu.nhb_regio.regio_nr
-        elif functie_nu.nhb_rayon:
-            # RKO
-            regio = (NhbRegio
-                     .objects
-                     .filter(rayon=functie_nu.nhb_rayon,
-                             is_administratief=False)
-                     .order_by('regio_nr'))[0]
-            regio_nr = regio.regio_nr
-    elif rol_nu == Rollen.ROL_SPORTER:
-        # sporter
-        account = request.user
-        if account.sporter_set.count() > 0:         # pragma: no branch
-            sporter = account.sporter_set.select_related('bij_vereniging__regio').all()[0]
-            if sporter.is_actief_lid and sporter.bij_vereniging:
-                nhb_ver = sporter.bij_vereniging
-                regio_nr = nhb_ver.regio.regio_nr
-
-    return regio_nr
-
-
 class UitslagenRegioIndivView(TemplateView):
 
-    """ Django class-based view voor de individuele uitslagen van de competitie in 1 regio """
+    """ Django class-based view voor de individuele uitslagen van de regiocompetitie in 1 regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV
     url_name = 'CompUitslagen:uitslagen-regio-indiv-n'
 
-    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog):
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, gekozen_regio_nr, comp_boog):
         """ filter optie voor de regio """
 
         # boogtype filters
@@ -76,6 +41,7 @@ class UitslagenRegioIndivView(TemplateView):
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.opt_text = boogtype.beschrijving
             boogtype.sel = 'boog_' + boogtype.afkorting
             if boogtype.afkorting.upper() == comp_boog.upper():
                 context['comp_boog'] = boogtype
@@ -83,10 +49,7 @@ class UitslagenRegioIndivView(TemplateView):
                 # geen url --> knop disabled
                 boogtype.selected = True
 
-            boogtype.zoom_url = reverse(self.url_name,
-                                        kwargs={'comp_pk': comp.pk,
-                                                'comp_boog': boogtype.afkorting.lower(),
-                                                'regio_nr': gekozen_regio_nr})
+            boogtype.url_part = boogtype.afkorting.lower()
         # for
 
         # regio filters
@@ -99,21 +62,14 @@ class UitslagenRegioIndivView(TemplateView):
 
             context['regio_filters'] = regios
 
-            prev_rayon = 1
             for regio in regios:
+                regio.opt_text = 'Regio %s' % regio.regio_nr
                 regio.sel = 'regio_%s' % regio.regio_nr
-                regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
-                prev_rayon = regio.rayon.rayon_nr
-
-                regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr == gekozen_regio_nr:
                     context['regio'] = regio
                     regio.selected = True
 
-                regio.zoom_url = reverse(self.url_name,
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'comp_boog': comp_boog,
-                                                 'regio_nr': regio.regio_nr})
+                regio.url_part = str(regio.regio_nr)
             # for
 
         # vereniging filters
@@ -135,7 +91,7 @@ class UitslagenRegioIndivView(TemplateView):
             context['ver_filters'] = vers
 
     @staticmethod
-    def _lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str):
+    def _lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, needs_closure, klasse_str):
         rank = 0
         aantal = 0
         is_first = True
@@ -151,11 +107,14 @@ class UitslagenRegioIndivView(TemplateView):
 
             if is_first:
                 obj.break_klasse = True
-                obj.is_eerste_groep = is_eerste_groep
+                obj.needs_closure = needs_closure
                 obj.klasse_str = klasse_str
                 obj.aantal_in_groep = 2 + len(objs1) + len(objs2)
                 is_first = False
         # for
+
+        needs_closure = not is_first
+        return needs_closure
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -192,16 +151,21 @@ class UitslagenRegioIndivView(TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
 
         self._maak_filter_knoppen(context, comp, regio_nr, comp_boog)
+
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'comp_boog': '~1',
+                                                 'regio_nr': '~2'})
 
         boogtype = context['comp_boog']
         if not boogtype:
@@ -223,12 +187,12 @@ class UitslagenRegioIndivView(TemplateView):
         objs2 = list()      # secundaire lijst (te weinig scores)
         klasse = -1
         klasse_str = None
-        is_eerste_groep = True
+        needs_closure = False
         for deelnemer in deelnemers:
 
             if klasse != deelnemer.indiv_klasse.volgorde:
-                self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
-                is_eerste_groep = False
+                if klasse_str:
+                    needs_closure = self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, needs_closure, klasse_str)
                 objs1 = list()
                 objs2 = list()
                 klasse_str = deelnemer.indiv_klasse.beschrijving
@@ -250,14 +214,15 @@ class UitslagenRegioIndivView(TemplateView):
                 objs1.append(deelnemer)
         # for
 
-        self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, is_eerste_groep, klasse_str)
+        self._lijstjes_toevoegen_aan_uitslag(objs, objs1, objs2, needs_closure, klasse_str)
 
         context['deelnemers'] = objs
         context['heeft_deelnemers'] = (len(objs) > 0)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio individueel')
         )
 
@@ -271,15 +236,16 @@ class UitslagenRegioTeamsView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS
-    url_name = 'CompUitslagen:uitslagen-regio-teams-n'
 
-    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, teamtype_afkorting):
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, gekozen_regio_nr, teamtype_afkorting):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         context['teamtype'] = None
         context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
+            team.opt_text = team.beschrijving
             team.sel = team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
                 # validatie van urlconf argument: gevraagde teamtype bestaat echt
@@ -287,10 +253,7 @@ class UitslagenRegioTeamsView(TemplateView):
                 teamtype_afkorting = team.afkorting.lower()
                 team.selected = True
 
-            team.zoom_url = reverse(self.url_name,
-                                    kwargs={'comp_pk': comp.pk,
-                                            'team_type': team.afkorting.lower(),
-                                            'regio_nr': gekozen_regio_nr})
+            team.url_part = team.afkorting.lower()
         # for
 
         # regio filters
@@ -308,17 +271,13 @@ class UitslagenRegioTeamsView(TemplateView):
                 regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
                 prev_rayon = regio.rayon.rayon_nr
 
+                regio.opt_text = 'Regio %s' % regio.regio_nr
                 regio.sel = 'regio_%s' % regio.regio_nr
-
-                regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr == gekozen_regio_nr:
                     regio.selected = True
                     context['regio'] = regio
 
-                regio.zoom_url = reverse(self.url_name,
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'team_type': teamtype_afkorting,
-                                                 'regio_nr': regio.regio_nr})
+                regio.url_part = str(regio.regio_nr)
             # for
 
         # vereniging filters
@@ -381,10 +340,10 @@ class UitslagenRegioTeamsView(TemplateView):
         try:
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -400,6 +359,11 @@ class UitslagenRegioTeamsView(TemplateView):
         self._maak_filter_knoppen(context, comp, regio_nr, teamtype_afkorting)
         if not context['teamtype']:
             raise Http404('Verkeerd team type')
+
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-teams-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'team_type': '~1',
+                                                 'regio_nr': '~2'})
 
         # zoek alle regio teams erbij
 
@@ -542,7 +506,8 @@ class UitslagenRegioTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio teams')
         )
 

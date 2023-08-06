@@ -11,10 +11,9 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 # updaten met dit commando:
-#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
+#  for x in `./manage.py show_urls --settings=SiteMain.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/|<app_label>|<id>|bondscompetities/beheer/'
 BEHEER_PAGINAS = (
     '/beheer/Account/account/',
-    '/beheer/Account/accountemail/',
     '/beheer/Account/accountverzoekenteller/',
     '/beheer/BasisTypen/boogtype/',
     '/beheer/BasisTypen/kalenderwedstrijdklasse/',
@@ -49,9 +48,12 @@ BEHEER_PAGINAS = (
     '/beheer/Feedback/feedback/',
     '/beheer/Functie/functie/',
     '/beheer/Functie/verklaringhanterenpersoonsgegevens/',
-    '/beheer/HistComp/histcompetitie/',
-    '/beheer/HistComp/histcompetitieindividueel/',
-    '/beheer/HistComp/histcompetitieteam/',
+    '/beheer/HistComp/histcompregioindiv/',
+    '/beheer/HistComp/histcompregioteam/',
+    '/beheer/HistComp/histcompseizoen/',
+    '/beheer/HistComp/histkampindiv/',
+    '/beheer/HistComp/histkampindivbk/',
+    '/beheer/HistComp/histkampteam/',
     '/beheer/Logboek/logboekregel/',
     '/beheer/Mailer/mailqueue/',
     '/beheer/NhbStructuur/nhbcluster/',
@@ -62,10 +64,12 @@ BEHEER_PAGINAS = (
     '/beheer/Opleidingen/opleidingdeelnemer/',
     '/beheer/Opleidingen/opleidingdiploma/',
     '/beheer/Opleidingen/opleidingmoment/',
-    '/beheer/Overig/sitetijdelijkeurl/',
     '/beheer/Records/anderrecord/',
     '/beheer/Records/besteindivrecords/',
     '/beheer/Records/indivrecord/',
+    '/beheer/Registreer/gastlidnummer/',
+    '/beheer/Registreer/gastregistratie/',
+    '/beheer/Registreer/gastregistratieratetracker/',
     '/beheer/Score/aanvangsgemiddelde/',
     '/beheer/Score/aanvangsgemiddeldehist/',
     '/beheer/Score/score/',
@@ -76,6 +80,7 @@ BEHEER_PAGINAS = (
     '/beheer/Sporter/sporterboog/',
     '/beheer/Sporter/sportervoorkeuren/',
     '/beheer/Taken/taak/',
+    '/beheer/TijdelijkeCodes/tijdelijkecode/',
     '/beheer/Vereniging/secretaris/',
     '/beheer/Webwinkel/webwinkelfoto/',
     '/beheer/Webwinkel/webwinkelkeuze/',
@@ -124,7 +129,7 @@ class TestBeheer(E2EHelpers, TestCase):
         # redirect naar wissel-van-rol pagina
         with self.assert_max_queries(20):
             resp = self.client.get('/beheer/', follow=True)
-        self.assertEqual(resp.redirect_chain[-1], ('/functie/otp-controle/?next=/beheer/', 302))
+        self.assertEqual(resp.redirect_chain[-1], ('/account/otp-controle/?next=/beheer/', 302))
 
         self.e2e_assert_other_http_commands_not_supported('/beheer/')
 
@@ -188,5 +193,56 @@ class TestBeheer(E2EHelpers, TestCase):
         # for
 
         settings.DEBUG = False
+
+    def test_admin_specials(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # Betaal
+        resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=0')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        resp = self.client.get('/beheer/Betaal/betaalinstellingenvereniging/?Mollie=1')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # Feedback
+        resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=0')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=1')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        resp = self.client.get('/beheer/Feedback/feedback/?is_afgehandeld=-1')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # Sporter
+        resp = self.client.get('/beheer/Sporter/sporter/?heeft_wa_id=Ja')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Sporter/sporter/?heeft_account=Ja')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        # Opleiding
+        resp = self.client.get('/beheer/Opleidingen/opleidingdiploma/?heeft_account=Ja')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        # Competitie
+        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=HWL')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?Zelfstandig=Zelf')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitiesporterboog/?TeamAG=Ontbreekt')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitieteam/?TeamType=R2')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamType=R2')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/regiocompetitierondeteam/?RondeTeamVer=1350')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
 
 # end of file

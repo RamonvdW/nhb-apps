@@ -7,50 +7,19 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from Competitie.definities import (DEEL_RK, DEELNAME_NEE,
-                                   KAMP_RANK_UNKNOWN, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
+from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
-from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
+from Sporter.models import Sporter
+from Sporter.operations import get_request_rayon_nr
 from Plein.menu import menu_dynamics
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_RK_INDIV = 'compuitslagen/uitslagen-rk-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_RK_TEAMS = 'compuitslagen/uitslagen-rk-teams.dtl'
-
-
-def get_request_rayon_nr(request):
-    """ Geeft het rayon nummer van de ingelogde gebruiker/beheerder terug,
-        of 1 als er geen rayon vastgesteld kan worden
-    """
-    rayon_nr = 1
-
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-    if functie_nu:
-        if functie_nu.nhb_ver:
-            # HWL, WL
-            rayon_nr = functie_nu.nhb_ver.regio.rayon.rayon_nr
-        elif functie_nu.nhb_regio:
-            # RCL
-            rayon_nr = functie_nu.nhb_regio.rayon.rayon_nr
-        elif functie_nu.nhb_rayon:
-            # RKO
-            rayon_nr = functie_nu.nhb_rayon.rayon_nr
-
-    elif rol_nu == Rollen.ROL_SPORTER:
-        account = request.user
-        if account.is_authenticated:                                    # pragma: no branch
-            if account.sporter_set.count() > 0:                         # pragma: no branch
-                sporter = account.sporter_set.all()[0]
-                if sporter.is_actief_lid and sporter.bij_vereniging:
-                    nhb_ver = sporter.bij_vereniging
-                    rayon_nr = nhb_ver.regio.rayon.rayon_nr
-
-    return rayon_nr
 
 
 class UitslagenRayonIndivView(TemplateView):
@@ -71,6 +40,7 @@ class UitslagenRayonIndivView(TemplateView):
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.opt_text = boogtype.beschrijving
             boogtype.sel = boogtype.afkorting.lower()
 
             if boogtype.afkorting.upper() == comp_boog.upper():
@@ -78,33 +48,26 @@ class UitslagenRayonIndivView(TemplateView):
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
 
-            boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                        kwargs={'comp_pk': comp.pk,
-                                                'comp_boog': boogtype.afkorting.lower(),
-                                                'rayon_nr': gekozen_rayon_nr})
+            boogtype.url_part = boogtype.afkorting.lower()
         # for
 
-        if context['comp_boog']:
-            # rayon filters
-            rayons = (NhbRayon
-                      .objects
-                      .order_by('rayon_nr')
-                      .all())
+        # rayon filters
+        rayons = (NhbRayon
+                  .objects
+                  .order_by('rayon_nr')
+                  .all())
 
-            context['rayon_filters'] = rayons
+        context['rayon_filters'] = rayons
 
-            for rayon in rayons:
-                rayon.title_str = 'Rayon %s' % rayon.rayon_nr
-                rayon.sel = 'rayon_%s' % rayon.pk
-                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'comp_boog': comp_boog,
-                                                 'rayon_nr': rayon.rayon_nr})
+        for rayon in rayons:
+            rayon.opt_text = 'Rayon %s' % rayon.rayon_nr
+            rayon.sel = 'rayon_%s' % rayon.pk
+            rayon.url_part = str(rayon.rayon_nr)
 
-                if rayon.rayon_nr == gekozen_rayon_nr:
-                    context['rayon'] = rayon
-                    rayon.selected = True
-            # for
+            if rayon.rayon_nr == gekozen_rayon_nr:
+                context['rayon'] = rayon
+                rayon.selected = True
+        # for
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -137,6 +100,11 @@ class UitslagenRayonIndivView(TemplateView):
 
         self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
 
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'comp_boog': '~1',
+                                                 'rayon_nr': '~2'})
+
         boogtype = context['comp_boog']
         if not boogtype:
             raise Http404('Boogtype niet bekend')
@@ -145,12 +113,12 @@ class UitslagenRayonIndivView(TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .prefetch_related('rk_bk_matches')
                         .get(competitie__is_afgesloten=False,
                              competitie=comp,
                              deel=DEEL_RK,
-                             nhb_rayon__rayon_nr=rayon_nr))
+                             rayon__rayon_nr=rayon_nr))
         except Kampioenschap.DoesNotExist:
             raise Http404('Kampioenschap niet gevonden')
 
@@ -210,7 +178,7 @@ class UitslagenRayonIndivView(TemplateView):
                             .objects
                             .filter(competitie__is_afgesloten=False,
                                     competitie=comp,
-                                    nhb_regio__rayon__rayon_nr=rayon_nr)
+                                    regio__rayon__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
             deelnemers = (RegiocompetitieSporterBoog
@@ -299,12 +267,11 @@ class UitslagenRayonIndivView(TemplateView):
                     deelnemer.scores_str_2 = '(blanco)'
                     deelnemer.geen_rank = True
 
-                elif deelnemer.result_rank < KAMP_RANK_BLANCO:
+                elif deelnemer.result_rank < KAMP_RANK_BLANCO:      # pragma: no branch
                     deelnemer.scores_str_1 = "%s (%s+%s)" % (deelnemer.result_score_1 + deelnemer.result_score_2,
                                                              deelnemer.result_score_1,
                                                              deelnemer.result_score_2)
                     deelnemer.scores_str_2 = deelnemer.result_counts        # 25m1pijl only
-                    deelnemer.geen_rank = (deelnemer.result_rank == KAMP_RANK_UNKNOWN)      # unknown = 99
 
             curr_teller.aantal_regels += 1
         # for
@@ -314,7 +281,8 @@ class UitslagenRayonIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK individueel')
         )
 
@@ -338,6 +306,7 @@ class UitslagenRayonTeamsView(TemplateView):
         context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
+            team.opt_text = team.beschrijving
             team.sel = 'team_' + team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
                 context['teamtype'] = team
@@ -346,10 +315,7 @@ class UitslagenRayonTeamsView(TemplateView):
             else:
                 team.selected = False
 
-            team.zoom_url = reverse('CompUitslagen:uitslagen-rk-teams-n',
-                                    kwargs={'comp_pk': comp.pk,
-                                            'team_type': team.afkorting.lower(),
-                                            'rayon_nr': gekozen_rayon_nr})
+            team.url_part = team.afkorting.lower()
         # for
 
         # als het team type correct was, maak dan de rayon knoppen
@@ -363,16 +329,13 @@ class UitslagenRayonTeamsView(TemplateView):
             context['rayon_filters'] = rayons
 
             for rayon in rayons:
-                rayon.title_str = 'Rayon %s' % rayon.rayon_nr
+                rayon.opt_text = 'Rayon %s' % rayon.rayon_nr
                 rayon.sel = 'rayon_%s' % rayon.rayon_nr
                 rayon.selected = (rayon.rayon_nr == gekozen_rayon_nr)
                 if rayon.selected:
                     context['rayon'] = rayon
 
-                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rk-teams-n',
-                                         kwargs={'comp_pk': comp.pk,
-                                                 'team_type': teamtype_afkorting,
-                                                 'rayon_nr': rayon.rayon_nr})
+                rayon.url_part = str(rayon.rayon_nr)
             # for
 
     @staticmethod
@@ -451,6 +414,11 @@ class UitslagenRayonTeamsView(TemplateView):
 
         self._maak_filter_knoppen(context, comp, rayon_nr, teamtype_afkorting)
 
+        context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-teams-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'team_type': '~1',
+                                                 'rayon_nr': '~2'})
+
         teamtype = context['teamtype']
         if not teamtype:
             raise Http404('Team type niet bekend')
@@ -459,12 +427,12 @@ class UitslagenRayonTeamsView(TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .prefetch_related('rk_bk_matches')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
                              deel=DEEL_RK,
-                             nhb_rayon__rayon_nr=rayon_nr))
+                             rayon__rayon_nr=rayon_nr))
         except Kampioenschap.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -477,15 +445,14 @@ class UitslagenRayonTeamsView(TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         account = self.request.user
         if account.is_authenticated:
-            if functie_nu and functie_nu.nhb_ver:
+            if functie_nu and functie_nu.vereniging:
                 # HWL, WL
-                toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
+                toon_team_leden_van_ver_nr = functie_nu.vereniging.ver_nr
             else:
                 # geen beheerder, dus sporter
-                if account.sporter_set.count() > 0:
-                    sporter = account.sporter_set.all()[0]
-                    if sporter.is_actief_lid and sporter.bij_vereniging:
-                        toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
+                sporter = Sporter.objects.filter(account=account).first()
+                if sporter and sporter.is_actief_lid and sporter.bij_vereniging:
+                    toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
 
         # haal de planning erbij: team klasse --> match
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
@@ -540,7 +507,7 @@ class UitslagenRayonTeamsView(TemplateView):
                         except KeyError:
                             pass
                     else:
-                        teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+                        teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
 
                 totaal_lijst.extend(klasse_teams_done)
                 totaal_lijst.extend(klasse_teams_plan)
@@ -568,29 +535,33 @@ class UitslagenRayonTeamsView(TemplateView):
                     team.rk_score_str = str(team.result_teamscore)
                 team.klasse_heeft_uitslag = True
 
-                originele_lid_nrs = list(team.gekoppelde_leden.all().values_list('sporterboog__sporter__lid_nr', flat=True))
+                originele_lid_nrs = list(team
+                                         .gekoppelde_leden.all()
+                                         .values_list('sporterboog__sporter__lid_nr', flat=True))
                 deelnemers = list()
                 lid_nrs = list()
                 for deelnemer in team.feitelijke_leden.select_related('sporterboog__sporter'):
-                    deelnemer.result_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
+                    deelnemer.result_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
+                    tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
+                    deelnemers.append(tup)      # toevoegen voordat result_totaal een string wordt
+
                     if deelnemer.result_totaal < 10:
                         deelnemer.result_totaal = '-'
                     deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                     lid_nr = deelnemer.sporterboog.sporter.lid_nr
                     if lid_nr not in originele_lid_nrs:
                         deelnemer.is_invaller = True
-                    tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
-                    deelnemers.append(tup)
 
                     lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
                 # for
                 for deelnemer in team.gekoppelde_leden.select_related('sporterboog__sporter'):
                     if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
+                        tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
+                        deelnemers.append(tup)
+
                         deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                         deelnemer.is_uitvaller = True
                         deelnemer.result_totaal = '-'
-                        tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
-                        deelnemers.append(tup)
                 # for
 
                 deelnemers.sort(reverse=True)       # hoogste eerst
@@ -630,7 +601,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 except KeyError:
                     pass
             else:
-                teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+                teller.klasse_str = team.team_type.beschrijving + " - Nog niet ingedeeld in een wedstrijdklasse"
 
         totaal_lijst.extend(klasse_teams_done)
         totaal_lijst.extend(klasse_teams_plan)
@@ -641,7 +612,8 @@ class UitslagenRayonTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK teams')
         )
 

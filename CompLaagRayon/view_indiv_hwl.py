@@ -42,7 +42,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
         rayon = ver.regio.rayon
 
         try:
@@ -50,9 +50,9 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .get(pk=deelkamp_pk,
-                             nhb_rayon=rayon,
+                             rayon=rayon,
                              deel=DEEL_RK))
         except (ValueError, Kampioenschap.DoesNotExist):
             raise Http404('Competitie niet gevonden')

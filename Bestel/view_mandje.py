@@ -6,9 +6,10 @@
 
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
+from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Bestel.definities import BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
 from Bestel.models import BestelMandje
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
@@ -17,7 +18,9 @@ from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
+from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
+from Registreer.definities import REGISTRATIE_FASE_DONE
 from decimal import Decimal
 
 
@@ -42,6 +45,20 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu != Rollen.ROL_NONE
 
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
+
+        if request.user.is_authenticated:
+            account = request.user
+            if account.is_gast:
+                gast = account.gastregistratie_set.first()
+                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                    # registratie is nog niet voltooid
+                    # dwing terug naar de lijst met vragen
+                    return redirect('Registreer:gast-meer-vragen')
+
+        return super().dispatch(request, *args, **kwargs)
+
     @staticmethod
     def _beschrijf_inhoud_mandje(account):
         """ gezamenlijk programma voor het tonen van de inhoud van het mandje en het afrekenen """
@@ -58,10 +75,10 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         # for
 
         try:
-            instellingen_nhb = ver_nr2instellingen[settings.BETAAL_VIA_NHB_VER_NR]
+            instellingen_bond = ver_nr2instellingen[settings.BETAAL_VIA_BOND_VER_NR]
         except KeyError:
             # nog niet aangemaakt
-            instellingen_nhb = None
+            instellingen_bond = None
 
         try:
             mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
@@ -100,9 +117,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         # geen instellingen, dus kan geen betaling ontvangen
                         product.kan_afrekenen = False
                     else:
-                        if instellingen.akkoord_via_nhb:
-                            ver_nr = settings.BETAAL_VIA_NHB_VER_NR
-                            if instellingen_nhb is None or instellingen_nhb.mollie_api_key == '':
+                        if instellingen.akkoord_via_bond:
+                            ver_nr = settings.BETAAL_VIA_BOND_VER_NR
+                            if instellingen_bond is None or instellingen_bond.mollie_api_key == '':
                                 product.kan_afrekenen = False
 
                     try:
@@ -163,20 +180,22 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
-        if producten:
-            for product in producten:                           # pragma: no branch
-                if product.webwinkel_keuze:
-                    context['toon_postadres'] = True
-                    sporter = account.sporter_set.all()[0]
-                    context['koper_sporter'] = sporter
-                    break
-            # for
+        if mandje:
+            if mandje.transport == BESTEL_TRANSPORT_OPHALEN:
+                context['toon_transport'] = True
+                context['ophalen_ver'] = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+
+            elif mandje.transport == BESTEL_TRANSPORT_VERZEND:
+                context['toon_transport'] = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG
+                sporter = account.sporter_set.first()
+                context['koper_sporter'] = sporter
 
         context['mandje_is_leeg'] = mandje_is_leeg
         context['mandje'] = mandje
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
+        context['url_kies_transport'] = reverse('Bestel:kies-transport')
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL
 

@@ -51,14 +51,14 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             deelnemer = (KampioenschapSporterBoog
                          .objects
                          .select_related('kampioenschap__competitie',
-                                         'kampioenschap__nhb_rayon',
+                                         'kampioenschap__rayon',
                                          'sporterboog__sporter',
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk))
         except (ValueError, KampioenschapSporterBoog.DoesNotExist):
             raise Http404('Deelnemer niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Geen sporter van jouw vereniging')
 
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
@@ -124,7 +124,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         afmelden = str(request.POST.get('afmelden', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
 
-        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Geen sporter van jouw vereniging')
 
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:

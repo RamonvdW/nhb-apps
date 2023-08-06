@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -57,7 +57,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         resp = self.e2e_login_no_check(self.account_normaal)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/is_inactief.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/login-geblokkeerd-geen-vereniging.dtl', 'plein/site_layout.dtl'))
 
     def test_inactief_bb(self):
         # inlog als BB met inactief nhblid moet gewoon werken
@@ -85,9 +85,12 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl',))
 
     def test_overdracht_naam(self):
-        # controleer dat de naam van het NHB lid door de login overgenomen wordt in het account
+        # controleer dat de naam van het lid door de login overgenomen wordt in het account
         self.assertNotEqual(self.account_normaal.first_name, self.sporter_100001.voornaam)
         self.assertNotEqual(self.account_normaal.last_name, self.sporter_100001.achternaam)
+        self.account_normaal.bevestigde_email = self.sporter_100001.email
+        self.account_normaal.save(update_fields=['bevestigde_email'])
+
         self.e2e_login(self.account_normaal)
         self.account_normaal = Account.objects.get(username=self.account_normaal.username)
         self.assertEqual(self.account_normaal.first_name, self.sporter_100001.voornaam)
@@ -95,13 +98,9 @@ class TestSporterLogin(E2EHelpers, TestCase):
 
         # nogmaals inloggen voor coverage "naam is al gelijk"
         self.e2e_login(self.account_normaal)
+        self.account_normaal = Account.objects.get(username=self.account_normaal.username)
         self.assertEqual(self.account_normaal.first_name, self.sporter_100001.voornaam)
         self.assertEqual(self.account_normaal.last_name, self.sporter_100001.achternaam)
-
-    def test_geen_email(self):
-        # corner case: account zonder accountemail
-        self.account_normaal.accountemail_set.all()[0].delete()
-        self.e2e_login(self.account_normaal)
 
     def test_nieuwe_email(self):
         # nieuwe email in CRM
@@ -110,11 +109,11 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.sporter_100001.email = 'nieuwe@test.com'
         self.sporter_100001.save()
 
-        obj = self.account_normaal.accountemail_set.all()[0]
-        self.assertEqual(obj.nieuwe_email, '')
-        self.assertTrue(obj.email_is_bevestigd)
+        account = self.account_normaal
+        self.assertEqual(account.nieuwe_email, '')
+        self.assertTrue(account.email_is_bevestigd)
 
-        resp = self.e2e_login_no_check(self.account_normaal, follow=True)
+        resp = self.e2e_login_no_check(account, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de KHSN')
         self.assertContains(resp, 'ni###e@test.com')
@@ -123,16 +122,16 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.e2e_assert_not_logged_in()
 
         # check propagatie is gedaan
-        obj = self.account_normaal.accountemail_set.all()[0]
-        self.assertEqual(obj.nieuwe_email, self.sporter_100001.email)
-        self.assertFalse(obj.email_is_bevestigd)
+        account = Account.objects.get(pk=account.pk)
+        self.assertEqual(account.nieuwe_email, self.sporter_100001.email)
+        self.assertFalse(account.email_is_bevestigd)
 
     def test_geen_nieuwe_email(self):
         # geen trigger als het e-mailadres niet gewijzigd is
-        obj = self.account_normaal.accountemail_set.all()[0]
-        self.assertTrue(obj.email_is_bevestigd)
-        self.sporter_100001.email = obj.bevestigde_email
-        self.sporter_100001.save()
+        account = self.account_normaal
+        self.assertTrue(account.email_is_bevestigd)
+        self.sporter_100001.email = account.bevestigde_email
+        self.sporter_100001.save(update_fields=['email'])
 
         self.e2e_login(self.account_normaal)    # checkt login success
 

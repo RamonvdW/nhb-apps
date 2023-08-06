@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white">
@@ -63,7 +63,7 @@
                         <td colspan="2" class="center" style="padding-top:50px">Als de taak afgehandeld is, dan kan je deze sluiten:<br><br>
                             <form action="{{ taak.url_sluiten }}" method="post">
                                 {% csrf_token %}
-                                <input class="btn-nhb-rood" name="button_sluit_taak" type="submit" value="Taak sluiten">
+                                <input class="btn-sv-rood" name="button_sluit_taak" type="submit" value="Taak sluiten">
                             </form>
                         </td>
                     </tr>

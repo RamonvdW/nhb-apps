@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,8 +21,8 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
-    emailadres = 'taak@nhb.not'
-    emailadres2 = 'taak2@nhb.not'
+    emailadres = 'taak@test.not'
+    emailadres2 = 'taak2@test.not'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -48,7 +48,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         stuur_email_taak_herinnering(self.emailadres, 1)     # 1 taak
         self.assertEqual(1, MailQueue.objects.count())
 
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
@@ -60,7 +60,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         stuur_email_nieuwe_taak(self.emailadres, 1)         # 1 taak
         self.assertEqual(1, MailQueue.objects.count())
 
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail)
 
@@ -89,7 +89,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         bestaat = check_taak_bestaat(deadline=deadline)
         self.assertTrue(bestaat)
 
-        taak = Taak.objects.all()[0]
+        taak = Taak.objects.first()
         self.assertFalse(taak.is_afgerond)
         self.assertEqual(taak.toegekend_aan_functie, self.functie_sup)
         self.assertEqual(taak.deadline, deadline)
@@ -97,7 +97,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(taak.beschrijving, "Tekst")
         self.assertEqual(taak.log, "Log")
 
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assertFalse(mail.is_verstuurd)
         self.assertEqual(mail.aantal_pogingen, 0)
         self.assertEqual(mail.mail_to, self.emailadres)
@@ -134,7 +134,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(1, Taak.objects.count())
         self.assertEqual(0, MailQueue.objects.count())      # want: geen emailadres
 
-        taak = Taak.objects.all()[0]
+        taak = Taak.objects.first()
         self.assertFalse(taak.is_afgerond)
         self.assertEqual(taak.toegekend_aan_functie, self.functie_mwz)
         self.assertEqual(taak.deadline, deadline)
@@ -162,7 +162,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(0, MailQueue.objects.count())      # maar mail is er niet uit gegaan
 
         # controleer dat alle velden van de taak goed ingevuld zijn
-        taak = Taak.objects.all()[0]
+        taak = Taak.objects.first()
         self.assertFalse(taak.is_afgerond)
         self.assertEqual(taak.toegekend_aan_functie, self.functie_sup)
         self.assertEqual(taak.deadline, deadline)

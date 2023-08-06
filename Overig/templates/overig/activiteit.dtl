@@ -19,16 +19,24 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
-                    <th>Totaal accounts aangemaakt</th>
+                    <th>Totaal aantal accounts</th>
                     <td>{{ totaal }}</td>
+                </tr>
+                <tr>
+                    <th>Waarvan gast-accounts</th>
+                    <td>{{ totaal_gast }}</td>
                 </tr>
                 <tr>
                     <th>Nieuw sinds {{ deze_maand|date }}</th>
                     <td>{{ deze_maand_count }}</td>
+                </tr>
+                <tr>
+                    <th>Waarvan gast-accounts</th>
+                    <td>{{ deze_maand_count_gast }}</td>
                 </tr>
                 <tr>
                     <th>Aantal actieve gebruikers</th>
@@ -48,7 +56,7 @@
 
     <!-- zoekformulier -->
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -61,7 +69,7 @@
 
                     <!-- button -->
                     <p class="center">
-                        <button class="btn-nhb-rood" type="submit">
+                        <button class="btn-sv-rood" type="submit">
                             <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </p>
                 </form>
@@ -80,7 +88,7 @@
                 {% if zoek_leden %}
                     <p>{{ zoek_leden|length }} gebruikers gevonden</p>
                 {% else %}
-                    <p class="nhb-rood-text">Niets gevonden</p>
+                    <p class="sv-rood-text">Niets gevonden</p>
                 {% endif %}
             </div>
         </div>
@@ -88,15 +96,16 @@
         {% if zoek_leden %}
 
             <!-- blauwe balk met informatie label : info -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12 l8 offset-l2 left-align">
 
-                    <ul class="collapsible">
+                    <ul class="collapsible popout">
                         {% for obj in zoek_leden %}
                             <!-- obj is Account -->
                             <li>
                                 <div class="collapsible-header white">
                                     <span>[{{ obj.lid_nr_str|highlight:zoekterm }}] {{ obj.volledige_naam|highlight:zoekterm }}</span>
+                                    <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
                                 </div>
                                 <div class="collapsible-body white">
                                     <div style="column-count: 2">
@@ -108,11 +117,12 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <a class="btn-nhb-rood" href="{{ obj.url_toon_bondspas }}" style="margin-top:15px; margin-right:20px" target="_blank" rel="noopener noreferrer">Toon Bondspas</a>
-                                        {% if obj.kan_loskoppelen %}
-                                            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}" style="margin-top:15px">Tweede factor loskoppelen</a>
+                                        {% if obj.url_toon_bondspas %}
+                                            <a class="btn-sv-rood" href="{{ obj.url_toon_bondspas }}" style="margin-top:15px; margin-right:20px" target="_blank" rel="noopener noreferrer">Toon Bondspas</a>
                                         {% endif %}
-
+                                        {% if obj.kan_loskoppelen %}
+                                            <a class="btn-sv-blauw modal-trigger" href="#bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}" style="margin-top:15px">Tweede factor loskoppelen</a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </li>
@@ -128,15 +138,15 @@
     <div class="row center">
         <div class="col s12">
             <p>Secties verderop op deze pagina:</p>
-            <!-- a class="btn-nhb-rood btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a -->
-            <a class="btn-nhb-rood btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
-            <a class="btn-nhb-rood btn-small margin-5" href="#recent">Recente activiteit</a>
-            <a class="btn-nhb-rood btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
+            <!-- a class="btn-sv-rood btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a -->
+            <a class="btn-sv-rood btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
+            <a class="btn-sv-rood btn-small margin-5" href="#recent">Recente activiteit</a>
+            <a class="btn-sv-rood btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
             {% if accses %}
-                <a class="btn-nhb-rood btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+                <a class="btn-sv-rood btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
             {% endif %}
             {% if age_groups %}
-                <a class="btn-nhb-rood btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
+                <a class="btn-sv-rood btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
             {% endif %}
         </div>
     </div>
@@ -151,7 +161,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white" id="tabel_hulp">
                 <thead>
@@ -199,7 +209,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white" id="tabel_nieuwe">
@@ -223,15 +233,15 @@
                 </thead>
 
                 <tbody>
-                    {% for obj in nieuwe_accounts %}
+                    {% for account in nieuwe_accounts %}
                         <tr>
-                            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
-                            <td>{{ obj.account.username }}</td>
-                            <td>{{ obj.account.volledige_naam }}</td>
-                            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                            <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
-                            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ account.date_joined|date:"j b H:i" }}</td>
+                            <td>{{ account.username }}</td>
+                            <td>{{ account.volledige_naam }}</td>
+                            <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ account.last_login|date:"j b H:i" }}</td>
+                            <td>{{ account.laatste_inlog_poging|date:"j b H:i" }}</td>
+                            <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -248,7 +258,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white" id="tabel_activiteit">
@@ -270,14 +280,14 @@
                     </tr>
                 </thead>
 
-                {% for obj in recente_activiteit %}
+                {% for account in recente_activiteit %}
                     <tr>
-                        <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                        <td>{{ obj.account.username }}</td>
-                        <td>{{ obj.account.volledige_naam }}</td>
-                        <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+                        <td>{{ account.last_login|date:"j b H:i" }}</td>
+                        <td>{{ account.username }}</td>
+                        <td>{{ account.volledige_naam }}</td>
+                        <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                        <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                        <td>{{ account.date_joined|date:"j b H:i" }}</td>
                     </tr>
                 {% endfor %}
             </table>
@@ -295,7 +305,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white" id="tabel_inlog">
                 <thead>
@@ -318,15 +328,15 @@
                 </thead>
 
                 <tbody>
-                    {% for obj in inlog_pogingen %}
+                    {% for account in inlog_pogingen %}
                         <tr>
-                            <td>{{ obj.account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
-                            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                            <td>{{ obj.account.username }}</td>
-                            <td>{{ obj.account.volledige_naam }}</td>
-                            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+                            <td>{{ account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
+                            <td>{{ account.last_login|date:"j b H:i" }}</td>
+                            <td>{{ account.username }}</td>
+                            <td>{{ account.volledige_naam }}</td>
+                            <td>{% if account.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{% if account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ account.date_joined|date:"j b H:i" }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -347,7 +357,7 @@
         <!-- scherm-brede tabel met dunne blauw rand -->
         <table class="white">
             <thead>
-                <tr class="nhb-table-header">
+                <tr class="sv-table-header">
                     <th>Gebruiker</th>
                     <th>Verloopt op</th>
                     <th>Cookie naam</th>
@@ -367,7 +377,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="5" class="nhb-table-onderrand"></td>
+                <td colspan="5" class="sv-table-onderrand"></td>
             </tr>
         </table>
     {% endif %}
@@ -381,11 +391,11 @@
         </div>
 
         <!-- blauwe balk met informatie label : info -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
                     <thead>
-                        <tr class="nhb-table-header">
+                        <tr class="sv-table-header">
                             <th>Leeftijdsgroep</th>
                             <th>Aantal</th>
                             <th class="right-align">Aandeel</th>
@@ -430,10 +440,10 @@
 
                                 <div class="modal-footer" style="text-align:center; display:block">
                                     <div style="display:inline-block; width:50%">
-                                        <button class="btn-nhb-rood" type="submit">Ja</button>
+                                        <button class="btn-sv-rood" type="submit">Ja</button>
                                     </div>
                                     <div style="display:inline-block; width:50%">
-                                        <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                        <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                                     </div>
                                 </div>
                             </form>

@@ -20,9 +20,9 @@
             const el = document.getElementById('submit')
             el.disabled = (count > 7)
             if (count > 7) {
-                el_aantal.classList.add('nhb-rood-text')
+                el_aantal.classList.add('sv-rood-text')
             } else {
-                el_aantal.classList.remove('nhb-rood-text')
+                el_aantal.classList.remove('sv-rood-text')
             }
         }
 
@@ -40,18 +40,18 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 {% if mag_aanmelden %}
-                    <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
                     <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
                     <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk op de rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
                     <p>Leden die aangegeven hebben niet mee te willen doen met de bondscompetities worden in grijs weergegeven.</p>
                 {% else %}
-                    <p>Deze pagina toont voor leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    <p>Deze pagina toont voor leden van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
 
                     <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten.</p>
 
@@ -67,7 +67,7 @@
     {% endif %}
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -116,7 +116,7 @@
 
                         {% if wedstrijden_2 %}
                             <tr id="id_wedstrijden_2_knop">
-                                <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
+                                <td><button class="btn-sv-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
                             </tr>
 
                             <tr id="id_wedstrijden_2" class="hide">
@@ -163,7 +163,7 @@
                     {% if leden_jeugd %}
 
                         <br>
-                        <h5 class="center nhb-blauw-text">Jeugd</h5>
+                        <h5 class="center sv-blauw-text">Jeugd</h5>
 
                         <table class="white" id="table1">
                             <thead>
@@ -220,7 +220,7 @@
                     {% endif %}
 
                     <br>
-                    <h5 class="center nhb-blauw-text">Senioren</h5>
+                    <h5 class="center sv-blauw-text">Senioren</h5>
 
                     <table class="white" id="table2">
                         <thead>
@@ -270,7 +270,7 @@
 
                     {% if mag_aanmelden %}
                         <div class="fixed-action-btn">
-                            <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden" id="submit">
+                            <input class="btn-sv-rood" type="submit" value="Geselecteerde sporters aanmelden" id="submit">
                         </div>
                     {% endif %}
 

@@ -84,7 +84,7 @@ def main():
                 stars = "*" * 30
                 print("\n%s START OF RUN %s\n" % (stars, stars))
 
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nhbapps.settings')
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SiteMain.settings')
         execute_from_command_line(sys.argv)
 
         report_validated_templates()

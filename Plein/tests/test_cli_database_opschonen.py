@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
-from Account.operations import account_create
+from Account.operations.aanmaken import account_create
 from Feedback.models import Feedback
 from Feedback.operations import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_queue_email
-from Overig.models import save_tijdelijke_url
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
+from TijdelijkeCodes.models import save_tijdelijke_code
 import datetime
 import io
 
@@ -29,7 +29,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         """ initialisatie van de test case """
 
         # maak een onvoltooid account aan
-        account, _ = account_create(
+        account = account_create(
                         'test',
                         'Voornaam',
                         'Achternaam',
@@ -47,16 +47,16 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
 
         # maak een mail aan die lang geleden verstuurd is
         mailer_queue_email('ergens@nergens.niet', 'Test', 'Test', enforce_whitelist=False)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         mail.toegevoegd_op -= datetime.timedelta(days=92)
         mail.save()
 
-        # maak een tijdelijke url aan
-        save_tijdelijke_url('code', 'test', geldig_dagen=-8)
+        # maak een tijdelijke code aan
+        save_tijdelijke_code('code', 'test', geldig_dagen=-8)
 
         # maak een oude, afgehandelde site feedback aan
         store_feedback('mij', 'rol', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')
-        feedback = Feedback.objects.all()[0]
+        feedback = Feedback.objects.first()
         feedback.toegevoegd_op -= datetime.timedelta(days=92)
         feedback.is_afgehandeld = True
         feedback.save()

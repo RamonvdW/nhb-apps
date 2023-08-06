@@ -12,7 +12,8 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
-                                   MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK)
+                                   MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
+                                   MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
 from Competitie.models import Competitie, Regiocompetitie, CompetitieMutatie, CompetitieTeamKlasse, KampioenschapTeam
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
@@ -22,7 +23,7 @@ from Plein.menu import menu_dynamics
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 TEMPLATE_COMPBEHEER_DOORZETTEN_REGIO_NAAR_RK = 'compbeheer/bko-doorzetten-1a-regio-naar-rk.dtl'
-TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_RK_BK_TEAMS = 'compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl'
+TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_KAMP_TEAMS = 'compbeheer/bko-doorzetten-1b-klassengrenzen-rk-bk-teams.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_INDIV = 'compbeheer/bko-doorzetten-2a-rk-naar-bk-indiv.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_RK_NAAR_BK_TEAMS = 'compbeheer/bko-doorzetten-2b-rk-naar-bk-teams.dtl'
 TEMPLATE_COMPBEHEER_DOORZETTEN_BK_KLEINE_KLASSEN_INDIV = 'compbeheer/bko-doorzetten-3a-bk-kleine-klassen-indiv.dtl'
@@ -55,13 +56,13 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
         regio_deelcomps = (Regiocompetitie
                            .objects
                            .filter(competitie=competitie)
-                           .select_related('nhb_regio',
-                                           'nhb_regio__rayon')
-                           .order_by('nhb_regio__regio_nr'))
+                           .select_related('regio',
+                                           'regio__rayon')
+                           .order_by('regio__regio_nr'))
 
         for obj in regio_deelcomps:
-            obj.regio_str = str(obj.nhb_regio.regio_nr)
-            obj.rayon_str = str(obj.nhb_regio.rayon.rayon_nr)
+            obj.regio_str = str(obj.regio.regio_nr)
+            obj.rayon_str = str(obj.regio.rayon.rayon_nr)
 
             if obj.is_afgesloten:
                 obj.status_str = "Afgesloten"
@@ -158,7 +159,7 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de BKO de teams klassengrenzen voor het RK en BK vaststellen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_RK_BK_TEAMS
+    template_name = TEMPLATE_COMPBEHEER_DOORZETTEN_KLASSENGRENZEN_KAMP_TEAMS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -310,7 +311,8 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Doorzetten')
         )
 
@@ -471,7 +473,8 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Competitie doorzetten')
         )
 
@@ -490,6 +493,7 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
         mutatie_ping.ping()
 
         # we wachten niet tot deze verwerkt is
+        # noteer: hierdoor geeft de test ook geen dekking voor de achtergrondtaak
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de BKO de knop 'Doorzetten naar de volgende fase' gebruikt """
@@ -498,7 +502,6 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
         self.doorzetten(request.user, comp)
 
-        # url = reverse('Competitie:kies')
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         return HttpResponseRedirect(url)
 
@@ -561,11 +564,7 @@ class BevestigEindstandBKIndivView(DoorzettenBasisView):
     expected_fase = 'P'
     check_indiv_fase = True
     url_name = 'bko-bevestig-eindstand-bk-indiv'
-
-    def doorzetten(self, account, comp):
-        # TODO: zet ook deelkamp.is_klaar_indiv = True
-        comp.bk_indiv_afgesloten = True
-        comp.save(update_fields=['bk_indiv_afgesloten'])
+    mutatie_code = MUTATIE_KAMP_INDIV_AFSLUITEN
 
 
 class BevestigEindstandBKTeamsView(DoorzettenBasisView):
@@ -576,11 +575,7 @@ class BevestigEindstandBKTeamsView(DoorzettenBasisView):
     expected_fase = 'P'
     check_indiv_fase = False
     url_name = 'bko-bevestig-eindstand-bk-teams'
-
-    def doorzetten(self, account, comp):
-        # TODO: zet ook deelkamp.is_klaar_teams = True
-        comp.bk_teams_afgesloten = True
-        comp.save(update_fields=['bk_teams_afgesloten'])
+    mutatie_code = MUTATIE_KAMP_TEAMS_AFSLUITEN
 
 
 # end of file

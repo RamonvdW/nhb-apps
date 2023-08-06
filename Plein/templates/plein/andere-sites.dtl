@@ -30,7 +30,7 @@
 
 <!-- Zoek een vereniging -->
 {% static 'plein/logo_hero_512x512.png' as img_src %}
-{% include 'plein/card.dtl' with title="Waar?" text="Zoek een vereniging bij jou in de buurt." icon_font_size="80px" icon="travel_explore" url="https://www.handboogsport.nl/zoek-je-vereniging/" extern_open=True %}
+{% include 'plein/card_icon.dtl' with title="Waar?" text="Zoek een vereniging bij jou in de buurt." icon_font_size="80px" icon="travel_explore" url="https://www.handboogsport.nl/zoek-je-vereniging/" extern_open=True %}
 
 
 <!-- end of file -->

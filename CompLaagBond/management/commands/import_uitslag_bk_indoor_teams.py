@@ -47,7 +47,7 @@ class Command(BaseCommand):
                           .filter(kampioenschap__competitie__afstand='18',
                                   kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                      .filter(kampioenschap__competitie__afstand='18',
                              kampioenschap__deel=DEEL_BK)
                      .select_related('kampioenschap',
-                                     'kampioenschap__nhb_rayon',
+                                     'kampioenschap__rayon',
                                      'vereniging',
                                      'team_type',
                                      'team_klasse')
@@ -82,21 +82,28 @@ class Command(BaseCommand):
                                        'feitelijke_leden')):
 
             self.teams_cache.append(team)
-            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr for deelnemer in team.gekoppelde_leden.all()]
+            self.team_lid_nrs[team.pk] = [deelnemer.sporterboog.sporter.lid_nr
+                                          for deelnemer in team.gekoppelde_leden.all()]
+            # self.stdout.write('[DEBUG] team %s, gekoppelde_leden: %s' % (repr(team.team_naam), repr(self.team_lid_nrs[team.pk])))
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
         gem = list()
         for lid_nr in lid_nrs:
-            deelnemer_all = [deelnemer for deelnemer in self.deelnemers[lid_nr] if deelnemer.sporterboog.boogtype.afkorting in self.toegestane_bogen]
+            deelnemer_all = [deelnemer
+                             for deelnemer in self.deelnemers[lid_nr]
+                             if deelnemer.sporterboog.boogtype.afkorting in self.toegestane_bogen]
 
-            if len(deelnemer_all) == 1:
-                deelnemer = deelnemer_all[0]
+            if len(deelnemer_all) == 0:
+                self.stderr.write('[ERROR] Sporter %s is geen deelnemer' % lid_nr)
             else:
-                self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer uit %s' % repr(deelnemer_all))
-                deelnemer = deelnemer_all[0]
-            tup = (deelnemer.gemiddelde, lid_nr)
-            gem.append(tup)
+                if len(deelnemer_all) == 1:
+                    deelnemer = deelnemer_all[0]
+                else:
+                    self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer uit %s' % repr(deelnemer_all))
+                    deelnemer = deelnemer_all[0]
+                tup = (deelnemer.gemiddelde, lid_nr)
+                gem.append(tup)
         # for
         gem.sort(reverse=True)
         return gem
@@ -136,8 +143,12 @@ class Command(BaseCommand):
                 # self.stdout.write('[DEBUG] cached team: %s' % repr(team))
                 if team.vereniging.ver_nr == ver_nr:
                     if team.team_naam.upper() in up_naam:
-                        self.stdout.write('[WARNING] Aangepast team naam: %s --> %s' % (
-                                            repr(team.team_naam), repr(team_naam)))
+                        if team.team_naam == team_naam:
+                            self.stdout.write('[WARNING] Team uit verkeerde klasse: naam=%s, klasse=%s' % (
+                                                repr(team_naam), team.team_klasse))
+                        else:
+                            self.stdout.write('[WARNING] Aangepaste team naam: %s --> %s' % (
+                                                repr(team.team_naam), repr(team_naam)))
                         if self.team_klasse is None or team.team_klasse == self.team_klasse:
                             sel_teams.append(team)
             # for
@@ -159,7 +170,7 @@ class Command(BaseCommand):
         blad = 'Deelnemers en Scores'
         try:
             ws = prg[blad]
-        except KeyError:
+        except KeyError:            # pragma: no cover
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
             return
 
@@ -204,6 +215,8 @@ class Command(BaseCommand):
 
             # zoek het team erbij
             kamp_team = self._get_team(team_naam, ver_nr, row_nr)
+            if self.verbose:
+                self.stdout.write('[DEBUG] row_nr=%s, kamp_team=%s' % (row_nr, kamp_team))
             if kamp_team is None:
                 continue
 
@@ -229,6 +242,8 @@ class Command(BaseCommand):
                 row = str(row_nr)
 
                 lid_nr = ws[col_lid_nr + row].value
+                if self.verbose:
+                    self.stdout.write('[DEBUG] row_nr=%s, lid_nr=%s' % (row_nr, repr(lid_nr)))
                 if lid_nr is None:
                     break
                 if str(lid_nr) == '-':
@@ -260,10 +275,12 @@ class Command(BaseCommand):
             # haal de verwachte lid_nrs eruit
             feitelijke_lid_nrs = [lid_nr for lid_nr in gevonden_lid_nrs if lid_nr in team_lid_nrs]
             if self.verbose:
-                self.stdout.write('[DEBUG] feitelijke_lid_nrs van team [%s] %s: %s' % (ver_nr, team_naam, repr(feitelijke_lid_nrs)))
+                self.stdout.write('[DEBUG] feitelijke_lid_nrs van team [%s] %s: %s' % (
+                                        ver_nr, team_naam, repr(feitelijke_lid_nrs)))
 
             if len(feitelijke_lid_nrs) == 0:
-                self.stdout.write('[WARNING] Team %s van vereniging %s heeft niet meegedaan (geen scores)' % (ver_nr, team_naam))
+                self.stdout.write('[WARNING] Team %s van vereniging %s heeft niet meegedaan (geen scores)' % (
+                                        ver_nr, team_naam))
                 del self.deelnemende_teams[team_naam]
             else:
                 for lid_nr in feitelijke_lid_nrs:
@@ -277,7 +294,7 @@ class Command(BaseCommand):
                     afgekeurd = list()
 
                     if len(invallers) > len(uitvallers):
-                        self.stderr.write('[ERROR] Te veel invallers voor team %s met max %s sporters (vereniging %s)' % (
+                        self.stderr.write('[ERROR] Te veel invallers voor team %s met max %s sporters (ver: %s)' % (
                                             repr(team_naam), aantal_gekoppeld, ver_nr))
                         feitelijke_deelnemers = list()
                     else:
@@ -297,10 +314,13 @@ class Command(BaseCommand):
                                 uitvallers.pop(0)
                         # while
 
-                        feitelijke_deelnemers = [deelnemer for deelnemer in feitelijke_deelnemers if deelnemer.sporterboog.sporter.lid_nr not in afgekeurd]
+                        feitelijke_deelnemers = [deelnemer
+                                                 for deelnemer in feitelijke_deelnemers
+                                                 if deelnemer.sporterboog.sporter.lid_nr not in afgekeurd]
 
                 if len(feitelijke_deelnemers) < 3:
-                    self.stderr.write('[ERROR] Maar %s deelnemers in team %s' % (len(feitelijke_deelnemers), kamp_team.team_naam))
+                    self.stderr.write('[ERROR] Maar %s deelnemers in team %s' % (
+                                            len(feitelijke_deelnemers), kamp_team.team_naam))
 
                 if len(feitelijke_deelnemers) > 0:
                     deelnemer_totalen = list()
@@ -331,7 +351,7 @@ class Command(BaseCommand):
         blad = 'Uitslag'
         try:
             ws = prg[blad]
-        except KeyError:
+        except KeyError:            # pragma: no cover
             self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
             return
 
@@ -347,7 +367,7 @@ class Command(BaseCommand):
 
         # check de header
         header = ws['B' + str(row_nr)].value
-        if header != 'Baan':
+        if header != 'Baan':            # pragma: no cover
             self.stderr.write('[ERROR] Blad is niet in orde: cell B8 bevat niet "Baan" maar %s' % repr(header))
             raise ValueError('Uitslag B8')
 
@@ -366,19 +386,21 @@ class Command(BaseCommand):
                 continue
 
             if self.verbose:
-                self.stdout.write('[DEBUG] Uitslag: ver_naam=%s, team_naam=%s, resultaat=%s' % (repr(ver_naam), repr(team_naam), repr(resultaat)))
+                self.stdout.write('[DEBUG] Uitslag: ver_naam=%s, team_naam=%s, resultaat=%s' % (
+                                    repr(ver_naam), repr(team_naam), repr(resultaat)))
 
             ver_nr = -1
+            ver_naam = str(ver_naam)
             try:
                 if ver_naam[0] == '[' and ver_naam[5:5+2] == '] ':
                     ver_nr = int(ver_naam[1:1+4])
-            except ValueError:
+            except ValueError:          # pragma: no cover
                 pass
 
             if ver_nr < 0:
                 continue
 
-            if team_naam is None:
+            if team_naam is None:       # pragma: no cover
                 continue
 
             nix_count = 0
@@ -409,12 +431,6 @@ class Command(BaseCommand):
 
     def _zet_rank_en_volgorde(self, goud, zilver, brons, vierde, vijfden):
 
-        # remove empty names
-        if isinstance(brons, list):
-            brons = [team_naam for team_naam in brons if team_naam]
-            if len(brons) == 1:
-                brons = brons[0]
-
         if self.verbose:
             self.stdout.write('[DEBUG] goud: %s' % repr(goud))
             self.stdout.write('[DEBUG] zilver: %s' % repr(zilver))
@@ -426,25 +442,17 @@ class Command(BaseCommand):
 
         rank = 1
         for team_naam in (goud, zilver, brons, vierde):
-            if isinstance(team_naam, list):
-                volgorde = rank
-                for naam in team_naam:
-                    kamp_team = self.deelnemende_teams[naam]
+            if team_naam:
+                try:
+                    kamp_team = self.deelnemende_teams[team_naam]
+                except KeyError:
+                    self.stderr.write('[ERROR] Kan team %s niet vinden!' % repr(team_naam))
+                else:
                     kamp_team.result_rank = rank
-                    kamp_team.result_volgorde = volgorde
+                    kamp_team.result_volgorde = rank
                     if not self.dryrun:
                         kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
                     finale_team_pks.append(kamp_team.pk)
-                    volgorde += 1
-                # for
-                rank += 1  # skip 4
-            elif team_naam:
-                kamp_team = self.deelnemende_teams[team_naam]
-                kamp_team.result_rank = rank
-                kamp_team.result_volgorde = rank
-                if not self.dryrun:
-                    kamp_team.save(update_fields=['result_rank', 'result_volgorde'])
-                finale_team_pks.append(kamp_team.pk)
             rank += 1
         # for
 
@@ -452,59 +460,56 @@ class Command(BaseCommand):
         # result_volgorde is al gezet, gebaseerd op aflopende scores
         min_rank = 5
         for team_naam in vijfden:
-            kamp_team = self.deelnemende_teams[team_naam]
-            kamp_team.result_rank = 5
-            finale_team_pks.append(kamp_team.pk)
-            min_rank += 1
-            if not self.dryrun:
-                kamp_team.save(update_fields=['result_rank'])
+            try:
+                kamp_team = self.deelnemende_teams[team_naam]
+            except KeyError:
+                self.stderr.write('[ERROR] Kan team %s niet vinden!' % repr(team_naam))
+            else:
+                kamp_team.result_rank = 5
+                finale_team_pks.append(kamp_team.pk)
+                min_rank += 1
+                if not self.dryrun:
+                    kamp_team.save(update_fields=['result_rank'])
         # for
+
+    @staticmethod
+    def _lees_team_naam(ws, cell):
+        team_naam = ws[cell].value
+        if team_naam in (None, 'n.v.t.', 'nvt', 'n.v.t', 'BYE'):
+            team_naam = ''
+        return team_naam
+
+    @staticmethod
+    def _kies_team_a_b(team_naam_a, team_naam_b, team_a_is_tweede):
+        if team_a_is_tweede:
+            return team_naam_b, team_naam_a
+        return team_naam_a, team_naam_b
 
     def _importeer_finales_8(self, ws):
         """ Lees de uitslag van het blad 'Finales 8 teams' """
 
         final_8 = list()
         for row_nr in (12, 14, 18, 20, 24, 26, 30, 32):
-            team_naam = ws['B' + str(row_nr)].value
-            if team_naam in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam = ''
-            if team_naam:
-                if team_naam in self.deelnemende_teams.keys():
-                    final_8.append(team_naam)
-                elif team_naam != 'BYE':
-                    self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
+            team_naam = self._lees_team_naam(ws, 'B' + str(row_nr))
+            if team_naam in self.deelnemende_teams.keys():
+                final_8.append(team_naam)
+            else:
+                self.stdout.write('[WARNING] Kwartfinale team %s op finale blad wordt niet herkend' % repr(team_naam))
         # for
         # self.stdout.write('final_8: %s' % repr(final_8))
 
         # gouden finale
-        team_naam_1 = ws['T19'].value
-        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_1 = ''
-        team_naam_2 = ws['T21'].value
-        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_2 = ''
-        if ws['Z19'].value == '2e':
-            goud = team_naam_2
-            zilver = team_naam_1
-        else:
-            goud = team_naam_1
-            zilver = team_naam_2
+        team_naam_1 = self._lees_team_naam(ws, 'T19')
+        team_naam_2 = self._lees_team_naam(ws, 'T21')
+        goud, zilver = self._kies_team_a_b(team_naam_1, team_naam_2, ws['Z19'].value == '2e')
 
         # bronzen finale
-        team_naam_1 = ws['T31'].value
-        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_1 = ''
-        team_naam_2 = ws['T33'].value
-        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'): team_naam_2 = ''
-        if ws['Z31'].value == '3e':
-            brons = team_naam_1
-            vierde = team_naam_2
-        elif ws['Z31'].value == '4e':
-            brons = team_naam_2
-            vierde = team_naam_1
-        else:
-            # gelijk geëindigd
-            brons = [team_naam_1, team_naam_2]
-            vierde = None
+        team_naam_1 = self._lees_team_naam(ws, 'T31')
+        team_naam_2 = self._lees_team_naam(ws, 'T33')
+        brons, vierde = self._kies_team_a_b(team_naam_1, team_naam_2, ws['Z31'].value != '3e')
 
         for team_naam in (goud, zilver, brons, vierde):
-            if team_naam in final_8:
+            if team_naam in final_8:            # pragma: no branch
                 final_8.remove(team_naam)
         # for
 
@@ -514,36 +519,14 @@ class Command(BaseCommand):
         """ Lees de uitslag van het blad 'Finales 4 teams' """
 
         # gouden finale
-        team_naam_1 = ws['L15'].value
-        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
-            team_naam_1 = ''
-        team_naam_2 = ws['L17'].value
-        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
-            team_naam_2 = ''
-        if ws['R15'].value == '2e':
-            goud = team_naam_2
-            zilver = team_naam_1
-        else:
-            goud = team_naam_1
-            zilver = team_naam_2
+        team_naam_1 = self._lees_team_naam(ws, 'L15')
+        team_naam_2 = self._lees_team_naam(ws, 'L17')
+        goud, zilver = self._kies_team_a_b(team_naam_1, team_naam_2, ws['R15'].value == '2e')
 
         # bronzen finale
-        team_naam_1 = ws['L25'].value
-        if team_naam_1 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
-            team_naam_1 = ''
-        team_naam_2 = ws['L27'].value
-        if team_naam_2 in (None, 'n.v.t.', 'nvt', 'n.v.t'):
-            team_naam_2 = ''
-        if ws['R25'].value == '3e':
-            brons = team_naam_1
-            vierde = team_naam_2
-        elif ws['R25'].value == '4e':
-            brons = team_naam_2
-            vierde = team_naam_1
-        else:
-            # gelijk geëindigd
-            brons = [team_naam_1, team_naam_2]
-            vierde = None
+        team_naam_1 = self._lees_team_naam(ws, 'L25')
+        team_naam_2 = self._lees_team_naam(ws, 'L27')
+        brons, vierde = self._kies_team_a_b(team_naam_1, team_naam_2, ws['R25'].value != '3e')
 
         self._zet_rank_en_volgorde(goud, zilver, brons, vierde, [])
 
@@ -569,19 +552,21 @@ class Command(BaseCommand):
         self._importeer_uitslag(prg)
 
         if len(self.deelnemende_teams) == 0:
-            self.stdout.write('[INFO] Geen deelnemende teams, dus geen kampioen')
+            self.stdout.write('[WARNING] Geen deelnemende teams, dus geen kampioen')
         else:
+            winnaar = None
             if "ERE" in self.team_klasse.beschrijving:
                 blad = 'Finales 8 teams'
                 try:
                     ws = prg[blad]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
                     return
 
                 winnaar = ws['Z19'].value
-            else:
-                winnaar = None
+                if winnaar:
+                    self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
+                    self._importeer_finales_8(ws)
 
             if not winnaar:
                 # None or leeg
@@ -589,21 +574,18 @@ class Command(BaseCommand):
                 blad = 'Finales 4 teams'
                 try:
                     ws = prg[blad]
-                except KeyError:
+                except KeyError:            # pragma: no cover
                     self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
                     return
 
                 winnaar = ws['R15'].value
-                if not winnaar:
+                if not winnaar:     # pragma: no cover
                     # None or leeg
                     self.stderr.write('[ERROR] Kan juiste finale blad niet bepalen (geen WINNAAR)')
                     return
 
                 self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
                 self._importeer_finales_4(ws)
-            else:
-                self.stdout.write('[INFO] Finales worden van blad %s gehaald' % repr(blad))
-                self._importeer_finales_8(ws)
 
             result = list()
             gebruikte_volgorde = list()
@@ -611,7 +593,7 @@ class Command(BaseCommand):
                 tup = (team.result_rank, team.result_volgorde, team_naam, team.result_teamscore)
                 result.append(tup)
 
-                if team.result_volgorde in gebruikte_volgorde:
+                if team.result_volgorde in gebruikte_volgorde:      # pragma: no cover
                     self.stderr.write('[ERROR] Dubbel gebruikte team.result_volgorde: %s' % team.result_volgorde)
                 else:
                     gebruikte_volgorde.append(team.result_volgorde)

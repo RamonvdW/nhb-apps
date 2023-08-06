@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,13 +20,13 @@ class TestTakenViews(E2EHelpers, TestCase):
     url_overzicht = '/taken/'
     url_details = '/taken/details/%s/'  # taak_pk
 
-    emailadres = 'taak@nhb.not'
-    emailadres2 = 'taak2@nhb.not'
+    emailadres = 'taak@test.not'
+    emailadres2 = 'taak2@test.not'
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """

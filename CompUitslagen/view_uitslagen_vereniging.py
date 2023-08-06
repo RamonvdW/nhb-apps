@@ -22,7 +22,7 @@ TEMPLATE_COMPUITSLAGEN_VERENIGING_TEAMS = 'compuitslagen/uitslagen-vereniging-te
 
 def get_sporter_ver_nr(request):
 
-    """ Geeft het vereniging nhb nummer van de ingelogde schutter terug,
+    """ Geeft het vereniging bondsnummer van de ingelogde sporter terug,
         of 101 als er geen regio vastgesteld kan worden
     """
     ver_nr = -1
@@ -30,15 +30,15 @@ def get_sporter_ver_nr(request):
     if request.user.is_authenticated:
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        if functie_nu and functie_nu.nhb_ver:
+        if functie_nu and functie_nu.vereniging:
             # HWL, WL, SEC
-            ver_nr = functie_nu.nhb_ver.ver_nr
+            ver_nr = functie_nu.vereniging.ver_nr
 
         if ver_nr < 0:
             # pak de vereniging van de ingelogde gebruiker
             account = request.user
-            if account.sporter_set.count() > 0:
-                sporter = account.sporter_set.all()[0]
+            if account.sporter_set.count() > 0:     # pragma: no branch
+                sporter = account.sporter_set.first()
                 if sporter.is_actief_lid and sporter.bij_vereniging:
                     ver_nr = sporter.bij_vereniging.ver_nr
 
@@ -88,10 +88,10 @@ class UitslagenVerenigingIndivView(TemplateView):
         try:
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(competitie=comp,
                              competitie__is_afgesloten=False,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except Regiocompetitie.DoesNotExist:     # pragma: no cover
             raise Http404('Competitie niet gevonden')
 
@@ -171,7 +171,7 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         context['deelnemers'] = deelnemers = self._get_deelnemers(deelcomp, boogtype, ver_nr)
         context['aantal_deelnemers'] = len(deelnemers)
-        context['aantal_regels'] = len(deelnemers) + 3
+        context['aantal_regels'] = len(deelnemers) + 2
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -253,7 +253,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
                                                'team_type': teamtype.afkorting.lower(),
                                                'regio_nr': regio_nr})
 
-        context['deelcomp'] = deelcomp = Regiocompetitie.objects.get(competitie=comp, nhb_regio=ver.regio)
+        context['deelcomp'] = deelcomp = Regiocompetitie.objects.get(competitie=comp, regio=ver.regio)
 
         context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
 
@@ -432,7 +432,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         context['geen_teams'] = (len(teams) == 0)
 
-        context['aantal_regels'] = len(teams) * 3 + 4       # team, team score, punten
+        context['aantal_regels'] = len(teams) * 3 + 3       # team, team score, punten
         for team in teams:
             context['aantal_regels'] += len(team.leden_lijst)
 

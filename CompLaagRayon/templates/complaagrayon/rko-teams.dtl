@@ -34,7 +34,7 @@
     </script>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -65,7 +65,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('rayon')">Activeer</a>
+                        <a class="btn-sv-rood" onclick="keuze_gemaakt('rayon')">Activeer</a>
                     </p>
                 </div>
             </div>
@@ -81,14 +81,14 @@
             <p>Aantal: {{ totaal_teams }}</p>
 
             {% if not toon_klassen %}
-                <p class="nhb-rood-text">De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld</p>
+                <p class="sv-rood-text">De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld</p>
             {% endif %}
         </div>
     </div>
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 {% if totaal_teams == 0 %}
@@ -105,9 +105,9 @@
                         <tr>
                             <td colspan="7" class="center">
                                 {% if toon_klassen %}
-                                    <h5 class="nhb-rood-text">Nog niet geplaatste teams</h5>
+                                    <h5 class="sv-rood-text">Nog niet geplaatste teams</h5>
                                 {% endif %}
-                                <span>Vraag de HWL's om <span class="nhb-rood-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
+                                <span>Vraag de HWL's om <span class="sv-rood-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
                             </td>
                         </tr>
                         <tr>
@@ -125,17 +125,17 @@
                         <td class="center">{{ team.vereniging.regio.regio_nr }}</td>
                         <td>{{ team.vereniging }}</td>
                         <td>{{ team.team_naam }}</td>
-                        <td class="center{% if team.sporter_count < 3 %} nhb-rood-text{% endif %}">{{ team.sporter_count }}</td>
-                        <td class="center{% if team.ag_str == "000,0" %} nhb-rood-text{% endif %}">{{ team.ag_str }}</td>
+                        <td class="center{% if team.sporter_count < 3 %} sv-rood-text{% endif %}">{{ team.sporter_count }}</td>
+                        <td class="center{% if team.ag_str == "000,0" %} sv-rood-text{% endif %}">{{ team.ag_str }}</td>
                         <td>{{ team.team_type.beschrijving }}</td>
                         <td class="center">
                             {% if team.url_aanpassen %}
-                                <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
+                                <a class="btn-sv-rood" href="{{ team.url_aanpassen }}">
                                     <i class="notranslate material-icons-round">group</i></a>
                             {% endif %}
                             {% if team.url_verwijder %}
                                 <span>&nbsp;&nbsp;</span>
-                                <a class="btn-nhb-rood" href="{{ team.url_verwijder }}">Verwijder</a>
+                                <a class="btn-sv-rood" href="{{ team.url_verwijder }}">Verwijder</a>
                             {% endif %}
                         </td>
                     </tr>
@@ -145,7 +145,7 @@
                     {% for klasse, teams in rk_teams.items %}
                         {% if not forloop.first %}
                         <tr>
-                            <td colspan="7" class="nhb-table-onderrand" style="height:50px"></td>
+                            <td colspan="7" class="sv-table-onderrand" style="height:50px"></td>
                         </tr>
                         {% endif %}
                         <tr>
@@ -172,7 +172,7 @@
                                 <td>{{ team.status_str }}</td>
                                 <td class="center">
                                     {% if team.url_aanpassen %}
-                                        <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                                        <a class="btn-sv-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
                                     {% endif %}
                                 </td>
                             </tr>

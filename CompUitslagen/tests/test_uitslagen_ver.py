@@ -22,8 +22,8 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
     url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
 
     regio_nr = 101
-    ver_nr = 0      # wordt in setupTestData ingevuld
-    club_naam = ''  # wordt in setupTestData ingevuld
+    ver_nr = 0      # wordt in setUpTestData ingevuld
+    club_naam = ''  # wordt in setUpTestData ingevuld
 
     testdata = None
 
@@ -32,7 +32,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
         cls.testdata.maak_clubs_en_sporters()
         cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
         cls.club_naam = '[%s] Club %s' % (cls.ver_nr, cls.ver_nr)
@@ -48,7 +48,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         cls.testdata.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[cls.regio_nr])
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def test_ver_indiv(self):
         # anon

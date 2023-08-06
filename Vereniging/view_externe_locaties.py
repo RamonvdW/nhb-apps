@@ -45,8 +45,8 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])        # afkappen voor de veiligheid
-            ver = NhbVereniging.objects.get(pk=ver_pk)
+            ver_nr = int(self.kwargs['ver_nr'][:6])        # afkappen voor de veiligheid
+            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
 
@@ -59,10 +59,10 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         context['ver'] = ver = self.get_vereniging()
 
         context['readonly'] = True
-        if self.functie_nu and self.functie_nu.rol == 'HWL' and self.functie_nu.nhb_ver == ver:
+        if self.functie_nu and self.functie_nu.rol == 'HWL' and self.functie_nu.vereniging == ver:
             context['readonly'] = False
             context['url_toevoegen'] = reverse('Vereniging:externe-locaties',
-                                               kwargs={'vereniging_pk': ver.pk})
+                                               kwargs={'ver_nr': ver.ver_nr})
 
         locaties = ver.wedstrijdlocatie_set.filter(zichtbaar=True,
                                                    baan_type='E')
@@ -74,7 +74,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             locatie.geen_disciplines = locatie.disciplines_str() == ""
 
             locatie.url_wijzig = reverse('Vereniging:locatie-details',
-                                         kwargs={'vereniging_pk': ver.pk,
+                                         kwargs={'ver_nr': ver.ver_nr,
                                                  'locatie_pk': locatie.pk})
         # for
 
@@ -97,7 +97,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
         ver = self.get_vereniging()
 
-        if not self.functie_nu or self.functie_nu.rol != 'HWL' or self.functie_nu.nhb_ver != ver:
+        if not self.functie_nu or self.functie_nu.rol != 'HWL' or self.functie_nu.vereniging != ver:
             raise PermissionDenied('Alleen HWL mag een locatie toevoegen')
 
         locatie = WedstrijdLocatie(baan_type='E')      # externe locatie
@@ -106,7 +106,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
         # meteen wijzigen
         url = reverse('Vereniging:locatie-details',
-                      kwargs={'vereniging_pk': ver.pk,
+                      kwargs={'ver_nr': ver.ver_nr,
                               'locatie_pk': locatie.pk})
 
         return HttpResponseRedirect(url)
@@ -137,8 +137,8 @@ class ExterneLocatieDetailsView(TemplateView):
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])          # afkappen voor de veiligheid
-            ver = NhbVereniging.objects.get(pk=ver_pk)
+            ver_nr = int(self.kwargs['ver_nr'][:6])          # afkappen voor de veiligheid
+            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
 
@@ -152,7 +152,7 @@ class ExterneLocatieDetailsView(TemplateView):
 
         # controleer dat de gebruiker HWL is van deze vereniging
         readonly = True
-        if functie_nu and functie_nu.rol == 'HWL' and functie_nu.nhb_ver == ver:
+        if functie_nu and functie_nu.rol == 'HWL' and functie_nu.vereniging == ver:
             readonly = False
 
         return readonly
@@ -180,18 +180,18 @@ class ExterneLocatieDetailsView(TemplateView):
         context['buiten_max_afstand'] = [nr for nr in range(30, 100+1, 10)]
 
         if not readonly:
-            context['url_opslaan'] = reverse('Vereniging:locatie-details',
-                                             kwargs={'vereniging_pk': ver.pk,
-                                                     'locatie_pk': locatie.pk})
-
-            context['url_verwijder'] = context['url_opslaan']
+            url = reverse('Vereniging:locatie-details',
+                          kwargs={'ver_nr': ver.ver_nr,
+                                  'locatie_pk': locatie.pk})
+            context['url_opslaan'] = url
+            context['url_verwijder'] = url
 
         context['url_terug'] = reverse('Vereniging:externe-locaties',
-                                       kwargs={'vereniging_pk': ver.pk})
+                                       kwargs={'ver_nr': ver.ver_nr})
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Vereniging:externe-locaties', kwargs={'vereniging_pk': ver.pk}), 'Wedstrijdlocaties'),
+            (reverse('Vereniging:externe-locaties', kwargs={'ver_nr': ver.ver_nr}), 'Wedstrijdlocaties'),
             (None, 'Locatie details')
         )
 
@@ -212,7 +212,7 @@ class ExterneLocatieDetailsView(TemplateView):
             # FUTURE: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
 
             url = reverse('Vereniging:externe-locaties',
-                          kwargs={'vereniging_pk': ver.pk})
+                          kwargs={'ver_nr': ver.ver_nr})
             return HttpResponseRedirect(url)
 
         data = request.POST.get('naam', '')
@@ -264,8 +264,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 banen = 0
             if locatie.banen_18m != banen:
-                activiteit = "Aanpassing aantal 18m banen van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, banen, locatie.banen_18m)
+                activiteit = "Aanpassing aantal 18m banen van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, banen, locatie.banen_18m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.banen_18m = banen
 
@@ -276,20 +276,10 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 banen = 0
             if locatie.banen_25m != banen:
-                activiteit = "Aanpassing aantal 25m banen van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, banen, locatie.banen_25m)
+                activiteit = "Aanpassing aantal 25m banen van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, banen, locatie.banen_25m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.banen_25m = banen
-
-            # FUTURE: remove when max_dt_per_baan has been removed
-            # max_dt = 3
-            # if request.POST.get('max_dt', '') == '4':
-            #     max_dt = 4
-            # if locatie.max_dt_per_baan != max_dt:
-            #     activiteit = "Aanpassing max DT per baan van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-            #                     locatie.naam, ver, max_dt, locatie.max_dt_per_baan)
-            #     schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
-            #     locatie.max_dt_per_baan = max_dt
 
             try:
                 sporters = int(request.POST.get('max_sporters_18m', 0))
@@ -298,8 +288,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 sporters = 0
             if locatie.max_sporters_18m != sporters:
-                activiteit = "Aanpassing maximum sporters 18m van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, sporters, locatie.max_sporters_18m)
+                activiteit = "Aanpassing maximum sporters 18m van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, sporters, locatie.max_sporters_18m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.max_sporters_18m = sporters
 
@@ -310,8 +300,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 sporters = 0
             if locatie.max_sporters_25m != sporters:
-                activiteit = "Aanpassing maximum sporters 25m van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, sporters, locatie.max_sporters_25m)
+                activiteit = "Aanpassing maximum sporters 25m van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s naar %s (was %s)" % (ver, sporters, locatie.max_sporters_25m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.max_sporters_25m = sporters
 
@@ -332,8 +322,9 @@ class ExterneLocatieDetailsView(TemplateView):
                 banen = 0
 
             if max_afstand != locatie.buiten_max_afstand or banen != locatie.buiten_banen:
-                activiteit = "Aanpassing aantal outdoor banen van externe locatie %s van vereniging %s: naar %s x %s meter (was %s x %sm)" % (
-                                locatie.naam, ver,
+                activiteit = "Aanpassing aantal outdoor banen van externe locatie %s" % locatie.naam
+                activiteit += " van vereniging %s: naar %s x %s meter (was %s x %sm)" % (
+                                ver,
                                 banen, max_afstand,
                                 locatie.buiten_banen, locatie.buiten_max_afstand)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -343,17 +334,18 @@ class ExterneLocatieDetailsView(TemplateView):
         data = request.POST.get('notities', '')
         data = data.replace('\r\n', '\n')
         if locatie.notities != data:
-            activiteit = "Aanpassing bijzonderheden van externe locatie %s van vereniging %s: %s (was %s)" % (
-                        locatie.naam, ver,
-                        repr(data.replace('\n', ' / ')),
-                        repr(locatie.notities.replace('\n', ' / ')))
+            activiteit = "Aanpassing bijzonderheden van externe locatie %s" % locatie.naam
+            activiteit += " van vereniging %s: %s (was %s)" % (
+                            ver,
+                            repr(data.replace('\n', ' / ')),
+                            repr(locatie.notities.replace('\n', ' / ')))
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
             locatie.notities = data
 
         locatie.save()
 
         url = reverse('Vereniging:externe-locaties',
-                      kwargs={'vereniging_pk': ver.pk})
+                      kwargs={'ver_nr': ver.ver_nr})
         return HttpResponseRedirect(url)
 
 

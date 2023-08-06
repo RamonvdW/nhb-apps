@@ -22,7 +22,7 @@ class Command(BaseCommand):
         for ronde_team in (RegiocompetitieRondeTeam
                            .objects
                            .select_related('team__regiocompetitie__competitie',
-                                           'team__regiocompetitie__nhb_regio',
+                                           'team__regiocompetitie__regio',
                                            'team__team_type',
                                            'team__vereniging')
                            .order_by('team__regiocompetitie__competitie',
@@ -52,7 +52,7 @@ class Command(BaseCommand):
             del tup
 
             tup2 = (ronde_team.team.regiocompetitie.competitie.pk,
-                    ronde_team.team.regiocompetitie.nhb_regio.regio_nr)
+                    ronde_team.team.regiocompetitie.regio.regio_nr)
 
             try:
                 count[tup2][ronde_team.ronde_nr] += 1

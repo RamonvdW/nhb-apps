@@ -54,7 +54,7 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 {% if huidige_beheerders.count %}
@@ -70,9 +70,9 @@
                         <tr>
                             <td>{{ account.volledige_naam }}</td>
                             <td>{{ account.geo_beschrijving }}</td>
-                            <td class="nhb-nhb-rood-text">{{ account.let_op }}</td>
+                            <td class="sv-rood-text">{{ account.let_op }}</td>
                             <td class="center">
-                                <a class="btn-nhb-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
+                                <a class="btn-sv-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
                                     <i class="notranslate material-icons-round left">delete</i>Verwijder</a>
 
                                 <!-- modal dialog voor deze specifieke beheerder -->
@@ -83,10 +83,10 @@
 
                                         <div class="modal-footer" style="text-align:center; display:block">
                                             <div style="display:inline-block; width:50%">
-                                                <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">Ja</button>
+                                                <button class="btn-sv-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">Ja</button>
                                             </div>
                                             <div style="display:inline-block; width:50%">
-                                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                                <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                                             </div>
                                         </div>
                                     </div>
@@ -120,7 +120,7 @@
     </div>
 
     <!-- blauwe balk met zoek dialoog -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -133,7 +133,7 @@
 
                     <div class="row"> <!-- style="margin-top:90px">-->
                         <div class="col s12">
-                            <button class="btn-nhb-rood" type="submit">
+                            <button class="btn-sv-rood" type="submit">
                                 <i class="notranslate material-icons-round left">search</i>Zoek</button>
                         </div>
                     </div>
@@ -157,7 +157,7 @@
 
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
                     {% if object_list|length > 0 %}
@@ -175,7 +175,7 @@
                                 <td>{{ account.volledige_naam|highlight:zoekterm }}</td>
                                 <td>{% if is_vereniging_rol %}{{ account.vereniging_naam }}{% else %}{{ account.geo_beschrijving }}{% endif %}</td>
                                 <td>
-                                    <button class="btn-nhb-rood" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
+                                    <button class="btn-sv-rood" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
                                         <i class="notranslate material-icons-round left">add</i>Koppel</button>
                                 </td>
                             </tr>

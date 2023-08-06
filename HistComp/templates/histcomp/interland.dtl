@@ -1,0 +1,91 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Interland lijst{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Interland lijst</h3>
+            <p>Uitslag competitie van 25m1pijl seizoen: <b>{{ seizoen }}</b>.</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="white" style="padding:10px">
+                <p>Onderstaande sporters hebben minimaal <b>{{ minimum_aantal_scores }}</b> scores neergezet in het seizoen.</p>
+
+                <p>De wedstrijdleeftijd is berekend voor het jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
+
+                <p>Sporters met een wedstrijdleeftijd:<br>
+                .. lager dan <b>{{ jeugd_min}}</b> zijn niet in de lijst opgenomen.<br>
+                .. vanaf <b>{{ jeugd_min }}</b> tot en met <b>{{ jeugd_max }}</b> worden als <b>Jeugd</b> gemarkeerd.<br>
+                .. boven de <b>{{ jeugd_max }}</b> krijgen simpelweg de opmerking <b>Senior</b>.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Kandidaten</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="white">
+
+                {% for klasse in klassen %}
+                    {% if not forloop.first %}
+                        <tr>
+                            <td colspan="6" class="sv-table-onderrand" style="height:50px"></td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <td colspan="6" class="center">
+                            <h5 id="{{ klasse.beschrijving }}">Klasse: {{ klasse.beschrijving }}</h5>
+                            <a class="btn-sv-rood" href="{{ klasse.url_download }}">
+                                <i class="notranslate material-icons-round left">get_app</i>Download</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="center">Gem<span class="hide-on-small-only">iddelde</span></th>
+                        <th class="center">Klasse</th>
+                        <th class="center">Gesl<span class="hide-on-small-only">acht</span></th>
+                        <th>Lid nr</th>
+                        <th>Naam</th>
+                        <th>Ver<span class="hide-on-small-only">eniging</span></th>
+                    </tr>
+
+                    {% for indiv in klasse.indiv %}
+                        <tr>
+                            <td class="center">{{ indiv.gemiddelde }}</td>
+                            <td class="center">{{ indiv.leeftijd_str }}</td>
+                            <td class="center">{{ indiv.sporter_geslacht }}</td>
+                            <td>{{ indiv.sporter_lid_nr }}</td>
+                            <td>{{ indiv.sporter_naam }}</td>
+                            <td>[{{ indiv.vereniging_nr }}]<span class="hide-on-small-only"> {{ indiv.vereniging_naam }}</span></td>
+                        </tr>
+                    {% endfor %}
+
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+{% include 'feedback/sidebar.dtl' with op_pagina="histcomp-interland" %}
+
+{% endblock %}

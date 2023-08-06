@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -25,15 +25,15 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
     test_after = ('Functie',)
 
     url_kies = '/bondscompetities/'
-    url_tijdlijn = '/bondscompetities/%s/tijdlijn/'             # comp_pk
     url_overzicht = '/bondscompetities/%s/'                     # comp_pk
+    url_tijdlijn = '/bondscompetities/beheer/%s/tijdlijn/'      # comp_pk
     url_overzicht_beheer = '/bondscompetities/beheer/%s/'       # comp_pk
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr
@@ -44,7 +44,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
                     geslacht="M",
                     voornaam=voornaam,
                     achternaam="Tester",
-                    email=voornaam.lower() + "@nhb.test",
+                    email=voornaam.lower() + "@test.not",
                     geboorte_datum=datetime.date(year=1972, month=3, day=4),
                     sinds_datum=datetime.date(year=2010, month=11, day=12),
                     bij_vereniging=self._ver)
@@ -72,7 +72,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
 
         # maak functie HWL aan voor deze vereniging
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
@@ -92,11 +92,11 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_RK, rayon=self.rayon_2).all():
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in Regiocompetitie.objects.filter(nhb_regio=self.regio_101).all():
+        for deelcomp in Regiocompetitie.objects.filter(regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -110,7 +110,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
 
         # maak functie HWL aan voor deze vereniging
         hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        hwl.nhb_ver = ver
+        hwl.vereniging = ver
         hwl.save()
 
     def _zet_competities_naar_fase_b(self):
@@ -137,9 +137,9 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         do_barebow = True
 
         # doorloop de 2 verenigingen in deze regio
-        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101):
+        for ver in NhbVereniging.objects.filter(regio=self.regio_101):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
 
             # maak 3 leden aan
@@ -149,7 +149,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
                 sporter.lid_nr = lid_nr
                 sporter.voornaam = "Lid %s" % lid_nr
                 sporter.achternaam = "de Tester"
-                sporter.bij_vereniging = nhb_ver
+                sporter.bij_vereniging = ver
                 sporter.is_actief_lid = True
                 if do_barebow:
                     sporter.geboorte_datum = datetime.date(2019 - 12, 1, 1)  # aspirant
@@ -199,9 +199,9 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
 
         # doorloop de 2 verenigingen in deze regio
-        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101):
+        for ver in NhbVereniging.objects.filter(regio=self.regio_101):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
 
             post_params = dict()
@@ -286,7 +286,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # RKO 25m Rayon 2
-        deelkamp = Kampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, nhb_rayon=self.rayon_2)
+        deelkamp = Kampioenschap.objects.get(competitie=comp25, deel=DEEL_RK, rayon=self.rayon_2)
         functie_rko = deelkamp.functie
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_login_and_pass_otp(self.account_rko)
@@ -299,7 +299,7 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # RCL
-        deelcomp = Regiocompetitie.objects.get(competitie=comp18, nhb_regio=self.regio_101)
+        deelcomp = Regiocompetitie.objects.get(competitie=comp18, regio=self.regio_101)
         functie_rcl = deelcomp.functie
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
@@ -310,6 +310,12 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_tijdlijn % comp18.pk)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
+
         # HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
@@ -317,18 +323,22 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_tijdlijn % comp18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_tijdlijn % comp25.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/tijdlijn.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compbeheer/tijdlijn.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_tijdlijn % 'x')
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # TODO: add WL
 
         # coverage voor models __str__
-        obj = RegiocompetitieSporterBoog.objects.all()[0]
+        obj = RegiocompetitieSporterBoog.objects.first()
         self.assertTrue(str(obj) != '')
 
 # end of file

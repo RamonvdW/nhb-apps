@@ -134,7 +134,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         deelkamp_rk = Kampioenschap.objects.get(
                         competitie=comp,
-                        nhb_rayon=rayon_3,
+                        rayon=rayon_3,
                         deel=DEEL_RK)
         deelkamp_rk.rk_bk_matches.set([wed2, wed3, wed4])
 
@@ -142,7 +142,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         # geen wijzigingen nodig
         deelkamp_rk = Kampioenschap.objects.get(
                         competitie=comp,
-                        nhb_rayon=rayon_1,
+                        rayon=rayon_1,
                         deel=DEEL_RK)
         self.assertIsNotNone(deelkamp_rk)
 

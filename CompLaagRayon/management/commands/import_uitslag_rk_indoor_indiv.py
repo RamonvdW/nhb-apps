@@ -42,7 +42,7 @@ class Command(BaseCommand):
                           .filter(kampioenschap__competitie__afstand='18',
                                   kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -442,10 +442,17 @@ class Command(BaseCommand):
                 sort_scores.append(tup)
         # for
         sort_scores.sort(reverse=True)  # hoogste eerst
-        for _, _, _, deelnemer in sort_scores:
-            deelnemer.result_rank = result
-            deelnemer.result_volgorde = result
-            result += 1
+        rank_doorlopend = result
+        rank = rank_doorlopend
+        prev_totaal = -1
+        for totaal, _, _, deelnemer in sort_scores:
+            if totaal != prev_totaal:
+                rank = rank_doorlopend
+            # else: zelfde score, zelfde rank
+            deelnemer.result_rank = rank
+            deelnemer.result_volgorde = rank_doorlopend
+            rank_doorlopend += 1
+            prev_totaal = totaal
             if not self.dryrun:
                 deelnemer.save(update_fields=['result_rank', 'result_volgorde'])
         # for
@@ -462,7 +469,8 @@ class Command(BaseCommand):
                 if label:
                     labels.append(label)
             # for
-            # print('[DEBUG] blad_naam: %s, labels: %s' % (repr(blad_naam), repr(labels)))
+
+            # self.stdout.write('[DEBUG] blad_naam: %s, labels: %s' % (repr(blad_naam), repr(labels)))
             if len(labels) > 1:
                 self.stdout.write('[INFO] Finale blad: %s' % repr(blad_naam))
                 break

@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -27,11 +27,11 @@
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ ronde.regiocompetitie.nhb_regio.rayon}}</td>
+                    <td>{{ ronde.regiocompetitie.regio.rayon}}</td>
                 </tr>
                 <tr>
                     <th>Regio</th>
-                    <td>{{ ronde.regiocompetitie.nhb_regio }}</td>
+                    <td>{{ ronde.regiocompetitie.regio }}</td>
                 </tr>
                 {% if ronde.cluster %}
                     <tr>
@@ -52,7 +52,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -75,7 +75,7 @@
                                 {% if wedstrijd.vereniging %}
                                     <span>{{ wedstrijd.vereniging }}</span>
                                 {% else %}
-                                    <i class="nhb-rood-text">Onbekend</i>
+                                    <i class="sv-rood-text">Onbekend</i>
                                 {% endif %}
                             </td>
 
@@ -84,7 +84,7 @@
                             <!-- knop om wedstrijd te wijzigen -->
                             <td class="center">
                                 {% if wedstrijd.url_wijzig %}
-                                    <a class="btn-nhb-rood" href="{{ wedstrijd.url_wijzig }}">
+                                    <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
                                         <i class="notranslate material-icons-round">edit</i></a>
                                 {% endif %}
                             </td>
@@ -104,7 +104,7 @@
                         <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
                             <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                                 {% csrf_token %}
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>

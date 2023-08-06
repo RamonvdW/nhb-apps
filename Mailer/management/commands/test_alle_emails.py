@@ -9,9 +9,10 @@
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Account.models import AccountEmail
+from Account.models import Account
+from Account.operations.otp import otp_stuur_email_losgekoppeld
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
-from Account.view_login import account_stuur_email_bevestig_nieuwe_email
+from Account.operations.email import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
 from Bestel.definities import BESTELLING_STATUS_WACHT_OP_BETALING
@@ -19,7 +20,6 @@ from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
-from Functie.view_otp_controle import functie_stuur_email_otp_losgekoppeld
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
 from NhbStructuur.models import NhbVereniging, NhbRegio
@@ -49,7 +49,7 @@ class Command(BaseCommand):
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
         self.to_email = ''              # krijgen we via de command line
-        self.account_email = None
+        self.account = None
         self.bestelling = None
         self.functie = None
         self.mailqueue_last = MailQueue.objects.count()
@@ -89,30 +89,30 @@ class Command(BaseCommand):
 
         sporter1 = Sporter(
                         lid_nr=self.test_lid_nr,
-                        voornaam=self.account_email.account.first_name,
-                        achternaam=self.account_email.account.last_name,
-                        unaccented_naam=self.account_email.account.unaccented_naam,
+                        voornaam=self.account.first_name,
+                        achternaam=self.account.last_name,
+                        unaccented_naam=self.account.unaccented_naam,
                         email=self.to_email,
                         geboorte_datum='1970-07-07',
                         geslacht='X',
                         para_classificatie='',
                         sinds_datum='2000-01-01',
                         bij_vereniging=ver,
-                        account=self.account_email.account)
+                        account=self.account)
         sporter1.save()
 
         sporter2 = Sporter(
                         lid_nr=self.test_lid_nr - 1,
-                        voornaam=self.account_email.account.first_name,
-                        achternaam=self.account_email.account.last_name,
-                        unaccented_naam=self.account_email.account.unaccented_naam,
+                        voornaam=self.account.first_name,
+                        achternaam=self.account.last_name,
+                        unaccented_naam=self.account.unaccented_naam,
                         email=self.to_email,
                         geboorte_datum='1970-07-07',
                         geslacht='M',
                         para_classificatie='',
                         sinds_datum='2000-01-01',
                         bij_vereniging=ver,
-                        account=self.account_email.account)
+                        account=self.account)
         sporter2.save()
 
         sporterboog_r = SporterBoog(
@@ -165,7 +165,7 @@ class Command(BaseCommand):
                             sessie=sessie,
                             wedstrijdklasse=wkls_r[0],
                             sporterboog=sporterboog_r,
-                            koper=self.account_email.account,
+                            koper=self.account,
                             ontvangen_euro=Decimal('42.40'))
         inschrijving_r.save()
 
@@ -176,7 +176,7 @@ class Command(BaseCommand):
                             sessie=sessie,
                             wedstrijdklasse=wkls_c[0],
                             sporterboog=sporterboog_c,
-                            koper=self.account_email.account,
+                            koper=self.account,
                             ontvangen_euro=Decimal('22.41'))
         inschrijving_c.save()
 
@@ -199,7 +199,7 @@ class Command(BaseCommand):
 
         bestelling = Bestelling(
                         bestel_nr=self.test_bestel_nr,
-                        account=self.account_email.account,
+                        account=self.account,
                         ontvanger=instellingen,
                         verkoper_naam='Test verkoper naam',
                         verkoper_adres1=ver.adres_regel1,
@@ -319,7 +319,7 @@ class Command(BaseCommand):
 
     def _test_account(self):
         self.stdout.write('Maak mail voor Account - Wachtwoord vergeten')
-        account_stuur_email_wachtwoord_vergeten(self.account_email, test=1)
+        account_stuur_email_wachtwoord_vergeten(self.account, test=1)
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Account - Bevestig toegang e-mail')
@@ -337,15 +337,15 @@ class Command(BaseCommand):
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Functie - Gewijzigde beheerder (toegevoegd)')
-        functie_wijziging_stuur_email_notificatie(self.account_email.account, 'not used', 'Test functie', add=True)
+        functie_wijziging_stuur_email_notificatie(self.account, 'not used', 'Test functie', add=True)
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Functie - Gewijzigde beheerder (verwijderd)')
-        functie_wijziging_stuur_email_notificatie(self.account_email.account, 'not used', 'Test functie', remove=True)
+        functie_wijziging_stuur_email_notificatie(self.account, 'not used', 'Test functie', remove=True)
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Functie - OTP losgekoppeld')
-        functie_stuur_email_otp_losgekoppeld(self.account_email.account)
+        otp_stuur_email_losgekoppeld(self.account)
         self._check_mail_gemaakt()
 
     def _test_taken(self):
@@ -367,11 +367,10 @@ class Command(BaseCommand):
                 self.stdout.write('[WARNING] E-mailadres is niet white-listed!')
 
         try:
-            self.account_email = (AccountEmail
-                                  .objects
-                                  .select_related('account')
-                                  .get(bevestigde_email=self.to_email))
-        except AccountEmail.DoesNotExist:
+            self.account = (Account
+                            .objects
+                            .get(bevestigde_email=self.to_email))
+        except Account.DoesNotExist:
             self.stderr.write('Geen account gevonden met dit e-mailadres')
             return False
 

@@ -61,9 +61,9 @@ class CompetitieKiesView(TemplateView):
                 comps.append(comp)
 
                 if comp.afstand == '18':
-                    comp.img_src = static('plein/badge_nhb_indoor.png')
+                    comp.img_src = static('plein/badge_discipline_indoor.png')
                 else:
-                    comp.img_src = static('plein/badge_nhb_25m1p.png')
+                    comp.img_src = static('plein/badge_discipline_25m1p.png')
 
                 if link_naar_beheer:
                     comp.card_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})

@@ -32,7 +32,7 @@ class HeeftMollieKeyFilter(admin.SimpleListFilter):
         keuze = self.value()
         if keuze is not None:
             # print('keuze: %s' % repr(keuze))
-            if keuze == '0':                                 # pragma: no cover
+            if keuze == '0':
                 # moet een mollie key hebben
                 queryset = queryset.exclude(mollie_api_key='')
 
@@ -47,7 +47,7 @@ class BetaalInstellingenVerenigingAdmin(admin.ModelAdmin):
 
     search_fields = ('vereniging__ver_nr', 'vereniging__naam')
 
-    list_filter = (HeeftMollieKeyFilter, 'akkoord_via_nhb')
+    list_filter = (HeeftMollieKeyFilter, 'akkoord_via_bond')
 
 
 class BetaalMutatieAdmin(admin.ModelAdmin):

@@ -7,8 +7,10 @@
 from django.test import TestCase
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, CompetitieMatch, Kampioenschap
+from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
+from Functie.rol import rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -35,58 +37,64 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         self.account_admin = self.e2e_create_account_admin(accepteer_vhpg=False)
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
+        self.account_geen_lid = self.e2e_create_account('geen_lid', 'geen_lid@test.com', 'Geen')
 
         regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         self.functie_rcl = maak_functie("RCL test", "RCL")
-        self.functie_rcl.nhb_regio = regio_111
+        self.functie_rcl.regio = regio_111
         self.functie_rcl.save()
 
         # maak een test vereniging
         ver = NhbVereniging(
                     ver_nr="1000",
                     naam="Grote Club",
+                    plaats='Pijlstad',
                     regio=regio_111)
         ver.save()
         self.ver1000 = ver
 
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                        lid_nr=100001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Tester",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_normaal,
+                        email=self.account_normaal.email)
         sporter.save()
 
         # maak een test vereniging zonder HWL rol
-        ver2 = NhbVereniging()
-        ver2.naam = "Grote Club"
-        ver2.ver_nr = "1001"
-        ver2.regio = regio_111
+        ver2 = NhbVereniging(
+                    naam="Grote Club",
+                    plaats='',
+                    ver_nr="1001",
+                    regio=regio_111)
         ver2.save()
+
+        self.functie_sec2 = maak_functie("SEC test 2", "SEC")
+        self.functie_sec2.vereniging = ver2
+        self.functie_sec2.save()
 
         self.functie_bko = maak_functie("BKO test", "BKO")
 
         self.functie_rko = maak_functie("RKO test", "RKO")
-        self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=1)
+        self.functie_rko.rayon = NhbRayon.objects.get(rayon_nr=1)
         self.functie_rko.save()
 
         self.functie_mo = maak_functie("MO test", "MO")
@@ -115,8 +123,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls = [url for url in urls if url.startswith('/functie/otp-koppelen-stap1/')]
-        self.assertEqual(urls, ['/functie/otp-koppelen-stap1/'])
+        urls = [url for url in urls if url.startswith('/account/otp-koppelen-stap1/')]
+        self.assertEqual(urls, ['/account/otp-koppelen-stap1/'])
 
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
@@ -253,11 +261,11 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_accountwissel, urls)
 
     def test_bb(self):
-        # maak een BB die geen NHB lid is
-        self.account_geenlid.is_BB = True
-        self.account_geenlid.save()
-        self.e2e_account_accepteert_vhpg(self.account_geenlid)
-        self.e2e_login_and_pass_otp(self.account_geenlid)
+        # maak een BB die geen lid is
+        self.account_geen_lid.is_BB = True
+        self.account_geen_lid.save()
+        self.e2e_account_accepteert_vhpg(self.account_geen_lid)
+        self.e2e_login_and_pass_otp(self.account_geen_lid)
 
         with self.assert_max_queries(25):
             resp = self.client.get(self.url_wissel_van_rol)
@@ -325,6 +333,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_rcl(self):
+        self.functie_hwl.vereniging.plaats = ''
+        self.functie_hwl.vereniging.save(update_fields=['plaats'])
+
         self.functie_rcl.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
@@ -349,6 +360,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
     def test_sec(self):
         self.functie_sec.accounts.add(self.account_normaal)
+        self.functie_sec2.accounts.add(self.account_normaal)        # ver.plaats is leeg
+
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_sec)
@@ -491,7 +504,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Sporter")
 
-    def test_geen_rolwissel(self):
+    def test_geen_rol(self):
         # dit raakt de exceptie in Account.rol:rol_mag_wisselen
         self.e2e_logout()
         with self.assert_max_queries(20):
@@ -604,7 +617,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         bko18.accounts.add(self.account_normaal)
 
         Sporter.objects.all().delete()
-        NhbVereniging.objects.all().delete()        # om lege nhbver_cache te raken
+        NhbVereniging.objects.all().delete()        # om lege ver_cache te raken
 
         # log in en wordt BKO
         self.e2e_account_accepteert_vhpg(self.account_normaal)
@@ -633,11 +646,11 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_html_ok(resp)       # checkt ook href's
 
     def test_bb_naar_sec(self):
-        # maak een BB die geen NHB lid is
-        self.account_geenlid.is_BB = True
-        self.account_geenlid.save()
-        self.e2e_account_accepteert_vhpg(self.account_geenlid)
-        self.e2e_login_and_pass_otp(self.account_geenlid)
+        # maak een BB die geen lid is
+        self.account_geen_lid.is_BB = True
+        self.account_geen_lid.save()
+        self.e2e_account_accepteert_vhpg(self.account_geen_lid)
+        self.e2e_login_and_pass_otp(self.account_geen_lid)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -669,7 +682,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         ver.save()
 
         functie_hwl = maak_functie('HWL ver 1001', 'HWL')
-        functie_hwl.nhb_ver = ver
+        functie_hwl.vereniging = ver
         functie_hwl.save()
 
         self.e2e_account_accepteert_vhpg(self.account_admin)
@@ -707,6 +720,27 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_activeer_functie % 999999)
         self.assert404(resp, 'Foute parameter (functie)')
+
+    def test_inconsistent(self):
+        # corner case: BB naar niet-bestaande functie
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+
+        resp = self.client.get('/plein/')
+        request = resp.wsgi_request
+
+        rol, functie = rol_get_huidige_functie(request)
+        self.assertEqual(rol, Rollen.ROL_BKO)
+        self.assertEqual(functie, self.functie_bko)
+
+        self.functie_bko.rol = 'RCL'
+        self.functie_bko.save(update_fields=['rol'])
+        self.e2e_wissel_naar_functie(self.functie_bko)
+
+        rol, functie = rol_get_huidige_functie(request)
+        self.assertEqual(rol, Rollen.ROL_BKO)
+        self.assertEqual(functie, self.functie_bko)
 
     def test_vhpg(self):
         # controleer doorsturen naar de VHPG acceptatie pagina
@@ -808,7 +842,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         deelkamp = Kampioenschap(
                         competitie=comp,
                         deel=DEEL_RK,
-                        nhb_rayon=self.functie_rko.nhb_rayon,
+                        rayon=self.functie_rko.rayon,
                         functie=self.functie_rko)
         deelkamp.save()
         deelkamp.rk_bk_matches.add(match)

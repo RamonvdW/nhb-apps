@@ -72,13 +72,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         context['wed'] = wedstrijd
 
+        # zorg dat de huidige datum weer gekozen kan worden
         context['now'] = now = timezone.now()
-        context['begin_jaar'] = min(now.year, wedstrijd.datum_begin.year)     # zorg dat de huidige datum weer gekozen kan worden
+        context['begin_jaar'] = min(now.year, wedstrijd.datum_begin.year)
 
         context['min_date'] = min(datetime.date(now.year, now.month, now.day), wedstrijd.datum_begin)
         context['max_date'] = datetime.date(now.year + 1, 12, 31)
@@ -395,7 +396,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
         limit_edits = False
@@ -433,7 +434,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 akkoord = request.POST.get('akkoord_verkoop', '')
                 if akkoord:
                     account = request.user
-                    sporter = account.sporter_set.all()[0]
+                    sporter = account.sporter_set.first()
                     wedstrijd.verkoopvoorwaarden_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     wedstrijd.verkoopvoorwaarden_status_when = timezone.now()
                     wedstrijd.verkoopvoorwaarden_status_acceptatie = True
@@ -493,7 +494,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     akkoord = request.POST.get('akkoord_a_status', '')
                     if akkoord:
                         account = request.user
-                        sporter = account.sporter_set.all()[0]
+                        sporter = account.sporter_set.first()
                         wedstrijd.voorwaarden_a_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                         wedstrijd.voorwaarden_a_status_when = timezone.now()
                         wedstrijd.voorwaarden_a_status_acceptatie = True
@@ -722,7 +723,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         # FUTURE: zet wijzigingen in het logboek, of begin een logboekje per wedstrijd
 
         if self.rol_nu == Rollen.ROL_HWL:
-            if wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+            if wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
             next_url = reverse('Wedstrijden:vereniging')

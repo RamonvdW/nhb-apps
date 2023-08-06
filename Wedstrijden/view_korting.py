@@ -47,7 +47,7 @@ class KortingenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
@@ -60,7 +60,10 @@ class KortingenView(UserPassesTestMixin, TemplateView):
 
         for korting in kortingen:
             korting.voor_wie_str = '-'
-            korting.voor_wedstrijden_str = '\n'.join(korting.voor_wedstrijden.order_by('datum_begin', 'pk').values_list('titel', flat=True))
+            korting.voor_wedstrijden_str = '\n'.join(korting
+                                                     .voor_wedstrijden
+                                                     .order_by('datum_begin', 'pk')
+                                                     .values_list('titel', flat=True))
 
             if korting.soort == WEDSTRIJD_KORTING_SPORTER:
                 korting.icon_name = 'account_circle'
@@ -131,7 +134,7 @@ class KiesNieuweKortingView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de HWL een nieuwe korting aan wil maken """
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
         toekomst = timezone.now().date() + datetime.timedelta(days=30)
 
         korting = WedstrijdKorting(
@@ -176,7 +179,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
         context = dict()
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
         context['ver'] = ver
 
         try:
@@ -228,8 +231,9 @@ class WijzigKortingView(UserPassesTestMixin, View):
         # for
 
         # nodig voor de datum picker
+        # zorg dat de huidige datum weer gekozen kan worden
         context['now'] = now = timezone.now()
-        context['begin_jaar'] = min(now.year, korting.geldig_tot_en_met.year)   # zorg dat de huidige datum weer gekozen kan worden
+        context['begin_jaar'] = min(now.year, korting.geldig_tot_en_met.year)
         context['min_date'] = min(now.date(), korting.geldig_tot_en_met)
         context['max_date'] = datetime.date(now.year + 1, 12, 31)
 
@@ -252,7 +256,7 @@ class WijzigKortingView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'opslaan' gebruikt wordt door de HWL """
 
-        onze_ver = self.functie_nu.nhb_ver
+        onze_ver = self.functie_nu.vereniging
 
         try:
             korting_pk = kwargs['korting_pk'][:6]       # afkappen voor de veiligheid

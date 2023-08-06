@@ -18,7 +18,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -67,7 +67,7 @@
                         </table>
 
                         <div class="center" style="margin-top:30px">
-                            <button class="btn-nhb-rood" type="submit">
+                            <button class="btn-sv-rood" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </div>
 
@@ -84,7 +84,7 @@
             <div class="col s12">
                 <h5>Niet meer nodig?</h5>
 
-                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_team">Verwijder dit team</a>
+                <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_team">Verwijder dit team</a>
             </div>
         </div>
 
@@ -100,10 +100,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>

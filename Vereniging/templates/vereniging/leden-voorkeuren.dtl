@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Voorkeuren leden</h3>
-            <p>van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}</p>
+            <p>van vereniging [{{ ver.ver_nr }}] {{ ver.naam }} te {{ ver.plaats }}</p>
         </div>
     </div>
 
@@ -28,7 +28,7 @@
         </div>
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <div class="white" style="padding:10px">
                     <table class="white" id="table1">   <!-- id is voor filter -->
@@ -60,14 +60,14 @@
                                     {% for boogtype in obj.wedstrijdbogen %}
                                         <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
                                     {% empty %}
-                                        <span class="nhb-rood-text">??</span>
+                                        <span class="sv-rood-text">??</span>
                                     {% endfor %}
                                 </td>
 
                                 {% if toon_wijzig_kolom %}
                                     <td class="right-align">
                                         {% if obj.wijzig_url %}
-                                            <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
+                                            <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
                                                 <i class="notranslate material-icons-round left hide-on-med-and-down">tune</i>
                                                 <i class="notranslate material-icons-round hide-on-large-and-up">tune</i>
                                                 <span class="hide-on-med-and-down">Wijzig</span>
@@ -93,7 +93,7 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white" id="table2">   <!-- id is voor filter -->
@@ -121,14 +121,14 @@
                             {% for boogtype in obj.wedstrijdbogen %}
                                 <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
                             {% empty %}
-                                <span class="nhb-rood-text">??</span>
+                                <span class="sv-rood-text">??</span>
                             {% endfor %}
                         </td>
 
                         {% if toon_wijzig_kolom %}
                             <td class="right-align">
                                 {% if obj.wijzig_url %}
-                                    <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
+                                    <a class="btn-sv-rood" href="{{ obj.wijzig_url }}">
                                         <i class="notranslate material-icons-round left hide-on-med-and-down">tune</i>
                                         <i class="notranslate material-icons-round hide-on-large-and-up">tune</i>
                                         <span class="hide-on-med-and-down">Wijzig</span>

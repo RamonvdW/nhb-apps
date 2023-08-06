@@ -1,27 +1,28 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# set high performance
-#sudo cpupower frequency-set --governor performance > /dev/null
-
-export PYTHONDONTWRITEBYTECODE=1
+STATIC_DIR="SiteMain/.static/"
+SETTINGS_DEV="SiteMain.settings_dev"
+SETTINGS_NORMAL="SiteMain.settings"
 BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
 
-DEBUG=1
-SETTINGS="nhbapps.settings_dev"
+export PYTHONDONTWRITEBYTECODE=1
+
 if [ "$1" = "--nodebug" ]
 then
     DEBUG=0
-    SETTINGS="nhbapps.settings"
+    SETTINGS="$SETTINGS_NORMAL"
+else
+    DEBUG=1
+    SETTINGS="$SETTINGS_DEV"
 fi
 
 ./manage.py check || exit 1
 
 echo "[INFO] Refreshing static files"
-STATIC_DIR="nhbapps/.static/"
 rm -rf "$STATIC_DIR"*
 ./manage.py collectstatic -l
 
@@ -32,34 +33,34 @@ python3 ./Betaal/test-tools/websim_betaal.py &
 
 echo "[INFO] Starting betaal_mutaties (runtime: $BG_DURATION minutes)"
 pkill -f betaal_mutaties
-./manage.py betaal_mutaties --settings=$SETTINGS $BG_DURATION &
+./manage.py betaal_mutaties --settings="$SETTINGS" $BG_DURATION &
 
 echo "[INFO] Starting bestel_mutaties (runtime: $BG_DURATION minutes)"
 pkill -f bestel_mutaties
-./manage.py bestel_mutaties --settings=$SETTINGS $BG_DURATION &
+./manage.py bestel_mutaties --settings="$SETTINGS" $BG_DURATION &
 
 echo "[INFO] Starting regiocomp_mutaties (runtime: $BG_DURATION minutes)"
 pkill -f regiocomp_mutaties
-./manage.py regiocomp_mutaties --settings=$SETTINGS $BG_DURATION &
+./manage.py regiocomp_mutaties --settings="$SETTINGS" $BG_DURATION &
 
 echo "[INFO] Starting regiocomp_tussenstand (runtime: $BG_DURATION minutes)"
 pkill -f regiocomp_tussenstand
-./manage.py regiocomp_tussenstand --settings=$SETTINGS $BG_DURATION &
+./manage.py regiocomp_tussenstand --settings="$SETTINGS" $BG_DURATION &
+
+# wacht tot alle achtergrondtaken gestart zijn
+sleep 0.8
 
 # start the development webserver
-if [ $DEBUG -eq 1 ]
+EXTRA_ARGS=''
+if [ $DEBUG -ne 1 ]
 then
-    echo "[INFO] Starting runserver with dev config and DEBUG=True"
-    ./manage.py runserver --settings=$SETTINGS
-else
     # run with DEBUG=False stops serving static files..
     # using --insecure fixes that
-    echo "[INFO] Starting runserver"
-    ./manage.py runserver --settings=$SETTINGS --insecure
+    EXTRA_ARGS="--insecure"
 fi
 
-# set normal performance
-#sudo cpupower frequency-set --governor schedutil > /dev/null
+echo "[INFO] Starting runserver with config $SETTINGS"
+./manage.py runserver --settings="$SETTINGS" --skip-checks $EXTRA_ARGS
 
 # kill the background processes
 echo "[INFO] Stopping background tasks"

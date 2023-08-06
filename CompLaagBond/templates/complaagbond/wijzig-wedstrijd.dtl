@@ -50,7 +50,7 @@
 
             if (el_select.length == 0) {
                 // vervang drop-down door statische text
-                el_td.innerHTML = '<i class="nhb-rood-text">Geen accommodatie gegevens bekend</i>';
+                el_td.innerHTML = '<i class="sv-rood-text">Geen accommodatie gegevens bekend</i>';
             } else if (el_select.length == 1) {
                 // vervang drop-down door statische text
                 el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">';
@@ -79,7 +79,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -88,14 +88,14 @@
                 </tr>
                 <tr>
                     <th>Rayon</th>
-                    <td>{{ deelkamp.nhb_rayon }}</td>
+                    <td>{{ deelkamp.rayon }}</td>
                 </tr>
             </table>
         </div>
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -127,7 +127,7 @@
                             <tr>
                                 <th>Bij vereniging</th>
                                 <td>
-                                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
+                                    <select name="ver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
                                         <option value="geen"{% if not wedstrijd.vereniging %} selected{% endif %}>-- nog niet afgesproken --</option>
                                         {% for opt in verenigingen %}
                                             <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
@@ -211,7 +211,7 @@
                         </table>
 
                         <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </div>
 
@@ -230,7 +230,7 @@
     {% elif url_verwijderen %}
 
         <p class="center">
-            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
+            <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
         </p>
 
         <div class="modal" id="bevestig_verwijder_wedstrijd">
@@ -244,10 +244,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>

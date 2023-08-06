@@ -8,26 +8,24 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
-from Competitie.tijdlijn import zet_competitie_fases
+from Competitie.tests.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
-import datetime
 
 
 class TestCompetitieTijdlijn(E2EHelpers, TestCase):
 
     """ tests voor de Competitie applicatie, module Tijdlijn """
 
-    url_overzicht = '/bondscompetities/%s/'
-
     @staticmethod
     def _maak_twee_klassen(comp):
-        indiv = TemplateCompetitieIndivKlasse.objects.all()[0]
+        indiv = TemplateCompetitieIndivKlasse.objects.first()
         CompetitieIndivKlasse(competitie=comp, volgorde=1, boogtype=indiv.boogtype, min_ag=0.0).save()
 
-        teamtype = TeamType.objects.all()[0]
+        teamtype = TeamType.objects.first()
         CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
 
-    def _dump_comp(self, comp, msg=''):         # pragma: no cover
+    @staticmethod
+    def _dump_comp(comp, msg=''):         # pragma: no cover
         print('\nCompetitie dump:')
         if msg:
             print(msg)
@@ -62,6 +60,9 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
                     begin_jaar=2000)
         comp.save()
         comp = Competitie.objects.get(pk=comp.pk)
+
+        # trigger 1e keer vaststellen fase_indiv
+        self.assertFalse(comp.is_open_voor_inschrijven())
 
         self.assertEqual(bepaal_fase_indiv(comp), 'A')
 
@@ -135,4 +136,6 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
             fase_teams = bepaal_fase_teams(comp)
             self.assertEqual(fase_teams, fase)
         # for
+
+
 # end of file

@@ -19,18 +19,18 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
             <!-- dialoog venster -->
             <div style="margin:50px 30px 30px 30px">
                 <form action="{% url 'Account:login' %}" method="post">
-                    {{ form.next }}
+                    {{ form.next_url }}
                     {% csrf_token %}
 
                     {% if form.errors %}
                         {% for error in form.non_field_errors %}
-                            <p class="left-align nhb-rood-text">Fout: {{ error|escape }}</p>
+                            <p class="left-align sv-rood-text">Fout: {{ error|escape }}</p>
                         {% endfor %}
                         <p>&nbsp;</p>
                     {% endif %}
@@ -53,14 +53,14 @@
                     <div class="row" style="margin-top:90px">
                         {% if show_wachtwoord_vergeten %}
                             <div class="col s8">
-                                <a class="btn-nhb-rood" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
+                                <a class="btn-sv-rood" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
                             </div>
                             <div class="col s4">
-                                <input class="btn-nhb-rood center-align" type="submit" value="Log in">
+                                <input class="btn-sv-rood center-align" type="submit" value="Log in">
                             </div>
                         {% else %}
                             <div class="col s12">
-                                <input class="btn-nhb-rood center-align" type="submit" value="Log in">
+                                <input class="btn-sv-rood center-align" type="submit" value="Log in">
                             </div>
                         {% endif %}
                     </div>
@@ -101,13 +101,13 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+    <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
             {% url 'Account:wachtwoord-vergeten' as card_url %}
-            {% include 'plein/card.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" icon="help" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" icon="help" url=card_url %}
 
-            {% url 'Sporter:registreer' as card_url %}
-            {% include 'plein/card.dtl' with title="Account aanmaken" text="Doorloop eenmalig de korte registratie procedure.<br><br>(<i>alleen voor KHSN leden</i>)" icon="fingerprint" url=card_url %}
+            {% url 'Registreer:begin' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Account aanmaken" text="Met een account wordt het persoonlijker en krijg je toegang tot meer functionaliteit." icon="fingerprint" url=card_url %}
         </div>
     </div>
 

@@ -8,7 +8,7 @@ from django.test import TestCase
 from Competitie.definities import MUTATIE_INITIEEL
 from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
-from Competitie.tijdlijn import zet_competitie_fase_rk_prep
+from Competitie.tests.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -25,7 +25,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities()
 
@@ -38,7 +38,7 @@ class TestCompLaagRayonCliOverig(E2EHelpers, TestCase):
         klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=data.comp18,
-                          boogtype=data.afkorting2boogtype_nhb['R'],
+                          boogtype=data.afkorting2boogtype_khsn['R'],
                           beschrijving__contains="Recurve klasse 6"))[0]
 
         # zet de cut op 16 voor de gekozen klasse

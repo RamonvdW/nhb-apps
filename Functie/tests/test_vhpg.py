@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,7 +16,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie; module VHPG """
 
-    test_after = ('Functie.tests.test_otp', 'Functie.tests.test_wisselvanrol')
+    test_after = ('Account.tests.test_otp_controle', 'Functie.tests.test_wisselvanrol')
 
     url_acceptatie = '/functie/vhpg-acceptatie/'
     url_afspraken = '/functie/vhpg-afspraken/'
@@ -27,7 +27,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -97,7 +97,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         needs_vhpg, _ = account_needs_vhpg(self.testdata.account_admin)
         self.assertFalse(needs_vhpg)
 
-        obj = VerklaringHanterenPersoonsgegevens.objects.all()[0]
+        obj = VerklaringHanterenPersoonsgegevens.objects.first()
         self.assertTrue(str(obj) != "")
 
         self.e2e_assert_other_http_commands_not_supported(self.url_acceptatie, post=False)

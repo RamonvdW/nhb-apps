@@ -37,7 +37,7 @@ class TestCompetitieCliRegiocompVerwijderOudeData(E2EHelpers, TestCase):
                 boogtype=boog_tr)
         sb.save()
 
-        comp = Competitie.objects.all()[0]
+        comp = Competitie.objects.first()
         CompetitieMatch(
             competitie=comp,
             datum_wanneer='2000-01-01',
@@ -48,7 +48,7 @@ class TestCompetitieCliRegiocompVerwijderOudeData(E2EHelpers, TestCase):
                         datum_wanneer='2000-01-01',
                         tijd_begin_wedstrijd='00:00')
         match.save()
-        deelkamp = Kampioenschap.objects.all()[0]
+        deelkamp = Kampioenschap.objects.first()
         deelkamp.rk_bk_matches.add(match)
 
         Score(waarde=0, afstand_meter=18, type=SCORE_TYPE_GEEN).save()

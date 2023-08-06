@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, ORGANISATIE_WA
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fase_regio_wedstrijden
+from Competitie.tests.tijdlijn import zet_competitie_fase_regio_wedstrijden
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
@@ -34,7 +34,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
         self.deelcomp103_18m = (Regiocompetitie
                                 .objects
                                 .get(competitie=self.comp_18m,
-                                     nhb_regio__regio_nr=103))
+                                     regio__regio_nr=103))
 
         self.indiv_klasse_bb = (CompetitieIndivKlasse
                                 .objects
@@ -55,7 +55,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                             geslacht="M",
                             voornaam='Gert',
                             achternaam="Pijlhaler",
-                            email="pijlhaler@nhb.test",
+                            email="pijlhaler@test.not",
                             geboorte_datum=date(year=1972, month=3, day=4),
                             sinds_datum=date(year=2010, month=11, day=12),
                             bij_vereniging=self.ver)
@@ -67,7 +67,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                                 voor_wedstrijd=True)
         self.sporterboog.save()
 
-        self.beheerder = self.e2e_create_account('100002', 'beheerder@nhb.not', 'Beheerdertje')
+        self.beheerder = self.e2e_create_account('100002', 'beheerder@test.not', 'Beheerdertje')
 
     def test_basis(self):
         with patch('django.utils.timezone.localtime') as mock_timezone:
@@ -113,7 +113,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
 
             # zoek de taak op en controleer de inhoud
             self.assertEqual(1, Taak.objects.count())
-            taak = Taak.objects.all()[0]
+            taak = Taak.objects.first()
             self.assertTrue('[100001] Gert Pijlhaler' in taak.beschrijving)
             self.assertTrue(' zelfstandig aangemeld' in taak.beschrijving)
 
@@ -142,7 +142,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             self.assertTrue('[INFO] RCL Regio 103 Indoor: 1 nieuwe aanmeldingen' in f2.getvalue())
             self.assertEqual(2, Taak.objects.count())
 
-            taak2 = Taak.objects.exclude(pk=taak.pk).all()[0]
+            taak2 = Taak.objects.exclude(pk=taak.pk).first()
             # print(taak2.beschrijving)
             self.assertTrue(' aangemeld door: Beheerdertje (100002)' in taak2.beschrijving)
 

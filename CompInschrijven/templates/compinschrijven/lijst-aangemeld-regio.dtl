@@ -27,16 +27,16 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
 
                 <div class="white shrink-wrap-5">
 
                     {% if zoom_alles_url %}
-                        <a class="margin-5 btn-nhb-rood btn-small" href="{{ zoom_alles_url }}">Alles</a>
+                        <a class="margin-5 btn-sv-rood btn-small" href="{{ zoom_alles_url }}">Alles</a>
                     {% else %}
-                        <a class="margin-5 btn-nhb-rood btn-small disabled" href="#">Alles</a>
+                        <a class="margin-5 btn-sv-rood btn-small disabled" href="#">Alles</a>
                     {% endif %}
 
                     <!-- begin rayon knoppen voor small -->
@@ -45,9 +45,9 @@
                     {% for rayon in zoom_rayons %}
 
                         {% if rayon.zoom_url %}
-                            <a class="hide-on-med-and-up margin-5 btn-nhb-rood btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+                            <a class="hide-on-med-and-up margin-5 btn-sv-rood btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
                         {% else %}
-                            <a class="hide-on-med-and-up margin-5 btn-nhb-rood btn-small disabled" href="#">{{ rayon.title_str }}</a>
+                            <a class="hide-on-med-and-up margin-5 btn-sv-rood btn-small disabled" href="#">{{ rayon.title_str }}</a>
                         {% endif %}
 
                     {% endfor %}
@@ -58,18 +58,18 @@
                         <br>
 
                         {% if rayon.zoom_url %}
-                            <a class="hide-on-small-only margin-5 btn-nhb-rood btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+                            <a class="hide-on-small-only margin-5 btn-sv-rood btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
                         {% else %}
-                            <a class="hide-on-small-only margin-5 btn-nhb-rood btn-small disabled" href="#">{{ rayon.title_str }}</a>
+                            <a class="hide-on-small-only margin-5 btn-sv-rood btn-small disabled" href="#">{{ rayon.title_str }}</a>
                         {% endif %}
                         <span class="hide-on-small-only">&nbsp;:&nbsp;</span>
 
                         {% for regio in rayon.regios %}
 
                             {% if regio.zoom_url %}
-                                <a class="margin-5 btn-nhb-rood btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+                                <a class="margin-5 btn-sv-rood btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
                             {% else %}
-                                <a class="margin-5 btn-nhb-rood btn-small disabled" href="#">{{ regio.title_str }}</a>
+                                <a class="margin-5 btn-sv-rood btn-small disabled" href="#">{{ regio.title_str }}</a>
                             {% endif %}
                         {% endfor %}
 
@@ -90,21 +90,21 @@
 
             {% if url_download %}
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_download }}">
+                    <a class="btn-sv-rood" href="{{ url_download }}">
                         <i class="notranslate material-icons-round left">download</i>Download lijst</a>
                 </p>
             {% endif %}
 
             {% if show_gekozen_wedstrijden %}
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_behoefte }}">
+                    <a class="btn-sv-rood" href="{{ url_behoefte }}">
                         <i class="notranslate material-icons-round left">leaderboard</i>Gekozen wedstrijden</a>
                 </p>
             {% endif %}
 
             {% if show_dagdeel_telling %}
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_behoefte }}">
+                    <a class="btn-sv-rood" href="{{ url_behoefte }}">
                         <i class="notranslate material-icons-round left">leaderboard</i>Benodigde dagdelen</a>
                 </p>
             {% endif %}
@@ -121,7 +121,7 @@
                 {% if obj.nieuwe_klasse %}
                     {% if not forloop.first %}
                         <tr>
-                            <td colspan="4" class="nhb-table-onderrand"></td>
+                            <td colspan="4" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
@@ -129,13 +129,13 @@
                         <td colspan="6" class="center"><h5>{{ obj.indiv_klasse.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
                     </tr>
 
-                    <tr class="nhb-table-header">
-                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                    <tr class="sv-table-header">
+                        <td rowspan="{{ obj.aantal_regels }}" class="sv-table-zijrand"></td>
                         <th>Vereniging</th>
                         <th class="center"><span class="hide-on-small-only">Aanvangsgemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
                         <th>Sporter</th>
                         <th>Notities</th>
-                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                        <td rowspan="{{ obj.aantal_regels }}" class="sv-table-zijrand"></td>
                     </tr>
 
                 {% endif %}
@@ -150,7 +150,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="4" class="nhb-table-onderrand"></td>
+                <td colspan="4" class="sv-table-onderrand"></td>
             </tr>
         </table>
 

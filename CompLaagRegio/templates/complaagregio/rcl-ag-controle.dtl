@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <p>Op deze pagina kan je als RCL een controle uitvoeren van de aanvangsgemiddelden voor de teamcompetitie.</p>
@@ -39,7 +39,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -57,7 +57,7 @@
                         <td>{{ obj.naam_str }}</td>
                         <td>{{ obj.boog_str }}</td>
                         <td>{{ obj.ag_str }}</td>
-                        <td><a class="btn-nhb-rood" href="{{ obj.url_details }}">Details</a></td>
+                        <td><a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a></td>
                     </tr>
                 {% empty %}
                     <tr>
@@ -76,12 +76,12 @@
         <div class="row center">
             <div class="col s12">
                 <h4>AG ontbreekt</h4>
-                <p>De volgende sporters hebben geen aanvangsgemiddelde voor de teamcompetitie gekregen van hun HWL en kunnen daarom <span class="nhb-rood-text">niet</span> meedoen of invallen in een team.</p>
+                <p>De volgende sporters hebben geen aanvangsgemiddelde voor de teamcompetitie gekregen van hun HWL en kunnen daarom <span class="sv-rood-text">niet</span> meedoen of invallen in een team.</p>
             </div>
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
                     <thead>

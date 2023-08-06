@@ -15,12 +15,12 @@
 
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
-            if (!initialized) return
+            if (!initialized) return;
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("opslaan_knop");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
         }
     </script>
 
@@ -32,7 +32,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -58,7 +58,7 @@
 
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -139,7 +139,7 @@
 
                         <!-- button -->
                         <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
                         </div>
 
@@ -156,7 +156,7 @@
     {% if url_verwijder %}
 
         <p style="margin-left:10px">
-            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_sessie">Verwijder deze sessie</a>
+            <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_sessie">Verwijder deze sessie</a>
         </p>
 
         <div class="modal" id="bevestig_verwijder_sessie">
@@ -170,10 +170,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>
@@ -189,7 +189,7 @@
                 let options = {
                         twelveHour: false,
                         defaultTime: "{{ sessie.tijd_begin_str }}",
-                      }
+                      };
                 let inst = M.Timepicker.init(el1, options);
                 inst._updateTimeFromInput();
                 inst.done();

@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
+from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, Leeftijdsklasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
+from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
@@ -39,10 +39,10 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         comp.save()
         self.comp = Competitie.objects.get(pk=comp.pk)
 
-        dummy_functie = Functie.objects.filter(rol='RCL', nhb_regio__regio_nr=111)[0]
+        dummy_functie = Functie.objects.filter(rol='RCL', regio__regio_nr=111)[0]
         deelcomp = Regiocompetitie(
                             competitie=comp,
-                            nhb_regio=regio_111,
+                            regio=regio_111,
                             functie=dummy_functie)
         deelcomp.save()
 
@@ -51,7 +51,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         indiv_tr = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_tr)[0]
         indiv_bb = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_bb)[0]
 
-        lkl_sa = LeeftijdsKlasse.objects.get(afkorting='SA')
+        lkl_sa = Leeftijdsklasse.objects.get(afkorting='SA')
 
         # TODO: leeftijdsklassen nodig?
         klasse_r1 = CompetitieIndivKlasse(
@@ -476,6 +476,14 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         self.assertTrue('Verwijder alle data voor deelnemer 123456' in f2.getvalue())
         self.assertTrue(' 3 deelnemers' in f2.getvalue())
+
+    def test_check_ag(self):
+        deelnemer = RegiocompetitieSporterBoog.objects.first()
+        deelnemer.ag_voor_team_mag_aangepast_worden = True
+        deelnemer.inschrijf_voorkeur_team = True
+        deelnemer.save(update_fields=['ag_voor_team_mag_aangepast_worden', 'inschrijf_voorkeur_team'])
+
+        self.run_management_command('check_ag')
 
 
 # end of file

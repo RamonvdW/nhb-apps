@@ -8,7 +8,6 @@ from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_BK, DEEL_RK
 from Competitie.models import KampioenschapSporterBoog, KampioenschapTeam
 from pypdf import PdfReader
-from decimal import Decimal
 import sys
 
 
@@ -116,7 +115,7 @@ class Command(BaseCommand):
                           .filter(kampioenschap__competitie__afstand='25',
                                   kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -139,7 +138,7 @@ class Command(BaseCommand):
         # for
 
     def _filter_deelnemers(self, team_klasse):
-        # reduceer het aantal KampioenschapSporterBoog aan de hand van de bogen die toegestaan zijn in deze wedstrijdklasse
+        # reduceer aantal KampioenschapSporterBoog aan de hand van de toegestaan bogen in deze wedstrijdklasse
         afkortingen = list(team_klasse.boog_typen.values_list('afkorting', flat=True))
         self.stdout.write('[INFO] Toegestane bogen in team klasse %s = %s' % (team_klasse, ",".join(afkortingen)))
 
@@ -159,7 +158,7 @@ class Command(BaseCommand):
                      .filter(kampioenschap__competitie__afstand='25',
                              kampioenschap__deel=DEEL_BK)
                      .select_related('kampioenschap',
-                                     'kampioenschap__nhb_rayon',
+                                     'kampioenschap__rayon',
                                      'vereniging',
                                      'team_type',
                                      'team_klasse')
@@ -169,6 +168,10 @@ class Command(BaseCommand):
             self.teams_cache.append(team)
             self.pk2team[team.pk] = team
             self.team_gekoppelde_pks[team.pk] = [deelnemer.pk for deelnemer in team.gekoppelde_leden.all()]
+
+            #print('team: %s' % team, team.team_klasse)
+            #for deelnemer in team.gekoppelde_leden.all():
+            #    print('  deelnemer: %s' % deelnemer)
         # for
 
     def _sort_op_gemiddelde(self, lid_nrs):
@@ -231,8 +234,8 @@ class Command(BaseCommand):
         # for
 
         if not team_klasse:
-            self.stderr.write('[ERROR] Kan team klasse niet bepalen')
-            sys.exit(1)
+            self.stderr.write('[ERROR] Kan team klasse niet bepalen (0 matches op team naam)')
+            return None
 
         self.stdout.write('[INFO] Team klasse: %s' % team_klasse.beschrijving)
 
@@ -286,6 +289,8 @@ class Command(BaseCommand):
     def _verwerk_uitslag(self, regels):
 
         team_klasse = self._bepaal_klasse(regels)
+        if not team_klasse:
+            return
         self._filter_deelnemers(team_klasse)
 
         team2sporters = dict()       # [team.pk] = [sporter_naam, ...]
@@ -334,15 +339,15 @@ class Command(BaseCommand):
             if len(invallers) > 0:
                 if len(invallers) > 1:
                     self.stderr.write('[ERROR] Meer dan 1 invallers is nog niet ondersteund')
-                    sys.exit(1)
+                    return
 
                 if len(gekoppeld) > 1:
                     self.stderr.write('[ERROR] Meer dan 1 overgebleven uitvaller is nog niet ondersteund')
-                    sys.exit(1)
+                    return
 
                 if len(invallers) > len(gekoppeld):
                     self.stderr.write('[ERROR] Te veel invallers voor team %s' % team)
-                    sys.exit(1)
+                    return
 
                 uitvaller = gekoppeld[0]
                 invaller = invallers[0]
@@ -350,7 +355,7 @@ class Command(BaseCommand):
                 if invaller.gemiddelde > uitvaller.gemiddelde:
                     self.stdout.write('[INFO] Uitvaller %s heeft gemiddelde %s' % (uitvaller, uitvaller.gemiddelde))
                     self.stderr.write('[ERROR] Invaller %s heeft hoger gemiddelde (%s) dan uitvaller' % (invaller, invaller.gemiddelde))
-                    sys.exit(1)
+                    return
 
             # sla de team leden en hun bijdrage op
             if not self.dryrun:
@@ -393,15 +398,17 @@ class Command(BaseCommand):
         self.dryrun = options['dryrun']
         self.verbose = options['verbose']
 
+        #print()
+
         # open de kopie, zodat we die aan kunnen passen
         fpath = options['bestand']
         self.stdout.write('[INFO] Lees bestand %s' % repr(fpath))
         lees = LeesPdf(start_at="Totale score", stop_at="150 pijlen")
         try:
             regels = lees.extract_from_pdf(fpath)
-        except FileNotFoundError as exc:
+        except FileNotFoundError:
             self.stderr.write('[ERROR] Kan bestand niet vinden')
-            sys.exit(1)
+            return
         del lees
 
         self._deelnemers_ophalen()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,11 +28,11 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = self.regio_111
         ver.save()
-        self.nhbver = ver
+        self.ver = ver
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
     def test_instellen(self):
@@ -70,10 +70,10 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        # zet de "akkoord via NHB" optie
-        instellingen = BetaalInstellingenVereniging.objects.all()[0]
+        # zet de "akkoord via bond" optie
+        instellingen = BetaalInstellingenVereniging.objects.first()
         self.assertEqual(instellingen.mollie_api_key, 'test_12345')
-        instellingen.akkoord_via_nhb = True
+        instellingen.akkoord_via_bond = True
         instellingen.save()
 
         # ophalen met instellingen opgeslagen
@@ -82,6 +82,6 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, 'Ja, betalingen aan jullie lopen via de NHB rekening')
+        self.assertContains(resp, 'Ja, betalingen aan jullie lopen via de KHSN rekening')
 
 # end of file

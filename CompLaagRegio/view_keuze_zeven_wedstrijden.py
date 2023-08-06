@@ -57,7 +57,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
                 raise PermissionDenied()
         else:
             # HWL: sporter moet lid zijn van zijn vereniging
-            if deelnemer.bij_vereniging != functie_nu.nhb_ver:
+            if deelnemer.bij_vereniging != functie_nu.vereniging:
                 raise PermissionDenied('Sporter is niet van jouw vereniging')
 
             context['is_hwl'] = True
@@ -168,7 +168,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
                 raise PermissionDenied()
         else:
             # HWL: sporter moet lid zijn van zijn vereniging
-            if deelnemer.bij_vereniging != functie_nu.nhb_ver:
+            if deelnemer.bij_vereniging != functie_nu.vereniging:
                 raise PermissionDenied('Sporter is niet van jouw vereniging')
 
         # zoek alle wedstrijden erbij

@@ -12,7 +12,8 @@ from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
                                BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
-                               BESTELLING_STATUS_GEANNULEERD)
+                               BESTELLING_STATUS_GEANNULEERD,
+                               BESTEL_TRANSPORT_OPHALEN)
 from Bestel.models import Bestelling
 from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Bestel.operations.mutaties import bestel_mutatieverzoek_annuleer
@@ -229,6 +230,8 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         if bestelling.status == BESTELLING_STATUS_GEANNULEERD:
             context['is_geannuleerd'] = True
         else:
+            context['transport_ophalen'] = (bestelling.transport == BESTEL_TRANSPORT_OPHALEN)
+
             rest_euro = bestelling.totaal_euro - transacties_euro
             if rest_euro > 0:
                 context['rest_euro'] = rest_euro

@@ -10,7 +10,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK, INSCHRIJF_METHODE_3
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -38,7 +38,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def _prep_beheerder_lid(self, voornaam):
         lid_nr = self._next_lid_nr
@@ -49,7 +49,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         sporter.geslacht = "M"
         sporter.voornaam = voornaam
         sporter.achternaam = "Tester"
-        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.email = voornaam.lower() + "@test.not"
         sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = self._ver
@@ -77,7 +77,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
         # maak HWL functie aan voor deze vereniging
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
@@ -98,11 +98,11 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
             deelkamp.functie.accounts.add(self.account_bko)
         # for
 
-        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_RK, nhb_rayon=self.rayon_2).all():
+        for deelkamp in Kampioenschap.objects.filter(deel=DEEL_RK, rayon=self.rayon_2).all():
             deelkamp.functie.accounts.add(self.account_rko)
         # for
 
-        for deelcomp in Regiocompetitie.objects.filter(nhb_regio=self.regio_101).all():
+        for deelcomp in Regiocompetitie.objects.filter(regio=self.regio_101).all():
             deelcomp.functie.accounts.add(self.account_rcl)
         # for
 
@@ -116,7 +116,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
         # maak HWL functie aan voor deze vereniging
         hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
-        hwl.nhb_ver = ver
+        hwl.vereniging = ver
         hwl.save()
 
     def _doe_inschrijven(self, comp):
@@ -136,7 +136,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         # zet de inschrijfmethode van regio 101 op 'methode 3' (=voorkeur dagdelen)
         dagdelen = ['GN', 'ZAT', 'ZON']   # uit: DAGDEEL_AFKORTINGEN
 
-        deelcomp = Regiocompetitie.objects.filter(nhb_regio=self.regio_101, competitie=comp)[0]
+        deelcomp = Regiocompetitie.objects.filter(regio=self.regio_101, competitie=comp)[0]
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = ",".join(dagdelen)
         deelcomp.save(update_fields=['inschrijf_methode', 'toegestane_dagdelen'])
@@ -150,9 +150,9 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
 
         # doorloop de 2 verenigingen in deze regio
-        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101).order_by('ver_nr'):
+        for ver in NhbVereniging.objects.filter(regio=self.regio_101).order_by('ver_nr'):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
-            functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
+            functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
             self.e2e_check_rol('HWL')
 
@@ -165,7 +165,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 sporter.lid_nr = lid_nr
                 sporter.voornaam = "Lid %s" % lid_nr
                 sporter.achternaam = "de Tester"
-                sporter.bij_vereniging = nhb_ver
+                sporter.bij_vereniging = ver
                 sporter.is_actief_lid = True
                 if barebow_boog_pk:
                     sporter.geboorte_datum = datetime.date(self.begin_jaar - 12, 1, 1)   # aspirant
@@ -222,7 +222,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         # for
 
     def test_anon(self):
-        comp = Competitie.objects.all()[0]
+        comp = Competitie.objects.first()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3 % (comp.pk, self.regio_101.pk))
@@ -235,7 +235,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     def test_behoefte3_18(self):
         comp = Competitie.objects.get(afstand='18')
         functie_rcl = Regiocompetitie.objects.get(competitie=comp,
-                                                  nhb_regio=self.regio_101).functie
+                                                  regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
@@ -259,7 +259,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = NhbRegio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 
@@ -270,8 +270,8 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compinschrijven/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
 
     def test_behoefte3_25(self):
-        comp = Competitie.objects.filter(afstand='25').all()[0]
-        functie_rcl = Regiocompetitie.objects.get(competitie=comp, nhb_regio=self.regio_101).functie
+        comp = Competitie.objects.filter(afstand='25').first()
+        functie_rcl = Regiocompetitie.objects.get(competitie=comp, regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
@@ -296,7 +296,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self._ver2.regio = NhbRegio.objects.get(pk=102)
         self._ver2.save()
 
-        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        obj = RegiocompetitieSporterBoog.objects.filter(bij_vereniging=self._ver).first()
         obj.inschrijf_voorkeur_dagdeel = 'XX'
         obj.save()
 
@@ -337,7 +337,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = Regiocompetitie.objects.get(competitie=comp,
-                                                  nhb_regio=self.regio_101).functie
+                                                  regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)

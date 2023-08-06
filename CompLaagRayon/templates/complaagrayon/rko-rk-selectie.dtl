@@ -20,14 +20,14 @@
         </div>
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <div class="white" style="padding:10px">
                     <p>Op deze pagina kan je de lijst met kandidaat-deelnemers voor jouw RK's inzien en bewerken.</p>
                     <p>Dit is pas mogelijk als alle onderliggende regiocompetities afgesloten zijn. De status hiervan kan je hieronder zien.</p>
                     <p>Tot dat moment kan je de kandidaten voor elke wedstrijdklassen zien op deze pagina:</p>
                     <p>
-                        <a class="btn-nhb-rood" href="{{ url_uitslagen }}">Uitslagen</a>
+                        <a class="btn-sv-rood" href="{{ url_uitslagen }}">Uitslagen</a>
                     </p>
                 </div>
             </div>
@@ -43,7 +43,7 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3">
                 <table class="white">
                     <thead>
@@ -71,12 +71,12 @@
         <div class="row center">
             <div class="col s12">
                 <h3 class="page-banner">RK selectie</h3>
-                <p>Hieronder tonen we de lijst van vastgestelde sporters voor elk van de {{ aantal_klassen }} wedstrijdklassen<br>van de Rayonkampioenschappen in <b>{{ deelkamp.nhb_rayon }}</b>.</p>
+                <p>Hieronder tonen we de lijst van vastgestelde sporters voor elk van de {{ aantal_klassen }} wedstrijdklassen<br>van de Rayonkampioenschappen in <b>{{ deelkamp.rayon }}</b>.</p>
             </div>
         </div>
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3">
                 <table class="white">
                     <tr>
@@ -90,8 +90,8 @@
                     </tr>
 
                     <tr>
-                        <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
-                        <td class="nhb-blauw-text">Onbekend</td>
+                        <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                        <td class="sv-blauw-text">Onbekend</td>
                         <td class="center">{{ aantal_onbekend }}</td>
                     </tr>
 
@@ -109,8 +109,8 @@
 
                     {% if aantal_attentie %}
                         <tr>
-                            <td class="center"><i class="nhb-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
-                            <td class="nhb-rood-text">Attentie</td>
+                            <td class="center"><i class="sv-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
+                            <td class="sv-rood-text">Attentie</td>
                             <td class="center">{{ aantal_attentie }}</td>
                         </tr>
                     {% endif %}
@@ -125,7 +125,7 @@
                 <p>Deelname-status voor de geselecteerde sporters + maximaal 8 reserves</p>
                 {% if url_download %}
                     <p>
-                        <a class="btn-nhb-rood" href="{{ url_download }}">
+                        <a class="btn-sv-rood" href="{{ url_download }}">
                             <i class="notranslate material-icons-round left">get_app</i>RK selectie bestand</a>
                     </p>
                 {% endif %}
@@ -134,7 +134,7 @@
 
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <table class="white">
@@ -144,7 +144,7 @@
                         {% if obj.break_klasse %}
                             {% if not forloop.first %}
                                 <tr>
-                                    <td colspan="7" class="nhb-table-onderrand" style="height:50px"></td>
+                                    <td colspan="7" class="sv-table-onderrand" style="height:50px"></td>
                                 </tr>
                             {% endif %}
                             <tr>
@@ -186,18 +186,18 @@
                             </td>
 
                             {% if not obj.bij_vereniging %}
-                                <td class="center"><i class="nhb-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
+                                <td class="center"><i class="sv-rood-text in-table-icon notranslate material-icons-round">warning</i></td>
                             {% elif obj.deelname == 'J' %}
                                 <td class="center"><i class="green-text in-table-icon notranslate material-icons-round">check</i></td>
                             {% elif obj.deelname == 'N' %}
                                 <td class="center"><i class="grey-text in-table-icon notranslate material-icons-round">block</i></td>
                             {% else %}
                                 <!-- onbekend -->
-                                <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                                <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
                             {% endif %}
 
                             <td>
-                                <a class="btn-nhb-rood" href="{{ obj.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ obj.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             </td>
                         </tr>

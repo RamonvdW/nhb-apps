@@ -27,7 +27,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
     url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # match_pk
     url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
     url_deelnemers_ophalen = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
-    url_deelnemer_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
+    url_deelnemer_zoeken = '/bondscompetities/scores/dynamic/check-bondsnummer/'
 
     url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # match_pk
     url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # match_pk
@@ -39,7 +39,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
     url_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'     # comp_pk
 
-    ver_nr = 0      # wordt in setupTestData ingevuld
+    ver_nr = 0      # wordt in setUpTestData ingevuld
 
     testdata = None
 
@@ -48,7 +48,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
         cls.testdata.maak_clubs_en_sporters()
         cls.ver_nr = cls.testdata.regio_ver_nrs[101][1]
         cls.testdata.maak_sporterboog_aanvangsgemiddelden(18, cls.ver_nr)
@@ -63,7 +63,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         cls.testdata.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[101])
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -86,7 +86,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp18_regio[101].pk)
         with self.assert_max_queries(20):
             self.client.post(self.url_planning_regio % self.testdata.deelcomp25_regio[101].pk)
-        ronde18 = RegiocompetitieRonde.objects.all()[0]
+        ronde18 = RegiocompetitieRonde.objects.first()
         ronde25 = RegiocompetitieRonde.objects.all()[1]
 
         # maak een cluster planning aan
@@ -98,15 +98,15 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         indiv_klassen = CompetitieIndivKlasse.objects.values_list('pk', flat=True)
 
         self.client.post(self.url_planning_regio_ronde % ronde18.pk, {})
-        match = CompetitieMatch.objects.all()[0]
-        match.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
+        match = CompetitieMatch.objects.first()
+        match.vereniging = self.testdata.functie_hwl[self.ver_nr].vereniging
         match.save()
         match.indiv_klassen.set(indiv_klassen)
         self.match18_pk = match.pk
 
         self.client.post(self.url_planning_regio_ronde % ronde25.pk, {})
         match = CompetitieMatch.objects.all()[1]
-        match.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
+        match.vereniging = self.testdata.functie_hwl[self.ver_nr].vereniging
         match.save()
         match.indiv_klassen.set(indiv_klassen)
         self.wedstrijd25_pk = match.pk
@@ -353,8 +353,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        json_data = json.loads(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         # nog een keer opslaan - met mutaties
@@ -366,8 +365,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        json_data = json.loads(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
     def test_rcl_accorderen(self):
@@ -394,8 +392,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        json_data = json.loads(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
@@ -553,9 +550,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         resp = self.client.post(self.url_uitslag_opslaan,
                                 json.dumps(json_data),
                                 content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp['Content-Type'], 'application/json')
-        json_data = json.loads(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
@@ -620,8 +615,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        json_data = json.loads(resp.content)
+        json_data = self.assert200_json(resp)
         self.assertEqual(json_data['done'], 1)
 
         self.client.logout()
@@ -649,7 +643,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         uitslag.scores.add(score)
 
         ronde = RegiocompetitieRonde.objects.filter(regiocompetitie=self.testdata.deelcomp18_regio[101])[0]
-        match = ronde.matches.all()[0]
+        match = ronde.matches.first()
         match.uitslag = uitslag
         match.save()
 

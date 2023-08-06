@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <div class="white" style="padding:0 10px 0 10px">
                 <table class="white">
@@ -31,13 +31,13 @@
 
                             <td class="center">
                                 {% if obj.bevinding == "4" %}
-                                    <i class="notranslate material-icons-round nhb-rood-text">thumb_down</i>
+                                    <i class="notranslate material-icons-round sv-rood-text">thumb_down</i>
                                 {% elif obj.bevinding == "6" %}
                                     <i class="notranslate material-icons-round">thumbs_up_down</i>
                                 {% elif obj.bevinding == "8" %}
                                     <i class="notranslate material-icons-round green-text">thumb_up</i>
                                 {% else %}
-                                    <span class="nhb-rood-text">{{ obj.bevinding }}</span>
+                                    <span class="sv-rood-text">{{ obj.bevinding }}</span>
                                 {% endif %}
                             </td>
 
@@ -45,12 +45,12 @@
                             <td class="right-align">
                                 <!-- button om pagina te openen -->
                                 {% if obj.volledige_url %}
-                                    <a class="btn-nhb-rood" href="{{ obj.volledige_url }}" target="_blank" rel="noopener noreferrer" style="margin-right:10px">
+                                    <a class="btn-sv-rood" href="{{ obj.volledige_url }}" target="_blank" rel="noopener noreferrer" style="margin-right:10px">
                                         <i class="notranslate material-icons-round">open_in_new</i></a>
                                 {% endif %}
 
                                 <!-- button for admin site -->
-                                <a class="btn-nhb-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/">
+                                <a class="btn-sv-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             </td>
                         </tr>

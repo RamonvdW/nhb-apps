@@ -36,7 +36,7 @@ class Command(BaseCommand):
         for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie',
-                                         'nhb_regio')):
+                                         'regio')):
 
             # alleen nieuwe aanmeldingen rapporteren als de open inschrijving gesloten is
             # en de competitie nog in de actieve wedstrijden periode is waarin mensen zich in kunnen schrijven
@@ -45,7 +45,7 @@ class Command(BaseCommand):
             if comp.fase_indiv == 'F':
                 # regio wedstrijden zijn begonnen
                 # tijdens deze periode willen we de RCL informeren over late inschrijvingen
-                tup = (deelcomp.competitie.afstand, deelcomp.nhb_regio.regio_nr)
+                tup = (deelcomp.competitie.afstand, deelcomp.regio.regio_nr)
                 afstand_regio2deelcomp[tup] = deelcomp
         # for
 
@@ -55,11 +55,11 @@ class Command(BaseCommand):
         for functie in (Functie
                         .objects
                         .filter(rol='RCL')
-                        .select_related('nhb_regio')
+                        .select_related('regio')
                         .order_by('comp_type',
-                                  'nhb_regio__regio_nr')):
+                                  'regio__regio_nr')):
 
-            tup = (functie.comp_type, functie.nhb_regio.regio_nr)
+            tup = (functie.comp_type, functie.regio.regio_nr)
             try:
                 deelcomp = afstand_regio2deelcomp[tup]
             except KeyError:
@@ -83,7 +83,7 @@ class Command(BaseCommand):
                     regels.append('Er zijn nieuwe inschrijvingen')
                     regels.append('')
                     regels.append('Competitie: %s' % deelcomp.competitie.beschrijving)
-                    regels.append('Regio: %s' % functie.nhb_regio)
+                    regels.append('Regio: %s' % functie.regio)
                     regels.append('Datum: %s' % gisteren_date)
                     regels.append('Aantal nieuwe inschrijvingen: %s' % aantal)
 

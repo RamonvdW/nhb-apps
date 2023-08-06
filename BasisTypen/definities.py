@@ -77,18 +77,18 @@ BLAZOEN_CHOICES = [
 
 # organisatie, om boogtype, leeftijdsklassen etc. uit elkaar te kunnen houden binnen 1 tabel
 ORGANISATIE_WA = 'W'      # World Archery
-ORGANISATIE_NHB = 'N'     # NHB
+ORGANISATIE_KHSN = 'N'    # Nationaal
 ORGANISATIE_IFAA = 'F'    # International Field Archery Association
 
 ORGANISATIES = [
     (ORGANISATIE_WA, 'World Archery'),
-    (ORGANISATIE_NHB, 'NHB'),
+    (ORGANISATIE_KHSN, 'KHSN'),
     (ORGANISATIE_IFAA, 'IFAA'),
 ]
 
 ORGANISATIES2SHORT_STR = {
     ORGANISATIE_WA: 'WA',
-    ORGANISATIE_NHB: 'NHB',
+    ORGANISATIE_KHSN: 'KHSN',
     ORGANISATIE_IFAA: 'IFAA',
 }
 
@@ -96,7 +96,7 @@ ORGANISATIES2SHORT_STR = {
 # Beschikbare disciplines van ...
 ORGANISATIES2LONG_STR = {
     ORGANISATIE_WA: 'World Archery',
-    ORGANISATIE_NHB: 'de NHB',
+    ORGANISATIE_KHSN: 'de KHSN',
     ORGANISATIE_IFAA: 'de IFAA',
 }
 

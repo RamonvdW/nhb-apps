@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Competitie.definities import DEEL_RK
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
-from Competitie.tijdlijn import zet_competitie_fase_bk_prep#, zet_competitie_fase_bk_wedstrijden
+from Competitie.tests.tijdlijn import zet_competitie_fase_bk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Wedstrijden.models import WedstrijdLocatie
@@ -18,12 +18,12 @@ import os
 
 class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
 
-    """ tests voor de CompLaagRayon applicatie, Formulieren functie """
+    """ tests voor de CompLaagBond applicatie, Formulieren functie """
 
     test_after = ('Competitie.tests.test_overzicht', 'CompBeheer.tests.test_bko')
 
-    url_forms_indiv = '/bondscompetities/bk/formulieren/indiv/%s/'               # deelkamp_bk
-    url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_bk
+    url_forms_indiv = '/bondscompetities/bk/formulieren/indiv/%s/'               # deelkamp_pk
+    url_forms_teams = '/bondscompetities/bk/formulieren/teams/%s/'               # deelkamp_pk
     url_forms_download_indiv = '/bondscompetities/bk/formulieren/indiv/download/%s/%s/'   # match_pk, klasse_pk
     url_forms_download_teams = '/bondscompetities/bk/formulieren/teams/download/%s/%s/'   # match_pk, klasse_pk
 
@@ -36,7 +36,7 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         s1 = timezone.now()
 
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities()
 
@@ -44,17 +44,18 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
             ver_nr = data.regio_ver_nrs[regio_nr][0]
             data.maak_rk_deelnemers(18, ver_nr, regio_nr, limit_boogtypen=['R', 'BB'])
             data.maak_rk_teams(18, ver_nr, zet_klasse=True)
-            data.maak_uitslag_rk_indiv(18)
-            data.maak_bk_deelnemers(18, ver_nr, limit_boogtypen=['R', 'BB'])
-            data.maak_bk_teams(18)
         # for
+
+        data.maak_uitslag_rk_indiv(18)
+        data.maak_bk_deelnemers(18)
+        data.maak_bk_teams(18)
 
         ver_nr = data.regio_ver_nrs[111][0]
         cls.ver = data.vereniging[ver_nr]
 
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def setUp(self):
         """ eenmalige setup voor alle tests

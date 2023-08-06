@@ -20,7 +20,7 @@
 
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white" style="padding:10px">
                 <p>Sporters die zich inschrijven op een wedstrijd via MijnHandboogsport kunnen direct afrekenen, bijvoorbeeld via iDEAL.</p>
@@ -37,7 +37,7 @@
 
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
 
             <!-- dialoog venster -->
@@ -47,13 +47,13 @@
                         {% csrf_token %}
 
                         <div class="center" style="margin-bottom:50px">
-                            <h6 class="nhb-blauw-text">Koppeling met Mollie</h6>
+                            <h6 class="sv-blauw-text">Koppeling met Mollie</h6>
                             <p>Alleen invullen als jullie vereniging een account bij Mollie heeft</p>
                         </div>
 
                         <table>
 
-                            {% if akkoord_via_nhb %}
+                            {% if akkoord_via_bond %}
                                 <tr>
                                     <th>Akkoord voor betalingen via de KHSN</th>
                                     <td>Ja, betalingen aan jullie lopen via de KHSN rekening</td>
@@ -78,7 +78,7 @@
 
                         <!-- button -->
                         <div class="center" style="margin-top:30px">
-                            <button class="btn-nhb-rood" type="submit">
+                            <button class="btn-sv-rood" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </div>
 
@@ -99,11 +99,11 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white" style="padding:10px">
                 <table>
-                    <tr style="border-bottom:0px">      <!-- verwijder de streep -->
+                    <tr style="border-bottom:none">      <!-- verwijder de streep -->
                         <th class="right-align">KvK nummer:<br>Naam:<br>Adres:<br><br>IBAN:<br>BIC:<br>E-mailadres:<br>Telefoonnummer:</th>
                         <td>{{ ver.kvk_nummer }}<br>{{ ver.naam }}<br>{{ ver.adres_regel1 }}<br>{{ ver.adres_regel2 }}<br>{{ ver.bank_iban }}<br>{{ ver.bank_bic }}<br>{{ ver.contact_email }}<br>{{ ver.telefoonnummer }}</td>
                     </tr>

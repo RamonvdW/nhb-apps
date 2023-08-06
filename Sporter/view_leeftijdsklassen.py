@@ -27,8 +27,8 @@ TEMPLATE_LEEFTIJDSGROEPEN = 'sporter/leeftijdsgroepen.dtl'
 
 def redirect_leeftijdsklassen(request):
     """ Deze functie wordt gebruikt om een oude URL om te leiden naar de nieuwe """
-    # TODO: verwijder in 2024
-    url = reverse('Sporter:leeftijdsklassen')
+    # FUTURE: verwijder in 2024
+    url = reverse('Sporter:leeftijdsgroepen-persoonlijk')
     return HttpResponseRedirect(url)
 
 
@@ -51,18 +51,20 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
 
         # gegarandeerd ingelogd door test_func()
         account = self.request.user
-        sporter = account.sporter_set.all()[0]
+        sporter = account.sporter_set.first()
         voorkeur = get_sporter_voorkeuren(sporter)
+
+        context['is_gast'] = sporter.is_gast
 
         if voorkeur.wedstrijd_geslacht_gekozen:
             # geslacht M/V of
             # geslacht X + keuze voor M/V gemaakt
             wedstrijdgeslacht = voorkeur.wedstrijd_geslacht
-            wedstrijdgeslacht_nhb = voorkeur.wedstrijd_geslacht
+            wedstrijdgeslacht_khsn = voorkeur.wedstrijd_geslacht
         else:
             # geslacht X, geen keuze gemaakt --> neem mannen
             wedstrijdgeslacht = GESLACHT_MAN
-            wedstrijdgeslacht_nhb = GESLACHT_ANDERS
+            wedstrijdgeslacht_khsn = GESLACHT_ANDERS
 
         # pak het huidige jaar na conversie naar lokale tijdzone
         # zodat dit ook goed gaat in de laatste paar uren van het jaar
@@ -77,14 +79,14 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
         context['lkl_wa'] = lkl_list
         context['lkl_wa_dit_jaar'] = lkl_dit_jaar
 
-        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst = bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_nhb, now.year)
-        context['lkl_nhb'] = lkl_lst
+        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst = bereken_leeftijdsklassen_khsn(geboorte_jaar, wedstrijdgeslacht_khsn, now.year)
+        context['lkl_khsn'] = lkl_lst
         spl = lkl_dit_jaar.split(' of ')
-        context['lkl_nhb_dit_jaar_1'] = spl[0]
+        context['lkl_khsn_dit_jaar_1'] = spl[0]
         if len(spl) > 1:
-            context['lkl_nhb_dit_jaar_2'] = spl[1]
+            context['lkl_khsn_dit_jaar_2'] = spl[1]
 
-        _, lkl_lst = bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nhb, now.year, now.month)
+        _, lkl_lst = bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_khsn, now.year, now.month)
         context['lkl_comp'] = lkl_lst
 
         context['wlst_ifaa'] = bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht, now.year)

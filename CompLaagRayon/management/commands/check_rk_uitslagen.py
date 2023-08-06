@@ -28,7 +28,7 @@ class Command(BaseCommand):
         for deelkamp in (Kampioenschap
                          .objects
                          .filter(competitie__afstand=afstand,
-                                 deel=DEEL_RK).order_by('nhb_rayon__rayon_nr')):
+                                 deel=DEEL_RK).order_by('rayon__rayon_nr')):
 
             self.stdout.write('[INFO] %s' % deelkamp)
 

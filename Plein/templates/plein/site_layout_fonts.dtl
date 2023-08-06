@@ -1,0 +1,52 @@
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze file levert de self-hosted font definities voor in de "head" van elke pagina
+
+{% endcomment %}
+
+{% load static %}
+
+<!-- FUTURE: is it legal to use @font-face inside a style block?
+             Must it be in a CSS file? It seems to work though -->
+<style>
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;  /* liever later tonen dan verspringende layout */
+  src: url({% static 'fonts/FiraSans-Medium-v17.ttf' %}) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: block;  /* liever later tonen dan verspringende layout */
+  src: url({% static 'fonts/OpenSans-Regular-v35.ttf' %}) format('truetype');
+}
+@font-face {
+  font-family: 'Material Icons Round';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;  /* liever later tonen dan verspringende layout */
+  src: url({% static 'fonts/Material-Icons-Round-v108.otf' %}) format('opentype');
+}
+</style>
+
+{% comment %}
+Oud:
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
+{% endcomment %}
+
+
+<!-- end of file -->

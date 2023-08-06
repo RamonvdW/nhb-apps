@@ -14,13 +14,13 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Deelnemers RK</h3>
-            <p>De lijst met kandidaat-deelnemers<br>voor de <b>Rayonkampioenschappen in {{ deelcomp_rk.nhb_rayon }}</b></p>
+            <p>De lijst met kandidaat-deelnemers<br>voor de <b>Rayonkampioenschappen in {{ deelcomp_rk.rayon }}</b></p>
             <p>Individuele sporters stromen door uit de regiocompetitie. Deelname aan het RK moet bevestigd worden.<br>Afmelden wordt op prijs gesteld zodat reserves alvast opgeroepen kunnen worden.</p>
         </div>
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <table class="white">
                 <tr>
@@ -34,8 +34,8 @@
                 </tr>
 
                 <tr>
-                    <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
-                    <td class="nhb-blauw-text">Onbekend</td>
+                    <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                    <td class="sv-blauw-text">Onbekend</td>
                     <td>{{ aantal_onbekend }}</td>
                 </tr>
 
@@ -63,7 +63,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -72,7 +72,7 @@
                     {% if obj.break_klasse %}
                         {% if not forloop.first %}
                             <tr>
-                                <td colspan="5" class="nhb-table-onderrand" style="height:50px"></td>
+                                <td colspan="5" class="sv-table-onderrand" style="height:50px"></td>
                             </tr>
                         {% endif %}
 
@@ -105,12 +105,12 @@
                             <td class="center"><i class="grey-text in-table-icon notranslate material-icons-round">block</i></td>
                         {% else %}
                             <!-- onbekend -->
-                            <td class="center"><i class="nhb-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
+                            <td class="center"><i class="sv-blauw-text in-table-icon notranslate material-icons-round">help</i></td>
                         {% endif %}
 
                         <td>
                             {% if obj.url_wijzig %}
-                                <a class="btn-nhb-rood" href="{{ obj.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ obj.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>

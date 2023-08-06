@@ -23,14 +23,15 @@
 <html lang="nl">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
         <title>{% block title %}{% endblock %}</title>
-        <link rel="icon" href="{% static 'plein/logo_khsn_192x192.png' %}" sizes="192x192">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-128.css' %}">
+
+        {% include 'plein/site_layout_fonts.dtl' %}
+
+        <link rel="stylesheet" href="{% static 'css/materialize-new-147.css' %}">
+
+        {% include 'plein/site_layout_favicons.dtl' %}
+
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -38,31 +39,40 @@
 
         <!-- top navbar -->
         <div class="navbar-fixed">
-            <nav class="nhb-grijs">
+            <nav class="sv-grijs">
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
-                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:1px; z-index:1">
-                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="62" width="264" alt="KHSN logo">
+                    <a href="/plein/" style="z-index:1;padding-top:1px">
+                        <img src="{% static 'plein/logo_with_text_khsn.png' %}" height="62" width="264" alt="KHSN logo" style="padding-left:7px">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->
                     <ul id="nav-mobile" class="right">
                         {% if menu_toon_mandje %}
                             <li>
-                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood">
-                                    <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>{% if menu_mandje_aantal %}{{ menu_mandje_aantal }}{% endif %}</a>
+                                <!-- position:relative + z-index=2: knop boven op het logo -->
+                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-sv-rood" style="position:relative; z-index:2; margin-top:14px">
+                                    {% if menu_mandje_aantal %}
+                                        <i class="notranslate material-icons-round left" style="line-height:36px">shopping_cart</i>
+                                        <span>{{ menu_mandje_aantal }}</span>
+                                    {% else %}
+                                        <i class="notranslate material-icons-round" style="line-height:36px">shopping_cart</i>
+                                    {% endif %}
+                                </a>
                             </li>
                         {% endif %}
 
                         {% if menu_voornaam %}
                             <li>
-                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2">
-                                    <i class="notranslate material-icons-round hide-on-small-only right" style="line-height:36px">expand_more</i>
-                                    <i class="notranslate material-icons-round hide-on-med-and-up"       style="line-height:36px">expand_more</i>
-                                    <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
+                                <!-- position:relative + z-index=2: knop boven op het logo -->
+                                <a href="#" class="btn-sv-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2; margin-top:14px">
+                                    <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span>
+                                    <i class="notranslate material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
+                                    <i class="notranslate material-icons-round       hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                </a>
                             </li>
                         {% elif not verberg_login_knop %}
-                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood" style="position:relative; z-index:2">Inloggen</a></li>
+                            <li><a href="{% url 'Account:login' %}" class="btn-sv-rood" style="position:relative; z-index:2">Inloggen</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -73,7 +83,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_wissel_van_rol }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">people_alt</i>Wissel van rol</a>
+                                <i class="notranslate material-icons-round sv-rood-text">people_alt</i>Wissel van rol</a>
                         </li>
                     {% endif %}
 
@@ -81,7 +91,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round nhb-blauw-text">build</i>Admin site</a>
+                                <i class="notranslate material-icons-round sv-blauw-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
 
@@ -89,7 +99,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_taken }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+                                <i class="notranslate material-icons-round sv-rood-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
                             </a>
                         </li>
                     {% endif %}
@@ -98,7 +108,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_profiel }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">portrait</i>Mijn pagina</a>
+                                <i class="notranslate material-icons-round sv-rood-text">portrait</i>Mijn pagina</a>
                         </li>
                     {% endif %}
 
@@ -106,7 +116,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_uitloggen }}">
-                                <i class="notranslate material-icons-round nhb-rood-text">logout</i>Uitloggen</a>
+                                <i class="notranslate material-icons-round sv-rood-text">logout</i>Uitloggen</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -128,16 +138,17 @@
 
             {% block broodkruimels %}
                 {% if kruimels %}
-                    <div style="padding:10px">
-                        <div class="valign-wrapper" style="height:25px">
-                            <button class="broodkruimels-btn-back" onclick="javascript:history.go(-1)">
-                                <!--svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960" height="25" width="25"><path d="M447 875 169 597q-5-5-7-10t-2-11q0-6 2-11t7-10l279-279q8-8 20-8t21 9q9 9 9 21t-9 21L262 546h496q13 0 21.5 8.5T788 576q0 13-8.5 21.5T758 606H262l228 228q8 8 8 20t-9 21q-9 9-21 9t-21-9Z"/></svg-->
-                                <i class="notranslate material-icons-round">arrow_back</i>
-                            </button>
+                    <div style="padding:10px; display:flex">
+                        <button class="broodkruimels-btn-back" onclick="history.go(-1)">
+                            <!--svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960" height="25" width="25"><path d="M447 875 169 597q-5-5-7-10t-2-11q0-6 2-11t7-10l279-279q8-8 20-8t21 9q9 9 9 21t-9 21L262 546h496q13 0 21.5 8.5T788 576q0 13-8.5 21.5T758 606H262l228 228q8 8 8 20t-9 21q-9 9-21 9t-21-9Z"/></svg-->
+                            <i class="notranslate material-icons-round">arrow_back</i>
+                        </button>
 
+                        <!--div class="valign-wrapper" style="height:25px" -->
+                        <div style="height:24px; margin-top:3px">
                             <a class="broodkruimels-link" href="{% url 'Plein:plein' %}">Plein</a>
                             {% for url, kruimel in kruimels %}
-                                <span class="nhb-blauw-text" style="margin-right:5px; font-weight:800">&rsaquo;</span>
+                                <span class="sv-blauw-text" style="margin-right:5px; font-weight:800">&rsaquo;</span>
                                 {% if not url %}
                                     <span class="broodkruimels-nolink">{{ kruimel }}</span>
                                 {% else %}
@@ -155,76 +166,11 @@
             </main>
         </div>
 
-        <script src="{% static 'materialize-new-13_min.js' %}"></script>
-        <script src="{% static 'site_layout-9_min.js' %}"></script>
+        <script src="{% static 'js/materialize-new-15_min.js' %}"></script>
+        <script src="{% static 'js/site_layout-18_min.js' %}"></script>
 
-        <!-- framework init, after everything has been loaded and instantiated -->
         <script type="application/javascript">
-            document.addEventListener("DOMContentLoaded", function() {
-                // accordeons
-                const options = { inDuration: 100,    // default is 300
-                                  outDuration: 100    // default is 300
-                                };
-                let elems;
-
-                // console.log('history.length:', history.length)
-                if (history.length < 2) {
-                    // nothing to go back to
-                    // typically happens when opening a manual page in a new window
-                    const el = document.getElementById("id_kruimels_back");
-                    // element bestaat niet als broodkruimels uitgezet zijn, zoals op het Plein zelf
-                    if (el) el.style.display = "none";
-                }
-
-                elems = document.querySelectorAll(".collapsible");
-                M.Collapsible.init(elems, options);
-
-                // dropdown menu
-                elems = document.querySelectorAll(".dropdown-trigger");
-                M.Dropdown.init(elems, {coverTrigger: false, constrainWidth: false});
-
-                // tooltips
-                elems = document.querySelectorAll(".tooltipped");
-                M.Tooltip.init(elems, { enterDelay: 1000 });
-
-                // rolgordijnen
-                elems = document.querySelectorAll("select");
-                M.FormSelect.init(elems, {});
-
-                // modals
-                elems = document.querySelectorAll(".modal");
-                M.Modal.init(elems, {'endingTop': '35%'});
-            });
-
-            // zoek alle tabellen met een zoekveld en trigger de oninput method
-            // dit is noodzakelijk bij gebruik van de browser 'back' knop
-            // anders zijn de tabellen niet meer gefiltreerd
-            window.addEventListener("load", function()
-            {
-                //console.log("load!")
-                const tables = document.getElementsByTagName("table");
-                Array.from(tables).forEach(table => {
-                    if (table.id !== "") {
-                        const inputs = table.getElementsByTagName("input");
-                        if (inputs.length >= 1) myTableFilter(inputs[0], table.id);
-                    }
-                });
-
-                // evalueer de posities van de labels van de forms
-                // zodat het label niet over het ingevulde input veld staat
-                M.updateTextFields();
-            });
-
-            // resize listener, om het dropdown menu automatisch te verstoppen
-            window.addEventListener('resize', function() {
-                const elems = document.querySelectorAll(".dropdown-trigger");
-                Array.from(elems).forEach(elem => {
-                    const instance = M.Dropdown.getInstance(elem);
-                    if (instance.isOpen) {
-                        instance.close();
-                    }
-                });
-            });
+            document.addEventListener("DOMContentLoaded", sitelayout_loaded);
         </script>
 
     </body>

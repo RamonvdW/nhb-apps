@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ USER_WWW="$1"
 ID=$(id -u)
 ID_ROOT=$(id -u root)
 ID_WWW=$(id -u "$USER_WWW")
-if [ $ID -ne $ID_ROOT -a $ID -ne $ID_WWW ]
+if [ "$ID" -ne "$ID_ROOT" ] && [ "$ID" -ne "$ID_WWW" ]
 then
     echo "Please run with sudo"
     exit 1
@@ -45,12 +45,12 @@ mkdir -p "$TMPDIR"
 cp "./downloader_service-account.json" "$TMPDIR/service-account.json"
 
 # calculate the checksum for the latest downloaded file
-LATESTFILE=$(ls -1t "$SPOOLDIR"/records_*.json | head -1)
-LATESTHASH="none"
-if [ -e "$LATESTFILE" ]
+LATEST_FILE=$(ls -1t "$SPOOLDIR"/records_*.json | head -1)
+LATEST_HASH="none"
+if [ -e "$LATEST_FILE" ]
 then
-    LATESTHASH=$(sha1sum < "$LATESTFILE")
-    echo "[INFO] Hash of previously downloaded records: $LATESTHASH" >> "$LOG"
+    LATEST_HASH=$(sha1sum < "$LATEST_FILE")
+    echo "[INFO] Hash of previously downloaded records: $LATEST_HASH" >> "$LOG"
 fi
 
 # download the records
@@ -66,7 +66,7 @@ then
     HASH=$(sha1sum < "$RECORDS")
     echo "[INFO] Hash of newly downloaded records: $HASH" >> "$LOG"
 
-    if [ "$HASH" != "$LATESTHASH" ]
+    if [ "$HASH" != "$LATEST_HASH" ]
     then
         # file has changed, so store and import!
 

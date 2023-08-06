@@ -13,8 +13,6 @@
     <script type="application/javascript">
         function keuze_gemaakt(groep) {
 
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
             const selector = "input[type='radio'][name=" + groep + "]:checked"
             const el = document.querySelector(selector)
             const url = el.dataset.url
@@ -34,7 +32,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -53,7 +51,7 @@
                 {% if not deelcomp.regio_organiseert_teamcompetitie %}
                     <tr>
                         <td></td>
-                        <td class="nhb-rood-text">Deze regio organiseert geen team competitie</td>
+                        <td class="sv-rood-text">Deze regio organiseert geen team competitie</td>
                     </tr>
                 {% endif %}
 
@@ -64,28 +62,28 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filters</h4>
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
         </div>
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
 
         <div class="col s12 m4 offset-m1 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een regio:</b></p>
-                <ul id="id_regio">
-                    {% for regio in regio_filters %}
+                <ul>
+                    {% for filter in regio_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ regio.sel }}">
-                                <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
-                                <span>{{ regio.title_str }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -93,46 +91,48 @@
         <div class="col s12 m5 l4" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een team type:</b></p>
-                <ul id="id_boog">
-                    {% for teamtype in teamtype_filters %}
+                <ul>
+                    {% for filter in teamtype_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ teamtype.sel }}">
-                                <input class="with-gap" type="radio" name="teamtype" value="{{ teamtype.sel }}" required id="id_{{ teamtype.sel }}" {% if teamtype.selected %}checked{% endif %} data-url="{{ teamtype.zoom_url }}">
-                                <span>{{ teamtype.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
 
-        <div class="col s12 m6 l5">
-            <div class="white left-align" style="padding:10px">
-                <p><b>Kies een vereniging:</b></p>
-                <ul id="id_ver">
-                    <li>
-                        <label class="black-text" for="id_ver_0">
-                            <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
-                            <span>Alle</span>
-                        </label>
-                    </li>
-                    {% for ver in ver_filters %}
+        {% if deelcomp.regio_organiseert_teamcompetitie %}
+            <div class="col s12 m6 l5">
+                <div class="white left-align" style="padding:10px">
+                    <p><b>Kies een vereniging:</b></p>
+                    <ul>
                         <li>
-                            <label class="black-text" for="id_{{ ver.sel }}">
-                                <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
-                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }} ({{ ver.plaats }})</span>
+                            <label class="black-text" for="id_ver_0">
+                                <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
+                                <span>Alle</span>
                             </label>
                         </li>
-                    {% endfor %}
-                </ul>
-                <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
-                </p>
+                        {% for ver in ver_filters %}
+                            <li>
+                                <label class="black-text" for="id_{{ ver.sel }}">
+                                    <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
+                                    <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }} ({{ ver.plaats }})</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-sv-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+                    </p>
+                </div>
             </div>
-        </div>
+        {% endif %}
     </div>
 
     {% if deelcomp.regio_organiseert_teamcompetitie %}
@@ -140,9 +140,10 @@
         <table class="white">
             {% for team in teams %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
+                    {% comment %}
                     <!-- forceer gelijkmatige layout in de Scores kolommen -->
-                    <tr style="visibility: collapse">
-                        <td class="nhb-table-zijrand"></td>
+                    <tr class="sv-table-hide-row">
+                        <td class="sv-table-zijrand"></td>
                         <td colspan="2"><!-- rank, naam --></td>
                         <td class="right-align smal">888</td>
                         <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
@@ -160,8 +161,9 @@
                         <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                         <td class="right-align hide-on-small-only">8888</td>
                         <td class="right-align">{% if toon_punten %}88{% else %}-{% endif %}</td>
-                        <td class="nhb-table-zijrand"></td>
+                        <td class="sv-table-zijrand"></td>
                     </tr>
+                    {% endcomment %}
                 {% endif %}
 
                 {% if team.break_poule %}
@@ -175,12 +177,12 @@
                         <tr>
                             <td colspan="20" style="padding:0">
                                 <table>
-                                    <tr class="nhb-table-header">
-                                        <td class="nhb-table-zijrand" rowspan="9"></td>
+                                    <tr class="sv-table-header">
+                                        <td class="sv-table-zijrand" rowspan="9"></td>
                                         <th class="center">Ronde</th>
                                         <th>Thuis team</th>
                                         <th>Bezoekend team</th>
-                                        <td class="nhb-table-zijrand" rowspan="9"></td>
+                                        <td class="sv-table-zijrand" rowspan="9"></td>
                                     </tr>
                                     {% for ronde_nr, wedstrijden in team.schema %}
                                         <tr>
@@ -194,7 +196,7 @@
                                         </tr>
                                     {% endfor %}
                                     <tr>
-                                        <td colspan="3" class="nhb-table-onderrand"></td>
+                                        <td colspan="3" class="sv-table-onderrand"></td>
                                     </tr>
                                 </table>
                             </td>
@@ -206,9 +208,9 @@
                             <td colspan="20" class="center">
                                 <br>
                                 {% if team.poule_str == '??' %}
-                                    <h5 class="nhb-rood-text">Nog niet in een poule geplaatst</h5>
+                                    <h5 class="sv-rood-text">Nog niet in een poule geplaatst</h5>
                                 {% else %}
-                                    <h4 class="nhb-rood-text">Poule: {{ team.poule_str }}</h4>
+                                    <h4 class="sv-rood-text">Poule: {{ team.poule_str }}</h4>
                                 {% endif %}
                             </td>
                         </tr>
@@ -219,14 +221,14 @@
                     <tr>
                         <td colspan="20" class="center"><h5>Klasse: {{ team.klasse_str }}</h5></td>
                     </tr>
-                    <tr class="nhb-table-header">
-                        <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
+                    <tr class="sv-table-header">
+                        <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
                         <th><!-- rank --></th>
                         <th>Team</th>
                         <th class="center" colspan="14">{% if toon_punten %}Scores<span class="hide-on-small-only"> / Punten</span>{% else %}Scores{% endif %}</th>
                         <th class="right-align hide-on-small-only">Totaal</th>
                         <th class="right-align">{% if toon_punten %}Punten{% endif %}</th>
-                        <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
+                        <td class="sv-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
                     </tr>
                 {% endif %}
 
@@ -244,11 +246,20 @@
 
                     {% if team.onderrand %}
                         <tr>
-                            <td colspan="18" class="nhb-table-onderrand"></td>
+                            <td colspan="18" class="sv-table-onderrand"></td>
                         </tr>
                     {% endif %}
                 {% endif %}
 
+                {% if forloop.last %}
+                    <!-- row with all cells defined, to avoid linting errors -->
+                    <tr style="display:none">
+                        <td></td> <td></td> <td></td> <td></td> <td></td>
+                        <td></td> <td></td> <td></td> <td></td> <td></td>
+                        <td></td> <td></td> <td></td> <td></td> <td></td>
+                        <td></td> <td></td> <td></td> <td></td> <td></td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
 

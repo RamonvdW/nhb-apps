@@ -34,7 +34,7 @@ class TestCompetitieHWL(E2EHelpers, TestCase):
 
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak het lid aan dat HWL wordt

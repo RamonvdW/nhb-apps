@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Mailer.operations import mailer_queue_email, render_email_template
-from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
+from TijdelijkeCodes.operations import maak_tijdelijke_code_bevestig_email_functie
 import datetime
 
 
@@ -53,9 +53,8 @@ def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschr
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD)
 
-    email = account.accountemail_set.all()[0]
-    if email.email_is_bevestigd:
-        if mailer_queue_email(email.bevestigde_email,                       # pragma: no branch
+    if account.email_is_bevestigd:
+        if mailer_queue_email(account.bevestigde_email,                       # pragma: no branch
                               'Wijziging rollen op ' + settings.NAAM_SITE,
                               mail_body):
             # het is gelukt een mail klaar te zetten
@@ -70,7 +69,7 @@ def functie_vraag_email_bevestiging(functie):
     """
 
     # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_url_functie_email(functie)
+    url = maak_tijdelijke_code_bevestig_email_functie(functie)
 
     context = {
         'url': url,
@@ -86,13 +85,13 @@ def functie_vraag_email_bevestiging(functie):
                        enforce_whitelist=False)
 
 
-def maak_account_vereniging_secretaris(nhb_ver, account):
+def maak_account_vereniging_secretaris(ver, account):
     """ Geeft het account rechten om als secretaris van de vereniging de site te gebruiken
         Retourneert True als het account aan de SEC-functie toegevoegd is
     """
 
     # zoek de SEC-functie van de vereniging erbij
-    functie = Functie.objects.get(rol='SEC', nhb_ver=nhb_ver)
+    functie = Functie.objects.get(rol='SEC', vereniging=ver)
 
     # kijk of dit lid al in de groep zit
     if functie.accounts.filter(pk=account.pk).count() == 0:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,6 @@ from Opleidingen.models import OpleidingDiploma
 from Sporter.models import Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
-import json
 
 
 class TestBondspas(E2EHelpers, TestCase):
@@ -29,11 +28,11 @@ class TestBondspas(E2EHelpers, TestCase):
         now = datetime.datetime.now()
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.sporter = sporter = Sporter(
                                     lid_nr=self.lid_nr,
@@ -44,7 +43,7 @@ class TestBondspas(E2EHelpers, TestCase):
                                     geboorte_datum=datetime.date(year=now.year - 55, month=3, day=4),
                                     sinds_datum=datetime.date(year=2010, month=11, day=12),
                                     geslacht='M',
-                                    bij_vereniging=self.nhbver1,
+                                    bij_vereniging=self.ver1,
                                     lid_tot_einde_jaar=now.year)
         self.account = self.e2e_create_account(self.lid_nr, sporter.email, sporter.voornaam)
         sporter.account = self.account
@@ -77,6 +76,13 @@ class TestBondspas(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bondspas/toon-bondspas-sporter.dtl', 'plein/site_layout.dtl'))
 
+        # gast-account
+        self.sporter.is_gast = True
+        self.sporter.save(update_fields=['is_gast'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon_sporter)
+        self.assert404(resp, 'Geen bondspas voor gast-accounts')
+
         resp = self.client.get(self.url_toon_van % 99999)
         self.assert403(resp)
 
@@ -88,8 +94,7 @@ class TestBondspas(E2EHelpers, TestCase):
 
     def _check_bondspas_resp(self, resp):
         # check het antwoord
-        self.assertEqual(resp['Content-Type'], 'application/json')
-        data = json.loads(resp.content)
+        data = self.assert200_json(resp)
         keys = list(data.keys())
         self.assertEqual(keys, ['bondspas_base64'])
 
@@ -111,7 +116,7 @@ class TestBondspas(E2EHelpers, TestCase):
         # speciaal geval: jarig op 1 januari
         # speciaal geval: geslacht X
         # speciaal geval: geen vereniging
-        # speciaal: NHB leeftijdsklassen die anders is dan WA: 60
+        # speciaal: KHSN leeftijdsklassen die anders is dan WA: 60
         # speciaal: para classificatie
         self.sporter.geboorte_datum = '%4d-01-01' % (now.year - 60)
         self.sporter.geslacht = GESLACHT_ANDERS
@@ -170,6 +175,13 @@ class TestBondspas(E2EHelpers, TestCase):
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self._check_bondspas_resp(resp)
 
+        # gast-account
+        self.sporter.is_gast = True
+        self.sporter.save(update_fields=['is_gast'])
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_ophalen)
+        self.assert404(resp, 'Geen bondspas voor gast-accounts')
+
     def test_beheerder(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
@@ -179,10 +191,18 @@ class TestBondspas(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen valide parameter')
 
         url = self.url_toon_van % self.sporter.lid_nr
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
+
+        # gast-account
+        self.sporter.is_gast = True
+        self.sporter.save(update_fields=['is_gast'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen bondspas voor gast-accounts')
 
     def test_speelsterkte(self):
 

@@ -19,7 +19,7 @@ from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_kl
                                    bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from HistComp.models import HistCompetitie
+from HistComp.models import HistCompSeizoen
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
@@ -77,7 +77,10 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.team_type.boog_typen.order_by('volgorde')]
+            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in (klasse
+                                                                            .team_type
+                                                                            .boog_typen
+                                                                            .order_by('volgorde'))]
             prev = groep
         # for
         return objs
@@ -209,7 +212,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                                              kwargs={'afstand': afstand})
 
         # zoek uit wat de meest recente HistComp is
-        histcomps = HistCompetitie.objects.order_by('-seizoen').all()
+        histcomps = HistCompSeizoen.objects.order_by('-seizoen').all()
         if len(histcomps) == 0:
             context['geen_histcomp'] = True
         else:
@@ -314,9 +317,9 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
-                comp.beschrijving.replace(' competitie', '')),
-            (None, 'Klassegrenzen')
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Klassengrenzen')
         )
 
         menu_dynamics(self.request, context)
@@ -430,10 +433,7 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
 
         # maak de HistComp uitslagen openbaar voor dit seizoen
         seizoen = '%s/%s' % (comps[0].begin_jaar, comps[0].begin_jaar + 1)
-        for histcomp in HistCompetitie.objects.filter(seizoen=seizoen, is_openbaar=False):
-            histcomp.is_openbaar = True
-            histcomp.save(update_fields=['is_openbaar'])
-        # for
+        HistCompSeizoen.objects.filter(seizoen=seizoen, is_openbaar=False).update(is_openbaar=True)
 
         return HttpResponseRedirect(reverse('Competitie:kies'))
 

@@ -124,7 +124,10 @@ class WedstrijdDetailsView(TemplateView):
         if wedstrijd.is_ter_info:
             context['toon_inschrijven'] = False
         else:
-            context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven'] and context['toon_sessies']) or (wedstrijd.extern_beheerd and wedstrijd.contact_website)
+            context['toon_inschrijven'] = (context['kan_aanmelden'] and
+                                           context['kan_inschrijven'] and
+                                           context['toon_sessies']) or (wedstrijd.extern_beheerd and
+                                                                        wedstrijd.contact_website)
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -139,7 +142,9 @@ class WedstrijdDetailsView(TemplateView):
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
+                                    'soort': 'alle',
+                                    'bogen': 'auto'})
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
             (None, 'Wedstrijd details'),
@@ -361,6 +366,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['sportersboog'] = list(SporterBoog
                                        .objects
+                                       .exclude(sporter__is_overleden=True)
                                        .filter(sporter__lid_nr=lid_nr,
                                                sporter__is_actief_lid=True,              # moet actief lid zijn
                                                voor_wedstrijd=True,
@@ -428,7 +434,9 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
+                                    'soort': 'alle',
+                                    'bogen': 'auto'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -515,6 +523,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         if zoek_lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=zoek_lid_nr,
                                                    sporter__is_actief_lid=True,
                                                    voor_wedstrijd=True,
@@ -531,6 +540,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         elif lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=lid_nr,
                                                    sporter__is_actief_lid=True,
                                                    voor_wedstrijd=True,
@@ -625,7 +635,9 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
+                                    'soort': 'alle',
+                                    'bogen': 'auto'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -707,6 +719,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['familie'] = list(SporterBoog
                                   .objects
+                                  .exclude(sporter__is_overleden=True)
                                   .filter(sporter__adres_code=adres_code,
                                           sporter__is_actief_lid=True,
                                           voor_wedstrijd=True,
@@ -821,7 +834,9 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
+                                    'soort': 'alle',
+                                    'bogen': 'auto'})
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
@@ -879,7 +894,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         inschrijving_open_of_404(wedstrijd)
 
-        if not sporterboog.sporter.is_actief_lid or not sporterboog.sporter.bij_vereniging:
+        sporter = sporterboog.sporter
+        if sporter.is_overleden or not sporter.is_actief_lid or not sporter.bij_vereniging:
             raise Http404('Niet actief lid')
 
         account_koper = request.user
@@ -929,7 +945,9 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         url_maand = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
+                                    'soort': 'alle',
+                                    'bogen': 'auto'})
 
         inschrijven_str = 'Inschrijven'
         url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -1000,7 +1018,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
-        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
             raise PermissionDenied('Wedstrijd van andere vereniging')
 
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
@@ -1039,6 +1057,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         if zoek_lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=zoek_lid_nr,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
@@ -1049,6 +1068,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         elif lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects
+                                           .exclude(sporter__is_overleden=True)
                                            .filter(sporter__lid_nr=lid_nr,
                                                    voor_wedstrijd=True,
                                                    boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
@@ -1159,7 +1179,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
             raise PermissionDenied('Wedstrijd van andere vereniging')
 
         sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
@@ -1185,6 +1205,9 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
         # TODO: check wedstrijd geslacht gekozen
         # TODO: check dat klasse bij sporterboog past
+        sporter = sporterboog.sporter
+        if sporter.is_overleden or not sporter.is_actief_lid or not sporter.bij_vereniging:
+            raise Http404('Niet actief lid')
 
         account_koper = request.user
 

@@ -5,8 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Competitie.definities import DEEL_BK
-from Competitie.models import Kampioenschap
 from Functie.definities import Rollen
 from types import SimpleNamespace
 
@@ -17,7 +15,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     """
 
     # Tijdlijn
-    url = reverse('Competitie:tijdlijn', kwargs={'comp_pk': comp.pk})
+    url = reverse('CompBeheer:tijdlijn', kwargs={'comp_pk': comp.pk})
     kaartje = SimpleNamespace(
                     prio=1,
                     titel="Tijdlijn",
@@ -37,7 +35,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
                     url=url)
         kaartjes_algemeen.append(kaartje)
 
-    # Toon klassegrenzen (is een openbaar kaartje)
+    # Toon klassengrenzen (is een openbaar kaartje)
     if comp.klassengrenzen_vastgesteld:
         url = reverse('Competitie:klassengrenzen-tonen', kwargs={'comp_pk': comp.pk})
         kaartje = SimpleNamespace(

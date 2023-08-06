@@ -88,7 +88,6 @@ class CompetitieOverzichtView(TemplateView):
             tussen_eind = "Eindstand"
         context['text_rayon_indiv'] = tussen_eind + ' voor de rayonkampioenschappen individueel'
 
-        # TODO: tussenstand/eindstand zou bepaald moeten worden ahv Kampioenschap.is_klaar_indiv / is_klaar_teams
         tussen_eind = "Tussen" if comp.fase_teams <= 'N' else "Eind"
         context['text_rayon_teams'] = tussen_eind + 'stand voor de rayonkampioenschappen teams'
 

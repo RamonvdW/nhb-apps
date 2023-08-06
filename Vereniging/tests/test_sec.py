@@ -4,13 +4,18 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
-from Competitie.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
+from Registreer.definities import REGISTRATIE_FASE_DONE
+from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -27,16 +32,18 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # <comp_pk>
-    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # <deelcomp_pk>
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                       # <sporter_pk>
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # comp_pk
+    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # deelcomp_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                       # sporter_pk
+    url_gast_accounts = '/vereniging/gast-accounts/'
+    url_gast_details = '/vereniging/gast-accounts/%s/details/'               # lid_nr
 
     testdata = None
 
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -51,17 +58,17 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = regio_111
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         # maak de HWL functie
         # de functie is nodig zodat er BB er naartoe kan wisselen om schutterboog instellingen te doen
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         # maak de SEC functie
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         # maak het lid aan dat SEC wordt
@@ -84,41 +91,41 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.sporter_100001 = sporter
 
         # maak een jeugdlid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Jeugdschutter",
+                    email="",
+                    geboorte_datum=datetime.date(year=2010, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100002 = sporter
 
         # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
-        sporter = Sporter()
-        sporter.lid_nr = 100012
-        sporter.geslacht = "V"
-        sporter.voornaam = "Andrea"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=10, day=10)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100012,
+                    geslacht="V",
+                    voornaam="Andrea",
+                    achternaam="de Jeugdschutter",
+                    email="",
+                    geboorte_datum=datetime.date(year=2010, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=10, day=10),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100012 = sporter
 
         # maak een senior lid aan, om inactief te maken
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100003,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Testerin",
+                    email="",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100003 = sporter
 
@@ -129,60 +136,106 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver2.ver_nr = "1222"
         ver2.regio = regio_111
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
         self._create_competitie()
 
+        # maak een vereniging aan voor de gasten
+        self.ver_extern = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+
+        self.functie_sec_extern = maak_functie("SEC extern", "SEC")
+        self.functie_sec_extern.vereniging = self.ver_extern
+        self.functie_sec_extern.save()
+        self.functie_sec_extern.accounts.add(self.account_sec)
+
+        # maak een gast-account aan
+        gast = GastRegistratie(
+                    lid_nr=800001,
+                    fase=REGISTRATIE_FASE_DONE,
+                    email="een@gasten.not",
+                    email_is_bevestigd=True,
+                    voornaam="Een",
+                    achternaam="van de Gasten",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    geslacht="V",
+                    eigen_sportbond_naam="Eigen bond",
+                    eigen_lid_nummer="EB-1234",
+                    club="Eigen club",
+                    club_plaats="Eigen plaats",
+                    land="Eigen land",
+                    telefoon="+998877665544",
+                    wa_id="",
+                    logboek="")
+        gast.save()
+        self.gast_800001 = gast
+
+        self.account_800001 = self.e2e_create_account(gast.lid_nr, gast.email, gast.voornaam)
+
+        sporter = Sporter(
+                    lid_nr=gast.lid_nr,
+                    is_gast=True,
+                    geslacht=gast.geslacht,
+                    voornaam=gast.voornaam,
+                    achternaam=gast.achternaam,
+                    email=gast.email,
+                    geboorte_datum=gast.geboorte_datum,
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self.ver_extern,
+                    account=self.account_800001)
+        sporter.save()
+        self.sporter_800001 = sporter
+
+        gast.sporter = sporter
+        gast.account = self.account_800001
+        gast.save(update_fields=['sporter', 'account'])
+
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
-        histcomp = HistCompetitie()
-        histcomp.seizoen = '2018/2019'
-        histcomp.comp_type = '18'
-        histcomp.boog_str = 'Testcurve1'
-        histcomp.is_team = False
-        histcomp.save()
+        hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18,
+                                       indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
+        hist_seizoen.save()
 
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100001.lid_nr
-        rec.sporter_naam = self.sporter_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'R'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100001.lid_nr,
+                    sporter_naam=self.sporter_100001.volledige_naam(),
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
+                    boogtype='R',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
         # record voor het jeugdlid
         # record voor het volwassen lid
-        rec = HistCompetitieIndividueel()
-        rec.histcompetitie = histcomp
-        rec.rank = 1
-        rec.sporter_lid_nr = self.sporter_100002.lid_nr
-        rec.sporter_naam = self.sporter_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.ver_nr
-        rec.vereniging_naam = self.nhbver1.naam
-        rec.boogtype = 'BB'
-        rec.score1 = 10
-        rec.score2 = 20
-        rec.score3 = 30
-        rec.score4 = 40
-        rec.score5 = 50
-        rec.score6 = 60
-        rec.score7 = 70
-        rec.totaal = 80
-        rec.gemiddelde = 5.321
+        rec = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=self.sporter_100002.lid_nr,
+                    sporter_naam=self.sporter_100002.volledige_naam(),
+                    vereniging_nr=self.ver1.ver_nr,
+                    vereniging_naam=self.ver1.naam,
+                    boogtype='BB',
+                    score1=10,
+                    score2=20,
+                    score3=30,
+                    score4=40,
+                    score5=50,
+                    score6=60,
+                    score7=70,
+                    totaal=80,
+                    gemiddelde=5.321)
         rec.save()
 
     def _create_competitie(self):
@@ -278,9 +331,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         regio100 = NhbRegio.objects.get(regio_nr=100)
         self.assertTrue(regio100.is_administratief)
 
-        # account_sec is SEC bij self.nhbver1
-        self.nhbver1.regio = regio100
-        self.nhbver1.save()
+        # account_sec is SEC bij self.ver1
+        self.ver1.regio = regio100
+        self.ver1.save()
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -328,7 +381,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         loc = WedstrijdLocatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
-        loc.verenigingen.add(self.nhbver1)
+        loc.verenigingen.add(self.ver1)
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -343,5 +396,69 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(len(urls2), 1)
 
         # ophalen en aanpassen: zie test_accommodatie
+
+    def test_sec_gast_accounts(self):
+        # wordt SEC van de vereniging voor gast-accounts
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
+        self.e2e_check_rol('SEC')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        # haal de gast-accounts ledenlijst op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+
+        # zet een last_login
+        self.account_800001.last_login = timezone.now()
+        self.account_800001.save(update_fields=['last_login'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+
+        # ontkoppel het account
+        self.sporter_800001.account = None
+        self.sporter_800001.save(update_fields=['account'])
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+
+        self.gast_800001.account = None
+        self.gast_800001.save(update_fields=['account'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_accounts)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_gast_accounts)
+
+    def test_sec_gast_details(self):
+        # wordt SEC van de vereniging voor gast-accounts
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
+        self.e2e_check_rol('SEC')
+
+        # haal de details van een gast-account op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/gast-account-details.dtl', 'plein/site_layout.dtl'))
+
+        # niet bestaand nummer
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % 999999)
+        self.assert404(resp, 'Slechte parameter')
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_gast_details % self.gast_800001.lid_nr)
 
 # end of file

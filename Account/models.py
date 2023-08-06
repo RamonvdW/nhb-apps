@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,14 +25,14 @@ class Account(AbstractUser):
     # (inherited) password
     # (inherited) date_joined
     # (inherited) last_login
-    # (inherited) is_active     - may log in
-    # (inherited) is_staff      - admin site access
-    # (inherited) is_superuser  - all permissions
+    # (inherited) is_active  - may log in
+    # (inherited) is_staff   - admin site access
     # (inherited) first_name
     # (inherited) last_name
-    # (inherited, not used) email
-    # (inherited) user_permissions: ManyToMany
-    # (inherited) groups: ManyToMany
+    # (inherited) email            (not used)
+    # (inherited) user_permissions (not used)
+    # (inherited) is_superuser     (not used)
+    # (inherited) groups           (not used)
 
     # om in te zoeken: volledige naam zonder leestekens
     unaccented_naam = models.CharField(max_length=200, default='', blank=True)
@@ -52,14 +52,10 @@ class Account(AbstractUser):
                                     blank=True, null=True,
                                     help_text="Login niet mogelijk tot")
 
-    # rollen / functies
+    # speciale vlag om dit account alle rechten te geven
     is_BB = models.BooleanField(
                         default=False,
                         help_text="Manager Competitiezaken")
-
-    is_Observer = models.BooleanField(
-                        default=False,
-                        help_text="Alleen observeren")
 
     # TOTP ondersteuning
     otp_code = models.CharField(
@@ -72,6 +68,19 @@ class Account(AbstractUser):
                         help_text="Is OTP verificatie gelukt")
 
     otp_controle_gelukt_op = models.DateTimeField(blank=True, null=True)
+
+    # e-mail
+    email_is_bevestigd = models.BooleanField(default=False)     # == mag inloggen
+    bevestigde_email = models.EmailField(blank=True)
+    nieuwe_email = models.EmailField(blank=True)
+
+    # taken
+    optout_nieuwe_taak = models.BooleanField(default=False)
+    optout_herinnering_taken = models.BooleanField(default=False)
+    laatste_email_over_taken = models.DateTimeField(blank=True, null=True)
+
+    # is dit een gast-account (minder minder mogelijkheden)?
+    is_gast = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['password']
 
@@ -90,9 +99,6 @@ class Account(AbstractUser):
     def volledige_naam(self):
         """ Geef de volledige naam (voornaam achternaam) van het account terug
             als beide niet ingevuld zijn, geef dan de username terug
-
-            Wordt ook gebruikt vanuit djangosaml2idp
-            in settings.py staat de referentie naar deze methode naam
         """
         if self.first_name or self.last_name:
             name = self.first_name + " " + self.last_name
@@ -108,55 +114,11 @@ class Account(AbstractUser):
         """
         return "%s (%s)" % (self.volledige_naam(), self.username)
 
-    def get_email(self):
-        """ helper om de email van de gebruiker te krijgen voor djangosaml2idp
-            zodat deze doorgegeven kan worden aan een Service Provider zoals de Wiki server
-            in settings.py staat de referentie naar deze methode naam
-        """
-        if self.accountemail_set.count() == 1:
-            email = self.accountemail_set.all()[0].bevestigde_email
-        else:
-            email = ""
-        return email
-
     def __str__(self):
         """ geef een korte beschrijving van dit account
             wordt gebruikt in de drop-down lijsten en autocomplete_fields van de admin interface
         """
         return self.get_account_full_name()
-
-
-class AccountEmail(models.Model):
-    """ definitie van een e-mail adres (en de status daarvan) voor een account """
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-
-    # e-mail
-    email_is_bevestigd = models.BooleanField(default=False)     # == mag inloggen
-    bevestigde_email = models.EmailField(blank=True)
-    nieuwe_email = models.EmailField(blank=True)
-
-    # taken
-    optout_nieuwe_taak = models.BooleanField(default=False)
-    optout_herinnering_taken = models.BooleanField(default=False)
-    laatste_email_over_taken = models.DateTimeField(blank=True, null=True)
-
-    # functie koppeling
-    optout_functie_koppeling = models.BooleanField(default=False)
-
-    # klachten
-    optout_reactie_klacht = models.BooleanField(default=False)
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "E-mail voor account '%s' (%s)" % (self.account.username,
-                                                  self.bevestigde_email)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "AccountEmail"
-        verbose_name_plural = "AccountEmails"
-
-    objects = models.Manager()      # for the editor only
 
 
 class AccountSessions(models.Model):
@@ -201,16 +163,15 @@ def accounts_opschonen(stdout):
     # zoek gebruikers die een account aangemaakt hebben,
     # maar de mail niet binnen 3 dagen bevestigen
     # door deze te verwijderen kan de registratie opnieuw doorlopen worden
-    for obj in (AccountEmail
+    for obj in (Account
                 .objects
-                .select_related('account')
                 .filter(email_is_bevestigd=False,
                         bevestigde_email='',
-                        account__last_login=None,
-                        account__date_joined__lt=wat_ouder)):
+                        last_login=None,
+                        date_joined__lt=wat_ouder)):
 
-        stdout.write('[INFO] Verwijder onvoltooid account %s' % obj.account)
-        obj.account.delete()
+        stdout.write('[INFO] Verwijder onvoltooid account %s' % obj)
+        obj.delete()
     # for
 
 

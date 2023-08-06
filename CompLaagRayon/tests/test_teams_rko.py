@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Competitie.definities import DEEL_RK
 from Competitie.models import KampioenschapTeam, Kampioenschap
-from Competitie.tijdlijn import zet_competitie_fase_rk_prep
+from Competitie.tests.tijdlijn import zet_competitie_fase_rk_prep
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -24,7 +24,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/doorzetten/rk-bk-teams-klassengrenzen-vaststellen/'  # comp_pk
 
     regio_nr = 101
-    ver_nr = 0      # wordt in setupTestData ingevuld
+    ver_nr = 0      # wordt in setUpTestData ingevuld
 
     testdata = None
 
@@ -33,19 +33,19 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         print('%s: populating testdata start' % cls.__name__)
         s1 = timezone.now()
         cls.testdata = TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
         cls.testdata.maak_clubs_en_sporters()
         cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][2]
         cls.testdata.maak_bondscompetities()
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.deelkamp_rk1 = Kampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
+        self.deelkamp_rk1 = Kampioenschap.objects.get(deel=DEEL_RK, competitie=self.testdata.comp18, rayon__rayon_nr=1)
 
     def test_rk_teams_alle(self):
         # BB en BKO mogen deze pagina ophalen
@@ -172,5 +172,30 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         url = self.url_rko_teams % self.testdata.deelkamp25_rk[2].pk
         resp = self.client.get(url)
         self.assert403(resp)
+
+    def test_admin(self):
+        # admin filter with actual records
+        account = self.testdata.account_admin
+        account.is_superuser = True      # toegang tot admin interface
+        account.save(update_fields=['is_superuser'])
+        self.e2e_login_and_pass_otp(account)
+
+        # without filter selection
+        resp = self.client.get('/beheer/Competitie/kampioenschapteam/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        # with filter selection
+        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?rk_bk_type=RK')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?rk_bk_type=BK')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?incompleet=incompleet')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        resp = self.client.get('/beheer/Competitie/kampioenschapteam/?incompleet=compleet')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
 
 # end of file

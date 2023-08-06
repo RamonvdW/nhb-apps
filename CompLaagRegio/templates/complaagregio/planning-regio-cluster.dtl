@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -71,7 +71,7 @@
 
                         <!-- knop naar de ronde van de regioplanning -->
                         <td class="center">
-                            <a class="btn-nhb-rood" href="{% url 'CompLaagRegio:regio-ronde-planning' ronde.pk %}">
+                            <a class="btn-sv-rood" href="{% url 'CompLaagRegio:regio-ronde-planning' ronde.pk %}">
                                 <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Inzien">
                             </a>
                         </td>
@@ -88,7 +88,7 @@
                         <td colspan="4" class="center">
                             <form action="{{ url_nieuwe_week }}" method="post">
                                 {% csrf_token %}
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>

@@ -14,13 +14,16 @@ USER_WWW="$1"
 ID=$(id -u)
 ID_ROOT=$(id -u root)
 ID_WWW=$(id -u "$USER_WWW")
-if [ $ID -ne $ID_ROOT -a $ID -ne $ID_WWW ]
+if [ "$ID" -ne "$ID_ROOT" ] && [ "$ID" -ne "$ID_WWW" ]
 then
     echo "Please run with sudo"
     exit 1
 fi
 
-cd $(dirname $0)    # ga naar de directory van het script
+# ga naar de directory waar het script staat
+SCRIPT_DIR=$(realpath "$0")             # volg links naar het echte script
+SCRIPT_DIR=$(dirname "$SCRIPT_DIR")     # directory van het script
+cd "$SCRIPT_DIR"
 
 # everything sent to stdout/stderr will be picked up by crontab and sent in an email
 # avoid this by writing to a logfile

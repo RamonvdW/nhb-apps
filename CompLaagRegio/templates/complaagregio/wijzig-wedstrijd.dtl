@@ -18,7 +18,7 @@
     </div>
 
         <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -59,22 +59,22 @@
 
     <script type="application/javascript">
 
-        let ignore_changes = true
+        let ignore_changes = true;
 
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
             if (!ignore_changes) {
                 // disable alle knoppen waarmee de invoer verloren zou gaan
-                const els = document.getElementsByClassName("vertrek_knop")
+                const els = document.getElementsByClassName("vertrek_knop");
                 Array.prototype.forEach.call(els, function(el) {
-                    el.classList.add('disabled')
+                    el.classList.add('disabled');
                 })
 
                 // enable de 'opslaan' knop
-                const el = document.getElementById("opslaan_knop")
-                el.disabled = false
-                el.parentElement.style.display = "block"
+                const el = document.getElementById("opslaan_knop");
+                el.disabled = false;
+                el.parentElement.style.display = "block";
             }
         }
 
@@ -84,49 +84,49 @@
 
         function locatie_keuze_tonen() {
             // herstel de hele lijst
-            const el_td = document.getElementById('id_accommodatie_td')
-            el_td.innerHTML = locatie_keuzes_html
+            const el_td = document.getElementById('id_accommodatie_td');
+            el_td.innerHTML = locatie_keuzes_html;
 
             // haal de keuze op
-            const ver = document.getElementById('id_ver_sel').value
+            const ver = document.getElementById('id_ver_sel').value;
 
             // maak een selectie in het drop-down menu
-            const el_select = document.getElementById('id_loc_sel')
+            const el_select = document.getElementById('id_loc_sel');
             for (let i = 0; i < el_select.length;) {
-                let option = el_select.options[i]
+                let option = el_select.options[i];
                 if (option.dataset.ver !== ver) {
-                    option.remove()
+                    option.remove();
                 } else {
                     i++;
                 }
             }
 
-            if (el_select.length == 0) {
+            if (el_select.length === 0) {
                 // vervang drop-down door statische text
-                el_td.innerHTML = '<i class="nhb-rood-text">Geen accommodatie gegevens bekend</i>'
-            } else if (el_select.length == 1) {
+                el_td.innerHTML = '<i class="sv-rood-text">Geen accommodatie gegevens bekend</i>';
+            } else if (el_select.length === 1) {
                 // vervang drop-down door statische text
-                el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">'
+                el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">';
             } else {
-                M.FormSelect.init(el_select)
+                M.FormSelect.init(el_select);
             }
         }
 
         function locatie_keuzes_aanpassen() {
-            locatie_keuze_tonen()
-            gewijzigd()
+            locatie_keuze_tonen();
+            gewijzigd();
         }
 
         function locatie_keuzes_init() {
-            locatie_keuzes_html = document.getElementById('id_accommodatie_td').innerHTML
-            locatie_keuze_tonen()
+            locatie_keuzes_html = document.getElementById('id_accommodatie_td').innerHTML;
+            locatie_keuze_tonen();
         }
 
         function datum_omzetten() {
-            let el1 = document.querySelector('#wanneer')
-            let el2 = document.querySelector('#datum')
-            el1.value = el2.M_Datepicker.toString('yyyy-mm-dd')
-            gewijzigd()
+            let el1 = document.querySelector('#wanneer');
+            let el2 = document.querySelector('#datum');
+            el1.value = el2.M_Datepicker.toString('yyyy-mm-dd');
+            gewijzigd();
         }
     </script>
 
@@ -140,7 +140,7 @@
 
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -182,7 +182,7 @@
                             <tr>
                                 <th>Organiserende vereniging</th>
                                 <td>
-                                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
+                                    <select name="ver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
                                         {% for opt in verenigingen %}
                                             <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
                                         {% endfor %}
@@ -263,7 +263,7 @@
 
                         <br>
                         <p class="center">
-                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
@@ -292,7 +292,7 @@
             <div class="col s12">
                 <h4>Verwijderen</h4>
                 <p>
-                    <a class="btn-nhb-blauw modal-trigger vertrek_knop" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
+                    <a class="btn-sv-blauw modal-trigger vertrek_knop" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
                 </p>
             </div>
         </div>
@@ -308,10 +308,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>
@@ -323,32 +323,32 @@
     <!-- initialisatie van de datum/tijd kiezers -->
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-                let el1 = document.querySelector('#tijd1')
+                let el1 = document.querySelector('#tijd1');
                 let options = {
                         twelveHour: false,
                         defaultTime: "{{ wedstrijd.tijd_begin_wedstrijd_str }}",
-                      }
-                let inst = M.Timepicker.init(el1, options)
-                inst._updateTimeFromInput()
-                inst.done()
+                      };
+                let inst = M.Timepicker.init(el1, options);
+                inst._updateTimeFromInput();
+                inst.done();
 
                 {% if not opt_weekdagen %}
-                    const minDate = new Date("{{ datum_eerste|date:'Y-m-d' }}")
-                    const maxDate = new Date("{{ datum_laatste|date:'Y-m-d' }}")
-                    const competitieJaren = [{{ competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]
+                    const minDate = new Date("{{ datum_eerste|date:'Y-m-d' }}");
+                    const maxDate = new Date("{{ datum_laatste|date:'Y-m-d' }}");
+                    const competitieJaren = [{{ competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1];
 
-                    let el2 = document.querySelector('#datum')
+                    let el2 = document.querySelector('#datum');
                     let options2 = { defaultDate: new Date("{{ wedstrijd.datum_wanneer|date:'Y-m-d' }}"),
                                      setDefaultDate: true,
                                      format: "dddd d mmmm yyyy",
                                      minDate: minDate, maxDate: maxDate,
-                                     yearRange: competitieJaren }
-                    M.Datepicker.init(el2, options2)
+                                     yearRange: competitieJaren };
+                    M.Datepicker.init(el2, options2);
                 {% endif %}
 
-                locatie_keuzes_init()
+                locatie_keuzes_init();
 
-                ignore_changes = false
+                ignore_changes = false;
             })
     </script>
 

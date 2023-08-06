@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
 from Vereniging import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
-                        view_lijst_verenigingen)
+                        view_gast_accounts, view_lijst_verenigingen)
 
 app_name = 'Vereniging'
 
+# basis: /vereniging/
+
 urlpatterns = [
 
+    # overzicht
     path('',
          view_overzicht.OverzichtView.as_view(),
          name='overzicht'),
 
+    # ledenlijst - normaal
     path('leden-lijst/',
          view_ledenlijst.LedenLijstView.as_view(),
          name='ledenlijst'),
@@ -24,28 +28,35 @@ urlpatterns = [
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
+    # ledenlijst - gast-accounts
+    path('gast-accounts/',
+         view_gast_accounts.GastAccountsView.as_view(),
+         name='gast-accounts'),
 
-    # Accommodatie (voor gebruik van buiten Beheer vereniging)
+    path('gast-accounts/<lid_nr>/details/',
+         view_gast_accounts.GastAccountDetailsView.as_view(),
+         name='gast-account-details'),
+
+    # accommodatie (voor gebruik van buiten Beheer vereniging)
     path('accommodaties/lijst/',
          view_lijst_verenigingen.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
 
-    path('accommodaties/details/<vereniging_pk>/',
+    path('accommodaties/details/<ver_nr>/',
          view_accommodatie.AccommodatieDetailsView.as_view(),
          name='accommodatie-details'),
 
     # eigen accommodatie
-    path('accommodatie-details/<vereniging_pk>/',
+    path('accommodatie-details/<ver_nr>/',
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 
-
-    # Wedstrijdlocaties
-    path('externe-locaties/<vereniging_pk>/',
+    # wedstrijdlocaties
+    path('externe-locaties/<ver_nr>/',
          view_externe_locaties.ExterneLocatiesView.as_view(),
          name='externe-locaties'),
 
-    path('externe-locaties/<vereniging_pk>/details/<locatie_pk>/',
+    path('externe-locaties/<ver_nr>/details/<locatie_pk>/',
          view_externe_locaties.ExterneLocatieDetailsView.as_view(),
          name='locatie-details'),
 

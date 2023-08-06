@@ -1,0 +1,88 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Geen email bekend{% endblock %}
+
+{% block broodkruimels %}
+{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Geen email bekend</h3>
+            <p>Je hebt zojuist geprobeerd een account aan te maken.</p>
+            <p>Jouw persoonlijke e-mailadres moet geregistreerd staan bij de bond.<br><span class="sv-rood-text">Dit is niet het geval</span></p>
+
+            {% if not sec_email %}
+                <br>
+                <p>Je staat waarschijnlijk niet (meer) geregistreerd als lid bij een vereniging.</p>
+                <p>Neem contact op met het bondsbureau via <code>{{ email_bb }}</code></p>
+                <p>
+                    <a class="btn-sv-rood" href="mailto:{{ email_bb }}">
+                        <i class="notranslate material-icons-round">email</i></a>
+                </p>
+
+            {% else %}
+
+                <p>De secretaris van jouw handboogvereniging kan dit oplossen.</p>
+
+            {% endif %}
+        </div>
+    </div>
+
+    {% if sec_email %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Contactgegevens secretaris</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <table class="white">
+                    <tr>
+                        <th>Naam</th>
+
+                        <td>
+                            {% if sec_naam %}
+                                <span>{{ sec_naam }}</span>
+                            {% else %}
+                                <i class="sv-rood-text">Onbekend</i>
+                            {% endif %}
+                        </td>
+
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <th>E-mailadres</th>
+
+                        <td>
+                            <code>{{ sec_email }}</code>
+                        </td>
+
+                        <td>
+                            <a class="btn-sv-rood" href="mailto:{{ sec_email }}">
+                                <i class="notranslate material-icons-round">email</i></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-nhb-geen-email" %}
+
+{% endblock %}

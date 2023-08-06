@@ -40,8 +40,8 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.functie_mww.save(update_fields=['bevestigde_email'])
 
         instellingen = BetaalInstellingenVereniging(
-                            vereniging=self.functie_mww.nhb_ver,
-                            akkoord_via_nhb=False)
+                            vereniging=self.functie_mww.vereniging,
+                            akkoord_via_bond=False)
         instellingen.save()
         self.instellingen = instellingen
 
@@ -129,7 +129,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.bestelling = Bestelling.objects.get(pk=self.bestelling.pk)
         self.assertEqual(self.bestelling.status, BESTELLING_STATUS_AFGEROND)
         self.assertEqual(1, self.bestelling.transacties.count())
-        transactie = self.bestelling.transacties.all()[0]
+        transactie = self.bestelling.transacties.first()
 
         self.assertEqual(2, MailQueue.objects.count())
 

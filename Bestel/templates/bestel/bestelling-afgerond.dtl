@@ -21,31 +21,31 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
-                    <th class="nhb-column-small">Bestelnummer</th>
+                    <th class="sv-table-col-small">Bestelnummer</th>
                     <td colspan="2">{{ bestelling.mh_bestel_nr }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Aangemaakt&nbsp;op</th>
+                    <th class="sv-table-col-small">Aangemaakt&nbsp;op</th>
                     <td colspan="2">{{ bestelling.aangemaakt }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Koper</th>
+                    <th class="sv-table-col-small">Koper</th>
                     <td colspan="2">{{ bestelling.account }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Aan&nbsp;vereniging</th>
+                    <th class="sv-table-col-small">Aan&nbsp;vereniging</th>
                     <td colspan="2">{{ bestelling.ontvanger.vereniging }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Bedrag</th>
+                    <th class="sv-table-col-small">Bedrag</th>
                     <td colspan="2">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                 </tr>
                 <tr>
-                    <th class="nhb-column-small">Ontvangen</th>
+                    <th class="sv-table-col-small">Ontvangen</th>
                     <td colspan="2">&euro;&nbsp;{{ ontvangen }}</td>
                 </tr>
                 <tr>
@@ -56,12 +56,12 @@
                         {% elif wacht_op_betaling %}
                             <i id="id_status">De betaling is (nog) niet ontvangen</i>
                         {% else %}
-                            <i class="nhb-rood-text">Er is een probleem opgetreden</i>
+                            <i class="sv-rood-text">Er is een probleem opgetreden</i>
                         {% endif %}
                     </td>
                     <td class="center">
                         {% if is_afgerond or wacht_op_betaling %}
-                            <a class="btn-nhb-rood" href="{{ url_afschrift }}" {% if wacht_op_betaling %}id="id_afschrift" style="display:none"{% endif %}>Toon afschrift</a>
+                            <a class="btn-sv-rood" href="{{ url_afschrift }}" {% if wacht_op_betaling %}id="id_afschrift" style="display:none"{% endif %}>Toon afschrift</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -104,12 +104,12 @@
 
                                 if (status === "afgerond") {
                                     // toon de gebruiker dat de betaling binnen is
-                                    const el = document.getElementById("id_status")
-                                    el.innerText = "De betaling is gelukt"
+                                    const el = document.getElementById("id_status");
+                                    el.innerText = "De betaling is gelukt";
 
                                     // enable de knop 'Toon afschrift'
-                                    const el_knop = document.getElementById("id_afschrift")
-                                    el_knop.style.display = "inline-block"
+                                    const el_knop = document.getElementById("id_afschrift");
+                                    el_knop.style.display = "inline-block";
 
                                     // niet nodig om te blijven checken
                                     pogingen = 0;
@@ -117,8 +117,8 @@
                                 }
                                 else if (status === "mislukt") {
                                     // toon de gebruiker dat de betaling afgebroken/mislukt is
-                                    const el = document.getElementById("id_status")
-                                    el.innerText = "De betaling is niet gelukt"
+                                    const el = document.getElementById("id_status");
+                                    el.innerText = "De betaling is niet gelukt";
 
                                     // niet nodig om te blijven checken
                                     pogingen = 0;
@@ -132,16 +132,16 @@
 
                 if (retry) {
                     // over 1 seconde opnieuw proberen
-                    setTimeout(check_status_bestelling, 1000)
+                    setTimeout(check_status_bestelling, 1000);
                 }
             }
 
             function status_ophalen_timeout(xhr) {
                 // voorkom reactie bij ontvangst laat antwoord
-                xhr.abort()
+                xhr.abort();
 
                 // doe de volgende status check over 1 seconde
-                setTimeout(check_status_bestelling, 1000)
+                setTimeout(check_status_bestelling, 1000);
             }
 
             function check_status_bestelling() {
@@ -155,8 +155,8 @@
                     const xhr = new XMLHttpRequest();
                     xhr.open("POST", "{{ url_status_check }}", true);        // true = async
                     xhr.timeout = 5000;                                      // 5 sec
-                    xhr.onloadend = function() { status_ophalen_klaar(xhr) }
-                    xhr.ontimeout = function() { status_ophalen_timeout(xhr) }
+                    xhr.onloadend = function() { status_ophalen_klaar(xhr); };
+                    xhr.ontimeout = function() { status_ophalen_timeout(xhr); };
                     xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
                     xhr.send();     // no data
                 }
@@ -166,7 +166,7 @@
             {
                 // doe de eerste status check over 500ms
                 // TODO: dit geeft mensen niet echt een kans om de tekst te lezen
-                setTimeout(check_status_bestelling, 500)
+                setTimeout(check_status_bestelling, 500);
             })
         </script>
     {% endif %}

@@ -1,0 +1,35 @@
+# required pip packages
+
+# base packages
+-r requirements.txt
+
+# add-ons for dev environment:
+
+# license check
+pip-licenses
+
+# update check
+pip-review
+
+# python code coverage measurement and reporting
+coverage
+
+# for TestHelper (bs4)
+beautifulsoup4
+
+# django database access analysis for performance / efficient queries
+django-debug-toolbar
+
+# django extensions
+django-extensions
+
+# html validatie
+html5validator
+
+# javascript/ecmascript validatie
+esprima
+
+# voor het maken van pdf's
+reportlab
+
+# end of file

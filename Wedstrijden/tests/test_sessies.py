@@ -34,7 +34,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.account_admin.save()
 
         self.lid_nr = 123456
-        self.account = self.e2e_create_account(str(self.lid_nr), 'test@nhb.not', 'Voornaam')
+        self.account = self.e2e_create_account(str(self.lid_nr), 'test@test.not', 'Voornaam')
 
         self.boog_r = BoogType.objects.get(afkorting='R')
 
@@ -48,14 +48,14 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         sporter.save()
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
@@ -72,7 +72,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
                     sinds_datum='2020-02-02',
                     adres_code='1234AB56',
                     account=self.account,
-                    bij_vereniging=self.nhbver1)
+                    bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
@@ -83,11 +83,11 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         sporterboog.save(update_fields=['voor_wedstrijd'])
         self.sporterboog1r = sporterboog
 
-        self.nhbver2 = NhbVereniging(
+        self.ver2 = NhbVereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver2.save()
+        self.ver2.save()
 
     @staticmethod
     def _maak_externe_locatie(ver):
@@ -105,12 +105,12 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
 
         # wissel naar HWL en maak een wedstrijd aan
         self.e2e_wissel_naar_functie(self.functie_hwl)
-        self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+        self._maak_externe_locatie(self.ver1)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         url = self.url_wedstrijden_sessies % wedstrijd.pk
 
         # haal de sessie op
@@ -163,12 +163,12 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # maak een wedstrijd aan en wissel die naar een andere vereniging
-        self._maak_externe_locatie(self.nhbver1)
+        self._maak_externe_locatie(self.ver1)
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
-        wedstrijd.organiserende_vereniging = self.nhbver2
+        wedstrijd = Wedstrijd.objects.first()
+        wedstrijd.organiserende_vereniging = self.ver2
         wedstrijd.save()
 
         # verkeerde vereniging
@@ -187,18 +187,18 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # maak een wedstrijd en sessie aan
-        self._maak_externe_locatie(self.nhbver1)
+        self._maak_externe_locatie(self.ver1)
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         wedstrijd.datum_einde = wedstrijd.datum_begin + datetime.timedelta(days=2)
         wedstrijd.save()
         url = self.url_wedstrijden_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, WedstrijdSessie.objects.count())
-        sessie = WedstrijdSessie.objects.all()[0]
+        sessie = WedstrijdSessie.objects.first()
 
         # haal de wijzig pagina op
         url = self.url_wedstrijden_wijzig_sessie % (wedstrijd.pk, sessie.pk)
@@ -226,7 +226,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         sessie = WedstrijdSessie.objects.get(pk=sessie.pk)
         self.assertEqual(sessie.datum, wedstrijd.datum_begin)
 
-        wkl = wedstrijd.wedstrijdklassen.all()[0]
+        wkl = wedstrijd.wedstrijdklassen.first()
 
         # wijzig een aantal parameters en koppel een wedstrijdklasse
         with self.assert_max_queries(20):
@@ -320,17 +320,17 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # maak een wedstrijd en sessie aan
-        self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+        self._maak_externe_locatie(self.ver1)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
 
-        wedstrijd = Wedstrijd.objects.all()[0]
+        wedstrijd = Wedstrijd.objects.first()
         url = self.url_wedstrijden_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, WedstrijdSessie.objects.count())
-        sessie = WedstrijdSessie.objects.all()[0]
+        sessie = WedstrijdSessie.objects.first()
 
         # niet bestaande wedstrijd
         url = self.url_wedstrijden_wijzig_sessie % (999999, 0)
@@ -381,7 +381,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen toegestaan aantal sporters')
 
         # niet van deze vereniging
-        wedstrijd.organiserende_vereniging = self.nhbver2
+        wedstrijd.organiserende_vereniging = self.ver2
         wedstrijd.save()
         url = self.url_wedstrijden_wijzig_sessie % (wedstrijd.pk, sessie.pk)
         resp = self.client.get(url)

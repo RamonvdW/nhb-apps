@@ -32,23 +32,23 @@ urlpatterns = [
 
 
     # HWL: individueel
-    path('lijst-rayonkampioenschappen/<deelkamp_pk>/vereniging/',
+    path('lijst/<deelkamp_pk>/vereniging/',
          view_indiv_hwl.LijstRkSelectieView.as_view(),
          name='lijst-rk-ver'),
 
 
     # RKO: individueel
-    path('lijst-rayonkampioenschappen/<deelkamp_pk>/',
+    path('lijst/<deelkamp_pk>/',
          view_indiv_rko.LijstRkSelectieView.as_view(),
          name='lijst-rk'),
 
-    path('lijst-rayonkampioenschappen/<deelkamp_pk>/bestand/',
+    path('lijst/<deelkamp_pk>/bestand/',
          view_indiv_rko.LijstRkSelectieAlsBestandView.as_view(),
          name='lijst-rk-als-bestand'),
 
 
     # HWL/RKO: individueel
-    path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
+    path('lijst/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
          view_indiv_wijzig_status.WijzigStatusRkDeelnemerView.as_view(),
          name='wijzig-status-rk-deelnemer'),
 

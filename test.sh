@@ -7,7 +7,7 @@
 ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
-TEST_DIR="./nhbapps/data_test"
+TEST_DIR="./SiteMain/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
@@ -30,7 +30,7 @@ COV_INCLUDE_3RD_PARTY=""
 
 PYCOV=""
 PYCOV="-m coverage run --append --branch"       # --pylib
-[ ! -z "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
+[ -n "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
 
 export PYTHONDONTWRITEBYTECODE=1
 
@@ -39,7 +39,8 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # kill the http simulator if still running in the background
 # -f check entire commandline program name is python and does not match
 pgrep -f websim > /dev/null
-if [ $? -eq 0 ]
+RES=$?
+if [ $RES -eq 0 ]
 then
     echo "[WARNING] simulators found running - cleaning up now"
     pkill -f websim
@@ -67,6 +68,16 @@ then
     ARGS=${ARGS/--force/}
 fi
 
+FORCE_FULL_COV=0
+if [[ "$ARGS" =~ "--fullcov" ]]
+then
+    echo "[INFO] Forcing full coverage report"
+    FORCE_FULL_COV=1
+    # remove from ARGS used to decide focus
+    # will still be given to ./manage.py where --force has no effect
+    ARGS=${ARGS/--fullcov/}
+fi
+
 KEEP_DB=1
 if [[ "$ARGS" =~ "--clean" ]]
 then
@@ -79,7 +90,7 @@ fi
 
 echo "[INFO] Provided  arguments: $ARGS"
 # convert a path to a test file into a test case
-ARGS=${ARGS//\//.}    # replace all (//) occurences of / with .
+ARGS=${ARGS//\//.}    # replace all (//) occurrences of / with .
 ARGS=${ARGS/.py/}   # string .py at the end
 echo "[INFO] Converted arguments: $ARGS"
 
@@ -107,7 +118,7 @@ else
     echo "[INFO] Focus set to $FOCUS"
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
-    [ ! -z "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
+    [ -n "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
 fi
 
 # echo "[DEBUG] FOCUS=$FOCUS, FOCUS_SPECIFIC_TEST=$FOCUS_SPECIFIC_TEST"
@@ -119,9 +130,6 @@ then
     python3 $PY_OPTS ./manage.py check --tag admin --tag models || exit $?
 fi
 
-# set high performance
-#sudo cpupower frequency-set --governor performance > /dev/null
-
 ABORTED=0
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
@@ -131,7 +139,7 @@ python3 $PY_OPTS -m coverage erase
 echo "[INFO] Capturing output in $LOG"
 # --pid=$$ means: stop when parent stops
 # -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | python -u ./number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+tail -f "$LOG" --pid=$$ | python -u ./SiteMain/utils/number_tests.py | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
 
@@ -141,8 +149,8 @@ then
     sudo -u postgres dropdb --if-exists test_data3
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
 
-    # add coverage with nodebug
-    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
+    # add coverage with no-debug
+    python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --noinput --settings=SiteMain.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
@@ -159,24 +167,29 @@ PID_WEBSIM2=$!
 # check all websim programs have started properly
 sleep 0.5               # give python some time to load everything
 kill -0 $PID_WEBSIM1    # check the simulator is running
-if [ $? -ne 0 ]
+RES=$?
+if [ $RES -ne 0 ]
 then
     echo "[ERROR] Mail transport service simulator failed to start"
     exit
 fi
 
 kill -0 $PID_WEBSIM2    # check the simulator is running
-if [ $? -ne 0 ]
+RES=$?
+if [ $RES -ne 0 ]
 then
     echo "[ERROR] Betaal service simulator failed to start"
     exit
 fi
 
+# set high performance
+powerprofilesctl set performance
+
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
 # note: double quotes not supported around $*
 echo "[INFO] Starting main test run" >>"$LOG"
-python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $ARGS &>>"$LOG"
+python3 $PY_OPTS -u $PYCOV ./manage.py test --keepdb --settings=SiteMain.settings_autotest -v 2 $ARGS &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
@@ -187,8 +200,8 @@ echo "[INFO] Finished main test run" >>"$LOG"
 # stop showing the additions to the logfile, because the rest is less interesting
 # use bash construct to prevent the Terminated message on the console
 sleep 0.1
-kill $PID_TAIL
-wait $PID_TAIL 2>/dev/null
+kill "$PID_TAIL"
+wait "$PID_TAIL" 2>/dev/null
 
 # launch log in editor
 [ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
@@ -202,7 +215,7 @@ then
         then
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-            python3 $PY_OPTS -u $PYCOV ./manage.py help $cmd &>>"$LOG"
+            python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
         fi
     done
     echo
@@ -211,12 +224,12 @@ fi
 if [ $RES -eq 0 ] && [ $# -eq 0 ]
 then
     echo "[INFO] Running help for each management command"
-    for cmd_file in $(ls */management/commands/*py | sed 's/\.py$//g');
+    for cmd_file in $(find -- */management/commands -name \*py | sed 's/\.py$//g');
     do
-        cmd=$(basename $cmd_file)
+        cmd=$(basename "$cmd_file")
         echo -n '.'
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-        python3 $PY_OPTS -u $PYCOV ./manage.py help $cmd &>>"$LOG"
+        python3 $PY_OPTS -u $PYCOV ./manage.py help "$cmd" &>>"$LOG"
     done
     echo
 fi
@@ -242,7 +255,7 @@ then
     # delete old coverage report
     rm -rf "$REPORT_DIR" &>>"$LOG"
 
-    if [ -z "$FOCUS" ]
+    if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
         python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
         res=$?
@@ -254,7 +267,7 @@ then
             COVERAGE_RED=1
         fi
     else
-        [ ! -z "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
+        [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
         python3 -m coverage report --precision=$PRECISION $COV_INCLUDE $OMIT
         python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $COV_INCLUDE $OMIT &>>"$LOG"
     fi
@@ -265,7 +278,7 @@ then
 fi
 
 # set normal performance
-#sudo cpupower frequency-set --governor schedutil > /dev/null
+powerprofilesctl set balanced
 
 if [ $COVERAGE_RED -ne 0 ]
 then
@@ -284,7 +297,8 @@ then
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
     read -t 5
-    if [ $? -ne 0 ]
+    RES=$?
+    if [ $RES -ne 0 ]
     then
         # automatically abort
         echo "^C"

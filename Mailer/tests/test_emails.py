@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-TEST_EMAIL_ADRES = 'schutter@nhb.test'
+TEST_EMAIL_ADRES = 'schutter@test.not'
 
 
 class TestMailerEmails(E2EHelpers, TestCase):

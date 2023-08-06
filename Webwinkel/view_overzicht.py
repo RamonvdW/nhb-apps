@@ -11,7 +11,6 @@ from django.utils.formats import localize
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Plein.menu import menu_dynamics
@@ -23,18 +22,12 @@ TEMPLATE_WEBWINKEL_PRODUCT = 'webwinkel/product.dtl'
 TEMPLATE_WEBWINKEL_TOEGEVOEGD_AAN_MANDJE = 'webwinkel/toegevoegd-aan-mandje.dtl'
 
 
-class OverzichtView(UserPassesTestMixin, TemplateView):
+class OverzichtView(TemplateView):
 
     """ Via deze view laten we alle producten zien als kaartjes """
 
     # class variables shared by all instances
     template_name = TEMPLATE_WEBWINKEL_OVERZICHT
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.request.user.is_authenticated
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -57,7 +50,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             if product.omslag_foto:
                 product.omslag_foto_src = static("webwinkel_fotos/" + product.omslag_foto.locatie)
             else:
-                product.omslag_foto_src = static("plein/logo_nhb_32x32.png")
+                product.omslag_foto_src = static("plein/logo_khsn_192x192.png")
 
             if not product.onbeperkte_voorraad:
                 if product.aantal_op_voorraad < 1:
@@ -76,18 +69,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class ProductView(UserPassesTestMixin, TemplateView):
+class ProductView(TemplateView):
 
     """ Via deze view kan 1 product ingezien en besteld worden """
 
     # class variables shared by all instances
     template_name = TEMPLATE_WEBWINKEL_PRODUCT
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.request.user.is_authenticated
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -155,7 +142,12 @@ class ProductView(UserPassesTestMixin, TemplateView):
             context['heeft_fotos'] = True
         # for
 
-        context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
+        if not self.request.user.is_authenticated:
+            context['moet_inloggen'] = True
+        else:
+            account = self.request.user
+            if not account.is_gast:
+                context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
 
         context['menu_toon_mandje'] = True
 
@@ -168,6 +160,10 @@ class ProductView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+
+        account = self.request.user
+        if not account.is_authenticated or account.is_gast:
+            raise Http404('Geen toegang')
 
         try:
             product_pk = kwargs['product_pk'][:6]           # afkappen voor de veiligheid

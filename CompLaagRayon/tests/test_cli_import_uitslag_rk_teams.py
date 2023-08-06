@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Competitie.models import KampioenschapTeam
-from Competitie.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
+from Competitie.tests.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -28,7 +28,7 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities()
 
@@ -59,7 +59,7 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         zet_competitie_fase_rk_prep(self.testdata.comp25)
         zet_competitie_fase_rk_prep(self.testdata.comp18)
 
-        # stel de klassegrenzen vast
+        # stel de klassengrenzen vast
         resp = self.client.post(self.url_klassengrenzen_teams_vaststellen % self.testdata.comp25.pk)
         self.assert_is_redirect_not_plein(resp)
 
@@ -86,13 +86,13 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_rk_25m1pijl_teams', self.test_file_25m, '--dryrun')
         # print('\nf1:', f1.getvalue())
         # print('\nf2:', f2.getvalue())
-        self.assertTrue('[ERROR] Te hoog gemiddelde 8.916 voor invaller 301834 voor team rk-4091-2-R2 van vereniging 4091' in f1.getvalue())
+        self.assertTrue('[ERROR] Te hoog gemiddelde 8.916 voor invaller 301834 voor team team-4091-2-R2 van vereniging 4091' in f1.getvalue())
         self.assertTrue('[ERROR] Lid 302093 is niet van vereniging 4121!' in f1.getvalue())
         self.assertTrue('[ERROR] Lid 123456 is niet gekwalificeerd voor dit kampioenschap!' in f1.getvalue())
         self.assertTrue("[ERROR] Kan team 'Niet bestaand team' van vereniging 4121 op regel 51 niet vinden" in f1.getvalue())
-        self.assertTrue("[ERROR] Te veel invallers voor team 'rk-4121-2-R2' met max 2 sporters (vereniging 4121" in f1.getvalue())
+        self.assertTrue("[ERROR] Te veel invallers voor team 'team-4121-2-R2' met max 2 sporters (vereniging 4121" in f1.getvalue())
 
-        self.assertTrue("[WARNING] Team 'rk-4111-2-R2' op regel 45 niet herkend voor klasse Recurve klasse B [R2] (25.128) (RK/BK)" in f2.getvalue())
+        self.assertTrue("[WARNING] Team 'team-4111-2-R2' op regel 45 niet herkend voor klasse Recurve klasse B [R2] (25.128) (RK/BK)" in f2.getvalue())
         self.assertTrue('[WARNING] Geen scores voor sporter 301826 op regel 13' in f2.getvalue())
 
         # echte import
@@ -100,8 +100,8 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         _ = (f1, f2)
         # print('\nf1:', f1.getvalue())
         # print('\nf2:', f2.getvalue())
-        team1 = KampioenschapTeam.objects.get(team_naam='rk-4111-1-R2', kampioenschap__competitie__afstand=25)
-        team2 = KampioenschapTeam.objects.get(team_naam='rk-4101-1-R2', kampioenschap__competitie__afstand=25)
+        team1 = KampioenschapTeam.objects.get(team_naam='team-4111-1-R2', kampioenschap__competitie__afstand=25)
+        team2 = KampioenschapTeam.objects.get(team_naam='team-4101-1-R2', kampioenschap__competitie__afstand=25)
         self.assertEqual(team1.result_rank, 1)              # een van de sporters heeft het hoogste resultaat
         self.assertEqual(team2.result_rank, 2)
         self.assertEqual(team1.result_teamscore, 1395)
@@ -111,7 +111,9 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', 'bestand')
         self.assertTrue('[ERROR] Kan het excel bestand niet openen' in f1.getvalue())
 
-        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file1_18m, '--dryrun', '--verbose')
+        f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams',
+                                             self.test_file1_18m,
+                                             '--dryrun', '--verbose')
         # print('\nf1:', f1.getvalue())
         # print('\nf2:', f2.getvalue())
         self.assertFalse('[ERROR]' in f1.getvalue())
@@ -120,17 +122,17 @@ class TestCompLaagRayonImportUitslagRkTeams(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('import_uitslag_rk_indoor_teams', self.test_file2_18m)
         # print('\nf1:', f1.getvalue())
         # print('\nf2:', f2.getvalue())
-        self.assertTrue("[ERROR] Kan team 'rk-4122-' van vereniging 4122 op regel 33 niet kiezen uit" in f1.getvalue())
-        self.assertTrue("[ERROR] Kan team 'rk-4122-' van vereniging 4122 op regel 33 niet vinden" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan team 'team-4122-' van vereniging 4122 op regel 33 niet kiezen uit" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan team 'team-4122-' van vereniging 4122 op regel 33 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 301948 is niet van vereniging 4122" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 123456 is niet gekwalificeerd voor dit kampioenschap!" in f1.getvalue())
         self.assertTrue("[ERROR] Probleem met de scores op regel 16" in f1.getvalue())
         self.assertTrue("[INFO] Uitslag wordt van blad 'Finales 8 teams' gehaald" in f2.getvalue())
-        self.assertTrue("[WARNING] Aangepaste team naam: 'rk-4122-5-R2' --> 'Aangepast rk-4122-5-R2'" in f2.getvalue())
-        self.assertTrue("[WARNING] Team 4122 van vereniging rk-4122-3-R2 heeft niet meegedaan (geen scores)" in f2.getvalue())
+        self.assertTrue("[WARNING] Aangepaste team naam: 'team-4122-5-R2' --> 'Aangepast team-4122-5-R2'" in f2.getvalue())
+        self.assertTrue("[WARNING] Team 4122 van vereniging team-4122-3-R2 heeft niet meegedaan (geen scores)" in f2.getvalue())
 
-        team1 = KampioenschapTeam.objects.get(team_naam='rk-4122-5-R2', kampioenschap__competitie__afstand=18)
-        team2 = KampioenschapTeam.objects.get(team_naam='rk-4121-7-R2', kampioenschap__competitie__afstand=18)
+        team1 = KampioenschapTeam.objects.get(team_naam='team-4122-5-R2', kampioenschap__competitie__afstand=18)
+        team2 = KampioenschapTeam.objects.get(team_naam='team-4121-7-R2', kampioenschap__competitie__afstand=18)
         self.assertEqual(team1.result_rank, 2)              # een van de sporters heeft het hoogste resultaat
         self.assertEqual(team2.result_rank, 3)
         self.assertEqual(team1.result_teamscore, 1174)

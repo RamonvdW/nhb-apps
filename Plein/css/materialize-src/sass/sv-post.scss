@@ -1,0 +1,590 @@
+
+// Copyright (c) 2020-2023 Ramon van der Winkel.
+// All rights reserved.
+// Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+// Specific classes for our website
+
+
+// als er geschakeld wordt naar een witte achtergrondkleur,
+// dan het hard zwart (ivm contrast grijze achtergrond)
+// omzetten naar het wat zachtere off-black
+.white {
+    @extend .white;
+    color: $off-black;
+}
+
+/* kleuren */
+.sv-blauw {
+    background-color: $primary-color-dark;     /* donker blauw */
+}
+
+.sv-blauw-hoofd {
+    background-color: $primary-color;          /* medium blauw */
+}
+
+.sv-blauw-steun {
+    background-color: $primary-color-light;    /* lichtblauw */
+}
+
+.sv-rood {
+    background-color: $secondary-color;        /* hoofdkleur oranje */
+}
+
+.sv-grijs {
+    /* standaard achtergrondkleur is wat te donker
+    background-color: #f5f5f5;      grey lighten-4 == achtergrondkleur */
+    background-color: #eee;      /* grey lighten-3 */
+}
+
+.sv-blauw-text {
+    color: $primary-color;
+}
+
+.sv-rood-text {
+    color: $secondary-color;
+}
+
+//-----------------------------------
+// blauwe button
+//
+.btn-sv-blauw {
+  @extend .btn;
+
+  //color: $button-raised-color;
+  background-color: $sv-blauw-default;
+
+  &:focus {
+    background-color: $sv-blauw-focus;
+  }
+
+  &:hover {
+    background-color: $sv-blauw-hover;
+  }
+}
+
+
+//-----------------------------------
+// rode button
+//
+.btn-sv-rood {
+  @extend .btn;
+
+  //color: $button-raised-color;
+  background-color: $sv-rood-default;
+
+  &:focus {
+    background-color: $sv-rood-focus;
+  }
+
+  &:hover {
+    background-color: $sv-rood-hover;
+  }
+}
+
+
+//-----------------------------------
+// download button
+//
+.btn-sv-download {
+  @extend .btn-sv-blauw;
+
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 10px;
+}
+
+
+//-----------------------------------
+// sv-card
+//
+.sv-card {
+  @extend .card;
+
+  // laat de kaartjes naast elkaar komen (in het display=block van de row)
+  display: inline-flex;
+  margin-right: 15px;
+  margin-left: 15px;
+  padding: 0;
+  border-radius: 5px;
+  border: 3px solid white;
+
+  // forceer een vaste breedte van de kaartjes
+  // dit voorkomt vervormen van de kaartjes door re-layout
+  position: relative;
+  width: 250px;
+  height: 250px;
+
+  &:hover {
+    border-width: 3px;
+    border-style: solid;
+    border-color: $sv-card-focus-border-color;
+  }
+}
+
+.sv-card-disabled {
+  @extend .card;
+
+  // laat de kaartjes naast elkaar komen (in het display=block van de row)
+  display: inline-flex;
+  margin-right: 15px;
+  margin-left: 15px;
+  padding: 3px;
+  border-radius: 5px;
+
+  // forceer een vaste breedte van de kaartjes
+  // dit voorkomt vervormen van de kaartjes door re-layout
+  position: relative;
+  width: 250px;
+  height: 250px;
+
+  // geen hover gedrag
+}
+
+.sv-card-vanaf {
+  position:absolute;
+  top: 110px;
+  width: 244px;   // related to the 250px above
+  text-align: center;
+  background-color: $secondary-color;
+  color: white;
+}
+
+.sv-card-webwinkel-titel {
+  @extend .sv-card-vanaf;
+  top: unset;
+  bottom: 40px;
+  background-color: $sv-donkerblauw-color;
+  padding: 3px;
+  opacity: 0.9;
+}
+
+.sv-card-schuine-banner {
+  @extend .sv-card-vanaf;
+  transform: rotate(-30deg);
+  padding: 3px;
+}
+
+.sv-card-content {
+  @extend .card-content;
+
+  padding: 24px 24px 0 24px;
+  color: $off-black;
+  width: 246px;          // iets minder dan maximum ivm border
+  border-radius: 0 0 5px 5px;
+}
+
+
+//--------------------------------------
+// foto thumbnails
+.sv-foto-thumb {
+  margin: 0 0 5px 0;
+  padding: 0;
+  border-radius: 5px;   // knoppen en kaartjes hebben afronding
+  cursor: pointer;
+  border: 3px solid $sv-blauw-color;
+  height: 90px;
+
+  &:hover {
+    border-color: $sv-card-focus-border-color;
+  }
+
+  @media #{$small-and-down} {
+    height: 50px;
+  }
+
+}
+
+.sv-foto-thumb-selected {
+  // enlarge from 90 to 100 px
+  // remove bottom margin from 5px to 0 to simulate center-align
+  height: 100px;
+  margin-bottom: 0px;
+
+  @media #{$small-and-down} {
+    height: 60px;
+  }
+}
+
+.sv-foto {
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  width: 100%;
+  height:auto;
+  max-width:1280px;
+
+  @media #{$small-and-down} {
+    max-width: 480px;
+  }
+  @media #{$medium-only} {
+    max-width: 600px;
+  }
+  @media #{$large-and-up} {
+    max-width: 800px;
+  }
+}
+
+
+//--------------------------------------
+// blauw vlak op de witte achtergrond
+// voor het groeperen van content
+//
+.row-sv-blauw {
+  @extend .row;
+  background-color: $primary-color;          /* medium blauw */
+  color: white;
+  text-align: center;
+  padding: 50px;
+
+  @media #{$small-and-down} {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+
+//-----------------------------------
+// tabel decoration
+// blauw rand rondom + header
+//
+.sv-table-header {
+  @extend .sv-blauw-hoofd;
+  color: white;
+}
+
+.sv-table-zijrand {
+  @extend .sv-blauw-hoofd;
+  padding: 0;
+  width: 3px;
+}
+
+.sv-table-onderrand {
+  @extend .sv-blauw-hoofd;
+  padding: 0px;
+  height: 3px;
+}
+
+// zo smal mogelijke tabel kolom, zonder wrapping
+.sv-table-col-small {
+  width: 1px;
+  white-space: nowrap;
+}
+
+// gebruik inhoud voor bepalen breedte van de kolom
+// maar niet tonen
+// TODO: broken!
+.sv-table-hide-row {
+  visibility: collapse;
+  line-height: 0;         // nodig voor Safari, anders row met volle hoogte
+  border-bottom: none;
+}
+
+
+//-----------------------------------
+// collection
+//
+.collection-item {
+    @extend .collection-item;
+
+    &:hover {
+        background-color: $sv-collection-hover-background;
+    }
+}
+
+
+//-----------------------------------
+// broodkruimels
+//
+
+.broodkruimels-btn-back {
+  background-color: transparent;
+  color: $primary-color-dark;
+  border: none;
+  //border: 2px solid $primary-color-dark;
+  //border-radius: 2px;
+  box-shadow: none;
+  display: inline-block;
+  //height: 25px;
+  //width: 25px;
+  //line-height: 25px;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
+  cursor: pointer;
+  margin-right: 5px;
+
+  &:hover, &:focus {
+    //border-color: $sv-card-focus-border-color;
+    color: $sv-card-focus-border-color;
+    background-color: transparent;
+  }
+}
+
+.broodkruimels-back {
+  padding: 3px;
+  margin-right:5px;
+  //font-size: 11px;
+  //vertical-align: middle;
+  border: 1px solid #03628c;
+  border-radius: $button-radius;
+  display: inline-block;
+  -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
+  outline: 0;
+  box-shadow: none;
+  background-color: transparent;
+  color: #03628c;         // donker blauw;
+  cursor: pointer;
+
+  &:focus, &:hover {
+    border: 2px solid #03628c;
+    padding: 2px;
+    //transition: .25s;
+  }
+}
+
+.broodkruimels-nolink {
+  //font-size:13px;
+  margin-right:5px;
+}
+
+.broodkruimels-link {
+  //font-size:13px;
+  margin-right:5px;
+
+  &:focus, &:hover {
+    color: #03628c;
+    text-decoration:underline;
+    transition: .25s;
+  }
+}
+
+/* fonts */
+html, button, input, optgroup, select, textarea {
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.page-banner {
+  color: $secondary-color;
+}
+
+a {
+    color: inherit;
+}
+
+.selectie-knoppen {
+    display: block;
+    margin-bottom: 10px;
+}
+
+
+/* pre-formatted / code block in de handleiding */
+.handleiding_code {
+    padding: 10px;
+    color: #000;             /* donker zwart */
+    background-color: #eee;  /* sv-grijs */
+}
+
+/* gebruik: extra ruimte rond dicht op elkaar geplaatst buttons
+   die bij wrap elkaar zouden raken */
+.margin-5 {
+    margin: 5px;
+}
+
+/* voor doorkrassen score */
+del {
+    text-decoration: line-through;
+    text-decoration-style: double;
+    text-decoration-color: #0aa0e1;     /* blauw default */
+}
+
+.decorate-sv-rood {
+    text-decoration-color: #f94137;     /* rood */
+}
+
+/* voor wie-schiet-waar */
+.kruisje {
+    text-align: center;
+    border-left: 1px black dashed;
+    border-right: 1px black dashed;
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
+/* lagere regel in een grid */
+.small-row {
+    padding: 5px 10px 5px 10px;
+    margin-bottom: 0;
+}
+
+/* smal in de breedte */
+.smal {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.in-table-icon {
+    vertical-align: middle;     /* betere alignment met text in andere td */
+    font-size: 22px;            /* deze maat aligned beter met de tekst */
+}
+
+/* invoerveld voor een zoek / filter veld boven aan de tabel */
+.table-filter {
+    padding: 0 5px;     /* deze padding komt voor en na het invoer veld */
+}
+
+input.table-filter {
+    font-size: 14px;
+    padding: 0;
+}
+
+/* gebruik voor witte achtergrond achter blok buttons */
+.shrink-wrap-5 {
+    display: inline-block;
+    padding: 5px;
+}
+
+/* een grijs kader om een witte tabel die in een wit vlak staat */
+.table-wrap-5 {
+    background-color: #eee;  /* sv-grijs */
+    padding: 5px;
+    border-radius: 2px;
+}
+
+/* feedback kader in de linker onderhoek */
+.site-feedback-box {
+    width: 180px;
+    display: block;
+    text-align: center;         /* centreert inhoud van div */
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;        /* is ignored by Chrome in geval van float: left */
+    border-radius: 5px;
+    background-color: #fff;     /* wit */
+}
+
+/* de binnenkant van het feedback kader */
+.site-feedback {
+    display: inline-block;
+    font-size: 12px;
+}
+
+/* padding rond de main content */
+#content {
+    padding: 20px;
+}
+
+.material-icons-round {
+    font-family: "Material Icons Round";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    /* display: inline-block; */
+    display: none;    /* wordt aangepast nadat het font geladen is - zie on-load handler */
+    transition: opacity 0.24s ease-in-out;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    width: 21px;      /* prevent layout shifts due to width = length of selector text */
+}
+
+/* reduceer de padding rond de content op echt kleine schermen */
+@media only screen and (max-width: 500px) {
+    #content {
+        padding: 5px;
+    }
+}
+
+/* marge rond een formulier dat zich aanpast aan de schermbreedte */
+.form-padding {
+    padding: 30px;
+}
+@media only screen and (max-width : 720px) {
+    .form-padding {
+        padding: 5px;
+    }
+}
+
+
+/*
+// -------------
+// KEEP IN SYNC
+// - this code: media query to show/hide labels
+// - site_layout.dtl: javascript checks for menu visible/hidden with media query
+// - materialize.js: cut-off point to show/hide sidebar (menu)
+// - variables.css: media query ranges
+// -------------
+*/
+
+/* toon content tegen de linker kan als het menu niet in beeld is */
+@media only screen and (max-width: 1020px) {
+    #container {
+        padding-left:0;
+    }
+}
+
+/* small: <=720 */
+@media only screen and (min-width: 721px) {
+    .hide-unless-small {
+        display: none;
+    }
+}
+
+/* medium: 720-1020 */
+@media only screen and (max-width : 720px) {
+    .hide-unless-medium {
+        display: none;
+    }
+}
+@media only screen and (min-width: 1021px) {
+    .hide-unless-medium {
+        display: none;
+    }
+}
+
+/* large: 1021-1350 */
+@media only screen and (max-width: 1020px) {
+    .hide-unless-large {
+        display: none;
+    }
+}
+@media only screen and (min-width: 1351px) {
+    .hide-unless-large {
+        display: none;
+    }
+}
+
+/* xlarge: >1330 */
+@media only screen and (max-width : 1350px) {
+    .hide-unless-xlarge {
+        display: none;
+    }
+}
+
+
+/* print support
+   without this, the content is one long page that doesn't fit on a printer page
+*/
+@media print {
+    // simulate "large" display when printing
+    .hide-unless-small, .hide-on-med-only, .hide-on-med-and-up, .hide-on-large-only, .hide-on-extra-large-only, .hide-on-large-and-down {
+        display: none !important;
+    }
+    .show-on-medium-and-up, .show-on-large {
+        display: block !important;
+    }
+
+    // hide the size labels
+    .hide-unless-small, .hide-unless-medium, .hide-unless-large, .hide-unless-xlarge {
+        display: none;
+    }
+}
+
+// end of file

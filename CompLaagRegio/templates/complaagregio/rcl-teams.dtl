@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -63,7 +63,7 @@
         </div>
 
         <!-- blauwe balk filters -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
 
             <!-- filter: xxx -->
             <div class="col s6 offset-s3 m4 offset-m4 xl2 offset-xl5" style="margin-bottom:15px">
@@ -80,7 +80,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('subset')">Activeer</a>
+                        <a class="btn-sv-rood" onclick="keuze_gemaakt('subset')">Activeer</a>
                     </p>
                 </div>
             </div>
@@ -101,7 +101,7 @@
             {% endif %}
             {% if url_download %}
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_download }}">
+                    <a class="btn-sv-rood" href="{{ url_download }}">
                         <i class="notranslate material-icons-round left">download</i>Download lijst</a>
                 </p>
             {% endif %}
@@ -115,11 +115,11 @@
             {% if team.break_before %}
                 <tr>
                     <td colspan="{{ cols }}">
-                        <h5 class="nhb-rood-text center">Nog niet geplaatste teams</h5>
+                        <h5 class="sv-rood-text center">Nog niet geplaatste teams</h5>
                     </td>
                 </tr>
-                <tr class="nhb-table-header">
-                    <td rowspan="{{ aantal_regels_niet_af }}" class="nhb-table-zijrand"></td>
+                <tr class="sv-table-header">
+                    <td rowspan="{{ aantal_regels_niet_af }}" class="sv-table-zijrand"></td>
                     {% if subset_filter %}
                         <th class="center">Regio</th>
                     {% endif %}
@@ -128,7 +128,7 @@
                     <th class="center">Team sterkte</th>
                     <th>Soort team</th>
                     <th><!-- kolom voor de knoppen --></th>
-                    <td rowspan="{{ aantal_regels_niet_af }}" class="nhb-table-zijrand"></td>
+                    <td rowspan="{{ aantal_regels_niet_af }}" class="sv-table-zijrand"></td>
                 </tr>
             {% endif %}
 
@@ -143,12 +143,12 @@
                 <td class="center">
                     <!-- knoppen -->
                     {% if team.url_aanpassen %}
-                        <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
+                        <a class="btn-sv-rood" href="{{ team.url_aanpassen }}">
                             <i class="notranslate material-icons-round">edit</i></a>
                     {% endif %}
                     {% if team.url_verwijder %}
                         <span>&nbsp;&nbsp;</span>
-                        <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_team_{{ team.pk }}">
+                        <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_team_{{ team.pk }}">
                             <i class="notranslate material-icons-round">delete</i></a>
 
                         <div class="modal" id="bevestig_verwijder_team_{{ team.pk }}">
@@ -162,10 +162,10 @@
 
                                     <div class="modal-footer" style="text-align:center; display:block">
                                         <div style="display:inline-block; width:50%">
-                                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                                            <button class="btn-sv-rood" type="submit">Ja</button>
                                         </div>
                                         <div style="display:inline-block; width:50%">
-                                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                                         </div>
                                     </div>
                                 </form>
@@ -177,7 +177,7 @@
         {% endfor %}
         {% if regioteams_niet_af %}
             <tr>
-                <td colspan="{{ cols }}" class="nhb-table-onderrand"></td>
+                <td colspan="{{ cols }}" class="sv-table-onderrand"></td>
             </tr>
         {% endif %}
 
@@ -186,8 +186,8 @@
                 <td colspan="{{ cols }}" class="center">
                     <h5>{{ klasse.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
             </tr>
-            <tr class="nhb-table-header">
-                <td rowspan="{{ klasse.aantal_regels }}" class="nhb-table-zijrand"></td>
+            <tr class="sv-table-header">
+                <td rowspan="{{ klasse.aantal_regels }}" class="sv-table-zijrand"></td>
                 {% if subset_filter %}
                     <th class="center">Regio</th>
                 {% endif %}
@@ -196,7 +196,7 @@
                 <th class="center">Team sterkte</th>
                 <th><!-- beschrijving --></th>
                 <th><!-- kolom voor knoppen --></th>
-                <td rowspan="{{ klasse.aantal_regels }}" class="nhb-table-zijrand"></td>
+                <td rowspan="{{ klasse.aantal_regels }}" class="sv-table-zijrand"></td>
             </tr>
 
             {% for team in teams %}
@@ -211,7 +211,7 @@
                     <td class="center">
                         <!-- knoppen -->
                         {% if team.url_aanpassen %}
-                            <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
+                            <a class="btn-sv-rood" href="{{ team.url_aanpassen }}">
                                 <i class="notranslate material-icons-round">edit</i></a>
                         {% endif %}
                     </td>
@@ -223,7 +223,7 @@
             {% endfor %}
 
             <tr>
-                <td colspan="{{ cols }}" class="nhb-table-onderrand"></td>
+                <td colspan="{{ cols }}" class="sv-table-onderrand"></td>
             </tr>
         {% endfor %}
 

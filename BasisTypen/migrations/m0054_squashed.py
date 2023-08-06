@@ -6,48 +6,48 @@
 
 from django.db import migrations, models
 from BasisTypen.definities import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
-                                   ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
+                                   ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
                                    GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
 
 
 LEEFTIJDSKLASSEN = (
-    # WA + NHB
+    # WA + KHSN
     # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
 
     # 60+ (was: Veteranen)
-    (61,       'VV',  GESLACHT_VROUW, 60, 0,   '60+',      '60+ Dames',               ORGANISATIE_NHB),
-    (62,       'VH',  GESLACHT_MAN,   60, 0,   '60+',      '60+ Heren',               ORGANISATIE_NHB),
-    (63,       'VA',  GESLACHT_ALLE,  60, 0,   '60+',      '60+ Gemengd',             ORGANISATIE_NHB),
+    (61,       'VV',  GESLACHT_VROUW, 60, 0,   '60+',      '60+ Dames',               ORGANISATIE_KHSN),
+    (62,       'VH',  GESLACHT_MAN,   60, 0,   '60+',      '60+ Heren',               ORGANISATIE_KHSN),
+    (63,       'VA',  GESLACHT_ALLE,  60, 0,   '60+',      '60+ Gemengd',             ORGANISATIE_KHSN),
 
     # 50+ (was: Master)
     (51,       'MV',  GESLACHT_VROUW, 50, 0,   '50+',      '50+ Dames',               ORGANISATIE_WA),
     (52,       'MH',  GESLACHT_MAN,   50, 0,   '50+',      '50+ Heren',               ORGANISATIE_WA),
-    (53,       'MA',  GESLACHT_ALLE,  50, 0,   '50+',      '50+ Gemengd',             ORGANISATIE_NHB),
+    (53,       'MA',  GESLACHT_ALLE,  50, 0,   '50+',      '50+ Gemengd',             ORGANISATIE_KHSN),
 
     # open klasse
-    (41,       'SV',  GESLACHT_VROUW, 0, 0,    'Dames',    'Dames',                   ORGANISATIE_WA),   # 21+
-    (42,       'SH',  GESLACHT_MAN,   0, 0,    'Heren',    'Heren',                   ORGANISATIE_WA),   # 21+
-    (43,       'SA',  GESLACHT_ALLE,  0, 0,    'Senior',   'Gemengd',                 ORGANISATIE_NHB),  # 21+
+    (41,       'SV',  GESLACHT_VROUW, 0, 0,    'Dames',    'Dames',                   ORGANISATIE_WA),    # 21+
+    (42,       'SH',  GESLACHT_MAN,   0, 0,    'Heren',    'Heren',                   ORGANISATIE_WA),    # 21+
+    (43,       'SA',  GESLACHT_ALLE,  0, 0,    'Senior',   'Gemengd',                 ORGANISATIE_KHSN),  # 21+
 
     # Onder 21 (was: Junioren)
     (31,       'JV',  GESLACHT_VROUW, 0, 20,   'Onder 21', 'Onder 21 Dames',          ORGANISATIE_WA),
     (32,       'JH',  GESLACHT_MAN,   0, 20,   'Onder 21', 'Onder 21 Heren',          ORGANISATIE_WA),
-    (33,       'JA',  GESLACHT_ALLE,  0, 20,   'Onder 21', 'Onder 21 Gemengd',        ORGANISATIE_NHB),
+    (33,       'JA',  GESLACHT_ALLE,  0, 20,   'Onder 21', 'Onder 21 Gemengd',        ORGANISATIE_KHSN),
 
     # Onder 18 (was: Cadetten)
     (21,       'CV',  GESLACHT_VROUW, 0, 17,   'Onder 18', 'Onder 18 Dames',          ORGANISATIE_WA),
     (22,       'CH',  GESLACHT_MAN,   0, 17,   'Onder 18', 'Onder 18 Heren',          ORGANISATIE_WA),
-    (23,       'CA',  GESLACHT_ALLE,  0, 17,   'Onder 18', 'Onder 18 Gemengd',        ORGANISATIE_NHB),
+    (23,       'CA',  GESLACHT_ALLE,  0, 17,   'Onder 18', 'Onder 18 Gemengd',        ORGANISATIE_KHSN),
 
     # Onder 14 (was: Aspiranten)
-    (15,       'AV2', GESLACHT_VROUW, 0, 13,   'Onder 14', 'Onder 14 Meisjes',        ORGANISATIE_NHB),
-    (16,       'AH2', GESLACHT_MAN,   0, 13,   'Onder 14', 'Onder 14 Jongens',        ORGANISATIE_NHB),
-    (17,       'AA2', GESLACHT_ALLE,  0, 13,   'Onder 14', 'Onder 14 Gemengd',        ORGANISATIE_NHB),
+    (15,       'AV2', GESLACHT_VROUW, 0, 13,   'Onder 14', 'Onder 14 Meisjes',        ORGANISATIE_KHSN),
+    (16,       'AH2', GESLACHT_MAN,   0, 13,   'Onder 14', 'Onder 14 Jongens',        ORGANISATIE_KHSN),
+    (17,       'AA2', GESLACHT_ALLE,  0, 13,   'Onder 14', 'Onder 14 Gemengd',        ORGANISATIE_KHSN),
 
     # Onder 12 (was: Aspiranten)
-    (11,       'AV1', GESLACHT_VROUW, 0, 11,   'Onder 12', 'Onder 12 Meisjes',        ORGANISATIE_NHB),
-    (12,       'AH1', GESLACHT_MAN,   0, 11,   'Onder 12', 'Onder 12 Jongens',        ORGANISATIE_NHB),
-    (13,       'AA1', GESLACHT_ALLE,  0, 11,   'Onder 12', 'Onder 12 Gemengd',        ORGANISATIE_NHB),
+    (11,       'AV1', GESLACHT_VROUW, 0, 11,   'Onder 12', 'Onder 12 Meisjes',        ORGANISATIE_KHSN),
+    (12,       'AH1', GESLACHT_MAN,   0, 11,   'Onder 12', 'Onder 12 Jongens',        ORGANISATIE_KHSN),
+    (13,       'AA1', GESLACHT_ALLE,  0, 11,   'Onder 12', 'Onder 12 Gemengd',        ORGANISATIE_KHSN),
 
     # IFAA
     # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
@@ -96,6 +96,10 @@ TEAM_COMP_KLASSEN = (                    # 18m                                  
 
     (50, 'Longbow klasse ERE',     'LB',  (BLAZOEN_40CM,),                          (BLAZOEN_60CM,)),
 )
+
+# alle ERE klassen teams mogen zich Nederlands Kampioen noemen
+TEAM_VOLGORDE__TITEL_NK = (15, 20, 31, 41, 50)
+
 
 # individuele competitie klassen volgens spec v2.2, deel 3, tabel 3.4
 INDIV_COMP_KLASSEN = (                        # boog   lkl            regio 1       regio 2     rk/bk
@@ -179,6 +183,19 @@ INDIV_COMP_KLASSEN = (                        # boog   lkl            regio 1   
     (1555, 'Longbow Onder 12 Jongens',          'LB', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
     (1556, 'Longbow Onder 12 Meisjes',          'LB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
 )
+
+INDIV_VOLGORDE_18M__TITEL_NK = (1150, 1151, 1160, 1161,                      # R:  O14 j/m, O12 j/m
+                                1250, 1251, 1260, 1261,                      # C:  O14 j/m, O12 j/m
+                                1350, 1351, 1360, 1361,                      # BB: O14 j/m, O12 j/m
+                                1450, 1451, 1460, 1461,                      # TR: O14 j/m, O12 j/m
+                                1550, 1551, 1560, 1561)                      # LB: O14 j/m, O12 j/m
+
+#                                                                         klasse:  kl1, kl1, kl1
+INDIV_VOLGORDE_25M__TITEL_NK = (      1110, 1120, 1150, 1151, 1160, 1161,    # R:       O21, O18, O14 j/m, O12 j/m
+                                1200, 1210, 1220, 1250, 1251, 1260, 1261,    # C:  21+, O21, O18, O14 j/m, O12 j/m
+                                1300, 1310, 1350, 1351, 1360, 1361,          # BB: 21+, Jeugd,    O14 j/m, O12 j/m
+                                1400, 1410, 1450, 1451, 1460, 1461,          # TR: 21+, Jeugd,    O14 j/m, O12 j/m
+                                1500, 1510, 1550, 1551, 1560, 1561)          # LB: 21+, Jeugd,    O14 j/m, O12 j/m
 
 
 KALENDERWEDSTRIJDENKLASSEN = (
@@ -421,8 +438,8 @@ def init_team_typen(apps, _):
     team_c = team_type_klas(afkorting='C',  volgorde=2, beschrijving='Compound team')
     team_bb2 = team_type_klas(afkorting='BB2', volgorde=3, beschrijving='Barebow team')
     # R, C en BB zijn officiële WA team typen, de rest is nationaal - deze zijn default al op WA gezet
-    team_tr = team_type_klas(afkorting='TR', volgorde=4, beschrijving='Traditional team', organisatie=ORGANISATIE_NHB)
-    team_lb = team_type_klas(afkorting='LB', volgorde=5, beschrijving='Longbow team', organisatie=ORGANISATIE_NHB)
+    team_tr = team_type_klas(afkorting='TR', volgorde=4, beschrijving='Traditional team', organisatie=ORGANISATIE_KHSN)
+    team_lb = team_type_klas(afkorting='LB', volgorde=5, beschrijving='Longbow team', organisatie=ORGANISATIE_KHSN)
 
     team_type_klas.objects.bulk_create([team_r2, team_c, team_bb2, team_tr, team_lb])
 

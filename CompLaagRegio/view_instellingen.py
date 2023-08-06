@@ -52,9 +52,9 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(competitie=comp_pk,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -112,7 +112,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
         context['url_opslaan'] = reverse('CompLaagRegio:regio-instellingen',
                                          kwargs={'comp_pk': deelcomp.competitie.pk,
-                                                 'regio_nr': deelcomp.nhb_regio.regio_nr})
+                                                 'regio_nr': deelcomp.regio.regio_nr})
 
         comp = deelcomp.competitie
 
@@ -133,9 +133,9 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(competitie=comp_pk,
-                             nhb_regio__regio_nr=regio_nr))
+                             regio__regio_nr=regio_nr))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -226,10 +226,10 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
         deelcomps = (Regiocompetitie
                      .objects
                      .select_related('competitie',
-                                     'nhb_regio',
-                                     'nhb_regio__rayon')
+                                     'regio',
+                                     'regio__rayon')
                      .filter(competitie=comp_pk)
-                     .order_by('nhb_regio__regio_nr'))
+                     .order_by('regio__regio_nr'))
 
         context['comp'] = comp
         context['deelcomps'] = deelcomps
@@ -247,8 +247,8 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
 
         for deelcomp in deelcomps:
 
-            deelcomp.regio_str = str(deelcomp.nhb_regio.regio_nr)
-            deelcomp.rayon_str = str(deelcomp.nhb_regio.rayon.rayon_nr)
+            deelcomp.regio_str = str(deelcomp.regio.regio_nr)
+            deelcomp.rayon_str = str(deelcomp.regio.rayon.rayon_nr)
 
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
                 deelcomp.short_inschrijfmethode_str = '1'
@@ -279,7 +279,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.short_puntenmodel_str = '-'
                 deelcomp.puntenmodel_str = '-'
 
-            if self.rol_nu == Rollen.ROL_RKO and deelcomp.nhb_regio.rayon != self.functie_nu.nhb_rayon:
+            if self.rol_nu == Rollen.ROL_RKO and deelcomp.regio.rayon != self.functie_nu.rayon:
                 deelcomp.lowlight = True
         # for
 

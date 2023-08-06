@@ -55,8 +55,6 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
 
-        context['nhb_ver'] = self.functie_nu.nhb_ver
-
         objs = (RegiocompetitieSporterBoog
                 .objects
                 .select_related('sporterboog',
@@ -64,7 +62,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
                                 'sporterboog__boogtype')
                 .prefetch_related('inschrijf_gekozen_matches')
                 .filter(regiocompetitie=deelcomp,
-                        bij_vereniging=self.functie_nu.nhb_ver)
+                        bij_vereniging=self.functie_nu.vereniging)
                 .order_by('sporterboog__sporter__voornaam',
                           'sporterboog__sporter__achternaam'))
 

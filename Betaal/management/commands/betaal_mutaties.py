@@ -45,11 +45,11 @@ class Command(BaseCommand):
 
         # cache de redelijke statische instellingen (voor 1 uur)
         try:
-            self._instellingen_nhb = (BetaalInstellingenVereniging
-                                      .objects
-                                      .get(vereniging__ver_nr=settings.BETAAL_VIA_NHB_VER_NR))
+            self._instellingen_bond = (BetaalInstellingenVereniging
+                                       .objects
+                                       .get(vereniging__ver_nr=settings.BETAAL_VIA_BOND_VER_NR))
         except BetaalInstellingenVereniging.DoesNotExist:
-            self._instellingen_nhb = None
+            self._instellingen_bond = None
 
         # maak de Mollie-client instantie aan
         # de API key zetten we later, afhankelijk van de vereniging waar we deze transactie voor doen
@@ -74,14 +74,14 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_start_ontvangst(self, mutatie):
         instellingen = mutatie.ontvanger
-        if instellingen.akkoord_via_nhb and self._instellingen_nhb:
-            instellingen = self._instellingen_nhb
+        if instellingen.akkoord_via_bond and self._instellingen_bond:
+            instellingen = self._instellingen_bond
 
         beschrijving = mutatie.beschrijving
         bedrag_euro_str = str(mutatie.bedrag_euro)      # moet decimale punt geven
 
         # schakel de Mollie-client over op de API key van deze vereniging
-        # als de betaling via de NHB loopt, dan zijn dit al de instellingen van de NHB
+        # als de betaling via de bond loopt, dan zijn dit al de instellingen van de bond
         try:
             self._mollie_client.set_api_key(instellingen.mollie_api_key)
         except (RequestError, RequestSetupError) as exc:
@@ -133,7 +133,7 @@ class Command(BaseCommand):
                     # houd de actieve betalingen bij
                     actief, is_created = BetaalActief.objects.get_or_create(
                                                 payment_id=payment_id,
-                                                ontvanger=instellingen)     # TODO: bij akkoord_via_nhb...
+                                                ontvanger=instellingen)     # TODO: bij akkoord_via_bond...
                     if not is_created:
                         actief.log = "Reused\n"
                     actief.log += "[%s]: created\n" % timezone.localtime(timezone.now())
@@ -243,10 +243,10 @@ class Command(BaseCommand):
             actief.log += '\n\n'
 
             # schakel de Mollie client over op de API key van deze vereniging
-            # als de betaling via de NHB loopt, dan zijn dit al de instellingen van de NHB
+            # als de betaling via de bond loopt, dan zijn dit al de instellingen van de bond
             instellingen = actief.ontvanger
-            if instellingen.akkoord_via_nhb and self._instellingen_nhb:
-                instellingen = self._instellingen_nhb
+            if instellingen.akkoord_via_bond and self._instellingen_bond:
+                instellingen = self._instellingen_bond
 
             try:
                 self._mollie_client.set_api_key(instellingen.mollie_api_key)

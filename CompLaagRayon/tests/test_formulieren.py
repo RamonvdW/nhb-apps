@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Competitie.definities import DEELNAME_NEE
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
-from Competitie.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
+from Competitie.tests.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Wedstrijden.models import WedstrijdLocatie
@@ -39,7 +39,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
         s1 = timezone.now()
 
         cls.testdata = data = testdata.TestData()
-        data.maak_accounts()
+        data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
         data.maak_bondscompetities()
 
@@ -55,7 +55,7 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
         s2 = timezone.now()
         d = s2 - s1
-        print('%s: populating testdata took %s seconds' % (cls.__name__, d.seconds))
+        print('%s: populating testdata took %.1f seconds' % (cls.__name__, d.total_seconds()))
 
     def setUp(self):
         """ eenmalige setup voor alle tests

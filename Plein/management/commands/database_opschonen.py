@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021-2022 Ramon van der Winkel.
+#  Copyright (c) 2021-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,11 +9,13 @@
 
 from django.core.management.base import BaseCommand
 from Account.models import accounts_opschonen
+from Beheer.views import beheer_opschonen
 from Feedback.models import feedback_opschonen
 from Logboek.models import logboek_opschonen
 from Mailer.models import mailer_opschonen
-from Overig.models import overig_opschonen
+from Registreer.models import registreer_opschonen
 from Taken.models import taken_opschonen
+from TijdelijkeCodes.models import tijdelijke_url_opschonen
 
 
 class Command(BaseCommand):
@@ -22,11 +24,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         accounts_opschonen(self.stdout)
+        beheer_opschonen(self.stdout)
         feedback_opschonen(self.stdout)
         logboek_opschonen(self.stdout)
         mailer_opschonen(self.stdout)
-        overig_opschonen(self.stdout)
         taken_opschonen(self.stdout)
+        tijdelijke_url_opschonen(self.stdout)
+        registreer_opschonen(self.stdout)
 
         self.stdout.write('Klaar')
 

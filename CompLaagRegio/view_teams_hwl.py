@@ -94,10 +94,10 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
-                             nhb_regio=self.functie_nu.nhb_ver.regio))
+                             regio=self.functie_nu.vereniging.regio))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -145,7 +145,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                  .select_related('vereniging',
                                  'team_type')
                  .filter(regiocompetitie=deelcomp,
-                         vereniging=self.functie_nu.nhb_ver)
+                         vereniging=self.functie_nu.vereniging)
                  .annotate(leden_count=Count('leden'))
                  .order_by('volg_nr'))
 
@@ -176,7 +176,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                                       'sporterboog__boogtype')
                       .prefetch_related('regiocompetitieteam_set')
                       .filter(regiocompetitie=deelcomp,
-                              bij_vereniging=self.functie_nu.nhb_ver,
+                              bij_vereniging=self.functie_nu.vereniging,
                               inschrijf_voorkeur_team=True)
                       .order_by('sporterboog__boogtype__volgorde',
                                 '-ag_voor_team'))
@@ -222,7 +222,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         if self.rol_nu != Rollen.ROL_HWL:
             raise PermissionDenied('Geen toegang met deze rol')
 
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
 
         # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
@@ -300,20 +300,20 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         # haal de gevraagde regiocompetitie op
 
         if self.rol_nu == Rollen.ROL_HWL:
-            regio = self.functie_nu.nhb_ver.regio
+            regio = self.functie_nu.vereniging.regio
         else:
             # RCL
-            regio = self.functie_nu.nhb_regio
+            regio = self.functie_nu.regio
 
         try:
             deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
                              regio_organiseert_teamcompetitie=True,
-                             nhb_regio=regio))
+                             regio=regio))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -335,7 +335,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         # zoek de regiocompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
-        ver = self.functie_nu.nhb_ver
+        ver = self.functie_nu.vereniging
 
         now = timezone.now()
         einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
@@ -411,7 +411,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL:
-            ver = self.functie_nu.nhb_ver
+            ver = self.functie_nu.vereniging
 
             now = timezone.now()
             einde = datetime.datetime(year=deelcomp.begin_fase_D.year,
@@ -429,7 +429,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             ver = None      # wordt later ingevuld
 
         if self.rol_nu == Rollen.ROL_HWL:
-            if team.vereniging != self.functie_nu.nhb_ver:
+            if team.vereniging != self.functie_nu.vereniging:
                 raise Http404('Team is niet van jouw vereniging')
 
         verwijderen = request.POST.get('verwijderen', None) is not None
@@ -493,11 +493,11 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         ver = deelnemer.bij_vereniging
         if self.rol_nu == Rollen.ROL_HWL:
             # HWL
-            if ver != self.functie_nu.nhb_ver:
+            if ver != self.functie_nu.vereniging:
                 raise PermissionDenied('Niet lid van jouw vereniging')
         else:
             # RCL
-            if ver.regio != self.functie_nu.nhb_regio:
+            if ver.regio != self.functie_nu.regio:
                 raise PermissionDenied('Niet lid van een vereniging in jouw regio')
 
     def get_context_data(self, **kwargs):
@@ -565,7 +565,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                  comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-ag-controle',
                          kwargs={'comp_pk': comp.pk,
-                                 'regio_nr': deelnemer.regiocompetitie.nhb_regio.regio_nr}),
+                                 'regio_nr': deelnemer.regiocompetitie.regio.regio_nr}),
                  'AG controle'),
                 (None, 'Wijzig AG')
             )
@@ -627,7 +627,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         else:
             url = reverse('CompLaagRegio:regio-ag-controle',
                           kwargs={'comp_pk': deelnemer.regiocompetitie.competitie.pk,
-                                  'regio_nr': deelnemer.regiocompetitie.nhb_regio.regio_nr})
+                                  'regio_nr': deelnemer.regiocompetitie.regio.regio_nr})
 
         return HttpResponseRedirect(url)
 
@@ -667,7 +667,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL:
-            ver = self.functie_nu.nhb_ver
+            ver = self.functie_nu.vereniging
             if team.vereniging != ver:
                 raise Http404('Team is niet van jouw vereniging')
         else:
@@ -780,7 +780,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL:
-            ver = self.functie_nu.nhb_ver
+            ver = self.functie_nu.vereniging
             if team.vereniging != ver:
                 raise Http404('Team is niet van jouw vereniging')
         else:
@@ -882,11 +882,11 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
             deelcomp = (Regiocompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie', 'regio')
                         .get(pk=deelcomp_pk,
                              is_afgesloten=False,
                              regio_organiseert_teamcompetitie=True,
-                             nhb_regio=self.functie_nu.nhb_ver.regio))
+                             regio=self.functie_nu.vereniging.regio))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -917,7 +917,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
                  .select_related('vereniging',
                                  'team_type')
                  .filter(regiocompetitie=deelcomp,
-                         vereniging=self.functie_nu.nhb_ver)
+                         vereniging=self.functie_nu.vereniging)
                  .order_by('volg_nr'))
         team_pks = [team.pk for team in teams]
 
@@ -957,7 +957,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
                                       'sporterboog__boogtype')
                       .prefetch_related('regiocompetitieteam_set')
                       .filter(regiocompetitie=deelcomp,
-                              bij_vereniging=self.functie_nu.nhb_ver,
+                              bij_vereniging=self.functie_nu.vereniging,
                               inschrijf_voorkeur_team=True)
                       .order_by('sporterboog__boogtype__volgorde',
                                 '-ag_voor_team'))
@@ -1027,7 +1027,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                                           'team__team_type')
                           .prefetch_related('team__team_type__boog_typen')
                           .get(pk=ronde_team_pk,
-                               team__vereniging=self.functie_nu.nhb_ver))
+                               team__vereniging=self.functie_nu.vereniging))
         except (ValueError, RegiocompetitieRondeTeam.DoesNotExist):
             raise Http404('Team niet gevonden of niet van jouw vereniging')
 
@@ -1048,7 +1048,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                                        'team__team_type')
                        .prefetch_related('deelnemers_geselecteerd',
                                          'deelnemers_feitelijk')
-                       .filter(team__vereniging=self.functie_nu.nhb_ver,
+                       .filter(team__vereniging=self.functie_nu.vereniging,
                                ronde_nr=deelcomp.huidige_team_ronde))
 
         deelnemers_bezet_pks = list()
@@ -1074,7 +1074,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .objects
                       .filter(regiocompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
-                              bij_vereniging=self.functie_nu.nhb_ver,
+                              bij_vereniging=self.functie_nu.vereniging,
                               sporterboog__boogtype__in=boog_pks)
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
@@ -1186,7 +1186,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                           .select_related('team')
                           .prefetch_related('deelnemers_geselecteerd')
                           .get(pk=ronde_team_pk,
-                               team__vereniging=self.functie_nu.nhb_ver))
+                               team__vereniging=self.functie_nu.vereniging))
         except (ValueError, RegiocompetitieRondeTeam.DoesNotExist):
             raise Http404('Team ronde niet gevonden of niet van jouw vereniging')
 
@@ -1204,7 +1204,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                             .prefetch_related('deelnemers_geselecteerd',
                                               'deelnemers_feitelijk')
                             .exclude(team=team)
-                            .filter(team__vereniging=self.functie_nu.nhb_ver,
+                            .filter(team__vereniging=self.functie_nu.vereniging,
                                     ronde_nr=deelcomp.huidige_team_ronde)):
 
             pks = list(ronde_team2.deelnemers_feitelijk.values_list('pk', flat=True))
@@ -1232,7 +1232,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .objects
                       .filter(regiocompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
-                              bij_vereniging=self.functie_nu.nhb_ver,
+                              bij_vereniging=self.functie_nu.vereniging,
                               sporterboog__boogtype__in=boog_pks,
                               ag_voor_team__gt=0.0))     # sporter moet een team AG hebben
 

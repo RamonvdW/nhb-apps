@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from django.test import TestCase
 from django.http import HttpResponseRedirect
-from Overig.models import SiteTijdelijkeUrl
-from Account.views import account_add_plugin_login
+from Account.plugin_manager import account_add_plugin_login_gate
+from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -21,11 +21,12 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
     test_after = ('Account.tests.test_login.',)
 
     url_wissel = '/account/account-wissel/'
+    url_code_prefix = '/tijdelijke-codes/'
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def _login_plugin(self, request, from_ip, account):
         if self._login_plugin_mode == 1:
@@ -37,7 +38,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
 
         self._login_plugin_mode = 0
-        account_add_plugin_login(10, self._login_plugin, False)
+        account_add_plugin_login_gate(10, self._login_plugin, False)
 
     def tearDown(self):
         self._login_plugin_mode = 0
@@ -64,7 +65,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
 
-        # controleer aanwezigheid van Selecteer knop, NHB nummer en Vereniging naam
+        # controleer aanwezigheid van Selecteer knop, bondsnummer en Vereniging naam
         self.assertNotContains(resp, "Niets gevonden")
         self.assertContains(resp, "normaal")
         self.assertContains(resp, "play_arrow")
@@ -91,9 +92,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
         # volg de tijdelijke url om ingelogd te raken
         self.e2e_logout()
@@ -134,9 +135,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
         # volg de tijdelijke url om ingelogd te raken
         with self.assert_max_queries(20):
@@ -176,9 +177,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
         # volg de tijdelijke url om ingelogd te raken
         with self.assert_max_queries(20):
@@ -240,7 +241,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # wis het tijdelijke urls geheugen zodat we makkelijk het nieuwe record kunnen vinden
-        SiteTijdelijkeUrl.objects.all().delete()
+        TijdelijkeCode.objects.all().delete()
 
         # selecteer de andere schutter
         with self.assert_max_queries(20):
@@ -250,11 +251,11 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if self.url_code_prefix in url]
         # hak het https deel eraf
-        tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
+        tijdelijke_url = urls[0][urls[0].find(self.url_code_prefix):]
 
-        obj = SiteTijdelijkeUrl.objects.all()[0]
+        obj = TijdelijkeCode.objects.first()
         obj.geldig_tot = timezone.now() - datetime.timedelta(seconds=1)
         obj.save()
 
@@ -262,6 +263,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('tijdelijkecodes/code-fout.dtl', 'plein/site_layout.dtl'))
 
 # end of file

@@ -7,10 +7,10 @@
 from django.contrib import auth
 from django.core import management
 from django.conf import settings
+from django.http import UnreadablePostError
 from django.test import TestCase, Client, override_settings
 from django.db import connection
-from Account.models import Account
-from Account.operations import account_create
+from Account.operations.aanmaken import account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from Mailer.models import MailQueue
 from TestHelpers.e2estatus import validated_templates, included_templates, consistent_email_templates
@@ -20,8 +20,10 @@ import subprocess
 import traceback
 import datetime
 import tempfile
+import esprima
 import vnujar
 import pyotp
+import json
 import time
 import io
 
@@ -47,17 +49,20 @@ class MyQueryTracer(object):
         call['now'] = time_start
 
         call['stack'] = stack = list()
-        for fname, linenr, base, code in traceback.extract_stack():
-            if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and 'manage.py' not in fname:
-                stack.append((fname, linenr, base))
+        for fname, line_nr, base, code in traceback.extract_stack():
+            if (base != '__call__'
+                    and not fname.startswith('/usr/lib')
+                    and '/site-packages/' not in fname
+                    and 'manage.py' not in fname):
+                stack.append((fname, line_nr, base))
             elif base == 'render' and 'template/response.py' in fname:
-                stack.append((fname, linenr, base))
+                stack.append((fname, line_nr, base))
         # for
 
         if REPORT_QUERY_ORIGINS:                        # pragma: no cover
             msg = ''
-            for fname, linenr, base in stack:
-                msg += '\n         %s:%s %s' % (fname[-30:], linenr, base)
+            for fname, line_nr, base in stack:
+                msg += '\n         %s:%s %s' % (fname[-30:], line_nr, base)
             try:
                 self.stack_counts[msg] += 1
             except KeyError:
@@ -101,32 +106,36 @@ class E2EHelpers(TestCase):
             html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
         return html
 
-    @staticmethod
-    def _get_useful_template_name(response):
-        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms') and not tmpl.name.startswith('email_')]
+    def _get_useful_template_name(self, response):
+        lst = [tmpl.name
+               for tmpl in response.templates
+               if (tmpl.name not in included_templates
+                   and not tmpl.name.startswith('django/forms')
+                   and not tmpl.name.startswith('email_'))]
+        if len(lst) == 0:       # pragma: no cover
+            return 'no template!'
         if len(lst) > 1:        # pragma: no cover
-            print('[WARNING] e2ehelpers._get_useful_template_name: too many choices!!! %s' % repr(lst))
+            self.fail('Too many choices for template name: %s' % repr(lst))
         return lst[0]
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
-        """ Maak een Account met AccountEmail aan in de database van de website """
-        account_create(username, voornaam, '', self.WACHTWOORD, email, True)
-        account = Account.objects.get(username=username)
+        """ Maak een Account aan in de database van de website """
+        account = account_create(username, voornaam, '', self.WACHTWOORD, email, True)
 
         # zet OTP actief (een test kan deze altijd weer uit zetten)
         account.otp_code = "whatever"
         account.otp_is_actief = True
-        account.save()
+        account.save(update_fields=['otp_code', 'otp_is_actief'])
 
         if accepteer_vhpg:
             self.e2e_account_accepteert_vhpg(account)
         return account
 
     def e2e_create_account_admin(self, accepteer_vhpg=True):
-        account = self.e2e_create_account('admin', 'admin@test.com', 'Admin', accepteer_vhpg)
+        account = self.e2e_create_account('424242', 'admin@test.com', 'Admin', accepteer_vhpg)
         # zet de benodigde vlaggen om admin te worden
-        account.is_staff = True
-        account.is_superuser = True
+        account.is_staff = True         # toegang tot de admin site
+        account.is_superuser = True     # alle rechten op alle database tabellen
         account.save()
         return account
 
@@ -142,7 +151,7 @@ class E2EHelpers(TestCase):
     def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         resp = self.e2e_login_no_check(account, wachtwoord)
-        if resp.status_code != 302:
+        if resp.status_code != 302:         # pragma: no cover
             self.e2e_dump_resp(resp)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
@@ -151,7 +160,7 @@ class E2EHelpers(TestCase):
     def e2e_login_and_pass_otp(self, account, wachtwoord=None):
         self.e2e_login(account, wachtwoord)
         # door de login is een cookie opgeslagen met het csrf token
-        resp = self.client.post('/functie/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
+        resp = self.client.post('/account/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
         self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     def _wissel_naar_rol(self, rol, expected_redirect):
@@ -172,7 +181,7 @@ class E2EHelpers(TestCase):
         'SEC': '/vereniging/',
         'HWL': '/vereniging/',
         'WL':  '/vereniging/',
-        'BKO': '/bondscompetities/##',
+        'BKO': '/bondscompetities/##',          # startswith = ##
         'RKO': '/bondscompetities/##',
         'RCL': '/bondscompetities/##',
         'MO':  '/opleidingen/manager/',
@@ -186,13 +195,8 @@ class E2EHelpers(TestCase):
 
         try:
             expected_url = self.WISSEL_VAN_ROL_EXPECTED_URL[functie.rol]
-        except KeyError:
+        except KeyError:        # pragma: no cover
             expected_url = 'functie ontbreekt'
-
-        # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
-        if functie.rol in ('BKO', 'RKO', 'RCL'):
-            if resp.status_code == 302 and not resp.url.startswith('/bondscompetities/'):
-                expected_url = '/functie/wissel-van-rol/'
 
         self.assert_is_redirect(resp, expected_url)
 
@@ -213,7 +217,7 @@ class E2EHelpers(TestCase):
         if rol_nu != rol_verwacht:
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
-    def _interpreteer_resp(self, resp):
+    def _interpreteer_resp(self, resp):                 # pragma: no cover
         long_msg = list()
         long_msg.append("status code: %s" % resp.status_code)
         long_msg.append(repr(resp))
@@ -275,7 +279,7 @@ class E2EHelpers(TestCase):
         soup = BeautifulSoup(content, features="html.parser")
         long_msg.append(soup.prettify())
 
-        return '', long_msg
+        return "?? (long msg follows):\n" + "\n".join(long_msg), long_msg
 
     def e2e_dump_resp(self, resp):                        # pragma: no cover
         short_msg, long_msg = self._interpreteer_resp(resp)
@@ -283,7 +287,7 @@ class E2EHelpers(TestCase):
         print("\n".join(long_msg))
         return
 
-    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
         if skip_menu:
@@ -313,12 +317,14 @@ class E2EHelpers(TestCase):
             pos1 = content.find('href="')
             pos2 = content.find('action="')
             pos3 = content.find('data-url="')
+            could_be_part_url = False
             if pos1 >= 0 and (pos2 == -1 or pos2 > pos1) and (pos3 == -1 or pos3 > pos1):
                 content = content[pos1+6:]       # strip all before href
             elif pos2 >= 0 and (pos1 == -1 or pos1 > pos2) and (pos3 == -1 or pos3 > pos2):
                 content = content[pos2+8:]       # strip all before action
             elif pos3 >= 0:
                 content = content[pos3+10:]      # strip all before data-url
+                could_be_part_url = True
             else:
                 # all interesting aspects handled
                 content = ""
@@ -330,7 +336,8 @@ class E2EHelpers(TestCase):
                 content = content[pos:]
                 if url != "#":
                     if not (skip_smileys and url.startswith('/feedback/')):
-                        urls.append(url)
+                        if not (could_be_part_url and url[0].count('/') == 0):
+                            urls.append(url)
         # while
         return urls
 
@@ -446,17 +453,75 @@ class E2EHelpers(TestCase):
                     # filter out website-internal links
                     if link.find('href="/') < 0 and link.find('href="#') < 0:
                         if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
-                            self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
+                            self.fail(msg='Unexpected empty link %s on page %s' % (
+                                        link, template_name))
                         elif link.find('href="mailto:') < 0 and link.find('javascript:history.go(-1)') < 0:
                             # remainder must be links that leave the website
                             # these must target a blank window
                             if 'target="_blank"' not in link:            # pragma: no cover
-                                self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                                self.fail(msg='Missing target="_blank" in link %s on page %s' % (
+                                            link, template_name))
                             if not is_email and 'rel="noopener noreferrer"' not in link:  # pragma: no cover
-                                self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
+                                self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (
+                                            link, template_name))
             else:
                 content = ''
         # while
+
+    @staticmethod
+    def _validate_javascript(script):
+        """ use ESprima to validate the javascript / ecmascript """
+
+        issues = list()
+
+        # strip <script src=".." type="..">
+        script = script[script.find('>')+1:]
+
+        # strip </script>
+        script = script[:script.find('</script>')]
+
+        if script:
+            # print('esprima: %s' % repr(script))
+            strict = '"use strict";'
+
+            failure = False
+            try:
+                result = esprima.parseScript(strict + script)
+            except esprima.Error:                       # pragma: no cover
+                failure = True
+            else:
+                if result.errors:                       # pragma: no cover
+                    failure = True
+
+            if failure:                                 # pragma: no cover
+                # make "Error in line 1" more useful
+                script = script.replace(';', ';\n')
+
+                add_snippet = True
+                try:
+                    result = esprima.parseScript(strict + script)
+                except esprima.Error as exc:
+                    issues.append("Exception in script: %s" % str(exc))
+                else:
+                    if result.errors:
+                        issues.append("Error in script: %s" % repr(result.errors))
+                    else:
+                        # no error in the readable script!
+                        issues.append('Could not duplicate script error after making readable')
+                        add_snippet = False
+
+                if add_snippet:
+                    issues.append("Snippet:")
+                    # avoid empty line at end
+                    if script[-1] == '\n':
+                        script = script[:-1]
+                    nr = 0
+                    for line in script.split('\n'):
+                        nr += 1
+                        issues.append('  %s: %s' % (nr, line))
+                    # for
+
+        return issues
 
     def assert_scripts_clean(self, html, template_name):
         pos = html.find('<script ')
@@ -465,13 +530,21 @@ class E2EHelpers(TestCase):
             pos = html.find('</script>')
             script = html[:pos+9]
 
+            issues = self._validate_javascript(script)
+            if len(issues):     # pragma: no cover
+                msg = 'Invalid script (template: %s):\n' % template_name
+                for issue in issues:
+                    msg += "    %s\n" % issue
+                # for
+                self.fail(msg=msg)
+
             pos = script.find('console.log')
-            if pos >= 0:
-                self.fail(msg='Detected console.log usage in script from template %s' % template_name)   # pragma: no cover
+            if pos >= 0:        # pragma: no cover
+                self.fail(msg='Detected console.log usage in script from template %s' % template_name)
 
             pos = script.find('/*')
-            if pos >= 0:
-                self.fail(msg='Found block comment in script from template %s' % template_name)     # pragma: no cover
+            if pos >= 0:        # pragma: no cover
+                self.fail(msg='Found block comment in script from template %s' % template_name)
 
             html = html[pos+9:]
             pos = html.find('<script ')
@@ -520,7 +593,6 @@ class E2EHelpers(TestCase):
                             line = lines[l1-1]
                             context = line[p1-1:p2]
                         else:
-                            # TODO
                             context = ''
                             pass
                         clean = ": ".join(spl[1:])
@@ -575,7 +647,8 @@ class E2EHelpers(TestCase):
                 p1 = klass.find("col s10")
                 p2 = klass.find("white")
                 if p1 >= 0 and p2 >= 0:             # pragma: no cover
-                    msg = 'Found grid col s10 + white (too much unused space on small) --> use separate div.white + padding:10px) in %s' % dtl
+                    msg = 'Found grid col s10 + white (too much unused space on small)'
+                    msg += ' --> use separate div.white + padding:10px) in %s' % dtl
                     self.fail(msg)
 
             pos = text.find("class=")
@@ -598,8 +671,8 @@ class E2EHelpers(TestCase):
                     part_spl = part.split('=')
                     tag = part_spl[0]
                     # print('part_spl: %s' % repr(part_spl))
-                    if tag not in ('value', 'autofocus') and part_spl[1] in ('""', "''"):
-                        msg = 'Found input tag %s with empty value: %s' % (repr(tag), repr(inp))
+                    if tag not in ('value', 'autofocus') and part_spl[1] in ('""', "''"):       # pragma: no cover
+                        msg = 'Found input tag %s with empty value: %s in %s' % (repr(tag), repr(inp), repr(dtl))
                         self.fail(msg)
             # for
         # while
@@ -619,7 +692,7 @@ class E2EHelpers(TestCase):
 
     def _assert_template_bug(self, html, dtl):
         pos = html.find('##BUG')
-        if pos >= 0:
+        if pos >= 0:                        # pragma: no cover
             msg = html[pos:]
             context = html[pos-30:]
             pos = msg.find('##', 3)
@@ -635,16 +708,16 @@ class E2EHelpers(TestCase):
 
         pos_csrf = html.find('csrfmiddlewaretoken')
         if is_post:
-            if pos_csrf < 0:
+            if pos_csrf < 0:        # pragma: no cover
                 self.fail(msg='Bug in template %s: missing csrf token inside form with method=post' % repr(dtl))
         else:
-            if pos_csrf >= 0:
+            if pos_csrf >= 0:       # pragma: no cover
                 self.fail(msg='Bug in template %s: found csrf token inside form not using method=post' % repr(dtl))
 
     def _assert_no_csrf(self, html, dtl):
         """ controleer geen oneigenlijk gebruik van het csrf_token """
         pos_csrf = html.find('csrfmiddlewaretoken')
-        if pos_csrf >= 0:
+        if pos_csrf >= 0:           # pragma: no cover
             self.fail('Bug in template %s: found csrf token usage outside form' % repr(dtl))
 
     def _assert_no_csrf_except_in_script(self, html, dtl):
@@ -675,8 +748,32 @@ class E2EHelpers(TestCase):
 
         self._assert_no_csrf_except_in_script(html, dtl)
 
+    def _assert_notranslate(self, html, dtl):
+        """ control gebruik notranslate class, bijvoorbeeld bij material-icons
+        """
+        pos_class = html.find(' class="')
+        while pos_class > 0:
+            pos_end = html.find('"', pos_class+8)
+            if pos_end < 0:     # pragma: no cover
+                pos_end = len(html)
+            class_str = html[pos_class+1:pos_end+1]
+
+            if 'notranslate' not in class_str:
+                if 'material-icons' in class_str:       # pragma: no cover
+                    self.fail('Bug in template %s: missing "notranslate" in %s' % (repr(dtl), class_str))
+
+            pos_class = html.find(' class="', pos_end)
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
+
+        # check for files
+        # 'Content-Disposition': 'attachment; filename="bond_alle.csv"'
+        check = response.get('Content-Disposition', '')
+        if 'ATTACHMENT;' in str(check).upper():     # pragma: no cover
+            self.fail('Found attachment instead of html page')
+
         html = response.content.decode('utf-8')
         html = self._remove_debug_toolbar(html)
 
@@ -696,6 +793,7 @@ class E2EHelpers(TestCase):
         self._assert_no_col_white(html, dtl)
         self._assert_inputs(html, dtl)
         self._assert_csrf_token_usage(html, dtl)
+        self._assert_notranslate(html, dtl)
 
         self._assert_template_bug(html, dtl)
 
@@ -784,7 +882,8 @@ class E2EHelpers(TestCase):
         if resp.status_code == 200:                     # pragma: no branch
             self.fail(msg='Onverwacht ingelogd')        # pragma: no cover
 
-    def e2e_assert_other_http_commands_not_supported(self, url, post=True, delete=True, put=True, patch=True):
+    def e2e_assert_other_http_commands_not_supported(self, url,
+                                                     get=False, post=True, delete=True, put=True, patch=True):
         """ Test een aantal 'common' http methoden
             en controleer dat deze niet ondersteund zijn (status code 405 = not allowed)
             POST, DELETE, PATCH
@@ -795,6 +894,11 @@ class E2EHelpers(TestCase):
         #   404 (not found)
         #   405 (not allowed)
         accepted_status_codes = (302, 403, 404, 405)
+
+        if get:
+            resp = self.client.get(url)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):    # pragma: no cover
+                self.fail(msg='Onverwachte status code %s bij GET command' % resp.status_code)
 
         if post:
             resp = self.client.post(url)
@@ -817,6 +921,9 @@ class E2EHelpers(TestCase):
                 self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
+        if isinstance(resp, str):
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
+
         if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
             if resp.status_code == 200:
@@ -909,8 +1016,8 @@ class E2EHelpers(TestCase):
                     queries += self._reformat_sql(prefix, call['sql'])
                     queries += prefix + '%s µs' % call['duration_us']
                     queries += '\n'
-                    for fname, linenr, base in call['stack']:
-                        queries += prefix + '%s:%s   %s' % (fname, linenr, base)
+                    for fname, line_nr, base in call['stack']:
+                        queries += prefix + '%s:%s   %s' % (fname, line_nr, base)
                     # for
                     limit -= 1
                     if limit <= 0:
@@ -1017,7 +1124,7 @@ class E2EHelpers(TestCase):
             self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
 
         # check the headers that make this a download
-        # print("response: ", repr([(a,b) for a,b in response.items()]))
+        # print("response: ", repr([(a,b) for a,b in resp.items()]))
         content_type_header = resp['Content-Type']
         self.assertEqual(expected_content_type, content_type_header)
         content_disposition_header = resp['Content-Disposition']
@@ -1025,6 +1132,23 @@ class E2EHelpers(TestCase):
 
         # ensure the file is not empty
         self.assertTrue(len(str(resp.content)) > 30)
+
+    def assert200_json(self, resp):
+        if resp.status_code != 200:                                 # pragma: no cover
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
+
+        # print("response: ", repr([(a,b) for a,b in resp.items()]))
+        content_type_header = resp['Content-Type']
+        self.assertEqual(content_type_header, 'application/json')
+
+        try:
+            json_data = json.loads(resp.content)
+        except (json.decoder.JSONDecodeError, UnreadablePostError) as exc:      # pragma: no cover
+            self.fail('No valid JSON response (%s)' % str(exc))
+            json_data = None
+
+        return json_data
 
     def assert200_is_bestand_csv(self, resp):
         self._assert_bestand(resp, 'text/csv; charset=UTF-8')
@@ -1035,8 +1159,8 @@ class E2EHelpers(TestCase):
     def assert200_is_bestand_xlsx(self, resp):
         self._assert_bestand(resp, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-    def assert200_is_bestand_xlsm(self, resp):
-        self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
+    # def assert200_is_bestand_xlsm(self, resp):
+    #     self._assert_bestand(resp, 'application/vnd.ms-excel.sheet.macroEnabled.12')
 
     def run_management_command(self, *args, report_exit_code=True):
         """ Helper om code duplicate te verminderen en bij een SystemExit toch de traceback (in stderr) te tonen """
@@ -1077,11 +1201,15 @@ class E2EHelpers(TestCase):
 
         return f1, f2
 
-    def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False, fail_on_error=True):
+    def verwerk_bestel_mutaties(self, kosten_pakket=6.75, kosten_brief=4.04,
+                                show_warnings=True, show_all=False, fail_on_error=True):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        with override_settings(WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO=kosten_pakket,
+                               WEBWINKEL_BRIEF_VERZENDKOSTEN_EURO=kosten_brief):
+            management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if fail_on_error:
             err_msg = f1.getvalue()

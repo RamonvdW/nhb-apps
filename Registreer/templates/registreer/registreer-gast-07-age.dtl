@@ -1,0 +1,62 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Geboortedatum{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Geboortedatum</h3>
+            <p>De persoonsgegevens waar we om vragen helpen bij het (correct) inschrijven op een wedstrijd.</p>
+            <p>Voorbeeld: bij IFAA wijzigt de wedstrijdklasse op je verjaardag.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post">
+                    {% csrf_token %}
+
+                    {% if foutmelding %}
+                        <p class="sv-rood-text">Fout: {{ foutmelding }}</p>
+                        <p>&nbsp;</p>
+                    {% endif %}
+
+                    <div class="input-field">
+                        <label for="id_jaar">Geboortejaar:</label>
+                        <input id="id_jaar" class="with-gap" type="number" name="jaar" value="{{ jaar }}" placeholder="1997" required autofocus>
+                    </div>
+
+                    <div class="input-field">
+                        <label for="id_maand">Geboortemaand (nummer):</label>
+                        <input id="id_maand" class="with-gap" type="number" name="maand" value="{{ maand }}" placeholder="1" required>
+                    </div>
+
+                    <div class="input-field">
+                        <label for="id_dag">Geboortedag:</label>
+                        <input id="id_dag" class="with-gap" type="number" name="dag" placeholder="28" value="{{ dag }}" required>
+                    </div>
+
+                    <p class="center">
+                        <button class="btn-sv-rood" type="submit">
+                            <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-gast-age" %}
+
+{% endblock %}

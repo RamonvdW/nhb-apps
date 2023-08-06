@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import TemplateView
+from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
@@ -31,6 +32,8 @@ class ManagerView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['bestellingen_url'] = reverse('Bestel:activiteit') + '?webwinkel=on'
 
         context['kruimels'] = (
             (None, 'Webwinkel'),

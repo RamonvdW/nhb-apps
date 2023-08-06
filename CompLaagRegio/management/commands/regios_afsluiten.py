@@ -14,12 +14,12 @@ class Command(BaseCommand):
     def _sluit_regios(self, comp, regio_van, regio_tot):
         for deelcomp in (Regiocompetitie
                          .objects
-                         .select_related('nhb_regio')
+                         .select_related('regio')
                          .filter(competitie=comp,
                                  is_afgesloten=False)
-                         .order_by('nhb_regio__regio_nr')):
+                         .order_by('regio__regio_nr')):
 
-            regio_nr = deelcomp.nhb_regio.regio_nr
+            regio_nr = deelcomp.regio.regio_nr
             if regio_van <= regio_nr <= regio_tot:
                 self.stdout.write('[INFO] Deelcompetitie %s wordt afgesloten' % deelcomp)
                 deelcomp.is_afgesloten = True

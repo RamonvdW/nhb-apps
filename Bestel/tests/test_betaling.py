@@ -47,19 +47,19 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        ver_nhb = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+        ver_bond = NhbVereniging(
+                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                     naam='Bondsbureau',
                     plaats='Schietstad',
                     regio=NhbRegio.objects.get(regio_nr=100))
-        ver_nhb.save()
-        self.ver_nhb = ver_nhb
+        ver_bond.save()
+        self.ver_bond = ver_bond
 
         instellingen = BetaalInstellingenVereniging(
-                            vereniging=ver_nhb,
+                            vereniging=ver_bond,
                             mollie_api_key='test_1234')
         instellingen.save()
-        self.instellingen_nhb = instellingen
+        self.instellingen_bond = instellingen
 
         ver = NhbVereniging(
                     ver_nr=1000,
@@ -69,7 +69,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         instellingen = BetaalInstellingenVereniging(
                             vereniging=ver,
-                            akkoord_via_nhb=True)
+                            akkoord_via_bond=True)
         instellingen.save()
         self.instellingen = instellingen
 
@@ -159,7 +159,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
 
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # TODO: betere url kiezen
@@ -178,9 +178,16 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assertTrue(betaal_mutatie.payment_id != '')
 
         betaal_actief = bestelling.betaal_actief
-        self.assertEqual(betaal_actief.ontvanger, self.instellingen_nhb)    # want akkoord_via_nhb
+        self.assertEqual(betaal_actief.ontvanger, self.instellingen_bond)    # want akkoord_via_bond
         self.assertTrue(betaal_actief.payment_id != '')
         self.assertEqual(betaal_actief.payment_status, 'open')
+
+        # haal de betaal status pagina op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_na_de_betaling % bestelling.bestel_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/bestelling-afgerond.dtl', 'plein/site_layout.dtl'))
 
         # fake het gebruik van de CPSP checkout en de payment-status-changed callback
         count = BetaalMutatie.objects.count()
@@ -221,7 +228,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         # controleer dat een e-mailbevestiging van de betaling aangemaakt is
         self.assertEqual(1, MailQueue.objects.count())
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 

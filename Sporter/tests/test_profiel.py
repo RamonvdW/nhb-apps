@@ -5,22 +5,21 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils.dateparse import parse_date
-from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieSporterBoog,
+from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog,
                                Kampioenschap, KampioenschapSporterBoog)
-from Competitie.tijdlijn import (zet_competitie_fases,
-                                 zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
-                                 zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,
-                                 zet_competitie_fase_rk_prep,
-                                 zet_competitie_fase_afsluiten)
+from Competitie.tests.tijdlijn import (zet_competitie_fases,
+                                       zet_competitie_fase_regio_prep, zet_competitie_fase_regio_inschrijven,
+                                       zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten,
+                                       zet_competitie_fase_rk_prep, zet_competitie_fase_afsluiten)
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.definities import HISTCOMP_TYPE_18
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
@@ -48,7 +47,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -79,7 +78,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         functie_hwl = maak_functie('HWL ver 1000', 'HWL')
         functie_hwl.accounts.add(self.account_normaal)
-        functie_hwl.nhb_ver = ver
+        functie_hwl.vereniging = ver
         functie_hwl.bevestigde_email = 'hwl@groteclub.nl'
         functie_hwl.save()
         self.functie_hwl = functie_hwl
@@ -87,7 +86,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         functie_sec = maak_functie('SEC ver 1000', 'SEC')
         functie_sec.accounts.add(self.account_normaal)
         functie_sec.bevestigde_email = 'sec@groteclub.nl'
-        functie_sec.nhb_ver = ver
+        functie_sec.vereniging = ver
         functie_sec.save()
         self.functie_sec = functie_sec
 
@@ -144,14 +143,14 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         rec.save()
 
         # geef dit account een goede en een slechte HistComp record
-        histcomp = HistCompetitie()
-        histcomp.seizoen = "2009/2010"
-        histcomp.comp_type = "18"
-        histcomp.boog_str = "don't care"
-        histcomp.save()
+        hist_seizoen = HistCompSeizoen(
+                            seizoen="2009/2010",
+                            comp_type=HISTCOMP_TYPE_18,
+                            indiv_bogen='R')
+        hist_seizoen.save()
 
-        indiv = HistCompetitieIndividueel()
-        indiv.histcompetitie = histcomp
+        indiv = HistCompRegioIndiv()
+        indiv.seizoen = hist_seizoen
         indiv.rank = 1
         indiv.sporter_lid_nr = 100001
         indiv.sporter_naam = "Ramon de Tester"
@@ -233,7 +232,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -241,7 +240,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='25', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='25', regio=self.ver.regio)
 
         # zet de 25m door naar fase F
         zet_competitie_fase_regio_wedstrijden(comp_25)     # zet einde_fase_F
@@ -435,7 +434,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # schrijf de sporter in voor de 18m Recurve
         zet_competitie_fase_regio_inschrijven(self.comp_18)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -457,7 +456,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.ver.save()
 
         # log in as sporter
-        # account_normaal is lid bij nhbver
+        # account_normaal is lid bij vereniging
         self.e2e_login(self.account_normaal)
 
         with self.assert_max_queries(20):
@@ -474,7 +473,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._competitie_aanmaken()
 
         # zet de regiocompetitie op inschrijfmethode 1
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=self.ver.regio)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
         deelcomp.save()
 
@@ -550,7 +549,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', nhb_regio=self.ver.regio)
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=self.ver.regio)
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -559,7 +558,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
 
         self.assertEqual(1, RegiocompetitieSporterBoog.objects.count())
-        deelnemer = RegiocompetitieSporterBoog.objects.all()[0]
+        deelnemer = RegiocompetitieSporterBoog.objects.first()
 
         # ingeschreven en geen knop meer voor aanmelden
         with self.assert_max_queries(27):
@@ -569,7 +568,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
         # laat de sporter doorstromen naar het RK
-        deelkamp_25 = Kampioenschap.objects.get(competitie__afstand='25', nhb_rayon=self.ver.regio.rayon)
+        deelkamp_25 = Kampioenschap.objects.get(competitie__afstand='25', rayon=self.ver.regio.rayon)
         kamp = KampioenschapSporterBoog(
                     kampioenschap=deelkamp_25,
                     sporterboog=sporterboog,
@@ -580,7 +579,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                     gemiddelde=9)
         kamp.save()
 
-        deelkamp_18 = Kampioenschap.objects.get(competitie__afstand='18', nhb_rayon=self.ver.regio.rayon)
+        deelkamp_18 = Kampioenschap.objects.get(competitie__afstand='18', rayon=self.ver.regio.rayon)
         kamp = KampioenschapSporterBoog(
                         kampioenschap=deelkamp_18,
                         sporterboog=sporterboog,

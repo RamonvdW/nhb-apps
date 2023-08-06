@@ -27,19 +27,21 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
     url_bestellingen_overzicht = '/bestel/overzicht/'
     url_overboeking_ontvangen = '/bestel/vereniging/overboeking-ontvangen/'
 
+    url_meer_vragen = '/account/registreer/gast/meer-vragen/'
+
     def setUp(self):
         """ initialisatie van de test case """
 
         self.lid_nr = 123456
 
-        self.account_email = 'winkel@nhb.not'
+        self.account_email = 'winkel@test.not'
         self.account_normaal = self.e2e_create_account(self.lid_nr, self.account_email, 'Mgr', accepteer_vhpg=True)
 
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         sporter1 = Sporter(
                     lid_nr=self.lid_nr,
@@ -50,7 +52,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
                     sinds_datum='2020-07-07',
                     adres_code='1234AB56',
                     account=self.account_normaal,
-                    bij_vereniging=self.nhbver1,
+                    bij_vereniging=self.ver1,
                     postadres_1='Sporter straatnaam 1',
                     postadres_2='Sporter woonplaats',
                     postadres_3='Sporter land')
@@ -59,7 +61,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.functie_mww = Functie.objects.get(rol='MWW')
         self.functie_mww.accounts.add(self.account_normaal)
-        self.functie_mww.bevestigde_email = 'webshop@nhb.not'
+        self.functie_mww.bevestigde_email = 'webshop@test.not'
         self.functie_mww.save(update_fields=['bevestigde_email'])
 
         foto = WebwinkelFoto()
@@ -108,11 +110,15 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_webwinkel_overzicht)
-        self.assert403(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_webwinkel_product % self.product.pk)
-        self.assert403(resp)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
 
         self.assertTrue(str(self.foto2) != '')
         self.assertTrue(str(self.product3) != '')
@@ -250,7 +256,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         self.assertEqual(2, WebwinkelKeuze.objects.count())
 
-        keuze = WebwinkelKeuze.objects.all()[0]
+        keuze = WebwinkelKeuze.objects.first()
         self.assertTrue(keuze.korte_beschrijving() != '')
         self.assertTrue(str(keuze) != '')
 
@@ -263,11 +269,11 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         self.assertEqual(1, Bestelling.objects.count())
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         self.assertEqual(1, MailQueue.objects.count())
-        email = MailQueue.objects.all()[0]
+        email = MailQueue.objects.first()
 
         # print(email.mail_text)
 
@@ -305,7 +311,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestel/overboeking-ontvangen.dtl', 'plein/site_layout.dtl'))
         self.verwerk_bestel_mutaties()
 
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.first()
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
 
         # koper en backoffice krijgen mails
@@ -328,10 +334,24 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
 
         email.delete()
 
-        email = MailQueue.objects.all()[0]
+        email = MailQueue.objects.first()
 
         self.assertEqual(email.mail_to, self.account_email)
         self.assertTrue("Bevestiging aankoop via MijnHandboogsport (MH-100" in email.mail_subj)
         self.assertTrue("Betaalstatus: Voldaan" in email.mail_text)
+
+    def test_gast(self):
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wisselnaarrol_sporter()
+
+        # gast-account
+        self.account_normaal.is_gast = True
+        self.account_normaal.save(update_fields=['is_gast'])
+
+        url = self.url_webwinkel_product % self.product.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal': '1', 'snel': 1})
+
+        self.assert404(resp, 'Geen toegang')
 
 # end of file

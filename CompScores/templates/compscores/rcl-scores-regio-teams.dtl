@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -28,7 +28,7 @@
                 </tr>
                 <tr>
                     <th>Regio</th>
-                    <td>{{ deelcomp.nhb_regio }}</td>
+                    <td>{{ deelcomp.regio }}</td>
                 </tr>
                 <tr>
                     <th>Huidige ronde</th>
@@ -42,15 +42,15 @@
 
         <div class="center">
             {% if aantal_keuzes_nodig > 0 %}
-                <p class="nhb-rood-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
-                {% if anchor %}<p><a class="btn-nhb-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
+                <p class="sv-rood-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
+                {% if anchor %}<p><a class="btn-sv-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
             {% else %}
                 <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te slaan!</p>
             {% endif %}
         </div>
 
         <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <!-- dialoog venster -->
@@ -63,7 +63,7 @@
                                 {% for regel in alle_regels %}
                                     {% if regel.poule_str %}
                                         <tr>
-                                            <td colspan="3" class="center nhb-rood-text"><h5>Poule: {{ regel.poule_str }}</h5></td>
+                                            <td colspan="3" class="center sv-rood-text"><h5>Poule: {{ regel.poule_str }}</h5></td>
                                         </tr>
                                     {% endif %}
 
@@ -80,7 +80,7 @@
                                     {% endif %}
 
                                     <tr>
-                                        <th colspan="3" class="nhb-table-header">{{ regel.team_str }}</th>
+                                        <th colspan="3" class="sv-table-header">{{ regel.team_str }}</th>
                                     </tr>
 
                                     {% for deelnemer in regel.deelnemers %}
@@ -91,7 +91,7 @@
                                             <td>
                                                 {% if deelnemer.kan_kiezen %}
                                                     {% if deelnemer.keuze_nodig %}
-                                                        <span class="nhb-rood-text">Keuze nodig:</span><br>
+                                                        <span class="sv-rood-text">Keuze nodig:</span><br>
                                                     {% endif %}
                                                     <ul id="{{ deelnemer.id_radio }}">
                                                         {% for wedstrijd, score in deelnemer.gevonden_scores %}
@@ -144,7 +144,7 @@
                             </table>
 
                             <div class="fixed-action-btn">
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                             </div>
                         </form>

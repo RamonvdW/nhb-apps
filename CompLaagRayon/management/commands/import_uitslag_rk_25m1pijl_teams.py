@@ -38,7 +38,7 @@ class Command(BaseCommand):
                           .filter(kampioenschap__competitie__afstand='25',
                                   kampioenschap__deel=DEEL_RK)
                           .select_related('kampioenschap',
-                                          'kampioenschap__nhb_rayon',
+                                          'kampioenschap__rayon',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'indiv_klasse')):
@@ -80,7 +80,7 @@ class Command(BaseCommand):
                      .filter(kampioenschap__competitie__afstand='25',
                              kampioenschap__deel=DEEL_RK)
                      .select_related('kampioenschap',
-                                     'kampioenschap__nhb_rayon',
+                                     'kampioenschap__rayon',
                                      'vereniging',
                                      'team_type',
                                      'team_klasse')
@@ -251,8 +251,8 @@ class Command(BaseCommand):
                             self.stdout.write('[WARNING] Geen scores voor sporter %s op regel %s' % (lid_nr, row_nr))
                         else:
                             deelnemer = self._get_deelnemer(lid_nr, lid_ag)
-                            deelnemer.result_teamscore_1 = score1
-                            deelnemer.result_teamscore_2 = score2
+                            deelnemer.result_rk_teamscore_1 = score1
+                            deelnemer.result_rk_teamscore_2 = score2
                             feitelijke_deelnemers.append(deelnemer)
                             gevonden_lid_nrs.append(lid_nr)
             # for
@@ -299,8 +299,8 @@ class Command(BaseCommand):
                 for deelnemer in feitelijke_deelnemers:
                     if not self.dryrun:
                         # uitgestelde save actie
-                        deelnemer.save(update_fields=['result_teamscore_1', 'result_teamscore_2'])
-                    deelnemer_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
+                        deelnemer.save(update_fields=['result_rk_teamscore_1', 'result_rk_teamscore_2'])
+                    deelnemer_totaal = deelnemer.result_rk_teamscore_1 + deelnemer.result_rk_teamscore_2
                     deelnemer_totalen.append(deelnemer_totaal)
                 # for
                 deelnemer_totalen.sort(reverse=True)                        # hoogste eerst

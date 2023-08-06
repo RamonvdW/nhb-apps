@@ -89,7 +89,7 @@
 
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s10 offset-s1 m12{% if url_opslaan %} white z-depth-3{% endif %}">
 
             <!-- dialoog venster -->
@@ -145,7 +145,7 @@
                                     {% if readonly %}
                                         {% for sel, str, checked in disc %}
                                             {% if checked %}
-                                                <span class="nhb-blauw-text">&check;&nbsp;</span><span>{{ str }}</span>
+                                                <span class="sv-blauw-text">&check;&nbsp;</span><span>{{ str }}</span>
                                                 <!-- else: discipline niet noemen -->
                                             {% endif %}
                                             <!-- voeg een verstopte radiobutton toe die gecheckt kan worden door javascript -->
@@ -180,7 +180,7 @@
 
                             <tr class="outdoor-veld-kan-verstoppen">
                                 <td colspan="2" class="center">
-                                    <h5 class="nhb-blauw-text">Buitenbanen</h5>
+                                    <h5 class="sv-blauw-text">Buitenbanen</h5>
                                 </td>
                             </tr>
 
@@ -219,7 +219,7 @@
 
                             <tr class="binnenbanen-kan-verstoppen">
                                 <td colspan="2" class="center">
-                                    <h5 class="nhb-blauw-text">Binnenbanen</h5>
+                                    <h5 class="sv-blauw-text">Binnenbanen</h5>
                                 </td>
                             </tr>
 
@@ -283,13 +283,13 @@
 
                         {% if url_verwijder %}
                             <p>
-                                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_locatie">Verwijder deze locatie</a>
+                                <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_locatie">Verwijder deze locatie</a>
                             </p>
                         {% endif %}
 
                         {% if not readonly %}
                             <div class="fixed-action-btn" style="display: none">
-                                <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                                     <i class="notranslate material-icons-round left">check</i>Wijzigingen opslaan</button>
                             </div>
                         {% endif %}
@@ -315,10 +315,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>

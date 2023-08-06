@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Bestel import view_mandje, view_bestelling, view_activiteit, view_overboeking
+from Bestel import view_mandje, view_bestelling, view_activiteit, view_overboeking, view_kies_transport
 
 app_name = 'Bestel'
+
+# basis = /bestel/
 
 urlpatterns = [
 
@@ -19,6 +21,9 @@ urlpatterns = [
          view_mandje.ToonInhoudMandje.as_view(),
          name='toon-inhoud-mandje'),
 
+    path('mandje/transport/',
+         view_kies_transport.KiesTransportView.as_view(),
+         name='kies-transport'),
 
     path('overzicht/',
          view_bestelling.ToonBestellingenView.as_view(),

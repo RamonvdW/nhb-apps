@@ -151,7 +151,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                 .objects
                 .select_related('indiv_klasse',
                                 'regiocompetitie',
-                                'regiocompetitie__nhb_regio',
+                                'regiocompetitie__regio',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
@@ -168,7 +168,8 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -217,12 +218,12 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .objects
                 .select_related('indiv_klasse',
                                 'regiocompetitie',
-                                'regiocompetitie__nhb_regio__rayon',
+                                'regiocompetitie__regio__rayon',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
                 .filter(regiocompetitie__competitie=comp,
-                        regiocompetitie__nhb_regio__rayon=rayon)
+                        regiocompetitie__regio__rayon=rayon)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
@@ -234,7 +235,8 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -285,7 +287,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp = Regiocompetitie.objects.get(competitie=comp,
-                                                   nhb_regio=regio)
+                                                   regio=regio)
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -327,7 +329,8 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
@@ -429,17 +432,17 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         # maak een lijst van alle verenigingen in deze regio
         context['regio_verenigingen'] = vers = list()
-        ver_nr2nhb_ver = dict()
-        for nhb_ver in (NhbVereniging
+        nr2ver = dict()
+        for ver in (NhbVereniging
                         .objects
                         .filter(regio=regio)
                         .order_by('ver_nr')
                         .all()):
 
-            vers.append(nhb_ver)
-            ver_nr2nhb_ver[nhb_ver.ver_nr] = nhb_ver
+            vers.append(ver)
+            nr2ver[ver.ver_nr] = ver
 
-            nhb_ver.blazoen_dict = dict()
+            ver.blazoen_dict = dict()
         # for
 
         # sporter met voorkeur voor eigen blazoen (DT of 60cm 4spot)
@@ -470,18 +473,18 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                         blazoen_str = BLAZOEN2STR[BLAZOEN_WENS_4SPOT]
 
             try:
-                nhb_ver = ver_nr2nhb_ver[deelnemer.bij_vereniging.ver_nr]
+                ver = nr2ver[deelnemer.bij_vereniging.ver_nr]
             except KeyError:
                 pass
             else:
                 try:
-                    counts_dict = nhb_ver.blazoen_dict[blazoen_str]
+                    counts_dict = ver.blazoen_dict[blazoen_str]
                 except KeyError:
                     counts_dict = dict()
                     for afkorting in DAGDEEL_AFKORTINGEN:
                         counts_dict[afkorting] = 0
                     # for
-                    nhb_ver.blazoen_dict[blazoen_str] = counts_dict
+                    ver.blazoen_dict[blazoen_str] = counts_dict
                     if blazoen_str not in alle_blazoenen:
                         alle_blazoenen.append(blazoen_str)
 
@@ -500,12 +503,12 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             totals[afkorting] = 0
         # for
 
-        for nhb_ver in vers:
-            nhb_ver.blazoen_list = list()
+        for ver in vers:
+            ver.blazoen_list = list()
 
             for blazoen_str in alle_blazoenen:
                 try:
-                    counts_dict = nhb_ver.blazoen_dict[blazoen_str]
+                    counts_dict = ver.blazoen_dict[blazoen_str]
                 except KeyError:
                     # blazoen niet nodig voor deze vereniging
                     pass
@@ -524,7 +527,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
                     if som > 0:
                         tup = (blazoen_str, counts_list)
-                        nhb_ver.blazoen_list.append(tup)
+                        ver.blazoen_list.append(tup)
             # for
         # for
 
@@ -544,8 +547,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         alle_blazoenen = list()
         blazoen_count = dict()
-        for nhb_ver in context['regio_verenigingen']:
-            for blazoen_str, counts_list in nhb_ver.blazoen_list:
+        for ver in context['regio_verenigingen']:
+            for blazoen_str, counts_list in ver.blazoen_list:
                 try:
                     counts = blazoen_count[blazoen_str]
                 except KeyError:
@@ -603,7 +606,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
-                             nhb_regio=regio))
+                             regio=regio))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -633,8 +636,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio',
+                     kwargs={'comp_pk': comp.pk,
+                             'regio_pk': deelcomp.regio.regio_nr}), 'Inschrijvingen'),
             (None, 'Benodigde dagdelen')
         )
 
@@ -679,7 +685,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
-                             nhb_regio=regio))
+                             regio=regio))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -701,8 +707,8 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         context['object_list'] = objs
 
         # voeg de tabel met dagdeel-behoefte toe
-        # dict(nhb_ver) = dict("dagdeel_afkorting") = count
-        # list[nhb_ver, ..] =
+        # dict(ver) = dict("dagdeel_afkorting") = count
+        # list[ver, ..] =
         self._maak_data_dagdeel_behoefte(context, deelcomp, objs, regio)
         self._maak_data_blazoen_behoefte(context)
 
@@ -717,9 +723,9 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         # voorkeur dagdelen per vereniging
         writer.writerow(['ver_nr', 'Naam', 'Blazoen'] + dagdelen + ['Totaal'])
 
-        for nhb_ver in context['regio_verenigingen']:
-            for blazoen_str, counts_list in nhb_ver.blazoen_list:
-                writer.writerow([nhb_ver.ver_nr, nhb_ver.naam, blazoen_str] + counts_list)
+        for ver in context['regio_verenigingen']:
+            for blazoen_str, counts_list in ver.blazoen_list:
+                writer.writerow([ver.ver_nr, ver.naam, blazoen_str] + counts_list)
         # for
 
         writer.writerow(['-', '-', 'Totalen'] + context['totalen'])
@@ -781,7 +787,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
-                             nhb_regio=regio))
+                             regio=regio))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -861,8 +867,11 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio',
+                     kwargs={'comp_pk': comp.pk,
+                             'regio_pk': deelcomp.regio.regio_nr}), 'Inschrijvingen'),
             (None, 'Gekozen wedstrijden')
         )
 
@@ -909,7 +918,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                         .select_related('competitie')
                         .get(is_afgesloten=False,
                              competitie=comp,
-                             nhb_regio=regio))
+                             regio=regio))
         except Regiocompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
@@ -1012,7 +1021,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                           .order_by('bij_vereniging__ver_nr',
                                     'sporterboog__sporter__lid_nr')):
 
-            pks = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
+            pks = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))  # TODO: 1 query per deelnemer!
 
             kruisjes = list()
             for pk in kolom_pks:

@@ -125,7 +125,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         # zorg dat de clusters een ronde hebben
         for cluster in (NhbCluster
                         .objects
-                        .filter(regio=deelcomp.nhb_regio,
+                        .filter(regio=deelcomp.regio,
                                 gebruik=deelcomp.competitie.afstand)
                         .prefetch_related('nhbvereniging_set',
                                           'regiocompetitieronde_set')
@@ -142,7 +142,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['clusters'] = clusters = list()
         for cluster in (NhbCluster
                         .objects
-                        .filter(regio=deelcomp.nhb_regio,
+                        .filter(regio=deelcomp.regio,
                                 gebruik=deelcomp.competitie.afstand)
                         .prefetch_related('nhbvereniging_set',
                                           'regiocompetitieronde_set')
@@ -181,7 +181,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         # zoek de bruikbare clusters
         clusters = (NhbCluster
                     .objects
-                    .filter(regio=deelcomp.nhb_regio,
+                    .filter(regio=deelcomp.regio,
                             gebruik=deelcomp.competitie.afstand)
                     .prefetch_related('nhbvereniging_set', 'regiocompetitieronde_set')
                     .select_related('regio')
@@ -208,16 +208,16 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio',
-                                        'nhb_regio__rayon')
+                                        'regio',
+                                        'regio__rayon')
                         .get(pk=deelcomp_pk))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
-        context['regio'] = deelcomp.nhb_regio
+        context['regio'] = deelcomp.regio
 
-        mag_wijzigen = (self.rol_nu == Rollen.ROL_RCL and self.functie_nu.nhb_regio == deelcomp.nhb_regio)
+        mag_wijzigen = (self.rol_nu == Rollen.ROL_RCL and self.functie_nu.regio == deelcomp.regio)
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             self._get_methode_1(context, deelcomp)
@@ -233,7 +233,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             rayon = Kampioenschap.objects.get(competitie=deelcomp.competitie,
                                               deel=DEEL_RK,
-                                              nhb_rayon=deelcomp.nhb_regio.rayon)
+                                              rayon=deelcomp.regio.rayon)
             context['url_rayon'] = reverse('CompLaagRayon:planning',
                                            kwargs={'deelkamp_pk': rayon.pk})
 
@@ -267,9 +267,9 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(pk=deelcomp_pk,
-                             nhb_regio=self.functie_nu.nhb_regio))
+                             regio=self.functie_nu.regio))
         except (ValueError, Regiocompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -434,7 +434,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             ronde = (RegiocompetitieRonde
                      .objects
                      .select_related('regiocompetitie__competitie',
-                                     'regiocompetitie__nhb_regio__rayon',
+                                     'regiocompetitie__regio__rayon',
                                      'cluster__regio')
                      .get(pk=ronde_pk))
         except (ValueError, RegiocompetitieRonde.DoesNotExist):
@@ -751,7 +751,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             ronde = (RegiocompetitieRonde
                      .objects
                      .select_related('regiocompetitie__competitie',
-                                     'regiocompetitie__nhb_regio__rayon',
+                                     'regiocompetitie__regio__rayon',
                                      'cluster__regio')
                      .get(pk=ronde_pk))
         except (ValueError, RegiocompetitieRonde.DoesNotExist):
@@ -965,7 +965,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp = ronde.regiocompetitie.competitie
         is_25m = (comp.afstand == '25')
 
-        context['regio'] = ronde.regiocompetitie.nhb_regio
+        context['regio'] = ronde.regiocompetitie.regio
         context['ronde'] = ronde
         context['wedstrijd'] = match
 
@@ -1012,7 +1012,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if ronde.cluster:
             verenigingen = ronde.cluster.nhbvereniging_set.order_by('ver_nr')
         else:
-            verenigingen = ronde.regiocompetitie.nhb_regio.nhbvereniging_set.order_by('ver_nr')
+            verenigingen = ronde.regiocompetitie.regio.nhbvereniging_set.order_by('ver_nr')
         context['verenigingen'] = verenigingen
 
         if not match.vereniging and verenigingen.count() > 0:
@@ -1137,27 +1137,27 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # mag niet wijzigen
             raise PermissionDenied('Niet de beheerder')
 
-        nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
+        ver_pk = request.POST.get('ver_pk', '')[:6]       # afkappen voor de veiligheid
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
 
-        if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] not in (':', '.'):    # allow numpad dot in time
+        if ver_pk == "" or len(aanvang) != 5 or aanvang[2] not in (':', '.'):    # allow numpad dot in time
             raise Http404('Geen valide verzoek')
 
         try:
-            nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
+            ver = NhbVereniging.objects.get(pk=ver_pk)
         except (NhbVereniging.DoesNotExist, ValueError):
             raise Http404('Vereniging niet gevonden')
 
         if loc_pk:
             try:
-                loc = nhbver.wedstrijdlocatie_set.get(pk=loc_pk)
+                loc = ver.wedstrijdlocatie_set.get(pk=loc_pk)
             except WedstrijdLocatie.DoesNotExist:
                 raise Http404('Geen valide verzoek')
         else:
             # formulier stuurt niets als er niet gekozen hoeft te worden
             loc = None
-            locs = nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all()
+            locs = ver.wedstrijdlocatie_set.exclude(zichtbaar=False).all()
             if locs.count() == 1:
                 loc = locs[0]       # de enige keuze
 
@@ -1206,7 +1206,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         match.datum_wanneer = when
         match.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
-        match.vereniging = nhbver
+        match.vereniging = ver
         match.locatie = loc
         match.save()
 
@@ -1428,7 +1428,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             # maak een taak aan voor de RKO
             deelkamp = Kampioenschap.objects.get(competitie=deelcomp.competitie,
                                                  deel=DEEL_RK,
-                                                 nhb_rayon=deelcomp.nhb_regio.rayon)
+                                                 rayon=deelcomp.regio.rayon)
             functie_rko = deelkamp.functie
             maak_taak(toegekend_aan_functie=functie_rko,
                       deadline=taak_deadline,

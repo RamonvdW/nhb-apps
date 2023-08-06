@@ -7,9 +7,6 @@
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_BK, DEELNAME_NEE, KAMP_RANK_NO_SHOW, KAMP_RANK_RESERVE
 from Competitie.models import KampioenschapSporterBoog
-from openpyxl.utils.exceptions import InvalidFileException
-import openpyxl
-import zipfile
 
 
 class Command(BaseCommand):
@@ -49,9 +46,10 @@ class Command(BaseCommand):
     def _read_html(self, fname):
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
         try:
-            data = open(fname).read()
+            with open(fname) as f:
+                data = f.read()
         except OSError as exc:
-            self.stderr.write('[ERROR] Kan het  bestand niet openen (%s)' % str(exc))
+            self.stderr.write('[ERROR] Kan het html bestand niet openen (%s)' % str(exc))
             return
 
         rank_doorlopend = 0

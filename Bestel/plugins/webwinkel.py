@@ -8,6 +8,7 @@
 
 from django.conf import settings
 from django.utils.formats import localize
+from Bestel.definities import BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
 from Webwinkel.definities import KEUZE_STATUS_GEANNULEERD
 from decimal import Decimal
 
@@ -62,17 +63,25 @@ def webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje):
             webwinkel_count += 1
     # for
 
+    mandje.verzendkosten_euro = Decimal(0)
+
     if webwinkel_count > 0:
-        # wel verzendkosten
-        mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO)
+        # wel fysieke producten
+        if mandje.transport == BESTEL_TRANSPORT_NVT:
+            # bij toevoegen eerste product schakelen we over op verzenden
+            mandje.transport = BESTEL_TRANSPORT_VERZEND
+
+        if mandje.transport == BESTEL_TRANSPORT_VERZEND:
+            # zet de kosten voor het verzenden (ophalen is gratis)
+            mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO)
     else:
         # geen verzendkosten
-        mandje.verzendkosten_euro = Decimal(0)
+        mandje.transport = BESTEL_TRANSPORT_NVT
 
-    mandje.save(update_fields=['verzendkosten_euro'])
+    mandje.save(update_fields=['verzendkosten_euro', 'transport'])
 
 
-def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, bestelling):
+def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, transport, bestelling):
     """ bereken de verzendkosten voor fysieke producten in het mandje """
 
     webwinkel_count = 0
@@ -81,14 +90,20 @@ def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, bestelling):
             webwinkel_count += 1
     # for
 
-    if webwinkel_count > 0:
+    if webwinkel_count == 0:
+        transport = BESTEL_TRANSPORT_NVT
+
+    bestelling.transport = transport
+
+    if transport == BESTEL_TRANSPORT_VERZEND:
         # wel verzendkosten
+        # TODO: briefpost
         bestelling.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO)
     else:
         # geen verzendkosten
         bestelling.verzendkosten_euro = Decimal(0)
 
-    bestelling.save(update_fields=['verzendkosten_euro'])
+    bestelling.save(update_fields=['verzendkosten_euro', 'transport'])
 
 
 def webwinkel_plugin_beschrijf_product(keuze):

@@ -8,7 +8,6 @@
 
 from django.conf import settings
 from django.utils import timezone
-from django.db.utils import DataError
 from django.db.models import ProtectedError
 from django.core.management.base import BaseCommand
 from django.core.validators import URLValidator
@@ -55,6 +54,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
+SKIP_VER_NR = (settings.EXTERN_VER_NR,)
 
 
 class Command(BaseCommand):
@@ -118,6 +118,7 @@ class Command(BaseCommand):
 
         for ver in (NhbVereniging
                     .objects
+                    .exclude(ver_nr__in=SKIP_VER_NR)
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set')
                     .all()):
@@ -138,7 +139,7 @@ class Command(BaseCommand):
 
         for functie in (Functie
                         .objects
-                        .select_related('nhb_ver')
+                        .select_related('vereniging')
                         .prefetch_related('accounts')
                         .all()):
             tup = (functie.rol, functie.beschrijving)
@@ -266,7 +267,8 @@ class Command(BaseCommand):
             try:
                 keys.remove(key)
             except ValueError:
-                self.stderr.write("[ERROR] [FATAL] Verplichte sleutel %s niet aanwezig in de %s data" % (repr(key), repr(level)))
+                self.stderr.write("[ERROR] [FATAL] Verplichte sleutel %s niet aanwezig in de %s data" % (
+                                    repr(key), repr(level)))
                 self._exit_code = 2
                 has_error = True
         # for
@@ -333,7 +335,8 @@ class Command(BaseCommand):
                 self._count_errors += 1
             else:
                 if obj.naam != rayon_naam:
-                    self.stdout.write('[INFO] Wijziging naam rayon %s: %s --> %s' % (rayon_nr, repr(obj.naam), repr(rayon_naam)))
+                    self.stdout.write('[INFO] Wijziging naam rayon %s: %s --> %s' % (
+                                        rayon_nr, repr(obj.naam), repr(rayon_naam)))
                     self._count_wijzigingen += 1
                     obj.naam = rayon_naam
                     if not self.dryrun:
@@ -363,7 +366,8 @@ class Command(BaseCommand):
                 self._count_errors += 1
             else:
                 if obj.naam != regio_naam:
-                    self.stdout.write('[INFO] Wijziging naam regio %s: %s --> %s' % (regio_nr, repr(obj.naam), repr(regio_naam)))
+                    self.stdout.write('[INFO] Wijziging naam regio %s: %s --> %s' % (
+                                        regio_nr, repr(obj.naam), repr(regio_naam)))
                     self._count_wijzigingen += 1
                     obj.naam = regio_naam
                     if not self.dryrun:
@@ -452,7 +456,8 @@ class Command(BaseCommand):
                 self.stdout.write('[WARNING] Vereniging %s heeft geen KvK nummer' % ver_nr)
                 self._count_warnings += 1
             elif len(ver_kvk) != 8 or not ver_kvk.isdecimal():
-                self.stdout.write('[WARNING] Vereniging %s KvK nummer %s moet 8 cijfers bevatten' % (ver_nr, repr(ver_kvk)))
+                self.stdout.write('[WARNING] Vereniging %s KvK nummer %s moet 8 cijfers bevatten' % (
+                                    ver_nr, repr(ver_kvk)))
                 self._count_warnings += 1
 
             ver_website = club['website']
@@ -490,7 +495,8 @@ class Command(BaseCommand):
             else:
                 adres_spl = adres.strip().split('\n')
                 if len(adres_spl) != 2:
-                    self.stderr.write('[ERROR] Vereniging %s adres bestaat niet uit 2 regels: %s' % (ver_nr, repr(club['address'])))
+                    self.stderr.write('[ERROR] Vereniging %s adres bestaat niet uit 2 regels: %s' % (
+                                        ver_nr, repr(club['address'])))
                     self._count_errors += 1
                 if len(adres_spl) >= 2:
                     ver_adres1 = adres_spl[0]
@@ -560,76 +566,89 @@ class Command(BaseCommand):
                 if obj.regio.regio_nr != ver_regio:
                     regio_obj = self._vind_regio(ver_regio)
                     if regio_obj is None:
-                        self.stderr.write('[ERROR] Kan vereniging %s niet wijzigen naar onbekende regio %s' % (ver_nr, ver_regio))
+                        self.stderr.write('[ERROR] Kan vereniging %s niet wijzigen naar onbekende regio %s' % (
+                                            ver_nr, ver_regio))
                         self._count_errors += 1
                     else:
-                        self.stdout.write('[INFO] Wijziging van regio van vereniging %s: %s --> %s' % (ver_nr, obj.regio.regio_nr, ver_regio))
+                        self.stdout.write('[INFO] Wijziging van regio van vereniging %s: %s --> %s' % (
+                                                ver_nr, obj.regio.regio_nr, ver_regio))
                         self._count_wijzigingen += 1
                         obj.regio = regio_obj
                         updated.append('regio')
 
                 if obj.naam != ver_naam:
-                    self.stdout.write('[INFO] Wijziging van naam van vereniging %s: "%s" --> "%s"' % (ver_nr, obj.naam, ver_naam))
+                    self.stdout.write('[INFO] Wijziging van naam van vereniging %s: "%s" --> "%s"' % (
+                                        ver_nr, obj.naam, ver_naam))
                     self._count_wijzigingen += 1
                     obj.naam = ver_naam
                     updated.append('naam')
 
                 if obj.plaats != ver_plaats:
-                    self.stdout.write('[INFO] Wijziging van plaats van vereniging %s: "%s" --> "%s"' % (ver_nr, obj.plaats, ver_plaats))
+                    self.stdout.write('[INFO] Wijziging van plaats van vereniging %s: "%s" --> "%s"' % (
+                                        ver_nr, obj.plaats, ver_plaats))
                     self._count_wijzigingen += 1
                     obj.plaats = ver_plaats
                     updated.append('plaats')
 
                 if obj.geen_wedstrijden != ver_geen_wedstrijden:
-                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' van vereniging %s: %s --> %s" % (ver_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
+                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
                     self._count_wijzigingen += 1
                     obj.geen_wedstrijden = ver_geen_wedstrijden
                     updated.append('geen_wedstrijden')
 
                 if obj.kvk_nummer != ver_kvk:
-                    self.stdout.write("[INFO] Wijziging van KvK nummer van vereniging %s: %s --> %s" % (ver_nr, obj.kvk_nummer, ver_kvk))
+                    self.stdout.write("[INFO] Wijziging van KvK nummer van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.kvk_nummer, ver_kvk))
                     self._count_wijzigingen += 1
                     obj.kvk_nummer = ver_kvk
                     updated.append('kvk_nummer')
 
                 if obj.website != ver_website:
-                    self.stdout.write("[INFO] Wijziging van website van vereniging %s: %s --> %s" % (ver_nr, obj.website, ver_website))
+                    self.stdout.write("[INFO] Wijziging van website van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.website, ver_website))
                     self._count_wijzigingen += 1
                     obj.website = ver_website
                     updated.append('website')
 
                 if obj.contact_email != ver_email:
-                    self.stdout.write("[INFO] Wijziging van contact_email van vereniging %s: %s --> %s" % (ver_nr, obj.contact_email, ver_email))
+                    self.stdout.write("[INFO] Wijziging van contact_email van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.contact_email, ver_email))
                     self._count_wijzigingen += 1
                     obj.contact_email = ver_email
                     updated.append('contact_email')
 
                 if obj.telefoonnummer != ver_tel_nr:
-                    self.stdout.write("[INFO] Wijziging van telefoonnummer van vereniging %s: %s --> %s" % (ver_nr, obj.telefoonnummer, ver_tel_nr))
+                    self.stdout.write("[INFO] Wijziging van telefoonnummer van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.telefoonnummer, ver_tel_nr))
                     self._count_wijzigingen += 1
                     obj.telefoonnummer = ver_tel_nr
                     updated.append('telefoonnummer')
 
                 if obj.adres_regel1 != ver_adres1:
-                    self.stdout.write("[INFO] Wijziging van adres regel 1 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel1, ver_adres1))
+                    self.stdout.write("[INFO] Wijziging van adres regel 1 van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.adres_regel1, ver_adres1))
                     self._count_wijzigingen += 1
                     obj.adres_regel1 = ver_adres1
                     updated.append('adres_regel1')
 
                 if obj.adres_regel2 != ver_adres2:
-                    self.stdout.write("[INFO] Wijziging van adres regel 2 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel2, ver_adres2))
+                    self.stdout.write("[INFO] Wijziging van adres regel 2 van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.adres_regel2, ver_adres2))
                     self._count_wijzigingen += 1
                     obj.adres_regel2 = ver_adres2
                     updated.append('adres_regel2')
 
                 if obj.bank_iban != ver_iban:
-                    self.stdout.write("[INFO] Wijziging van IBAN van vereniging %s: %s --> %s" % (ver_nr, obj.bank_iban, ver_iban))
+                    self.stdout.write("[INFO] Wijziging van IBAN van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.bank_iban, ver_iban))
                     self._count_wijzigingen += 1
                     obj.bank_iban = ver_iban
                     updated.append('bank_iban')
 
                 if obj.bank_bic != ver_bic:
-                    self.stdout.write("[INFO] Wijziging van BIC van vereniging %s: %s --> %s" % (ver_nr, obj.bank_bic, ver_bic))
+                    self.stdout.write("[INFO] Wijziging van BIC van vereniging %s: %s --> %s" % (
+                                        ver_nr, obj.bank_bic, ver_bic))
                     self._count_wijzigingen += 1
                     obj.bank_bic = ver_bic
                     updated.append('bank_bic')
@@ -639,17 +658,17 @@ class Command(BaseCommand):
 
             if is_nieuw:
                 obj = None
-                ver = NhbVereniging()
-                ver.ver_nr = ver_nr
-                ver.naam = ver_naam
-                ver.plaats = ver_plaats
-                ver.geen_wedstrijden = ver_geen_wedstrijden
-                ver.kvk_nummer = ver_kvk
-                ver.website = ver_website
-                ver.telefoonnummer = ver_tel_nr
-                ver.contact_email = ver_email
-                ver.adres_regel1 = ver_adres1
-                ver.adres_regel2 = ver_adres2
+                ver = NhbVereniging(
+                            ver_nr=ver_nr,
+                            naam=ver_naam,
+                            plaats=ver_plaats,
+                            geen_wedstrijden=ver_geen_wedstrijden,
+                            kvk_nummer=ver_kvk,
+                            website=ver_website,
+                            telefoonnummer=ver_tel_nr,
+                            contact_email=ver_email,
+                            adres_regel1=ver_adres1,
+                            adres_regel2=ver_adres2)
                 regio_obj = self._vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1
@@ -681,9 +700,9 @@ class Command(BaseCommand):
 
                     updated = list()
 
-                    if functie.nhb_ver != obj:
-                        functie.nhb_ver = obj
-                        updated.append('nhb_ver')
+                    if functie.vereniging != obj:
+                        functie.vereniging = obj
+                        updated.append('vereniging')
 
                     if rol == 'SEC':
                         # secretaris functie krijgt email uit CRM
@@ -977,7 +996,8 @@ class Command(BaseCommand):
                                                 lid_nr, member['birthday']))
                         self._count_errors += 1
             try:
-                lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date()  # YYYY-MM-DD
+                lid_geboorte_datum = datetime.datetime.strptime(member['birthday'],
+                                                                "%Y-%m-%d").date()          # YYYY-MM-DD
             except (ValueError, TypeError):
                 lid_geboorte_datum = None
                 is_valid = False
@@ -986,7 +1006,8 @@ class Command(BaseCommand):
                     self._count_errors += 1
 
             # datum overlijden
-            lid_overleden_datum = None
+            lid_is_overleden = False
+            lid_overleden_datum = '?'
             if member['date_of_death']:
                 try:
                     lid_overleden_datum = datetime.datetime.strptime(member['date_of_death'],
@@ -997,6 +1018,8 @@ class Command(BaseCommand):
                         self.stderr.write('[ERROR] Lid %s heeft geen valide datum van overlijden: %s' % (
                                             lid_nr, repr(member['date_of_death'])))
                         self._count_errors += 1
+                else:
+                    lid_is_overleden = True
 
             lid_geslacht = member['gender']
             if lid_geslacht not in ('M', 'F', 'X'):
@@ -1083,7 +1106,6 @@ class Command(BaseCommand):
 
             # "educations": [
             #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
-            #    {"code": "031", "name": "WEDSTRIJDLEIDER INDOOR\/OUTDOOR", "date_start": "1990-01-01", "date_stop": "1990-01-01"}]
             lid_edus = list()
             try:
                 edus = member['educations']
@@ -1147,9 +1169,12 @@ class Command(BaseCommand):
                 else:
                     updated = list()
 
-                    if lid_overleden_datum:
-                        if obj.is_actief_lid:
-                            self.stdout.write('[INFO] Lid %s is overleden en wordt op inactief gezet' % lid_nr)
+                    if lid_is_overleden:
+                        if not obj.is_overleden:
+                            self.stdout.write('[INFO] Lid %s is overleden op %s en wordt op inactief gezet' % (
+                                            repr(lid_nr), lid_overleden_datum))
+                            obj.is_overleden = True
+                            updated.append('is_overleden')
                         lid_blocked = True
 
                     if not lid_blocked:
@@ -1362,6 +1387,7 @@ class Command(BaseCommand):
                 obj.bij_vereniging = lid_ver
                 obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
                 obj.adres_code = lid_adres_code
+                obj.is_overleden = lid_is_overleden
                 if not lid_ver:
                     obj.lid_tot_einde_jaar -= 1
                     obj.is_actief_lid = False
@@ -1500,7 +1526,7 @@ class Command(BaseCommand):
             lid_nr = lid_nrs.pop(0)
             obj = self._vind_sporter(lid_nr)
 
-            # behoud fictieve leden
+            # behoud fictieve leden en externe leden
             if obj.bij_vereniging and obj.bij_vereniging.ver_nr in settings.CRM_IMPORT_BEHOUD_CLUB:
                 continue
 
@@ -1523,7 +1549,7 @@ class Command(BaseCommand):
                 # lid echt verwijderen
                 #
                 # echt verwijderen van een lid is een groot risico gezien aangezien het verwijderen
-                # van gerelateerde records tot onrepareerbare schade kan lijden.
+                # van gerelateerde records tot niet herstelbare schade kan lijden.
                 #
                 # de database structuur is beveiligd tegen het verwijderen van records die nog in gebruik zijn
                 # daarnaast hebben we ook altijd nog de backups.
@@ -1572,8 +1598,8 @@ class Command(BaseCommand):
             if ver_nr in settings.CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE:
                 continue
 
-            nhb_ver = self._vind_vereniging(ver_nr)
-            if not nhb_ver:
+            ver = self._vind_vereniging(ver_nr)
+            if not ver:
                 continue
 
             # een vereniging zonder doel heeft een lege location_name
@@ -1590,8 +1616,8 @@ class Command(BaseCommand):
             if not adres:
                 # vereniging heeft geen adres meer
                 # verwijder de koppeling met wedstrijdlocatie uit crm
-                for obj in nhb_ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
-                    nhb_ver.wedstrijdlocatie_set.remove(obj)
+                for obj in ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
+                    ver.wedstrijdlocatie_set.remove(obj)
                     self.stdout.write('[INFO] Wedstrijdlocatie %s ontkoppeld voor vereniging %s' % (repr(obj.adres), ver_nr))
                     self._count_wijzigingen += 1
                 continue
@@ -1604,7 +1630,7 @@ class Command(BaseCommand):
                                     .get(adres=adres))
             except WedstrijdLocatie.MultipleObjectsReturned:            # pragma: no cover
                 # er is een ongelukje gebeurt
-                self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
+                self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % ver)
                 self._count_errors += 1
                 continue
             except WedstrijdLocatie.DoesNotExist:
@@ -1626,24 +1652,24 @@ class Command(BaseCommand):
 
             # adres van locatie mag niet wijzigen
             # dus als vereniging een ander adres heeft, ontkoppel dan de oude locatie
-            for obj in (nhb_ver
+            for obj in (ver
                         .wedstrijdlocatie_set
                         .exclude(adres_uit_crm=False)           # niet extern/buitenbaan
                         .exclude(pk=wedstrijdlocatie.pk)):
-                nhb_ver.wedstrijdlocatie_set.remove(obj)
-                self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (nhb_ver, repr(obj.adres)))
+                ver.wedstrijdlocatie_set.remove(obj)
+                self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (ver, repr(obj.adres)))
                 self._count_wijzigingen += 1
             # for
 
             if wedstrijdlocatie.verenigingen.filter(ver_nr=ver_nr).count() == 0:
                 # maak koppeling tussen vereniging en wedstrijdlocatie
-                wedstrijdlocatie.verenigingen.add(nhb_ver)
-                self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (nhb_ver, repr(adres)))
+                wedstrijdlocatie.verenigingen.add(ver)
+                self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (ver, repr(adres)))
                 self._count_toevoegingen += 1
 
             # zoek ook de buitenbaan van de vereniging erbij
             try:
-                buiten_locatie = (nhb_ver
+                buiten_locatie = (ver
                                   .wedstrijdlocatie_set
                                   .get(baan_type=BAAN_TYPE_BUITEN,
                                        zichtbaar=True))

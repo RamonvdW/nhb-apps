@@ -40,7 +40,7 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata.maak_accounts_admin_en_bb()
         cls.testdata.maak_clubs_en_sporters()
 
     def setUp(self):
@@ -73,7 +73,7 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
         self.sporter_100001 = sporter
 
         self.functie_hwl = maak_functie('HWL test', 'HWL')
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
         self.functie_hwl.accounts.add(self.account_lid)
 
@@ -136,7 +136,7 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
         competities_aanmaken(jaar=expected_year)
         # nu in fase A
 
-        comp = Competitie.objects.all()[0]
+        comp = Competitie.objects.first()
 
         now = timezone.now()
         if now.month == expected_month and now.day == expected_day:     # pragma: no cover

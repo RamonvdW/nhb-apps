@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,7 +20,7 @@ class TestNhbStructuur(TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
     def test_rayons(self):
         self.assertEqual(NhbRayon.objects.count(), 4)
@@ -35,13 +35,13 @@ class TestNhbStructuur(TestCase):
         self.assertIsNotNone(str(regio))
 
     def test_vereniging(self):
-        ver = NhbVereniging.objects.all()[0]
+        ver = NhbVereniging.objects.first()
         self.assertIsNotNone(str(ver))
         ver.clean_fields()      # run validators
         ver.clean()             # run model validator
 
     def test_cluster(self):
-        ver = self.nhbver1
+        ver = self.ver1
 
         # maak een cluster aan
         cluster = NhbCluster()

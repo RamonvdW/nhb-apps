@@ -23,9 +23,9 @@ TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
 
 
 DISCIPLINE_TO_ICON = {
-    'OD': static('plein/badge_nhb_outdoor.png'),
-    '18': static('plein/badge_nhb_indoor.png'),
-    '25': static('plein/badge_nhb_25m1p.png')
+    'OD': static('plein/badge_discipline_outdoor.png'),
+    '18': static('plein/badge_discipline_indoor.png'),
+    '25': static('plein/badge_discipline_25m1p.png')
 }
 
 
@@ -193,7 +193,7 @@ class RecordsZoekView(ListView):
                 filter_nr = 0
 
             if filter_nr and len(str(filter_nr)) == 6:
-                # zoek het NHB lid met dit nummer
+                # zoek het lid met dit nummer
                 try:
                     sporter = Sporter.objects.get(lid_nr=filter_nr)
                 except Sporter.DoesNotExist:

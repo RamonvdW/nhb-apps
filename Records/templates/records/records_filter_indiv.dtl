@@ -1,0 +1,424 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Handboogsport Records{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner" id="filters" data-url="{{ url_filters }}">Filteren</h3>
+            <p>Vind nederlandse handboogsport records van interesse</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met filters -->
+    <div class="row-sv-blauw" style="margin-bottom:0; padding-bottom:0">
+
+        <!-- filter: para classificatie -->
+        <div class="col s6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Para classificatie:</b></p>
+                <ul>
+                    {% for filter in para_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_6" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: leeftijdsklassen -->
+        <div class="col s6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Leeftijdsklasse:</b></p>
+                {% if toon_lcat %}
+                    <ul>
+                        {% for filter in lcat_filters %}
+                            <li>
+                                <label class="black-text" for="id_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="filter_3" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                    <span>{{ filter.opt_text }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    </p>
+                {% else %}
+                    <p class="grey-text">Niet van toepassing</p>
+                    <input type="hidden" name="filter_3" value="lcat_U" data-url="gecombineerd">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- filter: materiaalklasse -->
+        <div class="col l3 hide-on-med-and-down" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Boog type:</b></p>
+                <ul>
+                    {% for filter in makl_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_4" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}" onchange="mirror_radio('filter_4', 'makl2')">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: record soorten -->
+        {% if toon_soorten %}
+            <div class="col s6 l3 hide-on-med-and-down" style="margin-bottom:15px">
+                <div class="white left-align" style="padding:10px">
+                    <p><b>Soort record:</b></p>
+                    <ul>
+                        {% for filter in soorten %}
+                            <li>
+                                <label class="black-text" for="id_soort1_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="filter_7" value="{{ filter.sel }}" required id="id_soort1_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}" onchange="mirror_radio('filter_7', 'soort2')">
+                                    <span>{{ filter.soort_record }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            <input type="hidden" name="filter_7" value="0" data-url="0">
+        {% endif %}
+
+    </div>
+
+    <div class="row-sv-blauw hide-on-large-and-up" style="margin-bottom:0; padding-bottom:0; padding-top:15px">
+
+        <!-- filter: materiaalklasse -->
+        <div class="col s6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Boog type:</b></p>
+                <ul>
+                    {% for filter in makl_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}_2">
+                                <input class="with-gap" type="radio" name="makl2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}_2" {% if filter.selected %}checked{% endif %} onchange="mirror_radio('makl2', 'filter_4')">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: record soorten -->
+        {% if toon_soorten %}
+            <div class="col s6 l3" style="margin-bottom:15px">
+                <div class="white left-align" style="padding:10px">
+                    <p><b>Soort record:</b></p>
+                    <ul>
+                        {% for filter in soorten %}
+                            <li>
+                                <label class="black-text" for="id_soort2_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="soort2" value="{{ filter.sel }}" required id="id_soort2_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} onchange="mirror_radio('soort2', 'filter_7')">
+                                    <span>{{ filter.opt_text }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row-sv-blauw" style="padding-top:15px">
+
+        <!-- filter: geslacht -->
+        <div class="col s6 l3">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Geslacht:</b></p>
+                <ul>
+                    {% for filter in gesl_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: discipline -->
+        <div class="col s6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Discipline:</b></p>
+                <ul>
+                    {% for filter in disc_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: verbeterbaar -->
+        <div class="col s6 l3">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Verbeterbaar:</b></p>
+                {% if toon_verb %}
+                    <ul>
+                        {% for filter in verb_filters %}
+                            <li>
+                                <label class="black-text" for="id_{{ filter.sel }}">
+                                    <input class="with-gap" type="radio" name="filter_5" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                    <span>{{ filter.opt_text }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    </p>
+                {% else %}
+                    <p class="grey-text">Niet van toepassing</p>
+                    <input type="hidden" name="filter_5" value="verb_ja" data-url="ja">
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+
+    {% if obj_record %}
+
+        <!-- toon het gefilterde record -->
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Record</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie label : info -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <table class="white">
+                    <tr>
+                        <th>Toegekend</th>
+                        <td>
+                            {%  if obj_record.is_european_record and obj_record.is_world_record %}
+                                <span>Nederlands, Europees en Wereld</span>
+                            {% elif obj_record.is_world_record %}
+                                <span>Nederlands en Wereld</span>
+                            {% elif obj_record.is_european_record %}
+                                <span>Nederlands en Europees</span>
+                            {% else %}
+                                <span>Nederlands</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Discipline</th>
+                        <td>{{ obj_record.disc_str }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Soort record</th>
+                        <td>{{ obj_record.soort_record }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Geslacht</th>
+                        <td>{{ obj_record.gesl_str }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Leeftijdscategorie</th>
+                        <td>{{ obj_record.lcat_str }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Materiaalklasse</th>
+                        <td>{{ obj_record.makl_str }}</td>
+                    </tr>
+
+                    {% if obj_record.para_klasse %}
+                        <tr>
+                            <th>Para klasse</th>
+                            <td>{{ obj_record.para_klasse }}</td>
+                        </tr>
+                    {% endif %}
+
+                    {% if not obj_record.verbeterbaar %}
+                        <tr>
+                            <th>Verbeterbaar</th>
+                            <td>Nee</td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>Score</th>
+                        <td>{{ obj_record.score_str }}</td>
+                    </tr>
+
+                    {% if obj_record.score_notitie %}
+                        <tr>
+                            <th>Score notitie</th>
+                            <td>{{ obj_record.score_notitie }}</td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>Maximale score</th>
+                        <td>{{ obj_record.max_score_str }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Naam</th>
+                        <td><b>{{ obj_record.naam }}</b></td>
+                    </tr>
+
+                    <tr>
+                        <th>Plaats</th>
+                        <td>
+                            {% if obj_record.plaats %}
+                                <span>{{ obj_record.plaats }}</span>
+                            {% else %}
+                                <span>Onbekend</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% if obj_record.land %}
+                        <tr>
+                            <th>Land</th>
+                            <td>{{ obj_record.land }}</td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>Datum</th>
+                        <td>
+                            {% if obj_record.datum.year >= 1950 %}
+                                <span>{{ obj_record.datum }}</span>
+                            {% else %}
+                                <span>Onbekend</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Nummer</th>
+                        <td>
+                            <a class="btn-sv-rood" href="{{ obj_record.url_specifiek }}">{{ obj_record.discipline }}-{{ obj_record.volg_nr }}</a>
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+
+        <!-- toon de lijst met records -->
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Gevonden records</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie label : info -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Score</th>
+                            <th>Naam</th>
+                            <th>Datum</th>
+                            <th><!-- knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in object_list %}
+                        <tr>
+                            <td>{{ obj.score_str }}</td>
+                            <td>{{ obj.naam }}</td>
+                            <td>
+                                {% if obj.datum.year >= 1950 %}
+                                    <span>{{ obj.datum }}</span>
+                                {% else %}
+                                    <span>Onbekend</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if obj.is_specifieke_record %}
+                                    <i>Wordt getoond</i>
+                                {% else %}
+                                    <a class="btn-sv-rood" href="{{ obj.url }}">
+                                        <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Toon">
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% else %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Record</h4>
+                <p class="sv-rood-text">Geen records gevonden voor deze filter combinatie.</p>
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-filter-indiv" %}
+
+{% endblock %}

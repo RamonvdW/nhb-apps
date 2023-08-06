@@ -5,23 +5,26 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.views.generic import ListView
+from django.http import Http404
+from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
-from Records.definities import disc2str, disc2url, url2disc, gesl2str, makl2str, lcat2str
+from Records.definities import (disc2str, disc2url, url2disc,
+                                gesl2str, gesl2url, url2gesl,
+                                makl2str, makl2url, url2makl,
+                                lcat2str, lcat2url, url2lcat)
 from Records.models import IndivRecord, BesteIndivRecords
 from types import SimpleNamespace
 
 
 TEMPLATE_RECORDS_VERBETERBAAR_KIES_DISC = 'records/verbeterbaar_kies_disc.dtl'
-TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE = 'records/verbeterbaar_discipline.dtl'
+TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE = 'records/verbeterbaar.dtl'
 
 
 DISCIPLINE_TO_ICON = {
-    'OD': static('plein/badge_nhb_outdoor.png'),
-    '18': static('plein/badge_nhb_indoor.png'),
-    '25': static('plein/badge_nhb_25m1p.png')
+    'OD': static('plein/badge_discipline_outdoor.png'),
+    '18': static('plein/badge_discipline_indoor.png'),
+    '25': static('plein/badge_discipline_25m1p.png')
 }
 
 
@@ -46,7 +49,10 @@ class RecordsVerbeterbaarKiesDisc(ListView):
             obj.tekst = "Toon alle verbeterbare records van de discipline %s." % obj.titel
 
             url_disc = disc2url[obj.discipline]
-            obj.url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
+            obj.url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc,
+                                                                         'makl': 'alle',
+                                                                         'lcat': 'alle',
+                                                                         'gesl': 'alle'})
         # for
 
         return objs
@@ -64,168 +70,160 @@ class RecordsVerbeterbaarKiesDisc(ListView):
         return context
 
 
-class RecordsVerbeterbaarInDiscipline(ListView):
+class RecordsVerbeterbaarInDiscipline(TemplateView):
 
     """ Deze view laat de gebruiker de lijst van verbeterbare NL records zien binnen een discipline """
 
     # class variables shared by all instances
     template_name = TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE
 
-    boogtype2filter = {'alles': '', 'recurve': 'R', 'compound': 'C', 'barebow': 'BB', 'longbow': 'LB', 'traditional': 'TR'}
-    geslacht2filter = {'alles': '', 'man': 'M', 'vrouw': 'V'}
-    leeftijd2filter = {'alles': '', 'para': 'U', 'master': 'M', 'senior': 'S', 'junior': 'J', 'cadet': 'C'}
+    @staticmethod
+    def _maak_filter_makl(context, url_makl):
+        gekozen_makl = ''
+        if url_makl != 'alle':
+            try:
+                gekozen_makl = url2makl[url_makl]
+            except KeyError:
+                raise Http404('Slechte parameter')
 
-    def dispatch(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen voor get_queryset
-            hier is het mogelijk om een redirect te doen.
-        """
-        url_disc = self.kwargs['disc']
-        try:
-            _ = url2disc[url_disc]      # check dat deze aanwezig is
-            _ = self.boogtype2filter[request.GET.get('boog', 'alles')]
-            _ = self.geslacht2filter[request.GET.get('geslacht', 'alles')]
-            _ = self.leeftijd2filter[request.GET.get('leeftijdsklasse', 'alles')]
-        except KeyError:
-            return HttpResponseRedirect(reverse('Records:indiv-verbeterbaar'))
+        context['makl_filter'] = list()
+        obj = SimpleNamespace(
+                    opt_text='Alle',
+                    sel='makl_alle',
+                    selected=(gekozen_makl == ''),
+                    url_part='alle')
+        context['makl_filter'].append(obj)
 
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        url_disc = self.kwargs['disc']
-        discipline = url2disc[url_disc]
-
-        filter_boogtype = self.boogtype2filter[self.request.GET.get('boog', 'alles')]
-        filter_geslacht = self.geslacht2filter[self.request.GET.get('geslacht', 'alles')]
-        filter_leeftijd = self.leeftijd2filter[self.request.GET.get('leeftijdsklasse', 'alles')]
-
-        objs = (BesteIndivRecords
-                .objects
-                .filter(discipline=discipline)
-                .exclude(beste=None)
-                .select_related('beste')
-                .order_by('volgorde'))
-
-        if filter_geslacht:
-            objs = objs.filter(geslacht=filter_geslacht)
-
-        if filter_boogtype:
-            objs = objs.filter(materiaalklasse=filter_boogtype)
-
-        if filter_leeftijd:
-            objs = objs.filter(leeftijdscategorie=filter_leeftijd)
-
-        for obj in objs:
-            obj.geslacht_str = gesl2str[obj.geslacht]
-            obj.materiaalklasse_str = makl2str[obj.materiaalklasse]
-            obj.leeftijdscategorie_str = lcat2str[obj.leeftijdscategorie]
-
-            obj.url_details = reverse('Records:specifiek', kwargs={'discipline': obj.discipline,
-                                                                   'nummer': obj.beste.volg_nr})
+        for makl_key, makl_value in makl2str.items():
+            obj = SimpleNamespace(
+                        opt_text=makl_value,
+                        sel="makl_"+makl_key,
+                        selected=(gekozen_makl == makl_key),
+                        url_part=makl2url[makl_key])
+            context['makl_filter'].append(obj)
         # for
 
-        return objs
+        return gekozen_makl
 
     @staticmethod
-    def maak_url(base_url, extra, param_type, param):
-        extra = extra[:]
-        if param != 'alles':
-            extra.append('%s=%s' % (param_type, param))
-        if len(extra):
-            extra.sort()
-            return base_url + '?' + '&'.join(extra)
-        return base_url
+    def _maak_filter_lcat(context, url_lcat, discipline):
+        gekozen_lcat = ''
+        if url_lcat != 'alle':
+            try:
+                gekozen_lcat = url2lcat[url_lcat]
+            except KeyError:
+                raise Http404('Slechte parameter')
+
+        context['lcat_filter'] = list()
+        obj = SimpleNamespace(
+                    opt_text='Alle',
+                    sel='lcat_alle',
+                    selected=(gekozen_lcat == ''),
+                    url_part='alle')
+        context['lcat_filter'].append(obj)
+
+        for lcat_key, lcat_value in lcat2str.items():
+
+            # de 'gecombineerd (para)' optie alleen tonen voor outdoor
+            if lcat_key == 'U' and discipline != 'OD':
+                continue
+
+            obj = SimpleNamespace(
+                        opt_text=lcat_value,
+                        sel='lcat_'+lcat_key,
+                        selected=(gekozen_lcat == lcat_key),
+                        url_part=lcat2url[lcat_key])
+            context['lcat_filter'].append(obj)
+        # for
+
+        return gekozen_lcat
+
+    @staticmethod
+    def _maak_filter_gesl(context, url_gesl):
+        gekozen_gesl = ''
+        if url_gesl != 'alle':
+            try:
+                gekozen_gesl = url2gesl[url_gesl]
+            except KeyError:
+                raise Http404('Slechte parameter')
+
+        context['gesl_filter'] = list()
+        obj = SimpleNamespace(
+                    opt_text='Alle',
+                    sel='gesl_alle',
+                    selected=(gekozen_gesl == ''),
+                    url_part='alle')
+        context['gesl_filter'].append(obj)
+
+        for gesl_key, gesl_value in gesl2str.items():
+            obj = SimpleNamespace(
+                    opt_text=gesl_value,
+                    sel='gesl_' + gesl_key,
+                    selected=(gekozen_gesl == gesl_key),
+                    url_part=gesl2url[gesl_key])
+            context['gesl_filter'].append(obj)
+        # for
+
+        return gekozen_gesl
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
         url_disc = self.kwargs['disc']
-        discipline = url2disc[url_disc]
-        context['beschrijving'] = disc2str[discipline]
+        try:
+            discipline = url2disc[url_disc]
+        except KeyError:
+            raise Http404('Slechte parameter')
 
-        boogtype = self.request.GET.get('boog', 'alles')
-        geslacht = self.request.GET.get('geslacht', 'alles')
-        leeftijd = self.request.GET.get('leeftijdsklasse', 'alles')
+        context['beschrijving'] = disc2str[discipline]      # komt boven in de pagina
 
-        base_url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
+        gekozen_makl = self._maak_filter_makl(context, self.kwargs['makl'])
+        gekozen_lcat = self._maak_filter_lcat(context, self.kwargs['lcat'], discipline)
+        gekozen_gesl = self._maak_filter_gesl(context, self.kwargs['gesl'])
 
-        extra = list()
-        if boogtype != 'alles':
-            extra.append('boog=' + boogtype)
-        if leeftijd != 'alles':
-            extra.append('leeftijdsklasse=' + leeftijd)
+        context['url_filters'] = reverse('Records:indiv-verbeterbaar-disc',
+                                         kwargs={'disc': url_disc,
+                                                 'makl': '~1',
+                                                 'lcat': '~2',
+                                                 'gesl': '~3'})
 
-        context['geslacht'] = list()
-        for geslacht_key, geslacht_filter in self.geslacht2filter.items():
-            obj = SimpleNamespace()
-            obj.sel = 'geslacht_' + geslacht_filter
-            try:
-                obj.beschrijving = gesl2str[geslacht_filter]
-            except KeyError:
-                obj.beschrijving = 'Alle'
-            if geslacht == geslacht_key:
-                obj.selected = True
-            obj.url = self.maak_url(base_url, extra, 'geslacht', geslacht_key)
-            context['geslacht'].append(obj)
-        # for
-
-        extra = list()
-        if geslacht != 'alles':
-            extra.append('geslacht=' + geslacht)
-        if leeftijd != 'alles':
-            extra.append('leeftijdsklasse=' + leeftijd)
-
-        context['bogen'] = list()
-        for boogtype_key, boogtype_filter in self.boogtype2filter.items():
-            obj = SimpleNamespace()
-            obj.sel = "boog_" + boogtype_filter
-            try:
-                obj.beschrijving = makl2str[boogtype_filter]
-            except KeyError:
-                obj.beschrijving = 'Alle'
-            if boogtype == boogtype_key:
-                obj.selected = True
-            obj.url = self.maak_url(base_url, extra, 'boog', boogtype_key)
-            context['bogen'].append(obj)
-        # for
-
-        extra = list()
-        if boogtype != 'alles':
-            extra.append('boog=' + boogtype)
-        if geslacht != 'alles':
-            extra.append('geslacht=' + geslacht)
-
-        context['leeftijd'] = list()
-        for leeftijd_key, leeftijd_filter in self.leeftijd2filter.items():
-
-            # skip de 'para' knop tenzij het voor Outdoor is
-            if leeftijd_key == 'para' and discipline != 'OD':
-                continue
-
-            obj = SimpleNamespace()
-            obj.sel = 'lcat_' + leeftijd_filter
-            try:
-                obj.beschrijving = lcat2str[leeftijd_filter]
-            except KeyError:
-                obj.beschrijving = 'Alle'
-            if leeftijd == leeftijd_key:
-                obj.selected = True
-            obj.url = self.maak_url(base_url, extra, 'leeftijdsklasse', leeftijd_key)
-            context['leeftijd'].append(obj)
-        # for
-
-        context['is_alles'] = (boogtype == geslacht == leeftijd)
-
+        context['is_alles'] = (gekozen_makl == gekozen_gesl == gekozen_lcat)
         context['toon_para_kolom'] = False
-        for obj in context['object_list']:
+
+        qset = (BesteIndivRecords
+                .objects
+                .filter(discipline=discipline)
+                .exclude(beste=None)
+                .select_related('beste')
+                .order_by('volgorde'))
+
+        if gekozen_makl:
+            qset = qset.filter(materiaalklasse=gekozen_makl)
+
+        if gekozen_lcat:
+            qset = qset.filter(leeftijdscategorie=gekozen_lcat)
+
+        if gekozen_gesl:
+            qset = qset.filter(geslacht=gekozen_gesl)
+
+        context['object_list'] = qset
+
+        for obj in qset:
+            obj.geslacht_str = gesl2str[obj.geslacht]
+            obj.materiaalklasse_str = makl2str[obj.materiaalklasse]
+            obj.leeftijdscategorie_str = lcat2str[obj.leeftijdscategorie]
+
+            obj.url_details = reverse('Records:specifiek', kwargs={'discipline': obj.discipline,
+                                                                   'nummer': obj.beste.volg_nr})
+
             if obj.para_klasse:
                 context['toon_para_kolom'] = True
-                break
         # for
 
-        context['aantal_regels'] = len(context['object_list']) + 2
+        aantal_gekozen = len(qset)
+        context['lege_lijst'] = (aantal_gekozen == 0)
+        context['aantal_regels'] = aantal_gekozen + 2
 
         context['kruimels'] = (
             (reverse('Records:overzicht'), 'Records'),

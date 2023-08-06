@@ -10,6 +10,45 @@
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function stuur_keuzes(url) {
+            // construeer een url en navigeer daar naartoe
+
+            let el_zoek = document.getElementById('id_zoekterm')
+            // console.log('el_zoek:', el_zoek)
+            const zoekterm = el_zoek.value
+
+            // vervang de ~1 in de url met het soort filter
+            let el_soort = document.querySelector("input[name='filter_soort']:checked");
+            // console.log('el_soort:', el_soort)
+            url = url.replace('~1', el_soort.dataset.url);
+
+            // vervang de ~2 in de url met het bogen filter
+            let el_bogen = document.querySelector("input[name='filter_bogen']:checked");
+            // console.log('el_bogen:', el_bogen)
+            url = url.replace('~2', el_bogen.dataset.url);
+
+            // voeg de zoekterm toe als query parameter
+            if (zoekterm !== "") {
+                url = url + '?zoek=' + zoekterm
+            }
+
+            // navigate to the final url
+            window.location.href = url;
+        }
+
+        // enter toets in de zoekterm invoer moet keuzes insturen
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('id_zoekterm').addEventListener("keyup", event => {
+                // console.log(event);
+                if (event.code === 'Enter') {
+                    stuur_keuzes('{{ url_keuzes }}');
+                }
+            })
+        });
+    </script>
+
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -17,32 +56,105 @@
             {% if not kan_aanmelden %}
                 <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
             {% endif %}
+
+            {% if url_toon_alles %}
+                <p>
+                    <a class="btn-sv-rood" href="{{ url_toon_alles }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
+                </p>
+            {% endif %}
+
         </div>
     </div>
 
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-sv-blauw">
 
-    <!-- TODO: filters -->
+        <!-- zoek tekst -->
+        <div class="col s12 m12 l6" style="margin-bottom:15px">
+            <div class="white z-depth-3 left-align" style="padding:10px">
 
+                <p><b>Zoek naar:</b></p>
+                <div class="input-text">
+                    <label>
+                        <input type="text" id="id_zoekterm" value="{{ zoekterm }}" placeholder="beschrijving">
+                    </label>
+                </div>
+
+                <p class="center">
+                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">
+                        <i class="notranslate material-icons-round left">search</i>Zoek</button>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: bogen -->
+        <div class="col s12 m6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Bogen:</b></p>
+                <ul>
+                    {% for filter in bogen_filter %}
+                    <li>
+                        <label class="{% if filter.disabled %}grey-text{% else %}black-text{% endif %}" for="id_{{ filter.sel }}">
+                            <input class="with-gap" type="radio" name="filter_bogen" id="id_{{ filter.sel }}" data-url="{{ filter.url_part }}"{% if filter.selected %} checked{% endif %}{% if filter.disabled %} disabled{% endif %}>
+                            <span>{{ filter.opt_text }}</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">Activeer</button>
+                </p>
+            </div>
+        </div>
+
+        <!-- filter: soort wedstrijd -->
+        <div class="col s12 m6 l3">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Soort wedstrijd:</b></p>
+                <ul>
+                    {% for filter in soort_filter %}
+                        <li>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_soort" value="{{ filter.sel }}" id="id_{{ filter.sel }}"{% if filter.selected %} checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_keuzes }}')">Activeer</button>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- maand titel met knoppen prev/next -->
     <table class="white">
-        <tr style="visibility:collapse">
-            <td><i class="notranslate material-icons-round">chevron_left</i></td>
-            <td><h5>september 2021</h5></td>
-            <td><i class="notranslate material-icons-round">chevron_right</i></td>
-        </tr>
-        <tr>
-            <td class="right-align"><a class="btn-nhb-rood" href="{{ url_prev_maand }}">
-                <i class="notranslate material-icons-round">chevron_left</i></a></td>
-            <td class="center"><h5>{{ datum|date:'F Y' }}</h5></td>
-            <td class="left-align"><a class="btn-nhb-rood" href="{{ url_next_maand }}">
-                <i class="notranslate material-icons-round">chevron_right</i></a></td>
+        <tr style="border-bottom:none">
+            <!-- knop -->
+            <td class="right-align">
+                <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_prev }}')">
+                    <i class="notranslate material-icons-round">chevron_left</i></button>
+            </td>
+
+            <td class="center" style="width:60%">       <!-- 60% voorkomt springen van de knoppen -->
+                <h5>{{ datum|date:'F Y' }}</h5>
+            </td>
+
+            <!-- knop -->
+            <td class="left-align">
+                <button class="btn-sv-rood" onclick="stuur_keuzes('{{ url_next }}')">
+                    <i class="notranslate material-icons-round">chevron_right</i></button>
+            </td>
         </tr>
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
     </table>
 
-    <br>
+    <p class="center">{{ aantal_wedstrijden }} wedstrijden gevonden</p>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -55,14 +167,16 @@
                     </tr>
                 </thead>
 
+                {% comment %}
                 <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
-                <tr style="visibility:collapse">
+                <tr class="sv-table-hide-row">
                     <td>88 september 8888</td>
                     <td>Dit is de titel van een best wel lange wedstrijd</td>
                     <td class="hide-on-med-and-down">Brede plaatnaam ergens</td>
                     <td class="hide-on-small-only">88 september 8888</td>
-                    <td class="center"><a class="btn-nhb-rood" href="#">Details</a></td>
+                    <td class="center"><a class="btn-sv-rood" href="#">Details</a></td>
                 </tr>
+                {% endcomment %}
 
                 {% for wed in wedstrijden %}
                     <tr>
@@ -74,16 +188,16 @@
                                 <span>{{ wed.inschrijven_voor }}</span>
                                 {% if wed.kan_inschrijven %}
                                     {% if wed.inschrijven_let_op %}
-                                        <br><span class="nhb-rood-text">(nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                                        <br><span class="sv-rood-text">(nog maar {{ wed.inschrijven_dagen }} dagen)</span>
                                     {% endif %}
                                 {% else %}
-                                    <br><span class="nhb-blauw-text">(gesloten)</span>
+                                    <br><span class="sv-blauw-text">(gesloten)</span>
                                 {% endif %}
                             {% endif %}
                         </td>
                         <td class="center">
                             {% if wed.url_details %}
-                                <a class="{% if wed.kan_inschrijven %}btn-nhb-rood{% else %}btn-nhb-blauw{% endif %}" href="{{ wed.url_details }}">
+                                <a class="{% if wed.kan_inschrijven %}btn-sv-rood{% else %}btn-sv-blauw{% endif %}" href="{{ wed.url_details }}">
                                     <!--<i class="notranslate material-icons-round">play_arrow</i>-->Details</a>
                             {% endif %}
                         </td>
@@ -100,6 +214,16 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-maand" %}
+
+    <!-- naar jaaroverzicht -->
+    <div class="row center">
+        <div class="col s12">
+            <div class="center">
+                <a class="btn-sv-rood" href="{{ url_toon_jaar }}">Toon jaaroverzicht</a>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-maand" %}
 
 {% endblock %}

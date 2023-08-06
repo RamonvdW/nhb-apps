@@ -192,7 +192,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL:
-            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
                 raise Http404('Wedstrijd is niet bij jullie vereniging')
 
         lid_nr2geslacht = dict()     # [lid_nr] = wedstrijd geslacht (M/V/X)
@@ -220,7 +220,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         response = HttpResponse(content_type=CONTENT_TYPE_TSV)
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.txt"'
 
-        # Ianseo supports a tab-separate file with specific column order, without headers
+        # Ianseo supports a tab-separated file with specific column order, without headers
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter="\t")       # tab separated fields
 
@@ -301,7 +301,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL:
-            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.vereniging.ver_nr:
                 raise Http404('Wedstrijd is niet bij jullie vereniging')
 
         lid_nr2voorkeuren = dict()   # [lid_nr] = SporterVoorkeuren
@@ -449,8 +449,7 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             # alleen van de eigen vereniging laten zien
-            ver = self.functie_nu.nhb_ver
-            if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+            if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.vereniging:
                 raise Http404('Verkeerde vereniging')
 
         if self.rol_nu == Rollen.ROL_SPORTER:
@@ -544,7 +543,7 @@ class AfmeldenView(UserPassesTestMixin, View):
 
         if self.rol_nu != Rollen.ROL_BB:
             # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
-            ver = self.functie_nu.nhb_ver
+            ver = self.functie_nu.vereniging
             if inschrijving.wedstrijd.organiserende_vereniging != ver:
                 raise Http404('Verkeerde vereniging')
 
@@ -552,7 +551,7 @@ class AfmeldenView(UserPassesTestMixin, View):
 
         if inschrijving.status == INSCHRIJVING_STATUS_RESERVERING_MANDJE:
             if inschrijving.bestelproduct_set.count() > 0:
-                product = inschrijving.bestelproduct_set.all()[0]
+                product = inschrijving.bestelproduct_set.first()
                 bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')

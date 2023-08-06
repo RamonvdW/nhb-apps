@@ -8,13 +8,12 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.otp import account_otp_is_gekoppeld
-from Account.rechten import account_rechten_is_otp_verified
+from Account.operations.otp import otp_is_controle_gelukt
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
 from Functie.rol import (rol_mag_wisselen, rol_enum_pallet, rol_get_huidige, rol_get_huidige_functie,
-                         rol_get_beschrijving, rol_evalueer_opnieuw)
+                         rol_get_beschrijving, rol_bepaal_beschikbare_rollen_opnieuw)
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
@@ -49,7 +48,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             return False
 
         # evalueer opnieuw welke rechten de gebruiker heeft
-        rol_evalueer_opnieuw(self.request)
+        rol_bepaal_beschikbare_rollen_opnieuw(self.request)
 
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
@@ -86,15 +85,15 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         elif functie.rol == "BKO":
             volgorde = 10  # 10
         elif functie.rol == "RKO":
-            volgorde = 20 + functie.nhb_rayon.rayon_nr  # 21-24
+            volgorde = 20 + functie.rayon.rayon_nr  # 21-24
         elif functie.rol == "RCL":
-            volgorde = functie.nhb_regio.regio_nr       # 101-116
+            volgorde = functie.regio.regio_nr       # 101-116
         elif functie.rol == "SEC":
-            volgorde = functie.nhb_ver.ver_nr           # 1000-9999
+            volgorde = functie.vereniging.ver_nr           # 1000-9999
         elif functie.rol == "HWL":
-            volgorde = functie.nhb_ver.ver_nr + 10000   # 11000-19999
+            volgorde = functie.vereniging.ver_nr + 10000   # 11000-19999
         elif functie.rol == "WL":
-            volgorde = functie.nhb_ver.ver_nr + 20000   # 21000-29999
+            volgorde = functie.vereniging.ver_nr + 20000   # 21000-29999
         elif functie.rol == "SUP":
             volgorde = 50000
         else:             # pragma: no cover
@@ -128,15 +127,9 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 tup = (volgorde, obj.pk, obj)
                 objs.append(tup)
 
-            elif rol == Rollen.ROL_NONE:
+            elif rol == Rollen.ROL_NONE:        # pragma: no cover
                 # wisselen naar "geen rol" kan alleen door uit te loggen
                 pass
-                # obj = Functie(beschrijving='Gebruiker')
-                # obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                # obj.selected = (self.rol_nu == rol)
-                # obj.pk = volgorde = 90001
-                # tup = (volgorde, obj.pk, obj)
-                # objs.append(tup)
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
@@ -152,22 +145,22 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         for obj in (Functie
                     .objects
                     .filter(pk__in=pks)
-                    .select_related('nhb_ver',
-                                    'nhb_regio',
-                                    'nhb_rayon')
+                    .select_related('vereniging',
+                                    'regio',
+                                    'rayon')
                     .only('beschrijving',
                           'rol',
-                          'nhb_ver__ver_nr',
-                          'nhb_ver__naam',
-                          'nhb_ver__plaats',
-                          'nhb_rayon__rayon_nr',
-                          'nhb_regio__regio_nr')):
+                          'vereniging__ver_nr',
+                          'vereniging__naam',
+                          'vereniging__plaats',
+                          'rayon__rayon_nr',
+                          'regio__regio_nr')):
 
             obj.ver_naam = ''
-            if obj.nhb_ver and obj.rol != 'MWW':
-                if obj.nhb_ver.plaats == '':
-                    obj.nhb_ver.plaats = 'onbekend'
-                obj.ver_naam = '%s (%s)' % (obj.nhb_ver.naam, obj.nhb_ver.plaats)
+            if obj.vereniging and obj.rol != 'MWW':
+                if obj.vereniging.plaats == '':
+                    obj.vereniging.plaats = 'onbekend'
+                obj.ver_naam = '%s (%s)' % (obj.vereniging.naam, obj.vereniging.plaats)
 
             if self.functie_nu:
                 obj.selected = (obj.pk == self.functie_nu.pk)
@@ -207,40 +200,41 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             for obj in (Functie
                         .objects
                         .filter(pk__in=pks)
-                        .select_related('nhb_ver',
-                                        'nhb_regio',
-                                        'nhb_rayon')
+                        .select_related('vereniging',
+                                        'regio',
+                                        'rayon')
                         .only('beschrijving',
                               'rol',
-                              'nhb_ver__ver_nr',
-                              'nhb_ver__naam',
-                              'nhb_ver__plaats',
-                              'nhb_rayon__rayon_nr',
-                              'nhb_regio__regio_nr')):
+                              'vereniging__ver_nr',
+                              'vereniging__naam',
+                              'vereniging__plaats',
+                              'rayon__rayon_nr',
+                              'regio__regio_nr')):
                 pk2func[obj.pk] = obj
             # for
 
-            if self.functie_nu and self.functie_nu.nhb_ver:
-                selected_hwl = self.functie_nu.nhb_ver.ver_nr
+            if self.functie_nu and self.functie_nu.vereniging:
+                selected_hwl = self.functie_nu.vereniging.ver_nr
             else:
                 selected_hwl = -1
 
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
+
                 if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
                     # voeg de beschrijving van de vereniging toe
                     functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
 
                     if rol == Rollen.ROL_SEC:               # pragma: no cover
-                        # nergens in de hierarchie kan je vandaag wisselen naar de HWL rol
+                        # nergens in de hiërarchie kan je vandaag wisselen naar de HWL rol
                         kort = 'SEC'
                     elif rol == Rollen.ROL_HWL:
                         kort = 'HWL'
                     else:
                         kort = 'WL'
 
-                    ver = functie.nhb_ver
+                    ver = functie.vereniging
                     kort += ' %s' % ver.ver_nr
 
                     if ver.plaats == '':
@@ -264,15 +258,15 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 if rol == Rollen.ROL_HWL:
                     func = pk2func[functie_pk]
 
-                    ver = functie.nhb_ver
-                    if ver.plaats == '':
-                        ver.plaats = 'onbekend'
+                    ver = functie.vereniging
+                    # if ver.plaats == '':
+                    #     ver.plaats = 'onbekend'       # is hierboven al gedaan
 
                     func.beschrijving = 'HWL %s %s (%s)' % (ver.ver_nr, ver.naam, ver.plaats)
-                    func.selected = (functie.nhb_ver.ver_nr == selected_hwl)
+                    func.selected = (functie.vereniging.ver_nr == selected_hwl)
                     func.url = url
 
-                    tup = (functie.nhb_ver.ver_nr, func)
+                    tup = (functie.vereniging.ver_nr, func)
                     hwls.append(tup)
             # for
 
@@ -292,8 +286,8 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         for obj in (Functie
                     .objects
                     .filter(rol__in=('BKO', 'RKO', 'RCL'))
-                    .select_related('nhb_rayon',
-                                    'nhb_regio')
+                    .select_related('rayon',
+                                    'regio')
                     .all()):
 
             if obj.comp_type == '25':
@@ -309,13 +303,13 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 obj.tekst_kort = obj.tekst_lang = 'BKO'
                 obj.ruimte = True
             elif obj.rol == 'RKO':
-                obj.tekst_kort = "RKO%s" % obj.nhb_rayon.rayon_nr
-                obj.tekst_lang = "RKO rayon %s" % obj.nhb_rayon.rayon_nr
-                if obj.nhb_rayon.rayon_nr == 4:
+                obj.tekst_kort = "RKO%s" % obj.rayon.rayon_nr
+                obj.tekst_lang = "RKO rayon %s" % obj.rayon.rayon_nr
+                if obj.rayon.rayon_nr == 4:
                     obj.do_break = True
             else:
-                obj.tekst_kort = "RCL%s" % obj.nhb_regio.regio_nr
-                obj.tekst_lang = "RCL regio %s" % obj.nhb_regio.regio_nr
+                obj.tekst_kort = "RCL%s" % obj.regio.regio_nr
+                obj.tekst_lang = "RCL regio %s" % obj.regio.regio_nr
         # for
 
         alle_18.sort(key=lambda x: x.volgorde)
@@ -337,11 +331,11 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             context['url_admin_site'] = reverse('admin:index')
             context['url_login_as'] = reverse('Account:account-wissel')
 
-        if not account_otp_is_gekoppeld(self.account):
+        if not self.account.otp_is_actief:
             context['show_otp_koppelen'] = True
         else:
             # tweede factor is al gekoppeld, maar misschien nog niet gecontroleerd
-            context['show_otp_controle'] = not account_rechten_is_otp_verified(self.request)
+            context['show_otp_controle'] = not otp_is_controle_gelukt(self.request)
 
         # zoek de rollen (eigen + helpen)
         context['eigen_rollen'], hierarchy = self._get_functies_eigen()
@@ -396,7 +390,7 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
         vers = (NhbVereniging
                 .objects
                 .select_related('regio', 'regio__rayon')
-                .exclude(regio__regio_nr=100)
+                # .exclude(regio__regio_nr=100)
                 .prefetch_related('functie_set')
                 .order_by('regio__regio_nr', 'ver_nr'))
         for ver in vers:

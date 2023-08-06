@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 class TestTakenCLI(E2EHelpers, TestCase):
     """ unittests voor de applicatie Taken, management command maak_taak """
 
-    emailadres = 'mwz@nhb.not'
+    emailadres = 'mwz@test.not'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -22,7 +22,7 @@ class TestTakenCLI(E2EHelpers, TestCase):
     def test_alles(self):
         self.assertEqual(0, Taak.objects.count())
 
-        account = self.e2e_create_account('normal', 'normal@nhb.not', 'Normaal')
+        account = self.e2e_create_account('normal', 'normal@test.not', 'Normaal')
         functie = Functie.objects.get(rol='MWZ')
 
         f1, f2 = self.run_management_command('maak_taak', 'BlaBla', '', '2020-02-03', 'Hallo')
@@ -41,7 +41,7 @@ class TestTakenCLI(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Geen e-mailadres bekend voor functie Manager Wedstrijdzaken" in f2.getvalue())
 
         self.assertEqual(1, Taak.objects.count())
-        taak = Taak.objects.all()[0]
+        taak = Taak.objects.first()
         self.assertEqual(str(taak.deadline), '2020-02-03')
         self.assertEqual(taak.toegekend_aan_functie, functie)
         self.assertIsNone(taak.aangemaakt_door)
@@ -58,7 +58,7 @@ class TestTakenCLI(E2EHelpers, TestCase):
         self.assertTrue('Taak aangemaakt door normal voor functie Manager Wedstrijdzaken met deadline 2020-02-03' in f2.getvalue())
 
         self.assertEqual(1, Taak.objects.count())
-        taak = Taak.objects.all()[0]
+        taak = Taak.objects.first()
         self.assertEqual(str(taak.deadline), '2020-02-03')
         self.assertEqual(taak.aangemaakt_door, account)
         self.assertEqual(taak.toegekend_aan_functie, functie)

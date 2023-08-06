@@ -19,7 +19,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <thead>
@@ -31,13 +31,15 @@
                     </tr>
                 </thead>
 
+                {% comment %}
                 <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
-                <tr style="visibility:collapse">
+                <tr class="sv-table-hide-row">
                     <td>Q1 2021</td>
                     <td>Dit is de titel van een best wel lange opleiding</td>
                     <td>??</td>
-                    <td><a class="btn-nhb-rood" href="#">Details</a></td>
+                    <td><a class="btn-sv-rood" href="#">Details</a></td>
                 </tr>
+                {% endcomment %}
 
                 {% for opleiding in opleidingen %}
                     <tr>
@@ -46,7 +48,7 @@
                         <td>{{ wed.locatie.plaats }}</td>
                         <td>
                             {% if wed.url_details %}
-                                <a class="btn-nhb-rood" href="{{ wed.url_details }}">
+                                <a class="btn-sv-rood" href="{{ wed.url_details }}">
                                     <i class="notranslate material-icons-round">play_arrow</i></a>
                             {% endif %}
                         </td>

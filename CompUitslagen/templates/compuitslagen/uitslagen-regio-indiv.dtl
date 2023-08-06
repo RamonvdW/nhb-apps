@@ -13,8 +13,6 @@
     <script type="application/javascript">
         function keuze_gemaakt(groep) {
 
-            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
-
             const selector = "input[type='radio'][name=" + groep + "]:checked"
             const el = document.querySelector(selector)
             const url = el.dataset.url
@@ -34,7 +32,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
@@ -56,27 +54,27 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Filters</h4>
+            <h4 id="filters" data-url="{{ url_filters }}">Filters</h4>
         </div>
     </div>
 
     <!-- blauwe balk met filters -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m6 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een boog type:</b></p>
-                <ul id="id_boog">
-                    {% for boog in boog_filters %}
+                <ul>
+                    {% for filter in boog_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ boog.sel }}">
-                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
-                                <span>{{ boog.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_1" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -84,18 +82,18 @@
         <div class="col s12 m6 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een regio:</b></p>
-                <ul id="id_regio">
-                    {% for regio in regio_filters %}
+                <ul>
+                    {% for filter in regio_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ regio.sel }}">
-                                <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
-                                <span>{{ regio.title_str }}</span>
+                            <label class="black-text" for="id_{{ filter.sel }}">
+                                <input class="with-gap" type="radio" name="filter_2" value="{{ filter.sel }}" required id="id_{{ filter.sel }}" {% if filter.selected %}checked{% endif %} data-url="{{ filter.url_part }}">
+                                <span>{{ filter.opt_text }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
+                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
                 </p>
             </div>
         </div>
@@ -120,7 +118,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+                    <a class="btn-sv-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
                 </p>
             </div>
         </div>
@@ -132,7 +130,7 @@
 
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <div class="col s12 m8 offset-m2 sv-rood white-text z-depth-3 center">
                     <p>Er is besloten een uitzondering te maken voor de {{ comp }}.<br>Om deel te mogen nemen aan de Rayonkampioenschappen moeten <b>{{ comp.aantal_scores_voor_rk_deelname }} scores</b> neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de <b>beste {{ comp.aantal_scores_voor_rk_deelname }} scores</b>.</p>
                 </div>
             </div>
@@ -144,9 +142,10 @@
         <table class="white">
             {% for obj in deelnemers %}
                 {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
+                    {% comment %}
                     <!-- forceer gelijkmatige layout in de Scores kolommen -->
-                    <tr style="visibility: collapse">
-                        <td class="nhb-table-zijrand"></td>
+                    <tr class="sv-table-hide-row">
+                        <td class="sv-table-zijrand"></td>
                         <td colspan="2"><!-- rank, sporter --></td>
                         <td><!-- vereniging --></td>
                         <td><!-- gemiddelde --></td>
@@ -159,14 +158,15 @@
                         <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
                         <td class="right-align" style="padding:0"><span class="smal hide-on-small-only">888</span></td>
                         <td class="right-align"><!-- totaal --></td>
-                        <td class="nhb-table-zijrand"></td>
+                        <td class="sv-table-zijrand"></td>
                     </tr>
+                    {% endcomment %}
                 {% endif %}
 
                 {% if obj.break_klasse %}
-                    {% if not obj.is_eerste_groep %}
+                    {% if obj.needs_closure %}
                         <tr>
-                            <td class="nhb-table-onderrand" colspan="13"></td>
+                            <td class="sv-table-onderrand" colspan="13"></td>
                         </tr>
                     {% endif %}
 
@@ -174,8 +174,8 @@
                         <td class="center" colspan="13"><h5>{{ obj.klasse_str }}</h5></td>
                     </tr>
 
-                    <tr class="nhb-table-header">
-                        <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
+                    <tr class="sv-table-header">
+                        <td class="sv-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                         <th><!-- rank --></th>
                         <th>Sporter</th>
                         <th><span class="hide-on-small-only" style="padding:0">Vereniging</span></th>
@@ -183,7 +183,7 @@
                         <th class="right-align" style="padding:0"><span class="hide-on-med-and-up">Scores</span></th>
                         <th class="center" style="padding:0" colspan="7"><span class="hide-on-small-only">Scores</span></th>
                         <th class="right-align" style="padding:0"><span class="hide-on-small-only" style="padding-left:5px; padding-right:5px">Totaal</span></th>
-                        <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
+                        <td class="sv-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                     </tr>
                 {% endif %}
 
@@ -214,7 +214,7 @@
             {% endfor %}
 
             <tr>
-                <td class="nhb-table-onderrand" colspan="13"></td>
+                <td class="sv-table-onderrand" colspan="13"></td>
             </tr>
         </table>
 

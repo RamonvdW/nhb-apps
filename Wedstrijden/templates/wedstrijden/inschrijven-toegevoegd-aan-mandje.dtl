@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2022 Ramon van der Winkel.
+                Copyright (c) 2022-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="white" style="padding:10px">
                 <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen wedstrijd.</p>
@@ -41,15 +41,15 @@
 
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- verder winkelen -->
-            {% include 'plein/card.dtl' with title="Verder winkelen" text="Terug naar de wedstrijd waar je mee bezig was." icon="event_note" url=url_verder %}
+            {% include 'plein/card_icon.dtl' with title="Verder winkelen" text="Terug naar de wedstrijd waar je mee bezig was." icon="event_note" url=url_verder %}
 
             <!-- mandje -->
             {% url 'Bestel:toon-inhoud-mandje' as card_url %}
-            {% include 'plein/card.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
 
         </div>
     </div>

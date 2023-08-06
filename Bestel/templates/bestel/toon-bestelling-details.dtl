@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
                 <tr>
@@ -30,8 +30,8 @@
 
                 {% for product in producten %}
                     <tr>
-                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</th>
-                        <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
+                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}<span>{{ hdr }}</span><br>{% endfor %}</th>
+                        <td>{% for hdr, lijn in product.beschrijving %}<span class="notranslate">{{ lijn }}</span><br>{% endfor %}</td>
                         <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ product.prijs_euro }}</td>
                     </tr>
 
@@ -50,6 +50,13 @@
                         <td class="hide-on-small-only" style="padding-left:20px"></td>
                         <td>Verzendkosten</td>
                         <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ bestelling.verzendkosten_euro }}</td>
+                    </tr>
+                {% elif transport_ophalen %}
+                    <!-- ophalen -->
+                    <tr>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
+                        <td>Ophalen op het bondsbureau</td>
+                        <td class="right-align" style="padding-right:20px">&euro;&nbsp;0,00</td>
                     </tr>
                 {% endif %}
 
@@ -111,7 +118,7 @@
                     <!-- afrekenen -->
                     {% if bevat_fout %}
                         <tr>
-                            <td colspan="3" class="center nhb-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                            <td colspan="3" class="center sv-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
                         </tr>
                     {% else %}
                         {% if url_afrekenen %}
@@ -121,7 +128,7 @@
                                     <!-- voorkom dubbelklikken op de submit knop -->
                                     <form action="{{ url_afrekenen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                                         {% csrf_token %}
-                                        <button class="btn-nhb-rood" name="submit_knop">
+                                        <button class="btn-sv-rood" name="submit_knop">
                                             <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Betalen</button>
                                     </form>
                                 </td>
@@ -143,7 +150,7 @@
                         <tr>
                             <td class="hide-on-small-only"></td>
                             <td class="right-align">
-                                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_annuleer">
+                                <a class="btn-sv-blauw modal-trigger" href="#bevestig_annuleer">
                                     <i class="notranslate material-icons-round left">delete</i>Annuleer</a>
                             </td>
                         </tr>
@@ -166,8 +173,8 @@
 
                 <tr>
                     <td></td>
-                    <th class="nhb-column-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>IBAN:<br>BIC:<br>E-mail:<br>Telefoon:</th>
-                    <td class="nhb-column-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_iban }}<br>{{ bestelling.verkoper_bic }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
+                    <th class="sv-table-col-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>IBAN:<br>BIC:<br>E-mail:<br>Telefoon:</th>
+                    <td class="sv-table-col-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_iban }}<br>{{ bestelling.verkoper_bic }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
                     <td></td>
                 </tr>
             </table>
@@ -190,10 +197,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>
@@ -213,11 +220,11 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
-                {% include 'plein/card.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
+                {% include 'plein/card_icon.dtl' with title="Evenementen" text="De verkoopvoorwaarden voor wedstrijden en evenementen staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_wedstrijden %}
 
-                {% include 'plein/card.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
+                {% include 'plein/card_icon.dtl' with title="Webwinkel" text="De verkoopvoorwaarden voor de webwinkel staan beschreven in dit document." icon="article" extern_open=True url=url_voorwaarden_webwinkel %}
         </div>
     </div>
 

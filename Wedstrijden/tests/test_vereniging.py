@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
+from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -38,22 +38,22 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         sporter.save()
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
-        self.nhbver2 = NhbVereniging(
+        self.ver2 = NhbVereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver2.save()
+        self.ver2.save()
 
     @staticmethod
     def _maak_externe_locatie(ver):
@@ -100,7 +100,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_maak_nieuw, post=True)
 
         # maak een wedstrijdlocatie van deze vereniging aan
-        self._maak_externe_locatie(self.nhbver1)
+        self._maak_externe_locatie(self.ver1)
 
         # haal het overzicht opnieuw op (geen wedstrijden)
         with self.assert_max_queries(20):
@@ -133,10 +133,10 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         # maak nog een wedstrijd aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(2, Wedstrijd.objects.count())
-        wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_NHB)
+        wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_KHSN)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)        # gender-neutrale klassen zijn niet gekozen
 

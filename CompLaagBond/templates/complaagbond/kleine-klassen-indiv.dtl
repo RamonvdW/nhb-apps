@@ -39,7 +39,7 @@
     </div>
 
     <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m8 offset-m2 l6 offset-l3">
             <table class="white">
                 <tr>
@@ -49,7 +49,7 @@
                 </tr>
 
                 {% for klasse in klassen %}
-                    <tr{% if klasse.is_klein %} class="nhb-rood-text"{% endif %}>
+                    <tr{% if klasse.is_klein %} class="sv-rood-text"{% endif %}>
                         <td>{{ klasse.beschrijving }}</td>
                         <td class="center">{{ klasse.min_ag }}</td>
                         <td class="center">{{ klasse.aantal_deelnemers }}</td>
@@ -74,7 +74,7 @@
 
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <table class="white">
@@ -84,7 +84,7 @@
                     {% if obj.break_klasse %}
                         {% if not forloop.first %}
                             <tr>
-                                <td colspan="4" class="nhb-table-onderrand" style="height:50px"></td>
+                                <td colspan="4" class="sv-table-onderrand" style="height:50px"></td>
                             </tr>
                         {% endif %}
                         <tr>
@@ -126,7 +126,7 @@
 
                         <td>
                             {% for letter, deelnemer_pk, klasse_pk in obj.wijzig_knoppen %}
-                                <button class="btn-nhb-rood" onclick="verplaats(this)" style="margin-right:5px" data-deelnemer="{{ deelnemer_pk }}" data-klasse="{{ klasse_pk }}">{{ letter }}</button>
+                                <button class="btn-sv-rood" onclick="verplaats(this)" style="margin-right:5px" data-deelnemer="{{ deelnemer_pk }}" data-klasse="{{ klasse_pk }}">{{ letter }}</button>
                             {% endfor %}
                         </td>
                     </tr>

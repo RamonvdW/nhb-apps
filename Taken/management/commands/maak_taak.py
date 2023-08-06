@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils import timezone
-from Account.models import Account, AccountEmail
+from Account.models import Account
 from Functie.models import Functie
 from Taken.models import Taak
 

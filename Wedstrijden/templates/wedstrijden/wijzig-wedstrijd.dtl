@@ -79,7 +79,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
 
             <!-- dialoog venster -->
@@ -92,7 +92,7 @@
                         <table class="white">
 
                             <tr>
-                                <td colspan="2" class="center nhb-blauw-text"><h6>Instellingen</h6></td>
+                                <td colspan="2" class="center sv-blauw-text"><h6>Instellingen</h6></td>
                             </tr>
 
                             <tr>
@@ -149,15 +149,15 @@
                                 <th>Status</th>
                                 <td>
                                     {% for opt in opt_status %}
-                                        <span class="{% if opt.selected %}nhb-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
+                                        <span class="{% if opt.selected %}sv-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
                                     {% endfor %}
                                     <br>
                                     {% if url_prev_tekst %}
-                                        <button form="form_prev" class="btn-nhb-blauw vertrek_knop">{{ url_prev_tekst }}</button>
+                                        <button form="form_prev" class="btn-sv-blauw vertrek_knop">{{ url_prev_tekst }}</button>
                                         <span>&nbsp;&nbsp;</span>
                                     {% endif %}
                                     {% if url_next_tekst %}
-                                        <button form="form_next" class="btn-nhb-rood vertrek_knop">{{ url_next_tekst }}</button>
+                                        <button form="form_next" class="btn-sv-rood vertrek_knop">{{ url_next_tekst }}</button>
                                     {% endif %}
                                     {% if not wed.verkoopvoorwaarden_status_acceptatie %}
                                         <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
@@ -234,11 +234,11 @@
 
                                         {% if wed.voorwaarden_a_status_acceptatie %}
                                             <span>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</span><br>
-                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                            <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
                                                 <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
                                         {% else %}
                                             <span>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</span><br>
-                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                            <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_a_status }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
                                                 <i class="notranslate material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
                                             {% if not limit_edits %}
                                                 <ul id="id_teams">
@@ -342,7 +342,7 @@
 
 
                             <tr>
-                                <td colspan="2" class="center nhb-blauw-text"><h6>Contactgegevens organisatie</h6></td>
+                                <td colspan="2" class="center sv-blauw-text"><h6>Contactgegevens organisatie</h6></td>
                             </tr>
 
                             <tr>
@@ -405,7 +405,7 @@
 
 
                             <tr>
-                                <td colspan="2" class="center nhb-blauw-text"><h6>Inschrijfgeld</h6></td>
+                                <td colspan="2" class="center sv-blauw-text"><h6>Inschrijfgeld</h6></td>
                             </tr>
 
                             <tr>
@@ -429,11 +429,11 @@
                                 <td>
                                     {% if wed.verkoopvoorwaarden_status_acceptatie %}
                                         <span>Akkoord voor de Verkoopvoorwaarden Wedstrijden is gegeven<br>op {{ wed.verkoopvoorwaarden_status_when }} door {{ wed.verkoopvoorwaarden_status_who }}</span><br>
-                                        <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                        <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
                                             <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
                                     {% else %}
                                         <span>Voor verkopen via MijnHandboogsport zijn de Verkoopvoorwaarden Wedstrijden van toepassing.<br>Lees het document en geef akkoord met de knop.</span><br>
-                                        <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
+                                        <a class="btn-sv-blauw btn-small" href="{{ url_voorwaarden_verkoop }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px">
                                             <i class="notranslate material-icons-round left">open_in_new</i>Verkoopvoorwaarden lezen</a>
 
                                         <ul id="id_verkoop">
@@ -450,7 +450,7 @@
 
 
                             <tr>
-                                <td colspan="2" class="center nhb-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                                <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
                             </tr>
 
                             <tr>
@@ -482,8 +482,8 @@
 
                             <tr>
                                 <td colspan="2" class="center">
-                                    <h6 class="nhb-blauw-text">Wedstrijdklassen</h6>
-                                                         <!-- N = NHB -->
+                                    <h6 class="sv-blauw-text">Wedstrijdklassen</h6>
+                                                         <!-- N = KHSN -->
                                     {% if wed.organisatie == 'N' %}
                                         <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                                     {% endif %}
@@ -505,7 +505,7 @@
 
 
                         <div class="center">
-                                                 <!-- N = NHB -->
+                                                 <!-- N = KHSN -->
                             {% if wed.organisatie == 'N' and wedstrijd_is_a_status %}
                                 <p>Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</p>
                             {% endif %}
@@ -515,7 +515,7 @@
                         </div>
 
                         <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
                         </div>
 
@@ -533,7 +533,7 @@
     {% if url_annuleer %}
 
         <p style="margin-left:10px">
-            <a class="btn-nhb-rood modal-trigger" href="#bevestig_annuleer">Annuleer deze wedstrijd</a>
+            <a class="btn-sv-rood modal-trigger" href="#bevestig_annuleer">Annuleer deze wedstrijd</a>
         </p>
 
         <div class="modal" id="bevestig_annuleer">
@@ -547,10 +547,10 @@
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                         </div>
                     </div>
                 </form>
@@ -563,7 +563,7 @@
 
             <!-- verwijderen van de wedstrijd -->
             <p style="margin-left:10px">
-                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder">Verwijder deze wedstrijd</a>
+                <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder">Verwijder deze wedstrijd</a>
             </p>
 
             <div class="modal" id="bevestig_verwijder">
@@ -579,10 +579,10 @@
 
                             <div class="modal-footer" style="text-align:center; display:block">
                                 <div style="display:inline-block; width:50%">
-                                    <button class="btn-nhb-rood" type="submit">Ja</button>
+                                    <button class="btn-sv-rood" type="submit">Ja</button>
                                 </div>
                                 <div style="display:inline-block; width:50%">
-                                    <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                    <a href="#" class="btn-sv-blauw modal-close">Nee</a>
                                 </div>
                             </div>
                         </form>
@@ -592,7 +592,7 @@
                         <p>Deze wedstrijd kan niet meer worden verwijderd. Vraag het bondsbureau om deze te annuleren.</p>
 
                         <div class="modal-footer" style="text-align:center; display:block">
-                            <a href="#" class="btn-nhb-rood modal-close">Sluit</a>
+                            <a href="#" class="btn-sv-rood modal-close">Sluit</a>
                         </div>
 
                     {% endif %}
@@ -607,20 +607,20 @@
 
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-                const minDate = new Date("{{ min_date|date:'Y-m-d' }}")
-                const maxDate = new Date("{{ max_date|date:'Y-m-d' }}")
+                const minDate = new Date("{{ min_date|date:'Y-m-d' }}");
+                const maxDate = new Date("{{ max_date|date:'Y-m-d' }}");
 
-                let el = document.querySelector('#id_datum')
+                let el = document.querySelector('#id_datum');
                 if (el) {
                     let options = { defaultDate: new Date("{{ wed.datum_begin|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
                                     format: "dddd d mmmm yyyy",
                                     minDate: minDate, maxDate: maxDate,
-                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]}
+                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]};
 
-                    M.Datepicker.init(el, options)
+                    M.Datepicker.init(el, options);
 
-                    datum_omzetten(true)
+                    datum_omzetten(true);
                 }
             })
     </script>

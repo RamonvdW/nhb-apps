@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from Account.models import Account
-from Account.operations import account_create
+from Account.operations.aanmaken import account_create
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -45,7 +45,7 @@ class Command(BaseCommand):
         try:
             account = Account.objects.get(username=lid_nr)
         except Account.DoesNotExist:
-            account, _ = account_create(lid_nr, voornaam, achternaam, password, email, True)
+            account = account_create(lid_nr, voornaam, achternaam, password, email, True)
 
         self.stdout.write('[INFO] Maak sporter %s' % lid_nr)
 

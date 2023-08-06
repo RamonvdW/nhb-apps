@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.tests.test_otp', 'Functie.tests.test_overzicht')
+    test_after = ('Account', 'Functie.tests.test_overzicht')
 
     url_overzicht = '/functie/overzicht/'
     url_overzicht_vereniging = '/functie/overzicht/vereniging/'
@@ -36,8 +36,8 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -53,9 +53,9 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
 
         self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
-        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', nhb_rayon=NhbRayon.objects.get(rayon_nr=3))
-        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', nhb_regio=NhbRegio.objects.get(regio_nr=111))
-        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', nhb_regio=NhbRegio.objects.get(regio_nr=101))
+        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', rayon=NhbRayon.objects.get(rayon_nr=3))
+        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=111))
+        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=101))
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -63,7 +63,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
-        self.nhbver1 = ver
+        self.ver1 = ver
 
         sporter = Sporter()
         sporter.lid_nr = 100042
@@ -92,15 +92,15 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.sporter_100043 = sporter
 
         self.functie_sec = maak_functie("SEC test", "SEC")
-        self.functie_sec.nhb_ver = ver
+        self.functie_sec.vereniging = ver
         self.functie_sec.save()
 
         self.functie_hwl = maak_functie("HWL test", "HWL")
-        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.vereniging = ver
         self.functie_hwl.save()
 
         self.functie_wl = maak_functie("WL test", "WL")
-        self.functie_wl.nhb_ver = ver
+        self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
         self.regio_112 = NhbRegio.objects.get(regio_nr=112)
@@ -111,14 +111,14 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         ver2.ver_nr = "1900"
         ver2.regio = self.regio_112
         ver2.save()
-        self.nhbver2 = ver2
+        self.ver2 = ver2
 
         self.functie_sec2 = maak_functie("SEC test 2", "SEC")
-        self.functie_sec2.nhb_ver = ver2
+        self.functie_sec2.vereniging = ver2
         self.functie_sec2.save()
 
         self.functie_hwl2 = maak_functie("HWL test 2", "HWL")
-        self.functie_hwl2.nhb_ver = ver2
+        self.functie_hwl2.vereniging = ver2
         self.functie_hwl2.save()
 
         sporter = Sporter()
@@ -246,7 +246,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         self.assert_email_html_ok(mail)
         self.assertTrue(settings.URL_PDF_HANDLEIDING_BEHEERDERS in mail.mail_html)
         self.assert_consistent_email_html_text(mail)
@@ -302,9 +302,9 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertContains(resp, "BKO ")
 
         # variant: nog geen bevestigde email
-        email = self.account_beh2.accountemail_set.all()[0]
-        email.email_is_bevestigd = False
-        email.save(update_fields=['email_is_bevestigd'])
+        account = self.account_beh2
+        account.email_is_bevestigd = False
+        account.save(update_fields=['email_is_bevestigd'])
 
         LogboekRegel.objects.all().delete()
 
@@ -317,7 +317,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rko3.accounts.count(), 1)
 
         # controleer correctheid toevoeging in het logboek
-        regel = LogboekRegel.objects.all()[0]
+        regel = LogboekRegel.objects.first()
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
         self.assertEqual(regel.activiteit, 'Sporter 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
 
@@ -365,7 +365,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
 
         # controleer correctheid toevoeging in het logboek
-        regel = LogboekRegel.objects.all()[0]
+        regel = LogboekRegel.objects.first()
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
         # beh1 is geen nhb lid
         self.assertEqual(regel.activiteit, 'Account Beheerder1 (testbeheerder1) is beheerder gemaakt voor functie RCL Regio 111 Indoor')
@@ -477,7 +477,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, self.account_beh2.volledige_naam())
 
-        # poog een NHB lid te koppelen dat niet lid is van de vereniging
+        # poog een lid te koppelen dat niet lid is van de vereniging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_ander.pk})
         self.assert403(resp)
@@ -597,7 +597,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # haal de pagina op - het gevonden lid heeft geen regio vermelding
         with self.assert_max_queries(20):
-            resp = self.client.get(url + '?zoekterm=100')       # matcht alle nhb nummers
+            resp = self.client.get(url + '?zoekterm=100')       # matcht alle bondsnummers
         self.assertEqual(resp.status_code, 200)
         self.assertNotContains(resp, 'regio 112')
 
@@ -652,7 +652,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         # maak de HWL lid bij een andere vereniging
         self.assertEqual(self.sporter_100042.account, self.account_beh2)
-        self.sporter_100042.bij_vereniging = self.nhbver2
+        self.sporter_100042.bij_vereniging = self.ver2
         self.sporter_100042.save()
 
         # haal de lijst met gekoppelde beheerder op
@@ -673,7 +673,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
                             {'login_naam': self.account_beh1.username,
                              'wachtwoord': self.WACHTWOORD})
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
-        session_key_beh1 = AccountSessions.objects.all()[0].session.session_key
+        session_key_beh1 = AccountSessions.objects.first().session.session_key
 
         session = SessionStore(session_key_beh1)
         self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)

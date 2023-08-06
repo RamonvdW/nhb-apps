@@ -19,24 +19,24 @@
     </div>
 
     <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
                     <th>Verenigingsnummer</th>
-                    <td>{{ nhb_ver.ver_nr }}</td>
+                    <td>{{ ver.ver_nr }}</td>
                 </tr>
                 <tr>
                     <th>Naam</th>
-                    <td>{{ nhb_ver.naam }}</td>
+                    <td>{{ ver.naam }}</td>
                 </tr>
                 <tr>
                     <th>Plaats</th>
-                    <td>{{ nhb_ver.plaats }}</td>
+                    <td>{{ ver.plaats }}</td>
                 </tr>
                 <tr>
                     <th>Regio</th>
-                    <td>{{ nhb_ver.regio }}</td>
+                    <td>{{ ver.regio }}</td>
                 </tr>
                 {% if clusters.count > 0 %}
                     <tr>
@@ -52,8 +52,8 @@
                 <tr>
                     <th>Website</th>
                     <td>
-                        {% if nhb_ver.website %}
-                            <a class="email" href="{{ nhb_ver.website }}" target="_blank" rel="noopener noreferrer"><code>{{ nhb_ver.website }}</code></a>
+                        {% if ver.website %}
+                            <a class="email" href="{{ ver.website }}" target="_blank" rel="noopener noreferrer"><code>{{ ver.website }}</code></a>
                         {% else %}
                             <i>Geen</i>
                         {% endif %}
@@ -63,16 +63,16 @@
                 {% comment %}
                 <tr>
                     <th>Telefoonnummer</th>
-                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
+                    <td>{% if ver.telefoonnummer %}{{ ver.telefoonnummer }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
                 </tr>
 
                 <tr>
                     <th>KvK nummer</th>
-                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="nhb-rood-text">Geen</i>{% endif %}</td>
+                    <td>{% if ver.kvk_nummer %}{{ ver.kvk_nummer }}{% else %}<i class="sv-rood-text">Geen</i>{% endif %}</td>
                 </tr>
                 {% endcomment %}
 
-                {% if nhb_ver.geen_wedstrijden %}
+                {% if ver.geen_wedstrijden %}
                     <tr>
                         <th>Speciale status</th>
                         <td>Geen wedstrijden</td>
@@ -92,25 +92,25 @@
         </div>
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <!-- competitiewedstrijden -->
                 {% if toon_competities %}
                     {% url 'CompScores:wedstrijden' as card_url %}
-                    {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
                 {% endif %}
 
                 <!-- scores invoeren -->
                 {% if heeft_wedstrijden %}
                     {% url 'CompScores:wedstrijden-scores' as card_url %}
-                    {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
                 {% endif %}
 
                 <!-- wedstrijdkalender (alleen voor de HWL) -->
                 {% if toon_wedstrijdkalender %}
                     {% url 'Wedstrijden:vereniging' as card_url %}
-                    {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+                    {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
                 {% endif %}
 
             </div>
@@ -131,7 +131,7 @@
             </div>
 
             <!-- blauwe balk -->
-            <div class="row-nhb-blauw">
+            <div class="row-sv-blauw">
                 <div class="col s12">
 
         {% elif kaartje.einde_blok %}
@@ -149,9 +149,9 @@
 
                     <!-- toon disabled -->
                     {% if kaartje.img %}
-                        {% include 'plein/card_logo_nog-niet-beschikbaar.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf img=kaartje.img %}
+                        {% include 'plein/card_logo_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf img=kaartje.img %}
                     {% else %}
-                        {% include 'plein/card_nog-niet-beschikbaar.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf icon=kaartje.icon %}
+                        {% include 'plein/card_icon_beschikbaar-vanaf.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf icon=kaartje.icon %}
                     {% endif %}
 
         {% elif kaartje.img %}
@@ -160,7 +160,7 @@
 
         {% else %}
 
-                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icon url=kaartje.url %}
+                    {% include 'plein/card_icon.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icon url=kaartje.url %}
 
         {% endif %}
     {% endfor %}
@@ -173,28 +173,34 @@
     </div>
 
     <!-- blauwe balk -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
+
             <!-- ledenlijst -->
-            {% url 'Vereniging:ledenlijst' as card_url %}
-            {% include 'plein/card.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="import_contacts" url=card_url %}
+            {% if toon_gast_accounts %}
+                {% url 'Vereniging:gast-accounts' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Gast accounts" text="Toon de aangemaakte gast-accounts." icon="import_contacts" url=card_url %}
+            {% else %}
+                {% url 'Vereniging:ledenlijst' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="import_contacts" url=card_url %}
+            {% endif %}
 
             <!-- beheerders vereniging -->
             {% url 'Functie:overzicht-vereniging' as card_url %}
-            {% include 'plein/card.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
 
             <!-- instellingen leden -->
             {% url 'Vereniging:leden-voorkeuren' as card_url %}
-            {% include 'plein/card.dtl' with title="Voorkeuren leden" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Voorkeuren leden" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
 
             <!-- accommodatie details -->
             {% if accommodatie_details_url %}
-                {% include 'plein/card.dtl' with title="Accommodatie" text="Details over jullie accommodatie die van belang zijn voor wedstrijden." icon="account_balance" url=accommodatie_details_url %}
+                {% include 'plein/card_icon.dtl' with title="Accommodatie" text="Details over jullie accommodatie die van belang zijn voor wedstrijden." icon="account_balance" url=accommodatie_details_url %}
             {% endif %}
 
             <!-- externe locaties -->
             {% if url_externe_locaties %}
-                {% include 'plein/card.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
+                {% include 'plein/card_icon.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
             {% endif %}
         </div>
     </div>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ import datetime
 import io
 
 
-TEST_EMAIL_ADRES = 'schutter@nhb.test'
+TEST_EMAIL_ADRES = 'schutter@test.not'
 
 
 class TestMailerCliGoedBase(E2EHelpers, TestCase):
@@ -48,7 +48,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp faal', 'body\ndoei!\n')
 
         # probeer te versturen
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertFalse(obj.is_verstuurd)
         self.assertEqual(obj.aantal_pogingen, 0)
 
@@ -57,7 +57,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertFalse(obj.is_verstuurd)
         self.assertTrue('[WARNING] ' in f2.getvalue())
@@ -69,7 +69,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
         mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp_1', 'body\ndoei!\n')
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertFalse(obj.is_verstuurd)
         self.assertFalse('(verstuurd)' in str(obj))
 
@@ -82,7 +82,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertTrue(obj.is_verstuurd)
         self.assertTrue('(verstuurd)' in str(obj))
 
@@ -107,7 +107,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertTrue(obj.is_verstuurd)
         self.assertTrue('(verstuurd)' in str(obj))
 
@@ -127,7 +127,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertTrue(obj.is_verstuurd)
         self.assertTrue('(verstuurd)' in str(obj))
 
@@ -145,8 +145,8 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
     def test_outdated(self):
         # maak een outbound mail aan die meer dan een maand out is
         self.assertEqual(0, MailQueue.objects.count(), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
-        obj = MailQueue.objects.all()[0]
+        mailer_queue_email('schutter@test.not', 'onderwerp', 'body\ndoei!\n')
+        obj = MailQueue.objects.first()
         obj.toegevoegd_op -= datetime.timedelta(days=60)
         obj.is_blocked = True
         obj.save(update_fields=['toegevoegd_op', 'is_blocked'])
@@ -162,7 +162,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
     def test_opschonen(self):
         # maak een mail aan die lang geleden verstuurd is
         mailer_queue_email('ergens@nergens.niet', 'Test', 'Test', enforce_whitelist=False)
-        mail = MailQueue.objects.all()[0]
+        mail = MailQueue.objects.first()
         mail.toegevoegd_op -= datetime.timedelta(days=92)
         mail.save()
 
@@ -196,7 +196,7 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
         mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp', 'body\ndoei!\n')
 
         self.assertEqual(MailQueue.objects.count(), 1)
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertFalse(obj.is_verstuurd)
         self.assertFalse(obj.is_blocked)
         self.assertEqual(obj.aantal_pogingen, 0)
@@ -207,14 +207,14 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
         with self.assert_max_queries(20, check_duration=False):     # duurt 7 seconden
             management.call_command('stuur_mails', '7', '--quick', stderr=f1, stdout=f2)
 
-        obj = MailQueue.objects.all()[0]
+        obj = MailQueue.objects.first()
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertTrue('[ERROR] ' in f1.getvalue())
 
 
 @override_settings(POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_FROM_ADDRESS='noreply@test.not',
                    EMAIL_ADDRESS_WHITELIST=())
 class TestMailerCliPostmark(TestMailerCliGoedBase):
     pass
@@ -223,7 +223,7 @@ class TestMailerCliPostmark(TestMailerCliGoedBase):
 # use a port with no service responding to it
 @override_settings(POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_FROM_ADDRESS='noreply@test.not',
                    EMAIL_ADDRESS_WHITELIST=(TEST_EMAIL_ADRES,))
 class TestMailerCliBadPostmark(TestMailerCliBadBase):
     pass

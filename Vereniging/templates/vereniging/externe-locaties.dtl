@@ -19,7 +19,7 @@
     </div>
 
     <!-- blauwe balk met informatie in een tabel -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
 
@@ -51,9 +51,9 @@
 
                         <td class="center">
                             {% if readonly %}
-                                <a class="btn-nhb-rood" href="{{ locatie.url_wijzig }}">Details</a>
+                                <a class="btn-sv-rood" href="{{ locatie.url_wijzig }}">Details</a>
                             {% else %}
-                                <a class="btn-nhb-rood" href="{{ locatie.url_wijzig }}">
+                                <a class="btn-sv-rood" href="{{ locatie.url_wijzig }}">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             {% endif %}
                         </td>
@@ -71,7 +71,7 @@
                         <td colspan="4" class="center">
                             <form action="{{ url_toevoegen }}" method="post">
                                 {% csrf_token %}
-                                <button class="btn-nhb-rood" type="submit">
+                                <button class="btn-sv-rood" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>

@@ -141,12 +141,12 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
     """ controleer toestemming om scoreverwerking te doen voor deze wedstrijd """
     if (functie_nu.rol == 'RCL'
-            and functie_nu.nhb_regio == deelcomp.nhb_regio
+            and functie_nu.regio == deelcomp.regio
             and functie_nu.comp_type == deelcomp.competitie.afstand):
         # RCL van deze regiocompetitie
         return True
 
-    if functie_nu.rol in ('HWL', 'WL') and functie_nu.nhb_ver == wedstrijd.vereniging:
+    if functie_nu.rol in ('HWL', 'WL') and functie_nu.vereniging == wedstrijd.vereniging:
         # (H)WL van de organiserende vereniging
         return True
 
@@ -291,7 +291,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         self._team_naam_toevoegen(scores, deelcomp)
 
-        context['url_check_nhbnr'] = reverse('CompScores:dynamic-check-nhbnr')
+        context['url_check_bondsnummer'] = reverse('CompScores:dynamic-check-bondsnummer')
         context['url_opslaan'] = reverse('CompScores:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('CompScores:dynamic-deelnemers-ophalen')
 
@@ -303,7 +303,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             team.naam_str = team.maak_team_naam_kort()
         context['teams'] = teams
 
-        # plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        # plan = wedstrijd.competitiewedstrijdenplan_set.first()
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if self.rol_nu == Rollen.ROL_RCL:

@@ -50,7 +50,7 @@ class OpleidingAdmin(admin.ModelAdmin):
     # search_fields = ('unaccented_naam', 'lid_nr')
 
     # filter mogelijkheid
-    # list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid', HeeftWaIdListFilter)
+    # list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid')
 
     # list_select_related = True
 

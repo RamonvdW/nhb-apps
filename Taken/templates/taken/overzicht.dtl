@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2022 Ramon van der Winkel.
+                Copyright (c) 2020-2023 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -29,7 +29,7 @@
         </div>
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <table class="white">
@@ -47,11 +47,11 @@
                         {% if not taak.is_afgerond %}
                             <tr>
                                 <td class="center">{{ taak.pk }}</td>
-                                <td class="center{% if taak.is_huidige_rol %} nhb-blauw-text{% endif %}">{{ taak.toegekend_aan_functie.beschrijving }}</td>
+                                <td class="center{% if taak.is_huidige_rol %} sv-blauw-text{% endif %}">{{ taak.toegekend_aan_functie.beschrijving }}</td>
                                 <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
                                 <td>{{ taak.titel }}</td>
                                 <td>
-                                    <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>
+                                    <a class="btn-sv-rood" href="{{ taak.url }}">Details</a>
                                 </td>
                             </tr>
                         {% endif %}
@@ -73,7 +73,7 @@
         </div>
 
         <!-- blauwe balk -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
 
                 <table class="white">
@@ -91,11 +91,11 @@
                         {% if taak.is_afgerond %}
                             <tr>
                                 <td class="center">{{ taak.pk }}</td>
-                                <td class="center{% if taak.is_huidige_rol %} nhb-blauw-text{% endif %}">{{ taak.toegekend_aan_functie.beschrijving }}</td>
+                                <td class="center{% if taak.is_huidige_rol %} sv-blauw-text{% endif %}">{{ taak.toegekend_aan_functie.beschrijving }}</td>
                                 <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
                                 <td>{{ taak.titel }}</td>
                                 <td>
-                                    <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>
+                                    <a class="btn-sv-rood" href="{{ taak.url }}">Details</a>
                                 </td>
                             </tr>
                         {% endif %}

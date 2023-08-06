@@ -101,11 +101,11 @@ class Sporter(models.Model):
     # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
 
-    # mag gebruik maken van NHB faciliteiten?
-    is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
-
-    # datum van lidmaatschap NHB
+    # datum van lidmaatschap
     sinds_datum = models.DateField(validators=[validate_sinds_datum])
+
+    # mag gebruik maken van faciliteiten?
+    is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
 
     # lid bij vereniging
     bij_vereniging = models.ForeignKey(
@@ -127,8 +127,14 @@ class Sporter(models.Model):
     postadres_2 = models.CharField(max_length=100, default='', blank=True)
     postadres_3 = models.CharField(max_length=100, default='', blank=True)
 
+    # om overleden leden eenvoudig speciaal te kunnen behandelen hebben we dit veld als filter optie
+    is_overleden = models.BooleanField(default=False)
+
     # is dit een erelid (voor vermelding op de bondspas)
     is_erelid = models.BooleanField(default=False)
+
+    # is dit een gast-account (minder minder mogelijkheden)?
+    is_gast = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

@@ -23,7 +23,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4 class="nhb-rood-text">Wat doe je hier?!</h4>
+                <h4 class="sv-rood-text">Wat doe je hier?!</h4>
                 <p class="center">De klassengrenzen zijn al vastgesteld.</p>
             </div>
         </div>
@@ -31,14 +31,14 @@
     {% else %}
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <div class="white" style="padding:10px">
-                    <h5 class="nhb-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
+                    <h5 class="sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
                     <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
                     <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
                     <p>
-                        <a class="btn-nhb-rood" href="{% url 'CompBeheer:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a>
+                        <a class="btn-sv-rood" href="{% url 'CompBeheer:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a>
                     </p>
                 </div>
             </div>
@@ -55,7 +55,7 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
                     <thead>
@@ -86,7 +86,7 @@
         </div>
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 <table class="white">
                     <thead>
@@ -112,7 +112,7 @@
         <div class="center">
             <form method="post" action="{% url 'CompBeheer:klassengrenzen-vaststellen' comp_pk=comp.pk %}">
                 {% csrf_token %}
-                <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Deze klassengrenzen vaststellen">
+                <input class="btn-sv-rood" name="button_aanmaken" type="submit" value="Deze klassengrenzen vaststellen">
             </form>
         </div>
 

@@ -1,0 +1,33 @@
+# required pip packages
+
+-c constraints.in
+
+# web framework
+Django
+
+# PostgreSQL database access
+psycopg
+
+# 2FA support
+pyotp
+
+# Excel read/write support
+openpyxl
+
+# voor bondspas plaatje maken
+pillow
+
+# QR code generation for 2FA
+qrcode
+
+# NL records download from gsheet
+google-auth
+google-api-python-client
+
+# collecting payment service provide
+mollie-api-python
+
+# voor inlezen uitslag uit pdf
+pypdf
+
+# end of file

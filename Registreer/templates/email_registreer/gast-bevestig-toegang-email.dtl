@@ -1,0 +1,32 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+    |Hallo {{ voornaam }},
+    |
+    |Je hebt een gast-account aangemaakt op {{ naam_site }}.
+    |Gebruik onderstaande link om dit te bevestigen.
+    |
+    |{{ url }}
+    |
+    |Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
+    |
+    |Veel plezier met de site!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }},</div>
+    <br>
+    <div>Je hebt een gast-account aangemaakt op {{ naam_site }}.</div>
+    <div>Gebruik onderstaande link om dit te bevestigen.</div>
+    <br>
+    <div style="padding-left:30px"><code><a href="{{ url }}" target="_blank">{{ url }}</a></code></div>
+    <br>
+    <div>Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
+    <br>
+    <div>Veel plezier met de site!</div>
+{% endblock %}

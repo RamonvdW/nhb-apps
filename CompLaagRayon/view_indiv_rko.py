@@ -52,14 +52,14 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         regio_deelcomps = (Regiocompetitie
                            .objects
                            .filter(competitie=competitie)
-                           .select_related('nhb_regio',
-                                           'nhb_regio__rayon')
-                           .order_by('nhb_regio__regio_nr'))
+                           .select_related('regio',
+                                           'regio__rayon')
+                           .order_by('regio__regio_nr'))
 
         alles_afgesloten = True
         for obj in regio_deelcomps:
-            obj.regio_str = str(obj.nhb_regio.regio_nr)
-            obj.rayon_str = str(obj.nhb_regio.rayon.rayon_nr)
+            obj.regio_str = str(obj.regio.regio_nr)
+            obj.rayon_str = str(obj.regio.rayon.rayon_nr)
 
             if obj.is_afgesloten:
                 obj.status_str = "Afgesloten"
@@ -84,7 +84,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
         except (ValueError, Kampioenschap.DoesNotExist):
@@ -107,7 +107,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
                                                kwargs={'comp_pk': deelkamp.competitie.pk,
                                                        'comp_boog': 'r',
-                                                       'rayon_nr': deelkamp.nhb_rayon.rayon_nr})
+                                                       'rayon_nr': deelkamp.rayon.rayon_nr})
             deelnemers = list()
         else:
             # situatie 2)
@@ -235,7 +235,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
             deelkamp = (Kampioenschap
                         .objects
                         .select_related('competitie',
-                                        'nhb_rayon')
+                                        'rayon')
                         .get(pk=deelkamp_pk,
                              deel=DEEL_RK))
         except (ValueError, Kampioenschap.DoesNotExist):
@@ -275,7 +275,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
         # for
 
         response = HttpResponse(content_type=CONTENT_TYPE_CSV)
-        response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelkamp.nhb_rayon.rayon_nr
+        response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelkamp.rayon.rayon_nr
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings

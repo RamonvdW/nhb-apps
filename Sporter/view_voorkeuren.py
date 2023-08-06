@@ -58,18 +58,19 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 raise Http404('Sporter niet gevonden')
 
             try:
-                sporter = Sporter.objects.select_related('bij_vereniging').get(pk=sporter_pk)
+                sporter = Sporter.objects.select_related('bij_vereniging', 'account').get(pk=sporter_pk)
             except Sporter.DoesNotExist:
                 raise Http404('Sporter niet gevonden')
 
             # laatste control: de sporter moet lid zijn bij de vereniging van de HWL
-            if sporter.bij_vereniging != functie_nu.nhb_ver:
+            if sporter.bij_vereniging != functie_nu.vereniging:
                 raise PermissionDenied('Geen sporter van jouw vereniging')
 
             return sporter
 
+        # fallback naar ingelogde gebruiker
         account = request.user
-        sporter = account.sporter_set.all()[0]  # ROL_SPORTER geeft bescherming tegen geen sporter
+        sporter = account.sporter_set.first()  # ROL_SPORTER geeft bescherming tegen geen sporter
 
         return sporter
 
@@ -206,29 +207,28 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu != Rollen.ROL_HWL:
             if rol_mag_wisselen(self.request):
                 account = request.user
-                email = account.accountemail_set.all()[0]
                 updated = list()
 
                 optout_nieuwe_taak = False
                 if request.POST.get('optout_nieuwe_taak'):
                     optout_nieuwe_taak = True
-                if email.optout_nieuwe_taak != optout_nieuwe_taak:
+                if account.optout_nieuwe_taak != optout_nieuwe_taak:
                     # wijziging doorvoeren
-                    email.optout_nieuwe_taak = optout_nieuwe_taak
+                    account.optout_nieuwe_taak = optout_nieuwe_taak
                     updated.append('optout_nieuwe_taak')
 
                 optout_herinnering_taken = False
                 if request.POST.get('optout_herinnering_taken'):
                     optout_herinnering_taken = True
 
-                if email.optout_herinnering_taken != optout_herinnering_taken:
+                if account.optout_herinnering_taken != optout_herinnering_taken:
                     # wijziging doorvoeren
-                    email.optout_herinnering_taken = optout_herinnering_taken
+                    account.optout_herinnering_taken = optout_herinnering_taken
                     updated.append('optout_herinnering_taken')
 
                 # wijziging opslaan
                 if len(updated):
-                    email.save(update_fields=updated)
+                    account.save(update_fields=updated)
 
         if self.rol_nu == Rollen.ROL_HWL:
             # stuur de HWL terug naar zijn ledenlijst
@@ -318,16 +318,15 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # for
 
         if self.rol_nu == Rollen.ROL_HWL:
-            actief = 'vereniging'
             context['sporter_pk'] = sporter.pk
             context['is_hwl'] = True
         else:
-            # niet de HWL maar de sporter zelf
-            actief = 'sporter-profiel'
+            # niet de HWL, dus de sporter zelf
             if rol_mag_wisselen(self.request):
                 # sporter is beheerder, dus toon opt-out opties
-                context['email'] = sporter.account.accountemail_set.all()[0]
+                context['account'] = sporter.account
 
+        context['toon_bondscompetities'] = not sporter.is_gast
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
 
         if self.rol_nu == Rollen.ROL_HWL:

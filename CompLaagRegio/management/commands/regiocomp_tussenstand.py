@@ -28,7 +28,7 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.stop_at = datetime.datetime(2000, 1, 1)
 
-        self.taken = CompetitieTaken.objects.all()[0]
+        self.taken = CompetitieTaken.objects.first()
 
         self.sporterboog2scores = dict()   # [SporterBoog.pk] = [(afstand, Score), ..]
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
                 # overschrijven naar andere regiocompetitie
                 if obj.bij_vereniging.regio != sporter.bij_vereniging.regio:
                     obj.regiocompetitie = Regiocompetitie.objects.get(competitie=obj.regiocompetitie.competitie,
-                                                                     nhb_regio=sporter.bij_vereniging.regio)
+                                                                      regio=sporter.bij_vereniging.regio)
                 obj.bij_vereniging = sporter.bij_vereniging
                 obj.save()
         # for

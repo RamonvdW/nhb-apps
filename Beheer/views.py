@@ -6,11 +6,14 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, Http404
-from django.template.response import TemplateResponse
+from django.http import HttpResponseRedirect
+from django.utils import timezone
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.sites import AdminSite
-from Account.rechten import account_rechten_is_otp_verified
+from Account.operations.otp import otp_is_controle_gelukt
 from collections import OrderedDict
+import datetime
+
 
 # aanpassingen van de ingebouwde Admin site
 # hiermee
@@ -45,7 +48,7 @@ class BeheerAdminSite(AdminSite):
         # send the 2FA page otherwise
         if request.user.is_active and request.user.is_staff and request.user.is_authenticated:
             # well, login is not needed
-            if account_rechten_is_otp_verified(request):
+            if otp_is_controle_gelukt(request):
                 # what are we doing here?
                 if next_url:
                     return HttpResponseRedirect(next_url)
@@ -54,7 +57,7 @@ class BeheerAdminSite(AdminSite):
                 return HttpResponseRedirect(reverse('Plein:plein'))
 
             # send to 2FA page
-            url = reverse('Functie:otp-controle')
+            url = reverse('Account:otp-controle')
         else:
             # send to login page
             url = reverse('Account:login')
@@ -74,14 +77,14 @@ class BeheerAdminSite(AdminSite):
         return (request.user.is_active
                 and request.user.is_staff
                 and request.user.is_authenticated
-                and account_rechten_is_otp_verified(request))
+                and otp_is_controle_gelukt(request))
 
     # overrides django/contrib/admin/sites.py:AdminSite:get_app_list
-    def get_app_list(self, request):
+    def get_app_list(self, request, app_label=None):
         """ kopie van contrib/admin/sites.py aangepast om de modellen niet meer te sorteren """
-        app_dict = self._build_app_dict(request)
+        app_dict = self._build_app_dict(request, app_label)
 
-        # Sort the apps alphabetically.
+        # sort the apps alphabetically
         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
 
         # don't show unused apps
@@ -89,35 +92,19 @@ class BeheerAdminSite(AdminSite):
 
         return app_list
 
-    # overrides django/contrib/admin/sites.py:AdminSite:app_index
-    def app_index(self, request, app_label, extra_context=None):
-        """ deze functie wordt aangeroepen om de lijst van modellen binnen een applicatie te tonen"""
 
-        app_dict = self._build_app_dict(request, app_label)
-        if not app_dict:
-            raise Http404("The requested admin page does not exist.")
+def beheer_opschonen(stdout):
+    """ verwijder Django admin log regels ouder dan 180 dagen """
+    now = timezone.now()
+    max_age = now - datetime.timedelta(days=180)
 
-        # sorteren is uitgezet zodat de volgorde uit models.py aangehouden wordt
+    # verwijder oude django admin log entries
+    objs = LogEntry.objects.filter(action_time__lt=max_age)
 
-        # Sort the models alphabetically within each app.
-        # app_dict["models"].sort(key=lambda x: x["name"])
+    count = objs.count()
+    if count > 0:               # pragma: no cover
+        stdout.write('[INFO] Verwijder %s oude django admin log regels' % count)
+        objs.delete()
 
-        context = {
-            **self.each_context(request),
-            "title": "%(app)s administration" % {"app": app_dict["name"]},
-            "subtitle": None,
-            "app_list": [app_dict],
-            "app_label": app_label,
-            **(extra_context or {}),
-        }
-
-        request.current_app = self.name
-
-        return TemplateResponse(
-            request,
-            self.app_index_template
-            or ["admin/%s/app_index.html" % app_label, "admin/app_index.html"],
-            context,
-        )
 
 # end of file

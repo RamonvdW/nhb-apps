@@ -18,7 +18,7 @@ from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
-from Sporter.models import SporterVoorkeuren, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog, get_sporter_voorkeuren
 from decimal import Decimal
 
 
@@ -55,7 +55,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(pk=deelcomp_pk))
 
         except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
@@ -70,9 +70,9 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat regiocompetitie bij de juist regio hoort
-        account = self.request.user
-        sporter = account.sporter_set.all()[0]      # ROL_SPORTER geeft bescherming tegen geen nhblid
-        if sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio:
+        account = self.request.user     # ROL_SPORTER geeft bescherming tegen geen Sporter
+        sporter = Sporter.objects.filter(account=account).first()
+        if sporterboog.sporter != sporter or deelcomp.regio != sporter.bij_vereniging.regio:
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
@@ -233,7 +233,7 @@ class RegiocompetitieAanmeldenView(View):
         account = request.user
         if account.is_authenticated:
             if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.all()[0]
+                sporter = account.sporter_set.first()
                 if not (sporter.is_actief_lid and sporter.bij_vereniging):
                     sporter = None
         if not sporter:
@@ -252,7 +252,7 @@ class RegiocompetitieAanmeldenView(View):
             deelcomp = (Regiocompetitie
                         .objects
                         .select_related('competitie',
-                                        'nhb_regio')
+                                        'regio')
                         .get(pk=deelcomp_pk))
         except (ValueError, KeyError, SporterBoog.DoesNotExist, Regiocompetitie.DoesNotExist):
             # niet bestaand record(s)
@@ -266,7 +266,7 @@ class RegiocompetitieAanmeldenView(View):
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat regiocompetitie bij de juist regio hoort
-        if sporterboog.sporter != sporter or deelcomp.nhb_regio != sporter.bij_vereniging.regio:
+        if sporterboog.sporter != sporter or deelcomp.regio != sporter.bij_vereniging.regio:
             raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
@@ -397,7 +397,7 @@ class RegiocompetitieAfmeldenView(View):
         account = request.user
         if account.is_authenticated:
             if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.all()[0]
+                sporter = account.sporter_set.first()
                 if not (sporter.is_actief_lid and sporter.bij_vereniging):
                     sporter = None
         if not sporter:

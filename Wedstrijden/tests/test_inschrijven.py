@@ -50,14 +50,14 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # maak een test vereniging
-        self.nhbver1 = NhbVereniging(
+        self.ver1 = NhbVereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
-        self.nhbver1.save()
+        self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
-        self.functie_hwl.nhb_ver = self.nhbver1
+        self.functie_hwl.vereniging = self.ver1
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
@@ -66,7 +66,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         self.lid_nr = 123456
-        self.account = self.e2e_create_account(str(self.lid_nr), 'test@nhb.not', 'Voornaam')
+        self.account = self.e2e_create_account(str(self.lid_nr), 'test@test.not', 'Voornaam')
 
         self.boog_r = boog_r = BoogType.objects.get(afkorting='R')
 
@@ -79,7 +79,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                     sinds_datum='2020-02-02',
                     adres_code='1234AB56',
                     account=self.account,
-                    bij_vereniging=self.nhbver1)
+                    bij_vereniging=self.ver1)
         sporter.save()
         self.sporter = sporter
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter)
@@ -98,7 +98,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                     geboorte_datum='1966-06-04',
                     sinds_datum='2020-02-02',
                     adres_code='1234AB56',
-                    bij_vereniging=self.nhbver1)
+                    bij_vereniging=self.ver1)
         sporter2.save()
         get_sporter_voorkeuren(sporter2)
 
@@ -112,16 +112,15 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
-        locatie.verenigingen.add(self.nhbver1)
+        locatie.verenigingen.add(self.ver1)
 
         # wordt HWL en maak een wedstrijd aan
-        self.e2e_login_and_pass_otp(self.account_admin)     # TODO: niet nodig?
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
-        self.wedstrijd = Wedstrijd.objects.all()[0]
+        self.wedstrijd = Wedstrijd.objects.first()
 
         # maak een R sessie aan
         sessie = WedstrijdSessie(
@@ -580,7 +579,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         regio=NhbRegio.objects.get(regio_nr=113))
         ver2.save()
         hwl2 = maak_functie('HWL Ver 2000', 'HWL')
-        hwl2.nhb_ver = ver2
+        hwl2.vereniging = ver2
         hwl2.save()
         hwl2.accounts.add(self.account_admin)
         self.e2e_login_and_pass_otp(self.account_admin)     # doet eval rollen

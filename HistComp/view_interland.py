@@ -11,17 +11,17 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.definities import HISTCOMP_TYPE_25, HIST_INTERLAND_BOGEN, HIST_BOOG2STR
+from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from decimal import Decimal
 from codecs import BOM_UTF8
+from types import SimpleNamespace
 import csv
 
 
-TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
-
-RESULTS_PER_PAGE = 100
+TEMPLATE_HISTCOMP_INTERLAND = 'histcomp/interland.dtl'
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive", "Longbow")
 
@@ -67,29 +67,30 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         context['klassen'] = list()
 
         # zoek het nieuwste seizoen beschikbaar
-        qset = HistCompetitie.objects.filter(comp_type='25').order_by('-seizoen').distinct('seizoen')
+        qset = HistCompSeizoen.objects.filter(comp_type=HISTCOMP_TYPE_25).order_by('-seizoen').distinct('seizoen')
         if len(qset) > 0:
             # neem de data van het nieuwste seizoen
-            context['seizoen'] = seizoen = qset[0].seizoen
+            seizoen = qset[0]
+            context['seizoen'] = seizoen_str = seizoen.seizoen
 
             # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
             # dit is het tweede jaar van het seizoen
-            context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
+            context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen_str.split('/')[1])
 
-            for klasse in (HistCompetitie
-                           .objects
-                           .filter(comp_type='25', seizoen=seizoen, is_team=False)):
+            for boog_afkorting in HIST_INTERLAND_BOGEN:
+                klasse = SimpleNamespace(
+                            boog_type=boog_afkorting,
+                            beschrijving=HIST_BOOG2STR[boog_afkorting],
+                            url_download=reverse('HistComp:interland-als-bestand',
+                                                 kwargs={'boog_type': boog_afkorting}),
+                            indiv=list())
                 context['klassen'].append(klasse)
 
-                klasse.url_download = reverse('HistComp:interland-als-bestand',
-                                              kwargs={'klasse_pk': klasse.pk})
-
                 # zoek alle records erbij met minimaal 5 scores
-                klasse.indiv = list()
-
-                for indiv in (HistCompetitieIndividueel
+                for indiv in (HistCompRegioIndiv
                               .objects
-                              .filter(histcompetitie=klasse,
+                              .filter(seizoen=seizoen,
+                                      boogtype=boog_afkorting,
                                       gemiddelde__gt=Decimal('0.000'))
                               .order_by('-gemiddelde')):
 
@@ -143,27 +144,25 @@ class InterlandAlsBestandView(InterlandView):
 
     def get(self, request, *args, **kwargs):
 
-        try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            klasse = HistCompetitie.objects.get(pk=klasse_pk)
-        except (ValueError, HistCompetitie.DoesNotExist):
-            raise Http404('Klasse niet gevonden')
+        afkorting = kwargs['boog_type'][:2]     # afkappen voor de veiligheid
+        if afkorting not in HIST_INTERLAND_BOGEN:
+            raise Http404('Verkeerd boog type')
 
         context = dict()
         self.maak_data(context)
 
         indivs = None
-        for context_klasse in context['klassen']:
-            if context_klasse.pk == klasse.pk:
-                indivs = context_klasse.indiv
+        for klasse in context['klassen']:
+            if klasse.boog_type == afkorting:
+                indivs = klasse.indiv
                 break   # from the for
         # for
 
         if indivs is None:
-            raise Http404('Geen sporters gevonden')
+            raise Http404('Geen data')
 
         response = HttpResponse(content_type=CONTENT_TYPE_CSV)
-        response['Content-Disposition'] = 'attachment; filename="interland.csv"'
+        response['Content-Disposition'] = 'attachment; filename="interland-%s.csv"' % afkorting.lower()
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
@@ -171,6 +170,8 @@ class InterlandAlsBestandView(InterlandView):
 
         for indiv in indivs:
             ver_str = '[%s] %s' % (indiv.vereniging_nr, indiv.vereniging_naam)
+            if indiv.vereniging_plaats:
+                ver_str += ' (%s)' % indiv.vereniging_plaats
 
             writer.writerow([indiv.gemiddelde,
                              indiv.leeftijd_str,

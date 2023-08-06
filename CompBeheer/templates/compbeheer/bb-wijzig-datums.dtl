@@ -55,9 +55,9 @@
                     const el2 = document.getElementById('datum' + nr)
                     const date2 = el2.M_Datepicker.toString('yyyy-mm-dd')
 
-                    el2.classList.remove('nhb-rood-text')
+                    el2.classList.remove('sv-rood-text')
                     if (date2 <= date) {
-                        el2.classList.add('nhb-rood-text')
+                        el2.classList.add('sv-rood-text')
                     }
                     date = date2
                 }
@@ -121,7 +121,7 @@
     </div>
 
     <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
+    <div class="row-sv-blauw">
         <div class="col s12 white z-depth-3">
 
             <!-- dialoog venster -->
@@ -221,7 +221,7 @@
                 </table>
 
                 <div class="fixed-action-btn" style="display: none">
-                    <button id="opslaan_knop" class="btn-nhb-rood" onclick="post_datums()" disabled>
+                    <button id="opslaan_knop" class="btn-sv-rood" onclick="post_datums()" disabled>
                         <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                 </div>
 

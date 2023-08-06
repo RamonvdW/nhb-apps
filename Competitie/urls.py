@@ -5,17 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Competitie import views_info, views_klassengrenzen, views_kies, views_overzicht, views_tijdlijn
+from Competitie import views_info, views_klassengrenzen, views_kies, views_overzicht
 
 app_name = 'Competitie'
 
 urlpatterns = [
-
-    # voor beheerders
-    path('<comp_pk>/tijdlijn/',
-         views_tijdlijn.CompetitieTijdlijnView.as_view(),
-         name='tijdlijn'),
-
 
     # openbare pagina's
     path('info/',

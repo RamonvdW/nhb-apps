@@ -15,7 +15,7 @@
         <div class="col s12">
             <h3 class="page-banner">Teams klassengrenzen vaststellen</h3>
             <p>voor de RK/BK teams wedstrijdklassen van de <b>{{ comp.beschrijving }}</b>.</p>
-            <p>Dit is een eenmalig actie <span class="nhb-rood-text">welke ook de open inschrijving voor RK teams afsluit.</span></p>
+            <p>Dit is een eenmalig actie <span class="sv-rood-text">welke ook de open inschrijving voor RK teams afsluit.</span></p>
         </div>
     </div>
 
@@ -23,12 +23,12 @@
     {% if niet_compleet_team %}
 
         <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s10 offset-s1 m12 xl8 offset-xl2 white">
                 <p>Deze actie kan niet uitgevoerd worden zolang er teams zijn zonder team sterkte (door te weinig gekoppelde sporters).</p>
 
                 <p>
-                    <a class="btn-nhb-rood" href="{{ url_terug }}">Terug</a>
+                    <a class="btn-sv-rood" href="{{ url_terug }}">Terug</a>
                 </p>
             </div>
         </div>
@@ -36,7 +36,7 @@
     {% else %}
 
         <!-- blauwe balk met informatie in een tabel -->
-        <div class="row-nhb-blauw">
+        <div class="row-sv-blauw">
             <div class="col s12 white left-align">
                 <p>Dit is het automatisch berekende voorstel voor de klassengrenzen:</p>
 
@@ -71,7 +71,7 @@
                         <td colspan="5" class="center">
                             <form method="post" action="{{ url_vaststellen }}">
                                 {% csrf_token %}
-                                <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel deze teams klassengrenzen vast">
+                                <input class="btn-sv-rood" name="button_vaststellen" type="submit" value="Ja, stel deze teams klassengrenzen vast">
                             </form>
                         </td>
                     </tr>
