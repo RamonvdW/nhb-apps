@@ -312,18 +312,21 @@ class RegiocompetitieAanmeldenView(View):
             if ag.waarde > 0.000:
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
 
-        ags = (AanvangsgemiddeldeHist
-               .objects
-               .filter(ag__sporterboog=sporterboog,
-                       ag__doel=AG_DOEL_TEAM,
-                       ag__afstand_meter=deelcomp.competitie.afstand)
-               .order_by('-when'))      # nieuwste eerst
+        if aanmelding.ag_voor_team_mag_aangepast_worden:
+            # geen vastgesteld AG - kijk of we nog een handmatig AG kunnen vinden
+            ags = (AanvangsgemiddeldeHist
+                   .objects
+                   .filter(ag__sporterboog=sporterboog,
+                           ag__doel=AG_DOEL_TEAM,
+                           ag__afstand_meter=deelcomp.competitie.afstand)
+                   .order_by('-when'))      # nieuwste eerst
 
-        if len(ags):
-            # iemand heeft een AG ingevoerd voor de teamcompetitie
-            ag = ags[0].ag
-            aanmelding.ag_voor_team = ag.waarde
-            aanmelding.ag_voor_team_mag_aangepast_worden = True
+            if len(ags):
+                # iemand heeft een AG ingevoerd voor de teamcompetitie
+                # let op: dit kan van lang geleden zijn
+                ag = ags[0].ag
+                aanmelding.ag_voor_team = ag.waarde
+                aanmelding.ag_voor_team_mag_aangepast_worden = True
 
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
