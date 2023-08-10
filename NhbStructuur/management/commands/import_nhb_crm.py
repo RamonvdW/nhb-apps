@@ -48,6 +48,7 @@ EXPECTED_CLUB_KEYS = ('region_number', 'club_number', 'name', 'prefix', 'email',
                       'has_disabled_facilities', 'address', 'postal_code', 'location_name',
                       'phone_business', 'phone_private', 'phone_mobile', 'coc_number',
                       'iso_abbr', 'latitude', 'longitude', 'secretaris', 'iban', 'bic')
+OPTIONAL_CLUB_KEYS = ('smoke_free_status',)
 EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first_name',
                         'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from',
                         'para_code', 'address', 'postal_code', 'location_name',
@@ -378,7 +379,7 @@ class Command(BaseCommand):
     def _import_clubs(self, data):
         """ Importeert data van alle verenigingen """
 
-        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, (), "club"):
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, OPTIONAL_CLUB_KEYS, "club"):
             return
 
         # houd bij welke verenigingsnummers in de database zitten
@@ -1175,6 +1176,7 @@ class Command(BaseCommand):
                                             repr(lid_nr), lid_overleden_datum))
                             obj.is_overleden = True
                             updated.append('is_overleden')
+                            self._count_wijzigingen += 1
                         lid_blocked = True
 
                     if not lid_blocked:
