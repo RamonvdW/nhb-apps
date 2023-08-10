@@ -17,9 +17,6 @@ class Command(BaseCommand):
         parser.add_argument('--commit', action='store_true', help='Wijzigingen doorvoeren')
 
     def _update_team(self, team, ags, do_commit):
-        #ags = team.leden.values_list('ag_voor_team', flat=True)
-        #ags = list(ags)
-
         klasse_oud = team.team_klasse
         team.team_klasse = None
 

@@ -836,7 +836,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_sporter_voorkeuren(100004)
         self._zet_sporter_voorkeuren(100003)
 
-        self._zet_ag(100004, 18)
+        # self._zet_ag(100004, 18)       # geen AG, dan mag handmatig AG gebruikt worden
         self._zet_ag(100003, 25)
 
         sporterboog = SporterBoog.objects.get(sporter__lid_nr=100004,
@@ -867,7 +867,63 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
             self.assertTrue(obj.inschrijf_voorkeur_team)
             if obj.sporterboog.sporter.lid_nr == 100004:
+                self.assertTrue(obj.ag_voor_team_mag_aangepast_worden)
                 self.assertEqual(str(obj.ag_voor_team), '8.180')
+        # for
+
+    def test_met_ag_prio(self):
+        # controleer dat individueel AG prio heeft over handmatig ingevoerd AG
+        url = self.url_aanmelden % self.comp_18.pk
+        zet_competitie_fase_regio_inschrijven(self.comp_18)
+
+        # anon
+        self.e2e_logout()
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp)
+
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # stel een paar bogen in
+        self._zet_sporter_voorkeuren(100004)
+        self._zet_sporter_voorkeuren(100003)
+
+        self._zet_ag(100004, 18)
+        self._zet_ag(100003, 25)
+
+        sporterboog = SporterBoog.objects.get(sporter__lid_nr=100004,
+                                              boogtype__afkorting=BOOGTYPE_AFKORTING_RECURVE)
+
+        res = score_teams_ag_opslaan(sporterboog, 18, 8.25, self.account_hwl, 'Test')
+        self.assertTrue(res)
+        sleep(0.050)  # zorg iets van spreiding in de 'when'
+        res = score_teams_ag_opslaan(sporterboog, 18, 8.18, self.account_hwl, 'Test')
+        self.assertTrue(res)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+
+        # nu de POST om een paar leden aan te melden
+        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
+        with self.assert_max_queries(23):
+            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',  # 1=R
+                                          'lid_100003_boogtype_3': 'on',  # 3=BB
+                                          'wil_in_team': 'ja',
+                                          'opmerking': 'door de hwl'})
+        self.assert_is_redirect_not_plein(resp)  # check success
+        self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 2)  # 2 schutters, 1 competitie
+
+        for obj in RegiocompetitieSporterBoog.objects.all():
+            self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
+            self.assertTrue(obj.inschrijf_voorkeur_team)
+            if obj.sporterboog.sporter.lid_nr == 100004:
+                self.assertEqual(obj.ag_voor_team, obj.ag_voor_indiv)
+                self.assertFalse(obj.ag_voor_team_mag_aangepast_worden)
         # for
 
 # end of file
