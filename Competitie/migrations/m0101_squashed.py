@@ -21,26 +21,24 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Competitie', 'm0089_squashed'),
-                ('Competitie', 'm0090_rename'),
-                ('Competitie', 'm0091_indiv_teams_split'),
-                ('Competitie', 'm0092_non-optional'),
-                ('Competitie', 'm0093_verwijder_afgemeld'),
-                ('Competitie', 'm0094_team_is_reserve'),
-                ('Competitie', 'm0095_rename')]
-
     # dit is de eerste
     initial = True
 
+    replaces = [('Competitie', 'm0096_squashed'),
+                ('Competitie', 'm0097_renames'),
+                ('Competitie', 'm0098_titels'),
+                ('Competitie', 'm0099_renames'),
+                ('Competitie', 'm0100_opruiming')]
+
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0023_squashed'),
-        ('BasisTypen', 'm0054_squashed'),
-        ('Functie', 'm0017_squashed'),
-        ('NhbStructuur', 'm0031_squashed'),
+        ('Account', 'm0027_squashed'),
+        ('BasisTypen', 'm0057_squashed'),
+        ('Functie', 'm0019_squashed'),
+        ('NhbStructuur', 'm0034_squashed'),
         ('Score', 'm0019_squashed'),
-        ('Sporter', 'm0021_squashed'),
-        ('Wedstrijden', 'm0037_squashed'),
+        ('Sporter', 'm0025_squashed'),
+        ('Wedstrijden', 'm0040_squashed'),
     ]
 
     # migratie functies
@@ -98,15 +96,13 @@ class Migration(migrations.Migration):
                 ('boog_typen', models.ManyToManyField(to='BasisTypen.boogtype')),
                 ('competitie', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Competitie.competitie')),
                 ('team_type', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.teamtype')),
+                ('titel_bk', models.CharField(default='', max_length=30)),
             ],
             options={
                 'verbose_name': 'Competitie team klasse',
                 'verbose_name_plural': 'Competitie team klassen',
+                'indexes': [models.Index(fields=['volgorde'], name='Competitie__volgord_054e8a_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='competitieteamklasse',
-            index=models.Index(fields=['volgorde'], name='Competitie__volgord_054e8a_idx'),
         ),
         migrations.CreateModel(
             name='CompetitieIndivKlasse',
@@ -124,15 +120,13 @@ class Migration(migrations.Migration):
                 ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
                 ('competitie', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Competitie.competitie')),
                 ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.leeftijdsklasse')),
+                ('titel_bk', models.CharField(default='', max_length=30)),
             ],
             options={
                 'verbose_name': 'Competitie indiv klasse',
                 'verbose_name_plural': 'Competitie indiv klassen',
+                'indexes': [models.Index(fields=['volgorde'], name='Competitie__volgord_476d31_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='competitieindivklasse',
-            index=models.Index(fields=['volgorde'], name='Competitie__volgord_476d31_idx'),
         ),
         migrations.CreateModel(
             name='CompetitieMatch',
@@ -159,7 +153,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('is_afgesloten', models.BooleanField(default=False)),
                 ('competitie', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Competitie.competitie')),
-                ('nhb_regio', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
+                ('regio', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
                 ('functie', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Functie.functie')),
                 ('inschrijf_methode', models.CharField(choices=[('1', 'Kies wedstrijden'), ('2', 'Naar locatie wedstrijdklasse'), ('3', 'Voorkeur dagdelen')], default='2', max_length=1)),
                 ('heeft_deelnemerslijst', models.BooleanField(default=False)),
@@ -217,32 +211,19 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Regiocompetitie sporterboog',
                 'verbose_name_plural': 'Regiocompetitie sportersboog',
+                'indexes': [models.Index(fields=['aantal_scores'], name='Competitie__aantal__955e64_idx'), models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_1225ce_idx'), models.Index(fields=['aantal_scores', 'regiocompetitie'], name='Competitie__aantal__258001_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='regiocompetitiesporterboog',
-            index=models.Index(fields=['aantal_scores'], name='Competitie__aantal__955e64_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='regiocompetitiesporterboog',
-            index=models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_1225ce_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='regiocompetitiesporterboog',
-            index=models.Index(fields=['aantal_scores', 'regiocompetitie'], name='Competitie__aantal__258001_idx'),
         ),
         migrations.CreateModel(
             name='Kampioenschap',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('deel', models.CharField(choices=[('RK', 'RK'), ('BK', 'BK')], max_length=2)),
-                ('is_klaar_indiv', models.BooleanField(default=False)),
-                ('is_klaar_teams', models.BooleanField(default=False)),
                 ('is_afgesloten', models.BooleanField(default=False)),
                 ('heeft_deelnemerslijst', models.BooleanField(default=False)),
                 ('competitie', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Competitie.competitie')),
                 ('functie', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Functie.functie')),
-                ('nhb_rayon', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
+                ('rayon', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
                 ('rk_bk_matches', models.ManyToManyField(blank=True, to='Competitie.competitiematch')),
             ],
             options={
@@ -269,8 +250,8 @@ class Migration(migrations.Migration):
                 ('result_volgorde', models.PositiveSmallIntegerField(default=99)),
                 ('result_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('result_score_2', models.PositiveSmallIntegerField(default=0)),
-                ('result_teamscore_1', models.PositiveSmallIntegerField(default=0)),
-                ('result_teamscore_2', models.PositiveSmallIntegerField(default=0)),
+                ('result_rk_teamscore_1', models.PositiveSmallIntegerField(default=0)),
+                ('result_rk_teamscore_2', models.PositiveSmallIntegerField(default=0)),
                 ('result_bk_teamscore_1', models.PositiveSmallIntegerField(default=0)),
                 ('result_bk_teamscore_2', models.PositiveSmallIntegerField(default=0)),
                 ('indiv_klasse', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Competitie.competitieindivklasse')),
@@ -278,23 +259,8 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Kampioenschap sporterboog',
                 'verbose_name_plural': 'Kampioenschap sportersboog',
+                'indexes': [models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_e5f73d_idx'), models.Index(fields=['volgorde'], name='Competitie__volgord_b01f18_idx'), models.Index(fields=['rank'], name='Competitie__rank_3b305c_idx'), models.Index(fields=['volgorde', '-gemiddelde'], name='Competitie__volgord_0ec600_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='kampioenschapsporterboog',
-            index=models.Index(fields=['-gemiddelde'], name='Competitie__gemidde_e5f73d_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='kampioenschapsporterboog',
-            index=models.Index(fields=['volgorde'], name='Competitie__volgord_b01f18_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='kampioenschapsporterboog',
-            index=models.Index(fields=['rank'], name='Competitie__rank_3b305c_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='kampioenschapsporterboog',
-            index=models.Index(fields=['volgorde', '-gemiddelde'], name='Competitie__volgord_0ec600_idx'),
         ),
         migrations.CreateModel(
             name='RegiocompetitieTeam',

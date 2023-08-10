@@ -695,11 +695,10 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('BasisTypen', 'm0052_squashed'),
-                ('BasisTypen', 'm0053_fix_43')]
-
     # dit is de eerste
     initial = True
+
+    replaces = [('BasisTypen', 'm0054_squashed'),]
 
     # volgorde afdwingen
     dependencies = []
@@ -713,18 +712,15 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=50)),
                 ('afkorting', models.CharField(max_length=5)),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
                 ('buiten_gebruik', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Boog type',
                 'verbose_name_plural': 'Boog typen',
                 'ordering': ['volgorde'],
+                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='boogtype',
-            index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx'),
         ),
         migrations.CreateModel(
             name='LeeftijdsKlasse',
@@ -737,7 +733,7 @@ class Migration(migrations.Migration):
                 ('min_wedstrijdleeftijd', models.IntegerField()),
                 ('max_wedstrijdleeftijd', models.IntegerField()),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
             ],
             options={
                 'verbose_name': 'Leeftijdsklasse',
@@ -753,22 +749,15 @@ class Migration(migrations.Migration):
                 ('afkorting', models.CharField(max_length=3)),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
                 ('boog_typen', models.ManyToManyField(to='BasisTypen.boogtype')),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
                 ('buiten_gebruik', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Team type',
                 'verbose_name_plural': 'Team typen',
                 'ordering': ['volgorde'],
+                'indexes': [models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'), models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='teamtype',
-            index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='teamtype',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx'),
         ),
         migrations.CreateModel(
             name='TemplateCompetitieIndivKlasse',
@@ -789,16 +778,15 @@ class Migration(migrations.Migration):
                 ('blazoen_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
                 ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
                 ('is_aspirant_klasse', models.BooleanField(default=False)),
+                ('titel_bk_18m', models.CharField(default='Bondskampioen', max_length=30)),
+                ('titel_bk_25m', models.CharField(default='Bondskampioen', max_length=30)),
             ],
             options={
                 'verbose_name': 'Template Competitie Indiv Klasse',
                 'verbose_name_plural': 'Template Competitie Indiv Klassen',
                 'ordering': ['volgorde'],
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_48eb00_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='templatecompetitieindivklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_48eb00_idx'),
         ),
         migrations.CreateModel(
             name='TemplateCompetitieTeamKlasse',
@@ -815,16 +803,15 @@ class Migration(migrations.Migration):
                 ('blazoen2_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
                 ('blazoen_18m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
                 ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
+                ('titel_bk_18m', models.CharField(default='Bondskampioen', max_length=30)),
+                ('titel_bk_25m', models.CharField(default='Bondskampioen', max_length=30)),
             ],
             options={
                 'verbose_name': 'Template Competitie Team Klasse',
                 'verbose_name_plural': 'Template Competitie Team Klassen',
                 'ordering': ['volgorde'],
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx')],
             },
-        ),
-        migrations.AddIndex(
-            model_name='templatecompetitieteamklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx'),
         ),
         migrations.CreateModel(
             name='KalenderWedstrijdklasse',
@@ -835,21 +822,18 @@ class Migration(migrations.Migration):
                 ('volgorde', models.PositiveIntegerField()),
                 ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
                 ('leeftijdsklasse', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.leeftijdsklasse')),
-                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1)),
                 ('afkorting', models.CharField(default='?', max_length=10)),
             ],
             options={
                 'verbose_name': 'Kalender Wedstrijdklasse',
                 'verbose_name_plural': 'Kalender Wedstrijdklassen',
                 'ordering': ['volgorde'],
+                'indexes': [models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx')],
             },
         ),
-        migrations.AddIndex(
-            model_name='kalenderwedstrijdklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx'),
-        ),
-        migrations.RunPython(init_boogtypen),
         migrations.RunPython(init_leeftijdsklassen),
+        migrations.RunPython(init_boogtypen),
         migrations.RunPython(init_team_typen),
         migrations.RunPython(init_wedstrijdklassen_individueel),
         migrations.RunPython(init_wedstrijdklassen_team),

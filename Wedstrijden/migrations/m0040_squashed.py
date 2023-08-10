@@ -15,13 +15,17 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
+    replaces = [('Wedstrijden', 'm0037_squashed'),
+                ('Wedstrijden', 'm0038_remove_max_dt_per_baan'),
+                ('Wedstrijden', 'm0039_khsn')]
+
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0023_squashed'),
-        ('BasisTypen', 'm0054_squashed'),
-        ('NhbStructuur', 'm0031_squashed'),
+        ('Account', 'm0027_squashed'),
+        ('BasisTypen', 'm0057_squashed'),
+        ('NhbStructuur', 'm0034_squashed'),
         ('Score', 'm0019_squashed'),
-        ('Sporter', 'm0021_squashed'),
+        ('Sporter', 'm0025_squashed'),
     ]
 
     operations = [
@@ -159,6 +163,13 @@ class Migration(migrations.Migration):
             model_name='wedstrijdinschrijving',
             constraint=models.UniqueConstraint(fields=('sessie', 'sporterboog'), name='Geen dubbele wedstrijd inschrijving'),
         ),
+        migrations.RemoveField(
+            model_name='wedstrijdlocatie',
+            name='max_dt_per_baan',
+        ),
+        migrations.AlterField(
+            model_name='wedstrijd',
+            name='organisatie',
+            field=models.CharField(choices=[('W', 'World Archery'), ('N', 'KHSN'), ('F', 'IFAA')], default='W', max_length=1),
+        ),
     ]
-
-# end of file

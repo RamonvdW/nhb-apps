@@ -42,7 +42,7 @@ def init_functies_bondscompetitie_2019(apps, _):
                 functie_klas(
                         beschrijving='RKO Rayon %s %s' % (obj.rayon_nr, comp_descr),
                         rol='RKO',
-                        nhb_rayon=obj,
+                        rayon=obj,
                         comp_type=comp_type))
         # for
 
@@ -55,7 +55,7 @@ def init_functies_bondscompetitie_2019(apps, _):
                 functie_klas(
                         beschrijving='RCL Regio %s %s' % (obj.regio_nr, comp_descr),
                         rol='RCL',
-                        nhb_regio=obj,
+                        regio=obj,
                         comp_type=comp_type))
         # for
     # for
@@ -75,23 +75,23 @@ def init_functies_extra(apps, _):
     functie_klas(rol='MO', beschrijving='Manager Opleidingen').save()
     functie_klas(rol='MWZ', beschrijving='Manager Wedstrijdzaken').save()
     functie_klas(rol='SUP', beschrijving='Support').save()
-    functie_klas(rol='MWW', beschrijving='Manager Webwinkel', nhb_ver=ver).save()
+    functie_klas(rol='MWW', beschrijving='Manager Webwinkel', vereniging=ver).save()
 
 
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Functie', 'm0015_squashed'),
-                ('Functie', 'm0016_rol_mww')]
-
     # dit is de eerste
     initial = True
+
+    replaces = [('Functie', 'm0017_squashed'),
+                ('Functie', 'm0018_renames')]
 
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0023_squashed'),
-        ('NhbStructuur', 'm0031_squashed'),
+        ('NhbStructuur', 'm0034_squashed'),
     ]
 
     # migratie functies
@@ -115,9 +115,9 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=50)),
                 ('rol', models.CharField(max_length=5)),
                 ('comp_type', models.CharField(blank=True, default='', max_length=2)),
-                ('nhb_rayon', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
-                ('nhb_regio', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
-                ('nhb_ver', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
+                ('rayon', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
+                ('regio', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
+                ('vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
                 ('accounts', models.ManyToManyField(blank=True, to='Account.account')),
                 ('bevestigde_email', models.EmailField(blank=True, max_length=254)),
                 ('nieuwe_email', models.EmailField(blank=True, max_length=254)),

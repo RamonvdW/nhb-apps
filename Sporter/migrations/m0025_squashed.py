@@ -15,11 +15,16 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
+    replaces = [('Sporter', 'm0021_squashed'),
+                ('Sporter', 'm0022_pas_code'),
+                ('Sporter', 'm0023_is_gast'),
+                ('Sporter', 'm0024_is_overleden')]
+
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0023_squashed'),
-        ('BasisTypen', 'm0054_squashed'),
-        ('NhbStructuur', 'm0031_squashed'),
+        ('Account', 'm0027_squashed'),
+        ('BasisTypen', 'm0057_squashed'),
+        ('NhbStructuur', 'm0034_squashed'),
     ]
 
     # migratie functies
@@ -48,6 +53,8 @@ class Migration(migrations.Migration):
                 ('geboorteplaats', models.CharField(blank=True, default='', max_length=100)),
                 ('telefoon', models.CharField(blank=True, default='', max_length=25)),
                 ('wa_id', models.CharField(blank=True, default='', max_length=8)),
+                ('is_gast', models.BooleanField(default=False)),
+                ('is_overleden', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Sporter',
@@ -91,6 +98,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'SporterBoog',
                 'unique_together': {('sporter', 'boogtype')},
                 'ordering': ['sporter__lid_nr', 'boogtype__volgorde'],
+                'indexes': [models.Index(fields=['voor_wedstrijd'], name='Sporter_spo_voor_we_c6b357_idx')],
             },
         ),
         migrations.CreateModel(
@@ -103,15 +111,11 @@ class Migration(migrations.Migration):
                 ('category', models.CharField(max_length=50)),
                 ('volgorde', models.PositiveSmallIntegerField()),
                 ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
-                ('pas_code', models.CharField(blank=True, default='', max_length=8)),
+                ('pas_code', models.CharField(blank=True, default='', max_length=10)),
             ],
             options={
                 'verbose_name': 'Speelsterkte',
             },
-        ),
-        migrations.AddIndex(
-            model_name='sporterboog',
-            index=models.Index(fields=['voor_wedstrijd'], name='Sporter_spo_voor_we_c6b357_idx'),
         ),
     ]
 

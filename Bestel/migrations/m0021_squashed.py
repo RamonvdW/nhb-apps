@@ -28,12 +28,15 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
+    replaces = [('Bestel', 'm0019_squashed'),
+                ('Bestel', 'm0020_transport')]
+
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0023_squashed'),
-        ('Betaal', 'm0011_squashed'),
+        ('Account', 'm0027_squashed'),
+        ('Betaal', 'm0013_squashed'),
         ('Webwinkel', 'm0005_squashed'),
-        ('Wedstrijden', 'm0037_squashed'),
+        ('Wedstrijden', 'm0040_squashed'),
     ]
 
     # migratie functies
@@ -90,10 +93,32 @@ class Migration(migrations.Migration):
                 ('btw_percentage_cat2', models.CharField(blank=True, default='', max_length=5)),
                 ('btw_percentage_cat3', models.CharField(blank=True, default='', max_length=5)),
                 ('verzendkosten_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('transport', models.CharField(choices=[('N', 'Niet van toepassing'), ('V', 'Verzend'), ('O', 'Ophalen')], default='N', max_length=1)),
             ],
             options={
                 'verbose_name': 'Bestelling',
                 'verbose_name_plural': 'Bestellingen',
+            },
+        ),
+        migrations.CreateModel(
+            name='BestelMandje',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=7)),
+                ('account', models.OneToOneField(on_delete=models.deletion.CASCADE, to='Account.account')),
+                ('producten', models.ManyToManyField(to='Bestel.bestelproduct')),
+                ('btw_euro_cat1', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_euro_cat2', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_euro_cat3', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('btw_percentage_cat1', models.CharField(blank=True, default='', max_length=5)),
+                ('btw_percentage_cat2', models.CharField(blank=True, default='', max_length=5)),
+                ('btw_percentage_cat3', models.CharField(blank=True, default='', max_length=5)),
+                ('verzendkosten_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
+                ('transport', models.CharField(choices=[('N', 'Niet van toepassing'), ('V', 'Verzend'), ('O', 'Ophalen')], default='N', max_length=1)),
+            ],
+            options={
+                'verbose_name': 'Mandje',
+                'verbose_name_plural': 'Mandjes',
             },
         ),
         migrations.CreateModel(
@@ -111,29 +136,10 @@ class Migration(migrations.Migration):
                 ('wedstrijd_inschrijving', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Wedstrijden.wedstrijdinschrijving')),
                 ('bedrag_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
                 ('webwinkel_keuze', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Webwinkel.webwinkelkeuze')),
+                ('transport', models.CharField(choices=[('N', 'Niet van toepassing'), ('V', 'Verzend'), ('O', 'Ophalen')], default='N', max_length=1)),
             ],
             options={
                 'verbose_name': 'Bestel mutatie',
-            },
-        ),
-        migrations.CreateModel(
-            name='BestelMandje',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('totaal_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=7)),
-                ('account', models.OneToOneField(on_delete=models.deletion.CASCADE, to='Account.account')),
-                ('producten', models.ManyToManyField(to='Bestel.bestelproduct')),
-                ('btw_euro_cat1', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
-                ('btw_euro_cat2', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
-                ('btw_euro_cat3', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
-                ('btw_percentage_cat1', models.CharField(blank=True, default='', max_length=5)),
-                ('btw_percentage_cat2', models.CharField(blank=True, default='', max_length=5)),
-                ('btw_percentage_cat3', models.CharField(blank=True, default='', max_length=5)),
-                ('verzendkosten_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=6)),
-            ],
-            options={
-                'verbose_name': 'Mandje',
-                'verbose_name_plural': 'Mandjes',
             },
         ),
         migrations.RunPython(init_hoogste_bestel_nr),

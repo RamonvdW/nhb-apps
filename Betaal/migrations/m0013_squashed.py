@@ -14,9 +14,12 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
+    replaces = [('Betaal', 'm0011_squashed'),
+                ('Betaal', 'm0012_rename')]
+
     # volgorde afdwingen
     dependencies = [
-        ('NhbStructuur', 'm0031_squashed'),
+        ('NhbStructuur', 'm0034_squashed'),
     ]
 
     # migratie functies
@@ -26,7 +29,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('mollie_api_key', models.CharField(blank=True, max_length=50)),
-                ('akkoord_via_nhb', models.BooleanField(default=False)),
+                ('akkoord_via_bond', models.BooleanField(default=False)),
                 ('vereniging', models.OneToOneField(on_delete=models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
             ],
             options={
