@@ -518,20 +518,23 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     aanmelding.ag_voor_team_mag_aangepast_worden = False
                 # for
 
-                # zoek de aanvangsgemiddelden er bij, indien beschikbaar
-                ag_hist = (AanvangsgemiddeldeHist
-                           .objects
-                           .filter(ag__sporterboog=sporterboog,
-                                   ag__afstand_meter=comp.afstand,
-                                   ag__doel=AG_DOEL_TEAM)
-                           .order_by('-when'))
+                if aanmelding.ag_voor_team_mag_aangepast_worden:
+                    # zoek de aanvangsgemiddelden er bij, indien beschikbaar
+                    ag_hist = (AanvangsgemiddeldeHist
+                               .objects
+                               .filter(ag__sporterboog=sporterboog,
+                                       ag__afstand_meter=comp.afstand,
+                                       ag__doel=AG_DOEL_TEAM)
+                               .order_by('-when')
+                               .first())
 
-                if len(ag_hist):
-                    # gebruik het nieuwste handmatige team AG
-                    ag = ag_hist[0].ag
-                    aanmelding.ag_voor_team = ag.waarde
-                    aanmelding.ag_voor_team_mag_aangepast_worden = True
-                # for
+                    if ag_hist:
+                        # iemand heeft een AG ingevoerd voor de teamcompetitie
+                        # let op: dit kan van lang geleden zijn
+                        ag = ag_hist.ag
+                        aanmelding.ag_voor_team = ag.waarde
+                        aanmelding.ag_voor_team_mag_aangepast_worden = True
+                    # for
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
                 try:

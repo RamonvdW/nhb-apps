@@ -314,17 +314,18 @@ class RegiocompetitieAanmeldenView(View):
 
         if aanmelding.ag_voor_team_mag_aangepast_worden:
             # geen vastgesteld AG - kijk of we nog een handmatig AG kunnen vinden
-            ags = (AanvangsgemiddeldeHist
-                   .objects
-                   .filter(ag__sporterboog=sporterboog,
-                           ag__doel=AG_DOEL_TEAM,
-                           ag__afstand_meter=deelcomp.competitie.afstand)
-                   .order_by('-when'))      # nieuwste eerst
+            ag_hist = (AanvangsgemiddeldeHist
+                       .objects
+                       .filter(ag__sporterboog=sporterboog,
+                               ag__doel=AG_DOEL_TEAM,
+                               ag__afstand_meter=deelcomp.competitie.afstand)
+                       .order_by('-when')      # nieuwste eerst
+                       .first())
 
-            if len(ags):
+            if ag_hist:
                 # iemand heeft een AG ingevoerd voor de teamcompetitie
                 # let op: dit kan van lang geleden zijn
-                ag = ags[0].ag
+                ag = ag_hist.ag
                 aanmelding.ag_voor_team = ag.waarde
                 aanmelding.ag_voor_team_mag_aangepast_worden = True
 
