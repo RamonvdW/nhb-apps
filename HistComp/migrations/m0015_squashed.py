@@ -1,52 +1,30 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
 
 
-def maak_en_koppel_seizoen(apps, _):
-
-    seizoen_klas = apps.get_model('HistComp', 'HistCompSeizoen')
-    comp_klas = apps.get_model('HistComp', 'HistCompetitie')
-    indiv_klas = apps.get_model('HistComp', 'HistCompRegioIndiv')
-
-    hist2seizoen = dict()    # [(comp_type, seizoen)] = HistCompSeizoen
-
-    for hist in comp_klas.objects.all():            # pragma: no cover
-        tup = (hist.comp_type, hist.seizoen)
-        try:
-            seizoen = hist2seizoen[tup]
-        except KeyError:
-            seizoen = seizoen_klas(
-                            seizoen=hist.seizoen,
-                            comp_type=hist.comp_type,
-                            aantal_beste_scores=hist.aantal_beste_scores,
-                            is_openbaar=hist.is_openbaar,
-                            indiv_bogen='R,C,BB,IB,LB',
-                            team_typen='R,C,BB,IB,LB')
-            seizoen.save()
-            hist2seizoen[tup] = seizoen
-
-        # corrigeer de klasse beschrijving
-        if hist.beschrijving == 'Instinctive bow':
-            hist.beschrijving = 'Instinctive'
-
-        # alle histcomp records die verwijzen naar deze HistCompetitie ook een seizoen geven
-        indiv_klas.objects.filter(histcompetitie=hist).update(seizoen=seizoen, indiv_klasse=hist.beschrijving)
-    # for
-
-
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    # dit is de eerste
+    initial = True
+
+    replaces = [('HistComp', 'm0007_squashed'),
+                ('HistComp', 'm0008_aantal'),
+                ('HistComp', 'm0009_renames'),
+                ('HistComp', 'm0010_team_en_kamp'),
+                ('HistComp', 'm0011_ver_plaats_regio'),
+                ('HistComp', 'm0012_no_defaults'),
+                ('HistComp', 'm0013_titels'),
+                ('HistComp', 'm0014_indiv_bk')]
+
     # volgorde afdwingen
-    dependencies = [
-        ('HistComp', 'm0009_renames'),
-    ]
+    dependencies = []
 
     # migratie functies
     operations = [
@@ -72,101 +50,6 @@ class Migration(migrations.Migration):
                 'ordering': ['-seizoen', 'comp_type'],
             },
         ),
-        migrations.AlterField(
-            model_name='histcompetitie',
-            name='comp_type',
-            field=models.CharField(choices=[('18', 'Indoor'), ('25', '25m1pijl')], max_length=2),
-        ),
-        migrations.AlterModelOptions(
-            name='histcompetitie',
-            options={'ordering': ['seizoen', 'comp_type'], 'verbose_name': 'Historie competitie', 'verbose_name_plural': 'Historie competitie'},
-        ),
-
-        migrations.AlterModelOptions(
-            name='histcompregioindiv',
-            options={'ordering': ['rank'], 'verbose_name': 'Hist regio indiv', 'verbose_name_plural': 'Hist regio indiv'},
-        ),
-        migrations.AddField(
-            model_name='histcompregioindiv',
-            name='seizoen',
-            field=models.ForeignKey(null=True, on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen'),
-        ),
-        migrations.AddField(
-            model_name='histcompregioindiv',
-            name='indiv_klasse',
-            field=models.CharField(default='', max_length=35),
-        ),
-        migrations.AddField(
-            model_name='histcompregioindiv',
-            name='vereniging_plaats',
-            field=models.CharField(default='', max_length=35),
-        ),
-        migrations.AddField(
-            model_name='histcompregioindiv',
-            name='regio_nr',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='boogtype',
-            field=models.CharField(default='', max_length=5),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='laagste_score_nr',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='rank',
-            field=models.PositiveSmallIntegerField(),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='score1',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='score2',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='score3',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='score4',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='score5',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='score6',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='score7',
-            field=models.PositiveSmallIntegerField(default=0),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='totaal',
-            field=models.PositiveSmallIntegerField(),
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='vereniging_nr',
-            field=models.PositiveSmallIntegerField(),
-        ),
-
         migrations.CreateModel(
             name='HistCompRegioTeam',
             fields=[
@@ -203,7 +86,6 @@ class Migration(migrations.Migration):
                 'ordering': ['rank', 'team_klasse'],
             },
         ),
-
         migrations.CreateModel(
             name='HistKampIndiv',
             fields=[
@@ -218,24 +100,20 @@ class Migration(migrations.Migration):
                 ('vereniging_plaats', models.CharField(default='', max_length=35)),
                 ('rayon_nr', models.PositiveSmallIntegerField()),
                 ('rank_rk', models.PositiveSmallIntegerField()),
-                ('rank_bk', models.PositiveSmallIntegerField(default=0)),
                 ('rk_score_is_blanco', models.BooleanField(default=False)),
                 ('rk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('rk_score_2', models.PositiveSmallIntegerField(default=0)),
                 ('rk_score_totaal', models.PositiveSmallIntegerField(default=0)),
                 ('rk_counts', models.CharField(blank=True, default='', max_length=20)),
-                ('bk_score_1', models.PositiveSmallIntegerField(default=0)),
-                ('bk_score_2', models.PositiveSmallIntegerField(default=0)),
-                ('bk_score_totaal', models.PositiveSmallIntegerField(default=0)),
-                ('bk_counts', models.CharField(blank=True, default='', max_length=20)),
                 ('teams_rk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('teams_rk_score_2', models.PositiveSmallIntegerField(default=0)),
                 ('teams_bk_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('teams_bk_score_2', models.PositiveSmallIntegerField(default=0)),
+                ('titel_code_rk', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')], default=' ', max_length=1)),
             ],
             options={
-                'verbose_name': 'Hist rk/bk indiv',
-                'verbose_name_plural': 'Hist rk/bk indiv',
+                'verbose_name': 'Hist indiv RK',
+                'verbose_name_plural': 'Hist indiv RK',
             },
         ),
         migrations.CreateModel(
@@ -257,29 +135,71 @@ class Migration(migrations.Migration):
                 ('score_lid_2', models.PositiveSmallIntegerField(default=0)),
                 ('score_lid_3', models.PositiveSmallIntegerField(default=0)),
                 ('score_lid_4', models.PositiveSmallIntegerField(default=0)),
-                ('lid_1', models.ForeignKey(on_delete=models.deletion.CASCADE, null=True, blank=True, related_name='team_lid_1', to='HistComp.histkampindiv')),
-                ('lid_2', models.ForeignKey(on_delete=models.deletion.CASCADE, null=True, blank=True, related_name='team_lid_2', to='HistComp.histkampindiv')),
-                ('lid_3', models.ForeignKey(on_delete=models.deletion.CASCADE, null=True, blank=True, related_name='team_lid_3', to='HistComp.histkampindiv')),
-                ('lid_4', models.ForeignKey(on_delete=models.deletion.CASCADE, null=True, blank=True, related_name='team_lid_4', to='HistComp.histkampindiv')),
+                ('lid_1', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_1', to='HistComp.histkampindiv')),
+                ('lid_2', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_2', to='HistComp.histkampindiv')),
+                ('lid_3', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_3', to='HistComp.histkampindiv')),
+                ('lid_4', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, related_name='team_lid_4', to='HistComp.histkampindiv')),
+                ('titel_code', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')], default=' ', max_length=1)),
             ],
             options={
                 'verbose_name': 'Hist rk/bk teams',
                 'verbose_name_plural': 'Hist rk/bk teams',
             },
         ),
-        migrations.RunPython(code=maak_en_koppel_seizoen,
-                             reverse_code=migrations.RunPython.noop),
-        migrations.RemoveField(
-            model_name='histcompregioindiv',
-            name='histcompetitie',
+        migrations.CreateModel(
+            name='HistCompRegioIndiv',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('rank', models.PositiveSmallIntegerField()),
+                ('sporter_lid_nr', models.PositiveIntegerField()),
+                ('sporter_naam', models.CharField(max_length=50)),
+                ('vereniging_nr', models.PositiveSmallIntegerField()),
+                ('vereniging_naam', models.CharField(max_length=50)),
+                ('boogtype', models.CharField(max_length=5)),
+                ('score1', models.PositiveSmallIntegerField(default=0)),
+                ('score2', models.PositiveSmallIntegerField(default=0)),
+                ('score3', models.PositiveSmallIntegerField(default=0)),
+                ('score4', models.PositiveSmallIntegerField(default=0)),
+                ('score5', models.PositiveSmallIntegerField(default=0)),
+                ('score6', models.PositiveSmallIntegerField(default=0)),
+                ('score7', models.PositiveSmallIntegerField(default=0)),
+                ('totaal', models.PositiveSmallIntegerField()),
+                ('gemiddelde', models.DecimalField(decimal_places=3, max_digits=5)),
+                ('laagste_score_nr', models.PositiveSmallIntegerField(default=0)),
+                ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
+                ('indiv_klasse', models.CharField(max_length=35)),
+                ('vereniging_plaats', models.CharField(max_length=35)),
+                ('regio_nr', models.PositiveSmallIntegerField(default=0)),
+            ],
+            options={
+                'verbose_name': 'Hist indiv regio',
+                'verbose_name_plural': 'Hist indiv regio',
+                'ordering': ['rank'],
+            },
         ),
-        migrations.DeleteModel(
-            name='HistCompetitie',
-        ),
-        migrations.AlterField(
-            model_name='histcompregioindiv',
-            name='seizoen',
-            field=models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen'),
+        migrations.CreateModel(
+            name='HistKampIndivBK',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('bk_indiv_klasse', models.CharField(max_length=35)),
+                ('sporter_lid_nr', models.PositiveIntegerField()),
+                ('sporter_naam', models.CharField(max_length=50)),
+                ('boogtype', models.CharField(max_length=5)),
+                ('vereniging_nr', models.PositiveSmallIntegerField()),
+                ('vereniging_naam', models.CharField(max_length=50)),
+                ('vereniging_plaats', models.CharField(default='', max_length=35)),
+                ('rank_bk', models.PositiveSmallIntegerField(default=0)),
+                ('titel_code_bk', models.CharField(choices=[(' ', 'None'), ('R', 'RK'), ('B', 'BK'), ('N', 'NK')], default=' ', max_length=1)),
+                ('bk_score_1', models.PositiveSmallIntegerField(default=0)),
+                ('bk_score_2', models.PositiveSmallIntegerField(default=0)),
+                ('bk_score_totaal', models.PositiveSmallIntegerField(default=0)),
+                ('bk_counts', models.CharField(blank=True, default='', max_length=20)),
+                ('seizoen', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.histcompseizoen')),
+            ],
+            options={
+                'verbose_name': 'Hist indiv BK',
+                'verbose_name_plural': 'Hist indiv BK',
+            },
         ),
     ]
 

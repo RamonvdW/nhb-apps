@@ -17,10 +17,15 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
+    replaces = [('Account', 'm0023_squashed'),
+                ('Account', 'm0024_merge_accountemail_1'),
+                ('Account', 'm0025_merge_accountemail_2'),
+                ('Account', 'm0026_is_gast')]
+
     # volgorde afdwingen
     dependencies = [
+        ('auth', '0012_alter_user_first_name_max_length'),
         ('sessions', '0001_initial'),
-        ('auth', '0001_initial'),
     ]
 
     # migratie functies
@@ -45,12 +50,18 @@ class Migration(migrations.Migration):
                 ('verkeerd_wachtwoord_teller', models.IntegerField(default=0, help_text='Aantal mislukte inlog pogingen op rij')),
                 ('is_geblokkeerd_tot', models.DateTimeField(blank=True, help_text='Login niet mogelijk tot', null=True)),
                 ('is_BB', models.BooleanField(default=False, help_text='Manager Competitiezaken')),
-                ('is_Observer', models.BooleanField(default=False, help_text='Alleen observeren')),
                 ('otp_code', models.CharField(blank=True, default='', help_text='OTP code', max_length=32)),
                 ('otp_is_actief', models.BooleanField(default=False, help_text='Is OTP verificatie gelukt')),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
+                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
+                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
                 ('otp_controle_gelukt_op', models.DateTimeField(blank=True, null=True)),
+                ('bevestigde_email', models.EmailField(blank=True, max_length=254)),
+                ('email_is_bevestigd', models.BooleanField(default=False)),
+                ('laatste_email_over_taken', models.DateTimeField(blank=True, null=True)),
+                ('nieuwe_email', models.EmailField(blank=True, max_length=254)),
+                ('optout_herinnering_taken', models.BooleanField(default=False)),
+                ('optout_nieuwe_taak', models.BooleanField(default=False)),
+                ('is_gast', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Account',
@@ -59,25 +70,6 @@ class Migration(migrations.Migration):
             managers=[
                 ('objects', django.contrib.auth.models.UserManager()),
             ],
-        ),
-        migrations.CreateModel(
-            name='AccountEmail',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email_is_bevestigd', models.BooleanField(default=False)),
-                ('bevestigde_email', models.EmailField(blank=True, max_length=254)),
-                ('nieuwe_email', models.EmailField(blank=True, max_length=254)),
-                ('optout_nieuwe_taak', models.BooleanField(default=False)),
-                ('optout_herinnering_taken', models.BooleanField(default=False)),
-                ('laatste_email_over_taken', models.DateTimeField(blank=True, null=True)),
-                ('optout_functie_koppeling', models.BooleanField(default=False)),
-                ('optout_reactie_klacht', models.BooleanField(default=False)),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'AccountEmail',
-                'verbose_name_plural': 'AccountEmails',
-            },
         ),
         migrations.CreateModel(
             name='AccountSessions',

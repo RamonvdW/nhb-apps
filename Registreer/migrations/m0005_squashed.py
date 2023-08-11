@@ -52,7 +52,7 @@ def maak_vereniging_extern(apps, _):
     sec_klas(vereniging=ver).save()
 
     # maak de beheerders rol aan
-    functie_klas(rol='SEC', beschrijving='Secretaris %s' % ver_nr, nhb_ver=ver).save()
+    functie_klas(rol='SEC', beschrijving='Secretaris %s' % ver_nr, vereniging=ver).save()
     # (bewust geen HWL en WL)
 
 
@@ -63,11 +63,16 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
+    replaces = [('Registreer', 'm0001_initial'),
+                ('Registreer', 'm0002_more'),
+                ('Registreer', 'm0003_kan_aanmaken'),
+                ('Registreer', 'm0004_opruimen')]
+
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0025_merge_accountemail_2'),
-        ('NhbStructuur', 'm0033_ver_is_extern'),
-        ('Sporter', 'm0022_pas_code'),
+        ('Account', 'm0027_squashed'),
+        ('NhbStructuur', 'm0034_squashed'),
+        ('Sporter', 'm0025_squashed'),
         ('Vereniging', 'm0001_initial'),
     ]
 
@@ -78,10 +83,11 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('volgende_lid_nr', models.PositiveIntegerField()),
+                ('kan_aanmaken', models.BooleanField(default=True)),
             ],
             options={
                 'verbose_name': 'Volgende gast lid nr',
-                'verbose_name_plural': 'Volgende gast lid nr'
+                'verbose_name_plural': 'Volgende gast lid nr',
             },
         ),
         migrations.CreateModel(
@@ -100,12 +106,13 @@ class Migration(migrations.Migration):
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('X', 'Anders')], default='M', max_length=1)),
                 ('eigen_sportbond_naam', models.CharField(blank=True, default='', max_length=100)),
                 ('eigen_lid_nummer', models.CharField(blank=True, default='', max_length=25)),
-                ('eigen_vereniging', models.CharField(blank=True, default='', max_length=100)),
-                ('woonplaats', models.CharField(blank=True, default='', max_length=100)),
+                ('club', models.CharField(blank=True, default='', max_length=100)),
                 ('land', models.CharField(blank=True, default='', max_length=100)),
                 ('telefoon', models.CharField(blank=True, default='', max_length=25)),
                 ('account', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Account.account')),
                 ('sporter', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
+                ('wa_id', models.CharField(blank=True, default='', max_length=8)),
+                ('club_plaats', models.CharField(blank=True, default='', max_length=50)),
             ],
             options={
                 'verbose_name': 'Gast registratie',

@@ -137,10 +137,13 @@ class Migration(migrations.Migration):
     # dit is de eerste
     initial = True
 
+    replaces = [('NhbStructuur', 'm0031_squashed'),
+                ('NhbStructuur', 'm0032_korter'),
+                ('NhbStructuur', 'm0033_ver_is_extern')]
+
     # volgorde afdwingen
     dependencies = []
 
-    # migratie functies
     operations = [
         migrations.CreateModel(
             name='NhbRayon',
@@ -185,19 +188,20 @@ class Migration(migrations.Migration):
             name='NhbVereniging',
             fields=[
                 ('ver_nr', models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ('naam', models.CharField(max_length=200)),
+                ('naam', models.CharField(max_length=50)),
                 ('regio', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
-                ('plaats', models.CharField(blank=True, max_length=100)),
-                ('clusters', models.ManyToManyField(blank=True, to='NhbStructuur.NhbCluster')),
+                ('plaats', models.CharField(blank=True, max_length=35)),
+                ('clusters', models.ManyToManyField(blank=True, to='NhbStructuur.nhbcluster')),
                 ('geen_wedstrijden', models.BooleanField(default=False)),
                 ('kvk_nummer', models.CharField(blank=True, default='', max_length=15)),
                 ('telefoonnummer', models.CharField(blank=True, default='', max_length=20)),
                 ('website', models.CharField(blank=True, default='', max_length=100)),
-                ('adres_regel1', models.CharField(blank=True, default='', max_length=100)),
-                ('adres_regel2', models.CharField(blank=True, default='', max_length=100)),
+                ('adres_regel1', models.CharField(blank=True, default='', max_length=50)),
+                ('adres_regel2', models.CharField(blank=True, default='', max_length=50)),
                 ('contact_email', models.EmailField(blank=True, max_length=254)),
                 ('bank_bic', models.CharField(blank=True, default='', max_length=11)),
                 ('bank_iban', models.CharField(blank=True, default='', max_length=18)),
+                ('is_extern', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Nhb vereniging',

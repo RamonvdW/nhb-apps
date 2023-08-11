@@ -11,16 +11,12 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Records', 'm0011_squashed'),
-                ('Records', 'm0012_traditional'),
-                ('Records', 'm0013_ander_record')]
-
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Sporter', 'm0021_squashed'),
+        ('Sporter', 'm0025_squashed'),
     ]
 
     # migratie functies
