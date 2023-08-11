@@ -349,9 +349,15 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.account_normaal.save(update_fields=['is_gast'])
 
         url = self.url_webwinkel_product % self.product.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal': '1', 'snel': 1})
-
         self.assert404(resp, 'Geen toegang')
 
 # end of file
