@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}
 
 {% block title %}Details{% endblock %}
 
@@ -20,7 +21,7 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 white">
 
             <!-- dialoog venster -->
             <div style="margin:50px 30px 30px 30px" class="left-align">
@@ -46,7 +47,7 @@
                     </tr>
                     <tr>
                         <th>E-mailadres</th>
-                        <td><code>{{ gast.email }}</code></td>
+                        <td><code>{{ gast.email|wbr_email }}</code></td>
                     </tr>
                     <tr>
                         <th>Telefoonnummer</th>
