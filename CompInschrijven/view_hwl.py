@@ -49,7 +49,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.functie_nu.rol == 'HWL'
+        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

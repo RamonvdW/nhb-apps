@@ -9,13 +9,15 @@ from HistComp import view_top, view_interland, view_regio, view_rk, view_bk
 
 app_name = 'HistComp'
 
+# base: /bondscompetities/hist/
+
 urlpatterns = [
 
     path('',
          view_top.HistCompTop.as_view(),
          name='top'),
 
-    path('<seizoen>/<histcomp_type>/',
+    path('<seizoen>/<histcomp_type>/',      # hier gaat ook de pre-v19 url heen: "indiv/38/"
          view_top.HistCompTop.as_view(),
          name='seizoen-top'),
 
