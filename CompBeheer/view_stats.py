@@ -9,7 +9,7 @@ from django.db.models import F
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
-from Competitie.models import (Competitie,
+from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam,
                                KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.definities import Rollen
@@ -89,11 +89,33 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         context['aantal_25m_teams'] = list()
         context['totaal_18m_teams'] = 0
         context['totaal_25m_teams'] = 0
+
+        regio_organiseert_teamcompetitie = dict()     # ["afstand", regio_nr] = True/False
         for regio_nr in range(101, 116+1):
-            context['aantal_18m_teams'].append(aantal_18m_teams[regio_nr])
-            context['aantal_25m_teams'].append(aantal_25m_teams[regio_nr])
-            context['totaal_18m_teams'] += aantal_18m_teams[regio_nr]
-            context['totaal_25m_teams'] += aantal_25m_teams[regio_nr]
+            regio_organiseert_teamcompetitie[('18', regio_nr)] = False
+            regio_organiseert_teamcompetitie[('25', regio_nr)] = False
+        # for
+        for deelcomp in (Regiocompetitie
+                         .objects
+                         .select_related('competitie',
+                                         'regio')
+                         .filter(competitie__in=actuele_comps)):
+            tup = (deelcomp.competitie.afstand, deelcomp.regio.regio_nr)
+            regio_organiseert_teamcompetitie[tup] = deelcomp.regio_organiseert_teamcompetitie
+        # for
+
+        for regio_nr in range(101, 116+1):
+            if regio_organiseert_teamcompetitie['18', regio_nr]:
+                context['aantal_18m_teams'].append(aantal_18m_teams[regio_nr])
+                context['totaal_18m_teams'] += aantal_18m_teams[regio_nr]
+            else:
+                context['aantal_18m_teams'].append('-')
+
+            if regio_organiseert_teamcompetitie['25', regio_nr]:
+                context['aantal_25m_teams'].append(aantal_25m_teams[regio_nr])
+                context['totaal_25m_teams'] += aantal_25m_teams[regio_nr]
+            else:
+                context['aantal_25m_teams'].append('-')
         # for
 
         aantal_18m_rayon = dict()
@@ -309,16 +331,16 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
 
             if comp.afstand not in afstand_gevonden:
                 comp.bepaal_fase()
-                comp.bepaal_openbaar(self.rol_nu)
-
-                if comp.is_openbaar:
-                    if comp.fase_indiv >= 'C':
-                        actuele_comps.append(comp)
-                        afstand_gevonden.append(comp.afstand)
-                        context['seizoen'] = comp.maak_seizoen_str()
+                if comp.fase_indiv >= 'C':
+                    actuele_comps.append(comp)
+                    afstand_gevonden.append(comp.afstand)
+                    context['seizoen'] = comp.maak_seizoen_str()
         # for
 
-        self._tel_aantallen(context, actuele_comps)
+        context['heeft_data'] = len(actuele_comps) > 0
+
+        if len(actuele_comps):
+            self._tel_aantallen(context, actuele_comps)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

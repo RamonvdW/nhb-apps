@@ -253,7 +253,7 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
 
             try:
                 count += hwl_count[ver_nr]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 count = 0
             if count == 0:
                 geen_hwl.append(ver)
