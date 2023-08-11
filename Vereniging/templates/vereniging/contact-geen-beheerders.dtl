@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}
 
 {% block title %}Zonder beheerders{% endblock %}
 
@@ -22,8 +23,8 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Geen beheerders</h4>
-            <p>Nog helemaal geen leden gekoppeld aan de beheerder rollen SEC / HWL / WL</p>
+            <h4>Geen HWL</h4>
+            <p>Geen beheerder gekoppeld aan de rol HWL</p>
         </div>
     </div>
 
@@ -32,9 +33,9 @@
         <div class="col s12">
             <table class="white">
                 <tr>
-                    <td>{% for ver in geen_beheerders %}{{ ver.nr_geen_beheerders }}<br>{% endfor %}</td>
-                    <td>{% for ver in geen_beheerders %}{{ ver }}<br>{% endfor %}</td>
-                    <td>{% for ver in geen_beheerders %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_hwl %}{{ ver.nr_geen_hwl }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_hwl %}{{ ver }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_hwl %}{{ ver.functie_sec_email|wbr_email }}<br>{% endfor %}</td>
                 </tr>
             </table>
         </div>
@@ -44,7 +45,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Secretaris account</h4>
+            <h4>Geen SEC account</h4>
             <p>Secretaris heeft nog geen account aangemaakt</p>
         </div>
     </div>
@@ -56,7 +57,7 @@
                 <tr>
                     <td>{% for ver in geen_sec %}{{ ver.nr_geen_sec }}<br>{% endfor %}</td>
                     <td>{% for ver in geen_sec %}{{ ver }}<br>{% endfor %}</td>
-                    <td>{% for ver in geen_sec %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_sec %}{{ ver.functie_sec_email|wbr_email }}<br>{% endfor %}</td>
                 </tr>
             </table>
         </div>
