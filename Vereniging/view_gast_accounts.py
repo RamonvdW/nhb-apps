@@ -41,7 +41,7 @@ class GastAccountsView(UserPassesTestMixin, ListView):
                 .objects
                 .select_related('sporter',
                                 'account')
-                .all())
+                .order_by('-aangemaakt'))       # nieuwste eerst
 
         for gast in objs:
             sporter = gast.sporter
