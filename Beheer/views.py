@@ -67,10 +67,12 @@ class BeheerAdminSite(AdminSite):
         return HttpResponseRedirect(url)
 
     def get_urls(self):
-        # remove the password-change-done entry
         url_conf = super(BeheerAdminSite, self).get_urls()
-        del url_conf[4]
-        return url_conf
+        # remove unwanted entries
+        cleaned = [conf
+                   for conf in url_conf
+                   if conf.pattern.name not in ('password_change_done',)]
+        return cleaned
 
     def has_permission(self, request):
         """ geef True terug als de gebruiker bij de admin pagina mag """
