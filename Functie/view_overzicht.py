@@ -35,25 +35,6 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
-    @staticmethod
-    def _sorteer(objs):
-        lst = list()
-        for obj in objs:
-            if obj.rol == "SEC":
-                nr = 1
-            elif obj.rol == "HWL":
-                nr = 2
-            elif obj.rol == "WL":
-                nr = 3
-            else:
-                # obj.rol == MWZ, MWW, etc.
-                nr = 4
-            tup = (nr, obj.pk, obj)
-            lst.append(tup)
-        # for
-        lst.sort()
-        return [obj for _, _, obj in lst]
-
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
@@ -61,13 +42,17 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
         # en de huidige functie selecteert de vereniging
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        # zoek alle rollen binnen deze vereniging
-        objs = Functie.objects.filter(vereniging=functie_nu.vereniging)
+        rol2volg_nr = {'SEC': 1, 'HWL': 2, 'WL': 3}
 
-        # zet beheerders en wijzig_url
-        for obj in objs:
-            obj.beheerders = [account.volledige_naam() for account in
-                              obj.accounts.only('username', 'first_name', 'last_name').all()]
+        # zoek alle rollen binnen deze vereniging
+        unsorted = list()
+        for obj in (Functie
+                    .objects
+                    .filter(vereniging=functie_nu.vereniging)):
+
+            # zet beheerders en urls voor de knoppen
+            obj.beheerders = [account.volledige_naam()
+                              for account in obj.accounts.only('username', 'first_name', 'last_name').all()]
 
             obj.wijzig_url = None
             obj.email_url = None
@@ -80,10 +65,12 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
                 if obj.rol != 'SEC':
                     # email voor secretaris komt uit Onze Relaties
                     mag_email_wijzigen = True
+
             elif rol_nu == Rollen.ROL_HWL and obj.rol in ('HWL', 'WL'):
                 # HWL mag andere HWL en WL koppelen
                 mag_koppelen = True
                 mag_email_wijzigen = True
+
             elif rol_nu == Rollen.ROL_WL and obj.rol == 'WL':
                 mag_email_wijzigen = True
 
@@ -92,9 +79,14 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
 
             if mag_email_wijzigen:
                 obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
+
+            volg_nr = rol2volg_nr[obj.rol]
+            tup = (volg_nr, obj.pk, obj)
+            unsorted.append(tup)
         # for
 
-        return self._sorteer(objs)
+        unsorted.sort()
+        return [obj for _, _, obj in unsorted]
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
