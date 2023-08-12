@@ -24,6 +24,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
     url_activiteit = '/overig/activiteit/'
     url_loskoppelen = '/overig/otp-loskoppelen/'
+    url_bondspas = '/sporter/bondspas/toon/van-lid/%s/'     # lid nr
 
     testdata = None
     huidige_jaar = 2020
@@ -99,6 +100,16 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
                 geboorte_datum='1980-01-09',
                 sinds_datum='2008-01-01',
                 is_actief_lid=False).save()
+
+        # gast-account
+        Sporter(
+                lid_nr=100005,
+                voornaam='Speciaal',
+                achternaam='Gast',
+                unaccented_naam='Speciaal Gast',
+                geboorte_datum='1980-01-09',
+                sinds_datum='2008-01-01',
+                is_gast=True).save()
 
     def test_anon(self):
         # geen inlog = geen toegang
@@ -194,6 +205,17 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertIn(self.url_bondspas % '100004', urls)
+
+        # gast-account (geen bondspas)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit, {'zoekterm': '100005'})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertNotIn(self.url_bondspas % '100005', urls)
 
         # maak wat wijzigingen
         account = self.account_100001

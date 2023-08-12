@@ -218,6 +218,7 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
                      .select_related('vereniging')
                      .filter(rol__in=('SEC', 'HWL'))
                      .exclude(vereniging__geen_wedstrijden=True)
+                     .exclude(vereniging__is_extern=True)
                      .annotate(aantal_accounts=Count('accounts'))
                      .order_by('vereniging__ver_nr')):
 
@@ -235,7 +236,7 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
         # for
 
         context['geen_sec'] = geen_sec = list()
-        context['geen_beheerders'] = geen_beheerders = list()
+        context['geen_hwl'] = geen_hwl = list()
 
         for ver in alle_ver:
             ver_nr = ver.ver_nr
@@ -252,11 +253,11 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
 
             try:
                 count += hwl_count[ver_nr]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 count = 0
             if count == 0:
-                geen_beheerders.append(ver)
-                ver.nr_geen_beheerders = len(geen_beheerders)
+                geen_hwl.append(ver)
+                ver.nr_geen_hwl = len(geen_hwl)
         # for
 
         context['kruimels'] = (

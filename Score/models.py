@@ -85,11 +85,11 @@ class AanvangsgemiddeldeHist(models.Model):
 class Score(models.Model):
     """ Bijhouden van een specifieke score """
 
-    # soort: score, indiv ag, team ag
-    type = models.CharField(max_length=1, choices=SCORE_CHOICES, default=SCORE_TYPE_SCORE)
+    # soort: score, geen score
+    type = models.CharField(max_length=1, choices=SCORE_CHOICES, default=SCORE_TYPE_SCORE)   # TODO: kan Boolean worden
 
     # bij wie hoort deze score
-    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)           # TOOD: null=True niet meer nodig?
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)  # TODO: null=True kan weg?
 
     # TODO: kopie toevoegen van het boogtype van de sporterboog, om eenvoudiger op te kunnen filteren
 

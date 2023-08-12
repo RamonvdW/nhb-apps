@@ -273,6 +273,10 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compbeheer/overzicht.dtl', 'plein/site_layout.dtl'))
 
+        # bad
+        resp = self.client.get(self.url_overzicht_beheer % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
         # BKO 18m
         deelkamp = Kampioenschap.objects.get(competitie=comp18, deel=DEEL_BK)
         functie_bko = deelkamp.functie

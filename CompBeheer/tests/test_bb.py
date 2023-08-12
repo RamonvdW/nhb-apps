@@ -21,7 +21,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompBeheerTestBB(E2EHelpers, TestCase):
+class TestCompBeheerBB(E2EHelpers, TestCase):
 
     """ tests voor de CompBeheer applicatie, module BB """
 
@@ -36,15 +36,14 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
     url_klassengrenzen_vaststellen = '/bondscompetities/beheer/%s/klassengrenzen-vaststellen/'  # comp_pk
     url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen-tonen/'                     # comp_pk
     url_seizoen_afsluiten = '/bondscompetities/beheer/seizoen-afsluiten/'
-    url_statistiek = '/bondscompetities/beheer/statistiek/'
 
     testdata = None
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
-        cls.testdata.maak_accounts_admin_en_bb()
-        cls.testdata.maak_clubs_en_sporters()
+        cls.testdata = data = testdata.TestData()
+        data.maak_accounts_admin_en_bb()
+        data.maak_clubs_en_sporters()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -326,9 +325,6 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
         resp = self.client.get(self.url_seizoen_afsluiten)
         self.assert403(resp)
 
-        resp = self.client.get(self.url_statistiek)
-        self.assert403(resp)
-
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
@@ -484,7 +480,10 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         # verander de fase van de 25m competitie zodat we verschillen hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
-        CompetitieIndivKlasse(competitie=comp, volgorde=1, min_ag=25.0, boogtype=self.sporterboog_100002.boogtype).save()
+        CompetitieIndivKlasse(competitie=comp,
+                              volgorde=1,
+                              min_ag=25.0,
+                              boogtype=self.sporterboog_100002.boogtype).save()
         comp.klassengrenzen_vastgesteld = True
         comp.save()
 
@@ -742,26 +741,6 @@ class TestCompBeheerTestBB(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_seizoen_afsluiten)
         self.assert404(resp, 'Geen competitie gevonden')
-
-    def test_statistiek(self):
-        # moet BB zijn
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        # maak een competitie van het volgende seizoen aan
-        competities_aanmaken(jaar=2019)
-
-        for comp in Competitie.objects.all():
-            comp.klassengrenzen_vastgesteld = True
-            comp.save(update_fields=['klassengrenzen_vastgesteld'])
-        # for
-
-        # TODO: controleer dat het "kies" scherm het kaartje statistiek bevat
-
-        resp = self.client.get(self.url_statistiek)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compbeheer/bb-statistiek.dtl', 'plein/site_layout.dtl'))
 
 
 # TODO: gebruik assert_other_http_commands_not_supported
