@@ -288,6 +288,8 @@ class TestHistComp(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.hist_kamp_team_rk) != '')
 
+        self.assertTrue(str(self.hist_kamp_indiv_bk) != '')
+
         # niet openbaar
         self.hist_seizoen.is_openbaar = False
         self.hist_seizoen.save(update_fields=['is_openbaar'])

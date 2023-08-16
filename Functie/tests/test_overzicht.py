@@ -113,7 +113,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig + '123/')
         self.assert403(resp)
 
-    def test_schutter(self):
+    def test_sporter(self):
         # geen rechten om dit overzicht in te zien
         # zelf niet na acceptatie VHPG en OTP controle
         self.e2e_login_and_pass_otp(self.account_normaal)

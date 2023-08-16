@@ -7,6 +7,7 @@
 from django.test import TestCase
 from Functie.models import Functie
 from Taken.models import Taak
+from Taken.operations import eval_open_taken, SESSIONVAR_TAAK_EVAL_AFTER
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -126,6 +127,15 @@ class TestTakenViews(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.taak1) != '')
         self.assertTrue(str(self.taak2) != '')
+
+        # corner-case
+        request = resp.wsgi_request
+        eval_open_taken(request, forceer=False)
+
+        session = request.session
+        del session[SESSIONVAR_TAAK_EVAL_AFTER]
+        session.save()
+        eval_open_taken(request, forceer=False)
 
     def test_bad(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
