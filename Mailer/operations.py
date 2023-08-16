@@ -140,7 +140,8 @@ def render_email_template(context, email_template_name):
     """
 
     context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_khsn.png')
-    context['logo_width'] = 213
+    # aspect ratio: 400x92 --> 217x50
+    context['logo_width'] = 217
     context['logo_height'] = 50
 
     context['basis_when'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
