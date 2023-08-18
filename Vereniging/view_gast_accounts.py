@@ -9,10 +9,14 @@ from django.http import Http404
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import GESLACHT2STR
+from Bestel.definities import BESTELLING_STATUS2STR
+from Bestel.models import BestelMandje, Bestelling
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
+from Wedstrijden.definities import INSCHRIJVING_STATUS_TO_STR
+from Wedstrijden.models import WedstrijdInschrijving
 
 TEMPLATE_GAST_ACCOUNTS = 'vereniging/gast-accounts.dtl'
 TEMPLATE_GAST_ACCOUNT_DETAILS = 'vereniging/gast-account-details.dtl'
@@ -95,21 +99,8 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-
-        context = super().get_context_data(**kwargs)
-
-        lid_nr = kwargs['lid_nr'][:6]       # afkappen voor extra veiligheid
-        try:
-            lid_nr = int(lid_nr)
-            gast = GastRegistratie.objects.get(lid_nr=lid_nr)
-        except (ValueError, GastRegistratie.DoesNotExist):
-            raise Http404('Slechte parameter')
-
-        gast.geslacht_str = GESLACHT2STR[gast.geslacht]
-        context['gast'] = gast
-
+    @staticmethod
+    def _zoek_matches(gast, context):
         # zoek naar overeenkomst in CRM
         try:
             eigen_lid_nr = int(gast.eigen_lid_nummer)
@@ -173,11 +164,57 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         beste_pks = [pk for count, pk in best[:10] if count > 1]
 
         context['heeft_matches'] = len(beste_pks) > 0
-        context['sporter_matches'] = Sporter.objects.filter(pk__in=beste_pks)
+        context['sporter_matches'] = Sporter.objects.select_related('account').filter(pk__in=beste_pks)
 
         for sporter in context['sporter_matches']:
             sporter.geslacht_str = GESLACHT2STR[sporter.geslacht]
         # for
+
+    @staticmethod
+    def _zoek_gebruik(gast, context):
+        # zoek naar gebruik van het gast-account
+
+        # zoek bestellingen / aankopen
+        context['gast_mandje'] = BestelMandje.objects.filter(account=gast.account).first()
+        context['gast_bestellingen'] = (Bestelling
+                                        .objects
+                                        .filter(account=gast.account)
+                                        .order_by('-aangemaakt')        # nieuwste eerst
+                                        .select_related('account')
+                                        [:10])
+
+        for bestelling in context['gast_bestellingen']:
+            bestelling.status_str = BESTELLING_STATUS2STR[bestelling.status]
+        # for
+
+        # zoek inschrijvingen (er is geen bestelling van indien betaald door iemand anders)
+        context['gast_wedstrijden'] = (WedstrijdInschrijving
+                                       .objects
+                                       .filter(sporterboog__sporter=gast.sporter)
+                                       .select_related('wedstrijd')
+                                       [:10])
+
+        for inschrijving in context['gast_wedstrijden']:
+            inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+        # for
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+
+        context = super().get_context_data(**kwargs)
+
+        lid_nr = kwargs['lid_nr'][:6]       # afkappen voor extra veiligheid
+        try:
+            lid_nr = int(lid_nr)
+            gast = GastRegistratie.objects.select_related('account', 'sporter').get(lid_nr=lid_nr)
+        except (ValueError, GastRegistratie.DoesNotExist):
+            raise Http404('Slechte parameter')
+
+        gast.geslacht_str = GESLACHT2STR[gast.geslacht]
+        context['gast'] = gast
+
+        self._zoek_matches(gast, context)
+        self._zoek_gebruik(gast, context)
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
