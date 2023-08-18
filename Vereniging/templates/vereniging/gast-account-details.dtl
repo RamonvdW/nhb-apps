@@ -86,6 +86,84 @@
         </div>
     </div>
 
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Bekend?</h4>
+            {% if heeft_matches %}
+                <p>Hieronder volgen mogelijke overeenkomsten met bestaande leden</p>
+            {% else %}
+                <p>Geen overeenkomsten gevonden met bestaande leden</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if heeft_matches %}
+        <!-- blauwe balk met informatie label : info -->
+        <div class="row-sv-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <table class="white">
+                    {% for sporter in sporter_matches %}
+                        <tr><td>
+
+                            <table class="white">
+                                <tr>
+                                    <th>Naam</th>
+                                    <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Geslacht</th>
+                                    <td>{{ sporter.geslacht_str }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Geboortedatum</th>
+                                    <td>{{ sporter.geboorte_datum }}</td>
+                                </tr>
+                                <tr>
+                                    <th>E-mailadres</th>
+                                    <td><code>{{ sporter.email|wbr_email }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th>Vereniging</th>
+                                    <td>{{ sporter.bij_vereniging.ver_nr_en_naam }}</td>
+                                </tr>
+                            </table>
+
+                        </td></tr>
+                    {% endfor %}
+        {% comment %}
+                    <tr>
+                        <th></th>
+                        <td>{{  }}</td>
+                    </tr>
+                    <tr>
+                        <th>Lid sinds</th>
+                        <td>{{ sporter.sinds_datum }}</td>
+                    </tr>
+                    <tr>
+                        <th>Lid bij vereniging</th>
+                        <td>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</td>
+                    </tr>
+                    <tr>
+                        <th>In plaats</th>
+                        <td>{{ sporter.bij_vereniging.plaats }}</td>
+                    </tr>
+                    <tr>
+                        <th>In regio</th>
+                        <td>{{ sporter.bij_vereniging.regio }}</td>
+                    </tr>
+                    <tr>
+                        <th>In rayon</th>
+                        <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
+                    </tr>
+        {% endcomment %}
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+
     {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-gast-account-details" %}
 
 {% endblock %}
