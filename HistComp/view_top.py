@@ -23,7 +23,6 @@ def maak_filter_seizoen(context, seizoenen):
             context['filter_seizoenen']
     """
     seizoen = context['seizoen']
-    histcomp_type_url = context['histcomp_type_url']
 
     context['filter_seizoenen'] = list()
     for opt in seizoenen:
@@ -37,12 +36,11 @@ def maak_filter_seizoen(context, seizoenen):
     # for
 
 
-def maak_filter_histcomp_type(context, **kwargs):
+def maak_filter_histcomp_type(context):
     """ Maak het competitie type filter (Indoor / 25m1pijl)
         Vult in:
             context['filter_histcomp_type']
     """
-    seizoen_url = context['seizoen_url']
     histcomp_type_url = context['histcomp_type_url']
 
     context['filter_histcomp_type'] = list()

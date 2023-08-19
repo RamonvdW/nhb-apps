@@ -173,7 +173,7 @@
             <div class="row-sv-blauw">
 
                 <!-- witte rechthoek voor radiobuttons -->
-                <div class="col s12 m8 offset-m2 l6" style="margin-bottom:50px">
+                <div class="col s12 m8 offset-m2 l6">
                     <div class="white left-align" style="padding:10px">
                         <ul>
                         {% for obj in eigen_rollen %}
