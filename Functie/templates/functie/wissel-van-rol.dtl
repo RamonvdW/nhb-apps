@@ -174,7 +174,7 @@
 
                 <!-- witte rechthoek voor radiobuttons -->
                 <div class="col s12 m8 offset-m2 l6">
-                    <div class="white left-align" style="padding:10px">
+                    <div class="white left-align" style="padding:10px; margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
                         <ul>
                         {% for obj in eigen_rollen %}
                             <li>

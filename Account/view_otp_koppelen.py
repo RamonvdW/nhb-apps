@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect
@@ -104,6 +105,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
 
         context['url_stap_2'] = reverse('Account:otp-koppelen-stap2')
         context['url_controleer'] = reverse('Account:otp-koppelen-stap3')
+        context['site_name'] = settings.OTP_ISSUER_NAME
 
         context['form'] = OTPControleForm()
         context['now'] = timezone.now()
@@ -138,6 +140,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
 
         context['url_stap_2'] = reverse('Account:otp-koppelen-stap2')
         context['url_controleer'] = reverse('Account:otp-koppelen-stap3')
+        context['site_name'] = settings.OTP_ISSUER_NAME
 
         context['form'] = form
         context['now'] = timezone.now()

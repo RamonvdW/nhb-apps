@@ -28,7 +28,7 @@
         <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
 
             <!-- dialoog venster -->
-            <div style="margin:50px 30px 30px 30px">
+            <div style="padding:20px">
                 <p>Met onderstaande knop wordt een nieuw tabblad geopend dat automatisch inlogt als account <b>{{ account.username }}</b>.</p>
 
                 <p>De knop moet binnen 60 seconden gebruikt worden.</p>

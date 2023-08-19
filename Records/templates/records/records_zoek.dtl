@@ -24,7 +24,7 @@
         <div class="col s10 offset-s1 m12 l8 offset-l2 xl6 offset-xl3 white z-depth-3">
 
             <!-- dialoog venster -->
-            <div style="margin:50px 30px 30px 30px" class="left-align">
+            <div style="padding:20px" class="left-align">
 
                 <div>
                     <p>Voer een deel van de naam van een sporter in.</p>
