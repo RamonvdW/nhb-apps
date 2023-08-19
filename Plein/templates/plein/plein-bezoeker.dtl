@@ -41,7 +41,6 @@
     </div>
 
     <!-- blauwe balk met kaartjes bondscompetities en records -->
-    <!--<div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">-->
     <div class="row-sv-blauw">
         <div class="col s12">
             <!-- bondscompetities -->

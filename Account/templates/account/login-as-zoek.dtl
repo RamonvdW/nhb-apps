@@ -76,7 +76,7 @@
         {% if object_list.count %}
 
             <!-- blauwe balk witten tabel met resultaten -->
-            <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+            <div class="row-sv-blauw">
                 <div class="col s12 m8 offset-m2 l6 offset-l3">
 
                     <table class="white">

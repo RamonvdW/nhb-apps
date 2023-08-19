@@ -76,7 +76,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 {% if url_regio_indiv %}
                     {% include 'plein/card_icon.dtl' with title="Regio individueel" text="Eindstand voor de regiocompetitie individueel" icon="view_compact" url=url_regio_indiv %}
@@ -106,7 +106,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row sv-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row-sv-blauw">
             <div class="col s12">
                 {% if url_regio_teams %}
                 {% include 'plein/card_icon.dtl' with title="Regio teams" text="Eindstand voor de regiocompetitie teams" icon="view_compact" url=url_regio_teams %}
