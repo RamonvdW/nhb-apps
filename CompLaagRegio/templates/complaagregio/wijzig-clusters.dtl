@@ -46,7 +46,7 @@
                 <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
 
                     <!-- dialoog venster -->
-                    <div style="margin:50px 30px 30px 30px" class="left-align">
+                    <div style="padding:20px" class="left-align">
 
                         {% comment %}
                         {% if foutmelding %}
@@ -124,7 +124,7 @@
                 <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
 
                     <!-- dialoog venster -->
-                    <div style="margin:50px 30px 30px 30px" class="left-align">
+                    <div style="padding:20px" class="left-align">
 
                         <table class="white">
                             <thead>

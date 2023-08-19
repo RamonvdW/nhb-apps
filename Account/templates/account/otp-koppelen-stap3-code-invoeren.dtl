@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Registreer tweede factor{% endblock %}
+{% block title %}Koppel tweede factor {{ site_name }}{% endblock %}
 
 {% block pagina %}
 
@@ -48,7 +48,7 @@
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
             <!-- dialoog venster -->
-            <div style="margin:50px 30px 30px 30px">
+            <div style="padding:20px">
                 <p class="left-align">Voer de 6 cijfers in om de koppeling te voltooien</p>
 
                 <form action="{{ url_controleer }}" method="post">

@@ -21,12 +21,12 @@
         <div class="col s12 m8 offset-m2 l6 offset-l3">
 
             <!-- dialoog venster -->
-            <div class="white" style="padding:30px">
+            <div class="white" style="padding:20px">
 
                 <p>Druk op de knop om volledig uit te loggen:</p>
                 <p>&nbsp;</p>
 
-                <form class="col s12" action="{% url 'Account:logout' %}" method="post">
+                <form action="{% url 'Account:logout' %}" method="post">
                     {% csrf_token %}
                     <input class="btn-sv-rood" name="button_logout" type="submit" value="Uitloggen">
                 </form>

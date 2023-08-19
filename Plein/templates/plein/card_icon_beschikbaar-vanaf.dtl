@@ -31,7 +31,7 @@
         {% endif %}
 
         <!-- icoon -->
-        <div style="margin-bottom:8px{% if not icon_font_size %}; height:64px{% endif %}">
+        <div style="margin-bottom:8px{% if not icon_font_size %}; height:56px{% endif %}">
             <i class="notranslate material-icons-round medium grey-text">{{ icon }}</i>
         </div>
 

@@ -22,7 +22,7 @@
         <div class="col s12">
 
             {% for obj in object_list %}
-                {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.tekst img_src=obj.img_src img_height="63" url=obj.url %}
+                {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.tekst img_src=obj.img_src img_height=63 url=obj.url %}
             {% endfor %}
         </div>
     </div>

@@ -60,7 +60,7 @@
 
                     <div class="sv-card-content" style="padding:0">
 
-                        <div class="card-image" style="top:0px; left:0px; width:244px; height:244px; overflow:hidden">
+                        <div class="card-image" style="top:0; left:0; width:224px; height:224px; overflow:hidden">
                             <!-- achtergrondplaatje -->
                             <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} style="opacity:0.5"{% endif %}>
 

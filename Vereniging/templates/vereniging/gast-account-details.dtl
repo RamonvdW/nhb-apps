@@ -23,66 +23,64 @@
     <div class="row-sv-blauw">
         <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 white">
 
-            <!-- dialoog venster -->
-            <div style="margin:50px 30px 30px 30px" class="left-align">
-                <table>
-                    <tr>
-                        <td colspan="2"><h5 class="sv-blauw-text center">Persoonsgegevens</h5></td>
-                    </tr>
-                    <tr>
-                        <th>Voornaam</th>
-                        <td class="notranslate">{{ gast.voornaam }}</td>
-                    </tr>
-                    <tr>
-                        <th>Achternaam</th>
-                        <td class="notranslate">{{ gast.achternaam }}</td>
-                    </tr>
-                    <tr>
-                        <th>Geslacht</th>
-                        <td>{{ gast.geslacht_str }}</td>
-                    </tr>
-                    <tr>
-                        <th>Geboortedatum</th>
-                        <td>{{ gast.geboorte_datum }}</td>
-                    </tr>
-                    <tr>
-                        <th>E-mailadres</th>
-                        <td><code>{{ gast.email|wbr_email }}</code></td>
-                    </tr>
-                    <tr>
-                        <th>Telefoonnummer</th>
-                        <td>{{ gast.telefoon }}</td>
-                    </tr>
+            <table class="white">
+                <tr>
+                    <td colspan="2"><h5 class="sv-blauw-text center">Persoonsgegevens</h5></td>
+                </tr>
+                <tr>
+                    <th>Voornaam</th>
+                    <td class="notranslate">{{ gast.voornaam }}</td>
+                </tr>
+                <tr>
+                    <th>Achternaam</th>
+                    <td class="notranslate">{{ gast.achternaam }}</td>
+                </tr>
+                <tr>
+                    <th>Geslacht</th>
+                    <td>{{ gast.geslacht_str }}</td>
+                </tr>
+                <tr>
+                    <th>Geboortedatum</th>
+                    <td>{{ gast.geboorte_datum }}</td>
+                </tr>
+                <tr>
+                    <th>E-mailadres</th>
+                    <td><code>{{ gast.email|wbr_email }}</code></td>
+                </tr>
+                <tr>
+                    <th>Telefoonnummer</th>
+                    <td>{{ gast.telefoon }}</td>
+                </tr>
 
-                    <tr>
-                        <td colspan="2"><h5 class="sv-blauw-text center">Lidmaatschap</h5></td>
-                    </tr>
-                    <tr>
-                        <th>Club</th>
-                        <td class="notranslate">{{ gast.club }}</td>
-                    </tr>
-                    <tr>
-                        <th>Plaats</th>
-                        <td class="notranslate">{{ gast.club_plaats }}</td>
-                    </tr>
-                    <tr>
-                        <th>Land</th>
-                        <td>{{ gast.land }}</td>
-                    </tr>
-                    <tr>
-                        <th>Sportbond</th>
-                        <td class="notranslate">{{ gast.eigen_sportbond_naam }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lid nummer</th>
-                        <td>{{ gast.eigen_lid_nummer }}</td>
-                    </tr>
-                    <tr>
-                        <th>World Archery ID</th>
-                        <td>{{ gast.wa_id }}</td>
-                    </tr>
-                </table>
-            </div>
+                <tr>
+                    <td colspan="2"><h5 class="sv-blauw-text center">Lidmaatschap</h5></td>
+                </tr>
+                <tr>
+                    <th>Club</th>
+                    <td class="notranslate">{{ gast.club }}</td>
+                </tr>
+                <tr>
+                    <th>Plaats</th>
+                    <td class="notranslate">{{ gast.club_plaats }}</td>
+                </tr>
+                <tr>
+                    <th>Land</th>
+                    <td>{{ gast.land }}</td>
+                </tr>
+                <tr>
+                    <th>Sportbond</th>
+                    <td class="notranslate">{{ gast.eigen_sportbond_naam }}</td>
+                </tr>
+                <tr>
+                    <th>Lid nummer</th>
+                    <td>{{ gast.eigen_lid_nummer }}</td>
+                </tr>
+                <tr>
+                    <th>World Archery ID</th>
+                    <td>{{ gast.wa_id }}</td>
+                </tr>
+            </table>
+
         </div>
     </div>
 

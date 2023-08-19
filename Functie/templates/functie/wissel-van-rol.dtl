@@ -174,7 +174,7 @@
 
                 <!-- witte rechthoek voor radiobuttons -->
                 <div class="col s12 m8 offset-m2 l6">
-                    <div class="white left-align" style="padding:10px">
+                    <div class="white left-align" style="padding:10px; margin-bottom:20px">  <!-- margin-bottom voor als kaart onder filter komt -->
                         <ul>
                         {% for obj in eigen_rollen %}
                             <li>
@@ -231,7 +231,7 @@
 
                 <!-- witte rechthoek met de radiobuttons -->
                 {% if show_help_rollen %}
-                    <div class="col s12 m10 offset-m1 {% if url_wissel_naar_sec %}l6{% else %}l8 offset-l2{% endif %}" style="margin-bottom:50px">
+                    <div class="col s12 m10 offset-m1 {% if url_wissel_naar_sec %}l6{% else %}l8 offset-l2{% endif %}">
                         <div class="white left-align" style="padding:10px">
                             <ul>
                                 {% for obj in help_rollen %}

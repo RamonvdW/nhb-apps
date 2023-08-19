@@ -20,7 +20,7 @@
 
 
   .card-title {
-    font-size: 20px;
+    font-size: 18px; //(2023-08-19) 20px;
     font-weight: 300;
     white-space: nowrap;    // voorkom wrappen van de titel naar 2e regel
     &.activator {
@@ -136,14 +136,15 @@
       bottom: 0;
       left: 0;
       max-width: 100%;
-      padding: $card-padding;
+      //(2023-08-18)padding: 15px $card-padding $card-padding $card-padding;
     }
   }
 
   .card-content {
-    padding: $card-padding;
+    //(2023-08-18)padding: $card-padding;
+    padding: 15px $card-padding 0 $card-padding;
     border-radius: 0 0 2px 2px;
-    font-size: 90%;
+    font-size: 14px; //(2023-08-18)90%;
 
     p {
       margin: 0;
@@ -151,7 +152,7 @@
     .card-title {
       display: block;
       line-height: 32px;
-      margin-bottom: 8px;
+      margin-bottom: 6px; //(2023-08-18)8px;
 
       i {
         line-height: 32px;
@@ -166,7 +167,7 @@
     // background-color: inherit; // Use inherit to inherit color classes
     border-top: 1px solid rgba(160,160,160,.2);
     position: relative;
-    padding: 16px $card-padding;
+    //(2023-08-18)padding: 16px $card-padding;
 
     a:not(.btn):not(.btn-large):not(.btn-floating) {
       color: $card-link-color;
@@ -179,7 +180,7 @@
   }
 
   .card-reveal {
-    padding: $card-padding;
+    //(2023-08-18)padding: $card-padding;
     position: absolute;
     background-color: $card-bg-color;
     width: 100%;

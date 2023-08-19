@@ -156,7 +156,7 @@
 
         {% elif kaartje.img %}
 
-                    {% include 'plein/card_logo.dtl' with title=kaartje.titel text=kaartje.tekst img_src=kaartje.img img_height="60" url=kaartje.url %}
+                    {% include 'plein/card_logo.dtl' with title=kaartje.titel text=kaartje.tekst img_src=kaartje.img img_height=60 url=kaartje.url %}
 
         {% else %}
 

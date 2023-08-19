@@ -115,7 +115,7 @@ $button-outline-text-focus: $button-raised-color;
 // 4. Cards
 // ==========================================================================
 
-$card-padding: 24px !default;
+$card-padding: 12px !default; //(2023-08-19)24px !default;
 $card-bg-color: #fff !default;
 $card-link-color: $sv-donkerblauw-color !default;
 $card-link-color-light: $sv-blauw-color !default;

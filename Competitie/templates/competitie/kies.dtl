@@ -57,9 +57,9 @@
             <!-- de beschikbare competities -->
             {% for obj in competities %}
                 {% if obj.is_volgend_seizoen %}
-                    {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height="63" url=obj.card_url img_style="filter: grayscale(100%)" %}
+                    {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height=63 url=obj.card_url img_style="filter: grayscale(100%)" %}
                 {% else %}
-                    {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height="63" url=obj.card_url %}
+                    {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height=63 url=obj.card_url %}
                 {% endif %}
             {% endfor %}
 

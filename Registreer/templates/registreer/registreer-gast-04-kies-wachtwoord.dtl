@@ -22,7 +22,7 @@
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
             <!-- dialoog venster -->
-            <div style="margin:50px 30px 30px 30px" class="left-align">
+            <div style="padding:20px" class="left-align">
                 <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post">
                     {% csrf_token %}
 
