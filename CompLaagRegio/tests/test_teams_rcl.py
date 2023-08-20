@@ -15,11 +15,12 @@ from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlass
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fases
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -77,18 +78,18 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         self.regio_112 = NhbRegio.objects.get(regio_nr=112)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Zuidelijke Club"
-        ver.ver_nr = 1111
-        ver.regio = self.regio_112
+        ver = Vereniging(
+                    naam="Zuidelijke Club",
+                    ver_nr=1111,
+                    regio=self.regio_112)
         ver.save()
         self.ver_112 = ver
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = 1000
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_101)
         ver.save()
         self.ver_101 = ver
 
@@ -161,9 +162,11 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
                                                 is_onbekend=True)
                                         .all())[0]
 
-        self.deelcomp_bond_18 = Kampioenschap.objects.filter(deel=DEEL_BK, competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(deel=DEEL_RK, competitie=self.comp_18, rayon=self.rayon_2)[0]
+        self.deelcomp_bond_18 = Kampioenschap.objects.filter(competitie=self.comp_18, deel=DEEL_BK).first()
+        self.deelcomp_rayon1_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
+                                                               deel=DEEL_RK, rayon=self.rayon_1).first()
+        self.deelcomp_rayon2_18 = Kampioenschap.objects.filter(competitie=self.comp_18,
+                                                               deel=DEEL_RK, rayon=self.rayon_2).first()
         self.deelcomp_regio101_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_101)[0]
         self.deelcomp_regio101_25 = Regiocompetitie.objects.filter(competitie=self.comp_25, regio=self.regio_101)[0]
         self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18, regio=self.regio_112)[0]
@@ -187,10 +190,10 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
         # maak nog een test vereniging, zonder HWL functie
         # stop deze in een cluster
-        ver = NhbVereniging()
-        ver.naam = "Kleine Club"
-        ver.ver_nr = "1100"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Kleine Club",
+                    ver_nr=1100,
+                    regio=self.regio_101)
         ver.save()
         ver.clusters.add(self.cluster_101e_25)
 

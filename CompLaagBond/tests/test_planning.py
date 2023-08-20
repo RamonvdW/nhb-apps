@@ -11,11 +11,11 @@ from Competitie.models import (Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
+from Wedstrijden.models import WedstrijdLocatie, Uitslag
 import datetime
 
 
@@ -145,10 +145,10 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.functie_rko1_18.accounts.add(self.account_rko1_18)
 
         # maak nog een test vereniging, zonder HWL functie
-        ver = NhbVereniging()
-        ver.naam = "Kleine Club"
-        ver.ver_nr = "1100"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Kleine Club",
+                    ver_nr=1100,
+                    regio=self.regio_101)
         ver.save()
 
         qset = CompetitieIndivKlasse.objects.filter(competitie=self.testdata.comp18, boogtype__afkorting='R', is_ook_voor_rk_bk=True)

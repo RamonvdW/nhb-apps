@@ -11,9 +11,10 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                KampioenschapTeam, KampioenschapSporterBoog,
                                KampioenschapIndivKlasseLimiet)
 from Competitie.operations import competities_aanmaken
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import os
 
 
@@ -45,7 +46,7 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         indiv_klasse = CompetitieIndivKlasse.objects.filter(competitie=comp_25,
                                                             is_ook_voor_rk_bk=True).first()
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1234,
                     naam='Test ver',
                     regio=regio_109)
@@ -122,7 +123,7 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         regio_109 = NhbRegio.objects.get(regio_nr=109)
         boog_r = BoogType.objects.get(afkorting='R')
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1234,
                     naam='Test ver',
                     regio=regio_109)

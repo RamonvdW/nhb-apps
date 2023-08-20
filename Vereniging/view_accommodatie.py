@@ -12,13 +12,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
-from Vereniging.models import Secretaris
+from Vereniging.models2 import Secretaris
 from Wedstrijden.definities import BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Wedstrijden.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
 from Vereniging.forms import AccommodatieDetailsForm
+from Vereniging.models import Vereniging
 
 
 TEMPLATE_ACCOMMODATIE_DETAILS = 'vereniging/accommodatie-details.dtl'
@@ -44,8 +44,8 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     def _get_vereniging_locaties_or_404(**kwargs):
         try:
             ver_nr = int(kwargs['ver_nr'][:6])    # afkappen voor de veiligheid
-            ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
-        except NhbVereniging.DoesNotExist:
+            ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        except Vereniging.DoesNotExist:
             raise Http404('Geen valide vereniging')
 
         clusters = list()

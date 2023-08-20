@@ -19,7 +19,6 @@ from Functie.models import Functie
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
-from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip, maak_unaccented
 from Plein.menu import menu_dynamics
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
@@ -33,6 +32,7 @@ from Sporter.models import Sporter
 from Taken.operations import maak_taak
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_EMAIL_REG_GAST,
                                         maak_tijdelijke_code_bevestig_email_registreer_gast)
+from Vereniging.models import Vereniging
 import datetime
 import logging
 
@@ -432,7 +432,7 @@ class RegistreerGastVolgendeVraagView(View):
         aantal = Sporter.objects.filter(lid_nr=gast.lid_nr).count()
         if aantal == 0:
             date_now = timezone.now().date()
-            ver_extern = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+            ver_extern = Vereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
 
             sporter = Sporter(
                         lid_nr=gast.lid_nr,

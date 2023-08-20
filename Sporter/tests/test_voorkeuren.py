@@ -7,12 +7,13 @@
 from django.test import TestCase
 from Account.models import Account
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Functie.operations import maak_functie
 from Sporter.models import (Sporter, SporterBoog, SporterVoorkeuren,
                             get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen)
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -39,10 +40,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.account_100003 = self.e2e_create_account('100003', 'sporterx@test.com', 'Geslacht X')
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(regio_nr=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=NhbRegio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 
@@ -66,10 +67,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.sporter1 = sporter
 
         # maak nog een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Nieuwe Club"
-        ver.ver_nr = "1001"
-        ver.regio = NhbRegio.objects.get(pk=112)
+        ver = Vereniging(
+                    naam="Nieuwe Club",
+                    ver_nr=1001,
+                    regio=NhbRegio.objects.get(pk=112))
         ver.save()
 
         # maak een test lid aan

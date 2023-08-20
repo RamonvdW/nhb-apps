@@ -8,12 +8,13 @@ from django.conf import settings
 from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
 from Sporter.models import Sporter
-from Vereniging.models import Secretaris
+from Vereniging.models2 import Secretaris
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -56,7 +57,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_rcl111.accounts.add(self.account_rcl)
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     naam="Noordelijke Club",
                     ver_nr=1000,
                     regio=regio_101)
@@ -91,7 +92,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_wl1.save()
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1001,
                     regio=regio_111)
@@ -512,7 +513,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # vereniging 'extern' heeft geen HWL en WL
 
         # haal de speciale vereniging en functie op
-        ver = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+        ver = Vereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
         self.assertTrue(ver.is_extern)
         functie_sec = Functie.objects.get(rol='SEC', vereniging=ver)
 
@@ -1043,10 +1044,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # maak een extra vereniging aan zonder beheerders
-        ver = NhbVereniging()
-        ver.naam = "Extra Club"
-        ver.ver_nr = 1099
-        ver.regio = NhbRegio.objects.get(regio_nr=101)
+        ver = Vereniging(
+                    naam="Extra Club",
+                    ver_nr=1099,
+                    regio=NhbRegio.objects.get(regio_nr=101))
         ver.save()
 
         # maak de SEC, HWL en WL functies aan voor deze vereniging

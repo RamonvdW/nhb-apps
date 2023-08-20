@@ -17,9 +17,9 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse,
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
+from Vereniging.models import Vereniging
 from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
@@ -155,7 +155,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
             obj.sporters_count = 0
 
             obj.wkl_namen = list()
-            for wkl in obj.indiv_klassen.order_by('volgorde'):      # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.indiv_klassen.order_by('volgorde'):    # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[100000 + wkl.pk] = None
 
@@ -166,7 +166,7 @@ class PlanningView(UserPassesTestMixin, TemplateView):
                     pass
             # for
 
-            for wkl in obj.team_klassen.order_by('volgorde'):       # FUTURE: order_by zorgt voor extra database accesses
+            for wkl in obj.team_klassen.order_by('volgorde'):     # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[200000 + wkl.pk] = None
 
@@ -428,7 +428,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # wedstrijd.tijd_begin_aanmelden_str = wedstrijd.tijd_begin_aanmelden.strftime("%H%M")
         # wedstrijd.tijd_einde_wedstrijd_str = wedstrijd.tijd_einde_wedstrijd.strftime("%H%M")
 
-        verenigingen = (NhbVereniging
+        verenigingen = (Vereniging
                         .objects
                         .filter(regio__is_administratief=False)
                         .prefetch_related('wedstrijdlocatie_set')
@@ -553,8 +553,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             match.locatie = None
         else:
             try:
-                ver = NhbVereniging.objects.get(pk=ver_pk, regio__is_administratief=False)
-            except (NhbVereniging.DoesNotExist, ValueError):
+                ver = Vereniging.objects.get(pk=ver_pk, regio__is_administratief=False)
+            except (Vereniging.DoesNotExist, ValueError):
                 raise Http404('Vereniging niet gevonden')
 
             match.vereniging = ver

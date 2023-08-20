@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand
 from Competitie.definities import DEEL_BK, DEEL_RK
 from Competitie.models import Kampioenschap, CompetitieMatch
-from NhbStructuur.models import NhbVereniging
+from Vereniging.models import Vereniging
 
 
 class Command(BaseCommand):
@@ -45,7 +45,7 @@ class Command(BaseCommand):
 
         ver2locs = dict()   # [ver_nr] = (loc, loc, ..)
 
-        for ver in NhbVereniging.objects.prefetch_related('wedstrijdlocatie_set').all():
+        for ver in Vereniging.objects.prefetch_related('wedstrijdlocatie_set').all():
             ver2locs[ver.ver_nr] = locs = list()
             for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
                 locs.append(loc)

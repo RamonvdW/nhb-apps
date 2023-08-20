@@ -179,7 +179,7 @@ def do_dispatch(request, obj):
         redirect = func(request, obj.hoort_bij_functie)
 
     elif obj.dispatch_to == RECEIVER_DEELNAME_KAMPIOENSCHAP:
-        # referentie = KampioenschapSchutterBoog
+        # referentie = KampioenschapSporterBoog
         func = tijdelijke_code_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoort_bij_kampioen)
 

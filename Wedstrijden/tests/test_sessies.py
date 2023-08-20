@@ -8,11 +8,12 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
-from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
@@ -48,7 +49,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         sporter.save()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
@@ -64,15 +65,15 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         sporter1 = Sporter(
-                    lid_nr=self.lid_nr,
-                    geslacht='M',
-                    voornaam='Ad',
-                    achternaam='de Admin',
-                    geboorte_datum='1966-06-06',
-                    sinds_datum='2020-02-02',
-                    adres_code='1234AB56',
-                    account=self.account,
-                    bij_vereniging=self.ver1)
+                        lid_nr=self.lid_nr,
+                        geslacht='M',
+                        voornaam='Ad',
+                        achternaam='de Admin',
+                        geboorte_datum='1966-06-06',
+                        sinds_datum='2020-02-02',
+                        adres_code='1234AB56',
+                        account=self.account,
+                        bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
@@ -83,7 +84,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         sporterboog.save(update_fields=['voor_wedstrijd'])
         self.sporterboog1r = sporterboog
 
-        self.ver2 = NhbVereniging(
+        self.ver2 = Vereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))

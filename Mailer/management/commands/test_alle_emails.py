@@ -22,9 +22,10 @@ from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_RESERVERING_BESTELD
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdLocatie
 from decimal import Decimal
@@ -69,7 +70,7 @@ class Command(BaseCommand):
         functie.save()
         self.functie = functie
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=self.test_ver_nr,
                     naam='Test vereniging',
                     adres_regel1='Eerste adresregel',
@@ -239,8 +240,8 @@ class Command(BaseCommand):
 
     def _database_opschonen(self):
         try:
-            ver = NhbVereniging.objects.get(ver_nr=self.test_ver_nr)
-        except NhbVereniging.DoesNotExist:      # pragma: no cover
+            ver = Vereniging.objects.get(ver_nr=self.test_ver_nr)
+        except Vereniging.DoesNotExist:      # pragma: no cover
             pass
         else:
             self.bestelling = None

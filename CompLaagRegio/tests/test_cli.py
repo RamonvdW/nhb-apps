@@ -10,11 +10,12 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Score.models import Aanvangsgemiddelde, ScoreHist, Score
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -86,10 +87,10 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         klasse_tr.save()
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club met een naam langer dan 30 tekens"
-        ver.ver_nr = "1000"
-        ver.regio = regio_111
+        ver = Vereniging(
+                    naam="Grote Club met een naam langer dan 30 tekens",
+                    ver_nr=1000,
+                    regio=regio_111)
         ver.save()
 
         # maak een test lid aan

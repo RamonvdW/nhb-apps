@@ -13,8 +13,8 @@ from django.utils import timezone
 from Account.models import Account
 from Account.operations.aanmaken import account_create
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbVereniging
 from Sporter.models import Sporter, SporterBoog
+from Vereniging.models import Vereniging
 from random import random
 
 
@@ -38,7 +38,7 @@ class Command(BaseCommand):
         geboorte_datum = options['geboorte_datum'][0]
         wedstrijdbogen = options['wedstrijdbogen'][0].split('+')
 
-        ver = NhbVereniging.objects.get(ver_nr=ver_nr)
+        ver = Vereniging.objects.get(ver_nr=ver_nr)
 
         self.stdout.write('[INFO] Maak of vind account %s' % lid_nr)
 

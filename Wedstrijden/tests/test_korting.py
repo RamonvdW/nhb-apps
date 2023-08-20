@@ -8,12 +8,13 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.definities import WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI
 from Wedstrijden.models import (WedstrijdLocatie, KalenderWedstrijdklasse, Wedstrijd, WedstrijdSessie,
                                 WedstrijdInschrijving, WedstrijdKorting)
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -51,7 +52,7 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
         self.sporterboog = sporterboog
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
@@ -62,7 +63,7 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
-        self.ver2 = NhbVereniging(
+        self.ver2 = Vereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))

@@ -828,7 +828,7 @@ class Command(BaseCommand):
                 insert_at = nr
                 rank = 0
 
-            # fake een paar velden uit KampioenschapSchutterBoog
+            # fake een paar velden uit KampioenschapSporterBoog
             rank += 1
             deelnemer.volgorde = rank
             deelnemer.deelname = DEELNAME_ONBEKEND
@@ -965,7 +965,7 @@ class Command(BaseCommand):
             het vaststellen van de wedstrijdklasse voor de RK teams volgt later
         """
 
-        # maak een look-up tabel van RegioCompetitieSporterBoog naar KampioenschapSchutterBoog
+        # maak een look-up tabel van RegioCompetitieSporterBoog naar KampioenschapSporterBoog
         sporterboog_pk2regiocompetitiesporterboog = dict()
         for deelnemer in (RegiocompetitieSporterBoog
                           .objects
@@ -1048,7 +1048,7 @@ class Command(BaseCommand):
             comp.regiocompetitie_is_afgesloten = True
             comp.save(update_fields=['regiocompetitie_is_afgesloten'])
 
-            # verwijder alle eerder aangemaakte KampioenschapSchutterBoog
+            # verwijder alle eerder aangemaakte KampioenschapSporterBoog
             # verwijder eerst alle eerder gekoppelde team leden
             for team in KampioenschapTeam.objects.filter(kampioenschap__competitie=comp):
                 team.gekoppelde_leden.clear()

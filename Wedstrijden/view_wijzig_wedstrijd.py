@@ -20,9 +20,9 @@ from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import (BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN,
                                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP,
@@ -329,7 +329,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             else:
                 selected_ver_nr = wedstrijd.organiserende_vereniging.ver_nr
 
-            context['opt_uitvoerende_vers'] = (NhbVereniging
+            context['opt_uitvoerende_vers'] = (Vereniging
                                                .objects
                                                .exclude(geen_wedstrijden=True)
                                                .annotate(aantal=Count('wedstrijdlocatie'))
@@ -543,7 +543,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 # voor deze wedstrijd mag een andere uitvoerende vereniging gekozen worden
                 data = request.POST.get('uitvoerend', '')
                 if data:
-                    for ver in (NhbVereniging
+                    for ver in (Vereniging
                                 .objects
                                 .exclude(geen_wedstrijden=True)
                                 .annotate(aantal=Count('wedstrijdlocatie'))

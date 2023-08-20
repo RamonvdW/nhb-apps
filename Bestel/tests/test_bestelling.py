@@ -20,9 +20,10 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SPORTER,
@@ -54,11 +55,11 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        ver_bond = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
-                    naam='Bondsbureau',
-                    plaats='Schietstad',
-                    regio=NhbRegio.objects.get(regio_nr=100))
+        ver_bond = Vereniging(
+                        ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
+                        naam='Bondsbureau',
+                        plaats='Schietstad',
+                        regio=NhbRegio.objects.get(regio_nr=100))
         ver_bond.save()
         self.ver_bond = ver_bond
 
@@ -68,7 +69,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen_bond = instellingen
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
                     regio=NhbRegio.objects.get(regio_nr=112),

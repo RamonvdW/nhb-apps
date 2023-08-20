@@ -7,8 +7,9 @@
 from django.test import TestCase, override_settings
 from Functie.operations import Functie
 from Sporter.models import Sporter
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelFoto
 from PIL import Image
 import tempfile
@@ -24,7 +25,7 @@ class TestWebwinkelCli(E2EHelpers, TestCase):
 
         self.account_normaal = self.e2e_create_account(self.lid_nr, 'winkel@test.not', 'Mgr', accepteer_vhpg=True)
 
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))

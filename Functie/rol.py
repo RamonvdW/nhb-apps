@@ -11,11 +11,11 @@ from Account.operations.otp import otp_is_controle_gelukt
 from Account.models import AccountSessions
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Kampioenschap
-from NhbStructuur.models import NhbVereniging
-from Overig.helpers import get_safe_from_ip
 from Functie.definities import Rollen, rol2url, url2rol
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg, account_needs_otp
+from Overig.helpers import get_safe_from_ip
+from Vereniging.models import Vereniging
 from types import SimpleNamespace
 from typing import Tuple
 import logging
@@ -117,7 +117,7 @@ def functie_expandeer_rol(functie_cache, ver_cache, rol_in, functie_in):
             # expandeer naar de HWL rollen van de verenigingen binnen de regio
             # vind alle verenigingen in deze regio
             if len(ver_cache) == 0:
-                for ver in (NhbVereniging
+                for ver in (Vereniging
                             .objects
                             .select_related('regio')
                             .only('ver_nr', 'regio__regio_nr')):

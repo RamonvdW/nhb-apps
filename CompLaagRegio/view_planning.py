@@ -21,9 +21,10 @@ from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbCluster
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
+from Vereniging.models import Vereniging
 from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
@@ -127,12 +128,12 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .objects
                         .filter(regio=deelcomp.regio,
                                 gebruik=deelcomp.competitie.afstand)
-                        .prefetch_related('nhbvereniging_set',
+                        .prefetch_related('vereniging_set',
                                           'regiocompetitieronde_set')
                         .select_related('regio')
                         .order_by('letter')):
 
-            if cluster.nhbvereniging_set.count() > 0:
+            if cluster.vereniging_set.count() > 0:
                 # maak de enige ronde automatisch aan
                 if cluster.regiocompetitieronde_set.filter(regiocompetitie=deelcomp).count() == 0:
                     maak_regiocompetitie_ronde(deelcomp, cluster)
@@ -144,12 +145,12 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .objects
                         .filter(regio=deelcomp.regio,
                                 gebruik=deelcomp.competitie.afstand)
-                        .prefetch_related('nhbvereniging_set',
+                        .prefetch_related('vereniging_set',
                                           'regiocompetitieronde_set')
                         .select_related('regio')
                         .order_by('letter')):
 
-            if cluster.nhbvereniging_set.count() > 0:
+            if cluster.vereniging_set.count() > 0:
                 ronde = cluster.regiocompetitieronde_set.filter(regiocompetitie=deelcomp)[0]
                 cluster.wedstrijden_count = ronde.matches.count()
                 cluster.ronde_url = reverse('CompLaagRegio:regio-methode1-planning',
@@ -183,12 +184,13 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                     .objects
                     .filter(regio=deelcomp.regio,
                             gebruik=deelcomp.competitie.afstand)
-                    .prefetch_related('nhbvereniging_set', 'regiocompetitieronde_set')
+                    .prefetch_related('vereniging_set',
+                                      'regiocompetitieronde_set')
                     .select_related('regio')
                     .order_by('letter'))
         context['clusters'] = list()
         for cluster in clusters:
-            if cluster.nhbvereniging_set.count() > 0:
+            if cluster.vereniging_set.count() > 0:
                 context['clusters'].append(cluster)
                 # tel het aantal rondes voor dit cluster
                 cluster.ronde_count = cluster.regiocompetitieronde_set.count()
@@ -1010,9 +1012,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         match.tijd_begin_wedstrijd_str = match.tijd_begin_wedstrijd.strftime("%H:%M")
 
         if ronde.cluster:
-            verenigingen = ronde.cluster.nhbvereniging_set.order_by('ver_nr')
+            verenigingen = ronde.cluster.vereniging_set.order_by('ver_nr')
         else:
-            verenigingen = ronde.regiocompetitie.regio.nhbvereniging_set.order_by('ver_nr')
+            verenigingen = ronde.regiocompetitie.regio.vereniging_set.order_by('ver_nr')
         context['verenigingen'] = verenigingen
 
         if not match.vereniging and verenigingen.count() > 0:
@@ -1044,7 +1046,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['all_locaties'] = all_locs = list()
         pks = [ver.pk for ver in verenigingen]
-        for ver in (NhbVereniging
+        for ver in (Vereniging
                     .objects
                     .prefetch_related('wedstrijdlocatie_set')
                     .filter(pk__in=pks)):
@@ -1145,8 +1147,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide verzoek')
 
         try:
-            ver = NhbVereniging.objects.get(pk=ver_pk)
-        except (NhbVereniging.DoesNotExist, ValueError):
+            ver = Vereniging.objects.get(pk=ver_pk)
+        except (Vereniging.DoesNotExist, ValueError):
             raise Http404('Vereniging niet gevonden')
 
         if loc_pk:

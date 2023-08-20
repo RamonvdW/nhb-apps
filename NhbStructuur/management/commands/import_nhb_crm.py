@@ -17,12 +17,13 @@ from Functie.models import Functie
 from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Opleidingen.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Speelsterkte
-from Vereniging.models import Secretaris
+from Vereniging.models import Vereniging
+from Vereniging.models2 import Secretaris
 from Wedstrijden.definities import BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
 from Wedstrijden.models import WedstrijdLocatie
 import traceback
@@ -93,7 +94,7 @@ class Command(BaseCommand):
         self._cache_account = dict()    # [username] = Account()
         self._cache_rayon = dict()      # [rayon_nr] = NhbRayon()
         self._cache_regio = dict()      # [regio_nr] = NhbRegio()
-        self._cache_ver = dict()        # [ver_nr] = NhbVereniging()
+        self._cache_ver = dict()        # [ver_nr] = Vereniging()
         self._cache_sec = dict()        # [ver_nr] = Secretaris()
         self._cache_sporter = dict()    # [lid_nr] = Sporter()
         self._cache_functie = dict()    # [(rol, beschrijving)] = Functie()
@@ -117,7 +118,7 @@ class Command(BaseCommand):
             self._cache_regio[regio.regio_nr] = regio
         # for
 
-        for ver in (NhbVereniging
+        for ver in (Vereniging
                     .objects
                     .exclude(ver_nr__in=SKIP_VER_NR)
                     .select_related('regio')
@@ -659,7 +660,7 @@ class Command(BaseCommand):
 
             if is_nieuw:
                 obj = None
-                ver = NhbVereniging(
+                ver = Vereniging(
                             ver_nr=ver_nr,
                             naam=ver_naam,
                             plaats=ver_plaats,

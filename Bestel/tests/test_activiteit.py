@@ -12,9 +12,10 @@ from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_O
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdLocatie, WedstrijdInschrijving, WedstrijdKorting
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
@@ -36,7 +37,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save(update_fields=['is_BB'])
 
-        ver_bond = NhbVereniging(
+        ver_bond = Vereniging(
                     ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                     naam='Bondsbureau',
                     plaats='Schietstad',
@@ -52,7 +53,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
         self.assertEqual(settings.BETAAL_VIA_BOND_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
                     regio=NhbRegio.objects.get(regio_nr=112),
@@ -203,9 +204,9 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
                     verkoper_adres2='Adres2',
                     verkoper_kvk='Kvk',
                     verkoper_email='test@test.not',
-                    verkoper_telefoon='telnr',
+                    verkoper_telefoon='tel nr',
                     verkoper_iban='IBAN',
-                    verkoper_bic='BICBIC',
+                    verkoper_bic='BIC123',
                     verkoper_heeft_mollie=True,
                     totaal_euro=Decimal('12.34'),
                     status=BESTELLING_STATUS_NIEUW,

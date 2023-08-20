@@ -12,11 +12,12 @@ from Bestel.definities import BESTEL_MUTATIE_VERWIJDER, BESTEL_TRANSPORT_VERZEND
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie, BestelMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Registreer.definities import REGISTRATIE_FASE_DONE
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_VERENIGING
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
@@ -42,11 +43,11 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        ver_bond = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
-                    naam='Bondsbureau',
-                    plaats='Schietstad',
-                    regio=NhbRegio.objects.get(regio_nr=100))
+        ver_bond = Vereniging(
+                        ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
+                        naam='Bondsbureau',
+                        plaats='Schietstad',
+                        regio=NhbRegio.objects.get(regio_nr=100))
         ver_bond.save()
         self.ver_bond = ver_bond
 
@@ -58,7 +59,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         self.assertEqual(settings.BETAAL_VIA_BOND_VER_NR, settings.WEBWINKEL_VERKOPER_VER_NR)
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
                     regio=NhbRegio.objects.get(regio_nr=112))

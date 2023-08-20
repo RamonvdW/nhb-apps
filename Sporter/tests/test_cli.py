@@ -6,9 +6,10 @@
 
 from django.test import TestCase
 from Sporter.models import Sporter
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 
 
 class TestSporterCli(E2EHelpers, TestCase):
@@ -84,7 +85,7 @@ class TestSporterCli(E2EHelpers, TestCase):
         # maak een test vereniging
         ver_nr = 1000
         self.regio_111 = NhbRegio.objects.get(regio_nr=111)
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=ver_nr,
                     naam="Grote Club",
                     regio=self.regio_111)

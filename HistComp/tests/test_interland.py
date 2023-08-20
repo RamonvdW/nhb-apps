@@ -7,10 +7,11 @@
 from django.test import TestCase
 from HistComp.definities import HISTCOMP_TYPE_25, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -33,7 +34,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
                     regio=self.regio_101)

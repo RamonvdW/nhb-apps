@@ -9,10 +9,11 @@ from django.utils import timezone
 from Account.models import Account
 from Functie.operations import maak_functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -53,7 +54,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.huidige_jaar = now.year
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))

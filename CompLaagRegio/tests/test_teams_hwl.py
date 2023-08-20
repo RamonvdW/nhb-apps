@@ -6,20 +6,21 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
 from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
                                        zet_competitie_fase_regio_inschrijven)
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
+from Functie.operations import maak_functie
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from Score.definities import AG_NUL
 from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -53,10 +54,10 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                naam="Grote Club",
+                ver_nr=1000,
+                regio=self.regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -101,7 +102,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         sporter.geboorte_datum = datetime.date(year=jaar-12, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         sporter.bij_vereniging = ver
-        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # last_login=None
         sporter.save()
         self.sporter_100002 = sporter
 
@@ -159,14 +160,14 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = self.regio_111
+        ver2 = Vereniging(
+                    naam="Andere Club",
+                    ver_nr=1222,
+                    regio=self.regio_111)
         ver2.save()
         self.ver2 = ver2
 
-        self.account_rcl = self.e2e_create_account('rcl111', 'ercel@test.not', 'Ercel', accepteer_vhpg=True)
+        self.account_rcl = self.e2e_create_account('rcl111', 'ercel@test.not', 'Er-c-el', accepteer_vhpg=True)
         self.functie_rcl = maak_functie('RCL Regio 111 Indoor', 'RCL')
         self.functie_rcl.regio = self.ver1.regio
         self.functie_rcl.save()
@@ -299,7 +300,8 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
             url = url_inschrijven % self.comp_18.pk
             with self.assert_max_queries(43):
-                resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R       # TODO: vervang boogtype pk met afkorting!
+                # TODO: vervang boogtype pk met afkorting
+                resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                               'lid_100003_boogtype_3': 'on',    # 3=BB
                                               'lid_100004_boogtype_1': 'on',    # 1=R
                                               'lid_100012_boogtype_1': 'on',    # 1=R
@@ -439,7 +441,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
         team = RegiocompetitieTeam.objects.first()
 
-        self.ver1 = NhbVereniging.objects.get(pk=self.ver1.pk)
+        self.ver1 = Vereniging.objects.get(pk=self.ver1.pk)
 
         self.assertEqual(team.regiocompetitie.pk, self.deelcomp18_regio111.pk)
         self.assertEqual(team.vereniging, self.ver1)
@@ -556,7 +558,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
         # bad team pk
-        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 'notanumber'))
+        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 'not-a-number'))
         self.assert404(resp, 'Geen valide parameter')
 
         # nieuw team maken met bad team_type

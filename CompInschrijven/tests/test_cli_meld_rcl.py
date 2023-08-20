@@ -9,10 +9,11 @@ from BasisTypen.models import BoogType, ORGANISATIE_WA
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_wedstrijden
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from unittest.mock import patch
 from datetime import datetime, date
 
@@ -44,7 +45,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                                 .all())[0]
 
         # maak een test vereniging
-        self.ver = NhbVereniging(
+        self.ver = Vereniging(
                         naam="Grote Club",
                         ver_nr="1000",
                         regio=self.regio_103)

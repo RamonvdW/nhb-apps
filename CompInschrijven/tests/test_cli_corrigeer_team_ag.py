@@ -9,9 +9,10 @@ from BasisTypen.models import BoogType, TeamType, ORGANISATIE_WA
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import competities_aanmaken
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 class TestCompInschrijvenCliCorrigeerTeamAG(E2EHelpers, TestCase):
@@ -81,7 +82,7 @@ class TestCompInschrijvenCliCorrigeerTeamAG(E2EHelpers, TestCase):
         self.team_klasse_bb.save(update_fields=['min_ag'])
 
         # maak een test vereniging
-        self.ver = NhbVereniging(
+        self.ver = Vereniging(
                         naam="Grote Club",
                         ver_nr="1000",
                         regio=self.regio_103)

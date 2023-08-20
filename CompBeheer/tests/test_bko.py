@@ -16,11 +16,12 @@ from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase
                                        zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
 from HistComp.models import HistCompSeizoen, HistCompRegioTeam
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -90,18 +91,18 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.regio_112 = NhbRegio.objects.get(regio_nr=112)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Zuidelijke Club"
-        ver.ver_nr = "1111"
-        ver.regio = self.regio_112
+        ver = Vereniging(
+                    naam="Zuidelijke Club",
+                    ver_nr=1111,
+                    regio=self.regio_112)
         ver.save()
         self.ver_112 = ver
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_101)
         ver.save()
         self.ver_101 = ver
 
@@ -207,10 +208,10 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         self.functie_rko1_25.accounts.add(self.account_rko1_25)
 
         # maak nog een test vereniging, zonder HWL functie
-        ver = NhbVereniging()
-        ver.naam = "Kleine Club"
-        ver.ver_nr = "1100"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Kleine Club",
+                    ver_nr=1100,
+                    regio=self.regio_101)
         ver.save()
 
     def _inschrijven_regio_indiv(self):

@@ -7,8 +7,9 @@
 from django.test import TestCase
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 class TestBetaalMutaties(E2EHelpers, TestCase):
@@ -23,10 +24,10 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_111)
         ver.save()
         self.ver = ver
 

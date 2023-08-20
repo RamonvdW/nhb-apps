@@ -9,10 +9,11 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -56,10 +57,10 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_101)
         ver.save()
         self._ver = ver
         self.ver1 = ver
@@ -89,10 +90,10 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_hwl)
 
         # maak nog een test vereniging, zonder HWL functie
-        ver = NhbVereniging()
-        ver.naam = "Kleine Club"
-        ver.ver_nr = "1100"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Kleine Club",
+                    ver_nr=1100,
+                    regio=self.regio_101)
         ver.save()
         # stop de vereniging in clusters
         cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='18').first()

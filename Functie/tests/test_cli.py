@@ -6,9 +6,10 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 class TestFunctieCli(E2EHelpers, TestCase):
@@ -24,10 +25,10 @@ class TestFunctieCli(E2EHelpers, TestCase):
         self.functie_tst = maak_functie("Test test", "x")
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = 1001
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1001,
+                    regio=NhbRegio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 
@@ -116,7 +117,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('maak_sec', 'normaal', '9999')
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-        self.assertTrue("NhbVereniging matching query does not exist" in f1.getvalue())
+        self.assertTrue("Vereniging matching query does not exist" in f1.getvalue())
 
         # functie bestaat niet
         self.functie_sec.delete()
@@ -159,7 +160,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         self.assertTrue("LET OP: geen lid meer bij een vereniging" in f2.getvalue())
 
         # maak lid bij een andere vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1042,
                     naam="Andere club",
                     plaats="Overkantje",

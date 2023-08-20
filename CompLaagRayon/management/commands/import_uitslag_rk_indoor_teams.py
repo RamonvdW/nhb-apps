@@ -20,7 +20,7 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
         self.dryrun = True
         self.verbose = False
-        self.deelnemers = dict()            # [lid_nr] = [KampioenschapSchutterBoog, ...]
+        self.deelnemers = dict()            # [lid_nr] = [KampioenschapSporterBoog, ...]
         self.teams_cache = list()           # [KampioenschapTeam, ...]
         self.team_lid_nrs = dict()          # [team.pk] = [lid_nr, ...]
         self.ver_lid_nrs = dict()           # [ver_nr] = [lid_nr, ...]

@@ -7,9 +7,10 @@
 from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -45,10 +46,10 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=101))
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(regio_nr=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=NhbRegio.objects.get(pk=111))
         ver.save()
 
         sporter = Sporter()
@@ -77,10 +78,10 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak nog een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Extra Club"
-        ver2.ver_nr = "1900"
-        ver2.regio = NhbRegio.objects.get(regio_nr=112)
+        ver2 = Vereniging(
+                    naam="Extra Club",
+                    ver_nr=1900,
+                    regio=NhbRegio.objects.get(regio_nr=112))
         ver2.save()
 
         self.functie_hwl2 = maak_functie("HWL test 2", "HWL")

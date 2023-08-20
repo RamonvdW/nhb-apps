@@ -11,9 +11,10 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from NhbStructuur.models import NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbCluster
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
+from Vereniging.models import Vereniging
 import copy
 
 
@@ -79,7 +80,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         opts.insert(0, opt_geen)
 
         # vereniging in de regio
-        objs = (NhbVereniging
+        objs = (Vereniging
                 .objects
                 .filter(regio=functie_nu.regio)
                 .prefetch_related('clusters')
@@ -187,7 +188,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # for
 
         # neem de cluster keuzes voor de verenigingen over
-        for obj in (NhbVereniging
+        for obj in (Vereniging
                     .objects
                     .filter(regio=functie_nu.regio)
                     .prefetch_related('clusters')):

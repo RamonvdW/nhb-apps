@@ -18,9 +18,10 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
                                RegiocompetitieSporterBoog)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
+from Vereniging.models import Vereniging
 from codecs import BOM_UTF8
 import textwrap
 import csv
@@ -417,7 +418,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _maak_data_dagdeel_behoefte(context, deelcomp, deelnemers, regio):
         """ voegt de volgende elementen toe aan de context:
-                regio_verenigingen: lijst van NhbVereniging met counts_list met telling van dagdelen
+                regio_verenigingen: lijst van Vereniging met counts_list met telling van dagdelen
                 dagdelen: beschrijving van dagdelen voor de kolom headers
         """
 
@@ -433,11 +434,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # maak een lijst van alle verenigingen in deze regio
         context['regio_verenigingen'] = vers = list()
         nr2ver = dict()
-        for ver in (NhbVereniging
-                        .objects
-                        .filter(regio=regio)
-                        .order_by('ver_nr')
-                        .all()):
+        for ver in (Vereniging
+                    .objects
+                    .filter(regio=regio)
+                    .order_by('ver_nr')):
 
             vers.append(ver)
             nr2ver[ver.ver_nr] = ver

@@ -10,8 +10,9 @@ from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalI
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling, BestelMutatie
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from decimal import Decimal
 from mollie.api.client import Client
 
@@ -30,7 +31,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
                     regio=self.regio_111)
@@ -133,7 +134,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # start ontvangst met betaling via de bond
 
         # maak de instellingen van de bond aan
-        ver = NhbVereniging(
+        ver = Vereniging(
                         ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                         naam="De bond",
                         regio=self.regio_100)
@@ -604,7 +605,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
     def test_status_changed_via_bond(self):
         # maak de instellingen van de bond aan
-        ver = NhbVereniging(
+        ver = Vereniging(
                         ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                         naam="De bond",
                         regio=self.regio_100)

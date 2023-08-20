@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
+from NhbStructuur.models import NhbRegio, NhbCluster
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam)
@@ -17,6 +17,7 @@ from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 from decimal import Decimal
 import datetime
 
@@ -46,10 +47,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -163,10 +164,10 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = self.regio_111
+        ver2 = Vereniging(
+                    naam="Andere Club",
+                    ver_nr=1222,
+                    regio=self.regio_111)
         ver2.save()
         self.ver2 = ver2
 
@@ -202,20 +203,20 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         de_tijd = datetime.time(hour=20)
 
         # maak binnen het plan drie wedstrijden voor deze vereniging
-        for volgnr in range(3):
+        for volg_nr in range(3):
             match = CompetitieMatch(
                         competitie=self.comp_18,
                         vereniging=self.ver1,
-                        datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
+                        datum_wanneer=datetime.date(year=2020, month=1, day=5+volg_nr*3),
                         tijd_begin_wedstrijd=de_tijd)
 
-            if volgnr <= 1:
+            if volg_nr <= 1:
                 uitslag = Uitslag(max_score=300, afstand=12)
                 uitslag.save()
                 match.uitslag = uitslag
-                match.beschrijving = "Test - Dit is een testje %s" % volgnr
+                match.beschrijving = "Test - Dit is een testje %s" % volg_nr
 
-                if volgnr == 1:
+                if volg_nr == 1:
                     score = Score(sporterboog=self.sporterboog_100001,
                                   waarde=123,
                                   afstand_meter=12)
@@ -469,7 +470,8 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
         for url in urls2:
-            self.assertTrue("/waarschijnlijke-deelnemers/" in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
+            self.assertTrue("/waarschijnlijke-deelnemers/" in url
+                            or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
         # for
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk

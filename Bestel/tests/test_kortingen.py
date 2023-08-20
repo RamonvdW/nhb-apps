@@ -13,9 +13,10 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje,
                                         bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_SPORTER,
                                     WEDSTRIJD_KORTING_COMBI)
@@ -270,11 +271,11 @@ class TestBestelKortingen(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        ver_bond = NhbVereniging(
-                    ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
-                    naam='Bondsbureau',
-                    plaats='Schietstad',
-                    regio=NhbRegio.objects.get(regio_nr=100))
+        ver_bond = Vereniging(
+                        ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
+                        naam='Bondsbureau',
+                        plaats='Schietstad',
+                        regio=NhbRegio.objects.get(regio_nr=100))
         ver_bond.save()
         self.ver_bond = ver_bond
 
@@ -284,7 +285,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen_bond = instellingen
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
                     regio=NhbRegio.objects.get(regio_nr=112),
@@ -297,7 +298,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         ver.save()
         self.ver = ver
 
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                     ver_nr=1001,
                     naam="Andere Club",
                     regio=NhbRegio.objects.get(regio_nr=113),

@@ -319,10 +319,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 ver_in_hwl_cluster = dict()     # [ver_nr] = True/False
                 for cluster in (hwl_ver
                                 .clusters
-                                .prefetch_related('nhbvereniging_set')
+                                .prefetch_related('vereniging_set')
                                 .filter(gebruik=self.comp.afstand)
                                 .all()):
-                    ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
+                    ver_nrs = list(cluster.vereniging_set.values_list('ver_nr', flat=True))
                     for ver_nr in ver_nrs:
                         ver_in_hwl_cluster[ver_nr] = True
                     # for

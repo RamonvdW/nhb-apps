@@ -6,10 +6,11 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbVereniging, NhbRegio, NhbRayon
+from NhbStructuur.models import NhbRegio, NhbRayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_regio_nr, get_request_rayon_nr
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -27,9 +28,9 @@ class TestSporterOperations(E2EHelpers, TestCase):
         self.rayon2 = NhbRayon.objects.get(rayon_nr=2)
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     naam="Grote Club",
-                    ver_nr="1000",
+                    ver_nr=1000,
                     regio=NhbRegio.objects.get(pk=111))
         ver.save()
         self.ver = ver

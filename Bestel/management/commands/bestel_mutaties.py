@@ -34,8 +34,8 @@ from Bestel.plugins.webwinkel import (webwinkel_plug_reserveren, webwinkel_plugi
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Mailer.operations import mailer_queue_email, render_email_template
-from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                     WEDSTRIJD_KORTING_COMBI)
 from mollie.api.client import Client, RequestSetupError
@@ -248,7 +248,7 @@ class Command(BaseCommand):
 
         self._emailadres_backoffice = Functie.objects.get(rol='MWW').bevestigde_email
 
-        ophalen_ver = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+        ophalen_ver = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
         self._adres_backoffice = (ophalen_ver.adres_regel1, ophalen_ver.adres_regel2)
 
     def add_arguments(self, parser):
@@ -349,7 +349,7 @@ class Command(BaseCommand):
     def _clear_instellingen_cache(self):
         self._instellingen_cache = dict()
 
-        ver_bond = NhbVereniging.objects.get(ver_nr=settings.BETAAL_VIA_BOND_VER_NR)
+        ver_bond = Vereniging.objects.get(ver_nr=settings.BETAAL_VIA_BOND_VER_NR)
 
         self._instellingen_via_bond, _ = (BetaalInstellingenVereniging
                                           .objects
@@ -591,7 +591,10 @@ class Command(BaseCommand):
 
                 if product.wedstrijd_inschrijving:
                     # wedstrijd van de kalender
-                    instellingen = self._get_instellingen(product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging)
+                    instellingen = self._get_instellingen(product
+                                                          .wedstrijd_inschrijving
+                                                          .wedstrijd
+                                                          .organiserende_vereniging)
                     ontvanger_ver_nr = instellingen.vereniging.ver_nr       # kan nu ook "via nhb" zijn
                     try:
                         ontvanger2producten[ontvanger_ver_nr].append(product)
@@ -684,8 +687,8 @@ class Command(BaseCommand):
                 # for
 
                 self.stdout.write(
-                    "[INFO] %s producten voor totaal %s uit mandje van account pk=%s (%s) omgezet in bestelling pk=%s" % (
-                        len(producten), totaal_euro, mutatie.account.pk, mutatie.account.volledige_naam(), bestelling.pk))
+                  "[INFO] %s producten voor totaal %s uit mandje van account pk=%s (%s) omgezet in bestelling pk=%s" % (
+                      len(producten), totaal_euro, mutatie.account.pk, mutatie.account.volledige_naam(), bestelling.pk))
             # for
 
             # kijk welke bestellingen een nul-bedrag hebben en daarom meteen afgerond kunnen worden
@@ -722,7 +725,8 @@ class Command(BaseCommand):
         # INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
         if oude_status == INSCHRIJVING_STATUS_RESERVERING_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
-            self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' % inschrijving.pk)
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' %
+                              inschrijving.pk)
 
             if inschrijving:
                 wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
@@ -731,7 +735,8 @@ class Command(BaseCommand):
 
         elif oude_status == INSCHRIJVING_STATUS_DEFINITIEF:
             # in een bestelling en betaald
-            self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' % inschrijving.pk)
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' %
+                              inschrijving.pk)
 
             if inschrijving:
                 wedstrijden_plugin_afmelden(inschrijving)
@@ -832,9 +837,8 @@ class Command(BaseCommand):
         bestelling = mutatie.bestelling
         bedrag_euro = mutatie.bedrag_euro
 
-        self.stdout.write('[INFO] Overboeking %s euro ontvangen voor bestelling %s (pk=%s)' % (bedrag_euro,
-                                                                                               bestelling.mh_bestel_nr(),
-                                                                                               bestelling.pk))
+        self.stdout.write('[INFO] Overboeking %s euro ontvangen voor bestelling %s (pk=%s)' % (
+                            bedrag_euro, bestelling.mh_bestel_nr(), bestelling.pk))
 
         status = bestelling.status
         if status == BESTELLING_STATUS_AFGEROND:

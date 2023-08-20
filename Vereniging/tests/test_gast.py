@@ -8,12 +8,13 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Registreer.definities import REGISTRATIE_FASE_DONE
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -47,10 +48,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -69,7 +70,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.account_sec = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
         # maak een vereniging aan voor de gasten
-        self.ver_extern = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+        self.ver_extern = Vereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
 
         self.functie_sec_extern = maak_functie("SEC extern", "SEC")
         self.functie_sec_extern.vereniging = self.ver_extern

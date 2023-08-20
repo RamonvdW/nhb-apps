@@ -20,9 +20,9 @@ from Competitie.models import (Regiocompetitie,
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
+from Vereniging.models import Vereniging
 from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
@@ -447,7 +447,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # wedstrijd.tijd_begin_aanmelden_str = wedstrijd.tijd_begin_aanmelden.strftime("%H%M")
         # wedstrijd.tijd_einde_wedstrijd_str = wedstrijd.tijd_einde_wedstrijd.strftime("%H%M")
 
-        verenigingen = (NhbVereniging
+        verenigingen = (Vereniging
                         .objects
                         .filter(regio__rayon=deelkamp.rayon,
                                 regio__is_administratief=False)
@@ -575,8 +575,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             match.locatie = None
         else:
             try:
-                ver = NhbVereniging.objects.get(pk=ver_pk)
-            except (NhbVereniging.DoesNotExist, ValueError):
+                ver = Vereniging.objects.get(pk=ver_pk)
+            except (Vereniging.DoesNotExist, ValueError):
                 raise Http404('Vereniging niet gevonden')
 
             # check dat dit een van de aangeboden verenigingen is

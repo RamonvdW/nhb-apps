@@ -9,9 +9,10 @@ from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGERON
 from Bestel.models import Bestelling
 from Functie.operations import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelFoto, WebwinkelKeuze
 
 
@@ -37,7 +38,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.account_email = 'winkel@test.not'
         self.account_normaal = self.e2e_create_account(self.lid_nr, self.account_email, 'Mgr', accepteer_vhpg=True)
 
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))

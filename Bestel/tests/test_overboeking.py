@@ -13,9 +13,10 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
@@ -35,7 +36,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
                     regio=NhbRegio.objects.get(regio_nr=112))
@@ -53,7 +54,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen = instellingen
 
-        ver_webshop = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+        ver_webshop = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
         instellingen_webshop = BetaalInstellingenVereniging(
                                     vereniging=ver_webshop,
                                     akkoord_via_bond=False)
@@ -152,7 +153,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         bestelling.producten.add(product)
         self.bestelling = bestelling
 
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                     ver_nr=1001,
                     naam="Andere Club",
                     regio=NhbRegio.objects.get(regio_nr=113))

@@ -12,10 +12,11 @@ from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporte
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -68,10 +69,10 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_101)
         ver.save()
         self._ver = ver
 
@@ -107,10 +108,10 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         # for
 
         # maak nog een test vereniging, zonder HWL functie
-        ver = NhbVereniging()
-        ver.naam = "Kleine Club"
-        ver.ver_nr = "1100"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Kleine Club",
+                    ver_nr=1100,
+                    regio=self.regio_101)
         ver.save()
         self._ver2 = ver
 
@@ -150,7 +151,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
 
         # doorloop de 2 verenigingen in deze regio
-        for ver in NhbVereniging.objects.filter(regio=self.regio_101).order_by('ver_nr'):
+        for ver in Vereniging.objects.filter(regio=self.regio_101).order_by('ver_nr'):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
             functie_hwl = ver.functie_set.filter(rol='HWL').first()
             self.e2e_wissel_naar_functie(functie_hwl)
@@ -178,7 +179,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 if barebow_boog_pk:
                     self.assertTrue(sporter.bereken_wedstrijdleeftijd_wa(self.begin_jaar + 1) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 
-                # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
+                # haal de schutter voorkeuren op, zodat de sporter-boog records aangemaakt worden
                 url_voorkeuren = self.url_voorkeuren % lid_nr
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)
@@ -191,7 +192,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
-                    # onthoud deze schutterboog om straks in bulk aan te melden
+                    # onthoud deze sporter-boog om straks in bulk aan te melden
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:

@@ -209,8 +209,8 @@ class UitslagenRayonIndivView(TemplateView):
         curr_teller = None
         for deelnemer in deelnemers:
             # deelnemer kan zijn:
-            #   is_lijst_rk == False --> RegioCompetitieSporterBoog
-            #   is_lijst_rk == True  --> KampioenschapSchutterBoog
+            #   is_lijst_rk == False --> RegiocompetitieSporterBoog
+            #   is_lijst_rk == True  --> KampioenschapSporterBoog
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 if klasse == -1:

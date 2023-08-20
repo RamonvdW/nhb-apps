@@ -5,14 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie, Functie
 from Mailer.models import MailQueue
-from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
+from TijdelijkeCodes.models import TijdelijkeCode
+from Vereniging.models import Vereniging
 
 
 class TestFunctieWijzigEmail(E2EHelpers, TestCase):
@@ -43,10 +44,10 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.functie_rcl105 = Regiocompetitie.objects.filter(competitie=deel1.competitie, regio=regio_105)[0].functie
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = regio_105
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=regio_105)
         ver.save()
         self.ver1 = ver
 

@@ -7,9 +7,10 @@
 from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie
 import datetime
@@ -43,7 +44,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.sporter = Sporter.objects.get(lid_nr=100000)     # geeft bruikbare geboorte_datum
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
@@ -54,7 +55,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
-        self.ver2 = NhbVereniging(
+        self.ver2 = Vereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
@@ -718,7 +719,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
 
     def test_uitvoerend(self):
         # maak het bondsbureau aan als vereniging
-        ver_bb = NhbVereniging(
+        ver_bb = Vereniging(
                             ver_nr=1234,
                             naam="Bondsbureau",
                             regio=NhbRegio.objects.get(regio_nr=100))

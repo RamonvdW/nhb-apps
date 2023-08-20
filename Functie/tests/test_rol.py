@@ -14,8 +14,9 @@ from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          rol_activeer_rol, rol_activeer_functie,
                          rol_get_huidige, rol_get_huidige_functie)
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 class TestFunctieRol(E2EHelpers, TestCase):
@@ -36,10 +37,10 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.functie_tst = maak_functie("Test test", "x")
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=NhbRegio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 

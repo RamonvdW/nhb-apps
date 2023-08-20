@@ -12,10 +12,11 @@ from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.operations import maak_functie, Functie
 from Logboek.models import LogboekRegel
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -58,10 +59,10 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=101))
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(regio_nr=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=NhbRegio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 
@@ -106,10 +107,10 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.regio_112 = NhbRegio.objects.get(regio_nr=112)
 
         # maak nog een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Extra Club"
-        ver2.ver_nr = "1900"
-        ver2.regio = self.regio_112
+        ver2 = Vereniging(
+                    naam="Extra Club",
+                    ver_nr=1900,
+                    regio=self.regio_112)
         ver2.save()
         self.ver2 = ver2
 

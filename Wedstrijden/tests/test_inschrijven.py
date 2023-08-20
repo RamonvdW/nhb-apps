@@ -8,8 +8,9 @@ from django.test import TestCase
 from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRegio
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -50,7 +51,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
@@ -573,7 +574,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
         # wedstrijd van andere vereniging
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                         ver_nr=2000,
                         naam="Test Club",
                         regio=NhbRegio.objects.get(regio_nr=113))
