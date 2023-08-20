@@ -16,7 +16,7 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
-from Sporter.models import Sporter
+from Sporter.models import Sporter, get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
@@ -577,6 +577,8 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+
+        get_sporter_voorkeuren(self.sporter1, mag_database_wijzigen=True)
 
         # met voorkeuren
         with self.assert_max_queries(20):

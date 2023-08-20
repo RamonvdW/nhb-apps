@@ -15,7 +15,7 @@ from BasisTypen.models import BoogType
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren, get_sporterboog
 from types import SimpleNamespace
 import logging
 
@@ -36,20 +36,20 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = None
+        self.functie_nu = None
+        self.sporter = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en de rol Sporter gekozen hebben
-        self.rol_nu = rol_get_huidige(self.request)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_SPORTER, Rollen.ROL_HWL)
 
-    @staticmethod
-    def _get_sporter_or_404(request, sporter_pk):
+    def _get_sporter_or_404(self, sporter_pk):
         """ Geeft het Sporter record terug van de sporter zelf,
             of in geval van de HWL de gekozen sporter """
 
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
-        if rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             try:
                 # conversie naar integer geef input-controle
                 sporter_pk = int(sporter_pk)
@@ -58,45 +58,35 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 raise Http404('Sporter niet gevonden')
 
             try:
-                sporter = Sporter.objects.select_related('bij_vereniging', 'account').get(pk=sporter_pk)
+                self.sporter = Sporter.objects.select_related('bij_vereniging', 'account').get(pk=sporter_pk)
             except Sporter.DoesNotExist:
                 raise Http404('Sporter niet gevonden')
 
             # laatste control: de sporter moet lid zijn bij de vereniging van de HWL
-            if sporter.bij_vereniging != functie_nu.vereniging:
+            if self.sporter.bij_vereniging != self.functie_nu.vereniging:
                 raise PermissionDenied('Geen sporter van jouw vereniging')
 
-            return sporter
+        else:
+            # fallback naar ingelogde gebruiker
+            account = self.request.user
+            # ROL_SPORTER geeft bescherming tegen geen sporter
+            self.sporter = account.sporter_set.first()
 
-        # fallback naar ingelogde gebruiker
-        account = request.user
-        sporter = account.sporter_set.first()  # ROL_SPORTER geeft bescherming tegen geen sporter
+    def _update_sporterboog(self):
+        objs = get_sporterboog(self.sporter, mag_database_wijzigen=True)
 
-        return sporter
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als een POST request ontvangen is."""
-
-        sporter = self._get_sporter_or_404(request,
-                                           request.POST.get('sporter_pk', None))
-
-        # sla de nieuwe voorkeuren op in SporterBoog records (1 per boogtype)
-        # werkt alleen na een GET (maakt de SporterBoog records aan)
-        for obj in (SporterBoog
-                    .objects
-                    .filter(sporter=sporter)
-                    .select_related('boogtype')):
-
+        # voer de wijzigingen door
+        for obj in objs:
             # wedstrijdboog
             old_voor_wedstrijd = obj.voor_wedstrijd
             obj.voor_wedstrijd = False
-            if request.POST.get('schiet_' + obj.boogtype.afkorting, None):
+            if self.request.POST.get('schiet_' + obj.boogtype.afkorting, None):
                 obj.voor_wedstrijd = True
 
             # informatie over de boog
             old_heeft_interesse = obj.heeft_interesse
             obj.heeft_interesse = False
-            if request.POST.get('info_' + obj.boogtype.afkorting, None):
+            if self.request.POST.get('info_' + obj.boogtype.afkorting, None):
                 obj.heeft_interesse = True
 
             if (old_voor_wedstrijd != obj.voor_wedstrijd or
@@ -105,90 +95,44 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 obj.save(update_fields=['heeft_interesse', 'voor_wedstrijd'])
         # for
 
-        voorkeuren = get_sporter_voorkeuren(sporter)
+    def _update_voorkeuren(self):
+        voorkeuren = get_sporter_voorkeuren(self.sporter, mag_database_wijzigen=True)
 
-        old_eigen_blazoen = voorkeuren.voorkeur_eigen_blazoen
-        voorkeuren.voorkeur_eigen_blazoen = False
-        if request.POST.get('voorkeur_eigen_blazoen', None):
-            voorkeuren.voorkeur_eigen_blazoen = True
+        keuze = self.request.POST.get('voorkeur_eigen_blazoen', None) is not None
+        voorkeuren.voorkeur_eigen_blazoen = keuze
 
-        old_voorkeur_meedoen_competitie = voorkeuren.voorkeur_meedoen_competitie
-        voorkeuren.voorkeur_meedoen_competitie = False
-        if request.POST.get('voorkeur_meedoen_competitie', None):
-            voorkeuren.voorkeur_meedoen_competitie = True
+        keuze = self.request.POST.get('voorkeur_meedoen_competitie', None) is not None
+        voorkeuren.voorkeur_meedoen_competitie = keuze
 
-        if (old_voorkeur_meedoen_competitie != voorkeuren.voorkeur_meedoen_competitie or
-                old_eigen_blazoen != voorkeuren.voorkeur_eigen_blazoen):
-            # wijzigingen opslaan
-            voorkeuren.save(update_fields=['voorkeur_eigen_blazoen', 'voorkeur_meedoen_competitie'])
+        para_notitie = self.request.POST.get('para_notitie', '')
+        voorkeuren.opmerking_para_sporter = para_notitie
 
-        para_notitie = request.POST.get('para_notitie', '')
-        if para_notitie != voorkeuren.opmerking_para_sporter:
-            # wijziging opslaan
-            voorkeuren.opmerking_para_sporter = para_notitie
-            voorkeuren.save(update_fields=['opmerking_para_sporter'])
+        keuze = self.request.POST.get('para_voorwerpen', None) is not None
+        voorkeuren.para_voorwerpen = keuze
 
-        old_voorkeur_para_voorwerpen = voorkeuren.para_voorwerpen
-        voorkeuren.para_voorwerpen = False
-        if request.POST.get('para_voorwerpen', None):
-            voorkeuren.para_voorwerpen = True
-        if old_voorkeur_para_voorwerpen != voorkeuren.para_voorwerpen:
-            # wijziging opslaan
-            voorkeuren.save(update_fields=['para_voorwerpen'])
+        keuze = self.request.POST.get('voorkeur_disc_outdoor', None) is not None
+        voorkeuren.voorkeur_discipline_outdoor = keuze
 
-        old_disc_outdoor = voorkeuren.voorkeur_discipline_outdoor
-        voorkeuren.voorkeur_discipline_outdoor = False
-        if request.POST.get('voorkeur_disc_outdoor', None):
-            voorkeuren.voorkeur_discipline_outdoor = True
+        keuze = self.request.POST.get('voorkeur_disc_indoor', None) is not None
+        voorkeuren.voorkeur_discipline_indoor = keuze
 
-        old_disc_indoor = voorkeuren.voorkeur_discipline_indoor
-        voorkeuren.voorkeur_discipline_indoor = False
-        if request.POST.get('voorkeur_disc_indoor', None):
-            voorkeuren.voorkeur_discipline_indoor = True
+        keuze = self.request.POST.get('voorkeur_disc_25m1p', None) is not None
+        voorkeuren.voorkeur_discipline_25m1pijl = keuze
 
-        old_disc_25m1p = voorkeuren.voorkeur_discipline_25m1pijl
-        voorkeuren.voorkeur_discipline_25m1pijl = False
-        if request.POST.get('voorkeur_disc_25m1p', None):
-            voorkeuren.voorkeur_discipline_25m1pijl = True
+        keuze = self.request.POST.get('voorkeur_disc_clout', None) is not None
+        voorkeuren.voorkeur_discipline_clout = keuze
 
-        old_disc_clout = voorkeuren.voorkeur_discipline_clout
-        voorkeuren.voorkeur_discipline_clout = False
-        if request.POST.get('voorkeur_disc_clout', None):
-            voorkeuren.voorkeur_discipline_clout = True
+        keuze = self.request.POST.get('voorkeur_disc_veld', None) is not None
+        voorkeuren.voorkeur_discipline_veld = keuze
 
-        old_disc_veld = voorkeuren.voorkeur_discipline_veld
-        voorkeuren.voorkeur_discipline_veld = False
-        if request.POST.get('voorkeur_disc_veld', None):
-            voorkeuren.voorkeur_discipline_veld = True
+        keuze = self.request.POST.get('voorkeur_disc_run', None) is not None
+        voorkeuren.voorkeur_discipline_run = keuze
 
-        old_disc_run = voorkeuren.voorkeur_discipline_run
-        voorkeuren.voorkeur_discipline_run = False
-        if request.POST.get('voorkeur_disc_run', None):
-            voorkeuren.voorkeur_discipline_run = True
+        keuze = self.request.POST.get('voorkeur_disc_3d', None) is not None
+        voorkeuren.voorkeur_discipline_3d = keuze
 
-        old_disc_3d = voorkeuren.voorkeur_discipline_3d
-        voorkeuren.voorkeur_discipline_3d = False
-        if request.POST.get('voorkeur_disc_3d', None):
-            voorkeuren.voorkeur_discipline_3d = True
-
-        if (old_disc_outdoor != voorkeuren.voorkeur_discipline_outdoor or
-                old_disc_indoor != voorkeuren.voorkeur_discipline_indoor or
-                old_disc_25m1p != voorkeuren.voorkeur_discipline_25m1pijl or
-                old_disc_clout != voorkeuren.voorkeur_discipline_clout or
-                old_disc_veld != voorkeuren.voorkeur_discipline_veld or
-                old_disc_run != voorkeuren.voorkeur_discipline_run or
-                old_disc_3d != voorkeuren.voorkeur_discipline_3d):
-            # wijzigingen opslaan
-            voorkeuren.save(update_fields=['voorkeur_discipline_25m1pijl',
-                                           'voorkeur_discipline_outdoor',
-                                           'voorkeur_discipline_indoor',
-                                           'voorkeur_discipline_clout',
-                                           'voorkeur_discipline_veld',
-                                           'voorkeur_discipline_run',
-                                           'voorkeur_discipline_3d'])
-
-        if sporter.geslacht == GESLACHT_ANDERS:
-            keuze = request.POST.get('wedstrijd_mv', None)
+        if self.sporter.geslacht == GESLACHT_ANDERS:
+            keuze = self.request.POST.get('wedstrijd_mv', None)
 
             if keuze in (GESLACHT_MAN, GESLACHT_VROUW):
                 gekozen = True
@@ -197,12 +141,18 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 keuze = GESLACHT_MAN
                 gekozen = False
 
-            if gekozen != voorkeuren.wedstrijd_geslacht_gekozen or voorkeuren.wedstrijd_geslacht != keuze:
-                voorkeuren.wedstrijd_geslacht_gekozen = gekozen
-                voorkeuren.wedstrijd_geslacht = keuze
-                voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen', 'wedstrijd_geslacht'])
+            voorkeuren.wedstrijd_geslacht_gekozen = gekozen
+            voorkeuren.wedstrijd_geslacht = keuze
 
-        del voorkeuren
+        voorkeuren.save()
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als een POST request ontvangen is."""
+
+        self._get_sporter_or_404(request.POST.get('sporter_pk', None))
+
+        self._update_sporterboog()
+        self._update_voorkeuren()
 
         if self.rol_nu != Rollen.ROL_HWL:
             if rol_mag_wisselen(self.request):
@@ -236,42 +186,14 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         return HttpResponseRedirect(reverse('Sporter:profiel'))
 
-    @staticmethod
-    def _get_bogen(sporter, geen_wedstrijden):
+    def _get_bogen(self, geen_wedstrijden):
         """ Retourneer een lijst met SporterBoog objecten, aangevuld met hulpvelden """
 
         if geen_wedstrijden:
             # sporter mag niet aan wedstrijden deelnemen
-            # verwijder daarom alle SporterBoog records
-            SporterBoog.objects.filter(sporter=sporter).delete()
             return None, None
 
-        # haal de SporterBoog records op van deze gebruiker
-        objs = (SporterBoog
-                .objects
-                .filter(sporter=sporter)
-                .select_related('boogtype')
-                .order_by('boogtype__volgorde'))
-
-        # maak ontbrekende SporterBoog records aan, indien nodig
-        boogtypen = BoogType.objects.exclude(buiten_gebruik=True)
-        if len(objs) < len(boogtypen):
-            aanwezig = objs.values_list('boogtype__pk', flat=True)
-            bulk = list()
-            for boogtype in boogtypen.exclude(pk__in=aanwezig):
-                sporterboog = SporterBoog(
-                                    sporter=sporter,
-                                    boogtype=boogtype)
-                bulk.append(sporterboog)
-            # for
-            SporterBoog.objects.bulk_create(bulk)
-            del bulk
-
-            objs = (SporterBoog
-                    .objects
-                    .filter(sporter=sporter)
-                    .select_related('boogtype')
-                    .order_by('boogtype__volgorde'))
+        objs = get_sporterboog(self.sporter, mag_database_wijzigen=False, geen_wedstrijden=geen_wedstrijden)
 
         # voeg de checkbox velden toe en opsplitsen in WA/IFAA
         objs_wa = list()
@@ -296,15 +218,17 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             sporter_pk = kwargs['sporter_pk']
         except KeyError:
             sporter_pk = None
-        sporter = self._get_sporter_or_404(self.request, sporter_pk)
+        self._get_sporter_or_404(sporter_pk)
 
-        context['geen_wedstrijden'] = geen_wedstrijden = sporter.bij_vereniging and sporter.bij_vereniging.geen_wedstrijden
+        context['sporter'] = self.sporter
+        context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(self.sporter)
 
-        context['bogen_wa'], context['bogen_ifaa'] = self._get_bogen(sporter, geen_wedstrijden)
-        context['sporter'] = sporter
-        context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
+        geen_wedstrijden = self.sporter.bij_vereniging and self.sporter.bij_vereniging.geen_wedstrijden
+        context['geen_wedstrijden'] = geen_wedstrijden
 
-        if sporter.geslacht == GESLACHT_ANDERS:
+        context['bogen_wa'], context['bogen_ifaa'] = self._get_bogen(geen_wedstrijden)
+
+        if self.sporter.geslacht == GESLACHT_ANDERS:
             context['toon_geslacht'] = True
             context['opt_wedstrijd_mv'] = opts = list()
 
@@ -318,15 +242,15 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # for
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['sporter_pk'] = sporter.pk
+            context['sporter_pk'] = self.sporter.pk
             context['is_hwl'] = True
         else:
             # niet de HWL, dus de sporter zelf
             if rol_mag_wisselen(self.request):
                 # sporter is beheerder, dus toon opt-out opties
-                context['account'] = sporter.account
+                context['account'] = self.sporter.account
 
-        context['toon_bondscompetities'] = not sporter.is_gast
+        context['toon_bondscompetities'] = not self.sporter.is_gast
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
 
         if self.rol_nu == Rollen.ROL_HWL:

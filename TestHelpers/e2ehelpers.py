@@ -62,8 +62,6 @@ class MyQueryTracer(object):
 
         call['stack'] = stack = list()
         for fname, line_nr, base, code in traceback.extract_stack():
-            if base == 'post':      # naam van functie is 'post'
-                self.modify_acceptable = True
             if (base != '__call__'
                     and not fname.startswith('/usr/lib')
                     and '<frozen' not in fname
@@ -71,18 +69,26 @@ class MyQueryTracer(object):
                     and 'manage.py' not in fname):
                 stack.append((fname, line_nr, base))
                 # houd bij vanuit welke view functie
-                if '/view' in fname:
+                if '/view' in fname and self.found_code == '':
                     if 'post' in base or 'get' in base or 'test_func' in base:
-                        self.found_code = "%s in %s:%s" % (base, fname, line_nr)
+                        if 'SELECT ' not in sql and 'SAVEPOINT ' not in sql:
+                            self.found_code = "%s in %s:%s" % (base, fname, line_nr)
+                            # print(sql[:40], self.found_code)
             elif base == 'render' and 'template/response.py' in fname:
                 stack.append((fname, line_nr, base))
+
+            # print(fname, line_nr, base)
+            if base == 'post':                  # naam van functie is 'post'
+                self.modify_acceptable = True
+            elif base == 'call_command':        # standaard Django functie om management command uit te voeren
+                self.modify_acceptable = True
         # for
         # print('call stack:\n  ', "\n  ".join([str(tup) for tup in stack))
 
         if REPORT_QUERY_ORIGINS:                        # pragma: no cover
             msg = ''
             for fname, line_nr, base in stack:
-                msg += '\n         %s:%s %s' % (fname[-30:], line_nr, base)
+                msg += '\n         %s:%s %s' % (fname[-35:], line_nr, base)
             try:
                 self.stack_counts[msg] += 1
             except KeyError:
@@ -866,7 +872,6 @@ class E2EHelpers(TestCase):
         self._assert_inputs(html, dtl)
         self._assert_csrf_token_usage(html, dtl)
         self._assert_notranslate(html, dtl)
-
         self._assert_template_bug(html, dtl)
 
         urls = self.extract_all_urls(response)
@@ -1120,7 +1125,7 @@ class E2EHelpers(TestCase):
                               '\n   ' +
                               '\n   '.join(explain))
             else:
-                print('[WARNING] Found database modification outside POST or background task:' +
+                print('\n[WARNING] Found database modification outside POST or background task:' +
                       '\n   ' +
                       '\n   '.join(explain))
 

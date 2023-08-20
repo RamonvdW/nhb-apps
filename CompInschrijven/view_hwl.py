@@ -490,7 +490,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # al aangemeld - zou niet hier moeten zijn gekomen
                     raise Http404('Sporter is al ingeschreven')
 
-                voorkeuren = get_sporter_voorkeuren(sporter)
+                voorkeuren = get_sporter_voorkeuren(sporter, mag_database_wijzigen=True)
                 if voorkeuren.wedstrijd_geslacht_gekozen:
                     wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
                 else:

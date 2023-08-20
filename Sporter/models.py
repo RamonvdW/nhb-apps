@@ -316,20 +316,34 @@ class SporterBoog(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-def get_sporter_voorkeuren(sporter):
+def get_sporter_voorkeuren(sporter, mag_database_wijzigen=False):
     """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
     """
 
-    voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+    if mag_database_wijzigen:
+        voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+    else:
+        try:
+            voorkeuren = SporterVoorkeuren.objects.get(sporter=sporter)
+            was_created = False
+        except SporterVoorkeuren.DoesNotExist:
+            voorkeuren = SporterVoorkeuren(sporter=sporter)
+            was_created = True
+
     if was_created:
+        updated = list()
+
         # default voor wedstrijd_geslacht_gekozen = True
         if sporter.geslacht != GESLACHT_ANDERS:
             if sporter.geslacht != voorkeuren.wedstrijd_geslacht:  # default is Man
                 voorkeuren.wedstrijd_geslacht = sporter.geslacht
-                voorkeuren.save(update_fields=['wedstrijd_geslacht'])
+                updated.append('wedstrijd_geslacht')
         else:
             voorkeuren.wedstrijd_geslacht_gekozen = False  # laat de sporter kiezen
-            voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
+            updated.append('wedstrijd_geslacht_gekozen')
+
+        if mag_database_wijzigen and len(updated):
+            voorkeuren.save(update_fields=updated)
 
     return voorkeuren
 
@@ -359,5 +373,55 @@ def get_sporter_voorkeuren_wedstrijdbogen(lid_nr):
 
     return sporter, voorkeuren, pks
 
+
+def get_sporterboog(sporter, mag_database_wijzigen=False, geen_wedstrijden=False):
+
+    if geen_wedstrijden:
+        # sporter mag niet aan wedstrijden deelnemen
+        # verwijder daarom alle SporterBoog records
+        if mag_database_wijzigen:
+            SporterBoog.objects.filter(sporter=sporter).delete()
+
+        return list()
+
+    else:
+        # TODO: dit moet met minder queries kunnen
+
+        # haal de SporterBoog records op van deze gebruiker
+        objs = (SporterBoog
+                .objects
+                .filter(sporter=sporter)
+                .select_related('boogtype',
+                                'sporter')
+                .order_by('boogtype__volgorde'))
+
+        # maak ontbrekende SporterBoog records aan, indien nodig
+        boogtypen = BoogType.objects.exclude(buiten_gebruik=True)
+
+        if len(objs) < len(boogtypen):
+            # er ontbreken een aantal SporterBoog
+            aanwezig = objs.values_list('boogtype__pk', flat=True)
+            bulk = list()
+            for boogtype in boogtypen.exclude(pk__in=aanwezig):
+                sporterboog = SporterBoog(
+                                    sporter=sporter,
+                                    boogtype=boogtype)
+                bulk.append(sporterboog)
+            # for
+
+            if mag_database_wijzigen:
+                SporterBoog.objects.bulk_create(bulk)
+
+                objs = (SporterBoog
+                        .objects
+                        .filter(sporter=sporter)
+                        .select_related('boogtype',
+                                        'sporter')
+                        .order_by('boogtype__volgorde'))
+            else:
+                bulk.extend(list(objs))
+                objs = bulk
+
+        return objs
 
 # end of file

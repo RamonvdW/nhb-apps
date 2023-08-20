@@ -32,7 +32,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
-    url_voorkeuren = '/vereniging/leden-voorkeuren/'
+    url_leden_voorkeuren = '/vereniging/leden-voorkeuren/'
     url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                                              # sporter_pk
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                                     # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'    # ronde_pk
@@ -283,12 +283,12 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
         # post een wijziging
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(31):
             resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
                                                              'schiet_R': 'on',
                                                              'info_C': 'on',
                                                              'voorkeur_meedoen_competitie': 'on'})
-        self.assert_is_redirect(resp, self.url_voorkeuren)
+        self.assert_is_redirect(resp, self.url_leden_voorkeuren)
 
     def test_overzicht(self):
         # anon
@@ -442,7 +442,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # eerste keer, zonder sporterboog records
         self.assertEqual(SporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
+            resp = self.client.get(self.url_leden_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -452,9 +452,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
             # get operatie maakt de sporterboog records aan
             url = self.url_sporter_voorkeuren % sporter.pk
-            with self.assert_max_queries(20):
-                resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)
+            with self.assert_max_queries(32):
+                resp = self.client.post(url, {'sporter_pk': sporter.pk})
+            self.assert_is_redirect(resp, self.url_leden_voorkeuren)
         # for
         self.assertEqual(SporterBoog.objects.count(), 51)
 
@@ -472,7 +472,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.sporter_100003.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
+            resp = self.client.get(self.url_leden_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

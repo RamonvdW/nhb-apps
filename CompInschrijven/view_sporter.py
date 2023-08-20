@@ -280,7 +280,7 @@ class RegiocompetitieAanmeldenView(View):
 
         # urlconf parameters geaccepteerd
 
-        voorkeuren = get_sporter_voorkeuren(sporter)
+        voorkeuren = get_sporter_voorkeuren(sporter, mag_database_wijzigen=True)
         if voorkeuren.wedstrijd_geslacht_gekozen:
             wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
         else:

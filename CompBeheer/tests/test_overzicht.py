@@ -146,18 +146,17 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
             # maak 3 leden aan
             for lp in range(3):
                 lid_nr += 1
-                sporter = Sporter()
-                sporter.lid_nr = lid_nr
-                sporter.voornaam = "Lid %s" % lid_nr
-                sporter.achternaam = "de Tester"
-                sporter.bij_vereniging = ver
-                sporter.is_actief_lid = True
+                sporter = Sporter(
+                            lid_nr=lid_nr,
+                            voornaam="Lid %s" % lid_nr,
+                            achternaam="de Tester",
+                            bij_vereniging=ver,
+                            is_actief_lid=True,
+                            sinds_datum=datetime.date(2010, 1, 1),
+                            geboorte_datum=datetime.date(2000, 1, 1),     # senior
+                            geslacht='M')
                 if do_barebow:
                     sporter.geboorte_datum = datetime.date(2019 - 12, 1, 1)  # aspirant
-                else:
-                    sporter.geboorte_datum = datetime.date(2000, 1, 1)  # senior
-                sporter.sinds_datum = datetime.date(2010, 1, 1)
-                sporter.geslacht = 'M'
                 sporter.save()
 
                 # haal de sporter voorkeuren op, zodat de sporterboog records aangemaakt worden
@@ -169,21 +168,21 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
                 # zet de recurve boog aan
                 if lp == 1:
                     # zet de voorkeur voor eigen blazoen aan voor een paar sporters
-                    with self.assert_max_queries(25):
+                    with self.assert_max_queries(31):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
                 elif lp == 2:
-                    with self.assert_max_queries(25):
+                    with self.assert_max_queries(31):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_C': 'on'})
                 elif do_barebow:
-                    with self.assert_max_queries(25):
+                    with self.assert_max_queries(31):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_BB': 'on'})
                     do_barebow = False
                 else:
-                    with self.assert_max_queries(25):
+                    with self.assert_max_queries(31):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on'})
 
