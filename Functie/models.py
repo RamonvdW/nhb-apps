@@ -8,7 +8,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.formats import date_format
 from Account.models import Account
-from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
+from NhbStructuur.models import NhbRegio, NhbRayon
+from Vereniging.models import Vereniging
 
 
 """ Deze module houdt bij wie beheerders zijn
@@ -79,7 +80,7 @@ class Functie(models.Model):
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT, null=True, blank=True)
 
     # SEC/HWL/WL only: vereniging
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE, null=True, blank=True)
+    vereniging = models.ForeignKey(Vereniging, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         """ Geef een string terug voor gebruik in de admin interface """

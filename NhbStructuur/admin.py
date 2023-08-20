@@ -5,40 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
-
-
-class NhbVerenigingAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor NhbVereniging klasse """
-    ordering = ('ver_nr',)
-    search_fields = ('naam', 'ver_nr')
-
-    # filter mogelijkheid
-    list_filter = ('regio',)
-
-    list_select_related = True
-
-    filter_horizontal = ('clusters',)
-
-    def __init__(self, model, admin_site):
-        super().__init__(model, admin_site)
-        self._ver_regio = None
-
-    def get_object(self, request, object_id, from_field=None):          # pragma: no cover
-        obj = super().get_object(request, object_id, from_field)
-        if obj:
-            self._ver_regio = obj.regio
-        return obj
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'clusters':
-            regio_clusters = (NhbCluster
-                              .objects
-                              .select_related('regio')
-                              .filter(regio=self._ver_regio)
-                              .order_by('letter'))
-            kwargs['queryset'] = regio_clusters
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
 
 
 class NhbRayonAdmin(admin.ModelAdmin):
@@ -75,7 +42,6 @@ class NhbClusterAdmin(admin.ModelAdmin):
     list_select_related = ('regio',)
 
 
-admin.site.register(NhbVereniging, NhbVerenigingAdmin)
 admin.site.register(NhbCluster, NhbClusterAdmin)
 
 # NhbRayon en NhbRegio zijn hard-coded, dus geen admin interface

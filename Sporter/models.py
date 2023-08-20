@@ -11,7 +11,7 @@ from Account.models import Account
 from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, GESLACHT_ANDERS, ORGANISATIE_IFAA
 from BasisTypen.models import BoogType
 # mag niet afhankelijk zijn van Competitie
-from NhbStructuur.models import NhbVereniging
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -109,7 +109,7 @@ class Sporter(models.Model):
 
     # lid bij vereniging
     bij_vereniging = models.ForeignKey(
-                                NhbVereniging,
+                                Vereniging,
                                 on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database

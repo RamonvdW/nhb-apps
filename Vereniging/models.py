@@ -1,36 +1,73 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from NhbStructuur.models import NhbVereniging
-from Sporter.models import Sporter
+from NhbStructuur.models import NhbRegio, NhbCluster
 
 
-class Secretaris(models.Model):
+class Vereniging(models.Model):
+    """ Tabel waarin gegevens van de Verenigingen staan """
 
-    """ de secretaris van een vereniging
-        (een vereniging kan meerdere secretarissen hebben)
+    # 4-cijferige nummer van de vereniging
+    ver_nr = models.PositiveIntegerField(primary_key=True)
 
-        deze aparte tabel voorkomt een circulaire afhankelijkheid tussen Sporter (lid bij vereniging)
-        en de secretaris van een vereniging (is een sporter)
-    """
+    # naam van de vereniging
+    naam = models.CharField(max_length=50)
 
-    # van welke vereniging
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE)
+    # adres van "het bedrijf"
+    adres_regel1 = models.CharField(max_length=50, default='', blank=True)
+    adres_regel2 = models.CharField(max_length=50, default='', blank=True)
 
-    # de leden die secretaris zijn (typisch maar een)
-    sporters = models.ManyToManyField(Sporter, blank=True)
+    # locatie van het doel van de vereniging
+    plaats = models.CharField(max_length=35, blank=True)
+
+    # de regio waarin de vereniging zit
+    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+
+    # de optionele clusters waar deze vereniging bij hoort
+    clusters = models.ManyToManyField(NhbCluster,
+                                      blank=True)   # mag leeg zijn / gemaakt worden
+
+    # er is een vereniging voor persoonlijk lidmaatschap
+    # deze leden mogen geen wedstrijden schieten
+    geen_wedstrijden = models.BooleanField(default=False)
+
+    # is dit deze vereniging voor gast-accounts?
+    is_extern = models.BooleanField(default=False)
+
+    # KvK-nummer - wordt gebruikt bij verkoop wedstrijd/opleiding
+    kvk_nummer = models.CharField(max_length=15, default='', blank=True)
+
+    # website van deze vereniging
+    website = models.CharField(max_length=100, default='', blank=True)
+
+    # algemeen e-mailadres
+    contact_email = models.EmailField(blank=True)
+
+    # telefoonnummer van deze vereniging
+    # maximum is 15 tekens, maar we staan streepjes/spaties toe
+    telefoonnummer = models.CharField(max_length=20, default='', blank=True)
+
+    # bankrekening details
+    bank_iban = models.CharField(max_length=18, default='', blank=True)
+    bank_bic = models.CharField(max_length=11, default='', blank=True)      # 8 of 11 tekens
+
+    def ver_nr_en_naam(self):
+        return "[%s] %s" % (self.ver_nr, self.naam)
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return self.ver_nr_en_naam()
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name_plural = verbose_name = "Secretaris Vereniging"
+        verbose_name = "Vereniging"
+        verbose_name_plural = "Verenigingen"
 
-    def __str__(self):
-        return "[%s] %s: %s" % (self.vereniging.ver_nr, self.vereniging.naam,
-                                " + ".join([sporter.lid_nr_en_volledige_naam() for sporter in self.sporters.all()]))
+    objects = models.Manager()      # for the editor only
 
 
 # end of file

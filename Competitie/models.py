@@ -19,9 +19,10 @@ from Competitie.definities import (AFSTANDEN,
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
+from Vereniging.models import Vereniging
 from Wedstrijden.models import WedstrijdLocatie
 import logging
 
@@ -401,7 +402,7 @@ class CompetitieMatch(models.Model):
     beschrijving = models.CharField(max_length=100, blank=True)
 
     # organiserende vereniging
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+    vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT,
                                    blank=True, null=True)   # mag later ingevuld worden
 
     # waar
@@ -543,7 +544,7 @@ class RegiocompetitieSporterBoog(models.Model):
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
 
     # vereniging wordt hier apart bijgehouden omdat de sporter over kan stappen midden in het seizoen
-    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
+    bij_vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT)
 
     # aanvangsgemiddelde voor de individuele competitie
     # typisch gebaseerd op de uitslag van vorig seizoen
@@ -641,7 +642,7 @@ class RegiocompetitieTeam(models.Model):
     regiocompetitie = models.ForeignKey(Regiocompetitie, on_delete=models.CASCADE)
 
     # bij welke vereniging hoort dit team
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
+    vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT)
 
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
@@ -860,7 +861,7 @@ class KampioenschapSporterBoog(models.Model):
     # vereniging wordt hier apart bijgehouden omdat leden over kunnen stappen
     # tijdens het seizoen.
     # Tijdens fase G wordt de vereniging bevroren voor het RK.
-    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+    bij_vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT,
                                        blank=True, null=True)
 
     # kampioenen hebben een label
@@ -960,7 +961,7 @@ class KampioenschapTeam(models.Model):
     kampioenschap = models.ForeignKey(Kampioenschap, on_delete=models.CASCADE)        # nodig voor de migratie
 
     # bij welke vereniging hoort dit team
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+    vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT,
                                    blank=True, null=True)
 
     # een volgnummer van het team binnen de vereniging
