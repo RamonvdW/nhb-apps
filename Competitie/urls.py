@@ -9,6 +9,8 @@ from Competitie import views_info, views_klassengrenzen, views_kies, views_overz
 
 app_name = 'Competitie'
 
+# basis = /bondscompetities/
+
 urlpatterns = [
 
     # openbare pagina's

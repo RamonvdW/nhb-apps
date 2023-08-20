@@ -7,10 +7,9 @@
 from django.urls import path
 from Registreer import view_begin, view_registreer_lid, view_registreer_gast
 
-
 app_name = 'Registreer'
 
-# baseline: /account/registreer/
+# basis: /account/registreer/
 
 urlpatterns = [
 

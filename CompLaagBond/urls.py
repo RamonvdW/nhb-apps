@@ -9,9 +9,9 @@ from CompLaagBond import view_planning, view_indiv, view_teams, view_formulieren
 
 app_name = 'CompLaagBond'
 
-urlpatterns = [
+# basis = /bondscompetities/bk/
 
-    # base url: bondscompetities/bk/
+urlpatterns = [
 
     # BK planning
     path('planning/<deelkamp_pk>/limieten/',

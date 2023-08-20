@@ -9,6 +9,8 @@ from CompBeheer import views_bb, views_bko, view_stats, view_overzicht, view_wij
 
 app_name = 'CompBeheer'
 
+# basis = /bondscompetities/beheer/
+
 urlpatterns = [
 
     # base url: bondscompetities/beheer/

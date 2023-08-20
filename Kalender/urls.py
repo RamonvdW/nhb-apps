@@ -9,6 +9,8 @@ from Kalender import view_landing_page, view_maand, view_jaar
 
 app_name = 'Kalender'
 
+# basis = /kalender/
+
 urlpatterns = [
 
     # base: /kalender/
