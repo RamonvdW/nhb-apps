@@ -5,7 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Functie import view_overzicht, view_vhpg, view_koppel_beheerder, view_wisselvanrol, view_activeer_rol
+
+from Functie import (view_activeer_rol, view_beheerders, view_beheerders_vereniging, view_email_beheerders,
+                     view_koppel_beheerder, view_vhpg, view_wisselvanrol)
 
 app_name = 'Functie'
 
@@ -27,15 +29,15 @@ urlpatterns = [
          name='wijzig-email'),
 
     path('overzicht/vereniging/',
-         view_overzicht.OverzichtVerenigingView.as_view(),
+         view_beheerders_vereniging.BeheerdersVerenigingView.as_view(),
          name='overzicht-vereniging'),
 
     path('overzicht/',
-         view_overzicht.OverzichtView.as_view(),
+         view_beheerders.LijstBeheerdersView.as_view(),
          name='overzicht'),
 
     path('overzicht/alle-lid-nrs/sec-hwl/',
-         view_overzicht.OverzichtEmailsSecHwlView.as_view(),
+         view_email_beheerders.OverzichtEmailsSecHwlView.as_view(),
          name='sec-hwl-lid_nrs'),
 
 

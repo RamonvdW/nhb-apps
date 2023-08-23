@@ -24,6 +24,7 @@ class Rollen(enum.IntEnum):
     ROL_MWZ = 30        # Manager Wedstrijdzaken
     ROL_MO = 40         # Manager Opleidingen
     ROL_MWW = 50        # Manager Webwinkel
+    ROL_CS = 60         # Commissie Scheidsrechters
     ROL_SUP = 90        # Support
     ROL_NONE = 99       # geen rol (gebruik: niet ingelogd)
 
@@ -46,6 +47,7 @@ url2rol = {
     'MO': Rollen.ROL_MO,
     'MWZ': Rollen.ROL_MWZ,
     'MWW': Rollen.ROL_MWW,
+    'CS': Rollen.ROL_CS,
     'support': Rollen.ROL_SUP,
     'sporter': Rollen.ROL_SPORTER,
     'geen': Rollen.ROL_NONE
