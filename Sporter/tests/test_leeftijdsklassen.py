@@ -16,7 +16,8 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
-from Sporter.models import Sporter, get_sporter_voorkeuren
+from Sporter.models import Sporter
+from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime

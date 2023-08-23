@@ -25,8 +25,8 @@ from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_DONE
 from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
-from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
-from Sporter.operations import get_sporter_gekozen_bogen
+from Sporter.models import SporterBoog, Speelsterkte
+from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
 import logging
 import copy
 

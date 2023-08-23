@@ -104,9 +104,13 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         sporter.save()
 
     def _prep_voorkeuren(self, lid_nr):
-        # haal de voorkeuren op - hiermee worden de SporterBoog records aangemaakt
-        with self.assert_max_queries(20):
-            self.client.get(self.url_voorkeuren)
+        # zet de bogen 'aan'
+        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
+                                                      'schiet_C': 'on',
+                                                      'schiet_BB': 'on',
+                                                      'schiet_TR': 'on',
+                                                      'schiet_LB': 'on'})
+        self.assert_is_redirect_not_plein(resp)
 
         # zet een wedstrijd voorkeur voor Recurve en informatie voorkeur voor Barebow
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R', sporter__lid_nr=lid_nr)

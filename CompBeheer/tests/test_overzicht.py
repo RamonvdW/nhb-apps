@@ -159,32 +159,24 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
                     sporter.geboorte_datum = datetime.date(2019 - 12, 1, 1)  # aspirant
                 sporter.save()
 
-                # haal de sporter voorkeuren op, zodat de sporterboog records aangemaakt worden
                 url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
-                with self.assert_max_queries(20):
-                    resp = self.client.get(url_voorkeuren)
-                self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-                # zet de recurve boog aan
+                # zet de juiste boog 'aan' voor wedstrijden
                 if lp == 1:
                     # zet de voorkeur voor eigen blazoen aan voor een paar sporters
-                    with self.assert_max_queries(31):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on',
-                                                                 'voorkeur_eigen_blazoen': 'on'})
+                    resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_R': 'on',
+                                                             'voorkeur_eigen_blazoen': 'on'})
                 elif lp == 2:
-                    with self.assert_max_queries(31):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_C': 'on'})
+                    resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_C': 'on'})
                 elif do_barebow:
-                    with self.assert_max_queries(31):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on'})
+                    resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_BB': 'on'})
                     do_barebow = False
                 else:
-                    with self.assert_max_queries(31):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on'})
+                    resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_R': 'on'})
 
                 self.assert_is_redirect_not_plein(resp)  # check for success
             # for

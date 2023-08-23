@@ -11,11 +11,11 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import (GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD,
                                    ORGANISATIE_IFAA)
-from BasisTypen.models import BoogType
 from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
+from Functie.rol import rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren, get_sporterboog
+from Sporter.models import Sporter
+from Sporter.operations import get_sporter_voorkeuren, get_sporterboog
 from types import SimpleNamespace
 import logging
 

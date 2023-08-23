@@ -6,11 +6,13 @@
 
 from django.test import TestCase
 from Account.models import Account
+from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio
 from Functie.operations import maak_functie
 from Sporter.models import (Sporter, SporterBoog, SporterVoorkeuren,
                             get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen, get_sporterboog)
+from Score.models import Aanvangsgemiddelde
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -475,7 +477,6 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(account.optout_herinnering_taken)
 
     def test_geslacht_anders(self):
-
         # begin met de sporter met geslacht man
         self.e2e_login(self.account_hwl)
 
@@ -547,5 +548,49 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         voorkeur = self.sporter_100003.sportervoorkeuren_set.first()
         self.assertFalse(voorkeur.wedstrijd_geslacht_gekozen)
 
+    def test_get_sporterboog(self):
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=False, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        # geen actie
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        # controleer aanvullen bij te weinig bogen
+        SporterBoog.objects.filter(boogtype__organisatie=ORGANISATIE_WA).delete()
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 12)
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        # gebruik een SporterBoog in een record met on_delete=models.PROTECT
+        sb = SporterBoog.objects.get(sporter=self.sporter_100001, boogtype=self.boog_R)
+        ag = Aanvangsgemiddelde(
+                    sporterboog=sb,
+                    boogtype=self.boog_R,
+                    waarde=1,
+                    afstand_meter=1)
+        ag.save()
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=False, geen_wedstrijden=True)
+        self.assertEqual(len(objs), 0)
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
+        self.assertEqual(len(objs), 0)
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        ag.delete()
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
+        self.assertEqual(len(objs), 0)
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
 
 # end of file

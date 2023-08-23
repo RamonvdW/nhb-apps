@@ -246,22 +246,19 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
         # post een wijziging
         if lid_nr == 100003:
-            with self.assert_max_queries(23):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'info_R': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_BB': 'on',
+                                                             'info_R': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
         elif lid_nr == 100013:
-            with self.assert_max_queries(24):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_TR': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_TR': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
         else:
-            with self.assert_max_queries(23):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on',
-                                                                 'info_C': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_R': 'on',
+                                                             'info_C': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 

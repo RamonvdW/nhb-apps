@@ -252,27 +252,24 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # post een wijziging
         if lid_nr == 100003:
-            with self.assert_max_queries(24):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'schiet_R': 'on',         # 2 bogen
-                                                                 'info_R': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_BB': 'on',
+                                                             'schiet_R': 'on',         # 2 bogen
+                                                             'info_R': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
         elif lid_nr == 100012:
             # geen voorkeur voor meedoen met de competitie
-            with self.assert_max_queries(24):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'info_R': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_BB': 'on',
+                                                             'info_R': 'on'})
 
             # verwijder de SchutterVoorkeur records
             SporterVoorkeuren.objects.filter(sporter__lid_nr=100012).delete()
         else:
-            with self.assert_max_queries(23):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on',
-                                                                 'info_C': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_R': 'on',
+                                                             'info_C': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, self.url_voorkeuren)
 

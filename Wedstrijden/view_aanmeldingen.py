@@ -16,7 +16,8 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, SporterVoorkeuren, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterVoorkeuren
+from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD,
                                     INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF)
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving

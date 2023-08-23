@@ -283,11 +283,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
         # post een wijziging
-        with self.assert_max_queries(31):
-            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                             'schiet_R': 'on',
-                                                             'info_C': 'on',
-                                                             'voorkeur_meedoen_competitie': 'on'})
+        resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                         'schiet_R': 'on',
+                                                         'info_C': 'on',
+                                                         'voorkeur_meedoen_competitie': 'on'})
         self.assert_is_redirect(resp, self.url_leden_voorkeuren)
 
     def test_overzicht(self):

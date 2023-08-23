@@ -23,7 +23,8 @@ from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog, get_sporterboog
+from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
+from Sporter.operations import get_sporterboog
 from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData

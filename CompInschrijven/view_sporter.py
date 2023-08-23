@@ -18,7 +18,8 @@ from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
-from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog
+from Sporter.operations import get_sporter_voorkeuren
 from decimal import Decimal
 
 

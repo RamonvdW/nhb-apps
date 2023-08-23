@@ -17,7 +17,7 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,
                                       bereken_leeftijdsklassen_bondscompetitie)
-from Sporter.models import get_sporter_voorkeuren
+from Sporter.operations import get_sporter_voorkeuren
 from types import SimpleNamespace
 
 

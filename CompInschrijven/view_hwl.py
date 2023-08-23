@@ -21,7 +21,8 @@ from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.operations import get_sporter_voorkeuren
 import copy
 
 

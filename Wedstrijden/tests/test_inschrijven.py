@@ -9,7 +9,8 @@ from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog
+from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving

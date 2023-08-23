@@ -9,7 +9,8 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog
+from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
