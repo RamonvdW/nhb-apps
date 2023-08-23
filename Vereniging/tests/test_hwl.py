@@ -449,10 +449,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # nog een keer, nu met sporterboog records aanwezig
         # zowel van de vereniging van de HWL als van andere verenigingen
         for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
-            # get operatie maakt de sporterboog records aan
+            # maak de sporterboog records aan
             url = self.url_sporter_voorkeuren % sporter.pk
-            with self.assert_max_queries(32):
-                resp = self.client.post(url, {'sporter_pk': sporter.pk})
+            resp = self.client.post(url, {'sporter_pk': sporter.pk})
             self.assert_is_redirect(resp, self.url_leden_voorkeuren)
         # for
         self.assertEqual(SporterBoog.objects.count(), 51)

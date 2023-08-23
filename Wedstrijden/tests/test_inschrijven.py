@@ -85,11 +85,13 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         sporter.save()
         self.sporter = sporter
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter)
-        self.client.get(self.url_sporter_voorkeuren % sporter.pk)   # maakt alle SporterBoog records aan
+
+        # maak alle SporterBoog aan
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk' : sporter.pk,
+                                                              'schiet_R': 'on'})
+        self.assert_is_redirect_not_plein(resp)
 
         sporterboog = SporterBoog.objects.get(sporter=sporter, boogtype=boog_r)
-        sporterboog.voor_wedstrijd = True
-        sporterboog.save(update_fields=['voor_wedstrijd'])
         self.sporterboog = sporterboog
 
         sporter2 = Sporter(

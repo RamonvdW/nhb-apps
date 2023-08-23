@@ -27,7 +27,9 @@ my_logger = logging.getLogger('NHBApps.Sporter')
 
 class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kunnen sporters hun voorkeuren inzien en aanpassen """
+    """ Via deze view kunnen sporters hun voorkeuren inzien en aanpassen
+        Ook de SEC en HWL kunnen via deze view de instellingen van een lid van de vereniging aanpassen
+    """
 
     template_name = TEMPLATE_VOORKEUREN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
@@ -43,13 +45,13 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en de rol Sporter gekozen hebben
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SPORTER, Rollen.ROL_HWL)
+        return self.rol_nu in (Rollen.ROL_SPORTER, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def _get_sporter_or_404(self, sporter_pk):
         """ Geeft het Sporter record terug van de sporter zelf,
             of in geval van de HWL de gekozen sporter """
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             try:
                 # conversie naar integer geef input-controle
                 sporter_pk = int(sporter_pk)
@@ -154,35 +156,34 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         self._update_sporterboog()
         self._update_voorkeuren()
 
-        if self.rol_nu != Rollen.ROL_HWL:
-            if rol_mag_wisselen(self.request):
-                account = request.user
-                updated = list()
-
-                optout_nieuwe_taak = False
-                if request.POST.get('optout_nieuwe_taak'):
-                    optout_nieuwe_taak = True
-                if account.optout_nieuwe_taak != optout_nieuwe_taak:
-                    # wijziging doorvoeren
-                    account.optout_nieuwe_taak = optout_nieuwe_taak
-                    updated.append('optout_nieuwe_taak')
-
-                optout_herinnering_taken = False
-                if request.POST.get('optout_herinnering_taken'):
-                    optout_herinnering_taken = True
-
-                if account.optout_herinnering_taken != optout_herinnering_taken:
-                    # wijziging doorvoeren
-                    account.optout_herinnering_taken = optout_herinnering_taken
-                    updated.append('optout_herinnering_taken')
-
-                # wijziging opslaan
-                if len(updated):
-                    account.save(update_fields=updated)
-
-        if self.rol_nu == Rollen.ROL_HWL:
-            # stuur de HWL terug naar zijn ledenlijst
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+            # stuur de beheerder terug naar zijn ledenlijst
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
+
+        if rol_mag_wisselen(self.request):
+            account = request.user
+            updated = list()
+
+            optout_nieuwe_taak = False
+            if request.POST.get('optout_nieuwe_taak'):
+                optout_nieuwe_taak = True
+            if account.optout_nieuwe_taak != optout_nieuwe_taak:
+                # wijziging doorvoeren
+                account.optout_nieuwe_taak = optout_nieuwe_taak
+                updated.append('optout_nieuwe_taak')
+
+            optout_herinnering_taken = False
+            if request.POST.get('optout_herinnering_taken'):
+                optout_herinnering_taken = True
+
+            if account.optout_herinnering_taken != optout_herinnering_taken:
+                # wijziging doorvoeren
+                account.optout_herinnering_taken = optout_herinnering_taken
+                updated.append('optout_herinnering_taken')
+
+            # wijziging opslaan
+            if len(updated):
+                account.save(update_fields=updated)
 
         return HttpResponseRedirect(reverse('Sporter:profiel'))
 

@@ -26,7 +26,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                  # wedstrijd_pk
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_wedstrijden_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'  # wedstrijd_pk, sessie_pk
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                    # sporter_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -78,7 +78,10 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         sporter1.save()
         self.sporter1 = sporter1
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
-        self.client.get(self.url_sporter_voorkeuren % sporter1.pk)   # maakt alle SporterBoog records aan
+
+        # maak alle SporterBoog aan
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter1.pk})
+        self.assert_is_redirect_not_plein(resp)
 
         sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_r)
         sporterboog.voor_wedstrijd = True
