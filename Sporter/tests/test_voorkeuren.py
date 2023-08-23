@@ -10,9 +10,9 @@ from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio
 from Functie.operations import maak_functie
-from Sporter.models import (Sporter, SporterBoog, SporterVoorkeuren,
-                            get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen, get_sporterboog)
 from Score.models import Aanvangsgemiddelde
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.operations import get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen, get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -85,7 +85,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
                         geboorte_datum=datetime.date(year=1972, month=3, day=4),
                         sinds_datum=datetime.date(year=2010, month=11, day=12),
                         bij_vereniging=ver,
-                        account = self.account_hwl)
+                        account=self.account_hwl)
         sporter.save()
         self.sporter_100002 = sporter
 
@@ -206,7 +206,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
     def test_getters(self):
-        voorkeuren = get_sporter_voorkeuren(self.sporter_100001, mag_database_wijzigen=True)
+        get_sporter_voorkeuren(self.sporter_100001, mag_database_wijzigen=True)
 
         # bestaat niet
         sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr=999999)
@@ -225,8 +225,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        # post een wijziging
-        # dit maakt ook de SporterBoog records aan
+        # maakt ook de SporterBoog aan met de juiste instellingen
         with self.assert_max_queries(29):
             resp = self.client.post(self.url_voorkeuren, {'sporter_pk': self.sporter_100001.lid_nr,
                                                           'schiet_R': 'on',

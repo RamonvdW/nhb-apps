@@ -79,7 +79,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                     bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
-        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
+        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1, mag_database_wijzigen=True)
         resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter1.pk})   # maak alle SporterBoog aan
         self.assert_is_redirect_not_plein(resp)
 

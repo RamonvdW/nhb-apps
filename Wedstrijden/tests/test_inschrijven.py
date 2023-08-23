@@ -84,7 +84,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                     bij_vereniging=self.ver1)
         sporter.save()
         self.sporter = sporter
-        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter)
+        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter, mag_database_wijzigen=True)
 
         # maak alle SporterBoog aan
         resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk' : sporter.pk,

@@ -245,13 +245,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         # deze functie kan alleen gebruikt worden als HWL
         url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SporterBoog records aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(url_sporter_voorkeuren + '%s/' % lid_nr)
-        self.assertEqual(resp.status_code, 200)
-
-        # post een wijziging
+        # maak de SporterBoog aan
         if lid_nr == 100003:
             resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
                                                              'schiet_BB': 'on',

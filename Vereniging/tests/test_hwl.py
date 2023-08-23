@@ -33,7 +33,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_leden_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                                              # sporter_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/'
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                                     # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'    # ronde_pk
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                  # match_pk
@@ -274,19 +274,12 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def _zet_sporter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
-        url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SporterBoog records aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_sporter_voorkeuren % lid_nr)
-        self.assertEqual(resp.status_code, 200)
-
-        # post een wijziging
-        resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                         'schiet_R': 'on',
-                                                         'info_C': 'on',
-                                                         'voorkeur_meedoen_competitie': 'on'})
+        # maak de SporterBoog aan
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                              'schiet_R': 'on',
+                                                              'info_C': 'on',
+                                                              'voorkeur_meedoen_competitie': 'on'})
         self.assert_is_redirect(resp, self.url_leden_voorkeuren)
 
     def test_overzicht(self):
@@ -450,8 +443,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # zowel van de vereniging van de HWL als van andere verenigingen
         for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
             # maak de sporterboog records aan
-            url = self.url_sporter_voorkeuren % sporter.pk
-            resp = self.client.post(url, {'sporter_pk': sporter.pk})
+            resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter.pk})
             self.assert_is_redirect(resp, self.url_leden_voorkeuren)
         # for
         self.assertEqual(SporterBoog.objects.count(), 51)

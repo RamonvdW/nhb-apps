@@ -145,7 +145,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if url.startswith('/functie/wijzig/')]
-        self.assertEqual(len(urls), 2)      # BKO 18m en 25m
+        self.assertEqual(len(urls), 6)      # MWZ, MWW, MO, CS, BKO 18m, BKO 25m
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina voor verschillende rollen
 

@@ -356,7 +356,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1998] Wegisweg Club wordt nu verwijderd" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1998] Weg is weg Club wordt nu verwijderd" in f2.getvalue())
 
     def test_weer_actief(self):
         # mutatie van inactief lid naar actief lid

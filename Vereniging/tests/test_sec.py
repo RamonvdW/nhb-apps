@@ -20,7 +20,7 @@ from Vereniging.models import Vereniging
 import datetime
 
 
-class TestVerenigingHWL(E2EHelpers, TestCase):
+class TestVerenigingSEC(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functies voor de SEC """
 
@@ -238,14 +238,16 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # probeer de sporterboog instellingen van sporters te veranderen
-        # maar dat mag de SEC niet, dus gebeurt er niets
         for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
             url = self.url_sporter_voorkeuren % sporter.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
-            self.assert403(resp)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+            self.assert_html_ok(resp)
         # for
         self.assertEqual(SporterBoog.objects.count(), 0)
 
