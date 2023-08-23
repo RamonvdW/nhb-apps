@@ -20,7 +20,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.11.1
     # via google-api-python-client
-google-api-python-client==2.95.0
+google-api-python-client==2.97.0
     # via -r requirements.in
 google-auth==2.22.0
     # via
@@ -48,7 +48,7 @@ openpyxl==3.1.2
     # via -r requirements.in
 pillow==10.0.0
     # via -r requirements.in
-protobuf==4.23.4
+protobuf==4.24.1
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -64,7 +64,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.1.1
     # via httplib2
-pypdf==3.14.0
+pypdf==3.15.2
     # via -r requirements.in
 pypng==0.20220715.0
     # via qrcode

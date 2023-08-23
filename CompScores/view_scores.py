@@ -1138,6 +1138,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     for wedstrijd, score in deelnemer.gevonden_scores:
                         if wedstrijd and not score.block_selection:
                             team_scores.append(score.pk)
+                    # for
             # for
         # for
 
