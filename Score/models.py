@@ -18,10 +18,10 @@ class Aanvangsgemiddelde(models.Model):
     """ Bijhouden van een specifiek aanvangsgemiddelde """
 
     # bij wie hoort dit aanvangsgemiddelde
-    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)      # TODO: verander in CASCADE?
 
     # kopie toevoegen van het boogtype van de sporterboog, om eenvoudiger op te kunnen filteren
-    boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
+    boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)            # TODO: verander in CASCADE?
 
     # AG voor individueel of team gebruik?
     doel = models.CharField(max_length=1, choices=AG_DOEL_CHOICES, default=AG_DOEL_INDIV)

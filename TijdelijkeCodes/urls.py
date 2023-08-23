@@ -9,7 +9,7 @@ from TijdelijkeCodes import view_ontvanger
 
 app_name = 'TijdelijkeCodes'
 
-# basis url: site:/tijdelijk-codes/
+# basis = /tijdelijke-codes/
 
 urlpatterns = [
     # tijdelijke url dispatcher

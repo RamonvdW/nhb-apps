@@ -9,6 +9,8 @@ from Records import views, views_indiv, views_special, views_verbeterbaar
 
 app_name = 'Records'
 
+# basis = /records/
+
 urlpatterns = [
 
     # verbeterbare records

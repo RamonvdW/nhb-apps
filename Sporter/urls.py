@@ -7,8 +7,9 @@
 from django.urls import path
 from Sporter import view_profiel, view_voorkeuren, view_leeftijdsklassen
 
-
 app_name = 'Sporter'
+
+# basis = /sporter/
 
 urlpatterns = [
     path('',

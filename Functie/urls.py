@@ -9,6 +9,8 @@ from Functie import view_overzicht, view_vhpg, view_koppel_beheerder, view_wisse
 
 app_name = 'Functie'
 
+# basis = /functie/
+
 urlpatterns = [
 
     # post-only, alle data gaat via parameters in de body ipv de url

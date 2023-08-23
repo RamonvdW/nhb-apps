@@ -9,6 +9,8 @@ from Account import view_login, view_login_as, view_logout, view_wachtwoord, vie
 
 app_name = 'Account'
 
+# basis = /account/
+
 urlpatterns = [
     path('login/',
          view_login.LoginView.as_view(),

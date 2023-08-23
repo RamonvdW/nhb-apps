@@ -9,6 +9,8 @@ from CompScores import view_scores, view_wedstrijden
 
 app_name = 'CompScores'
 
+# basis = /bondscompetities/scores/
+
 urlpatterns = [
 
     # HWL: wedstrijden kaartje
