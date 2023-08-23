@@ -24,24 +24,24 @@ class Command(BaseCommand):
         self._beheerder_accounts = list()
 
     def add_arguments(self, parser):
-        parser.add_argument('toekennen_aan', nargs=1, help="Functie beschrijving (deel van)")
+        parser.add_argument('voor_functie', nargs=1, help="Functie beschrijving (deel van)")
         parser.add_argument('aangemaakt_door', nargs=1, help="Account inlog naam of 'systeem'")
         parser.add_argument('deadline', nargs=1, help='Wanneer moet het af zijn (formaat: YYYY-MM-DD)')
         parser.add_argument('beschrijving', nargs=1, help='Beschrijving (gebruik \\n voor nieuwe regel)')
 
     def handle(self, *args, **options):
 
-        toekennen_aan = options['toekennen_aan'][0]
+        voor_functie = options['voor_functie'][0]
 
-        qset = Functie.objects.filter(Q(beschrijving__icontains=toekennen_aan) | Q(rol=toekennen_aan))
+        qset = Functie.objects.filter(Q(beschrijving__icontains=voor_functie) | Q(rol=voor_functie))
         functie_count = qset.count()
 
         if functie_count == 0:
-            self.stderr.write('[ERROR] Geen functie gevonden die voldoet aan %s' % repr(toekennen_aan))
+            self.stderr.write('[ERROR] Geen functie gevonden die voldoet aan %s' % repr(voor_functie))
             return
 
         if functie_count > 1:
-            self.stderr.write('[ERROR] Meerdere functies gevonden die voldoen aan %s' % repr(toekennen_aan))
+            self.stderr.write('[ERROR] Meerdere functies gevonden die voldoen aan %s' % repr(voor_functie))
             for functie in qset:
                 self.stderr.write('    (%s) %s' % (functie.rol, functie.beschrijving))
             # for
