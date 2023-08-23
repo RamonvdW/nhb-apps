@@ -198,7 +198,7 @@ def is_open_voor_inschrijven_rk_teams(comp):
         False, None:        De inschrijving ver in de toekomst of in het verre verleden
     """
 
-    if 'F' <= comp.fase_teams <= 'J':
+    if comp.fase_teams <= 'J':
 
         vanaf = comp.begin_fase_F + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
 
