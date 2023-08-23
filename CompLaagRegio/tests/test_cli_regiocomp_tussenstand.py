@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetiti
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from Competitie.tests.tijdlijn import zet_competitie_fases
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
@@ -197,7 +197,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'          # comp_pk
 
         # deze test is afhankelijk van de standaard regio's
-        self.regio_101 = NhbRegio.objects.get(regio_nr=101)
+        self.regio_101 = Regio.objects.get(regio_nr=101)
         self.boog_r = BoogType.objects.get(afkorting='R')
 
         # maak een BB aan, nodig om de competitie defaults in te zien
@@ -458,7 +458,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.assertFalse("[INFO] Verwerk overstap" in f2.getvalue())
 
         # maak een tweede vereniging aan
-        regio_116 = NhbRegio.objects.get(regio_nr=116)
+        regio_116 = Regio.objects.get(regio_nr=116)
         ver = Vereniging(
                     naam="Zuidelijke Club",
                     plaats="Grensstad",

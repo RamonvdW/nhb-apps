@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbRayon, NhbRegio
+from NhbStructuur.models import Rayon, Regio
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
@@ -29,9 +29,9 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal', accepteer_vhpg=True)
 
-        rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        regio_101 = NhbRegio.objects.get(regio_nr=101)
-        regio_105 = NhbRegio.objects.get(regio_nr=105)
+        rayon_1 = Rayon.objects.get(rayon_nr=1)
+        regio_101 = Regio.objects.get(regio_nr=101)
+        regio_105 = Regio.objects.get(regio_nr=105)
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)

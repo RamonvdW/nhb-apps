@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from NhbStructuur.models import NhbCluster
+from NhbStructuur.models import Cluster
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Vereniging.models import Vereniging
@@ -53,7 +53,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['gebruik'] = gebruik_filter = functie_nu.comp_type
 
         # cluster namen
-        objs = (NhbCluster
+        objs = (Cluster
                 .objects
                 .filter(regio=functie_nu.regio, gebruik=gebruik_filter)
                 .select_related('regio')
@@ -74,7 +74,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # for
 
         # voeg de "geen cluster" opties toe
-        opt_geen = NhbCluster()
+        opt_geen = Cluster()
         opt_geen.tekst = "Geen"
         opt_geen.choice_name = "0"
         opts.insert(0, opt_geen)
@@ -136,7 +136,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
 
             try:
                 huidige = ver.clusters.get(gebruik=gebruik)
-            except NhbCluster.DoesNotExist:
+            except Cluster.DoesNotExist:
                 # vereniging zit niet in een cluster voor de 18m
                 # stop de vereniging in het gevraagde cluster
                 if new_cluster:
@@ -169,7 +169,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # waarvan de definitie heel handig overeen komt met cluster.gebruik
         gebruik_filter = functie_nu.comp_type
 
-        clusters = (NhbCluster
+        clusters = (Cluster
                     .objects
                     .filter(regio=functie_nu.regio,
                             gebruik=gebruik_filter))

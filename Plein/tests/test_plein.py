@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Bestel.models import BestelMandje, BestelProduct
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio
+from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -44,18 +44,18 @@ class TestPlein(E2EHelpers, TestCase):
         self.functie_bko = maak_functie('BKO Test', 'BKO')
 
         self.functie_rko = maak_functie('RKO Test', 'RKO')
-        self.functie_rko.rayon = NhbRayon.objects.get(rayon_nr=3)
+        self.functie_rko.rayon = Rayon.objects.get(rayon_nr=3)
         self.functie_rko.save()
 
         self.functie_rcl = maak_functie('RCL Test', 'RCL')
-        self.functie_rcl.regio = NhbRegio.objects.get(regio_nr=111)
+        self.functie_rcl.regio = Regio.objects.get(regio_nr=111)
         self.functie_rcl.save()
 
         # maak een test vereniging
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         self.functie_sec = maak_functie('Secretaris vereniging 1000', 'SEC')

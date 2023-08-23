@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from Account.models import Account
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog, Speelsterkte
 from Vereniging.models import Vereniging
 import datetime
@@ -32,7 +32,7 @@ class TestSporterModels(TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 

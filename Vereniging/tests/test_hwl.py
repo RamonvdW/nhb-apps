@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
                                Regiocompetitie, RegiocompetitieRonde, Kampioenschap)
@@ -50,7 +50,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(
@@ -365,7 +365,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(urls_expected, urls)
 
         # maak dit een administratieve vereniging
-        self.ver1.regio = NhbRegio.objects.filter(is_administratief=True).first()
+        self.ver1.regio = Regio.objects.filter(is_administratief=True).first()
         self.ver1.save(update_fields=['regio'])
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)

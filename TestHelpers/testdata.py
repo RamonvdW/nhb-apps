@@ -23,7 +23,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
+from NhbStructuur.models import Rayon, Regio, Cluster
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -249,11 +249,11 @@ class TestData(object):
             self.afkorting2boogtype_ifaa[boogtype.afkorting] = boogtype
         # for
         del boogtype
-        for regio in NhbRegio.objects.all():
+        for regio in Regio.objects.all():
             self.regio[regio.regio_nr] = regio
         # for
         del regio
-        for rayon in NhbRayon.objects.all():
+        for rayon in Rayon.objects.all():
             self.rayon[rayon.rayon_nr] = rayon
         # for
         del rayon
@@ -460,7 +460,7 @@ class TestData(object):
         cluster_regios = list()
 
         bulk = list()
-        for regio in NhbRegio.objects.select_related('rayon').order_by('regio_nr'):
+        for regio in Regio.objects.select_related('rayon').order_by('regio_nr'):
             if regio.regio_nr in (101, 107):
                 cluster_regios.append(regio)
 
@@ -496,7 +496,7 @@ class TestData(object):
         # for
 
         for regio in cluster_regios:
-            cluster = NhbCluster.objects.filter(regio=regio).order_by('letter')[0]
+            cluster = Cluster.objects.filter(regio=regio).order_by('letter')[0]
             self.regio_cluster[regio.regio_nr] = cluster
             for ver in Vereniging.objects.filter(regio=regio).order_by('ver_nr')[:3]:
                 ver.clusters.add(cluster)

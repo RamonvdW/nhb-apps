@@ -9,7 +9,7 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -49,7 +49,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
@@ -349,7 +349,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         ver2 = Vereniging(
                         ver_nr=2000,
                         naam="Andere Club",
-                        regio=NhbRegio.objects.get(regio_nr=116))
+                        regio=Regio.objects.get(regio_nr=116))
         ver2.save()
         self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save(update_fields=['organiserende_vereniging'])
@@ -375,7 +375,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         ver2 = Vereniging(
                         ver_nr=1001,
                         naam="Kleine Club",
-                        regio=NhbRegio.objects.get(regio_nr=112))
+                        regio=Regio.objects.get(regio_nr=112))
         ver2.save()
         self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save()
@@ -434,7 +434,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         ver2 = Vereniging(
                             ver_nr=2000,
                             naam="Extra Club",
-                            regio=NhbRegio.objects.get(regio_nr=116))
+                            regio=Regio.objects.get(regio_nr=116))
         ver2.save()
 
         self.wedstrijd.organiserende_vereniging = ver2

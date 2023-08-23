@@ -10,7 +10,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Score.models import Aanvangsgemiddelde, ScoreHist, Score
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -25,7 +25,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-        regio_111 = NhbRegio.objects.get(pk=111)
+        regio_111 = Regio.objects.get(pk=111)
 
         boog_r = BoogType.objects.get(afkorting='R')
         boog_bb = BoogType.objects.get(afkorting='BB')

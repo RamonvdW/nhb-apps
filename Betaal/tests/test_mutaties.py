@@ -10,7 +10,7 @@ from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalI
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling, BestelMutatie
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from decimal import Decimal
@@ -27,8 +27,8 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
     def setUp(self):
         self.account = self.e2e_create_account_admin()
 
-        self.regio_100 = NhbRegio.objects.get(regio_nr=100)
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_100 = Regio.objects.get(regio_nr=100)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(

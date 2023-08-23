@@ -9,7 +9,7 @@ from django.utils import timezone
 from Account.models import Account
 from Functie.operations import maak_functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -57,7 +57,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.sporter_100001 = Sporter(lid_nr=100001,

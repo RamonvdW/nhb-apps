@@ -17,7 +17,7 @@ from Functie.models import Functie
 from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
-from NhbStructuur.models import NhbRayon, NhbRegio
+from NhbStructuur.models import Rayon, Regio
 from Opleidingen.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
@@ -110,11 +110,11 @@ class Command(BaseCommand):
             self._cache_account[account.username] = account
         # for
 
-        for rayon in NhbRayon.objects.all():
+        for rayon in Rayon.objects.all():
             self._cache_rayon[rayon.rayon_nr] = rayon
         # for
 
-        for regio in NhbRegio.objects.all():
+        for regio in Regio.objects.all():
             self._cache_regio[regio.regio_nr] = regio
         # for
 

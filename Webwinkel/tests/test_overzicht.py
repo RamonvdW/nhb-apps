@@ -9,7 +9,7 @@ from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGERON
 from Bestel.models import Bestelling
 from Functie.operations import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -41,7 +41,7 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         sporter1 = Sporter(

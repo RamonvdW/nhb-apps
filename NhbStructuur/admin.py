@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
+from NhbStructuur.models import Rayon, Regio, Cluster
 
 
 class NhbRayonAdmin(admin.ModelAdmin):
@@ -46,11 +46,11 @@ class NhbClusterAdmin(admin.ModelAdmin):
     ordering = ('regio', 'gebruik', 'letter')
 
 
-admin.site.register(NhbCluster, NhbClusterAdmin)
+admin.site.register(Cluster, NhbClusterAdmin)
 
 # NhbRayon en NhbRegio zijn hard-coded, dus geen admin interface
 # hard-coded data: zie NhbStructuur/migrations/m00??_nhbstructuur_20??
-admin.site.register(NhbRayon, NhbRayonAdmin)
-admin.site.register(NhbRegio, NhbRegioAdmin)
+admin.site.register(Rayon, NhbRayonAdmin)
+admin.site.register(Regio, NhbRegioAdmin)
 
 # end of file

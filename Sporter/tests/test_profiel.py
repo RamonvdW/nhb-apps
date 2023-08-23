@@ -17,7 +17,7 @@ from Competitie.tests.tijdlijn import (zet_competitie_fases,
                                        zet_competitie_fase_rk_prep, zet_competitie_fase_afsluiten)
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Records.models import IndivRecord
@@ -60,7 +60,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver = ver
 

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Account.models import Account
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -27,7 +27,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan

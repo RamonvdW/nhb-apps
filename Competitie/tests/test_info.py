@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -23,7 +23,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
         # deze test is afhankelijk van de standaard regio's
-        regio = NhbRegio.objects.get(regio_nr=101)
+        regio = Regio.objects.get(regio_nr=101)
 
         # maak een test vereniging
         ver = Vereniging(

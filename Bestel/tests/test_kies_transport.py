@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Bestel.definities import BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN, BESTEL_TRANSPORT_NVT
 from Bestel.models import BestelMandje, BestelProduct
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -37,7 +37,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(regio_nr=103))
+                    regio=Regio.objects.get(regio_nr=103))
         ver.save()
 
         sporter = Sporter(

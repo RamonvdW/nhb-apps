@@ -7,7 +7,7 @@
 from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -47,7 +47,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
@@ -58,7 +58,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.ver2 = Vereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver2.save()
 
         # onder 18 in 2022
@@ -722,7 +722,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         ver_bb = Vereniging(
                             ver_nr=1234,
                             naam="Bondsbureau",
-                            regio=NhbRegio.objects.get(regio_nr=100))
+                            regio=Regio.objects.get(regio_nr=100))
         ver_bb.save()
 
         # elke vereniging heeft minimaal 1 locatie nodig om een wedstrijd aan te mogen maken

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbRayon
+from NhbStructuur.models import Regio, Rayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_regio_nr, get_request_rayon_nr
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -23,15 +23,15 @@ class TestSporterOperations(E2EHelpers, TestCase):
 
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal', accepteer_vhpg=True)
 
-        self.regio100 = NhbRegio.objects.get(regio_nr=100)
-        self.regio111 = NhbRegio.objects.get(regio_nr=111)
-        self.rayon2 = NhbRayon.objects.get(rayon_nr=2)
+        self.regio100 = Regio.objects.get(regio_nr=100)
+        self.regio111 = Regio.objects.get(regio_nr=111)
+        self.rayon2 = Rayon.objects.get(rayon_nr=2)
 
         # maak een test vereniging
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver = ver
 

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 
@@ -21,7 +21,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
     def setUp(self):
         self.account = self.e2e_create_account_admin()
 
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(

@@ -13,7 +13,7 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -39,7 +39,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(regio_nr=112))
+                    regio=Regio.objects.get(regio_nr=112))
         ver.save()
         self.ver1 = ver
 
@@ -156,7 +156,7 @@ class TestBestelOverboeking(E2EHelpers, TestCase):
         ver2 = Vereniging(
                     ver_nr=1001,
                     naam="Andere Club",
-                    regio=NhbRegio.objects.get(regio_nr=113))
+                    regio=Regio.objects.get(regio_nr=113))
         ver2.save()
         self.ver2 = ver2
 

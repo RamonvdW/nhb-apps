@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -24,7 +24,7 @@ class TestCompetitieHWL(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
 
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(

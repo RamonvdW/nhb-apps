@@ -11,7 +11,7 @@ from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporte
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio
+from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -59,9 +59,9 @@ class TestCompBeheerOverzicht(E2EHelpers, TestCase):
         """
         self._next_lid_nr = 100001
 
-        self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
-        self.regio_101 = NhbRegio.objects.get(regio_nr=101)
+        self.rayon_1 = Rayon.objects.get(rayon_nr=1)
+        self.rayon_2 = Rayon.objects.get(rayon_nr=2)
+        self.regio_101 = Regio.objects.get(regio_nr=101)
 
         # maak een test vereniging
         ver = Vereniging(

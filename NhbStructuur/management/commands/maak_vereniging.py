@@ -8,7 +8,7 @@
 # dit is bedoeld voor demonstraties en de handleiding
 
 from django.core.management.base import BaseCommand
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Vereniging.models import Vereniging
 
 
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         naam = options['naam'][0]
         plaats = options['plaats'][0]
 
-        regio = NhbRegio.objects.get(regio_nr=100)
+        regio = Regio.objects.get(regio_nr=100)
 
         # maak een nieuwe vereniging aan
         ver = Vereniging(

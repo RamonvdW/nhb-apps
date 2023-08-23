@@ -20,7 +20,7 @@ from Competitie.operations.poules import maak_poule_schema
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbRayon
+from NhbStructuur.models import Rayon
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL
@@ -91,8 +91,8 @@ class RegioTeamsTemplateView(TemplateView):
             else:
                 # alleen de regio's van het rayon
                 try:
-                    context['rayon'] = NhbRayon.objects.get(rayon_nr=subset)
-                except NhbRayon.DoesNotExist:
+                    context['rayon'] = Rayon.objects.get(rayon_nr=subset)
+                except Rayon.DoesNotExist:
                     raise Http404('Selectie wordt niet ondersteund')
 
                 deelcomp_pks = (Regiocompetitie
@@ -110,7 +110,7 @@ class RegioTeamsTemplateView(TemplateView):
                                                    'subset': 'alle'}))
             filters.append(alle_filter)
 
-            for rayon in NhbRayon.objects.all():
+            for rayon in Rayon.objects.all():
                 rayon.label = 'Rayon %s' % rayon.rayon_nr
                 rayon.sel = 'rayon_%s' % rayon.rayon_nr
                 rayon.selected = (str(rayon.rayon_nr) == subset)

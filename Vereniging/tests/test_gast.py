@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_DONE
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
@@ -45,7 +45,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
 
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(

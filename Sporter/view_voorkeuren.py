@@ -242,7 +242,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 opts.append(opt)
             # for
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             context['sporter_pk'] = self.sporter.pk
             context['is_hwl'] = True
         else:
@@ -254,7 +254,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         context['toon_bondscompetities'] = not self.sporter.is_gast
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Vereniging:leden-voorkeuren'), 'Voorkeuren leden'),

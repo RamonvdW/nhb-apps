@@ -6,7 +6,7 @@
 
 from django.test import TestCase, override_settings
 from Sporter.models import Sporter, SporterVoorkeuren, GESLACHT_ANDERS
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Opleidingen.models import OpleidingDiploma
 from Sporter.models import Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -32,7 +32,7 @@ class TestBondspas(E2EHelpers, TestCase):
         self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.sporter = sporter = Sporter(

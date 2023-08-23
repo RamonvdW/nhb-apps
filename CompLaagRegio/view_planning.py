@@ -21,7 +21,7 @@ from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbCluster
+from NhbStructuur.models import Cluster
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
@@ -124,7 +124,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['regio_ronde'] = regio_ronde
 
         # zorg dat de clusters een ronde hebben
-        for cluster in (NhbCluster
+        for cluster in (Cluster
                         .objects
                         .filter(regio=deelcomp.regio,
                                 gebruik=deelcomp.competitie.afstand)
@@ -141,7 +141,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         # zoek de bruikbare clusters
         context['clusters'] = clusters = list()
-        for cluster in (NhbCluster
+        for cluster in (Cluster
                         .objects
                         .filter(regio=deelcomp.regio,
                                 gebruik=deelcomp.competitie.afstand)
@@ -180,7 +180,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
         # zoek de bruikbare clusters
-        clusters = (NhbCluster
+        clusters = (Cluster
                     .objects
                     .filter(regio=deelcomp.regio,
                             gebruik=deelcomp.competitie.afstand)
@@ -315,11 +315,11 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         try:
             cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen voor de veiligheid
-            cluster = (NhbCluster
+            cluster = (Cluster
                        .objects
                        .select_related('regio', 'regio__rayon')
                        .get(pk=cluster_pk))
-        except (ValueError, NhbCluster.DoesNotExist):
+        except (ValueError, Cluster.DoesNotExist):
             raise Http404('Cluster niet gevonden')
 
         context['cluster'] = cluster
@@ -380,11 +380,11 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         try:
             cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen voor de veiligheid
-            cluster = (NhbCluster
+            cluster = (Cluster
                        .objects
                        .select_related('regio', 'regio__rayon')
                        .get(pk=cluster_pk))
-        except (ValueError, NhbCluster.DoesNotExist):
+        except (ValueError, Cluster.DoesNotExist):
             raise Http404('Cluster niet gevonden')
 
         try:

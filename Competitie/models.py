@@ -19,7 +19,7 @@ from Competitie.definities import (AFSTANDEN,
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
+from NhbStructuur.models import Rayon, Regio, Cluster
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
 from Vereniging.models import Vereniging
@@ -446,7 +446,7 @@ class Regiocompetitie(models.Model):
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
     # regio, voor regiocompetitie
-    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+    regio = models.ForeignKey(Regio, on_delete=models.PROTECT)
 
     # welke beheerder hoort hier bij?
     functie = models.ForeignKey(Functie, on_delete=models.PROTECT)
@@ -503,7 +503,7 @@ class RegiocompetitieRonde(models.Model):
     regiocompetitie = models.ForeignKey(Regiocompetitie, on_delete=models.CASCADE)
 
     # het cluster waar deze planning specifiek bij hoort (optioneel)
-    cluster = models.ForeignKey(NhbCluster, on_delete=models.PROTECT,
+    cluster = models.ForeignKey(Cluster, on_delete=models.PROTECT,
                                 null=True, blank=True)      # cluster is optioneel
 
     # het week nummer van deze ronde
@@ -765,7 +765,7 @@ class Kampioenschap(models.Model):
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
     # rayon, voor RK
-    rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
+    rayon = models.ForeignKey(Rayon, on_delete=models.PROTECT,
                               null=True, blank=True)    # optioneel want alleen voor RK
 
     # welke beheerder hoort hier bij?

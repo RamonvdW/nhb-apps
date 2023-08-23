@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
@@ -68,7 +68,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan
@@ -347,7 +347,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Weg is weg Club",
                     ver_nr=1998,
-                    regio=NhbRegio.objects.get(pk=116))
+                    regio=Regio.objects.get(pk=116))
         ver.save()
 
         with self.assert_max_queries(77):
@@ -633,7 +633,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Weg is weg Club",
                     ver_nr=1999,
-                    regio=NhbRegio.objects.get(pk=116))
+                    regio=Regio.objects.get(pk=116))
         ver.save()
         with self.assert_max_queries(26):
             self.run_management_command(IMPORT_COMMAND,
@@ -853,7 +853,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=ver_nr,
                     naam="Demo Club",
-                    regio=NhbRegio.objects.get(pk=115))
+                    regio=Regio.objects.get(pk=115))
         ver.save()
 
         # koppel een lid aan deze club

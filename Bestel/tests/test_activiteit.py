@@ -12,7 +12,7 @@ from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_O
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -41,7 +41,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
                     ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                     naam='Bondsbureau',
                     plaats='Schietstad',
-                    regio=NhbRegio.objects.get(regio_nr=100))
+                    regio=Regio.objects.get(regio_nr=100))
         ver_bond.save()
         self.ver_bond = ver_bond
 
@@ -56,7 +56,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(regio_nr=112),
+                    regio=Regio.objects.get(regio_nr=112),
                     bank_iban='IBAN123456789',
                     bank_bic='BIC2BIC',
                     kvk_nummer='KvK1234',

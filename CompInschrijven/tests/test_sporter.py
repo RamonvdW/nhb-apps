@@ -12,7 +12,7 @@ from Competitie.models import (CompetitieIndivKlasse, Regiocompetitie, Regiocomp
 from Competitie.tests.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.models import Functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
@@ -60,7 +60,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver = ver
 
@@ -295,7 +295,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen valide combinatie')
 
         # mismatch diverse zaken
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=NhbRegio.objects.get(regio_nr=116))
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=Regio.objects.get(regio_nr=116))
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bevestig_aanmelden % (deelcomp.pk, sporterboog.pk))
         self.assert404(resp, 'Geen valide combinatie')
@@ -459,7 +459,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
 
     def test_inschrijven_methode3_twee_dagdelen(self):
-        regio_105 = NhbRegio.objects.get(pk=105)
+        regio_105 = Regio.objects.get(pk=105)
         self.ver.regio = regio_105
         self.ver.save()
 
@@ -528,7 +528,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
     def test_inschrijven_methode3_alle_dagdelen(self):
-        regio_105 = NhbRegio.objects.get(pk=105)
+        regio_105 = Regio.objects.get(pk=105)
         self.ver.regio = regio_105
         self.ver.save()
 
@@ -636,7 +636,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(klasse.boogtype, sporterboog.boogtype)
 
     def test_inschrijven_methode1(self):
-        regio_101 = NhbRegio.objects.get(pk=101)
+        regio_101 = Regio.objects.get(pk=101)
         self.ver.regio = regio_101
         self.ver.save()
 

@@ -11,7 +11,7 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
@@ -49,7 +49,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         ver = Vereniging(
                 ver_nr=1000,
                 naam="Grote Club",
-                regio=NhbRegio.objects.get(regio_nr=112))
+                regio=Regio.objects.get(regio_nr=112))
         ver.save()
         self.ver1 = ver
 

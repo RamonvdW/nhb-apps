@@ -11,7 +11,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                KampioenschapTeam, KampioenschapSporterBoog,
                                KampioenschapIndivKlasseLimiet)
 from Competitie.operations import competities_aanmaken
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -33,7 +33,7 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
 
         f1, f2 = self.run_management_command('bk_lijst_zonder_rk', '18', '--indiv',)
 
-        regio_109 = NhbRegio.objects.get(regio_nr=109)
+        regio_109 = Regio.objects.get(regio_nr=109)
         boog_r = BoogType.objects.get(afkorting='R')
         comp_25 = Competitie.objects.get(afstand=25)
         deelkamp = Kampioenschap.objects.get(competitie=comp_25,
@@ -120,7 +120,7 @@ class TestCompLaagBondCli(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Geen deelnemers gevonden" in f2.getvalue())
 
         # deelnemer aanmaken
-        regio_109 = NhbRegio.objects.get(regio_nr=109)
+        regio_109 = Regio.objects.get(regio_nr=109)
         boog_r = BoogType.objects.get(afkorting='R')
 
         ver = Vereniging(

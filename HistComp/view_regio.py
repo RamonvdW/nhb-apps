@@ -12,7 +12,7 @@ from HistComp.definities import (HISTCOMP_TYPE_18, HISTCOMP_TYPE2STR, HIST_KLASS
                                  HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG_DEFAULT, HIST_BOOG2STR,
                                  HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM_DEFAULT, HIST_TEAM2STR)
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Plein.menu import menu_dynamics
 from Sporter.operations import get_request_regio_nr
 from types import SimpleNamespace
@@ -27,7 +27,7 @@ def maak_filter_regio_nr(context):
 
     gekozen_regio_nr = context['regio_nr']
 
-    regios = (NhbRegio
+    regios = (Regio
               .objects
               .select_related('rayon')
               .filter(is_administratief=False)

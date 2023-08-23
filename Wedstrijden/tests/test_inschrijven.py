@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
@@ -55,7 +55,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
@@ -580,7 +580,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         ver2 = Vereniging(
                         ver_nr=2000,
                         naam="Test Club",
-                        regio=NhbRegio.objects.get(regio_nr=113))
+                        regio=Regio.objects.get(regio_nr=113))
         ver2.save()
         hwl2 = maak_functie('HWL Ver 2000', 'HWL')
         hwl2.vereniging = ver2

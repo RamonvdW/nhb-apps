@@ -8,7 +8,7 @@ from django.db import models
 from NhbStructuur.definities import GEBRUIK, GEBRUIK2STR
 
 
-class NhbRayon(models.Model):
+class Rayon(models.Model):
     """ Tabel waarin de Rayon definities """
 
     # 1-digit nummer van dit rayon
@@ -25,13 +25,12 @@ class NhbRayon(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Nhb rayon"
-        verbose_name_plural = "Nhb rayons"
+        verbose_name = "Rayon"
 
     objects = models.Manager()      # for the editor only
 
 
-class NhbRegio(models.Model):
+class Regio(models.Model):
     """ Tabel waarin de Regio definities """
 
     # 3-cijferige nummer van deze regio
@@ -41,7 +40,7 @@ class NhbRegio(models.Model):
     naam = models.CharField(max_length=50)
 
     # rayon waar deze regio bij hoort
-    rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT)
+    rayon = models.ForeignKey(Rayon, on_delete=models.PROTECT)
 
     # is dit een administratieve regio die niet mee doet voor de wedstrijden / competities?
     is_administratief = models.BooleanField(default=False)
@@ -52,17 +51,17 @@ class NhbRegio(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Nhb regio"
-        verbose_name_plural = "Nhb regios"
+        verbose_name = "Regio"
+        verbose_name_plural = "Regio's"
 
     objects = models.Manager()      # for the source code editor only
 
 
-class NhbCluster(models.Model):
+class Cluster(models.Model):
     """ Tabel waarin de definitie van een cluster staat """
 
     # regio waar dit cluster bij hoort
-    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+    regio = models.ForeignKey(Regio, on_delete=models.PROTECT)
 
     # letter voor unieke identificatie van het cluster
     letter = models.CharField(max_length=1, default='x')
@@ -93,8 +92,7 @@ class NhbCluster(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Nhb cluster"
-        verbose_name_plural = "Nhb clusters"
+        verbose_name = "Cluster"
 
         # zorg dat elk cluster uniek is
         unique_together = ('regio', 'letter')

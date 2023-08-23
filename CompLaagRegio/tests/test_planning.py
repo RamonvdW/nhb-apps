@@ -14,7 +14,7 @@ from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster
+from NhbStructuur.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from Vereniging.models import Vereniging
@@ -72,11 +72,11 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         """
         self._next_lid_nr = 100001
 
-        self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
-        self.regio_101 = NhbRegio.objects.get(regio_nr=101)
-        self.regio_105 = NhbRegio.objects.get(regio_nr=105)
-        self.regio_112 = NhbRegio.objects.get(regio_nr=112)
+        self.rayon_1 = Rayon.objects.get(rayon_nr=1)
+        self.rayon_2 = Rayon.objects.get(rayon_nr=2)
+        self.regio_101 = Regio.objects.get(regio_nr=101)
+        self.regio_105 = Regio.objects.get(regio_nr=105)
+        self.regio_112 = Regio.objects.get(regio_nr=112)
 
         # maak een test vereniging
         ver = Vereniging(
@@ -176,8 +176,8 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         self.deelcomp_regio112_18 = Regiocompetitie.objects.filter(competitie=self.comp_18,
                                                                    regio=self.regio_112).first()
 
-        self.cluster_101a_18 = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
-        self.cluster_101e_25 = NhbCluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
+        self.cluster_101a_18 = Cluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
+        self.cluster_101e_25 = Cluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
 
         self.functie_bko_18 = self.deelcomp_bond_18.functie
         self.functie_rko1_18 = self.deelcomp_rayon1_18.functie

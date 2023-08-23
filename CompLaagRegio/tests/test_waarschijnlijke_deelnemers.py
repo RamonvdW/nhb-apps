@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbCluster
+from NhbStructuur.models import Regio, Cluster
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam)
@@ -44,7 +44,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(
@@ -576,7 +576,7 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # cluster
-        self.ver1.clusters.add(NhbCluster.objects.first())
+        self.ver1.clusters.add(Cluster.objects.first())
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk
         with self.assert_max_queries(20):

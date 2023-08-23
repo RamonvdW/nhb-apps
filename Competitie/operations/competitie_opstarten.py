@@ -10,7 +10,7 @@ from Competitie.definities import AFSTANDEN, DEEL_RK, DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Regiocompetitie, Kampioenschap, RegiocompetitieRonde)
 from Functie.models import Functie
-from NhbStructuur.models import NhbRayon, NhbRegio
+from NhbStructuur.models import Rayon, Regio
 from Score.definities import AG_NUL
 from datetime import date
 import datetime
@@ -327,8 +327,8 @@ def competities_aanmaken(jaar=None):
     begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
     begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei
 
-    rayons = NhbRayon.objects.all()
-    regios = NhbRegio.objects.filter(is_administratief=False)
+    rayons = Rayon.objects.all()
+    regios = Regio.objects.filter(is_administratief=False)
 
     functies = dict()   # [rol, afstand, 0/rayon_nr/regio_nr] = functie
     for functie in (Functie

@@ -13,7 +13,7 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje,
                                         bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -275,7 +275,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
                         ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                         naam='Bondsbureau',
                         plaats='Schietstad',
-                        regio=NhbRegio.objects.get(regio_nr=100))
+                        regio=Regio.objects.get(regio_nr=100))
         ver_bond.save()
         self.ver_bond = ver_bond
 
@@ -288,7 +288,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(regio_nr=112),
+                    regio=Regio.objects.get(regio_nr=112),
                     bank_iban='IBAN123456789',
                     bank_bic='BIC2BIC',
                     kvk_nummer='KvK1234',
@@ -301,7 +301,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         ver2 = Vereniging(
                     ver_nr=1001,
                     naam="Andere Club",
-                    regio=NhbRegio.objects.get(regio_nr=113),
+                    regio=Regio.objects.get(regio_nr=113),
                     bank_iban='IBAN123456000',
                     bank_bic='BIC2BIC',
                     kvk_nummer='KvK4566',

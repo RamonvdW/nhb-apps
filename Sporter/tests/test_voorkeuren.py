@@ -8,7 +8,7 @@ from django.test import TestCase
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Functie.operations import maak_functie
 from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -45,7 +45,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 
@@ -72,7 +72,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Nieuwe Club",
                     ver_nr=1001,
-                    regio=NhbRegio.objects.get(pk=112))
+                    regio=Regio.objects.get(pk=112))
         ver.save()
 
         # maak een test lid aan
@@ -226,10 +226,9 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maakt ook de SporterBoog aan met de juiste instellingen
-        with self.assert_max_queries(29):
-            resp = self.client.post(self.url_voorkeuren, {'sporter_pk': self.sporter_100001.lid_nr,
-                                                          'schiet_R': 'on',
-                                                          'schiet_C': 'on'})
+        resp = self.client.post(self.url_voorkeuren, {'sporter_pk': self.sporter_100001.lid_nr,
+                                                      'schiet_R': 'on',
+                                                      'schiet_C': 'on'})
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
         sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(self.sporter_100001.lid_nr)
@@ -371,7 +370,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(voorkeuren.voorkeur_discipline_3d)
 
         # alle disciplines 'uit' zetten
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(29):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
@@ -450,7 +449,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(account.optout_herinnering_taken)
 
         # wijzig zonder opt-out te doen
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(33):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 

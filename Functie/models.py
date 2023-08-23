@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.formats import date_format
 from Account.models import Account
-from NhbStructuur.models import NhbRegio, NhbRayon
+from NhbStructuur.models import Regio, Rayon
 from Vereniging.models import Vereniging
 
 
@@ -74,10 +74,10 @@ class Functie(models.Model):
     comp_type = models.CharField(max_length=2, default="", blank=True)
 
     # RKO only: rayon
-    rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT, null=True, blank=True)
+    rayon = models.ForeignKey(Rayon, on_delete=models.PROTECT, null=True, blank=True)
 
     # RCL only: regio
-    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT, null=True, blank=True)
+    regio = models.ForeignKey(Regio, on_delete=models.PROTECT, null=True, blank=True)
 
     # SEC/HWL/WL only: vereniging
     vereniging = models.ForeignKey(Vereniging, on_delete=models.CASCADE, null=True, blank=True)

@@ -11,7 +11,7 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbRayon, NhbRegio
+from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -40,7 +40,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_geen_lid = self.e2e_create_account('geen_lid', 'geen_lid@test.com', 'Geen')
 
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        regio_111 = Regio.objects.get(regio_nr=111)
 
         self.functie_rcl = maak_functie("RCL test", "RCL")
         self.functie_rcl.regio = regio_111
@@ -95,7 +95,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_bko = maak_functie("BKO test", "BKO")
 
         self.functie_rko = maak_functie("RKO test", "RKO")
-        self.functie_rko.rayon = NhbRayon.objects.get(rayon_nr=1)
+        self.functie_rko.rayon = Rayon.objects.get(rayon_nr=1)
         self.functie_rko.save()
 
         self.functie_mo = maak_functie("MO test", "MO")
@@ -679,7 +679,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Bondsbureau; veel te lange naam die afgekort wordt",
                     ver_nr=1001,
-                    regio=NhbRegio.objects.get(pk=100))
+                    regio=Regio.objects.get(pk=100))
         ver.save()
 
         functie_hwl = maak_functie('HWL ver 1001', 'HWL')

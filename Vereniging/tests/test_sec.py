@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
@@ -45,7 +45,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
 
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(
@@ -276,7 +276,7 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
         # corner case: SEC van vereniging in administratieve regio
 
         # regio 100 is administratief
-        regio100 = NhbRegio.objects.get(regio_nr=100)
+        regio100 = Regio.objects.get(regio_nr=100)
         self.assertTrue(regio100.is_administratief)
 
         # account_sec is SEC bij self.ver1

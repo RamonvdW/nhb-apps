@@ -22,7 +22,7 @@ from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
 from Vereniging.models import Vereniging
@@ -76,7 +76,7 @@ class Command(BaseCommand):
                     adres_regel1='Eerste adresregel',
                     adres_regel2='Tweede adresregel',
                     plaats='Testplaats',
-                    regio=NhbRegio.objects.get(regio_nr=self.test_regio_nr),
+                    regio=Regio.objects.get(regio_nr=self.test_regio_nr),
                     kvk_nummer='KvkNummer123',
                     website='https://test.verenig.ing',
                     contact_email='contact@verenig.ing',

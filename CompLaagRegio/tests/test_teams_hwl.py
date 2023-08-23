@@ -14,7 +14,7 @@ from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Score.definities import AG_NUL
 from Score.operations import score_indiv_ag_opslaan
@@ -51,7 +51,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = Vereniging(
@@ -808,7 +808,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/wijzig-team-ag.dtl', 'plein/site_layout.dtl'))
 
         # verkeerde regio
-        self.functie_rcl.regio = NhbRegio.objects.get(regio_nr=101)
+        self.functie_rcl.regio = Regio.objects.get(regio_nr=101)
         self.functie_rcl.save(update_fields=['regio'])
         self.e2e_wissel_naar_functie(self.functie_rcl)
 

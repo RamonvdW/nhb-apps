@@ -10,7 +10,7 @@ from BasisTypen.models import BoogType
 from Competitie.models import Competitie
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -49,7 +49,7 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
         # deze test is afhankelijk van de standaard regio's
-        self.regio_101 = regio = NhbRegio.objects.get(regio_nr=101)
+        self.regio_101 = regio = Regio.objects.get(regio_nr=101)
 
         # maak een test vereniging
         ver = Vereniging(

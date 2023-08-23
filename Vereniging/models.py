@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from NhbStructuur.models import NhbRegio, NhbCluster
+from NhbStructuur.models import Regio, Cluster
 
 
 class Vereniging(models.Model):
@@ -25,10 +25,10 @@ class Vereniging(models.Model):
     plaats = models.CharField(max_length=35, blank=True)
 
     # de regio waarin de vereniging zit
-    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+    regio = models.ForeignKey(Regio, on_delete=models.PROTECT)
 
     # de optionele clusters waar deze vereniging bij hoort
-    clusters = models.ManyToManyField(NhbCluster,
+    clusters = models.ManyToManyField(Cluster,
                                       blank=True)   # mag leeg zijn / gemaakt worden
 
     # er is een vereniging voor persoonlijk lidmaatschap

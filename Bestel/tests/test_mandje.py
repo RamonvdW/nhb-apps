@@ -12,7 +12,7 @@ from Bestel.definities import BESTEL_MUTATIE_VERWIJDER, BESTEL_TRANSPORT_VERZEND
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie, BestelMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_DONE
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
@@ -47,7 +47,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
                         ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                         naam='Bondsbureau',
                         plaats='Schietstad',
-                        regio=NhbRegio.objects.get(regio_nr=100))
+                        regio=Regio.objects.get(regio_nr=100))
         ver_bond.save()
         self.ver_bond = ver_bond
 
@@ -62,7 +62,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(regio_nr=112))
+                    regio=Regio.objects.get(regio_nr=112))
         ver.save()
 
         instellingen = BetaalInstellingenVereniging(

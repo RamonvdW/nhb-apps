@@ -10,7 +10,7 @@ from BasisTypen.definities import GESLACHT_ANDERS
 from BasisTypen.models import BoogType
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 
 
@@ -33,7 +33,7 @@ def get_request_regio_nr(request, allow_admin_regio=True):
             regio_nr = functie_nu.regio.regio_nr
         elif functie_nu.rayon:
             # RKO
-            regio = (NhbRegio
+            regio = (Regio
                      .objects
                      .filter(rayon=functie_nu.rayon,
                              is_administratief=False)

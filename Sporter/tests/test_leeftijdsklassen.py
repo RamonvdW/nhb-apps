@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
                                    ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIE_WA)
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,
@@ -44,7 +44,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1000,
-                    regio=NhbRegio.objects.get(pk=111))
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan

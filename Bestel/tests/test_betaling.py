@@ -16,7 +16,7 @@ from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Mailer.models import MailQueue
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_DEFINITIEF
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -52,7 +52,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
                         ver_nr=settings.BETAAL_VIA_BOND_VER_NR,
                         naam='Bondsbureau',
                         plaats='Schietstad',
-                        regio=NhbRegio.objects.get(regio_nr=100))
+                        regio=Regio.objects.get(regio_nr=100))
         ver_bond.save()
         self.ver_bond = ver_bond
 
@@ -65,7 +65,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         ver = Vereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(regio_nr=112))
+                    regio=Regio.objects.get(regio_nr=112))
         ver.save()
 
         instellingen = BetaalInstellingenVereniging(
