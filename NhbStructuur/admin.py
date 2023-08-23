@@ -41,6 +41,8 @@ class NhbRegioAdmin(admin.ModelAdmin):
 class NhbClusterAdmin(admin.ModelAdmin):
     list_select_related = ('regio',)
 
+    list_filter = ('regio',)
+    
 
 admin.site.register(NhbCluster, NhbClusterAdmin)
 
