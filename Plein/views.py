@@ -104,6 +104,7 @@ class PleinView(View):
             if rol_nu == Rollen.ROL_SPORTER:
                 template = TEMPLATE_PLEIN_SPORTER
                 context['url_profiel'] = reverse('Sporter:profiel')
+                context['url_handleiding_leden'] = settings.URL_PDF_HANDLEIDING_LEDEN
 
                 # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
                 eval_mandje_inhoud(request)
