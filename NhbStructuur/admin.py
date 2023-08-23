@@ -75,6 +75,8 @@ class NhbClusterAdmin(admin.ModelAdmin):
     list_select_related = ('regio',)
 
     list_filter = ('regio',)
+
+    ordering = ('regio', 'gebruik', 'letter')
     
 
 admin.site.register(NhbVereniging, NhbVerenigingAdmin)
