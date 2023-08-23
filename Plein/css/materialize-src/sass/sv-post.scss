@@ -28,7 +28,11 @@
 }
 
 .sv-rood {
-    background-color: $secondary-color;        /* hoofdkleur oranje */
+    background-color: $secondary-color;        /* hoofdkleur rood/oranje */
+}
+
+.sv-rood-donker {
+    background-color: $secondary-color-dark;   /* donker rood */
 }
 
 .sv-grijs {
@@ -39,6 +43,10 @@
 
 .sv-blauw-text {
     color: $primary-color-dark;   // (2023-08-19) $primary-color is te licht op wit
+}
+
+.sv-middel-blauw-text {
+    color: $primary-color;
 }
 
 .sv-rood-text {
@@ -75,7 +83,8 @@
   //color: $button-raised-color;
   text-shadow: 0 0 1px $off-black;   // geeft extra contrast ivm wit-op-blauw
 
-  background-color: $sv-rood-default;
+  background-color: $secondary-color;
+  //background-color: $secondary-color-dark;
 
   &:focus {
     background-color: $sv-rood-focus;

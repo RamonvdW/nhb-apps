@@ -28,7 +28,7 @@
 
         {% include 'plein/site_layout_fonts.dtl' %}
 
-        <link rel="stylesheet" href="{% static 'css/materialize-new-171.css' %}">
+        <link rel="stylesheet" href="{% static 'css/materialize-new-177.css' %}">
 
         {% include 'plein/site_layout_favicons.dtl' %}
 
@@ -92,7 +92,7 @@
                         <li class="divider"></li>
                         <li>
                             <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
-                                <i class="notranslate material-icons-round sv-blauw-text">build</i>Admin site</a>
+                                <i class="notranslate material-icons-round sv-middel-blauw-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
 
