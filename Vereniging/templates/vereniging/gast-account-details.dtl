@@ -15,7 +15,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Details gast-account</h3>
-            <p>Hieronder tonen we alle persoonsgegevens gerelateerd aan het gast-account met het tijdelijke bondsnummer <b>{{ gast.lid_nr }}</b>.</p>
+            <p>Hieronder tonen we alle persoonsgegevens gerelateerd aan het gast-account met het tijdelijke bondsnummer {% if gast.lid_nr > 0 %}<b>{{ gast.lid_nr }}</b>{% else %}<i>Geen</i>{% endif %}.</p>
         </div>
     </div>
 
@@ -124,7 +124,7 @@
                                 </tr>
                                 <tr>
                                     <th>Vereniging</th>
-                                    <td>{{ sporter.bij_vereniging.ver_nr_en_naam }}</td>
+                                    <td>{% if sporter.bij_vereniging %}{{ sporter.bij_vereniging.ver_nr_en_naam }}{% else %}<i>Geen</i>{% endif %}</td>
                                 </tr>
                             </table>
 

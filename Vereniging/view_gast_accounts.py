@@ -57,12 +57,14 @@ class GastAccountsView(UserPassesTestMixin, ListView):
             gast.url_details = reverse('Vereniging:gast-account-details',
                                        kwargs={'lid_nr': gast.lid_nr})
 
+            gast.geen_inlog = 0
             if account:
                 if account.last_login:
                     gast.laatste_inlog = gast.account.last_login
                 else:
                     gast.geen_inlog = 2
             else:
+                # onvoltooid account
                 gast.geen_inlog = 1
         # for
 
@@ -164,7 +166,7 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         beste_pks = [pk for count, pk in best[:10] if count > 1]
 
         context['heeft_matches'] = len(beste_pks) > 0
-        context['sporter_matches'] = Sporter.objects.select_related('account').filter(pk__in=beste_pks)
+        context['sporter_matches'] = Sporter.objects.select_related('account', 'bij_vereniging').filter(pk__in=beste_pks)
 
         for sporter in context['sporter_matches']:
             sporter.geslacht_str = GESLACHT2STR[sporter.geslacht]
