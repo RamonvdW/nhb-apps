@@ -42,11 +42,11 @@
 
                 {% for obj in object_list %}
                     <tr>
-                        <td>{{ obj.lid_nr }}</td>
+                        <td>{% if obj.lid_nr > 0 %}{{ obj.lid_nr }}{% else %}<i>Geen</i>{% endif %}</td>
                         <td>{{ obj.volledige_naam }}</td>
 
                         <td>
-                            {% if obj.geen_inlog == 2 %}
+                            {% if obj.geen_inlog == 1 %}
                                 <i>Onvoltooid account</i>
                             {% elif obj.geen_inlog %}
                                 <i>Nooit</i>
