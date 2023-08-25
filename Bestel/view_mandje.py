@@ -20,7 +20,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
-from Registreer.definities import REGISTRATIE_FASE_DONE
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from decimal import Decimal
 
 
@@ -52,7 +52,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             account = request.user
             if account.is_gast:
                 gast = account.gastregistratie_set.first()
-                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                if gast and gast.fase != REGISTRATIE_FASE_COMPLEET:
                     # registratie is nog niet voltooid
                     # dwing terug naar de lijst met vragen
                     return redirect('Registreer:gast-meer-vragen')

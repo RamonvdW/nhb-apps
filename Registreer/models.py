@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 from Account.models import Account
 from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MAN
-from Registreer.definities import REGISTRATIE_FASE_BEGIN, REGISTRATIE_FASE2STR, REGISTRATIE_FASE_DONE
+from Registreer.definities import REGISTRATIE_FASE_BEGIN, REGISTRATIE_FASE2STR, REGISTRATIE_FASE_COMPLEET
 from Sporter.models import Sporter, validate_geboorte_datum
 import datetime
 
@@ -162,7 +162,7 @@ def registreer_opschonen(stdout):
     if GAST_LID_NUMMER_FIXED_PK < 1:        # aka: "never"
         for obj in (GastRegistratie
                     .objects
-                    .exclude(fase=REGISTRATIE_FASE_DONE)
+                    .exclude(fase=REGISTRATIE_FASE_COMPLEET)
                     .filter(aangemaakt__lt=max_age)):
 
             stdout.write('[INFO] Verwijder niet afgeronde gast-account registratie %s in fase %s' % (

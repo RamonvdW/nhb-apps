@@ -13,7 +13,7 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie, BestelMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Registreer.definities import REGISTRATIE_FASE_DONE
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -325,7 +325,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assert_is_redirect(resp, self.url_meer_vragen)
 
-        gast.fase = REGISTRATIE_FASE_DONE
+        gast.fase = REGISTRATIE_FASE_COMPLEET
         gast.save(update_fields=['fase'])
 
         with self.assert_max_queries(20):

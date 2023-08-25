@@ -9,7 +9,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Registreer.definities import REGISTRATIE_FASE_DONE
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -79,7 +79,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # maak een gast-account aan
         gast = GastRegistratie(
                     lid_nr=800001,
-                    fase=REGISTRATIE_FASE_DONE,
+                    fase=REGISTRATIE_FASE_COMPLEET,
                     email="een@gasten.not",
                     email_is_bevestigd=True,
                     voornaam="Een",

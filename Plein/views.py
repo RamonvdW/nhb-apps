@@ -13,7 +13,7 @@ from Bestel.operations.mandje import eval_mandje_inhoud
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from Registreer.definities import REGISTRATIE_FASE_DONE
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Taken.operations import eval_open_taken
 
 
@@ -75,7 +75,7 @@ class PleinView(View):
             account = request.user
             if account.is_gast:
                 gast = account.gastregistratie_set.first()
-                if gast and gast.fase != REGISTRATIE_FASE_DONE:
+                if gast and gast.fase != REGISTRATIE_FASE_COMPLEET:
                     # registratie is nog niet voltooid
                     # dwing terug naar de lijst met vragen
                     return redirect('Registreer:gast-meer-vragen')

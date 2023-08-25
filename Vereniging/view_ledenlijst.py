@@ -33,10 +33,12 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
         self.huidige_jaar = 0
+        self.mag_wijzigen = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        self.mag_wijzigen = self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
         return self.functie_nu and self.functie_nu.rol in ('SEC', 'HWL', 'WL')
 
     def get_queryset(self):
@@ -148,8 +150,8 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         # zoek de laatste-inlog bij elk lid
         for sporter in objs:
-            # HWL mag de voorkeuren van de sporters aanpassen
-            if self.rol_nu == Rollen.ROL_HWL:
+            # voorkeuren van de sporters aanpassen
+            if self.mag_wijzigen:
                 sporter.wijzig_url = reverse('Sporter:voorkeuren-sporter',
                                              kwargs={'sporter_pk': sporter.pk})
 
@@ -187,7 +189,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         context['leden_senior'] = senior
         context['leden_inactief'] = inactief
         context['wedstrijdklasse_jaar'] = self.huidige_jaar
-        context['toon_wijzig_kolom'] = (self.rol_nu == Rollen.ROL_HWL)
+        context['toon_wijzig_kolom'] = self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL)
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),

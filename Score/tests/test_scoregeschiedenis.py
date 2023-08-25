@@ -24,7 +24,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
     url_geschiedenis = '/score/geschiedenis/'
 
     def _maak_uitslag(self, sporterboog):
-        # maak 2x wedstrijd + uitslag + score voor deze schutterboog, met geschiedenis
+        # maak 2x wedstrijd + uitslag + score voor deze sporter-boog, met geschiedenis
         uur_00 = datetime.time(hour=0)
         uur_19 = datetime.time(hour=19)
 
@@ -144,7 +144,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.boog_r = BoogType.objects.get(afkorting='R')
         self.boog_c = BoogType.objects.get(afkorting='C')
 
-        # maak 2 schutterboog aan
+        # maak 2 sporter-boog aan
         sporterboog = SporterBoog(sporter=sporter, boogtype=self.boog_c, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100001c = sporterboog

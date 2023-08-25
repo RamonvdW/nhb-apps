@@ -6,23 +6,25 @@
 
 from django.urls import reverse
 from django.http import Http404
-from django.views.generic import ListView, TemplateView
+from django.utils import timezone
+from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import GESLACHT2STR
 from Bestel.definities import BESTELLING_STATUS2STR
 from Bestel.models import BestelMandje, Bestelling
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
-from Wedstrijden.definities import INSCHRIJVING_STATUS_TO_STR
+from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import WedstrijdInschrijving
 
 TEMPLATE_GAST_ACCOUNTS = 'vereniging/gast-accounts.dtl'
 TEMPLATE_GAST_ACCOUNT_DETAILS = 'vereniging/gast-account-details.dtl'
 
 
-class GastAccountsView(UserPassesTestMixin, ListView):
+class GastAccountsView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de SEC van vereniging 8000 de gast-accounts lijst zien """
 
     # class variables shared by all instances
@@ -39,18 +41,19 @@ class GastAccountsView(UserPassesTestMixin, ListView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
 
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
 
-        objs = (GastRegistratie
-                .objects
-                .select_related('sporter',
-                                'account')
-                .order_by('-aangemaakt'))       # nieuwste eerst
+        context = super().get_context_data(**kwargs)
 
-        for gast in objs:
-            sporter = gast.sporter
-            account = gast.account
+        context['gasten'] = gasten = list()
+        context['afgewezen'] = afgewezen = list()
+
+        for gast in (GastRegistratie
+                     .objects
+                     .select_related('sporter',
+                                     'account')
+                     .order_by('-aangemaakt')):  # nieuwste eerst
 
             # zoek de laatste-inlog bij elk lid
             # SEC mag de voorkeuren van de sporters aanpassen
@@ -58,22 +61,22 @@ class GastAccountsView(UserPassesTestMixin, ListView):
                                        kwargs={'lid_nr': gast.lid_nr})
 
             gast.geen_inlog = 0
-            if account:
-                if account.last_login:
+            if gast.account:
+                if gast.account.last_login:
                     gast.laatste_inlog = gast.account.last_login
                 else:
                     gast.geen_inlog = 2
             else:
                 # onvoltooid account
                 gast.geen_inlog = 1
+
+            if gast.fase == REGISTRATIE_FASE_AFGEWEZEN:
+                afgewezen.append(gast)
+            else:
+                gasten.append(gast)
         # for
 
-        return objs
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-
-        context = super().get_context_data(**kwargs)
+        context['heeft_afgewezen'] = len(afgewezen) > 0
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
@@ -166,7 +169,55 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         beste_pks = [pk for count, pk in best[:10] if count > 1]
 
         context['heeft_matches'] = len(beste_pks) > 0
-        context['sporter_matches'] = Sporter.objects.select_related('account', 'bij_vereniging').filter(pk__in=beste_pks)
+
+        matches = (Sporter
+                   .objects
+                   .select_related('account',
+                                   'bij_vereniging')
+                   .filter(pk__in=beste_pks))
+        for match in matches:
+            match.is_match_geboorte_datum = match.geboorte_datum == gast.geboorte_datum
+            match.is_match_email = match.email.lower() == gast.email.lower()
+
+            match.is_match_lid_nr = gast.eigen_lid_nummer == str(match.lid_nr)
+            match.is_match_geslacht = gast.geslacht == match.geslacht
+            match.is_match_voornaam = gast.voornaam.upper() in match.voornaam.upper()
+            match.is_match_achternaam = gast.achternaam.upper() in match.achternaam.upper()
+
+            if match.bij_vereniging:
+                match.vereniging_str = match.bij_vereniging.ver_nr_en_naam()
+                match.is_match_vereniging = gast.club.upper() in match.vereniging_str.upper()
+
+                match.plaats_str = match.bij_vereniging.plaats
+                match.is_match_plaats = (gast.club_plaats.upper().replace('-', ' ') in
+                                         match.plaats_str.upper().replace('-', ' '))
+            else:
+                match.is_match_vereniging = False
+                match.is_match_plaats = False
+
+            match.heeft_account = (match.account is not None)
+
+            if match.is_match_geboorte_datum:
+                gast.ophef += 1
+            if match.is_match_email:
+                gast.ophef += 5
+            if match.is_match_lid_nr:
+                gast.ophef += 5
+            if match.is_match_voornaam:
+                gast.ophef += 1
+            if match.is_match_achternaam:
+                gast.ophef += 1
+            if match.is_match_geslacht:
+                gast.ophef += 1
+            if match.is_match_vereniging:
+                gast.ophef += 1
+            if match.is_match_plaats:
+                gast.ophef += 1
+            if match.heeft_account:
+                gast.ophef += 5
+        # for
+
+        context['sporter_matches'] = matches
 
         for sporter in context['sporter_matches']:
             sporter.geslacht_str = GESLACHT2STR[sporter.geslacht]
@@ -198,6 +249,8 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
 
         for inschrijving in context['gast_wedstrijden']:
             inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
+            if inschrijving.status == INSCHRIJVING_STATUS_DEFINITIEF:
+                gast.ophef = -100
         # for
 
     def get_context_data(self, **kwargs):
@@ -215,8 +268,18 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         gast.geslacht_str = GESLACHT2STR[gast.geslacht]
         context['gast'] = gast
 
+        gast.ophef = 0
         self._zoek_matches(gast, context)
         self._zoek_gebruik(gast, context)
+
+        if not gast.account:
+            delta = timezone.now() - gast.aangemaakt
+            gast.dagen_geleden = delta.days
+
+        if gast.fase == REGISTRATIE_FASE_AFGEWEZEN:
+            gast.is_afgewezen = True
+        elif gast.ophef >= 4:
+            gast.url_ophef = reverse('Registreer:opheffen')
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
