@@ -17,7 +17,7 @@ class GastRegistratieFaseFilter(admin.SimpleListFilter):
 
     default_value = None
 
-    def lookups(self, request, model_admin):                    # pragma: no cover
+    def lookups(self, request, model_admin):
         """ Return list of tuples for the sidebar """
         return [tup for tup in REGISTRATIE_FASE2STR.items()]
 
