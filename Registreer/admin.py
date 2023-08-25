@@ -5,13 +5,27 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from Registreer.definities import REGISTRATIE_FASE2STR
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker
 
 
-class GastRegistratieRateTrackerAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor Sporter klasse """
+class GastRegistratieFaseFilter(admin.SimpleListFilter):
 
-    ordering = ('teller_uur',)
+    title = "Fase"
+
+    parameter_name = 'fase_filter'
+
+    default_value = None
+
+    def lookups(self, request, model_admin):                    # pragma: no cover
+        """ Return list of tuples for the sidebar """
+        return [tup for tup in REGISTRATIE_FASE2STR.items()]
+
+    def queryset(self, request, queryset):
+        selection = self.value()
+        if selection:
+            queryset = queryset.filter(fase=selection)
+        return queryset
 
 
 class GastRegistratieAdmin(admin.ModelAdmin):
@@ -24,6 +38,14 @@ class GastRegistratieAdmin(admin.ModelAdmin):
     list_select_related = True
 
     autocomplete_fields = ('account', 'sporter')
+
+    list_filter = (GastRegistratieFaseFilter,)
+
+
+class GastRegistratieRateTrackerAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Sporter klasse """
+
+    ordering = ('teller_uur',)
 
 
 admin.site.register(GastRegistratie, GastRegistratieAdmin)

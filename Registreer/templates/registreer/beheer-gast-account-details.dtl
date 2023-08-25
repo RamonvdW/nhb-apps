@@ -223,6 +223,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-gast-account-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-beheer-gast-account-details" %}
 
 {% endblock %}

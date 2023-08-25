@@ -6,7 +6,7 @@
 
 from django.urls import path
 from Vereniging import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
-                        view_gast_accounts, view_lijst_verenigingen)
+                        view_lijst_verenigingen)
 
 app_name = 'Vereniging'
 
@@ -27,15 +27,6 @@ urlpatterns = [
     path('leden-voorkeuren/',
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
-
-    # ledenlijst - gast-accounts
-    path('gast-accounts/',
-         view_gast_accounts.GastAccountsView.as_view(),
-         name='gast-accounts'),
-
-    path('gast-accounts/<lid_nr>/details/',
-         view_gast_accounts.GastAccountDetailsView.as_view(),
-         name='gast-account-details'),
 
     # accommodatie (voor gebruik van buiten Beheer vereniging)
     path('accommodaties/lijst/',

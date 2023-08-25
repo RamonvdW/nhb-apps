@@ -30,8 +30,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # comp_pk
     url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # deelcomp_pk
     url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                       # sporter_pk
-    url_gast_accounts = '/vereniging/gast-accounts/'
-    url_gast_details = '/vereniging/gast-accounts/%s/details/'               # lid_nr
+    url_gast_accounts = '/account/registreer/beheer-gast-accounts/'
+    url_gast_details = '/account/registreer/beheer-gast-accounts/%s/details/'               # lid_nr
 
     testdata = None
 
@@ -193,7 +193,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
         # zet een last_login
         self.account_800001.last_login = timezone.now()
@@ -207,7 +207,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.sporter_800001.save(update_fields=['account'])
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
         self.gast_800001.account = None
         self.gast_800001.save(update_fields=['account'])
@@ -216,7 +216,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_accounts)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/gast-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_gast_accounts)
 
@@ -231,7 +231,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/gast-account-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
 
         # niet bestaand nummer
         with self.assert_max_queries(20):

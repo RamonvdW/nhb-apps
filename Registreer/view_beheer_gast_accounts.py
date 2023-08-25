@@ -4,24 +4,33 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.db import transaction
+from django.conf import settings
 from django.urls import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
+from django.views import View
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import GESLACHT2STR
 from Bestel.definities import BESTELLING_STATUS2STR
 from Bestel.models import BestelMandje, Bestelling
 from Functie.rol import rol_get_huidige_functie
+from Mailer.operations import render_email_template, mailer_queue_email
+from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
 from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_TO_STR
 from Wedstrijden.models import WedstrijdInschrijving
+import logging
 
-TEMPLATE_GAST_ACCOUNTS = 'vereniging/gast-accounts.dtl'
-TEMPLATE_GAST_ACCOUNT_DETAILS = 'vereniging/gast-account-details.dtl'
+TEMPLATE_GAST_ACCOUNTS = 'registreer/beheer-gast-accounts.dtl'
+TEMPLATE_GAST_ACCOUNT_DETAILS = 'registreer/beheer-gast-account-details.dtl'
+EMAIL_TEMPLATE_GAST_AFGEWEZEN = 'email_registreer/gast-afgewezen.dtl'
+
+my_logger = logging.getLogger('NHBApps.Registreer')
 
 
 class GastAccountsView(UserPassesTestMixin, TemplateView):
@@ -57,7 +66,7 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
 
             # zoek de laatste-inlog bij elk lid
             # SEC mag de voorkeuren van de sporters aanpassen
-            gast.url_details = reverse('Vereniging:gast-account-details',
+            gast.url_details = reverse('Registreer:beheer-gast-account-details',
                                        kwargs={'lid_nr': gast.lid_nr})
 
             gast.geen_inlog = 0
@@ -289,5 +298,66 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
+
+class GastAccountOpheffenView(UserPassesTestMixin, View):
+
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
+
+    def post(self, request, *args, **kwargs):
+        """ wordt aangeroepen als de SEC8000 op de Opheffen knop drukt + modaal bevestigd heeft """
+
+        lid_nr = request.POST.get('lid_nr', '')[:6]  # afkappen voor extra veiligheid
+        try:
+            lid_nr = int(lid_nr)
+            gast = GastRegistratie.objects.get(lid_nr=lid_nr)
+        except (ValueError, GastRegistratie.DoesNotExist):
+            raise Http404('Niet gevonden')
+
+        if gast.fase != REGISTRATIE_FASE_AFGEWEZEN:
+            now = timezone.now()
+            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+            beheerder = request.user.get_account_full_name()
+
+            with transaction.atomic():
+                gast.fase = REGISTRATIE_FASE_AFGEWEZEN
+                gast.logboek += '[%s] %s in de rol van %s heeft dit gast-account afgewezen\n' % (
+                                        stamp_str, beheerder, self.functie_nu.beschrijving)
+                gast.save(update_fields=['fase', 'logboek'])
+
+                gast.account.is_active = False
+                gast.account.save(update_fields=['is_active'])
+
+                gast.sporter.is_actief_lid = False
+                gast.sporter.save(update_fields=['is_actief_lid'])
+
+            # schrijf in syslog
+            from_ip = get_safe_from_ip(request)
+            my_logger.info('%s REGISTREER gast-account %s afgewezen door %s; stuur e-mail' % (
+                                from_ip, gast.lid_nr, beheerder))
+
+            # stuur een e-mail over de afwijzing
+            context = {
+                'voornaam': gast.voornaam,
+                'naam_site': settings.NAAM_SITE,
+                'contact_email': settings.EMAIL_BONDSBUREAU,
+            }
+            mail_body = render_email_template(context, EMAIL_TEMPLATE_GAST_AFGEWEZEN)
+
+            # stuur de e-mail
+            mailer_queue_email(gast.email,
+                               'Gast-account afgewezen',
+                               mail_body)
+
+        return HttpResponseRedirect(reverse('Registreer:beheer-gast-accounts'))
 
 # end of file

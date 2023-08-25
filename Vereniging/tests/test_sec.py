@@ -345,4 +345,22 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
 
         # ophalen en aanpassen: zie test_accommodatie
 
+    def test_extern(self):
+        self.ver1.is_extern = True
+        self.ver1.save(update_fields=['is_extern'])
+
+        # login als SEC
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        # check voor het kaartje om de doel details aan te passen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+
+
+
 # end of file
