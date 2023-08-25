@@ -145,7 +145,7 @@
                                 </tr>
                                 <tr>
                                     <th>Account aangemaakt?</th>
-                                    <td>{% if heeft_account %}Ja{% else %}Nee{% endif %}</td>
+                                    <td>{% if match.heeft_account %}Ja{% else %}Nee{% endif %}</td>
                                 </tr>
                             </table>
 
