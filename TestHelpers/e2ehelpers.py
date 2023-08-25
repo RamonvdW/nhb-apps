@@ -135,7 +135,7 @@ class MyQueryTracer(object):
         # while
         return query
 
-    def __str__(self):
+    def __str__(self):                                  # pragma: no cover
         queries = 'Captured queries:'
         prefix = '\n       '
         limit = 200  # begrens aantal queries dat we printen
@@ -1038,7 +1038,7 @@ class E2EHelpers(TestCase):
 
         self.assertTrue(resp.url.startswith, '/account/login/')
 
-    def _check_concurrency_risks(self, tracer):
+    def _check_concurrency_risks(self, tracer):         # pragma: no cover
         found_delete = False
         found_insert = False
         found_update = False

@@ -19,7 +19,7 @@ def add_vereniging_new(apps, _):
         ver_nr2ver[ver.ver_nr] = ver
     # for
 
-    for obj in fix_klas.objects.select_related('vereniging').all():
+    for obj in fix_klas.objects.select_related('vereniging').all():     # pragma: no cover
         obj.vereniging_new = ver_nr2ver[obj.vereniging.ver_nr]
         obj.save(update_fields=['vereniging_new'])
     # for

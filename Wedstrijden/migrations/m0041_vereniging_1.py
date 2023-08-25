@@ -21,7 +21,7 @@ def add_vereniging_new(apps, _):
         ver_nr2ver[ver.ver_nr] = ver
     # for
 
-    for obj in fix_klas1.objects.select_related('organiserende_vereniging', 'uitvoerende_vereniging').all():
+    for obj in fix_klas1.objects.select_related('organiserende_vereniging', 'uitvoerende_vereniging').all():  # pragma: no cover
         obj.organiserende_vereniging_new = ver_nr2ver[obj.organiserende_vereniging.ver_nr]
 
         if obj.uitvoerende_vereniging:
@@ -30,12 +30,12 @@ def add_vereniging_new(apps, _):
         obj.save(update_fields=['organiserende_vereniging_new', 'uitvoerende_vereniging_new'])
     # for
 
-    for obj in fix_klas2.objects.select_related('uitgegeven_door').all():
+    for obj in fix_klas2.objects.select_related('uitgegeven_door').all():       # pragma: no cover
         obj.uitgegeven_door_new = ver_nr2ver[obj.uitgegeven_door.ver_nr]
         obj.save(update_fields=['uitgegeven_door_new'])
     # for
 
-    for obj in fix_klas3.objects.prefetch_related('verenigingen').all():
+    for obj in fix_klas3.objects.prefetch_related('verenigingen').all():        # pragma: no cover
         new_vers = list()
         for old_ver in obj.verenigingen.all():
             new_ver = ver_nr2ver[old_ver.ver_nr]

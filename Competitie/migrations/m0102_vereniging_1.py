@@ -23,31 +23,31 @@ def add_vereniging_new(apps, _):
         ver_nr2ver[ver.ver_nr] = ver
     # for
 
-    for obj in fix_klas1.objects.select_related('bij_vereniging').all():
+    for obj in fix_klas1.objects.select_related('bij_vereniging').all():        # pragma: no cover
         if obj.bij_vereniging:
             obj.bij_vereniging_new = ver_nr2ver[obj.bij_vereniging.ver_nr]
         obj.save(update_fields=['bij_vereniging_new'])
     # for
 
-    for obj in fix_klas2.objects.select_related('vereniging').all():
+    for obj in fix_klas2.objects.select_related('vereniging').all():            # pragma: no cover
         if obj.vereniging:
             obj.vereniging_new = ver_nr2ver[obj.vereniging.ver_nr]
         obj.save(update_fields=['vereniging_new'])
     # for
 
-    for obj in fix_klas3.objects.select_related('bij_vereniging').all():
+    for obj in fix_klas3.objects.select_related('bij_vereniging').all():        # pragma: no cover
         if obj.bij_vereniging:
             obj.bij_vereniging_new = ver_nr2ver[obj.bij_vereniging.ver_nr]
         obj.save(update_fields=['bij_vereniging_new'])
     # for
 
-    for obj in fix_klas4.objects.select_related('vereniging').all():
+    for obj in fix_klas4.objects.select_related('vereniging').all():            # pragma: no cover
         if obj.vereniging:
             obj.vereniging_new = ver_nr2ver[obj.vereniging.ver_nr]
         obj.save(update_fields=['vereniging_new'])
     # for
 
-    for obj in fix_klas5.objects.select_related('vereniging').all():
+    for obj in fix_klas5.objects.select_related('vereniging').all():            # pragma: no cover
         if obj.vereniging:
             obj.vereniging_new = ver_nr2ver[obj.vereniging.ver_nr]
         obj.save(update_fields=['vereniging_new'])

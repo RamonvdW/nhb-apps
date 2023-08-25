@@ -4,8 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from Functie.models import Functie
+from Opleidingen import admin
+from Opleidingen.models import OpleidingDiploma
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -34,6 +37,26 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('opleidingen/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        sporter = Sporter(lid_nr=1)
+        deelnemer = OpleidingDiploma(sporter=sporter, code='1234', beschrijving='test')
+        self.assertTrue(str(deelnemer) != '')
+
+    def test_admin(self):
+        factory = RequestFactory()
+
+        # GastRegistratieFaseFilter
+        worker = (admin.HeeftAccountFilter(None,
+                                           {'heeft_account': 'Nee'},
+                                           OpleidingDiploma,
+                                           admin.OpleidingDiplomaAdmin))
+        _ = worker.queryset(None, OpleidingDiploma.objects.all())
+
+        worker = (admin.HeeftAccountFilter(None,
+                                           {'heeft_account': 'Ja'},
+                                           OpleidingDiploma,
+                                           admin.OpleidingDiplomaAdmin))
+        _ = worker.queryset(None, OpleidingDiploma.objects.all())
 
     def test_mo(self):
         self.e2e_login_and_pass_otp(self.account_normaal)
