@@ -10,7 +10,7 @@ from Mailer.models import MailQueue
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
                                    REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
-                                   REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_DONE)
+                                   REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET)
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker, GastLidNummer
 from Sporter.models import Sporter
 from TijdelijkeCodes.models import TijdelijkeCode
@@ -672,7 +672,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.post(self.url_volgende_vraag, {'bevestigd': 'Ja'})
         self.assert_is_redirect(resp, self.url_sporter_profiel)
         gast = GastRegistratie.objects.first()
-        self.assertEqual(gast.fase, REGISTRATIE_FASE_DONE)
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_COMPLEET)
 
         sporter = gast.sporter
         self.assertEqual(sporter.voornaam, self.test_voornaam)
@@ -688,7 +688,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
             resp = self.client.post(self.url_volgende_vraag, {'bevestigd': 'Ja'})
         self.assert_is_redirect(resp, self.url_sporter_profiel)
         gast = GastRegistratie.objects.first()
-        self.assertEqual(gast.fase, REGISTRATIE_FASE_DONE)
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_COMPLEET)
 
         self.assertEqual(sporter_count, Sporter.objects.count())
 

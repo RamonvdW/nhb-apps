@@ -32,6 +32,10 @@ urlpatterns = [
     path('gast/volgende-vraag/',
          view_registreer_gast.RegistreerGastVolgendeVraagView.as_view(),
          name='gast-volgende-vraag'),
+
+    path('gast/opheffen/',
+         view_registreer_gast.GastAccountOpheffenView.as_view(),
+         name='opheffen')
 ]
 
 # end of file

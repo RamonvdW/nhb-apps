@@ -40,23 +40,23 @@
                     </tr>
                 </thead>
 
-                {% for obj in object_list %}
+                {% for gast in gasten %}
                     <tr>
-                        <td>{% if obj.lid_nr > 0 %}{{ obj.lid_nr }}{% else %}<i>Geen</i>{% endif %}</td>
-                        <td>{{ obj.volledige_naam }}</td>
+                        <td>{% if gast.lid_nr > 0 %}{{ gast.lid_nr }}{% else %}<i>Geen</i>{% endif %}</td>
+                        <td>{{ gast.volledige_naam }}</td>
 
                         <td>
-                            {% if obj.geen_inlog == 1 %}
+                            {% if gast.geen_inlog == 1 %}
                                 <i>Onvoltooid account</i>
-                            {% elif obj.geen_inlog %}
+                            {% elif gast.geen_inlog %}
                                 <i>Nooit</i>
                             {% else %}
-                                <span>{{ obj.laatste_inlog }}</span>
+                                <span>{{ gast.laatste_inlog }}</span>
                             {% endif %}
                         </td>
 
                         <td>
-                            <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>
+                            <a class="btn-sv-rood" href="{{ gast.url_details }}">Details</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -64,6 +64,63 @@
 
         </div>
     </div>
+
+
+    {% if heeft_afgewezen %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Afgewezen gast-accounts</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <table class="white" id="table3">
+                    <thead>
+                        <tr>        <!-- filter veld -->
+                            <td colspan="2" class="table-filter">
+                                <input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/>
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr>
+                            <th data-filter="on">Bonds<wbr>nummer</th>
+                            <th data-filter="on">Naam</th>
+                            <th>Laatste inlog</th>
+                            <th><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    {% for gast in afgewezen %}
+                        <tr>
+                            <td>{% if gast.lid_nr > 0 %}{{ gast.lid_nr }}{% else %}<i>Geen</i>{% endif %}</td>
+                            <td>{{ gast.volledige_naam }}</td>
+
+                            <td>
+                                {% if gast.geen_inlog == 1 %}
+                                    <i>Onvoltooid account</i>
+                                {% elif gast.geen_inlog %}
+                                    <i>Nooit</i>
+                                {% else %}
+                                    <span>{{ gast.laatste_inlog }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a class="btn-sv-blauw" href="{{ gast.url_details }}">Details</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+
+    {% endif %}
 
 {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-gast-accounts" %}
 

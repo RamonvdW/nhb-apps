@@ -16,12 +16,15 @@
         <div class="col s12">
             <h3 class="page-banner">Details gast-account</h3>
             <p>Hieronder tonen we alle persoonsgegevens gerelateerd aan het gast-account met het tijdelijke bondsnummer {% if gast.lid_nr > 0 %}<b>{{ gast.lid_nr }}</b>{% else %}<i>Geen</i>{% endif %}.</p>
+            {% if not gast.account %}
+                <p>Registratie is gestart op {{ gast.aangemaakt }} ({{ gast.dagen_geleden }} dag{% if gast.dagen_geleden != 1 %}en{% endif %} geleden)</p>
+            {% endif %}
         </div>
     </div>
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3 white">
+        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
 
             <table class="white">
                 <tr>
@@ -91,6 +94,14 @@
             <h4>Bekend?</h4>
             {% if heeft_matches %}
                 <p>Hieronder volgen mogelijke overeenkomsten met bestaande leden</p>
+                {% if gast.url_ophef %}
+                    <p>
+                        <a class="btn-sv-rood modal-trigger" href="#bevestig_opheffen">Opheffen</a>
+                    </p>
+                {% elif not gast.is_afgewezen %}
+                    <p>Ophef score: {{ gast.ophef }}</p>
+                {% endif %}
+
             {% else %}
                 <p>Geen overeenkomsten gevonden met bestaande leden</p>
             {% endif %}
@@ -100,65 +111,75 @@
     {% if heeft_matches %}
         <!-- blauwe balk met informatie label : info -->
         <div class="row-sv-blauw">
-            <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
                 <table class="white">
-                    {% for sporter in sporter_matches %}
+                    {% for match in sporter_matches %}
                         <tr><td>
 
                             <table class="white">
                                 <tr>
                                     <th>Naam</th>
-                                    <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
+                                    <td><span{% if match.is_match_lid_nr %} class="green-text"{% endif %}>[{{ match.lid_nr }}]&nbsp;</span>
+                                        <span{% if match.is_match_voornaam %} class="green-text"{% endif %}>{{match.voornaam }}&nbsp;</span>
+                                        <span{% if match.is_match_achternaam %} class="green-text"{% endif %}>{{ match.achternaam }}</span></td>
                                 </tr>
                                 <tr>
                                     <th>Geslacht</th>
-                                    <td>{{ sporter.geslacht_str }}</td>
+                                    <td{% if match.is_match_geslacht %} class="green-text"{% endif %}>{{ match.geslacht_str }}</td>
                                 </tr>
                                 <tr>
                                     <th>Geboortedatum</th>
-                                    <td>{{ sporter.geboorte_datum }}</td>
+                                    <td{% if match.is_match_geboorte_datum %} class="green-text"{% endif %}>{{ match.geboorte_datum }}</td>
                                 </tr>
                                 <tr>
                                     <th>E-mailadres</th>
-                                    <td><code>{{ sporter.email|wbr_email }}</code></td>
+                                    <td{% if match.is_match_email %} class="green-text"{% endif %}><code>{{ match.email|wbr_email }}</code></td>
                                 </tr>
                                 <tr>
                                     <th>Vereniging</th>
-                                    <td>{% if sporter.bij_vereniging %}{{ sporter.bij_vereniging.ver_nr_en_naam }}{% else %}<i>Geen</i>{% endif %}</td>
+                                    <td{% if match.is_match_vereniging %} class="green-text"{% endif %}>{% if match.vereniging_str %}{{ match.vereniging_str }}{% else %}<i>Geen</i>{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <th>Plaats</th>
+                                    <td{% if match.is_match_plaats %} class="green-text"{% endif %}>{% if match.vereniging_str %}{{ match.plaats_str }}{% else %}<i>Geen</i>{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <th>Account aangemaakt?</th>
+                                    <td>{% if heeft_account %}Ja{% else %}Nee{% endif %}</td>
                                 </tr>
                             </table>
 
                         </td></tr>
                     {% endfor %}
-        {% comment %}
-                    <tr>
-                        <th></th>
-                        <td>{{  }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lid sinds</th>
-                        <td>{{ sporter.sinds_datum }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lid bij vereniging</th>
-                        <td>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</td>
-                    </tr>
-                    <tr>
-                        <th>In plaats</th>
-                        <td>{{ sporter.bij_vereniging.plaats }}</td>
-                    </tr>
-                    <tr>
-                        <th>In regio</th>
-                        <td>{{ sporter.bij_vereniging.regio }}</td>
-                    </tr>
-                    <tr>
-                        <th>In rayon</th>
-                        <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
-                    </tr>
-        {% endcomment %}
                 </table>
+
             </div>
         </div>
+    {% endif %}
+
+    {% if gast.url_ophef %}
+        <div class="modal" id="bevestig_opheffen">
+            <div class="modal-content center">
+                <h5>Gast-account opheffen?</h5>
+                <p>Je hebt gecontroleerd dat het gast-account overeenkomt met een bekend lid.</p>
+                <p>We blokkeren het gast-account en sturen een automatische e-mail waarin we kort uitleggen dat een normaal account gemaakt moet worden.</p>
+
+                <form method="post" action="{{ gast.url_ophef }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="lid_nr" value="{{ gast.lid_nr }}">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-sv-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     {% endif %}
 
 
