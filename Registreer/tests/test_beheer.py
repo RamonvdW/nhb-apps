@@ -7,29 +7,28 @@
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from Bestel.models import Bestelling
 from Functie.operations import maak_functie
+from Mailer.models import MailQueue
 from NhbStructuur.models import Regio
-from Registreer.definities import REGISTRATIE_FASE_COMPLEET
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
-from Sporter.models import Sporter
+from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
+from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF
+from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie, WedstrijdLocatie
 import datetime
 
 
-class TestVerenigingHWL(E2EHelpers, TestCase):
+class TestRegistreerBeheer(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, module gast-accounts """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
-    url_overzicht = '/vereniging/'
-    url_ledenlijst = '/vereniging/leden-lijst/'
-    url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'         # comp_pk
-    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'     # deelcomp_pk
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                          # sporter_pk
     url_gast_accounts = '/account/registreer/beheer-gast-accounts/'
     url_gast_details = '/account/registreer/beheer-gast-accounts/%s/details/'   # lid_nr
     url_opheffen = '/account/registreer/beheer-gast-accounts/opheffen/'
@@ -57,15 +56,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.ver1 = ver
 
         # maak het lid aan dat SEC wordt
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Secretaris"
-        sporter.email = "rdesecretaris@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Secretaris",
+                    email="rdesecretaris@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
 
         self.account_sec = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -119,75 +118,27 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         gast.account = self.account_800001
         gast.save(update_fields=['sporter', 'account'])
 
-    # def _create_histcomp(self):
-    #     # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
-    #     hist_seizoen = HistCompSeizoen(seizoen='2018/2019', comp_type=HISTCOMP_TYPE_18,
-    #                                    indiv_bogen=",".join(HIST_BOGEN_DEFAULT))
-    #     hist_seizoen.save()
-    #
-    #     # record voor het volwassen lid
-    #     rec = HistCompRegioIndiv(
-    #                 seizoen=hist_seizoen,
-    #                 rank=1,
-    #                 sporter_lid_nr=self.sporter_100001.lid_nr,
-    #                 sporter_naam=self.sporter_100001.volledige_naam(),
-    #                 vereniging_nr=self.ver1.ver_nr,
-    #                 vereniging_naam=self.ver1.naam,
-    #                 boogtype='R',
-    #                 score1=10,
-    #                 score2=20,
-    #                 score3=30,
-    #                 score4=40,
-    #                 score5=50,
-    #                 score6=60,
-    #                 score7=70,
-    #                 totaal=80,
-    #                 gemiddelde=5.321)
-    #     rec.save()
-    #
-    #     # record voor het jeugdlid
-    #     # record voor het volwassen lid
-    #     rec = HistCompRegioIndiv(
-    #                 seizoen=hist_seizoen,
-    #                 rank=1,
-    #                 sporter_lid_nr=self.sporter_100002.lid_nr,
-    #                 sporter_naam=self.sporter_100002.volledige_naam(),
-    #                 vereniging_nr=self.ver1.ver_nr,
-    #                 vereniging_naam=self.ver1.naam,
-    #                 boogtype='BB',
-    #                 score1=10,
-    #                 score2=20,
-    #                 score3=30,
-    #                 score4=40,
-    #                 score5=50,
-    #                 score6=60,
-    #                 score7=70,
-    #                 totaal=80,
-    #                 gemiddelde=5.321)
-    #     rec.save()
+        boog_r = BoogType.objects.get(afkorting='R')
+        self.sporterboog_800001 = SporterBoog(sporter=sporter, boogtype=boog_r)
+        self.sporterboog_800001.save()
 
-    # def _create_competitie(self):
-    #     # BB worden
-    #     self.e2e_login_and_pass_otp(self.testdata.account_bb)
-    #     self.e2e_wisselnaarrol_bb()
-    #     self.e2e_check_rol('BB')
-    #
-    #     self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
-    #     competities_aanmaken()
-    #     self.comp_18 = Competitie.objects.get(afstand='18')
-    #     self.comp_25 = Competitie.objects.get(afstand='25')
+    def test_anon(self):
+        self.client.logout()
 
-    def test_sec_gast_accounts(self):
+        resp = self.client.get(self.url_gast_accounts)
+        self.assert403(resp)
+
+        resp = self.client.get(self.url_gast_details % 99999)
+        self.assert403(resp)
+
+        resp = self.client.post(self.url_opheffen)
+        self.assert403(resp)
+
+    def test_overzicht(self):
         # wordt SEC van de vereniging voor gast-accounts
         self.e2e_login_and_pass_otp(self.account_sec)
         self.e2e_wissel_naar_functie(self.functie_sec_extern)
         self.e2e_check_rol('SEC')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # haal de gast-accounts ledenlijst op
         with self.assert_max_queries(20):
@@ -211,7 +162,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('registreer/beheer-gast-accounts.dtl', 'plein/site_layout.dtl'))
 
         self.gast_800001.account = None
-        self.gast_800001.save(update_fields=['account'])
+        self.gast_800001.fase = REGISTRATIE_FASE_AFGEWEZEN
+        self.gast_800001.save(update_fields=['account', 'fase'])
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_gast_accounts)
@@ -221,13 +173,112 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_gast_accounts)
 
-    def test_sec_gast_details(self):
+    def test_details(self):
         # wordt SEC van de vereniging voor gast-accounts
         self.e2e_login_and_pass_otp(self.account_sec)
         self.e2e_wissel_naar_functie(self.functie_sec_extern)
         self.e2e_check_rol('SEC')
 
+        # maak een bestelling aan
+        Bestelling(bestel_nr=1, account=self.account_800001).save()
+
+        # maak een inschrijving op een wedstrijd aan
+        locatie = WedstrijdLocatie(
+                        naam='locatie',
+                        adres='',
+                        notities='')
+        locatie.save()
+
+        datum = "2000-01-01"
+
+        wedstrijd = Wedstrijd(
+                        titel='test',
+                        datum_begin=datum,
+                        datum_einde=datum,
+                        organiserende_vereniging=self.ver1,
+                        locatie=locatie)
+        wedstrijd.save()
+
+        sessie = WedstrijdSessie(datum=datum, tijd_begin="10:00", tijd_einde="11:00")
+        sessie.save()
+
+        klasse = KalenderWedstrijdklasse.objects.first()
+
+        inschrijving = WedstrijdInschrijving(
+                            wanneer=timezone.now(),
+                            wedstrijd=wedstrijd,
+                            sessie=sessie,
+                            sporterboog=self.sporterboog_800001,
+                            wedstrijdklasse=klasse,
+                            koper=self.account_800001)
+        inschrijving.save()
+
         # haal de details van een gast-account op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+
+        # lever twee mogelijke matches
+        wa_id = "12345"
+        Sporter(
+            lid_nr=200001,
+            geslacht='M',
+            voornaam="Andere voornaam",
+            achternaam="Andere achternaam",
+            email="andere@test.not",
+            geboorte_datum=self.gast_800001.geboorte_datum,
+            wa_id=wa_id,
+            sinds_datum=datetime.date(year=2010, month=11, day=12),
+            bij_vereniging=self.ver1).save()
+
+        self.gast_800001.eigen_lid_nummer = "200001"
+        self.gast_800001.club = self.ver1.naam
+        self.gast_800001.club_plaats = self.ver1.plaats
+        self.gast_800001.account = None     # geen account, dan tonen we hoeveel dagen geleden registratie is gestart
+        self.gast_800001.save(update_fields=['eigen_lid_nummer', 'club', 'club_plaats', 'account'])
+
+        Sporter(
+            lid_nr=200002,
+            geslacht=self.gast_800001.geslacht,
+            voornaam=self.gast_800001.voornaam,
+            achternaam=self.gast_800001.achternaam,
+            email=self.gast_800001.email,
+            geboorte_datum=datetime.date(year=2000, month=1, day=1),
+            sinds_datum=datetime.date(year=2010, month=11, day=12),
+            account=self.account_800001,        # voor de coverage
+            bij_vereniging=None).save()
+
+        # haal de details van een gast-account op --> met opheffen knop
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        #print('urls: %s' % repr(urls))
+        self.assertIn(self.url_opheffen, urls)
+
+        # pas de wedstrijdinschrijving aan
+        inschrijving.status = INSCHRIJVING_STATUS_DEFINITIEF
+        inschrijving.save(update_fields=['status'])
+
+        self.gast_800001.wa_id = wa_id
+        self.gast_800001.save(update_fields=['wa_id'])
+
+        # haal de details van een gast-account op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
+
+        # corner-case: afgewezen
+        self.gast_800001.fase = REGISTRATIE_FASE_AFGEWEZEN
+        self.gast_800001.save(update_fields=['fase'])
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_gast_details % self.gast_800001.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -240,5 +291,32 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert404(resp, 'Slechte parameter')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_gast_details % self.gast_800001.lid_nr)
+
+    def test_opheffen(self):
+        # wordt SEC van de vereniging voor gast-accounts
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
+        self.e2e_check_rol('SEC')
+
+        resp = self.client.post(self.url_opheffen)
+        self.assert404(resp, 'Niet gevonden')
+
+        resp = self.client.post(self.url_opheffen, {'lid_nr': 999999})
+        self.assert404(resp, 'Niet gevonden')
+
+        self.assertEqual(0, MailQueue.objects.count())
+
+        resp = self.client.post(self.url_opheffen, {'lid_nr': self.gast_800001.lid_nr})
+        self.assert_is_redirect(resp, self.url_gast_accounts)
+
+        self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
+
+        # nog een keer (al afgewezen)
+        resp = self.client.post(self.url_opheffen, {'lid_nr': self.gast_800001.lid_nr})
+        self.assert_is_redirect(resp, self.url_gast_accounts)
+
 
 # end of file

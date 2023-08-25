@@ -12,7 +12,7 @@ from Score.models import Score, Uitslag
 from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (BAAN_TYPE, BAAN_TYPE_ONBEKEND, BAANTYPE2STR,
-                                    WEDSTRIJD_STATUS, WEDSTRIJD_STATUS_TO_STR,
+                                    WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING, WEDSTRIJD_BEGRENZING_LANDELIJK,
                                     WEDSTRIJD_DISCIPLINES, WEDSTRIJD_DISCIPLINE_OUTDOOR,
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
@@ -179,7 +179,7 @@ class Wedstrijd(models.Model):
     titel = models.CharField(max_length=50, default='')
 
     # status van deze wedstrijd: ontwerp --> goedgekeurd --> geannuleerd
-    status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS, default='O')
+    status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS_CHOICES, default=WEDSTRIJD_STATUS_ONTWERP)
 
     # ter info op de kalender = niet op in te schrijven, dus geen inschrijf deadline tonen
     is_ter_info = models.BooleanField(default=False)

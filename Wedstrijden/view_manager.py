@@ -13,7 +13,7 @@ from BasisTypen.definities import ORGANISATIES2SHORT_STR
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS,
+from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS_CHOICES,
                                     WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
 from Wedstrijden.models import Wedstrijd
 from types import SimpleNamespace
@@ -23,7 +23,7 @@ TEMPLATE_WEDSTRIJDEN_OVERZICHT_MANAGER = 'wedstrijden/overzicht-manager.dtl'
 
 
 # vertaling van wedstrijd status in een url parameter en terug
-WEDSTRIJD_STATUS2URL = {key: beschrijving.split()[0].lower() for key, beschrijving in WEDSTRIJD_STATUS}
+WEDSTRIJD_STATUS2URL = {key: beschrijving.split()[0].lower() for key, beschrijving in WEDSTRIJD_STATUS_CHOICES}
 
 WEDSTRIJD_URL2STATUS = {value: key for key, value in WEDSTRIJD_STATUS2URL.items()}
 WEDSTRIJD_URL2STATUS['alle'] = None
@@ -59,7 +59,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
                             zoom_url=reverse('Wedstrijden:manager'))
         status_filters.append(optie_alle)
 
-        for status, beschrijving in WEDSTRIJD_STATUS:       # gegarandeerde volgorde
+        for status, beschrijving in WEDSTRIJD_STATUS_CHOICES:       # gegarandeerde volgorde
 
             url_param = WEDSTRIJD_STATUS2URL[status]
             url = reverse('Wedstrijden:manager-status', kwargs={'status': url_param})

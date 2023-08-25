@@ -6,7 +6,7 @@
 
 from django.urls import path
 
-from Registreer import view_begin, view_registreer_lid, view_registreer_gast, view_beheer_gast_accounts
+from Registreer import view_begin, view_registreer_lid, view_registreer_gast, view_beheer_sec
 
 app_name = 'Registreer'
 
@@ -41,15 +41,15 @@ urlpatterns = [
 
     # beheer gast-accounts
     path('beheer-gast-accounts/',
-         view_beheer_gast_accounts.GastAccountsView.as_view(),
+         view_beheer_sec.GastAccountsView.as_view(),
          name='beheer-gast-accounts'),
 
     path('beheer-gast-accounts/<lid_nr>/details/',
-         view_beheer_gast_accounts.GastAccountDetailsView.as_view(),
+         view_beheer_sec.GastAccountDetailsView.as_view(),
          name='beheer-gast-account-details'),
 
     path('beheer-gast-accounts/opheffen/',
-         view_beheer_gast_accounts.GastAccountOpheffenView.as_view(),
+         view_beheer_sec.GastAccountOpheffenView.as_view(),
          name='opheffen'),
 ]
 
