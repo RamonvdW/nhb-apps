@@ -5,14 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import Rayon, Regio
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie, Functie
 from Mailer.models import MailQueue
-from TijdelijkeCodes.models import TijdelijkeCode
 from TestHelpers.e2ehelpers import E2EHelpers
+from TijdelijkeCodes.models import TijdelijkeCode
+from Vereniging.models import Vereniging
 
 
 class TestFunctieWijzigEmail(E2EHelpers, TestCase):
@@ -28,9 +29,9 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal', accepteer_vhpg=True)
 
-        rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        regio_101 = NhbRegio.objects.get(regio_nr=101)
-        regio_105 = NhbRegio.objects.get(regio_nr=105)
+        rayon_1 = Rayon.objects.get(rayon_nr=1)
+        regio_101 = Regio.objects.get(regio_nr=101)
+        regio_105 = Regio.objects.get(regio_nr=105)
 
         # creëer een competitie met regiocompetities
         competities_aanmaken(jaar=2019)
@@ -43,10 +44,10 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.functie_rcl105 = Regiocompetitie.objects.filter(competitie=deel1.competitie, regio=regio_105)[0].functie
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = regio_105
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=regio_105)
         ver.save()
         self.ver1 = ver
 

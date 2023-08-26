@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKl
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbRayon
+from NhbStructuur.models import Rayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_rayon_nr
 from Plein.menu import menu_dynamics
@@ -52,7 +52,7 @@ class UitslagenRayonIndivView(TemplateView):
         # for
 
         # rayon filters
-        rayons = (NhbRayon
+        rayons = (Rayon
                   .objects
                   .order_by('rayon_nr')
                   .all())
@@ -209,8 +209,8 @@ class UitslagenRayonIndivView(TemplateView):
         curr_teller = None
         for deelnemer in deelnemers:
             # deelnemer kan zijn:
-            #   is_lijst_rk == False --> RegioCompetitieSporterBoog
-            #   is_lijst_rk == True  --> KampioenschapSchutterBoog
+            #   is_lijst_rk == False --> RegiocompetitieSporterBoog
+            #   is_lijst_rk == True  --> KampioenschapSporterBoog
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 if klasse == -1:
@@ -321,7 +321,7 @@ class UitslagenRayonTeamsView(TemplateView):
         # als het team type correct was, maak dan de rayon knoppen
         if context['teamtype']:
             # rayon filters
-            rayons = (NhbRayon
+            rayons = (Rayon
                       .objects
                       .order_by('rayon_nr')
                       .all())

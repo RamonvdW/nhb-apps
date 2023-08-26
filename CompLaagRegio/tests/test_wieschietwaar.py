@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieMatch
 from Competitie.operations import maak_regiocompetitie_ronde
@@ -16,6 +16,7 @@ from Sporter.models import Sporter, SporterBoog
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -40,13 +41,13 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -157,10 +158,10 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = self.regio_111
+        ver2 = Vereniging(
+                    naam="Andere Club",
+                    ver_nr=1222,
+                    regio=self.regio_111)
         ver2.save()
         self.ver2 = ver2
 
@@ -201,8 +202,6 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         self.client.logout()
 
     def _create_competitie(self):
-        url_kies = '/bondscompetities/'
-
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_c()
 
@@ -220,20 +219,20 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
         de_tijd = datetime.time(hour=20)
 
         # maak binnen het plan drie wedstrijden voor deze vereniging
-        for volgnr in range(3):
+        for volg_nr in range(3):
             match = CompetitieMatch(
                         competitie=self.deelcomp_regio.competitie,
                         vereniging=self.ver1,
-                        datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
+                        datum_wanneer=datetime.date(year=2020, month=1, day=5+volg_nr*3),
                         tijd_begin_wedstrijd=de_tijd)
 
-            if volgnr <= 1:
+            if volg_nr <= 1:
                 uitslag = Uitslag(max_score=300, afstand=12)
                 uitslag.save()
                 match.uitslag = uitslag
-                match.beschrijving = "Dit is een testje %s" % volgnr
+                match.beschrijving = "Dit is een testje %s" % volg_nr
 
-                if volgnr == 1:
+                if volg_nr == 1:
                     score = Score(sporterboog=self.sporterboog_100001,
                                   waarde=123,
                                   afstand_meter=12)

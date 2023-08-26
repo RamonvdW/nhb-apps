@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,8 @@
 # dit is bedoeld voor demonstraties en de handleiding
 
 from django.core.management.base import BaseCommand
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import Regio
+from Vereniging.models import Vereniging
 
 
 class Command(BaseCommand):
@@ -27,10 +28,10 @@ class Command(BaseCommand):
         naam = options['naam'][0]
         plaats = options['plaats'][0]
 
-        regio = NhbRegio.objects.get(regio_nr=100)
+        regio = Regio.objects.get(regio_nr=100)
 
         # maak een nieuwe vereniging aan
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=ver_nr,
                     naam=naam,
                     adres_regel1='Doelpakstraat 1',

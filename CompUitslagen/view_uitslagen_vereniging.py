@@ -11,8 +11,8 @@ from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
 from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
+from Vereniging.models import Vereniging
 from types import SimpleNamespace
 
 
@@ -42,7 +42,7 @@ def get_sporter_ver_nr(request):
                 if sporter.is_actief_lid and sporter.bij_vereniging:
                     ver_nr = sporter.bij_vereniging.ver_nr
 
-    ver_nrs = list(NhbVereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
+    ver_nrs = list(Vereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
     if ver_nr not in ver_nrs:
         ver_nr = ver_nrs[0]
 
@@ -149,8 +149,8 @@ class UitslagenVerenigingIndivView(TemplateView):
             raise Http404('Verkeerd verenigingsnummer')
 
         try:
-            ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
-        except NhbVereniging.DoesNotExist:
+            ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        except Vereniging.DoesNotExist:
             raise Http404('Vereniging niet gevonden')
 
         context['ver'] = ver
@@ -235,8 +235,8 @@ class UitslagenVerenigingTeamsView(TemplateView):
             raise Http404('Verkeerd verenigingsnummer')
 
         try:
-            ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
-        except NhbVereniging.DoesNotExist:
+            ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        except Vereniging.DoesNotExist:
             raise Http404('Vereniging niet gevonden')
 
         context['ver'] = ver

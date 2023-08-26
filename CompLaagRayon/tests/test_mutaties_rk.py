@@ -15,7 +15,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMutatie, KampioenschapSporterBoog)
 from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
-                      zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden)
+                                       zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden)
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -816,9 +816,9 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     # def test_rko_allemaal_afmelden(self):
     #     self.e2e_login_and_pass_otp(self.account_bko)
     #     self.e2e_wissel_naar_functie(self.functie_rko)
-    #     self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
+    #     self.assertTrue(KampioenschapSporterBoog.objects.count() > 0)
     #
-    #     pks = list(KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).values_list('pk', flat=True))
+    #     pks = list(KampioenschapSporterBoog.objects.filter(indiv_klasse=self.klasse).values_list('pk', flat=True))
     #     for pk in pks:
     #         url = self.url_wijzig_status % pk
     #         with self.assert_max_queries(20):

@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from Functie.models import Functie
-from NhbStructuur.models import NhbVereniging
+from Vereniging.models import Vereniging
 from Logboek.models import schrijf_in_logboek
 
 
@@ -30,8 +30,8 @@ class Command(BaseCommand):
 
     def get_vereniging(self, ver_nr):
         try:
-            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
-        except NhbVereniging.DoesNotExist as exc:
+            ver = Vereniging.objects.get(ver_nr=ver_nr)
+        except Vereniging.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
             ver = None
         return ver

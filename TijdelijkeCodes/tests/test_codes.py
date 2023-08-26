@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog
 from Functie.models import Functie
-from NhbStructuur.models import NhbRayon
+from NhbStructuur.models import Rayon
 from Sporter.models import SporterBoog, Sporter
 from Registreer.models import GastRegistratie
 from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_EMAIL_ACCOUNT, RECEIVER_BEVESTIG_EMAIL_FUNCTIE,
@@ -363,7 +363,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         kamp = Kampioenschap(
                     competitie=comp,
                     deel='RK',
-                    rayon=NhbRayon.objects.first(),
+                    rayon=Rayon.objects.first(),
                     functie=Functie.objects.filter(rol='RKO').first())
         kamp.save()
 

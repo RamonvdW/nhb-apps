@@ -10,13 +10,13 @@ from Account.models import Account
 from Betaal.definities import (MOLLIE_API_KEY_MAXLENGTH, BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_PAYMENT_STATUS_MAXLENGTH,
                                BETAAL_BESCHRIJVING_MAXLENGTH, BETAAL_KLANT_NAAM_MAXLENGTH,
                                BETAAL_KLANT_ACCOUNT_MAXLENGTH, BETAAL_MUTATIE_TO_STR)
-from NhbStructuur.models import NhbVereniging
+from Vereniging.models import Vereniging
 
 
 class BetaalInstellingenVereniging(models.Model):
 
     # bij welke vereniging hoort deze informatie?
-    vereniging = models.OneToOneField(NhbVereniging, on_delete=models.CASCADE)
+    vereniging = models.OneToOneField(Vereniging, on_delete=models.CASCADE)
 
     # de API key van deze vereniging voor Mollie
     mollie_api_key = models.CharField(max_length=MOLLIE_API_KEY_MAXLENGTH, blank=True)

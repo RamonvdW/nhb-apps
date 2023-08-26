@@ -8,11 +8,13 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from NhbStructuur.models import Regio
+from Sporter.models import Sporter, SporterBoog
+from Sporter.operations import get_sporter_voorkeuren
+from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
-from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
@@ -24,7 +26,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                  # wedstrijd_pk
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_wedstrijden_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'  # wedstrijd_pk, sessie_pk
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                    # sporter_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -48,10 +50,10 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         sporter.save()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
@@ -64,29 +66,32 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         sporter1 = Sporter(
-                    lid_nr=self.lid_nr,
-                    geslacht='M',
-                    voornaam='Ad',
-                    achternaam='de Admin',
-                    geboorte_datum='1966-06-06',
-                    sinds_datum='2020-02-02',
-                    adres_code='1234AB56',
-                    account=self.account,
-                    bij_vereniging=self.ver1)
+                        lid_nr=self.lid_nr,
+                        geslacht='M',
+                        voornaam='Ad',
+                        achternaam='de Admin',
+                        geboorte_datum='1966-06-06',
+                        sinds_datum='2020-02-02',
+                        adres_code='1234AB56',
+                        account=self.account,
+                        bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
         self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
-        self.client.get(self.url_sporter_voorkeuren % sporter1.pk)   # maakt alle SporterBoog records aan
+
+        # maak alle SporterBoog aan
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter1.pk})
+        self.assert_is_redirect_not_plein(resp)
 
         sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_r)
         sporterboog.voor_wedstrijd = True
         sporterboog.save(update_fields=['voor_wedstrijd'])
         self.sporterboog1r = sporterboog
 
-        self.ver2 = NhbVereniging(
+        self.ver2 = Vereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver2.save()
 
     @staticmethod

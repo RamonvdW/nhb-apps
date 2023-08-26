@@ -11,15 +11,16 @@ from django.core.exceptions import ObjectDoesNotExist
 from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Vereniging.models import Secretaris
+from Vereniging.models2 import Secretaris
 from Wedstrijden.definities import BAAN_TYPE_BUITEN
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 import io
 
@@ -64,10 +65,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         """ initialisatie van de test case """
 
         # maak een test vereniging
-        ver = NhbVereniging(
-                ver_nr="1000",
-                naam="Grote Club",
-                regio=NhbRegio.objects.get(pk=111))
+        ver = Vereniging(
+                    ver_nr=1000,
+                    naam="Grote Club",
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan
@@ -137,7 +138,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Wijziging van website van vereniging 1000:  --> https://www.groteclub.archery" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1042 website url: 'www.vasteclub.archery' bevat fout (['Voer een geldige URL in.'])" in f2.getvalue())
         self.assertTrue("[INFO] Lidmaatschap voor 100101 gaat pas in op datum: '2080-06-06'" in f2.getvalue())
-        ver = NhbVereniging.objects.get(ver_nr=1001)
+        ver = Vereniging.objects.get(ver_nr=1001)
         self.assertEqual(ver.website, "http://www.somewhere.test")
         self.assertEqual(ver.telefoonnummer, "+316666666")
         self.assertEqual(ver.kvk_nummer, "12345678")
@@ -193,7 +194,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
         self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan wedstrijdlocatie 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
 
-        ver = NhbVereniging.objects.get(ver_nr=1000)
+        ver = Vereniging.objects.get(ver_nr=1000)
 
         locatie = WedstrijdLocatie(
                         naam="Ergens buiten",
@@ -343,10 +344,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # test het verwijderen van een lege vereniging
 
         # maak een test vereniging die verwijderd kan worden
-        ver = NhbVereniging()
-        ver.naam = "Wegisweg Club"
-        ver.ver_nr = "1998"
-        ver.regio = NhbRegio.objects.get(pk=116)
+        ver = Vereniging(
+                    naam="Weg is weg Club",
+                    ver_nr=1998,
+                    regio=Regio.objects.get(pk=116))
         ver.save()
 
         with self.assert_max_queries(77):
@@ -355,7 +356,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1998] Wegisweg Club wordt nu verwijderd" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1998] Weg is weg Club wordt nu verwijderd" in f2.getvalue())
 
     def test_weer_actief(self):
         # mutatie van inactief lid naar actief lid
@@ -439,14 +440,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Vereniging 2000 secretarissen: geen --> 100024+100001" in f2.getvalue())
         self.assertTrue("[WARNING] Secretaris 100001 is geen lid bij vereniging 2000" in f2.getvalue())
 
-        ver = NhbVereniging.objects.get(ver_nr="1000")
+        ver = Vereniging.objects.get(ver_nr="1000")
         functie = Functie.objects.get(rol="SEC", vereniging=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
         secs = Secretaris.objects.prefetch_related('sporters').get(vereniging__ver_nr=2000)
         self.assertEqual(2, secs.sporters.count())
 
-        ver = NhbVereniging.objects.get(ver_nr="2000")
+        ver = Vereniging.objects.get(ver_nr="2000")
         functie = Functie.objects.get(rol="SEC", vereniging=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
@@ -492,21 +493,21 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                         OPTION_SIM)
 
         # controleer de geen_wedstrijden vlag voor 1377 en normale clubs
-        ver = NhbVereniging.objects.get(ver_nr=1000)
+        ver = Vereniging.objects.get(ver_nr=1000)
         self.assertFalse(ver.geen_wedstrijden)
 
-        ver = NhbVereniging.objects.get(ver_nr=1377)
+        ver = Vereniging.objects.get(ver_nr=1377)
         self.assertTrue(ver.geen_wedstrijden)
 
         # verifieer verwijderen van "(geen deelname wedstrijden)" uit de naam
         self.assertEqual(ver.naam, "Persoonlijk")
 
         # controleer dat de mutatie achteraf werkt
-        ver = NhbVereniging.objects.get(ver_nr=1000)
+        ver = Vereniging.objects.get(ver_nr=1000)
         ver.geen_wedstrijden = True
         ver.save()
 
-        ver = NhbVereniging.objects.get(ver_nr=1377)
+        ver = Vereniging.objects.get(ver_nr=1377)
         ver.geen_wedstrijden = False
         ver.save()
 
@@ -576,7 +577,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                     TESTFILE_14_WIJZIG_GESLACHT_2,
                                     OPTION_SIM)
 
-        # maak een schutterboog aan
+        # maak een sporter-boog aan
         boog_r = BoogType.objects.get(afkorting='R')
         sporter = Sporter.objects.get(lid_nr="100024")
         sporterboog = SporterBoog(sporter=sporter,
@@ -608,7 +609,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                         TESTFILE_03_BASE_DATA,
                                         OPTION_SIM)
 
-        ver = NhbVereniging.objects.get(ver_nr=1000)
+        ver = Vereniging.objects.get(ver_nr=1000)
         ver.geen_wedstrijden = True
         ver.save()
 
@@ -629,10 +630,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                         OPTION_DRY_RUN)
 
         # maak een test vereniging die verwijderd kan worden
-        ver = NhbVereniging()
-        ver.naam = "Wegisweg Club"
-        ver.ver_nr = "1999"
-        ver.regio = NhbRegio.objects.get(pk=116)
+        ver = Vereniging(
+                    naam="Weg is weg Club",
+                    ver_nr=1999,
+                    regio=Regio.objects.get(pk=116))
         ver.save()
         with self.assert_max_queries(26):
             self.run_management_command(IMPORT_COMMAND,
@@ -846,13 +847,13 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         ver_nr = settings.CRM_IMPORT_BEHOUD_CLUB[0]
 
-        self.assertEqual(0, NhbVereniging.objects.filter(ver_nr=ver_nr).count())
+        self.assertEqual(0, Vereniging.objects.filter(ver_nr=ver_nr).count())
 
         # maak de speciale club aan
-        ver = NhbVereniging(
-                ver_nr=ver_nr,
-                naam="Demo Club",
-                regio=NhbRegio.objects.get(pk=115))
+        ver = Vereniging(
+                    ver_nr=ver_nr,
+                    naam="Demo Club",
+                    regio=Regio.objects.get(pk=115))
         ver.save()
 
         # koppel een lid aan deze club
@@ -875,7 +876,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
-        self.assertEqual(1, NhbVereniging.objects.filter(ver_nr=ver_nr).count())
+        self.assertEqual(1, Vereniging.objects.filter(ver_nr=ver_nr).count())
         self.assertEqual(3, Sporter.objects.count())
 
         # nog een keer, maar dan met lege configuratie
@@ -889,7 +890,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
-        self.assertEqual(0, NhbVereniging.objects.filter(ver_nr=ver_nr).count())
+        self.assertEqual(0, Vereniging.objects.filter(ver_nr=ver_nr).count())
 
 
 # end of file

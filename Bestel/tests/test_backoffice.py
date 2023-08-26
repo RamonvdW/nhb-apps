@@ -11,8 +11,9 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
+from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from TestHelpers.e2ehelpers import E2EHelpers
 from decimal import Decimal
@@ -45,10 +46,10 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         instellingen.save()
         self.instellingen = instellingen
 
-        ver = NhbVereniging(
-            ver_nr=1000,
-            naam="Grote Club",
-            regio=NhbRegio.objects.get(regio_nr=112))
+        ver = Vereniging(
+                ver_nr=1000,
+                naam="Grote Club",
+                regio=Regio.objects.get(regio_nr=112))
         ver.save()
         self.ver1 = ver
 
@@ -124,12 +125,13 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assertEqual(1, BestelMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1: %s\nf2: %s' % (f1.getvalue(), f2.getvalue()))
-        self.assertTrue("[INFO] Overboeking 10.00 euro ontvangen voor bestelling MH-%s" % self.bestel_nr in f2.getvalue())
+        self.assertTrue("[INFO] Overboeking 10.00 euro ontvangen voor bestelling MH-%s" % self.bestel_nr
+                        in f2.getvalue())
         self.assertTrue("[INFO] Betaling is gelukt voor bestelling MH-%s" % self.bestel_nr in f2.getvalue())
         self.bestelling = Bestelling.objects.get(pk=self.bestelling.pk)
         self.assertEqual(self.bestelling.status, BESTELLING_STATUS_AFGEROND)
         self.assertEqual(1, self.bestelling.transacties.count())
-        transactie = self.bestelling.transacties.first()
+        # transactie = self.bestelling.transacties.first()
 
         self.assertEqual(2, MailQueue.objects.count())
 

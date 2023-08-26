@@ -18,7 +18,7 @@ from Registreer.forms import RegistreerNormaalForm
 from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
 from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_REG_LID
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_bevestig_email_registreer_lid
-from Vereniging.models import Secretaris
+from Vereniging.models2 import Secretaris
 import logging
 
 

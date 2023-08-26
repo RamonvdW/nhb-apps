@@ -18,9 +18,10 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
                                RegiocompetitieSporterBoog)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import Rayon, Regio
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
+from Vereniging.models import Vereniging
 from codecs import BOM_UTF8
 import textwrap
 import csv
@@ -45,12 +46,12 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
     if rayon != regio:
         context['zoom_alles_url'] = reverse('CompInschrijven:lijst-regiocomp-alles', kwargs={'comp_pk': comp_pk})
 
-    regios = (NhbRegio
+    regios = (Regio
               .objects
               .select_related('rayon')
               .filter(is_administratief=False))
 
-    rayons = NhbRayon.objects.all()
+    rayons = Rayon.objects.all()
 
     context['zoom_rayons'] = list()
     for obj in rayons:
@@ -208,8 +209,8 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         try:
             rayon_pk = int(kwargs['rayon_pk'][:6])  # afkappen voor de veiligheid
-            rayon = NhbRayon.objects.get(pk=rayon_pk)
-        except (ValueError, NhbRayon.DoesNotExist):
+            rayon = Rayon.objects.get(pk=rayon_pk)
+        except (ValueError, Rayon.DoesNotExist):
             raise Http404('Rayon niet gevonden')
 
         context['inhoud'] = 'in ' + str(rayon)
@@ -275,11 +276,11 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         try:
             regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
-            regio = (NhbRegio
+            regio = (Regio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except (ValueError, NhbRegio.DoesNotExist):
+        except (ValueError, Regio.DoesNotExist):
             raise Http404('Regio niet gevonden')
 
         context['regio'] = regio
@@ -417,7 +418,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _maak_data_dagdeel_behoefte(context, deelcomp, deelnemers, regio):
         """ voegt de volgende elementen toe aan de context:
-                regio_verenigingen: lijst van NhbVereniging met counts_list met telling van dagdelen
+                regio_verenigingen: lijst van Vereniging met counts_list met telling van dagdelen
                 dagdelen: beschrijving van dagdelen voor de kolom headers
         """
 
@@ -433,11 +434,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # maak een lijst van alle verenigingen in deze regio
         context['regio_verenigingen'] = vers = list()
         nr2ver = dict()
-        for ver in (NhbVereniging
-                        .objects
-                        .filter(regio=regio)
-                        .order_by('ver_nr')
-                        .all()):
+        for ver in (Vereniging
+                    .objects
+                    .filter(regio=regio)
+                    .order_by('ver_nr')):
 
             vers.append(ver)
             nr2ver[ver.ver_nr] = ver
@@ -591,11 +591,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         try:
             regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
-            regio = (NhbRegio
+            regio = (Regio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except (ValueError, NhbRegio.DoesNotExist):
+        except (ValueError, Regio.DoesNotExist):
             raise Http404('Regio niet gevonden')
 
         context['regio'] = regio
@@ -672,11 +672,11 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         try:
             regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
-            regio = (NhbRegio
+            regio = (Regio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except (ValueError, NhbRegio.DoesNotExist):
+        except (ValueError, Regio.DoesNotExist):
             raise Http404('Regio niet gevonden')
 
         try:
@@ -772,11 +772,11 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
         try:
             regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
-            regio = (NhbRegio
+            regio = (Regio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except (ValueError, NhbRegio.DoesNotExist):
+        except (ValueError, Regio.DoesNotExist):
             raise Http404('Regio niet gevonden')
 
         context['regio'] = regio
@@ -905,11 +905,11 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
         try:
             regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
-            regio = (NhbRegio
+            regio = (Regio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except (ValueError, NhbRegio.DoesNotExist):
+        except (ValueError, Regio.DoesNotExist):
             raise Http404('Regio niet gevonden')
 
         try:

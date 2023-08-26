@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
                                    ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIE_WA)
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,
@@ -17,7 +17,9 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
 from Sporter.models import Sporter
+from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -32,43 +34,43 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
+        self.account_geen_lid = self.e2e_create_account('geen_lid', 'geenlid@test.com', 'Geen')
 
         now = timezone.now()  # is in UTC
         now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
         self.huidige_jaar = now.year
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                        lid_nr=100001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Tester",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_normaal,
+                        email=self.account_normaal.email)
         sporter.save()
         self.sporter1 = sporter
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100002,
+                        geslacht="V",
+                        voornaam="Ramona",
+                        achternaam="de Testerin",
+                        email="",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver)
         sporter.save()
 
     def test_model(self):
@@ -576,6 +578,8 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+
+        get_sporter_voorkeuren(self.sporter1, mag_database_wijzigen=True)
 
         # met voorkeuren
         with self.assert_max_queries(20):

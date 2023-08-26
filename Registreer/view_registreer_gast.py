@@ -11,22 +11,20 @@ from django.utils import timezone
 from django.shortcuts import render, reverse, redirect, Http404
 from django.contrib.auth import update_session_auth_hash
 from django.views.generic import View, TemplateView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.view_wachtwoord import auto_login_gast_account
 from BasisTypen.definities import GESLACHT2STR
 from Functie.models import Functie
-from Functie.rol import rol_bepaal_beschikbare_rollen, rol_get_huidige_functie
+from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
-from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip, maak_unaccented
 from Plein.menu import menu_dynamics
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
                                    REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
-                                   REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN)
+                                   REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET)
 from Registreer.forms import RegistreerGastForm
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker
 from Registreer.operations import registratie_gast_volgende_lid_nr, registratie_gast_is_open
@@ -34,6 +32,7 @@ from Sporter.models import Sporter
 from Taken.operations import maak_taak
 from TijdelijkeCodes.operations import (set_tijdelijke_codes_receiver, RECEIVER_BEVESTIG_EMAIL_REG_GAST,
                                         maak_tijdelijke_code_bevestig_email_registreer_gast)
+from Vereniging.models import Vereniging
 import datetime
 import logging
 
@@ -53,7 +52,6 @@ TEMPLATE_REGISTREER_GAST_CONFIRM = 'registreer/registreer-gast-25-confirm.dtl'
 
 EMAIL_TEMPLATE_GAST_BEVESTIG_EMAIL = 'email_registreer/gast-bevestig-toegang-email.dtl'
 EMAIL_TEMPLATE_GAST_LID_NR = 'email_registreer/gast-tijdelijk-bondsnummer.dtl'
-EMAIL_TEMPLATE_GAST_AFGEWEZEN = 'email_registreer/gast-afgewezen.dtl'
 
 my_logger = logging.getLogger('NHBApps.Registreer')
 
@@ -434,7 +432,7 @@ class RegistreerGastVolgendeVraagView(View):
         aantal = Sporter.objects.filter(lid_nr=gast.lid_nr).count()
         if aantal == 0:
             date_now = timezone.now().date()
-            ver_extern = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+            ver_extern = Vereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
 
             sporter = Sporter(
                         lid_nr=gast.lid_nr,
@@ -713,66 +711,5 @@ class RegistreerGastVolgendeVraagView(View):
             raise Http404('Verkeerde fase')
 
         return HttpResponseRedirect(reverse('Registreer:gast-volgende-vraag'))
-
-
-class GastAccountOpheffenView(UserPassesTestMixin, View):
-
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.functie_nu.rol == 'SEC' and self.functie_nu.vereniging.is_extern
-
-    @staticmethod
-    def post(request, *args, **kwargs):
-        """ wordt aangeroepen als de SEC8000 op de Opheffen knop drukt + modaal bevestigd heeft """
-
-        lid_nr = request.POST.get('lid_nr', '')[:6]  # afkappen voor extra veiligheid
-        try:
-            lid_nr = int(lid_nr)
-            gast = GastRegistratie.objects.get(lid_nr=lid_nr)
-        except (ValueError, GastRegistratie.DoesNotExist):
-            raise Http404('Niet gevonden')
-
-        if gast.fase != REGISTRATIE_FASE_AFGEWEZEN:
-            now = timezone.now()
-            stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-
-            with transaction.atomic():
-                gast.fase = REGISTRATIE_FASE_AFGEWEZEN
-                gast.logboek += '[%s] SEC heeft dit gast-account afgewezen\n' % stamp_str
-                gast.save(update_fields=['fase', 'logboek'])
-
-                gast.account.is_active = False
-                gast.account.save(update_fields=['is_active'])
-
-                gast.sporter.is_actief_lid = False
-                gast.sporter.save(update_fields=['is_actief_lid'])
-
-            # schrijf in syslog
-            from_ip = get_safe_from_ip(request)
-            my_logger.info('%s REGISTREER gast-account afgewezen; stuur e-mail' % from_ip)
-
-            # stuur een e-mail over de afwijzing
-            context = {
-                'voornaam': gast.voornaam,
-                'naam_site': settings.NAAM_SITE,
-                'contact_email': settings.EMAIL_BONDSBUREAU,
-            }
-            mail_body = render_email_template(context, EMAIL_TEMPLATE_GAST_AFGEWEZEN)
-
-            # stuur de e-mail
-            mailer_queue_email(gast.email,
-                               'Gast-account afgewezen',
-                               mail_body)
-
-        return HttpResponseRedirect(reverse('Vereniging:gast-accounts'))
-
 
 # end of file

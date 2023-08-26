@@ -80,7 +80,7 @@ class Command(BaseCommand):
         # FUTURE: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
 
         # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren (afsluiten fase G)
-        #    KampioenschapSchutterBoog.bij_vereniging
+        #    KampioenschapSporterBoog.bij_vereniging
         #    overstappen is daarna niet meer mogelijk
 
         regio_comp_pks = list()

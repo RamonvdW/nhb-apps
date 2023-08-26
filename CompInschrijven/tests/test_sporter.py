@@ -12,13 +12,14 @@ from Competitie.models import (CompetitieIndivKlasse, Regiocompetitie, Regiocomp
 from Competitie.tests.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.models import Functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 from time import sleep
 import datetime
 
@@ -50,73 +51,77 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
+        self.account_geen_lid = self.e2e_create_account('geen_lid', 'geenlid@test.com', 'Geen')
         self.account_twee = self.e2e_create_account('twee', 'twee@test.com', 'Twee')
 
         # afhankelijk van het rayon / de regios aangemaakt door NhbStructuur migratie
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver = ver
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.account_normaal,
+                    email=self.account_normaal.email)
         sporter.save()
         self.sporter1 = sporter
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Twee"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_twee
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                        lid_nr=100002,
+                        geslacht="V",
+                        voornaam="Twee",
+                        achternaam="de Tester",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_twee,
+                        email=self.account_twee.email)
         sporter.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "V"
-        sporter.voornaam = "Geen"
-        sporter.achternaam = "Lid"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.account = self.account_geenlid
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                        lid_nr=100003,
+                        geslacht="V",
+                        voornaam="Geen",
+                        achternaam="Lid",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        account=self.account_geen_lid,
+                        email=self.account_geen_lid.email)
         sporter.save()
 
     def _prep_voorkeuren(self, lid_nr):
-        # haal de voorkeuren op - hiermee worden de SporterBoog records aangemaakt
-        with self.assert_max_queries(20):
-            self.client.get(self.url_voorkeuren)
+        # zet de bogen 'aan'
+        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
+                                                      'schiet_C': 'on',
+                                                      'schiet_BB': 'on',
+                                                      'schiet_TR': 'on',
+                                                      'schiet_LB': 'on'})
+        self.assert_is_redirect_not_plein(resp)
 
         # zet een wedstrijd voorkeur voor Recurve en informatie voorkeur voor Barebow
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R', sporter__lid_nr=lid_nr)
         sporterboog.voor_wedstrijd = True
         sporterboog.heeft_interesse = False
-        sporterboog.save()
+        sporterboog.save(update_fields=['voor_wedstrijd', 'heeft_interesse'])
 
         for boog in ('C', 'TR', 'LB'):
             sporterboog = SporterBoog.objects.get(boogtype__afkorting=boog, sporter__lid_nr=lid_nr)
             sporterboog.heeft_interesse = False
-            sporterboog.save()
+            sporterboog.save(update_fields=['heeft_interesse'])
         # for
 
     @staticmethod
@@ -258,7 +263,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # inschrijven als inactief lid
         self.client.logout()
-        self.e2e_login(self.account_geenlid)
+        self.e2e_login(self.account_geen_lid)
         resp = self.client.post(self.url_aanmelden % (0, 0))
         self.assert404(resp, 'Sporter niet gevonden')
 
@@ -290,7 +295,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen valide combinatie')
 
         # mismatch diverse zaken
-        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=NhbRegio.objects.get(regio_nr=116))
+        deelcomp = Regiocompetitie.objects.get(competitie__afstand='18', regio=Regio.objects.get(regio_nr=116))
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bevestig_aanmelden % (deelcomp.pk, sporterboog.pk))
         self.assert404(resp, 'Geen valide combinatie')
@@ -318,7 +323,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # afmelden als inactief lid
         self.client.logout()
-        self.e2e_login(self.account_geenlid)
+        self.e2e_login(self.account_geen_lid)
         resp = self.client.post(self.url_afmelden % 0)
         self.assert404(resp, 'Sporter niet gevonden')
 
@@ -454,7 +459,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
 
     def test_inschrijven_methode3_twee_dagdelen(self):
-        regio_105 = NhbRegio.objects.get(pk=105)
+        regio_105 = Regio.objects.get(pk=105)
         self.ver.regio = regio_105
         self.ver.save()
 
@@ -523,7 +528,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)
 
     def test_inschrijven_methode3_alle_dagdelen(self):
-        regio_105 = NhbRegio.objects.get(pk=105)
+        regio_105 = Regio.objects.get(pk=105)
         self.ver.regio = regio_105
         self.ver.save()
 
@@ -631,7 +636,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(klasse.boogtype, sporterboog.boogtype)
 
     def test_inschrijven_methode1(self):
-        regio_101 = NhbRegio.objects.get(pk=101)
+        regio_101 = Regio.objects.get(pk=101)
         self.ver.regio = regio_101
         self.ver.save()
 

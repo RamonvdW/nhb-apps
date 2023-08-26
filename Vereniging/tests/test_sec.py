@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
@@ -16,10 +16,11 @@ from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
-class TestVerenigingHWL(E2EHelpers, TestCase):
+class TestVerenigingSEC(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functies voor de SEC """
 
@@ -44,13 +45,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
 
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -125,10 +126,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = regio_111
+        ver2 = Vereniging(
+                    naam="Andere Club",
+                    ver_nr=1222,
+                    regio=regio_111)
         ver2.save()
         self.ver2 = ver2
 
@@ -237,14 +238,16 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # probeer de sporterboog instellingen van sporters te veranderen
-        # maar dat mag de SEC niet, dus gebeurt er niets
         for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
             url = self.url_sporter_voorkeuren % sporter.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
-            self.assert403(resp)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+            self.assert_html_ok(resp)
         # for
         self.assertEqual(SporterBoog.objects.count(), 0)
 
@@ -273,7 +276,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # corner case: SEC van vereniging in administratieve regio
 
         # regio 100 is administratief
-        regio100 = NhbRegio.objects.get(regio_nr=100)
+        regio100 = Regio.objects.get(regio_nr=100)
         self.assertTrue(regio100.is_administratief)
 
         # account_sec is SEC bij self.ver1
@@ -341,5 +344,23 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(len(urls2), 1)
 
         # ophalen en aanpassen: zie test_accommodatie
+
+    def test_extern(self):
+        self.ver1.is_extern = True
+        self.ver1.save(update_fields=['is_extern'])
+
+        # login als SEC
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        # check voor het kaartje om de doel details aan te passen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+
+
 
 # end of file

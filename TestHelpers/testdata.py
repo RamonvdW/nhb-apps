@@ -23,10 +23,11 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import Rayon, Regio, Cluster
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Vereniging.models import Vereniging
 from Wedstrijden.models import WedstrijdLocatie
 from bs4 import BeautifulSoup
 from decimal import Decimal
@@ -140,7 +141,7 @@ class TestData(object):
 
         # verenigingen
         self.regio_ver_nrs = dict()             # [regio_nr] = list(ver_nrs)
-        self.vereniging = dict()                # [ver_nr] = NhbVereniging()
+        self.vereniging = dict()                # [ver_nr] = Vereniging()
 
         self.account_sec = dict()               # [ver_nr] = Account
         self.account_hwl = dict()               # [ver_nr] = Account
@@ -215,8 +216,8 @@ class TestData(object):
         self.comp25_poules = list()
 
         # regiokampioenen
-        self.comp18_regiokampioenen = list()    # [KampioenschapSchutterBoog met kampioen_label != '', ...]
-        self.comp25_regiokampioenen = list()    # [KampioenschapSchutterBoog met kampioen_label != '', ...]
+        self.comp18_regiokampioenen = list()    # [KampioenschapSporterBoog met kampioen_label != '', ...]
+        self.comp25_regiokampioenen = list()    # [KampioenschapSporterBoog met kampioen_label != '', ...]
 
         # aangemaakte RK sporters
         self.comp18_rk_deelnemers = list()
@@ -248,11 +249,11 @@ class TestData(object):
             self.afkorting2boogtype_ifaa[boogtype.afkorting] = boogtype
         # for
         del boogtype
-        for regio in NhbRegio.objects.all():
+        for regio in Regio.objects.all():
             self.regio[regio.regio_nr] = regio
         # for
         del regio
-        for rayon in NhbRayon.objects.all():
+        for rayon in Rayon.objects.all():
             self.rayon[rayon.rayon_nr] = rayon
         # for
         del rayon
@@ -351,7 +352,7 @@ class TestData(object):
         now = timezone.now()
 
         # alle accounts moeten en Sporter hebben en die hebben weer een vereniging nodig
-        ver = NhbVereniging(
+        ver = Vereniging(
                     ver_nr=7000,
                     naam='Admin vereniging',
                     plaats='Stadium',
@@ -459,7 +460,7 @@ class TestData(object):
         cluster_regios = list()
 
         bulk = list()
-        for regio in NhbRegio.objects.select_related('rayon').order_by('regio_nr'):
+        for regio in Regio.objects.select_related('rayon').order_by('regio_nr'):
             if regio.regio_nr in (101, 107):
                 cluster_regios.append(regio)
 
@@ -470,7 +471,7 @@ class TestData(object):
             for nr in range(aantal):
                 ver_nr = MIN_VER_NR + regio.regio_nr * 10 + nr + 1
 
-                ver = NhbVereniging(
+                ver = Vereniging(
                             ver_nr=ver_nr,
                             naam="Club %s" % ver_nr,
                             plaats="Regio %s dorp %s" % (regio.regio_nr, nr+1),
@@ -482,8 +483,8 @@ class TestData(object):
             # for
         # for
 
-        NhbVereniging.objects.bulk_create(bulk)     # 48x
-        # print('TestData: created %sx NhbVereniging' % len(bulk))
+        Vereniging.objects.bulk_create(bulk)     # 48x
+        # print('TestData: created %sx Vereniging' % len(bulk))
 
         for ver in bulk:
             self.vereniging[ver.ver_nr] = ver
@@ -495,9 +496,9 @@ class TestData(object):
         # for
 
         for regio in cluster_regios:
-            cluster = NhbCluster.objects.filter(regio=regio).order_by('letter')[0]
+            cluster = Cluster.objects.filter(regio=regio).order_by('letter')[0]
             self.regio_cluster[regio.regio_nr] = cluster
-            for ver in NhbVereniging.objects.filter(regio=regio).order_by('ver_nr')[:3]:
+            for ver in Vereniging.objects.filter(regio=regio).order_by('ver_nr')[:3]:
                 ver.clusters.add(cluster)
             # for
         # for
@@ -710,7 +711,7 @@ class TestData(object):
 
         # maak de functies aan
         bulk = list()
-        for ver in (NhbVereniging
+        for ver in (Vereniging
                     .objects
                     .filter(ver_nr__gte=MIN_VER_NR)
                     .exclude(geen_wedstrijden=True)):
@@ -767,8 +768,8 @@ class TestData(object):
         # for
 
     def maak_clubs_en_sporters(self, ook_ifaa_bogen=False):
-        # print('TestData: maak_clubs_en_leden. Counters: NhbVereniging=%s, Sporter=%s' % (
-        #                     NhbVereniging.objects.count(), Sporter.objects.count()))
+        # print('TestData: maak_clubs_en_leden. Counters: Vereniging=%s, Sporter=%s' % (
+        #                     Vereniging.objects.count(), Sporter.objects.count()))
         self._maak_verenigingen()
         self._maak_leden(ook_ifaa_bogen)
         self._maak_accounts_en_functies()
@@ -1056,7 +1057,7 @@ class TestData(object):
             ver_nr = regio_nr * 10 + volgnummer
         """
 
-        ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
         regio_nr = ver.regio.regio_nr
 
         if afstand == 18:
@@ -1334,7 +1335,7 @@ class TestData(object):
     def maak_voorinschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, ook_incomplete_teams=True):
         """ maak voor deze vereniging een paar teams aan voor de open RK teams inschrijving """
 
-        ver = NhbVereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
+        ver = Vereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
         rayon_nr = ver.regio.rayon.rayon_nr
 
         if afstand == 18:                                                           # pragma: no cover
@@ -1479,7 +1480,7 @@ class TestData(object):
             en koppel er meteen een aantal RK deelnemers van de vereniging aan.
         """
 
-        ver = NhbVereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
+        ver = Vereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
         rayon_nr = ver.regio.rayon.rayon_nr
 
         if afstand == 18:

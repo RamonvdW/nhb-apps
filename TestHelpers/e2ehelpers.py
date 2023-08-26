@@ -30,14 +30,18 @@ import io
 
 # debug optie: toon waar in de code de queries vandaan komen
 REPORT_QUERY_ORIGINS = False
+FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
 
 class MyQueryTracer(object):
-    def __init__(self):
-        self.trace = list()
+    def __init__(self, modify_acceptable=False):
+        self.trace = list()             # [dict, dict, ..]
         self.started_at = datetime.datetime.now()
         self.total_duration_us = 0
         self.stack_counts = dict()      # [stack] = count
+        self.modify_acceptable = modify_acceptable
+        self.found_modify = False       # meer dan SELECT gevonden
+        self.found_code = ""            # view function filename, line, name
 
     def __call__(self, execute, sql, params, many, context):
         call = {'sql': sql}
@@ -48,25 +52,7 @@ class MyQueryTracer(object):
         time_start = time.monotonic_ns()
         call['now'] = time_start
 
-        call['stack'] = stack = list()
-        for fname, line_nr, base, code in traceback.extract_stack():
-            if (base != '__call__'
-                    and not fname.startswith('/usr/lib')
-                    and '/site-packages/' not in fname
-                    and 'manage.py' not in fname):
-                stack.append((fname, line_nr, base))
-            elif base == 'render' and 'template/response.py' in fname:
-                stack.append((fname, line_nr, base))
-        # for
-
-        if REPORT_QUERY_ORIGINS:                        # pragma: no cover
-            msg = ''
-            for fname, line_nr, base in stack:
-                msg += '\n         %s:%s %s' % (fname[-30:], line_nr, base)
-            try:
-                self.stack_counts[msg] += 1
-            except KeyError:
-                self.stack_counts[msg] = 1
+        execute(sql, params, many, context)
 
         time_end = time.monotonic_ns()
         time_delta_ns = time_end - time_start
@@ -74,9 +60,101 @@ class MyQueryTracer(object):
         call['duration_us'] = duration_us
         self.total_duration_us += duration_us
 
+        call['stack'] = stack = list()
+        for fname, line_nr, base, code in traceback.extract_stack():
+            if (base != '__call__'
+                    and not fname.startswith('/usr/lib')
+                    and '<frozen' not in fname
+                    and '/site-packages/' not in fname
+                    and 'manage.py' not in fname):
+                stack.append((fname, line_nr, base))
+                # houd bij vanuit welke view functie
+                if '/view' in fname and self.found_code == '':
+                    if 'post' in base or 'get' in base or 'test_func' in base:
+                        if 'SELECT ' not in sql and 'SAVEPOINT ' not in sql:
+                            self.found_code = "%s in %s:%s" % (base, fname, line_nr)
+                            # print(sql[:40], self.found_code)
+            elif base == 'render' and 'template/response.py' in fname:
+                stack.append((fname, line_nr, base))
+
+            # print(fname, line_nr, base)
+            if base == 'post':                  # naam van functie is 'post'
+                self.modify_acceptable = True
+            elif base == 'call_command':        # standaard Django functie om management command uit te voeren
+                self.modify_acceptable = True
+        # for
+        # print('call stack:\n  ', "\n  ".join([str(tup) for tup in stack))
+
+        if REPORT_QUERY_ORIGINS:                        # pragma: no cover
+            msg = ''
+            for fname, line_nr, base in stack:
+                msg += '\n         %s:%s %s' % (fname[-35:], line_nr, base)
+            try:
+                self.stack_counts[msg] += 1
+            except KeyError:
+                self.stack_counts[msg] = 1
+
+        if not sql.startswith('SELECT '):
+            ignore = False
+
+            # ignore SAVEPOINT and RELEASE SAVEPOINT
+            if "SAVEPOINT " in sql:
+                ignore = True
+
+            # ignore UPDATE "django_session"
+            if "django_session" in sql:
+                ignore = True
+
+            if not ignore:
+                self.found_modify = True
+
         self.trace.append(call)
 
-        execute(sql, params, many, context)
+    @staticmethod
+    def _find_statement(query, start):                  # pragma: no cover
+        best = -1
+        word_len = 0
+        for word in (  # 'SELECT', 'DELETE FROM', 'INSERT INTO',
+                     ' WHERE ', ' LEFT OUTER JOIN ', ' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
+                     ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
+            pos = query.find(word, start)
+            if pos >= 0 and (best == -1 or pos < best):
+                best = pos
+                word_len = len(word)
+        # for
+        return best, word_len
+
+    def _reformat_sql(self, prefix, query):             # pragma: no cover
+        start = 0
+        pos, word_len = self._find_statement(query, start)
+        prefix = prefix[:-1]        # because pos starts with a space
+        while pos >= 0:
+            query = query[:pos] + prefix + query[pos:]
+            start = pos + word_len + len(prefix)
+            pos, word_len = self._find_statement(query, start)
+        # while
+        return query
+
+    def __str__(self):                                  # pragma: no cover
+        queries = 'Captured queries:'
+        prefix = '\n       '
+        limit = 200  # begrens aantal queries dat we printen
+        for i, call in enumerate(self.trace, start=1):
+            if i > 1:
+                queries += '\n'
+            queries += prefix + str(call['now'])
+            queries += '\n [%d]  ' % i
+            queries += self._reformat_sql(prefix, call['sql'])
+            queries += prefix + '%s µs' % call['duration_us']
+            queries += '\n'
+            for fname, line_nr, base in call['stack']:
+                queries += prefix + '%s:%s   %s' % (fname, line_nr, base)
+            # for
+            limit -= 1
+            if limit <= 0:
+                break
+        # for
+        return queries
 
 
 class E2EHelpers(TestCase):
@@ -794,7 +872,6 @@ class E2EHelpers(TestCase):
         self._assert_inputs(html, dtl)
         self._assert_csrf_token_usage(html, dtl)
         self._assert_notranslate(html, dtl)
-
         self._assert_template_bug(html, dtl)
 
         urls = self.extract_all_urls(response)
@@ -961,34 +1038,100 @@ class E2EHelpers(TestCase):
 
         self.assertTrue(resp.url.startswith, '/account/login/')
 
-    @staticmethod
-    def _find_statement(query, start):                  # pragma: no cover
-        best = -1
-        word_len = 0
-        for word in (  # 'SELECT', 'DELETE FROM', 'INSERT INTO',
-                     ' WHERE ', ' LEFT OUTER JOIN ', ' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
-                     ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
-            pos = query.find(word, start)
-            if pos >= 0 and (best == -1 or pos < best):
-                best = pos
-                word_len = len(word)
-        # for
-        return best, word_len
+    def _check_concurrency_risks(self, tracer):         # pragma: no cover
+        found_delete = False
+        found_insert = False
+        found_update = False
 
-    def _reformat_sql(self, prefix, query):       # pragma: no cover
-        start = 0
-        pos, word_len = self._find_statement(query, start)
-        prefix = prefix[:-1]        # because pos starts with a space
-        while pos >= 0:
-            query = query[:pos] + prefix + query[pos:]
-            start = pos + word_len + len(prefix)
-            pos, word_len = self._find_statement(query, start)
-        # while
-        return query
+        for call in tracer.trace:
+            sql = call['sql']
+
+            if sql.startswith('INSERT INTO '):
+                found_insert = True
+
+            elif sql.startswith('UPDATE '):
+                pos1 = sql.find(' "')
+                pos2 = sql.find('"', pos1 + 2)
+                table_name = sql[pos1 + 2:pos2]
+                if table_name != 'django_session':
+                    found_update = True
+
+            elif sql.startswith('DELETE FROM '):
+                found_delete = True
+        # for
+
+        do_report = False
+        if found_delete or found_insert or found_update:
+            if not tracer.modify_acceptable:
+                do_report = True
+
+        if do_report:
+            explain = list()
+            explain.append('concurrency check (modify_acceptable: %s):' % tracer.modify_acceptable)
+            explain.append('from: ' + tracer.found_code)
+
+            renames = dict()        # [original_term] = new_term
+            savepoint_nr = 0
+
+            for call in tracer.trace:
+                sql = call['sql']
+                table_name = ''
+
+                if sql.startswith('SELECT '):
+                    pos1 = sql.find(' FROM "') + 5
+                    pos2 = sql.find('"', pos1 + 2)
+                    table_name = sql[pos1 + 2:pos2]
+                    cmd = "SELECT"
+                    if " FOR UPDATE" in sql:
+                        cmd += '.. FOR UPDATE'
+
+                elif sql.startswith('INSERT INTO '):
+                    cmd = 'INSERT INTO'
+                    pos1 = sql.find(' "')
+                    pos2 = sql.find('"', pos1 + 2)
+                    table_name = sql[pos1 + 2:pos2]
+
+                elif sql.startswith('UPDATE '):
+                    cmd = 'UPDATE'
+                    pos1 = sql.find(' "')
+                    pos2 = sql.find('"', pos1 + 2)
+                    table_name = sql[pos1 + 2:pos2]
+
+                elif sql.startswith('DELETE FROM '):
+                    cmd = 'DELETE FROM'
+                    pos1 = sql.find(' "')
+                    pos2 = sql.find('"', pos1 + 2)
+                    table_name = sql[pos1 + 2:pos2]
+
+                elif sql.startswith('SAVEPOINT'):
+                    try:
+                        cmd = renames[sql]
+                    except KeyError:
+                        savepoint_nr += 1
+                        cmd = renames[sql] = '#' + str(savepoint_nr)
+                    cmd += ' savepoint'
+
+                elif sql.startswith('RELEASE SAVEPOINT'):
+                    cmd = renames[sql[8:]] + ' release'
+
+                else:
+                    cmd = '?? unknown sql: %s' % repr(sql)
+
+                explain.append(cmd + ' ' + table_name)
+            # for
+
+            if FAIL_UNSAFE_DATABASE_MODIFICATION:
+                self.fail(msg='Found database modification outside POST or background task:' +
+                              '\n   ' +
+                              '\n   '.join(explain))
+            else:
+                print('\n[WARNING] Found database modification outside POST or background task:' +
+                      '\n   ' +
+                      '\n   '.join(explain))
 
     @contextmanager
-    def assert_max_queries(self, num, check_duration=True):
-        tracer = MyQueryTracer()
+    def assert_max_queries(self, num, check_duration=True, modify_acceptable=False):
+        tracer = MyQueryTracer(modify_acceptable)
         try:
             with connection.execute_wrapper(tracer):
                 yield
@@ -1002,30 +1145,11 @@ class E2EHelpers(TestCase):
             count = len(tracer.trace)
 
             if num == -1:                         # pragma: no cover
-                print('Operation resulted in %s queries' % count)
+                print('[INFO] Operation resulted in %s queries' % count)
 
             elif count > num:                     # pragma: no cover
-                queries = 'Captured queries:'
-                prefix = '\n       '
-                limit = 200     # begrens aantal queries dat we printen
-                for i, call in enumerate(tracer.trace, start=1):
-                    if i > 1:
-                        queries += '\n'
-                    queries += prefix + str(call['now'])
-                    queries += '\n [%d]  ' % i
-                    queries += self._reformat_sql(prefix, call['sql'])
-                    queries += prefix + '%s µs' % call['duration_us']
-                    queries += '\n'
-                    for fname, line_nr, base in call['stack']:
-                        queries += prefix + '%s:%s   %s' % (fname, line_nr, base)
-                    # for
-                    limit -= 1
-                    if limit <= 0:
-                        break
-                # for
-
-                msg = "Too many queries: %s; maximum %d. " % (count, num)
-                self.fail(msg=msg + queries)
+                msg = "Too many queries: %s; maximum %d. %s" % (count, num, tracer)
+                self.fail(msg)
 
             if count <= num:
                 # kijk of het wat minder kan
@@ -1035,11 +1159,15 @@ class E2EHelpers(TestCase):
                         self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
 
             if duration_seconds > 1.5:                                              # pragma: no cover
-                print("Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (
+                print("[WARNING] Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (
                                     duration_seconds, len(tracer.trace), tracer.total_duration_us / 1000.0))
 
             if len(tracer.trace) > 500:                                             # pragma: no cover
-                print("Operation required a lot of database interactions: %s queries" % len(tracer.trace))
+                print("[WARNING] Operation required a lot of database interactions: %s queries" % len(tracer.trace))
+
+            if tracer.found_modify:
+                # more than just SELECT
+                self._check_concurrency_risks(tracer)
 
         if REPORT_QUERY_ORIGINS:                                                    # pragma: no cover
             # sorteer op aantal aanroepen
@@ -1145,8 +1273,8 @@ class E2EHelpers(TestCase):
         try:
             json_data = json.loads(resp.content)
         except (json.decoder.JSONDecodeError, UnreadablePostError) as exc:      # pragma: no cover
+            # json_data = None
             self.fail('No valid JSON response (%s)' % str(exc))
-            json_data = None
 
         return json_data
 

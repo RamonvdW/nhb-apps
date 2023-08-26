@@ -13,10 +13,11 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.core.management.base import BaseCommand
 from BasisTypen.definities import GESLACHT_ANDERS
-from Sporter.models import Sporter, get_sporter_voorkeuren
+from Sporter.models import Sporter
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
+from Sporter.operations import get_sporter_voorkeuren
 from reportlab.pdfgen import canvas
 from reportlab.lib import pagesizes
 import datetime

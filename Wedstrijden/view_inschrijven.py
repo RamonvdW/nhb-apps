@@ -21,7 +21,8 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog
+from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                     INSCHRIJVING_STATUS_TO_STR,
                                     WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR,

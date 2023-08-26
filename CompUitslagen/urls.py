@@ -9,6 +9,8 @@ from CompUitslagen import view_uitslagen_bk, view_uitslagen_rk, view_uitslagen_r
 
 app_name = 'CompUitslagen'
 
+# basis = /bondscompetities/uitslagen/
+
 urlpatterns = [
 
     # competitie uitslagen

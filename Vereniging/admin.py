@@ -5,12 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from NhbStructuur.models import Cluster
 from Sporter.models import Sporter
-from Vereniging.models import Secretaris
+from Vereniging.models import Vereniging
+from Vereniging.models2 import Secretaris
 
 
 class SecretarisAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor Secretaris klasse """
+    """ Admin configuratie voor Secretaris """
 
     search_fields = ('vereniging__ver_nr',
                      'vereniging__naam',)
@@ -40,6 +42,41 @@ class SecretarisAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class VerenigingAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Vereniging """
+
+    ordering = ('ver_nr',)
+    search_fields = ('naam', 'ver_nr')
+
+    # filter mogelijkheid
+    list_filter = ('regio',)
+
+    list_select_related = True
+
+    filter_horizontal = ('clusters',)
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self._ver_regio = None
+
+    def get_object(self, request, object_id, from_field=None):          # pragma: no cover
+        obj = super().get_object(request, object_id, from_field)
+        if obj:
+            self._ver_regio = obj.regio
+        return obj
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'clusters':
+            regio_clusters = (Cluster
+                              .objects
+                              .select_related('regio')
+                              .filter(regio=self._ver_regio)
+                              .order_by('letter'))
+            kwargs['queryset'] = regio_clusters
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
+admin.site.register(Vereniging, VerenigingAdmin)
 admin.site.register(Secretaris, SecretarisAdmin)
 
 # end of file

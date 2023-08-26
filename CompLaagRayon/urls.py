@@ -11,6 +11,8 @@ from CompLaagRayon import (view_planning, view_formulieren,
 
 app_name = 'CompLaagRayon'
 
+# basis = /bondscompetities/rk/
+
 urlpatterns = [
 
     # RKO: planning RK

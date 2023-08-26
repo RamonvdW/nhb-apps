@@ -9,10 +9,11 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -52,14 +53,14 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         """
         self._next_lid_nr = 100001
 
-        self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
-        self.regio_101 = NhbRegio.objects.get(regio_nr=101)
+        self.rayon_2 = Rayon.objects.get(rayon_nr=2)
+        self.regio_101 = Regio.objects.get(regio_nr=101)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_101)
         ver.save()
         self._ver = ver
         self.ver1 = ver
@@ -89,15 +90,15 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_hwl)
 
         # maak nog een test vereniging, zonder HWL functie
-        ver = NhbVereniging()
-        ver.naam = "Kleine Club"
-        ver.ver_nr = "1100"
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Kleine Club",
+                    ver_nr=1100,
+                    regio=self.regio_101)
         ver.save()
         # stop de vereniging in clusters
-        cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='18').first()
+        cluster = Cluster.objects.filter(regio=ver.regio, gebruik='18').first()
         ver.clusters.add(cluster)
-        cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='25').all()[2]
+        cluster = Cluster.objects.filter(regio=ver.regio, gebruik='25').all()[2]
         ver.clusters.add(cluster)
         self.ver2 = ver
 
@@ -180,7 +181,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # stop ze een voor een in een eigen cluster
 
         # maak een cluster aan en stop ver1 erin
-        cluster = NhbCluster()
+        cluster = Cluster()
         cluster.regio = self.ver1.regio
         cluster.letter = 'Y'
         cluster.naam = "Bovenlijns"
@@ -204,7 +205,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # stop ver2 in een apart cluster
-        cluster = NhbCluster()
+        cluster = Cluster()
         cluster.regio = self.ver1.regio
         cluster.letter = 'Z'
         cluster.naam = "Onderlijns"

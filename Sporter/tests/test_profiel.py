@@ -17,16 +17,18 @@ from Competitie.tests.tijdlijn import (zet_competitie_fases,
                                        zet_competitie_fase_rk_prep, zet_competitie_fase_afsluiten)
 from Competitie.tests.test_helpers import competities_aanmaken, maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterVoorkeuren, SporterBoog
-from Vereniging.models import Secretaris
+from Sporter.operations import get_sporterboog
+from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -55,24 +57,24 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver = ver
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                        lid_nr=100001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Tester",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_normaal,
+                        email=self.account_normaal.email)
         sporter.save()
         self.sporter1 = sporter
 
@@ -96,50 +98,50 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.sec = sec
 
         # geef dit account een record
-        rec = IndivRecord()
-        rec.discipline = '18'
-        rec.volg_nr = 1
-        rec.soort_record = "60p"
-        rec.geslacht = sporter.geslacht
-        rec.leeftijdscategorie = 'J'
-        rec.materiaalklasse = "R"
-        rec.sporter = sporter
-        rec.naam = "Ramon de Tester"
-        rec.datum = parse_date('2011-11-11')
-        rec.plaats = "Top stad"
-        rec.score = 293
-        rec.max_score = 300
+        rec = IndivRecord(
+                    discipline='18',
+                    volg_nr=1,
+                    soort_record="60p",
+                    geslacht=sporter.geslacht,
+                    leeftijdscategorie='J',
+                    materiaalklasse="R",
+                    sporter=sporter,
+                    naam="Ramon de Tester",
+                    datum=parse_date('2011-11-11'),
+                    plaats="Top stad",
+                    score=293,
+                    max_score=300)
         rec.save()
 
-        rec = IndivRecord()
-        rec.discipline = '18'
-        rec.volg_nr = 2
-        rec.soort_record = "60p"
-        rec.geslacht = sporter.geslacht
-        rec.leeftijdscategorie = 'J'
-        rec.materiaalklasse = "C"
-        rec.sporter = sporter
-        rec.naam = "Ramon de Tester"
-        rec.datum = parse_date('2012-12-12')
-        rec.plaats = "Top stad"
-        rec.land = 'Verwegistan'
-        rec.score = 290
-        rec.max_score = 300
+        rec = IndivRecord(
+                    discipline='18',
+                    volg_nr=2,
+                    soort_record="60p",
+                    geslacht=sporter.geslacht,
+                    leeftijdscategorie='J',
+                    materiaalklasse="C",
+                    sporter=sporter,
+                    naam="Ramon de Tester",
+                    datum=parse_date('2012-12-12'),
+                    plaats="Top stad",
+                    land='Verwegistan',
+                    score=290,
+                    max_score=300)
         rec.save()
 
-        rec = IndivRecord()
-        rec.discipline = '18'
-        rec.volg_nr = 3
-        rec.soort_record = "60p"
-        rec.geslacht = sporter.geslacht
-        rec.leeftijdscategorie = 'C'
-        rec.materiaalklasse = "C"
-        rec.sporter = sporter
-        rec.naam = "Ramon de Tester"
-        rec.datum = parse_date('1991-12-12')
-        rec.plaats = ""     # typisch voor oudere records
-        rec.score = 290
-        rec.max_score = 300
+        rec = IndivRecord(
+                    discipline='18',
+                    volg_nr=3,
+                    soort_record="60p",
+                    geslacht=sporter.geslacht,
+                    leeftijdscategorie='C',
+                    materiaalklasse="C",
+                    sporter=sporter,
+                    naam="Ramon de Tester",
+                    datum=parse_date('1991-12-12'),
+                    plaats="",     # typisch voor oudere records
+                    score=290,
+                    max_score=300)
         rec.save()
 
         # geef dit account een goede en een slechte HistComp record
@@ -149,24 +151,24 @@ class TestSporterProfiel(E2EHelpers, TestCase):
                             indiv_bogen='R')
         hist_seizoen.save()
 
-        indiv = HistCompRegioIndiv()
-        indiv.seizoen = hist_seizoen
-        indiv.rank = 1
-        indiv.sporter_lid_nr = 100001
-        indiv.sporter_naam = "Ramon de Tester"
-        indiv.boogtype = "R"
-        indiv.vereniging_nr = 1000
-        indiv.vereniging_naam = "don't care"
-        indiv.score1 = 123
-        indiv.score2 = 234
-        indiv.score3 = 345
-        indiv.score4 = 456
-        indiv.score5 = 0
-        indiv.score6 = 666
-        indiv.score7 = 7
-        indiv.laagste_score_nr = 7
-        indiv.totaal = 1234
-        indiv.gemiddelde = 9.123
+        indiv = HistCompRegioIndiv(
+                    seizoen=hist_seizoen,
+                    rank=1,
+                    sporter_lid_nr=100001,
+                    sporter_naam="Ramon de Tester",
+                    boogtype="R",
+                    vereniging_nr=1000,
+                    vereniging_naam="don't care",
+                    score1=123,
+                    score2=234,
+                    score3=345,
+                    score4=456,
+                    score5=0,
+                    score6=666,
+                    score7=7,
+                    laagste_score_nr=7,
+                    totaal=1234,
+                    gemiddelde=9.123)
         indiv.save()
 
         indiv.pk = None
@@ -175,10 +177,8 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
-    def _prep_voorkeuren(self):
-        # haal de voorkeuren op - hiermee worden de SporterBoog records aangemaakt
-        with self.assert_max_queries(20):
-            self.client.get(self.url_voorkeuren)
+    def _prep_voorkeuren(self, sporter):
+        get_sporterboog(sporter, mag_database_wijzigen=True)
 
         # zet een wedstrijd voorkeur voor Recurve en informatie voorkeur voor Barebow
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
@@ -206,7 +206,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     def test_compleet(self):
         # log in as sporter
         self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
+        self._prep_voorkeuren(self.sporter1)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
@@ -217,7 +217,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # log in as sporter
         self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
+        self._prep_voorkeuren(self.sporter1)
 
         # controleer dat inschrijven mogelijk is
         with self.assert_max_queries(23):
@@ -336,7 +336,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
     def test_geen_sec(self):
         # log in as sporter
         self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
+        self._prep_voorkeuren(self.sporter1)
 
         # als er geen SEC gekoppeld is, dan wordt de secretaris van de vereniging gebruikt
         self.functie_sec.accounts.remove(self.account_normaal)
@@ -370,7 +370,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen sporterboog
 
         # haal de profiel pagina op
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -402,7 +402,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # log in as sporter
         self.e2e_login(self.account_normaal)
         self.assertTrue(self.sporter1.account == self.account_normaal)
-        self._prep_voorkeuren()
+        self._prep_voorkeuren(self.sporter1)
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase_regio_prep(self.comp_18)
@@ -488,14 +488,15 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # log in as sporter en prep voor inschrijving
         self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
+        self._prep_voorkeuren(self.sporter1)
+
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         res = score_indiv_ag_opslaan(sporterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         # schrijf de sporter in voor de 18m Recurve
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
 
@@ -511,7 +512,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # log in as sporter
         self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
+        self._prep_voorkeuren(self.sporter1)
 
         # competitie in fase A wordt niet getoond op profiel
         with self.assert_max_queries(20):
@@ -529,7 +530,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             account=self.account_normaal,
             log='testje').save()
 
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -545,7 +546,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # log in as sporter
         self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
+        self._prep_voorkeuren(self.sporter1)
 
         # schrijf de sporter in voor de 18m Recurve
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')

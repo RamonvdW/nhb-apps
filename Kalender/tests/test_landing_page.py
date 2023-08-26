@@ -7,10 +7,11 @@
 from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -31,10 +32,10 @@ class TestKalender(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')

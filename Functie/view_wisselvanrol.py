@@ -14,9 +14,9 @@ from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
 from Functie.rol import (rol_mag_wisselen, rol_enum_pallet, rol_get_huidige, rol_get_huidige_functie,
                          rol_get_beschrijving, rol_bepaal_beschikbare_rollen_opnieuw)
-from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
+from Vereniging.models import Vereniging
 
 
 TEMPLATE_WISSEL_VAN_ROL = 'functie/wissel-van-rol.dtl'
@@ -387,7 +387,7 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # maak knoppen voor alle verenigingen
-        vers = (NhbVereniging
+        vers = (Vereniging
                 .objects
                 .select_related('regio', 'regio__rayon')
                 # .exclude(regio__regio_nr=100)

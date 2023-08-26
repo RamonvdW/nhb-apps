@@ -6,9 +6,10 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
-from Wedstrijden.models import WedstrijdLocatie
+from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
+from Wedstrijden.models import WedstrijdLocatie
 
 
 class TestWedstrijdenManager(E2EHelpers, TestCase):
@@ -28,10 +29,10 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         # geef de vereniging een wedstrijdlocatie

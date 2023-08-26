@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
                                Regiocompetitie, RegiocompetitieRonde, Kampioenschap)
@@ -20,6 +20,7 @@ from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -31,8 +32,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
-    url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                                              # sporter_pk
+    url_leden_voorkeuren = '/vereniging/leden-voorkeuren/'
+    url_sporter_voorkeuren = '/sporter/voorkeuren/'
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                                     # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'    # ronde_pk
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                  # match_pk
@@ -49,13 +50,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -149,10 +150,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = self.regio_111
+        ver2 = Vereniging(
+                    naam="Andere Club",
+                    ver_nr=1222,
+                    regio=self.regio_111)
         ver2.save()
         self.ver2 = ver2
 
@@ -273,21 +274,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def _zet_sporter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
-        url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SporterBoog records aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_sporter_voorkeuren % lid_nr)
-        self.assertEqual(resp.status_code, 200)
-
-        # post een wijziging
-        with self.assert_max_queries(23):
-            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                             'schiet_R': 'on',
-                                                             'info_C': 'on',
-                                                             'voorkeur_meedoen_competitie': 'on'})
-        self.assert_is_redirect(resp, self.url_voorkeuren)
+        # maak de SporterBoog aan
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                              'schiet_R': 'on',
+                                                              'info_C': 'on',
+                                                              'voorkeur_meedoen_competitie': 'on'})
+        self.assert_is_redirect(resp, self.url_leden_voorkeuren)
 
     def test_overzicht(self):
         # anon
@@ -372,7 +365,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(urls_expected, urls)
 
         # maak dit een administratieve vereniging
-        self.ver1.regio = NhbRegio.objects.filter(is_administratief=True).first()
+        self.ver1.regio = Regio.objects.filter(is_administratief=True).first()
         self.ver1.save(update_fields=['regio'])
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
@@ -441,7 +434,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # eerste keer, zonder sporterboog records
         self.assertEqual(SporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
+            resp = self.client.get(self.url_leden_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -449,11 +442,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # nog een keer, nu met sporterboog records aanwezig
         # zowel van de vereniging van de HWL als van andere verenigingen
         for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
-            # get operatie maakt de sporterboog records aan
-            url = self.url_sporter_voorkeuren % sporter.pk
-            with self.assert_max_queries(20):
-                resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)
+            # maak de sporterboog records aan
+            resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter.pk})
+            self.assert_is_redirect(resp, self.url_leden_voorkeuren)
         # for
         self.assertEqual(SporterBoog.objects.count(), 51)
 
@@ -471,7 +462,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.sporter_100003.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
+            resp = self.client.get(self.url_leden_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

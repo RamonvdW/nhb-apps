@@ -15,8 +15,8 @@ from Bestel.models import BestelMandje
 from Bestel.operations.mutaties import bestel_mutatieverzoek_transport
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
+from Vereniging.models import Vereniging
 
 
 TEMPLATE_BESTEL_KEUZE_TRANSPORT = 'bestel/kies-transport.dtl'
@@ -61,7 +61,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
         context['wil_ophalen'] = (mandje.transport == BESTEL_TRANSPORT_OPHALEN)
         context['mag_ophalen'] = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG
 
-        context['ophalen_ver'] = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+        context['ophalen_ver'] = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
 
         context['url_opslaan'] = reverse('Bestel:kies-transport')
 

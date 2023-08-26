@@ -9,10 +9,11 @@ from BasisTypen.models import BoogType, ORGANISATIE_WA
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_wedstrijden
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from unittest.mock import patch
 from datetime import datetime, date
 
@@ -26,7 +27,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
         # comp en deelcomp nodig
         competities_aanmaken(2019)
 
-        self.regio_103 = NhbRegio.objects.get(regio_nr=103)
+        self.regio_103 = Regio.objects.get(regio_nr=103)
         self.boog_bb = BoogType.objects.get(afkorting='BB', organisatie=ORGANISATIE_WA)
 
         self.comp_18m = Competitie.objects.get(afstand='18')
@@ -44,7 +45,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
                                 .all())[0]
 
         # maak een test vereniging
-        self.ver = NhbVereniging(
+        self.ver = Vereniging(
                         naam="Grote Club",
                         ver_nr="1000",
                         regio=self.regio_103)

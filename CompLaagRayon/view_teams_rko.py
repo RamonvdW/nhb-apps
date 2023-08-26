@@ -14,7 +14,7 @@ from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbRayon
+from NhbStructuur.models import Rayon
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL
 
@@ -72,8 +72,8 @@ class RayonTeamsTemplateView(TemplateView):
                 # alleen het gekozen rayon
                 try:
                     rayon_nr = int(str(subset))      # is al eerder afgekapt op 10
-                    context['rayon'] = NhbRayon.objects.get(rayon_nr=rayon_nr)
-                except (ValueError, NhbRayon.DoesNotExist):
+                    context['rayon'] = Rayon.objects.get(rayon_nr=rayon_nr)
+                except (ValueError, Rayon.DoesNotExist):
                     raise Http404('Selectie wordt niet ondersteund')
 
                 deelkamp_pks = (Kampioenschap
@@ -91,7 +91,7 @@ class RayonTeamsTemplateView(TemplateView):
                                                    'subset': 'alle'}))
             filters.append(alle_filter)
 
-            for rayon in NhbRayon.objects.all():
+            for rayon in Rayon.objects.all():
                 rayon.beschrijving = 'Rayon %s' % rayon.rayon_nr
                 rayon.sel = 'rayon_%s' % rayon.rayon_nr
                 rayon.url = reverse('CompLaagRayon:rayon-teams-alle',

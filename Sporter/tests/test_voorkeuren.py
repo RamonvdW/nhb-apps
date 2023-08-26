@@ -6,13 +6,16 @@
 
 from django.test import TestCase
 from Account.models import Account
+from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Functie.operations import maak_functie
-from Sporter.models import (Sporter, SporterBoog, SporterVoorkeuren,
-                            get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen)
+from Score.models import Aanvangsgemiddelde
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.operations import get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen, get_sporterboog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -39,10 +42,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.account_100003 = self.e2e_create_account('100003', 'sporterx@test.com', 'Geslacht X')
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(regio_nr=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 
@@ -52,51 +55,51 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_hwl)
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.bevestigde_email
+        sporter = Sporter(
+                        lid_nr=100001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Tester",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_normaal,
+                        email=self.account_normaal.bevestigde_email)
         sporter.save()
-        self.sporter1 = sporter
+        self.sporter_100001 = sporter
 
         # maak nog een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Nieuwe Club"
-        ver.ver_nr = "1001"
-        ver.regio = NhbRegio.objects.get(pk=112)
+        ver = Vereniging(
+                    naam="Nieuwe Club",
+                    ver_nr=1001,
+                    regio=Regio.objects.get(pk=112))
         ver.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_hwl
+        sporter = Sporter(
+                        lid_nr=100002,
+                        geslacht="V",
+                        voornaam="Ramona",
+                        achternaam="de Testerin",
+                        email="",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_hwl)
         sporter.save()
         self.sporter_100002 = sporter
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "X"
-        sporter.voornaam = "RamonX"
-        sporter.achternaam = "de Xester"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_100003
+        sporter = Sporter(
+                        lid_nr=100003,
+                        geslacht="X",
+                        voornaam="RamonX",
+                        achternaam="de Xester",
+                        email="",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver,
+                        account=self.account_100003)
         sporter.save()
         self.sporter_100003 = sporter
 
@@ -114,42 +117,47 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         # initieel zijn er geen voorkeuren opgeslagen
         self.assertEqual(SporterBoog.objects.count(), 0)
         self.assertEqual(SporterVoorkeuren.objects.count(), 0)
-        with self.assert_max_queries(20):
+
+        with self.assert_max_queries(20, ):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
-        # na bekijken voorkeuren zijn ze aangemaakt
-        self.assertEqual(SporterBoog.objects.count(), 17)
+        # bekijken voorkeuren maakt ze niet aan
+        self.assertEqual(SporterBoog.objects.count(), 0)
 
-        # controleer dat ze niet nog een keer aangemaakt worden
+        # gebruik een POST om de voorkeuren aan te maken
+        resp = self.client.post(self.url_voorkeuren, {'info_R': 'on'})
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        # ophalen als de voorkeuren sportersboog wel aangemaakt zijn
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(SporterBoog.objects.count(), 17)
 
-        obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
+        obj = SporterBoog.objects.get(sporter=self.sporter_100001, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
         self.assertFalse(obj.voor_wedstrijd)
 
         # maak wat wijzigingen
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
                                                           'info_BB': 'on',
                                                           'voorkeur_eigen_blazoen': 'on'})
-        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+        self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(SporterBoog.objects.count(), 17)
         self.assertEqual(SporterVoorkeuren.objects.count(), 1)
 
-        obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
+        obj = SporterBoog.objects.get(sporter=self.sporter_100001, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
 
-        voorkeuren = SporterVoorkeuren.objects.first()
+        voorkeuren = SporterVoorkeuren.objects.select_related('sporter').first()
+        self.assertEqual(voorkeuren.sporter, self.sporter_100001)
         self.assertTrue(voorkeuren.voorkeur_eigen_blazoen)
         self.assertFalse(voorkeuren.voorkeur_meedoen_competitie)
-        self.assertEqual(voorkeuren.sporter, self.sporter1)
 
         # coverage
         self.assertTrue(str(obj) != "")
@@ -169,7 +177,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
-        obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
+        obj = SporterBoog.objects.get(sporter=self.sporter_100001, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
 
@@ -198,7 +206,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
     def test_getters(self):
-        voorkeuren = get_sporter_voorkeuren(self.sporter1)
+        get_sporter_voorkeuren(self.sporter_100001, mag_database_wijzigen=True)
 
         # bestaat niet
         sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr=999999)
@@ -207,7 +215,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(len(boog_pks), 0)
 
         # initieel zijn er geen bogen
-        sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(self.sporter1.lid_nr)
+        sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(self.sporter_100001.lid_nr)
         self.assertIsNotNone(sporter)
         self.assertIsNotNone(voorkeuren)
         self.assertEqual(len(boog_pks), 0)
@@ -217,21 +225,13 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SporterBoog records aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren + '100001/')
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
-
-        # post een wijziging
-        with self.assert_max_queries(25):
-            resp = self.client.post(self.url_voorkeuren, {'sporter_pk': self.sporter1.lid_nr,
-                                                          'schiet_R': 'on',
-                                                          'schiet_C': 'on'})
+        # maakt ook de SporterBoog aan met de juiste instellingen
+        resp = self.client.post(self.url_voorkeuren, {'sporter_pk': self.sporter_100001.lid_nr,
+                                                      'schiet_R': 'on',
+                                                      'schiet_C': 'on'})
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
-        sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(self.sporter1.lid_nr)
+        sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(self.sporter_100001.lid_nr)
         self.assertIsNotNone(sporter)
         self.assertIsNotNone(voorkeuren)
         self.assertEqual(len(boog_pks), 2)
@@ -242,8 +242,9 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SporterBoog records aan
+        get_sporterboog(self.sporter_100001, mag_database_wijzigen=True)
+
+        # haal als HWL de voorkeuren pagina op van een lid
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '100001/')
         self.assertEqual(resp.status_code, 200)
@@ -258,7 +259,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(obj_c.heeft_interesse)
 
         # post een wijziging
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(28):
             resp = self.client.post(self.url_voorkeuren, {'sporter_pk': '100001', 'schiet_R': 'on', 'info_C': 'on'})
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
@@ -309,7 +310,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(0, SporterBoog.objects.filter(sporter=self.sporter1).count())
+        self.assertEqual(0, SporterBoog.objects.filter(sporter=self.sporter_100001).count())
 
     def test_wijzig_wachtwoord(self):
         # zelfde test als in Account.test_wachtwoord
@@ -353,13 +354,10 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_login(self.account_hwl, wachtwoord=nieuw_ww)
 
     def test_discipline(self):
-        # met schutter-login wel toegankelijk
         self.e2e_login(self.account_normaal)
 
-        # voorkeuren worden aangemaakt bij ophalen
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # voorkeuren aanmaken
+        get_sporter_voorkeuren(self.sporter_100001, mag_database_wijzigen=True)
 
         # check the initiële voorkeuren: alle disciplines actief
         voorkeuren = SporterVoorkeuren.objects.first()
@@ -372,7 +370,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(voorkeuren.voorkeur_discipline_3d)
 
         # alle disciplines 'uit' zetten
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(29):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
@@ -407,17 +405,14 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         # met schutter-login wel toegankelijk
         self.e2e_login(self.account_normaal)
 
-        # voorkeuren worden aangemaakt bij ophalen
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        get_sporter_voorkeuren(self.sporter_100001, mag_database_wijzigen=True)
 
         # niet-para sporter mag ook een opmerking invoeren
-        voorkeuren = SporterVoorkeuren.objects.filter(sporter__account=self.account_normaal)[0]
+        voorkeuren = SporterVoorkeuren.objects.filter(sporter__account=self.account_normaal).first()
         self.assertEqual(voorkeuren.opmerking_para_sporter, '')
         self.assertFalse(voorkeuren.para_voorwerpen)
 
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(30):
             resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test 1',
                                                           'para_voorwerpen': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
@@ -427,8 +422,8 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(voorkeuren.para_voorwerpen)
 
         # maak dit een para sporter
-        self.sporter1.para_classificatie = 'VI1'
-        self.sporter1.save()
+        self.sporter_100001.para_classificatie = 'VI1'
+        self.sporter_100001.save()
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test 2'})
@@ -448,18 +443,13 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_login(self.account_hwl)
         self.e2e_wisselnaarrol_sporter()
 
-        # voorkeuren worden aangemaakt bij ophalen
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-
         # check de defaults
         account = self.account_hwl
         self.assertFalse(account.optout_nieuwe_taak)
         self.assertFalse(account.optout_herinnering_taken)
 
         # wijzig zonder opt-out te doen
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(33):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
@@ -485,14 +475,11 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(account.optout_herinnering_taken)
 
     def test_geslacht_anders(self):
-
         # begin met de sporter met geslacht man
         self.e2e_login(self.account_hwl)
 
-        # voorkeuren worden aangemaakt bij ophalen
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # voorkeuren aanmaken
+        get_sporter_voorkeuren(self.sporter_100002, mag_database_wijzigen=True)
 
         # controleer de voorkeuren
         voorkeur = self.sporter_100002.sportervoorkeuren_set.first()
@@ -559,5 +546,49 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         voorkeur = self.sporter_100003.sportervoorkeuren_set.first()
         self.assertFalse(voorkeur.wedstrijd_geslacht_gekozen)
 
+    def test_get_sporterboog(self):
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=False, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        # geen actie
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        # controleer aanvullen bij te weinig bogen
+        SporterBoog.objects.filter(boogtype__organisatie=ORGANISATIE_WA).delete()
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 12)
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=False)
+        self.assertEqual(len(objs), 17)     # 5x WA + 12x IFAA
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        # gebruik een SporterBoog in een record met on_delete=models.PROTECT
+        sb = SporterBoog.objects.get(sporter=self.sporter_100001, boogtype=self.boog_R)
+        ag = Aanvangsgemiddelde(
+                    sporterboog=sb,
+                    boogtype=self.boog_R,
+                    waarde=1,
+                    afstand_meter=1)
+        ag.save()
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=False, geen_wedstrijden=True)
+        self.assertEqual(len(objs), 0)
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
+        self.assertEqual(len(objs), 0)
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 17)
+
+        ag.delete()
+        objs = get_sporterboog(self.sporter_100001, mag_database_wijzigen=True, geen_wedstrijden=True)
+        self.assertEqual(len(objs), 0)
+        self.assertEqual(SporterBoog.objects.filter(sporter=self.sporter_100001).count(), 0)
 
 # end of file

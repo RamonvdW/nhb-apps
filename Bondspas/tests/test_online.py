@@ -6,10 +6,11 @@
 
 from django.test import TestCase, override_settings
 from Sporter.models import Sporter, SporterVoorkeuren, GESLACHT_ANDERS
-from NhbStructuur.models import NhbVereniging, NhbRegio
+from NhbStructuur.models import Regio
 from Opleidingen.models import OpleidingDiploma
 from Sporter.models import Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -28,10 +29,10 @@ class TestBondspas(E2EHelpers, TestCase):
         now = datetime.datetime.now()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.sporter = sporter = Sporter(

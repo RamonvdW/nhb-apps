@@ -7,7 +7,7 @@
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Competitie.definities import DEEL_RK
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
@@ -19,6 +19,7 @@ from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -44,13 +45,13 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -64,15 +65,15 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100001,
+                        geslacht="M",
+                        voornaam="Ramon",
+                        achternaam="de Tester",
+                        email="rdetester@gmail.not",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver)
         sporter.save()
 
         self.account_hwl = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -85,77 +86,78 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         jaar = timezone.now().year
 
         # maak een aspirant aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = "nietleeg@test.not"
-        sporter.geboorte_datum = datetime.date(year=jaar-12, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter = Sporter(
+                        lid_nr=100002,
+                        geslacht="V",
+                        voornaam="Ramona",
+                        achternaam="de Jeugdschutter",
+                        email="nietleeg@test.not",
+                        geboorte_datum=datetime.date(year=jaar-12, month=3, day=4),
+                        sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
+                        bij_vereniging=ver)
+        # account heeft last_login=None
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
         self.sporter_100002 = sporter
 
         # maak een cadet aan
-        sporter = Sporter()
-        sporter.lid_nr = 100012
-        sporter.geslacht = "V"
-        sporter.voornaam = "Andrea"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=jaar-15, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100012,
+                        geslacht="V",
+                        voornaam="Andrea",
+                        achternaam="de Jeugdschutter",
+                        email="",
+                        geboorte_datum=datetime.date(year=jaar-15, month=3, day=4),
+                        sinds_datum=datetime.date(year=jaar-3, month=10, day=10),
+                        bij_vereniging=ver)
         sporter.save()
         self.sporter_100012 = sporter
 
         # maak een jeugd lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100004
-        sporter.geslacht = "M"
-        sporter.voornaam = "Cadet"
-        sporter.achternaam = "de Jeugd"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=jaar-13, month=3, day=4)    # 13=asp, maar 14 in 2e jaar competitie!
-        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100004,
+                        geslacht="M",
+                        voornaam="Cadet",
+                        achternaam="de Jeugd",
+                        email="",
+                        geboorte_datum=datetime.date(year=jaar-13, month=3, day=4),  # 14 jaar in 2e jaar competitie
+                        sinds_datum=datetime.date(year=jaar-3, month=11, day=12),
+                        bij_vereniging=ver)
         sporter.save()
         self.sporter_100004 = sporter
 
         # maak een senior lid aan, om inactief te maken
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100003,
+                        geslacht="V",
+                        voornaam="Ramona",
+                        achternaam="de Testerin",
+                        email="",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                        sinds_datum=datetime.date(year=jaar-4, month=11, day=12),
+                        bij_vereniging=ver)
         sporter.save()
         self.sporter_100003 = sporter
 
         # maak een senior lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100013
-        sporter.geslacht = "M"
-        sporter.voornaam = "Instinctive"
-        sporter.achternaam = "de Bower"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=5)
-        sporter.sinds_datum = datetime.date(year=jaar-4, month=7, day=1)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                        lid_nr=100013,
+                        geslacht="M",
+                        voornaam="Instinctive",
+                        achternaam="de Bower",
+                        email="",
+                        geboorte_datum=datetime.date(year=1972, month=3, day=5),
+                        sinds_datum=datetime.date(year=jaar-4, month=7, day=1),
+                        bij_vereniging=ver)
         sporter.save()
         self.sporter_100013 = sporter
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = self.regio_111
+        ver2 = Vereniging(
+                    naam="Andere Club",
+                    ver_nr=1222,
+                    regio=self.regio_111)
         ver2.save()
         self.ver2 = ver2
 
@@ -237,30 +239,21 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         # deze functie kan alleen gebruikt worden als HWL
         url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SporterBoog records aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(url_sporter_voorkeuren + '%s/' % lid_nr)
-        self.assertEqual(resp.status_code, 200)
-
-        # post een wijziging
+        # maak de SporterBoog aan
         if lid_nr == 100003:
-            with self.assert_max_queries(23):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'info_R': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_BB': 'on',
+                                                             'info_R': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
         elif lid_nr == 100013:
-            with self.assert_max_queries(24):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_TR': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_TR': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
         else:
-            with self.assert_max_queries(23):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on',
-                                                                 'info_C': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_R': 'on',
+                                                             'info_C': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 

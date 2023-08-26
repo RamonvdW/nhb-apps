@@ -9,15 +9,17 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from NhbStructuur.models import Regio
+from Sporter.models import Sporter, SporterBoog
+from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from datetime import timedelta
 
 
-class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
+class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module Aanmeldingen """
 
@@ -34,7 +36,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
     url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                  # wedstrijd_pk
     url_inschrijven_toevoegen_mandje = '/wedstrijden/inschrijven/toevoegen-mandje/'
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                              # sporter_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -44,10 +46,10 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
@@ -77,8 +79,9 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                     bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
-        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1)
-        self.client.get(self.url_sporter_voorkeuren % sporter1.pk)   # maakt alle SporterBoog records aan
+        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1, mag_database_wijzigen=True)
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter1.pk})   # maak alle SporterBoog aan
+        self.assert_is_redirect_not_plein(resp)
 
         sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_r)
         sporterboog.voor_wedstrijd = True
@@ -102,7 +105,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         sporter2.save()
         self.sporter2 = sporter2
         get_sporter_voorkeuren(sporter2)
-        self.client.get(self.url_sporter_voorkeuren % sporter2.pk)   # maakt alle SporterBoog records aan
+        resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter2.pk})   # maak alle SporterBoog aan
+        self.assert_is_redirect_not_plein(resp)
 
         sporterboog = SporterBoog.objects.get(sporter=sporter2, boogtype=self.boog_c)
         sporterboog.voor_wedstrijd = True
@@ -342,10 +346,10 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.inschrijving1c.save(update_fields=['status'])
 
         # verkeerde vereniging
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                         ver_nr=2000,
                         naam="Andere Club",
-                        regio=NhbRegio.objects.get(regio_nr=116))
+                        regio=Regio.objects.get(regio_nr=116))
         ver2.save()
         self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save(update_fields=['organiserende_vereniging'])
@@ -368,10 +372,10 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_details_aanmelding % self.inschrijving1r.pk)
 
         # maak een tweede vereniging
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                         ver_nr=1001,
                         naam="Kleine Club",
-                        regio=NhbRegio.objects.get(regio_nr=112))
+                        regio=Regio.objects.get(regio_nr=112))
         ver2.save()
         self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save()
@@ -427,10 +431,10 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assert200_is_bestand_csv(resp)
 
         # als verkeerde HWL
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                             ver_nr=2000,
                             naam="Extra Club",
-                            regio=NhbRegio.objects.get(regio_nr=116))
+                            regio=Regio.objects.get(regio_nr=116))
         ver2.save()
 
         self.wedstrijd.organiserende_vereniging = ver2

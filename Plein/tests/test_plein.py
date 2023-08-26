@@ -7,11 +7,12 @@
 from django.test import TestCase
 from Bestel.models import BestelMandje, BestelProduct
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -43,18 +44,18 @@ class TestPlein(E2EHelpers, TestCase):
         self.functie_bko = maak_functie('BKO Test', 'BKO')
 
         self.functie_rko = maak_functie('RKO Test', 'RKO')
-        self.functie_rko.rayon = NhbRayon.objects.get(rayon_nr=3)
+        self.functie_rko.rayon = Rayon.objects.get(rayon_nr=3)
         self.functie_rko.save()
 
         self.functie_rcl = maak_functie('RCL Test', 'RCL')
-        self.functie_rcl.regio = NhbRegio.objects.get(regio_nr=111)
+        self.functie_rcl.regio = Regio.objects.get(regio_nr=111)
         self.functie_rcl.save()
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(regio_nr=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         self.functie_sec = maak_functie('Secretaris vereniging 1000', 'SEC')

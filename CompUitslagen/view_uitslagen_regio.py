@@ -12,9 +12,10 @@ from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegiocompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Plein.menu import menu_dynamics
 from Sporter.operations import get_request_regio_nr
+from Vereniging.models import Vereniging
 from types import SimpleNamespace
 
 
@@ -54,7 +55,7 @@ class UitslagenRegioIndivView(TemplateView):
 
         # regio filters
         if context['comp_boog']:
-            regios = (NhbRegio
+            regios = (Regio
                       .objects
                       .select_related('rayon')
                       .filter(is_administratief=False)
@@ -74,7 +75,7 @@ class UitslagenRegioIndivView(TemplateView):
 
         # vereniging filters
         if context['comp_boog']:
-            vers = (NhbVereniging
+            vers = (Vereniging
                     .objects
                     .select_related('regio')
                     .filter(regio__regio_nr=gekozen_regio_nr)
@@ -258,7 +259,7 @@ class UitslagenRegioTeamsView(TemplateView):
 
         # regio filters
         if context['teamtype']:
-            regios = (NhbRegio
+            regios = (Regio
                       .objects
                       .select_related('rayon')
                       .filter(is_administratief=False)

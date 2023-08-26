@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -22,13 +23,13 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
         # deze test is afhankelijk van de standaard regio's
-        regio = NhbRegio.objects.get(regio_nr=101)
+        regio = Regio.objects.get(regio_nr=101)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = 1000
-        ver.regio = regio
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=regio)
         ver.save()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)

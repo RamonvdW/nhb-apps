@@ -21,7 +21,8 @@ from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.operations import get_sporter_voorkeuren
 import copy
 
 
@@ -319,10 +320,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 ver_in_hwl_cluster = dict()     # [ver_nr] = True/False
                 for cluster in (hwl_ver
                                 .clusters
-                                .prefetch_related('nhbvereniging_set')
+                                .prefetch_related('vereniging_set')
                                 .filter(gebruik=self.comp.afstand)
                                 .all()):
-                    ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
+                    ver_nrs = list(cluster.vereniging_set.values_list('ver_nr', flat=True))
                     for ver_nr in ver_nrs:
                         ver_in_hwl_cluster[ver_nr] = True
                     # for
@@ -490,7 +491,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # al aangemeld - zou niet hier moeten zijn gekomen
                     raise Http404('Sporter is al ingeschreven')
 
-                voorkeuren = get_sporter_voorkeuren(sporter)
+                voorkeuren = get_sporter_voorkeuren(sporter, mag_database_wijzigen=True)
                 if voorkeuren.wedstrijd_geslacht_gekozen:
                     wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
                 else:

@@ -8,12 +8,13 @@ from django.conf import settings
 from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter
-from Vereniging.models import Secretaris
+from Vereniging.models2 import Secretaris
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -41,9 +42,9 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        rayon_3 = NhbRayon.objects.get(rayon_nr=3)
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
-        regio_101 = NhbRegio.objects.get(regio_nr=101)
+        rayon_3 = Rayon.objects.get(rayon_nr=3)
+        regio_111 = Regio.objects.get(regio_nr=111)
+        regio_101 = Regio.objects.get(regio_nr=101)
 
         # RKO rol
         self.account_rko = self.e2e_create_account('rko', 'rko@test.com', 'RKO', accepteer_vhpg=True)
@@ -56,7 +57,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_rcl111.accounts.add(self.account_rcl)
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     naam="Noordelijke Club",
                     ver_nr=1000,
                     regio=regio_101)
@@ -91,7 +92,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_wl1.save()
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     naam="Grote Club",
                     ver_nr=1001,
                     regio=regio_111)
@@ -512,7 +513,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # vereniging 'extern' heeft geen HWL en WL
 
         # haal de speciale vereniging en functie op
-        ver = NhbVereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
+        ver = Vereniging.objects.get(ver_nr=settings.EXTERN_VER_NR)
         self.assertTrue(ver.is_extern)
         functie_sec = Functie.objects.get(rol='SEC', vereniging=ver)
 
@@ -588,9 +589,9 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
     def test_cluster(self):
         # stop de vereniging in een cluster
-        cluster = NhbCluster.objects.filter(regio=self.ver2.regio, gebruik='18').first()
+        cluster = Cluster.objects.filter(regio=self.ver2.regio, gebruik='18').first()
         self.ver2.clusters.add(cluster)
-        cluster = NhbCluster.objects.filter(regio=self.ver2.regio, gebruik='25').all()[2]
+        cluster = Cluster.objects.filter(regio=self.ver2.regio, gebruik='25').all()[2]
         self.ver2.clusters.add(cluster)
 
         # login als HWL van ver2 op loc2
@@ -1043,10 +1044,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # maak een extra vereniging aan zonder beheerders
-        ver = NhbVereniging()
-        ver.naam = "Extra Club"
-        ver.ver_nr = 1099
-        ver.regio = NhbRegio.objects.get(regio_nr=101)
+        ver = Vereniging(
+                    naam="Extra Club",
+                    ver_nr=1099,
+                    regio=Regio.objects.get(regio_nr=101))
         ver.save()
 
         # maak de SEC, HWL en WL functies aan voor deze vereniging

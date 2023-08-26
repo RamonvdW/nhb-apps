@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie
 from Competitie.operations import competities_aanmaken
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
@@ -15,6 +15,7 @@ from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -40,13 +41,13 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -120,10 +121,10 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Andere Club"
-        ver2.ver_nr = "1222"
-        ver2.regio = self.regio_111
+        ver2 = Vereniging(
+                    naam="Andere Club",
+                    ver_nr=1222,
+                    regio=self.regio_111)
         ver2.save()
         self.ver2 = ver2
 
@@ -242,10 +243,10 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
 
-        # probeer de schutterboog instellingen van schutters te veranderen
+        # probeer de sporter-boog instellingen van schutters te veranderen
         # maar dat mag de WL niet, dus gebeurt er niets
-        for nhblid in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
-            url = self.url_schutter_voorkeuren % nhblid.pk
+        for lid in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
+            url = self.url_schutter_voorkeuren % lid.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
             self.assert403(resp)   # naar Plein, want mag niet

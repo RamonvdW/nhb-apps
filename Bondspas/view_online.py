@@ -16,10 +16,11 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Opleidingen.models import OpleidingDiploma
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, get_sporter_voorkeuren
+from Sporter.models import Sporter
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklasse_wa,
                                       bereken_leeftijdsklasse_khsn,
                                       bereken_leeftijdsklasse_ifaa)
+from Sporter.operations import get_sporter_voorkeuren
 from PIL import Image, ImageFont, ImageDraw
 from PIL.TiffImagePlugin import ImageFileDirectory_v2
 import io

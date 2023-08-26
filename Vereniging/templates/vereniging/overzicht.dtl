@@ -178,7 +178,7 @@
 
             <!-- ledenlijst -->
             {% if toon_gast_accounts %}
-                {% url 'Vereniging:gast-accounts' as card_url %}
+                {% url 'Registreer:beheer-gast-accounts' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Gast accounts" text="Toon de aangemaakte gast-accounts." icon="import_contacts" url=card_url %}
             {% else %}
                 {% url 'Vereniging:ledenlijst' as card_url %}
@@ -187,7 +187,7 @@
 
             <!-- beheerders vereniging -->
             {% url 'Functie:overzicht-vereniging' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Beheerders" text="Beheerders en e-mailadressen van functies aanpassen." icon="supervisor_account" url=card_url %}
 
             <!-- instellingen leden -->
             {% url 'Vereniging:leden-voorkeuren' as card_url %}

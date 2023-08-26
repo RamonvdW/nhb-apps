@@ -12,10 +12,10 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbVereniging
-from Plein.menu import menu_dynamics
-from Wedstrijden.models import WedstrijdLocatie
 from Logboek.models import schrijf_in_logboek
+from Plein.menu import menu_dynamics
+from Vereniging.models import Vereniging
+from Wedstrijden.models import WedstrijdLocatie
 
 
 TEMPLATE_EXTERNE_LOCATIE = 'vereniging/externe-locaties.dtl'
@@ -46,8 +46,8 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
     def get_vereniging(self):
         try:
             ver_nr = int(self.kwargs['ver_nr'][:6])        # afkappen voor de veiligheid
-            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
-        except (ValueError, NhbVereniging.DoesNotExist):
+            ver = Vereniging.objects.get(ver_nr=ver_nr)
+        except (ValueError, Vereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
 
         return ver
@@ -138,8 +138,8 @@ class ExterneLocatieDetailsView(TemplateView):
     def get_vereniging(self):
         try:
             ver_nr = int(self.kwargs['ver_nr'][:6])          # afkappen voor de veiligheid
-            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
-        except (ValueError, NhbVereniging.DoesNotExist):
+            ver = Vereniging.objects.get(ver_nr=ver_nr)
+        except (ValueError, Vereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
 
         return ver

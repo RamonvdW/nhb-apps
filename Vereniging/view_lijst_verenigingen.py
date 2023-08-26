@@ -11,9 +11,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
-from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
-
+from Vereniging.models import Vereniging
 
 TEMPLATE_LIJST_VERENIGINGEN = 'vereniging/lijst-verenigingen.dtl'
 TEMPLATE_CONTACT_GEEN_BEHEERDERS = 'vereniging/contact-geen-beheerders.dtl'
@@ -66,7 +65,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
             # het rayonnummer is verkrijgbaar via de regiocompetitie van de functie
-            return (NhbVereniging
+            return (Vereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
@@ -77,7 +76,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_BB and self.is_staff:
             # landelijke lijst + telling aantal leden
-            objs = (NhbVereniging
+            objs = (Vereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .prefetch_related('wedstrijdlocatie_set',
@@ -97,7 +96,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             # toon de landelijke lijst)
-            return (NhbVereniging
+            return (Vereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .prefetch_related('wedstrijdlocatie_set',
@@ -107,7 +106,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         # toon de lijst van verenigingen in de regio
         if self.rol_nu == Rollen.ROL_RCL:
             # het regionummer is verkrijgbaar via de regiocompetitie van de functie
-            objs = (NhbVereniging
+            objs = (Vereniging
                     .objects
                     .filter(regio=self.functie_nu.regio)
                     .select_related('regio')
@@ -117,7 +116,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         else:
             # rol_nu == Rollen.ROL_HWL / ROL_SEC
             # het regionummer is verkrijgbaar via de vereniging
-            objs = (NhbVereniging
+            objs = (Vereniging
                     .objects
                     .filter(regio=self.functie_nu.vereniging.regio)
                     .select_related('regio')

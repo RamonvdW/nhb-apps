@@ -8,12 +8,13 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist, Uitslag
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -115,10 +116,10 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.e2e_account_accepteert_vhpg(self.account_hwl)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(regio_nr=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 

@@ -25,8 +25,8 @@ from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
-from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
-from Sporter.operations import get_sporter_gekozen_bogen
+from Sporter.models import SporterBoog, Speelsterkte
+from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
 import logging
 import copy
 
@@ -295,28 +295,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 .select_related('boogtype')
                 .order_by('boogtype__volgorde'))
 
-        # maak ontbrekende SporterBoog records aan, indien nodig
-        aantal_boogtypen = alle_bogen.count()
-        if len(objs) < aantal_boogtypen:
-            aanwezig = objs.values_list('boogtype__pk', flat=True)
-            for boogtype in alle_bogen.exclude(pk__in=aanwezig):
-                sporterboog = SporterBoog(
-                                    sporter=sporter,
-                                    boogtype=boogtype)
-                sporterboog.save()
-            # for
-            objs = (SporterBoog
-                    .objects
-                    .filter(sporter=sporter)
-                    .select_related('boogtype')
-                    .order_by('boogtype__volgorde'))
-
         # zoek de AG informatie erbij
-        pks = [obj.pk for obj in objs]
-        # haal AG's voor dit boogtype op, van 18m en 25m op, indien aanwezig
         ags = (Aanvangsgemiddelde
                .objects
-               .filter(sporterboog__in=pks,
+               .filter(#sporterboog__in=pks,
+                       sporterboog__sporter=sporter,
                        doel__in=(AG_DOEL_INDIV, AG_DOEL_TEAM))
                .select_related('sporterboog')
                .order_by('afstand_meter'))
@@ -480,14 +463,18 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['moet_bogen_kiezen'] = len(boog_afkorting_wedstrijd) == 0
 
         context['toon_bondscompetities'] = False
-        if sporter.bij_vereniging and not sporter.bij_vereniging.geen_wedstrijden and not (is_extern or is_administratief):
+        if (sporter.bij_vereniging
+                and not sporter.bij_vereniging.geen_wedstrijden
+                and not (is_extern or is_administratief)):
+
             context['toon_bondscompetities'] = True
 
             context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
 
             context['competities'] = comps = self._find_competities(voorkeuren)
 
-            regiocomps, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen, boog_afk2sporterboog, boog_afkorting_wedstrijd)
+            regiocomps, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen,
+                                                                      boog_afk2sporterboog, boog_afkorting_wedstrijd)
             context['regiocompetities'] = regiocomps
             context['gebruik_knoppen'] = gebruik_knoppen
 

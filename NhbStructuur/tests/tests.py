@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import Rayon, Regio, Cluster
+from Vereniging.models import Vereniging
 
 
 class TestNhbStructuur(TestCase):
@@ -15,27 +16,27 @@ class TestNhbStructuur(TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 
     def test_rayons(self):
-        self.assertEqual(NhbRayon.objects.count(), 4)
-        rayon = NhbRayon.objects.get(pk=3)
+        self.assertEqual(Rayon.objects.count(), 4)
+        rayon = Rayon.objects.get(pk=3)
         self.assertEqual(rayon.naam, "Rayon 3")
         self.assertIsNotNone(str(rayon))
 
     def test_regios(self):
-        self.assertEqual(NhbRegio.objects.count(), 17)
-        regio = NhbRegio.objects.get(pk=111)
+        self.assertEqual(Regio.objects.count(), 17)
+        regio = Regio.objects.get(pk=111)
         self.assertEqual(regio.naam, "Regio 111")
         self.assertIsNotNone(str(regio))
 
     def test_vereniging(self):
-        ver = NhbVereniging.objects.first()
+        ver = Vereniging.objects.first()
         self.assertIsNotNone(str(ver))
         ver.clean_fields()      # run validators
         ver.clean()             # run model validator
@@ -44,7 +45,7 @@ class TestNhbStructuur(TestCase):
         ver = self.ver1
 
         # maak een cluster aan
-        cluster = NhbCluster()
+        cluster = Cluster()
         cluster.regio = ver.regio
         cluster.letter = 'Z'        # mag niet overeen komen met standaard clusters
         cluster.gebruik = '18'

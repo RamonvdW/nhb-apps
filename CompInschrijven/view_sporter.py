@@ -18,7 +18,8 @@ from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
-from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog
+from Sporter.operations import get_sporter_voorkeuren
 from decimal import Decimal
 
 
@@ -161,10 +162,10 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             ver_in_hwl_cluster = dict()  # [ver_nr] = True/False
             for cluster in (ver
                             .clusters
-                            .prefetch_related('nhbvereniging_set')
+                            .prefetch_related('vereniging_set')
                             .filter(gebruik=comp.afstand)
                             .all()):
-                ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
+                ver_nrs = list(cluster.vereniging_set.values_list('ver_nr', flat=True))
                 for ver_nr in ver_nrs:
                     ver_in_hwl_cluster[ver_nr] = True
                 # for
@@ -280,7 +281,7 @@ class RegiocompetitieAanmeldenView(View):
 
         # urlconf parameters geaccepteerd
 
-        voorkeuren = get_sporter_voorkeuren(sporter)
+        voorkeuren = get_sporter_voorkeuren(sporter, mag_database_wijzigen=True)
         if voorkeuren.wedstrijd_geslacht_gekozen:
             wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
         else:

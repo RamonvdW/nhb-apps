@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Plein.menu import menu_dynamics
 from BasisTypen.models import TemplateCompetitieIndivKlasse
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 
 
@@ -27,7 +27,7 @@ class InfoCompetitieView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['regios'] = (NhbRegio
+        context['regios'] = (Regio
                              .objects
                              .filter(is_administratief=False)
                              .select_related('rayon')

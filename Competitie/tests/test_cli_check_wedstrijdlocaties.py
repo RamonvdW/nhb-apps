@@ -9,8 +9,9 @@ from django.core import management
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Kampioenschap, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
-from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
+from NhbStructuur.models import Regio, Rayon
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.models import WedstrijdLocatie
 import io
 
@@ -36,15 +37,15 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         indiv1, indiv2 = CompetitieIndivKlasse.objects.filter(competitie=comp)[:2]
         team1, team2 = CompetitieTeamKlasse.objects.filter(competitie=comp)[:2]
 
-        regio_114 = NhbRegio.objects.get(regio_nr=114)
-        rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        rayon_3 = NhbRayon.objects.get(rayon_nr=3)
+        regio_114 = Regio.objects.get(regio_nr=114)
+        rayon_1 = Rayon.objects.get(rayon_nr=1)
+        rayon_3 = Rayon.objects.get(rayon_nr=3)
 
-        ver = NhbVereniging(
-                ver_nr=1234,
-                naam='ver1',
-                plaats='stad1',
-                regio=regio_114)
+        ver = Vereniging(
+                    ver_nr=1234,
+                    naam='ver1',
+                    plaats='stad1',
+                    regio=regio_114)
         ver.save()
 
         loc = WedstrijdLocatie(
@@ -108,11 +109,11 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         wed3.save()
 
         # wedstrijd met vereniging maar zonder locatie
-        ver = NhbVereniging(
-                ver_nr=1235,
-                naam='ver2',
-                plaats='stad2',
-                regio=regio_114)
+        ver = Vereniging(
+                    ver_nr=1235,
+                    naam='ver2',
+                    plaats='stad2',
+                    regio=regio_114)
         ver.save()
 
         # wed4: indiv, teams, ver; geen loc

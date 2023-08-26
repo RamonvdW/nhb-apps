@@ -8,11 +8,11 @@ from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from NhbStructuur.models import NhbVereniging
 from Score.models import Score, Uitslag
 from Sporter.models import Sporter, SporterBoog
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import (BAAN_TYPE, BAAN_TYPE_ONBEKEND, BAANTYPE2STR,
-                                    WEDSTRIJD_STATUS, WEDSTRIJD_STATUS_TO_STR,
+                                    WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING, WEDSTRIJD_BEGRENZING_LANDELIJK,
                                     WEDSTRIJD_DISCIPLINES, WEDSTRIJD_DISCIPLINE_OUTDOOR,
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
@@ -38,8 +38,7 @@ class WedstrijdLocatie(models.Model):
     zichtbaar = models.BooleanField(default=True)
 
     # verenigingen die deze locatie gebruiken (kan gedeeld doel zijn)
-    verenigingen = models.ManyToManyField(NhbVereniging,
-                                          blank=True)       # mag leeg zijn / gemaakt worden
+    verenigingen = models.ManyToManyField(Vereniging)
 
     # eigen accommodatie binnenbaan (volledig overdekt of half overdekt), buitenbaan, extern of 'onbekend'
     baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default=BAAN_TYPE_ONBEKEND)
@@ -180,7 +179,7 @@ class Wedstrijd(models.Model):
     titel = models.CharField(max_length=50, default='')
 
     # status van deze wedstrijd: ontwerp --> goedgekeurd --> geannuleerd
-    status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS, default='O')
+    status = models.CharField(max_length=1, choices=WEDSTRIJD_STATUS_CHOICES, default=WEDSTRIJD_STATUS_ONTWERP)
 
     # ter info op de kalender = niet op in te schrijven, dus geen inschrijf deadline tonen
     is_ter_info = models.BooleanField(default=False)
@@ -198,10 +197,10 @@ class Wedstrijd(models.Model):
     inschrijven_tot = models.PositiveSmallIntegerField(default=7)
 
     # waar wordt de wedstrijd gehouden
-    organiserende_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
+    organiserende_vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT)
 
     # bondsbureau kan wedstrijd verleggen bij gekozen vereniging
-    uitvoerende_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+    uitvoerende_vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT,
                                                related_name='uitvoerend',
                                                blank=True, null=True)
     locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
@@ -303,7 +302,7 @@ class WedstrijdKorting(models.Model):
     geldig_tot_en_met = models.DateField()
 
     # welke vereniging heeft deze korting uitgegeven? (en mag deze dus wijzigen)
-    uitgegeven_door = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+    uitgegeven_door = models.ForeignKey(Vereniging, on_delete=models.PROTECT,
                                         null=True, blank=True,
                                         related_name='wedstrijd_korting_uitgever')
 

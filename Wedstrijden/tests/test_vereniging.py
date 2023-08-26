@@ -7,11 +7,12 @@
 from django.test import TestCase
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_3D
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
-from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestWedstrijdenVereniging(E2EHelpers, TestCase):
@@ -38,10 +39,10 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         sporter.save()
 
         # maak een test vereniging
-        self.ver1 = NhbVereniging(
+        self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
@@ -49,10 +50,10 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_admin)
         self.functie_hwl.save()
 
-        self.ver2 = NhbVereniging(
+        self.ver2 = Vereniging(
                             ver_nr=1001,
                             naam="Kleine Club",
-                            regio=NhbRegio.objects.get(regio_nr=112))
+                            regio=Regio.objects.get(regio_nr=112))
         self.ver2.save()
 
     @staticmethod

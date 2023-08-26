@@ -6,9 +6,10 @@
 
 from django.test import TestCase
 from Account.models import Account
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -23,10 +24,10 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan
@@ -60,7 +61,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/login-geblokkeerd-geen-vereniging.dtl', 'plein/site_layout.dtl'))
 
     def test_inactief_bb(self):
-        # inlog als BB met inactief nhblid moet gewoon werken
+        # inlog als BB met inactief lid moet gewoon werken
         self.account_normaal.is_BB = True
         self.account_normaal.save()
         self.sporter_100001.is_actief_lid = False
@@ -68,14 +69,14 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
 
     def test_inactief_staff(self):
-        # inlog als staff met inactief nhblid moet gewoon werken
+        # inlog als staff met inactief lid moet gewoon werken
         self.account_normaal.is_staff = True
         self.account_normaal.save()
         self.sporter_100001.is_actief_lid = False
         self.sporter_100001.save()
         self.e2e_login(self.account_normaal)
 
-    def test_geen_nhblid(self):
+    def test_geen_lid(self):
         self.sporter_100001.account = None
         self.sporter_100001.save()
 
@@ -104,7 +105,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
 
     def test_nieuwe_email(self):
         # nieuwe email in CRM
-        # tijdens login word accountemail.nieuwe_email gezet
+        # tijdens login word account.nieuwe_email gezet
         # gebruiker mag niet inloggen totdat email bevestigd is
         self.sporter_100001.email = 'nieuwe@test.com'
         self.sporter_100001.save()

@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import BOOGTYPE_AFKORTING_RECURVE
 from Functie.operations import maak_functie, Functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog,
                                Kampioenschap, RegiocompetitieRonde, CompetitieMatch)
@@ -20,6 +20,7 @@ from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 from time import sleep
 import datetime
 
@@ -50,13 +51,13 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=self.regio_111)
         ver.save()
         self.ver1 = ver
 
@@ -147,7 +148,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                     naam="Andere Club",
                     ver_nr="1222",
                     regio=self.regio_111)
@@ -243,35 +244,26 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         # deze functie kan alleen gebruikt worden als HWL
         url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SporterBoog records aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_sporter_voorkeuren % lid_nr)
-        self.assertEqual(resp.status_code, 200)
-
-        # post een wijziging
+        # maak de SporterBoog aan
         if lid_nr == 100003:
-            with self.assert_max_queries(24):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'schiet_R': 'on',         # 2 bogen
-                                                                 'info_R': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_BB': 'on',
+                                                             'schiet_R': 'on',         # 2 bogen
+                                                             'info_R': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
         elif lid_nr == 100012:
             # geen voorkeur voor meedoen met de competitie
-            with self.assert_max_queries(24):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'info_R': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_BB': 'on',
+                                                             'info_R': 'on'})
 
             # verwijder de SchutterVoorkeur records
             SporterVoorkeuren.objects.filter(sporter__lid_nr=100012).delete()
         else:
-            with self.assert_max_queries(23):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on',
-                                                                 'info_C': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_R': 'on',
+                                                             'info_C': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, self.url_voorkeuren)
 

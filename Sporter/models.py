@@ -4,14 +4,15 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import models
+from django.db import models, transaction, IntegrityError
+from django.db.models import ProtectedError
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from Account.models import Account
 from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, GESLACHT_ANDERS, ORGANISATIE_IFAA
 from BasisTypen.models import BoogType
 # mag niet afhankelijk zijn van Competitie
-from NhbStructuur.models import NhbVereniging
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -109,7 +110,7 @@ class Sporter(models.Model):
 
     # lid bij vereniging
     bij_vereniging = models.ForeignKey(
-                                NhbVereniging,
+                                Vereniging,
                                 on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database
@@ -314,50 +315,6 @@ class SporterBoog(models.Model):
             return "sporter? - %s" % self.boogtype.beschrijving
 
     objects = models.Manager()      # for the editor only
-
-
-def get_sporter_voorkeuren(sporter):
-    """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
-    """
-
-    voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
-    if was_created:
-        # default voor wedstrijd_geslacht_gekozen = True
-        if sporter.geslacht != GESLACHT_ANDERS:
-            if sporter.geslacht != voorkeuren.wedstrijd_geslacht:  # default is Man
-                voorkeuren.wedstrijd_geslacht = sporter.geslacht
-                voorkeuren.save(update_fields=['wedstrijd_geslacht'])
-        else:
-            voorkeuren.wedstrijd_geslacht_gekozen = False  # laat de sporter kiezen
-            voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
-
-    return voorkeuren
-
-
-def get_sporter_voorkeuren_wedstrijdbogen(lid_nr):
-    """ retourneer de sporter, voorkeuren en pk's van de boogtypen geselecteerd voor wedstrijden """
-    pks = list()
-    sporter = None
-    voorkeuren = None
-    try:
-        sporter = (Sporter
-                   .objects
-                   .prefetch_related('sportervoorkeuren_set')
-                   .get(lid_nr=lid_nr))
-    except Sporter.DoesNotExist:
-        pass
-    else:
-        voorkeuren = get_sporter_voorkeuren(sporter)
-
-        for sporterboog in (SporterBoog
-                            .objects
-                            .select_related('boogtype')
-                            .filter(sporter__lid_nr=lid_nr,
-                                    voor_wedstrijd=True)):
-            pks.append(sporterboog.boogtype.id)
-        # for
-
-    return sporter, voorkeuren, pks
 
 
 # end of file

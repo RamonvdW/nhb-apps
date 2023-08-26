@@ -18,9 +18,9 @@ from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
+from Vereniging.models import Vereniging
 from decimal import Decimal
 
 
@@ -183,7 +183,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         if mandje:
             if mandje.transport == BESTEL_TRANSPORT_OPHALEN:
                 context['toon_transport'] = True
-                context['ophalen_ver'] = NhbVereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
+                context['ophalen_ver'] = Vereniging.objects.get(ver_nr=settings.WEBWINKEL_VERKOPER_VER_NR)
 
             elif mandje.transport == BESTEL_TRANSPORT_VERZEND:
                 context['toon_transport'] = settings.WEBWINKEL_TRANSPORT_OPHALEN_MAG

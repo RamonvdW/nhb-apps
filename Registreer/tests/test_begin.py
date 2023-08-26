@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Registreer.models import GastLidNummer
 from Sporter.models import Sporter
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -25,10 +26,10 @@ class TestRegistreerBegin(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak een test vereniging
-        ver = NhbVereniging(
+        ver = Vereniging(
                     naam="Grote Club",
-                    ver_nr="1000",
-                    regio=NhbRegio.objects.get(pk=111))
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
 
         # maak een test lid aan

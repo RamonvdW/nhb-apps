@@ -12,10 +12,11 @@ from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.operations import maak_functie, Functie
 from Logboek.models import LogboekRegel
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -53,15 +54,15 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.account_ander = self.e2e_create_account('anderlid', 'anderlid@test.nhb', 'Ander')
 
         self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
-        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', rayon=NhbRayon.objects.get(rayon_nr=3))
-        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=111))
-        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=NhbRegio.objects.get(regio_nr=101))
+        self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', rayon=Rayon.objects.get(rayon_nr=3))
+        self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', regio=Regio.objects.get(regio_nr=111))
+        self.functie_rcl101 = Functie.objects.get(comp_type='18', rol='RCL', regio=Regio.objects.get(regio_nr=101))
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = NhbRegio.objects.get(regio_nr=111)
+        ver = Vereniging(
+                    naam="Grote Club",
+                    ver_nr=1000,
+                    regio=Regio.objects.get(pk=111))
         ver.save()
         self.ver1 = ver
 
@@ -103,13 +104,13 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.functie_wl.vereniging = ver
         self.functie_wl.save()
 
-        self.regio_112 = NhbRegio.objects.get(regio_nr=112)
+        self.regio_112 = Regio.objects.get(regio_nr=112)
 
         # maak nog een test vereniging
-        ver2 = NhbVereniging()
-        ver2.naam = "Extra Club"
-        ver2.ver_nr = "1900"
-        ver2.regio = self.regio_112
+        ver2 = Vereniging(
+                    naam="Extra Club",
+                    ver_nr=1900,
+                    regio=self.regio_112)
         ver2.save()
         self.ver2 = ver2
 

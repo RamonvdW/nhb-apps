@@ -50,7 +50,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
 
         if clusters.count() > 0:
             # vereniging zit in een cluster, dus toon alleen de deelnemers van dit cluster
-            ver_pks = clusters[0].nhbvereniging_set.values_list('pk', flat=True)
+            ver_pks = clusters[0].vereniging_set.values_list('pk', flat=True)
             deelnemers_indiv = (RegiocompetitieSporterBoog
                                 .objects
                                 .filter(regiocompetitie=deelcomp,

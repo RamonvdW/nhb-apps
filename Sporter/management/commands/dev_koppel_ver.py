@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,8 @@
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from NhbStructuur.models import NhbVereniging
 from Sporter.models import Sporter
+from Vereniging.models import Vereniging
 
 
 class Command(BaseCommand):
@@ -28,8 +28,8 @@ class Command(BaseCommand):
         ver_nr = options['ver_nr'][0]
 
         try:
-            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
-        except NhbVereniging.DoesNotExist:
+            ver = Vereniging.objects.get(ver_nr=ver_nr)
+        except Vereniging.DoesNotExist:
             self.stderr.write('Vereniging %s niet gevonden' % repr(ver_nr))
         else:
             try:

@@ -11,9 +11,10 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 
 
@@ -39,15 +40,15 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_geen_lid = self.e2e_create_account('geen_lid', 'geen_lid@test.com', 'Geen')
 
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        regio_111 = Regio.objects.get(regio_nr=111)
 
         self.functie_rcl = maak_functie("RCL test", "RCL")
         self.functie_rcl.regio = regio_111
         self.functie_rcl.save()
 
         # maak een test vereniging
-        ver = NhbVereniging(
-                    ver_nr="1000",
+        ver = Vereniging(
+                    ver_nr=1000,
                     naam="Grote Club",
                     plaats='Pijlstad',
                     regio=regio_111)
@@ -80,10 +81,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         sporter.save()
 
         # maak een test vereniging zonder HWL rol
-        ver2 = NhbVereniging(
+        ver2 = Vereniging(
                     naam="Grote Club",
                     plaats='',
-                    ver_nr="1001",
+                    ver_nr=1001,
                     regio=regio_111)
         ver2.save()
 
@@ -94,7 +95,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_bko = maak_functie("BKO test", "BKO")
 
         self.functie_rko = maak_functie("RKO test", "RKO")
-        self.functie_rko.rayon = NhbRayon.objects.get(rayon_nr=1)
+        self.functie_rko.rayon = Rayon.objects.get(rayon_nr=1)
         self.functie_rko.save()
 
         self.functie_mo = maak_functie("MO test", "MO")
@@ -580,7 +581,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # hierdoor krijg je dubbele rollen: 2x alle HWL in je regio
 
         rko18r3 = maak_functie("RKO Rayon 3 Indoor", "RKO")
-        rcl18r111 = maak_functie("RCL Regio 111 Indoor", "RCL")     # omdat 2x NhbVereniging in regio 111
+        rcl18r111 = maak_functie("RCL Regio 111 Indoor", "RCL")     # omdat 2x Vereniging in regio 111
 
         rko18r3.accounts.add(self.account_normaal)
         rcl18r111.accounts.add(self.account_normaal)
@@ -617,7 +618,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         bko18.accounts.add(self.account_normaal)
 
         Sporter.objects.all().delete()
-        NhbVereniging.objects.all().delete()        # om lege ver_cache te raken
+        Vereniging.objects.all().delete()        # om lege ver_cache te raken
 
         # log in en wordt BKO
         self.e2e_account_accepteert_vhpg(self.account_normaal)
@@ -675,10 +676,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
     def test_bb_to_hwl_regio_100(self):
         # maak een test vereniging
-        ver = NhbVereniging(
-            naam="Bondsbureau; veel te lange naam die afgekort wordt",
-            ver_nr="1001",
-            regio=NhbRegio.objects.get(pk=100))
+        ver = Vereniging(
+                    naam="Bondsbureau; veel te lange naam die afgekort wordt",
+                    ver_nr=1001,
+                    regio=Regio.objects.get(pk=100))
         ver.save()
 
         functie_hwl = maak_functie('HWL ver 1001', 'HWL')

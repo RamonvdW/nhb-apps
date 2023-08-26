@@ -6,8 +6,9 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
+from NhbStructuur.models import Regio, Cluster
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 class TestCompLaagRegioClusters(E2EHelpers, TestCase):
@@ -22,7 +23,7 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        regio_111 = Regio.objects.get(regio_nr=111)
 
         # maak een RCL aan
         rcl = self.e2e_create_account('rcl111', 'rcl111@test.com', 'RCL', accepteer_vhpg=True)
@@ -38,32 +39,32 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         self.functie_rcl111.accounts.add(self.account_rcl111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Eerste Club"
-        ver.ver_nr = "1001"
-        ver.regio = regio_111
+        ver = Vereniging(
+                    naam="Eerste Club",
+                    ver_nr=1001,
+                    regio=regio_111)
         ver.save()
         self.ver1 = ver
 
-        ver = NhbVereniging()
-        ver.naam = "Tweede Club"
-        ver.ver_nr = "1002"
-        ver.regio = regio_111
+        ver = Vereniging(
+                    naam="Tweede Club",
+                    ver_nr=1002,
+                    regio=regio_111)
         ver.save()
         self.ver2 = ver
 
-        ver = NhbVereniging()
-        ver.naam = "Derde Club"
-        ver.ver_nr = "1003"
-        ver.regio = regio_111
+        ver = Vereniging(
+                    naam="Derde Club",
+                    ver_nr=1003,
+                    regio=regio_111)
         ver.save()
         self.ver3 = ver
 
         # stop de verenigingen in een cluster
-        self.cluster1 = NhbCluster.objects.get(gebruik='18', regio=regio_111, letter='a')     # standaard cluster
+        self.cluster1 = Cluster.objects.get(gebruik='18', regio=regio_111, letter='a')     # standaard cluster
         self.ver1.clusters.add(self.cluster1)
 
-        self.cluster2 = NhbCluster.objects.get(gebruik='18', regio=regio_111, letter='b')     # standaard cluster
+        self.cluster2 = Cluster.objects.get(gebruik='18', regio=regio_111, letter='b')     # standaard cluster
         self.ver2.clusters.add(self.cluster2)
 
     def test_anon(self):
@@ -96,7 +97,7 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
                                                         'ver_1003': self.cluster1.pk})
         self.assert_is_redirect_not_plein(resp)    # redirect = success
 
-        cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
+        cluster = Cluster.objects.get(pk=self.cluster1.pk)
         self.assertEqual(cluster.naam, 'Hallo!')
 
         # tweede set transacties, identiek aan de eerste
@@ -116,7 +117,7 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         # foute parameters are silently ignored
         self.assert_is_redirect_not_plein(resp)    # redirect = success
 
-        cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
+        cluster = Cluster.objects.get(pk=self.cluster1.pk)
         self.assertEqual(cluster.naam, lange_tekst[:50])
 
         self.e2e_assert_other_http_commands_not_supported(self.url_clusters, post=False)

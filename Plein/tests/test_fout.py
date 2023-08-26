@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.models import Functie
 from Mailer.models import MailQueue
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
@@ -88,7 +88,7 @@ class TestPleinFout(E2EHelpers, TestCase):
         func = Functie(
                     beschrijving="Test Functie 1234",
                     rol='RCL',
-                    regio=NhbRegio.objects.get(regio_nr=104))
+                    regio=Regio.objects.get(regio_nr=104))
         func.save()
         func.accounts.add(self.testdata.account_bb)
 

@@ -13,12 +13,13 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetiti
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from Competitie.tests.tijdlijn import zet_competitie_fases
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 import datetime
 import io
 
@@ -69,7 +70,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         uur = 1
         for pk in match_pks[:]:     # copy to ensure stable
             with self.assert_max_queries(20):
-                resp = self.client.get(self.url_uitslag_invoeren % pk)
+                self.client.get(self.url_uitslag_invoeren % pk)
             match = CompetitieMatch.objects.get(pk=pk)
             self.assertIsNotNone(match.uitslag)
             match.vereniging = self.ver
@@ -196,7 +197,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'          # comp_pk
 
         # deze test is afhankelijk van de standaard regio's
-        self.regio_101 = NhbRegio.objects.get(regio_nr=101)
+        self.regio_101 = Regio.objects.get(regio_nr=101)
         self.boog_r = BoogType.objects.get(afkorting='R')
 
         # maak een BB aan, nodig om de competitie defaults in te zien
@@ -205,11 +206,11 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.account_bb.save()
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.plaats = "Boogstad"
-        ver.ver_nr = 1000
-        ver.regio = self.regio_101
+        ver = Vereniging(
+                    naam="Grote Club",
+                    plaats="Boogstad",
+                    ver_nr=1000,
+                    regio=self.regio_101)
         ver.save()
         self.ver = ver
 
@@ -276,7 +277,10 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.gemiddelde), '4.117')
 
-        # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
+        # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (
+        #           deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5,
+        #           deelnemer.score6, deelnemer.score7,
+        #           deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
 
         # nog een keer - nu wordt er niets bijgewerkt omdat er geen nieuwe scores zijn
         f1 = io.StringIO()
@@ -312,7 +316,6 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
-        # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score7, 129)
         self.assertEqual(deelnemer.totaal, 759)
@@ -339,7 +342,6 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog=self.sporterboog_100001)
-        # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
         self.assertEqual(deelnemer.score1, 123)
         self.assertEqual(deelnemer.score6, 128)
         self.assertEqual(deelnemer.score7, 0)
@@ -456,12 +458,12 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.assertFalse("[INFO] Verwerk overstap" in f2.getvalue())
 
         # maak een tweede vereniging aan
-        regio_116 = NhbRegio.objects.get(regio_nr=116)
-        ver = NhbVereniging()
-        ver.naam = "Zuidelijke Club"
-        ver.plaats = "Grensstad"
-        ver.ver_nr = 1100
-        ver.regio = regio_116
+        regio_116 = Regio.objects.get(regio_nr=116)
+        ver = Vereniging(
+                    naam="Zuidelijke Club",
+                    plaats="Grensstad",
+                    ver_nr=1100,
+                    regio=regio_116)
         ver.save()
 
         sporter.bij_vereniging = ver
@@ -471,7 +473,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(178):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue("[INFO] Verwerk overstap 100001: [101] [1000] Grote Club --> [116] [1100] Zuidelijke Club" in f2.getvalue())
+        self.assertTrue("[INFO] Verwerk overstap 100001: [101] [1000] Grote Club --> [116] [1100] Zuidelijke Club"
+                        in f2.getvalue())
 
         # overstap naar vereniging in zelfde regio
         self.ver.regio = regio_116
@@ -483,7 +486,8 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(178):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue("[INFO] Verwerk overstap 100001: [116] [1100] Zuidelijke Club --> [116] [1000] Grote Club" in f2.getvalue())
+        self.assertTrue("[INFO] Verwerk overstap 100001: [116] [1100] Zuidelijke Club --> [116] [1000] Grote Club"
+                        in f2.getvalue())
 
         # zet the competitie in een later fase zodat overschrijvingen niet meer gedaan worden
         for comp in Competitie.objects.all():
