@@ -232,9 +232,9 @@ class FormulierBkIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws['C4'] = 'BK %s, Klasse: %s' % (comp.beschrijving, klasse.beschrijving)
 
-        ws['D5'] = match.vereniging.naam     # organisatie
+        ws['D5'] = match.vereniging.naam        # organisatie
         if match.locatie:
-            ws['G5'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['G5'] = match.locatie.adres      # adres van de locatie
         else:
             ws['G5'] = 'Onbekend'
         ws['J5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
@@ -438,9 +438,9 @@ class FormulierBkTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws['B2'] = 'BK teams %s, Klasse: %s' % (comp.beschrijving, klasse_str)
         ws['H4'] = match.datum_wanneer.strftime('%Y-%m-%d')
-        ws['B4'] = match.vereniging.naam     # organisatie
+        ws['B4'] = match.vereniging.naam         # organisatie
         if match.locatie:
-            ws['F4'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['F4'] = match.locatie.adres       # adres van de locatie
         else:
             ws['F4'] = 'Onbekend'
 

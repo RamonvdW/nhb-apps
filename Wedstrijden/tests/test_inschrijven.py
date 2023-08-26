@@ -8,12 +8,13 @@ from django.test import TestCase
 from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -112,7 +113,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                 voor_wedstrijd=True).save()
 
         # voeg een locatie toe
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()

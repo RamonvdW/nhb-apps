@@ -23,12 +23,12 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
+from Locatie.models import Locatie
 from NhbStructuur.models import Rayon, Regio, Cluster
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 from bs4 import BeautifulSoup
 from decimal import Decimal
 import datetime
@@ -1572,7 +1572,7 @@ class TestData(object):
         # for
 
     def maak_wedstrijd_locatie(self, ver_nr):
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='locatie %s' % ver_nr,
                         discipline_25m1pijl=True,
                         discipline_outdoor=True,

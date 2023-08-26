@@ -13,13 +13,13 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import evaluatie_datum, zet_competitie_fase_rk_prep, zet_competitie_fase_regio_afsluiten
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Rayon, Regio, Cluster
 from Score.models import Uitslag
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 import datetime
 import time
 
@@ -99,9 +99,9 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
         ver.save()
         self.ver_101 = ver
 
-        loc = WedstrijdLocatie(banen_18m=1,
-                               banen_25m=1,
-                               adres='De Spanning 1, Houtdorp')
+        loc = Locatie(banen_18m=1,
+                      banen_25m=1,
+                      adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc = loc

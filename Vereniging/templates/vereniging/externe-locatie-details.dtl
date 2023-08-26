@@ -306,8 +306,8 @@
     {% if url_verwijder %}
         <div class="modal" id="bevestig_verwijder_locatie">
             <div class="modal-content center">
-                <h5>Verwijder wedstrijdlocatie?</h5>
-                <p>Wil je deze wedstrijdlocatie van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
+                <h5>Verwijder locatie?</h5>
+                <p>Wil je deze locatie van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
                 <form method="post" action="{{ url_verwijder }}">
                     {% csrf_token %}

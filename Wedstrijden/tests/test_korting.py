@@ -8,10 +8,11 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.definities import WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI
-from Wedstrijden.models import (WedstrijdLocatie, KalenderWedstrijdklasse, Wedstrijd, WedstrijdSessie,
+from Wedstrijden.models import (KalenderWedstrijdklasse, Wedstrijd, WedstrijdSessie,
                                 WedstrijdInschrijving, WedstrijdKorting)
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
@@ -70,7 +71,7 @@ class TestWedstrijdenKorting(E2EHelpers, TestCase):
         self.ver2.save()
 
         # voeg een locatie toe
-        self.locatie = WedstrijdLocatie(
+        self.locatie = Locatie(
                             baan_type='E',      # externe locatie
                             naam='Test locatie')
         self.locatie.save()

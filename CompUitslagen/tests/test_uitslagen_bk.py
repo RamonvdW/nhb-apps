@@ -57,7 +57,7 @@ class TestCompUitslagenBK(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-bk-indiv.dtl', 'plein/site_layout.dtl'))
 
-        # maak een wedstrijdlocatie aan
+        # maak een locatie aan
         locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
 
         # maak een RK match aan

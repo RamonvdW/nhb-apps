@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django import forms
 
 
 class AccommodatieDetailsForm(forms.Form):
-    """ Dit formulier wordt gebruikt om de details van een wedstrijdlocatie te ontvangen
+    """ Dit formulier wordt gebruikt om de details van een locatie te ontvangen
     """
 
     baan_type = forms.CharField(

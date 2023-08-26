@@ -144,6 +144,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = []
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='NhbRayon',

@@ -15,9 +15,9 @@ from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlass
 from Competitie.operations import competities_aanmaken
 from Competitie.tests.tijdlijn import zet_competitie_fases
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -93,9 +93,9 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         ver.save()
         self.ver_101 = ver
 
-        loc = WedstrijdLocatie(banen_18m=1,
-                               banen_25m=1,
-                               adres='De Spanning 1, Houtdorp')
+        loc = Locatie(banen_18m=1,
+                      banen_25m=1,
+                      adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc = loc

@@ -11,11 +11,12 @@ from Competitie.models import (Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse, CompetitieMatch,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet)
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie, Uitslag
+from Wedstrijden.models import Uitslag
 import datetime
 
 
@@ -83,9 +84,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver_nr = self.testdata.regio_ver_nrs[101][0]
         self.ver_101 = ver = self.testdata.vereniging[ver_nr]
 
-        loc = WedstrijdLocatie(banen_18m=1,
-                               banen_25m=1,
-                               adres='De Spanning 1, Houtdorp')
+        loc = Locatie(banen_18m=1,
+                      banen_25m=1,
+                      adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc = loc

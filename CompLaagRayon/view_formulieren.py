@@ -342,7 +342,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         ws['J3'] = "Datum: " + match.datum_wanneer.strftime('%Y-%m-%d')
 
         if match.locatie:
-            ws['H3'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['H3'] = match.locatie.adres       # adres van de locatie
         else:
             ws['H3'] = 'Onbekend'
 
@@ -551,9 +551,9 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         ws = prg['Deelnemers en Scores']
 
         ws['B2'] = 'RK Teams Rayon %s, %s, Klasse: %s' % (deelkamp.rayon.rayon_nr, comp.beschrijving, klasse_str)
-        ws['B4'] = match.vereniging.naam     # organisatie
+        ws['B4'] = match.vereniging.naam         # organisatie
         if match.locatie:
-            ws['F4'] = match.locatie.adres       # adres van de wedstrijdlocatie
+            ws['F4'] = match.locatie.adres       # adres van de locatie
         else:
             ws['F4'] = 'Onbekend'
         ws['H4'] = match.datum_wanneer.strftime('%Y-%m-%d')

@@ -70,7 +70,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
                     .filter(regio__rayon=self.functie_nu.rayon)
-                    .prefetch_related('wedstrijdlocatie_set',
+                    .prefetch_related('locatie_set',
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
 
@@ -79,7 +79,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             objs = (Vereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
-                    .prefetch_related('wedstrijdlocatie_set',
+                    .prefetch_related('locatie_set',
                                       'functie_set',
                                       'clusters')
                     .annotate(sporter_set_count=Count('sporter'))
@@ -99,7 +99,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             return (Vereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
-                    .prefetch_related('wedstrijdlocatie_set',
+                    .prefetch_related('locatie_set',
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
 
@@ -110,7 +110,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .objects
                     .filter(regio=self.functie_nu.regio)
                     .select_related('regio')
-                    .prefetch_related('wedstrijdlocatie_set',
+                    .prefetch_related('locatie_set',
                                       'clusters')
                     .order_by('ver_nr'))
         else:
@@ -120,7 +120,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .objects
                     .filter(regio=self.functie_nu.vereniging.regio)
                     .select_related('regio')
-                    .prefetch_related('wedstrijdlocatie_set',
+                    .prefetch_related('locatie_set',
                                       'clusters')
                     .order_by('ver_nr'))
 
@@ -159,7 +159,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                       kwargs={'ver_nr': ver.ver_nr})
 
             for loc in (ver
-                        .wedstrijdlocatie_set           # FUTURE: kost een query -> aparte ophalen in dict
+                        .locatie_set           # FUTURE: kost een query -> aparte ophalen in dict
                         .filter(zichtbaar=True)):
                 if loc.baan_type == 'E':
                     ver.heeft_externe_locaties = True

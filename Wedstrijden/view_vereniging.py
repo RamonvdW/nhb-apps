@@ -70,7 +70,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
         context['wedstrijden'] = wedstrijden
 
         # vereniging kan alleen een wedstrijd beginnen als er een locatie is
-        if ver.wedstrijdlocatie_set.exclude(zichtbaar=False).count() > 0:
+        if ver.locatie_set.exclude(zichtbaar=False).count() > 0:
             context['url_nieuwe_wedstrijd'] = reverse('Wedstrijden:nieuwe-wedstrijd-kies-type')
         else:
             context['geen_locatie'] = True
@@ -130,10 +130,10 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
         account = request.user
 
         ver = self.functie_nu.vereniging
-        locaties = ver.wedstrijdlocatie_set.exclude(zichtbaar=False)
+        locaties = ver.locatie_set.exclude(zichtbaar=False)
         aantal = locaties.count()
         if aantal > 0:
-            # vereniging heeft een wedstrijdlocatie
+            # vereniging heeft een locatie
 
             keuze = request.POST.get('keuze', '')
             if keuze in ('wa', 'ifaa', 'khsn'):

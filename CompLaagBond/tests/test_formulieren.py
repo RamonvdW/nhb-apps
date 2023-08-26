@@ -9,9 +9,9 @@ from django.utils import timezone
 from Competitie.definities import DEEL_RK
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapTeam
 from Competitie.tests.tijdlijn import zet_competitie_fase_bk_prep
+from Locatie.models import Locatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-from Wedstrijden.models import WedstrijdLocatie
 import zipfile
 import os
 
@@ -77,9 +77,9 @@ class TestCompLaagBondFormulieren(E2EHelpers, TestCase):
         #zet_competitie_fase_bk_wedstrijden(self.testdata.comp18)
         #zet_competitie_fase_bk_wedstrijden(self.testdata.comp25)
 
-        loc = WedstrijdLocatie(banen_18m=8,
-                               banen_25m=8,
-                               adres='De Spanning 1, Houtdorp')
+        loc = Locatie(banen_18m=8,
+                      banen_25m=8,
+                      adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(self.ver)
 

@@ -7,12 +7,13 @@
 from django.test import TestCase, override_settings
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 import datetime
 
 
@@ -73,7 +74,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
     @staticmethod
     def _maak_externe_locatie(ver):
         # voeg een locatie toe
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
@@ -84,7 +85,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
     @staticmethod
     def _maak_accommodatie_binnen(ver):
         # voeg een locatie toe
-        binnen_locatie = WedstrijdLocatie(
+        binnen_locatie = Locatie(
                                 baan_type='X',      # onbekend
                                 adres='Verweg 1, Om de hoek',
                                 adres_uit_crm=True)
@@ -95,7 +96,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
     @staticmethod
     def _maak_accommodatie_buiten(ver):
         # voeg een locatie toe
-        buiten_locatie = WedstrijdLocatie(
+        buiten_locatie = Locatie(
                                 baan_type='B',      # buiten
                                 adres_uit_crm=False,
                                 discipline_outdoor=True,

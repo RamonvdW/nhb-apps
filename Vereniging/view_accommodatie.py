@@ -12,11 +12,11 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
+from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
+from Locatie.models import Locatie
+from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
 from Vereniging.models2 import Secretaris
-from Wedstrijden.definities import BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
-from Wedstrijden.models import WedstrijdLocatie
-from Logboek.models import schrijf_in_logboek
 from Vereniging.forms import AccommodatieDetailsForm
 from Vereniging.models import Vereniging
 
@@ -26,7 +26,7 @@ TEMPLATE_ACCOMMODATIE_DETAILS = 'vereniging/accommodatie-details.dtl'
 
 class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kunnen details van een wedstrijdlocatie gewijzigd worden """
+    """ Via deze view kunnen details van een locatie gewijzigd worden """
 
     # class variables shared by all instances
     template_name = TEMPLATE_ACCOMMODATIE_DETAILS
@@ -59,7 +59,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         binnen_locatie = None
         buiten_locatie = None
         externe_locaties = list()
-        for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
+        for loc in ver.locatie_set.exclude(zichtbaar=False):
             if loc.baan_type == BAAN_TYPE_EXTERN:
                 externe_locaties.append(loc)
             elif loc.baan_type == BAAN_TYPE_BUITEN:
@@ -238,7 +238,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                     buiten_locatie.zichtbaar = True
                     buiten_locatie.save()
             elif binnen_locatie:
-                buiten = WedstrijdLocatie(
+                buiten = Locatie(
                                 baan_type=BAAN_TYPE_BUITEN,
                                 adres_uit_crm=False,
                                 adres=binnen_locatie.adres,

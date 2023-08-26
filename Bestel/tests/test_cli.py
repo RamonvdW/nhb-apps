@@ -9,13 +9,14 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import BestelMandje, BestelProduct
+from Locatie.models import Locatie
 from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdLocatie, WedstrijdInschrijving
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from decimal import Decimal
 import datetime
 
@@ -110,7 +111,7 @@ class TestBestelCli(E2EHelpers, TestCase):
                             voor_wedstrijd=True)
         sporterboog2_r.save()
 
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

@@ -9,13 +9,14 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from datetime import timedelta
 
 
@@ -114,7 +115,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.sporterboog2c = sporterboog
 
         # voeg een locatie toe
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()

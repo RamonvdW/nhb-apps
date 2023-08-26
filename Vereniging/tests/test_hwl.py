@@ -16,8 +16,8 @@ from Competitie.tests.tijdlijn import (zet_competitie_fase_regio_wedstrijden, ze
                                        zet_competitie_fase_rk_prep, zet_competitie_fase_afsluiten)
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
+from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -467,9 +467,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-    def test_wedstrijdlocatie(self):
+    def test_locatie(self):
         # maak een locatie en koppel aan de vereniging
-        loc = WedstrijdLocatie()
+        loc = Locatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
         loc.verenigingen.add(self.ver1)

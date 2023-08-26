@@ -100,7 +100,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
-        # maak een wedstrijdlocatie aan
+        # maak een locatie aan
         locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
 
         # maak een RK match aan

@@ -19,11 +19,11 @@ from Competitie.definities import (AFSTANDEN,
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Rayon, Regio, Cluster
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 import logging
 
 my_logger = logging.getLogger('NHBApps.Competitie')
@@ -406,7 +406,7 @@ class CompetitieMatch(models.Model):
                                    blank=True, null=True)   # mag later ingevuld worden
 
     # waar
-    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT,
+    locatie = models.ForeignKey(Locatie, on_delete=models.PROTECT,
                                 blank=True, null=True)      # mag later ingevuld worden
 
     # datum en tijdstippen

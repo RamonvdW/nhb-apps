@@ -6,10 +6,10 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
+from Locatie.models import Locatie
 from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 
 
 class TestWedstrijdenManager(E2EHelpers, TestCase):
@@ -35,8 +35,8 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
                             regio=Regio.objects.get(regio_nr=112))
         self.ver1.save()
 
-        # geef de vereniging een wedstrijdlocatie
-        locatie = WedstrijdLocatie(
+        # geef de vereniging een locatie
+        locatie = Locatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()

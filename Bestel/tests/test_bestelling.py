@@ -19,6 +19,7 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
                                         bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 from Functie.models import Functie
+from Locatie.models import Locatie
 from Mailer.models import MailQueue
 from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
@@ -29,7 +30,7 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KOR
                                     WEDSTRIJD_KORTING_SPORTER,
                                     INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                     INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdLocatie, WedstrijdInschrijving, WedstrijdKorting
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from decimal import Decimal
 import io
 
@@ -109,7 +110,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,
@@ -281,7 +282,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
 
-        # mutileer het product (doorzetten vanuit het mandje lukt niet)
+        # maak het product "kapot" zodat doorzetten vanuit het mandje niet meer kan
         product1.wedstrijd_inschrijving = None
         product1.save(update_fields=['wedstrijd_inschrijving'])
 
@@ -476,7 +477,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         resp = self.client.post(self.url_check_status % andere.bestel_nr)
         self.assert404(resp, 'Niet gevonden')       # want verkeerd account
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_check_status % andere.bestel_nr, get=True, post=False)
+        self.e2e_assert_other_http_commands_not_supported(self.url_check_status % andere.bestel_nr,
+                                                          get=True, post=False)
 
         url = self.url_check_status % bestelling.bestel_nr
         with self.assert_max_queries(20):

@@ -42,7 +42,7 @@ urlpatterns = [
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 
-    # wedstrijdlocaties
+    # locaties
     path('externe-locaties/<ver_nr>/',
          view_externe_locaties.ExterneLocatiesView.as_view(),
          name='externe-locaties'),

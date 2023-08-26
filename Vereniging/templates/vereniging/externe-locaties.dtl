@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wedstrijdlocaties{% endblock %}
+{% block title %}Locaties{% endblock %}
 
 {% block pagina %}
 
@@ -61,7 +61,7 @@
                 {% empty %}
                     <tr>
                         <td colspan="4" class="center">
-                            <i>Er zijn nog geen wedstrijdlocaties aangemaakt</i>
+                            <i>Er zijn nog geen locaties aangemaakt</i>
                         </td>
                     </tr>
                 {% endfor %}

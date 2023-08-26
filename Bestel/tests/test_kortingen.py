@@ -13,6 +13,7 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje,
                                         bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
+from Locatie.models import Locatie
 from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -20,7 +21,7 @@ from Vereniging.models import Vereniging
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_AFGEMELD,
                                     WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_SPORTER,
                                     WEDSTRIJD_KORTING_COMBI)
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdLocatie, WedstrijdInschrijving, WedstrijdKorting
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 import datetime
 
 
@@ -86,7 +87,7 @@ class TestBestelKortingen(E2EHelpers, TestCase):
         now = timezone.now()
         datum = datetime.date(now.year, now.month, now.day) + datetime.timedelta(days=5)
 
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

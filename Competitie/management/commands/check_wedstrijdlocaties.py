@@ -45,9 +45,9 @@ class Command(BaseCommand):
 
         ver2locs = dict()   # [ver_nr] = (loc, loc, ..)
 
-        for ver in Vereniging.objects.prefetch_related('wedstrijdlocatie_set').all():
+        for ver in Vereniging.objects.prefetch_related('locatie_set').all():
             ver2locs[ver.ver_nr] = locs = list()
-            for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
+            for loc in ver.locatie_set.exclude(zichtbaar=False):
                 locs.append(loc)
             # for
         # for
@@ -115,7 +115,7 @@ class Command(BaseCommand):
 
             if ver:
                 if loc:
-                    # als de gekozen locatie discipline_indoor is en banen_18m/banen_25m ingesteld heeft, dan is het goed
+                    # als de gekozen locatie discipline_indoor is en banen_18m of _25m ingesteld heeft, dan is het goed
                     if (not loc.discipline_indoor) or (loc.banen_18m == 0 and loc.banen_25m == 0):
                         toon_loc = True
             else:

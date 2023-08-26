@@ -12,10 +12,10 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
+from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 
 
 TEMPLATE_EXTERNE_LOCATIE = 'vereniging/externe-locaties.dtl'
@@ -24,7 +24,7 @@ TEMPLATE_EXTERNE_LOCATIE_DETAILS = 'vereniging/externe-locatie-details.dtl'
 
 class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kunnen details van een externe wedstrijdlocatie gewijzigd worden """
+    """ Via deze view kunnen details van een externe locatie gewijzigd worden """
 
     # class variables shared by all instances
     template_name = TEMPLATE_EXTERNE_LOCATIE
@@ -64,8 +64,8 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             context['url_toevoegen'] = reverse('Vereniging:externe-locaties',
                                                kwargs={'ver_nr': ver.ver_nr})
 
-        locaties = ver.wedstrijdlocatie_set.filter(zichtbaar=True,
-                                                   baan_type='E')
+        locaties = ver.locatie_set.filter(zichtbaar=True,
+                                          baan_type='E')
         context['locaties'] = locaties
 
         for locatie in locaties:
@@ -81,12 +81,12 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (None, 'Wedstrijdlocaties')
+                (None, 'Locaties')
             )
         else:
             context['kruimels'] = (
                 (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
-                (None, 'Wedstrijdlocaties')
+                (None, 'Locaties')
             )
 
         menu_dynamics(self.request, context)
@@ -100,7 +100,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         if not self.functie_nu or self.functie_nu.rol != 'HWL' or self.functie_nu.vereniging != ver:
             raise PermissionDenied('Alleen HWL mag een locatie toevoegen')
 
-        locatie = WedstrijdLocatie(baan_type='E')      # externe locatie
+        locatie = Locatie(baan_type='E')      # externe locatie
         locatie.save()
         locatie.verenigingen.add(ver)
 
@@ -114,7 +114,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
 class ExterneLocatieDetailsView(TemplateView):
 
-    """ Via deze view kunnen details van een wedstrijdlocatie aangepast worden.
+    """ Via deze view kunnen details van een locatie aangepast worden.
         Alleen de HWL van de vereniging(en) die aan deze locatie gekoppeld zijn mogen de details aanpassen.
     """
 
@@ -122,15 +122,15 @@ class ExterneLocatieDetailsView(TemplateView):
     template_name = TEMPLATE_EXTERNE_LOCATIE_DETAILS
 
     def get_locatie(self):
-        """ haal de wedstrijdlocatie op en geef een 404 als deze niet bestaat
+        """ haal de locatie op en geef een 404 als deze niet bestaat
             doe een access-check en
         """
         try:
             location_pk = int(self.kwargs['locatie_pk'][:6])        # afkappen voor de veiligheid
-            locatie = WedstrijdLocatie.objects.get(pk=location_pk,
-                                                   zichtbaar=True,
-                                                   baan_type='E')   # voorkomt wijzigen accommodatie
-        except (ValueError, WedstrijdLocatie.DoesNotExist):
+            locatie = Locatie.objects.get(pk=location_pk,
+                                          zichtbaar=True,
+                                          baan_type='E')   # voorkomt wijzigen accommodatie
+        except (ValueError, Locatie.DoesNotExist):
             raise Http404('Locatie bestaat niet')
 
         return locatie
@@ -191,7 +191,7 @@ class ExterneLocatieDetailsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Vereniging:externe-locaties', kwargs={'ver_nr': ver.ver_nr}), 'Wedstrijdlocaties'),
+            (reverse('Vereniging:externe-locaties', kwargs={'ver_nr': ver.ver_nr}), 'Locaties'),
             (None, 'Locatie details')
         )
 

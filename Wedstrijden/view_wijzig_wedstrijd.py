@@ -20,16 +20,17 @@ from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
+from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
+from Locatie.models import Locatie
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN,
-                                    ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
+from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP,
                                     WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
                                     WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
-from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
+from Wedstrijden.models import Wedstrijd
 import datetime
 from types import SimpleNamespace
 
@@ -166,12 +167,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         else:
             ver = wedstrijd.organiserende_vereniging
         locaties = (ver
-                    .wedstrijdlocatie_set
+                    .locatie_set
                     .exclude(zichtbaar=False)
                     .order_by('pk'))
         try:
             binnen_locatie = locaties.get(adres_uit_crm=True)
-        except WedstrijdLocatie.DoesNotExist:
+        except Locatie.DoesNotExist:
             binnen_locatie = None
 
         max_banen = 1
@@ -332,7 +333,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             context['opt_uitvoerende_vers'] = (Vereniging
                                                .objects
                                                .exclude(geen_wedstrijden=True)
-                                               .annotate(aantal=Count('wedstrijdlocatie'))
+                                               .annotate(aantal=Count('locatie'))
                                                .filter(aantal__gte=1)
                                                .order_by('ver_nr'))
             for ver in context['opt_uitvoerende_vers']:
@@ -546,7 +547,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     for ver in (Vereniging
                                 .objects
                                 .exclude(geen_wedstrijden=True)
-                                .annotate(aantal=Count('wedstrijdlocatie'))
+                                .annotate(aantal=Count('locatie'))
                                 .filter(aantal__gte=1)):
                         sel = 'ver_%s' % ver.ver_nr
                         if data == sel:
@@ -562,7 +563,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 else:
                     ver = wedstrijd.organiserende_vereniging
                 for locatie in (ver
-                                .wedstrijdlocatie_set
+                                .locatie_set
                                 .exclude(zichtbaar=False)):
                     sel = 'loc_%s' % locatie.pk
                     if sel == data:
