@@ -187,7 +187,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                           .filter(sporterboog__sporter=sporter))
 
         objs = list()
-
         comp_pks = [comp.pk for comp in comps]
 
         # zoek regiocompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
@@ -476,6 +475,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             regiocomps, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen,
                                                                       boog_afk2sporterboog, boog_afkorting_wedstrijd)
             context['regiocompetities'] = regiocomps
+            context['hint_voorkeuren'] = regiocomps is not None and len(regiocomps) == 0
             context['gebruik_knoppen'] = gebruik_knoppen
 
             context['regiocomp_scores'] = self._find_scores(sporter)
