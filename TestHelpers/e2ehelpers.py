@@ -365,7 +365,7 @@ class E2EHelpers(TestCase):
         print("\n".join(long_msg))
         return
 
-    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True):
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, skip_hash_links=True, report_dupes=True):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
         if skip_menu:
@@ -415,8 +415,11 @@ class E2EHelpers(TestCase):
                 if url != "#":
                     if not (skip_smileys and url.startswith('/feedback/')):
                         if not (could_be_part_url and url[0].count('/') == 0):
-                            urls.append(url)
+                            if not (skip_hash_links and url[0] == '#'):
+                                if report_dupes or url not in urls:
+                                    urls.append(url)
         # while
+        urls.sort()     # ensure consistent order
         return urls
 
     def extract_checkboxes(self, resp):

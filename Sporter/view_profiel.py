@@ -476,6 +476,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             regiocomps, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen,
                                                                       boog_afk2sporterboog, boog_afkorting_wedstrijd)
             context['regiocompetities'] = regiocomps
+            context['hint_voorkeuren'] = len(regiocomps) == 0
             context['gebruik_knoppen'] = gebruik_knoppen
 
             context['regiocomp_scores'] = self._find_scores(sporter)
