@@ -14,8 +14,8 @@ from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
 from Functie.operations import maak_functie
+from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import Locatie
-from NhbStructuur.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from Vereniging.models import Vereniging

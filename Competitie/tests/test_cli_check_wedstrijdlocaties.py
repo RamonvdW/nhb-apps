@@ -9,8 +9,8 @@ from django.core import management
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Kampioenschap, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
+from Geo.models import Regio, Rayon
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio, Rayon
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import io

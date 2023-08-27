@@ -8,7 +8,7 @@ from django.test import TestCase
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Functie.operations import maak_functie
 from Score.models import Aanvangsgemiddelde
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren

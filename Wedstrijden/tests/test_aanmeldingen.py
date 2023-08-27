@@ -9,8 +9,8 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
 from Functie.operations import maak_functie
+from Geo.models import Regio
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers

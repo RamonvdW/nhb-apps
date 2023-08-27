@@ -7,9 +7,9 @@
 from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
+from Geo.models import Rayon, Regio
 from Locatie.definities import BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
-from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers

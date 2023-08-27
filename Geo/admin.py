@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from NhbStructuur.models import Rayon, Regio, Cluster
+from Geo.models import Rayon, Regio, Cluster
 
 
-class NhbRayonAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor NhbRayon klasse """
+class RayonAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Rayon klasse """
     ordering = ('rayon_nr',)
     list_select_related = True
 
@@ -23,8 +23,8 @@ class NhbRayonAdmin(admin.ModelAdmin):
         return False
 
 
-class NhbRegioAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor NhbRegio klasse """
+class RegioAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Regio klasse """
     ordering = ('regio_nr',)
     list_select_related = True
 
@@ -38,7 +38,7 @@ class NhbRegioAdmin(admin.ModelAdmin):
         return False
 
 
-class NhbClusterAdmin(admin.ModelAdmin):
+class ClusterAdmin(admin.ModelAdmin):
     list_select_related = ('regio',)
 
     list_filter = ('regio',)
@@ -46,11 +46,10 @@ class NhbClusterAdmin(admin.ModelAdmin):
     ordering = ('regio', 'gebruik', 'letter')
 
 
-admin.site.register(Cluster, NhbClusterAdmin)
-
-# NhbRayon en NhbRegio zijn hard-coded, dus geen admin interface
-# hard-coded data: zie NhbStructuur/migrations/m00??_nhbstructuur_20??
-admin.site.register(Rayon, NhbRayonAdmin)
-admin.site.register(Regio, NhbRegioAdmin)
+# Rayon en Regio zijn hard-coded, dus geen admin interface
+# hard-coded data: zie Locatie/migrations/m00??_squashed.py
+admin.site.register(Rayon, RayonAdmin)
+admin.site.register(Regio, RegioAdmin)
+admin.site.register(Cluster, ClusterAdmin)
 
 # end of file

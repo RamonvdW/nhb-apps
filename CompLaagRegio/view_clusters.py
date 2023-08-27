@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from NhbStructuur.models import Cluster
+from Geo.models import Cluster
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Vereniging.models import Vereniging

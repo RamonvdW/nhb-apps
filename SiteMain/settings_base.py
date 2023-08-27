@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',
     'Functie.apps.FunctieConfig',
+    'Geo.apps.GeoConfig',
     'HistComp.apps.HistCompConfig',
     'Kalender.apps.KalenderConfig',
     'Locatie.apps.LocatieConfig',

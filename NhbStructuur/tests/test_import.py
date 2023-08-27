@@ -10,10 +10,10 @@ from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
 from BasisTypen.models import BoogType
 from Functie.models import Functie
+from Geo.models import Regio
 from Locatie.definities import BAAN_TYPE_BUITEN
 from Locatie.models import Locatie
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan

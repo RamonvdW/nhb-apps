@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Geo.models import Regio
 from Sporter.models import Sporter
-from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging

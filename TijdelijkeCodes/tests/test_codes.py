@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieIndivKlasse, Kampioenschap, KampioenschapSporterBoog
 from Functie.models import Functie
-from NhbStructuur.models import Rayon
+from Geo.models import Rayon
 from Sporter.models import SporterBoog, Sporter
 from Registreer.models import GastRegistratie
 from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_EMAIL_ACCOUNT, RECEIVER_BEVESTIG_EMAIL_FUNCTIE,

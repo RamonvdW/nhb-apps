@@ -10,7 +10,7 @@ from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalI
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling, BestelMutatie
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from decimal import Decimal

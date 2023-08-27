@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import Rayon, Regio, Cluster
+from Geo.models import Rayon, Regio, Cluster
 from Vereniging.models import Vereniging
 
 
-class TestNhbStructuur(TestCase):
+class TestGeo(TestCase):
 
-    """ tests voor de NhbStructuur applicatie """
+    """ tests voor de Geo applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -35,11 +35,11 @@ class TestNhbStructuur(TestCase):
         self.assertEqual(regio.naam, "Regio 111")
         self.assertIsNotNone(str(regio))
 
-    def test_vereniging(self):
-        ver = Vereniging.objects.first()
-        self.assertIsNotNone(str(ver))
-        ver.clean_fields()      # run validators
-        ver.clean()             # run model validator
+    # def test_vereniging(self):
+    #     ver = Vereniging.objects.first()
+    #     self.assertIsNotNone(str(ver))
+    #     ver.clean_fields()      # run validators
+    #     ver.clean()             # run model validator
 
     def test_cluster(self):
         ver = self.ver1

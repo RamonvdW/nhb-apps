@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import Regio
-from TestHelpers.e2ehelpers import E2EHelpers
+from Geo.models import Regio
 from Registreer.models import GastLidNummer
 from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
 

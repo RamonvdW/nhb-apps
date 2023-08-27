@@ -20,7 +20,7 @@ from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Locatie.models import Locatie
-from NhbStructuur.models import Rayon, Regio, Cluster
+from Geo.models import Rayon, Regio, Cluster
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
 from Vereniging.models import Vereniging
@@ -923,17 +923,17 @@ class KampioenschapSporterBoog(models.Model):
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         if self.kampioenschap.deel == DEEL_BK:
-            substr = "BK"
+            deel_str = "BK"
         else:
-            substr = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
+            deel_str = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
 
-        substr += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
+        deel_str += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
 
         return "[%s] %s (%s) %s" % (
                     self.sporterboog.sporter.lid_nr,
                     self.sporterboog.sporter.volledige_naam(),
                     self.sporterboog.boogtype.beschrijving,
-                    substr)
+                    deel_str)
 
     class Meta:
         verbose_name = "Kampioenschap sporterboog"

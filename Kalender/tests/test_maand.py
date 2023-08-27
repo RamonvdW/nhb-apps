@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.operations import maak_functie
+from Geo.models import Regio
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
 from Wedstrijden.models import Wedstrijd

@@ -13,8 +13,8 @@ from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
 from Functie.operations import maak_functie
+from Geo.models import Regio
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

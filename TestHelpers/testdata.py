@@ -23,8 +23,8 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
+from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import Locatie
-from NhbStructuur.models import Rayon, Regio, Cluster
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren

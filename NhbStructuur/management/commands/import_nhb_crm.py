@@ -15,11 +15,11 @@ from django.core.exceptions import ValidationError
 from Account.models import Account
 from Functie.models import Functie
 from Functie.operations import maak_functie, maak_account_vereniging_secretaris
+from Geo.models import Rayon, Regio
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
-from NhbStructuur.models import Rayon, Regio
 from Opleidingen.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord

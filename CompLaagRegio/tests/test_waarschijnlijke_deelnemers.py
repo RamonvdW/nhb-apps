@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio, Cluster
+from Geo.models import Regio, Cluster
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam)

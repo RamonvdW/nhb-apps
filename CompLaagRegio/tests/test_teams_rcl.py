@@ -15,8 +15,8 @@ from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlass
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Functie.operations import maak_functie
+from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import Locatie
-from NhbStructuur.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio, Cluster
+from Geo.models import Regio, Cluster
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 

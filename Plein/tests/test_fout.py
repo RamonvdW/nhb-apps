@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from Functie.models import Functie
+from Geo.models import Regio
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 

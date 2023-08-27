@@ -20,9 +20,9 @@ from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, Competitie
 from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr_to_date
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
+from Geo.models import Cluster
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import Cluster
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging

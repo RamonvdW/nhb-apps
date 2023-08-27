@@ -10,9 +10,9 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
 from Functie.operations import maak_functie
+from Geo.models import Regio
 from Locatie.models import Locatie
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog

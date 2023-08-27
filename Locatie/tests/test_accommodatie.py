@@ -7,10 +7,10 @@
 from django.test import TestCase
 from Functie.models import Functie
 from Functie.operations import maak_functie
+from Geo.models import Regio, Cluster
 from Locatie.definities import (BAAN_TYPE_ONBEKEND, BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT, BAAN_TYPE_BINNEN_BUITEN,
                                 BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN)
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio, Cluster
 from Sporter.models import Sporter
 from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers

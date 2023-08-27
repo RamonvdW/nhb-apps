@@ -9,9 +9,9 @@ from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie
+from Geo.models import Rayon, Regio, Cluster
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAAN_TYPE_ONBEKEND
 from Locatie.models import Locatie
-from NhbStructuur.models import Rayon, Regio, Cluster
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

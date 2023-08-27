@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2023 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from NhbStructuur.definities import GEBRUIK, GEBRUIK2STR
+from Geo.definities import CLUSTER_GEBRUIK_CHOICES, CLUSTER_GEBRUIK2STR
 
 
 class Rayon(models.Model):
@@ -73,7 +73,7 @@ class Cluster(models.Model):
     naam = models.CharField(max_length=50, default='', blank=True)
 
     # aparte clusters voor 18m en 25m
-    gebruik = models.CharField(max_length=2, choices=GEBRUIK)
+    gebruik = models.CharField(max_length=2, choices=CLUSTER_GEBRUIK_CHOICES)
 
     def cluster_code(self):
         return "%s%s" % (self.regio.regio_nr, self.letter)
@@ -81,7 +81,7 @@ class Cluster(models.Model):
     def cluster_code_str(self):
         msg = "%s voor " % self.cluster_code()
         try:
-            msg += GEBRUIK2STR[self.gebruik]
+            msg += CLUSTER_GEBRUIK2STR[self.gebruik]
         except KeyError:         # pragma: no cover
             msg = "?"
         return msg

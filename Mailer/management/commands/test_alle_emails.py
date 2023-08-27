@@ -20,10 +20,10 @@ from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
+from Geo.models import Regio
 from Locatie.models import Locatie
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
 from Vereniging.models import Vereniging

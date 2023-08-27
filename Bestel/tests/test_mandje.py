@@ -12,8 +12,8 @@ from Bestel.definities import BESTEL_MUTATIE_VERWIJDER, BESTEL_TRANSPORT_VERZEND
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie, BestelMandje
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
+from Geo.models import Regio
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog

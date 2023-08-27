@@ -18,7 +18,7 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
                                RegiocompetitieSporterBoog)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from NhbStructuur.models import Rayon, Regio
+from Geo.models import Rayon, Regio
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from Vereniging.models import Vereniging

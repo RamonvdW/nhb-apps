@@ -12,9 +12,9 @@ from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
 from Competitie.operations import competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep, zet_competitie_fase_afsluiten
 from Functie.operations import maak_functie
+from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

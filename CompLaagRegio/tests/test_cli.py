@@ -10,7 +10,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Score.models import Aanvangsgemiddelde, ScoreHist, Score
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren

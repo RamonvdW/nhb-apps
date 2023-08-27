@@ -8,8 +8,8 @@ from django.test import TestCase
 from BasisTypen.definities import GESLACHT_ANDERS, GESLACHT_ALLE, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.operations import maak_functie
+from Geo.models import Regio
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Sporter.operations import get_sporter_voorkeuren
 from Vereniging.models import Vereniging

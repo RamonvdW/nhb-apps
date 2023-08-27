@@ -10,7 +10,7 @@ from Competitie.definities import AFSTANDEN, DEEL_RK, DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Regiocompetitie, Kampioenschap, RegiocompetitieRonde)
 from Functie.models import Functie
-from NhbStructuur.models import Rayon, Regio
+from Geo.models import Rayon, Regio
 from Score.definities import AG_NUL
 from datetime import date
 import datetime

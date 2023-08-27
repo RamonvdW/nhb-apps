@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from NhbStructuur.models import Regio, Cluster
+from Geo.models import Regio, Cluster
 
 
 class Vereniging(models.Model):

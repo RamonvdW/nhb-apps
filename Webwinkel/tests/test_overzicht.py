@@ -8,8 +8,8 @@ from django.test import TestCase
 from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND
 from Bestel.models import Bestelling
 from Functie.operations import Functie
+from Geo.models import Regio
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

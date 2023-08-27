@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken

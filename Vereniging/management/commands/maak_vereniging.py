@@ -8,7 +8,7 @@
 # dit is bedoeld voor demonstraties en de handleiding
 
 from django.core.management.base import BaseCommand
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Vereniging.models import Vereniging
 
 

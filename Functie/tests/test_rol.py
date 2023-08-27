@@ -13,8 +13,8 @@ from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie,
                          rol_get_huidige, rol_get_huidige_functie)
+from Geo.models import Regio
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 

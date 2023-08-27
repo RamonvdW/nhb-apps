@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegiocompetitieSporterBoog)
 from Competitie.operations.poules import maak_poule_schema
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Plein.menu import menu_dynamics
 from Sporter.operations import get_request_regio_nr
 from Vereniging.models import Vereniging

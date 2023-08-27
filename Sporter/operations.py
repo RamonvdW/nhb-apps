@@ -10,7 +10,7 @@ from BasisTypen.definities import GESLACHT_ANDERS
 from BasisTypen.models import BoogType
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 
 

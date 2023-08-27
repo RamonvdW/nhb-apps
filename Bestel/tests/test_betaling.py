@@ -13,9 +13,9 @@ from Bestel.models import BestelMandje, Bestelling
 from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Geo.models import Regio
 from Mailer.models import MailQueue
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

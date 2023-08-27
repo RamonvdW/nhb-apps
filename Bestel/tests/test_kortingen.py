@@ -13,8 +13,8 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstr
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje,
                                         bestel_mutatieverzoek_maak_bestellingen)
 from Betaal.models import BetaalInstellingenVereniging
+from Geo.models import Regio
 from Locatie.models import Locatie
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

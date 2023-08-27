@@ -24,4 +24,5 @@ BAANTYPE2STR = {
     'E': 'Extern'                       # externe locatie
 }
 
+
 # end of file

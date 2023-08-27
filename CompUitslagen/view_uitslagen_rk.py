@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKl
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import Rayon
+from Geo.models import Rayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_rayon_nr
 from Plein.menu import menu_dynamics
