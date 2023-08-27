@@ -38,7 +38,10 @@ class Command(BaseCommand):
         geboorte_datum = options['geboorte_datum'][0]
         wedstrijdbogen = options['wedstrijdbogen'][0].split('+')
 
-        ver = Vereniging.objects.get(ver_nr=ver_nr)
+        try:
+            ver = Vereniging.objects.get(ver_nr=ver_nr)
+        except Vereniging.DoesNotExist:
+            self.stderr.write('[ERROR] Vereniging %s niet gevonden' % ver_nr)
 
         self.stdout.write('[INFO] Maak of vind account %s' % lid_nr)
 

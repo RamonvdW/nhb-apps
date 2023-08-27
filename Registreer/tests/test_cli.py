@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from TestHelpers.e2ehelpers import E2EHelpers
+from Vereniging.models import Vereniging
 
 
 class TestRegistreerCli(E2EHelpers, TestCase):
@@ -17,7 +18,9 @@ class TestRegistreerCli(E2EHelpers, TestCase):
         pass
 
     def test_all(self):
-        f1, f2 = self.run_management_command('maak_gebruiker', '1999', '199901', 'Voornaam', '2000-01-01', 'BB+C')
+        ver = Vereniging.objects.first()
+
+        f1, f2 = self.run_management_command('maak_gebruiker', str(ver.ver_nr), '199901', 'Voornaam', '2000-01-01', 'BB+C')
         self.assertEqual(f1.getvalue(), '')
 
 
