@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from Competitie.definities import DEELNAME_NEE
 from Competitie.models import CompetitieMatch, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet
-from Competitie.tests.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden
 from Locatie.models import Locatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

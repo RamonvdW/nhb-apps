@@ -65,10 +65,10 @@ def get_request_rayon_nr(request):
     if functie_nu:
         if functie_nu.vereniging:
             # HWL, WL
-            rayon_nr = functie_nu.vereniging.regio.rayon.rayon_nr
+            rayon_nr = functie_nu.vereniging.regio.rayon_nr
         elif functie_nu.regio:
             # RCL
-            rayon_nr = functie_nu.regio.rayon.rayon_nr
+            rayon_nr = functie_nu.regio.rayon_nr
         elif functie_nu.rayon:
             # RKO
             rayon_nr = functie_nu.rayon.rayon_nr
@@ -79,7 +79,7 @@ def get_request_rayon_nr(request):
             if account.sporter_set.count() > 0:                         # pragma: no branch
                 sporter = account.sporter_set.first()
                 if sporter.is_actief_lid and sporter.bij_vereniging:
-                    rayon_nr = sporter.bij_vereniging.regio.rayon.rayon_nr
+                    rayon_nr = sporter.bij_vereniging.regio.rayon_nr
 
     return rayon_nr
 

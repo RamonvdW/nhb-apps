@@ -114,7 +114,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                 if ver:
                     deelnemer.ver = ver
                     deelnemer.regio_nr = ver.regio.regio_nr
-                    deelnemer.rayon_nr = ver.regio.rayon.rayon_nr
+                    deelnemer.rayon_nr = ver.regio.rayon_nr
 
                     vorige_indiv_klasse = deelnemer.indiv_klasse
                     try:
@@ -317,7 +317,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
             if ver:
                 deelnemer.ver = ver
                 deelnemer.regio_nr = ver.regio.regio_nr
-                deelnemer.rayon_nr = ver.regio.rayon.rayon_nr
+                deelnemer.rayon_nr = ver.regio.rayon_nr
                 deelnemer.url = reverse('CompLaagRayon:geef-deelnemer-blanco-resultaat',
                                         kwargs={'comp_pk': comp.pk, 'deelnemer_pk': deelnemer.pk})
             else:

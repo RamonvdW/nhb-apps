@@ -12,8 +12,8 @@ from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieMatch,
                                Regiocompetitie, RegiocompetitieRonde, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_inschrijven,
-                                            zet_competitie_fase_rk_prep, zet_competitie_fase_afsluiten)
+from Competitie.test_utils.tijdlijn import (zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_rk_prep,
+                                            zet_competitie_fase_regio_inschrijven, zet_competitie_fase_afsluiten)
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Locatie.models import Locatie

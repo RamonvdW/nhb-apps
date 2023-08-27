@@ -36,14 +36,17 @@ class Regio(models.Model):
     # 3-cijferige nummer van deze regio
     regio_nr = models.PositiveIntegerField(primary_key=True)
 
+    # is dit een administratieve regio die niet mee doet voor de wedstrijden / competities?
+    is_administratief = models.BooleanField(default=False)
+
     # beschrijving van de regio
     naam = models.CharField(max_length=50)
 
+    # kopie rayon.rayon_nr
+    rayon_nr = models.PositiveIntegerField(default=0)
+
     # rayon waar deze regio bij hoort
     rayon = models.ForeignKey(Rayon, on_delete=models.PROTECT)
-
-    # is dit een administratieve regio die niet mee doet voor de wedstrijden / competities?
-    is_administratief = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

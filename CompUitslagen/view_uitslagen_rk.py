@@ -178,7 +178,7 @@ class UitslagenRayonIndivView(TemplateView):
                             .objects
                             .filter(competitie__is_afgesloten=False,
                                     competitie=comp,
-                                    regio__rayon__rayon_nr=rayon_nr)
+                                    regio__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
             deelnemers = (RegiocompetitieSporterBoog

@@ -448,7 +448,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 if sporter.bij_vereniging:
                     regio = sporter.bij_vereniging.regio
                     if not regio.is_administratief:
-                        account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
+                        account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon_nr)
                 if not sporter.bij_vereniging:
                     # deze melding komt na 15 januari
                     account.let_op = 'LET OP: geen lid meer bij een vereniging'
@@ -496,7 +496,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 else:
                     regio = sporter.bij_vereniging.regio
                     if not regio.is_administratief:
-                        account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
+                        account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon_nr)
 
                 objs.append(account)
             # for

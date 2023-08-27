@@ -269,8 +269,8 @@ class UitslagenRegioTeamsView(TemplateView):
 
             prev_rayon = 1
             for regio in regios:
-                regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
-                prev_rayon = regio.rayon.rayon_nr
+                regio.break_before = (prev_rayon != regio.rayon_nr)
+                prev_rayon = regio.rayon_nr
 
                 regio.opt_text = 'Regio %s' % regio.regio_nr
                 regio.sel = 'regio_%s' % regio.regio_nr

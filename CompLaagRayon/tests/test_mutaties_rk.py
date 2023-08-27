@@ -14,8 +14,8 @@ from Competitie.definities import (MUTATIE_INITIEEL, MUTATIE_COMPETITIE_OPSTARTE
 from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                CompetitieMutatie, KampioenschapSporterBoog)
-from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
-                                       zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden)
+from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                            zet_competitie_fase_rk_prep, zet_competitie_fase_rk_wedstrijden)
 from Sporter.models import SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -29,7 +29,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
     url_lijst_rk_rko = '/bondscompetities/rk/lijst/%s/'                            # deelcomp_rk.pk
     url_lijst_rk_hwl = '/bondscompetities/rk/lijst/%s/vereniging/'                 # deelcomp_rk.pk
     url_wijzig_stat = '/bondscompetities/rk/lijst/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-    url_wijzig_cut_rk = '/bondscompetities/rk/planning/%s/limieten/'                                  # deelcomp_rk.pk
+    url_wijzig_cut_rk = '/bondscompetities/rk/planning/%s/limieten/'               # deelcomp_rk.pk
 
     testdata = None
     rayon_nr = 1

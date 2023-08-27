@@ -98,7 +98,7 @@ class RegioTeamsTemplateView(TemplateView):
                 deelcomp_pks = (Regiocompetitie
                                 .objects
                                 .filter(competitie=comp,
-                                        regio__rayon__rayon_nr=subset)
+                                        regio__rayon_nr=subset)
                                 .values_list('pk', flat=True))
 
             context['filters'] = filters = list()

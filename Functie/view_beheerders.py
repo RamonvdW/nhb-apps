@@ -143,12 +143,16 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
                     .filter(Q(rol='RCL', regio=functie_hwl.vereniging.regio) |
                             Q(rol='RKO', rayon=functie_hwl.vereniging.regio.rayon) |
                             Q(rol='BKO'))
-                    .select_related('rayon', 'regio', 'regio__rayon')
+                    .select_related('rayon',
+                                    'regio',
+                                    'regio__rayon')
                     .prefetch_related('accounts'))
         else:
             objs = (Functie.objects
                     .filter(rol__in=('BKO', 'RKO', 'RCL', 'MWZ', 'MWW', 'SUP', 'MO', 'CS'))
-                    .select_related('rayon', 'regio', 'regio__rayon')
+                    .select_related('rayon',
+                                    'regio',
+                                    'regio__rayon')
                     .prefetch_related('accounts'))
 
         objs = self._sorteer_functies(objs)

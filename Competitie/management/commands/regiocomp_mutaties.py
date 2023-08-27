@@ -785,7 +785,7 @@ class Command(BaseCommand):
         for deelcomp in (Regiocompetitie
                          .objects
                          .filter(competitie=competitie,
-                                 regio__rayon__rayon_nr=rayon_nr)):
+                                 regio__rayon_nr=rayon_nr)):
             pks.append(deelcomp.pk)
         # for
 
@@ -892,7 +892,7 @@ class Command(BaseCommand):
                 ver = deelnemer.sporterboog.sporter.bij_vereniging
                 if ver:
                     # schrijf de sporter in het juiste rayon in
-                    deelkamp = rayon_nr2deelkamp[ver.regio.rayon.rayon_nr]
+                    deelkamp = rayon_nr2deelkamp[ver.regio.rayon_nr]
 
                     kampioen = KampioenschapSporterBoog(
                                     kampioenschap=deelkamp,

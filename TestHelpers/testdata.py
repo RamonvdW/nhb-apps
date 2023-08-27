@@ -1206,11 +1206,11 @@ class TestData(object):
         ver = self.vereniging[ver_nr]
 
         if afstand == 18:
-            deelkamp = self.deelkamp18_rk[ver.regio.rayon.rayon_nr]
+            deelkamp = self.deelkamp18_rk[ver.regio.rayon_nr]
             klassen = self.comp18_klassen_indiv
             rk_deelnemers = self.comp18_rk_deelnemers
         else:
-            deelkamp = self.deelkamp25_rk[ver.regio.rayon.rayon_nr]
+            deelkamp = self.deelkamp25_rk[ver.regio.rayon_nr]
             klassen = self.comp25_klassen_indiv
             rk_deelnemers = self.comp25_rk_deelnemers
 
@@ -1335,8 +1335,8 @@ class TestData(object):
     def maak_voorinschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, ook_incomplete_teams=True):
         """ maak voor deze vereniging een paar teams aan voor de open RK teams inschrijving """
 
-        ver = Vereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
-        rayon_nr = ver.regio.rayon.rayon_nr
+        ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        rayon_nr = ver.regio.rayon_nr
 
         if afstand == 18:                                                           # pragma: no cover
             deelkamp = self.deelkamp18_rk[rayon_nr]
@@ -1480,8 +1480,8 @@ class TestData(object):
             en koppel er meteen een aantal RK deelnemers van de vereniging aan.
         """
 
-        ver = Vereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
-        rayon_nr = ver.regio.rayon.rayon_nr
+        ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        rayon_nr = ver.regio.rayon_nr
 
         if afstand == 18:
             deelkamp = self.deelkamp18_rk[rayon_nr]

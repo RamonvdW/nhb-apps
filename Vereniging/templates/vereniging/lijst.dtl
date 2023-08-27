@@ -88,7 +88,7 @@
             {% for obj in verenigingen %}
                 <tr>
                     {% if toon_rayon %}
-                        <td class="center hide-on-med-and-down">{{ obj.regio.rayon.rayon_nr }}</td>
+                        <td class="center hide-on-med-and-down">{{ obj.regio.rayon_nr }}</td>
                     {% endif %}
 
                     {% if toon_regio %}

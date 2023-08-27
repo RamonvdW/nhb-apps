@@ -206,8 +206,10 @@ def rol_zet_sessionvars(account, request):
                                 'regio__rayon',
                                 'vereniging',
                                 'vereniging__regio')
-                .only('rol', 'comp_type',
+                .only('rol',
+                      'comp_type',
                       'regio__regio_nr',
+                      # 'regio__rayon_nr',      # warning: does not work!
                       'rayon__rayon_nr',
                       'regio__rayon__rayon_nr',
                       'vereniging__ver_nr',
@@ -391,8 +393,10 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
                     functie = (Functie
                                .objects
                                .select_related('rayon',
-                                               'regio', 'regio__rayon',
-                                               'vereniging', 'vereniging__regio')
+                                               'regio',
+                                               'regio__rayon',
+                                               'vereniging',
+                                               'vereniging__regio')
                                .get(pk=functie_pk))
                 except (ValueError, Functie.DoesNotExist):
                     # slecht getal of geen bestaande functie
@@ -510,10 +514,10 @@ def rol_activeer_functie(request, functie):
                 return
         # for
 
-        # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
+        # IT en BB mogen wisselen naar elke SEC (dit is niet aan het pallet toegevoegd)
         account = request.user
         if account.is_authenticated:                            # pragma: no branch
-            if otp_is_controle_gelukt(request):         # pragma: no branch
+            if otp_is_controle_gelukt(request):                 # pragma: no branch
                 if account.is_staff or account.is_BB:
                     # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
                     if functie.rol == 'SEC':                    # pragma: no branch

@@ -72,23 +72,27 @@ class LijstView(UserPassesTestMixin, TemplateView):
             # het rayonnummer is verkrijgbaar via de regiocompetitie van de functie
             return (Vereniging
                     .objects
-                    .select_related('regio', 'regio__rayon')
+                    .select_related('regio',
+                                    'regio__rayon')
                     .exclude(regio__regio_nr=100)
                     .filter(regio__rayon=self.functie_nu.rayon)
                     .prefetch_related('locatie_set',
                                       'clusters')
-                    .order_by('regio__regio_nr', 'ver_nr'))
+                    .order_by('regio__regio_nr',
+                              'ver_nr'))
 
         if self.rol_nu == Rollen.ROL_BB and self.is_staff:
             # landelijke lijst + telling aantal leden
             objs = (Vereniging
                     .objects
-                    .select_related('regio', 'regio__rayon')
+                    .select_related('regio',
+                                    'regio__rayon')
                     .prefetch_related('locatie_set',
                                       'functie_set',
                                       'clusters')
                     .annotate(sporter_set_count=Count('sporter'))
-                    .order_by('regio__regio_nr', 'ver_nr'))
+                    .order_by('regio__regio_nr',
+                              'ver_nr'))
 
             for obj in objs:
                 obj.aantal_leden = obj.sporter_set_count
@@ -103,10 +107,12 @@ class LijstView(UserPassesTestMixin, TemplateView):
             # toon de landelijke lijst)
             return (Vereniging
                     .objects
-                    .select_related('regio', 'regio__rayon')
+                    .select_related('regio',
+                                    'regio__rayon')
                     .prefetch_related('locatie_set',
                                       'clusters')
-                    .order_by('regio__regio_nr', 'ver_nr'))
+                    .order_by('regio__regio_nr',
+                              'ver_nr'))
 
         # toon de lijst van verenigingen in de regio
         if self.rol_nu == Rollen.ROL_RCL:
