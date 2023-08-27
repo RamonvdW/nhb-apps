@@ -11,8 +11,8 @@ from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
-                                       zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten)
+from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                            zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
 from Locatie.models import Locatie
 from NhbStructuur.models import Rayon, Regio, Cluster

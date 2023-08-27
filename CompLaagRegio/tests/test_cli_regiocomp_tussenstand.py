@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, Regiocompetiti
                                RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch,
                                Kampioenschap)
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
-from Competitie.tests.tijdlijn import zet_competitie_fases
+from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from NhbStructuur.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.models import Score, ScoreHist

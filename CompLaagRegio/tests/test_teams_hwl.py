@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieSporterBoog, RegiocompetitieRondeTeam)
-from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
-                                       zet_competitie_fase_regio_inschrijven)
+from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                            zet_competitie_fase_regio_inschrijven)
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.operations import maak_functie
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT

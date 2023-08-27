@@ -14,6 +14,7 @@ comp_fase_kort = {
     'A': 'opstarten',
     'B': 'voorbereiden',
     'C': 'inschrijven',
+    'D': 'inschrijving (laat)',
     'F': 'wedstrijden regio',
     'G': 'vaststellen uitslag regio',
     'J': 'voorbereiding RK',
@@ -103,9 +104,13 @@ def bepaal_fase_indiv(comp) -> str:
         # B = voorbereidingen door RCL
         return 'B'
 
-    if vandaag < comp.begin_fase_F:
+    if vandaag < comp.begin_fase_D_indiv:
         # C = open voor inschrijvingen
         return 'C'
+
+    if vandaag < comp.begin_fase_F:
+        # D = late inschrijvingen
+        return 'D'
 
     if vandaag <= comp.einde_fase_F:
         # F = Wedstrijden

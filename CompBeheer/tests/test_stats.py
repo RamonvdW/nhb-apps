@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import RegiocompetitieSporterBoog
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.tijdlijn import zet_competitie_fase_regio_prep
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_prep
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

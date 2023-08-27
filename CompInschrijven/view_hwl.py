@@ -405,7 +405,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # zoek eerst de voorkeuren op
         mag_team_schieten = comp.fase_indiv == 'C'
         bulk_team = False
-        if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
+        if request.POST.get('wil_in_team', '') != '':
+            if not mag_team_schieten:
+                raise Http404('Voorkeur teamschieten niet meer toegestaan')
             bulk_team = True
 
         bulk_voorkeur_rk_bk = True

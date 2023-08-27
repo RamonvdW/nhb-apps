@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
-from Competitie.tests.tijdlijn import zet_competitie_fases
+from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -78,7 +78,7 @@ class TestCompetitieTijdlijn(E2EHelpers, TestCase):
         zet_competitie_fases(comp, 'A', 'A')
         self.assertEqual(bepaal_fase_indiv(comp), 'A')
 
-        sequence = 'BCFGJKLNOPQZQPONLKJGFCB'
+        sequence = 'BCDFGJKLNOPQZQPONLKJGFDCB'
         for fase in sequence:
             zet_competitie_fases(comp, fase, fase)
             # if fase in ('P', 'Q'):

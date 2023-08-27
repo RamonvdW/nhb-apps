@@ -12,8 +12,8 @@ from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
-                                       zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
+from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
+                                            zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
 from HistComp.models import HistCompSeizoen, HistCompRegioTeam
 from Locatie.models import Locatie

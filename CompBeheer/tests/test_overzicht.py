@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieSporterBoog, Kampioenschap
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.operations import maak_functie
 from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter

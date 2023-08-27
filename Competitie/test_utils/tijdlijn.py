@@ -86,8 +86,12 @@ def _zet_competitie_indiv_fase(comp, indiv_fase):
         return
 
     comp.begin_fase_C = gister
-
     if indiv_fase == 'C':
+        comp.begin_fase_D_indiv = morgen
+        return
+
+    comp.begin_fase_D_indiv = gister
+    if indiv_fase == 'D':
         comp.begin_fase_F = morgen
         return
 
@@ -165,18 +169,17 @@ def _zet_competitie_team_fase(comp, team_fase):
     if comp.competitieteamklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar team fase %s zonder competitie team klassen!" % team_fase)
 
+    # volgende worden in _zet_competitie_indiv_fase gezet
     if team_fase == 'B':
         comp.begin_fase_C = morgen
         return
 
     comp.begin_fase_C = gister
-
     if team_fase in ('C', 'D'):
         comp.begin_fase_F = morgen
         return
 
     comp.begin_fase_F = gister
-
     if team_fase == 'F':
         comp.einde_fase_F = morgen
         return
@@ -196,7 +199,7 @@ def zet_competitie_fases(comp, indiv_fase, team_fase):
             raise NotImplementedError("Combinatie indiv_fase=%s en team_fase=%s niet ondersteund" % (
                                         indiv_fase, team_fase))
 
-    if indiv_fase == 'C' and team_fase not in ('C', 'D'):
+    if indiv_fase in ('C', 'D') and team_fase not in ('C', 'D'):
         raise NotImplementedError("Combinatie indiv_fase=%s en team_fase=%s niet ondersteund" % (
                                         indiv_fase, team_fase))
 

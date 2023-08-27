@@ -66,9 +66,11 @@ class Competitie(models.Model):
     #         controle handmatig AG (RCL)
     #         poules voorbereiden
 
-    # Regiocompetitie bevat de (regio specifieke) begin_fase_D
+    begin_fase_D_indiv = models.DateField(default='2000-01-01')     # typisch: 15 augustus
+    # Regiocompetitie bevat de (regio specifieke) begin_fase_D voor de teamcompetitie
 
-    # fase D: incomplete teams verwijderen (RCL)
+    # fase D: late inschrijvingen individueel
+    #         incomplete teams verwijderen (RCL)
     #         alle teams in een poule plaatsen (RCL)
 
     # eerste datum wedstrijden
