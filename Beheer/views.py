@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.sites import AdminSite
+from django.contrib.admin.templatetags import admin_list
 from Account.operations.otp import otp_is_controle_gelukt
 from collections import OrderedDict
 import datetime
@@ -34,6 +35,15 @@ class BeheerAdminSite(AdminSite):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._registry = OrderedDict()
+
+        # vervang de functie die readonly booleans velden omzet een onduidelijk plaatje
+        admin_list._boolean_icon = self._boolean_icon
+
+    @staticmethod
+    def _boolean_icon(field_val):
+        return {None: "Unknown (none)",
+                True: "Ja (true)",
+                False: "Nee (false)"}[field_val]
 
     def password_change(self, request, extra_context=None):
         return HttpResponseRedirect(reverse('Account:nieuw-wachtwoord'))
