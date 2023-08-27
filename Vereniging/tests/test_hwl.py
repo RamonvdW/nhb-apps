@@ -483,8 +483,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
         urls = self.extract_all_urls(resp)
-        urls2 = [url for url in urls if url.startswith('/vereniging/accommodatie-details/')]
-        self.assertEqual(len(urls2), 1)
+        urls2 = [url for url in urls if url.startswith('/vereniging/locatie/')]
+        self.assertEqual(len(urls2), 2)
 
         # ophalen en aanpassen: zie test_accommodatie
 

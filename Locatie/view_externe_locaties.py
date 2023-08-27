@@ -18,8 +18,8 @@ from Plein.menu import menu_dynamics
 from Vereniging.models import Vereniging
 
 
-TEMPLATE_EXTERNE_LOCATIE = 'vereniging/externe-locaties.dtl'
-TEMPLATE_EXTERNE_LOCATIE_DETAILS = 'vereniging/externe-locatie-details.dtl'
+TEMPLATE_EXTERNE_LOCATIE = 'locatie/externe-locaties.dtl'
+TEMPLATE_EXTERNE_LOCATIE_DETAILS = 'locatie/externe-locatie-details.dtl'
 
 
 class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
@@ -61,7 +61,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         context['readonly'] = True
         if self.functie_nu and self.functie_nu.rol == 'HWL' and self.functie_nu.vereniging == ver:
             context['readonly'] = False
-            context['url_toevoegen'] = reverse('Vereniging:externe-locaties',
+            context['url_toevoegen'] = reverse('Locatie:externe-locaties',
                                                kwargs={'ver_nr': ver.ver_nr})
 
         locaties = ver.locatie_set.filter(zichtbaar=True,
@@ -73,7 +73,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             locatie.geen_plaats = locatie.plaats.strip() == ""
             locatie.geen_disciplines = locatie.disciplines_str() == ""
 
-            locatie.url_wijzig = reverse('Vereniging:locatie-details',
+            locatie.url_wijzig = reverse('Locatie:extern-locatie-details',
                                          kwargs={'ver_nr': ver.ver_nr,
                                                  'locatie_pk': locatie.pk})
         # for
@@ -85,7 +85,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             )
         else:
             context['kruimels'] = (
-                (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
+                (reverse('Vereniging:lijst'), 'Verenigingen'),
                 (None, 'Locaties')
             )
 
@@ -105,7 +105,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         locatie.verenigingen.add(ver)
 
         # meteen wijzigen
-        url = reverse('Vereniging:locatie-details',
+        url = reverse('Locatie:extern-locatie-details',
                       kwargs={'ver_nr': ver.ver_nr,
                               'locatie_pk': locatie.pk})
 
@@ -180,18 +180,18 @@ class ExterneLocatieDetailsView(TemplateView):
         context['buiten_max_afstand'] = [nr for nr in range(30, 100+1, 10)]
 
         if not readonly:
-            url = reverse('Vereniging:locatie-details',
+            url = reverse('Locatie:extern-locatie-details',
                           kwargs={'ver_nr': ver.ver_nr,
                                   'locatie_pk': locatie.pk})
             context['url_opslaan'] = url
             context['url_verwijder'] = url
 
-        context['url_terug'] = reverse('Vereniging:externe-locaties',
+        context['url_terug'] = reverse('Locatie:externe-locaties',
                                        kwargs={'ver_nr': ver.ver_nr})
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Vereniging:externe-locaties', kwargs={'ver_nr': ver.ver_nr}), 'Locaties'),
+            (reverse('Locatie:externe-locaties', kwargs={'ver_nr': ver.ver_nr}), 'Locaties'),
             (None, 'Locatie details')
         )
 
@@ -207,11 +207,11 @@ class ExterneLocatieDetailsView(TemplateView):
 
         if request.POST.get('verwijder', ''):
             locatie.zichtbaar = False
-            locatie.save()
+            locatie.save(update_fields=['zichtbaar'])
 
             # FUTURE: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
 
-            url = reverse('Vereniging:externe-locaties',
+            url = reverse('Locatie:externe-locaties',
                           kwargs={'ver_nr': ver.ver_nr})
             return HttpResponseRedirect(url)
 
@@ -344,7 +344,7 @@ class ExterneLocatieDetailsView(TemplateView):
 
         locatie.save()
 
-        url = reverse('Vereniging:externe-locaties',
+        url = reverse('Locatie:externe-locaties',
                       kwargs={'ver_nr': ver.ver_nr})
         return HttpResponseRedirect(url)
 

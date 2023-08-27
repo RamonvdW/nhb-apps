@@ -86,25 +86,25 @@
 
             <!-- verenigingen/accommodaties overzicht BB/BKO/MWZ -->
             {% if rol_is_bko or rol_is_bb or rol_is_mwz %}
-                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% url 'Vereniging:lijst' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht RKO -->
             {% if rol_is_rko %}
-                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% url 'Vereniging:lijst' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht RCL en HWL -->
             {% if rol_is_rcl %}
-                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% url 'Vereniging:lijst' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodaties." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht SEC en HWL -->
             {% if rol_is_sec or rol_is_hwl %}
-                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% url 'Vereniging:lijst' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Overzicht van de verenigingen en accommodaties in jouw regio." icon="share_location" url=card_url %}
             {% endif %}
 

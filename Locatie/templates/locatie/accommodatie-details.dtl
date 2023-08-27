@@ -506,6 +506,6 @@
         <p class="center">Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-accommodatie-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-accommodatie-details" %}
 
 {% endblock %}

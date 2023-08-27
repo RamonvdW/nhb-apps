@@ -50,7 +50,7 @@
             <table class="white">
                 <tr>
                     <th></th>
-                    <td>{{  }}</td>
+                    <td>{{ x }}</td>
                 </tr>
                 <tr>
                     <th>Lid sinds</th>

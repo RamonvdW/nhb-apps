@@ -13,20 +13,20 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
+from Locatie.forms import AccommodatieDetailsForm
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
-from Vereniging.models2 import Secretaris
-from Vereniging.forms import AccommodatieDetailsForm
 from Vereniging.models import Vereniging
+from Vereniging.models2 import Secretaris
 
 
-TEMPLATE_ACCOMMODATIE_DETAILS = 'vereniging/accommodatie-details.dtl'
+TEMPLATE_ACCOMMODATIE_DETAILS = 'locatie/accommodatie-details.dtl'
 
 
-class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
+class VerenigingAccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kunnen details van een locatie gewijzigd worden """
+    """ Via deze view kunnen details van de accommodatie van een vereniging gewijzigd worden """
 
     # class variables shared by all instances
     template_name = TEMPLATE_ACCOMMODATIE_DETAILS
@@ -36,9 +36,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB,
-                          Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                          Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
+        return rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
 
     @staticmethod
     def _get_vereniging_locaties_or_404(**kwargs):
@@ -79,7 +77,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 # HWL mag van zijn eigen vereniging wijzigen
                 if functie_nu.vereniging == ver:
                     return True
-            elif rol_nu == Rollen.ROL_RCL:
+            elif rol_nu == Rollen.ROL_RCL:      # TODO: dit werkt niet meer - RCL komt in Vereniging/view_lijst terecht
                 # RCL mag van alle verenigingen in zijn regio de accommodatie instellingen wijzigen
                 if functie_nu.regio == ver.regio:
                     return True
@@ -95,8 +93,6 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         binnen_locatie, buiten_locatie, externe_locaties, ver = self._get_vereniging_locaties_or_404(**kwargs)
-        if buiten_locatie and not buiten_locatie.zichtbaar:
-            buiten_locatie = None
         context['locatie'] = binnen_locatie
         context['buiten_locatie'] = buiten_locatie
         context['externe_locaties'] = externe_locaties
@@ -112,7 +108,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         qset = Functie.objects.filter(vereniging=ver).prefetch_related('accounts')
         try:
             functie_sec = qset.filter(rol='SEC')[0]
-        except IndexError:                  # pragma: no cover
+        except IndexError:
             # only in autotest environment
             raise Http404('Rol ontbreekt')
 
@@ -122,7 +118,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             try:
                 functie_hwl = qset.filter(rol='HWL')[0]
                 functie_wl = qset.filter(rol='WL')[0]
-            except IndexError:                  # pragma: no cover
+            except IndexError:
                 # only in autotest environment
                 raise Http404('Rol ontbreekt')
 
@@ -179,22 +175,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             disc.append(('disc_clout', 'Clout', buiten_locatie.discipline_clout))
 
         # terug en opslaan knoppen voor in de template
-        if 'is_ver' in kwargs:      # wordt gezet door VerenigingAccommodatieDetailsView
-            context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (None, 'Accommodatie')
-            )
-
-            opslaan_urlconf = 'Vereniging:vereniging-accommodatie-details'
-        else:
-            context['kruimels'] = (
-                (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
-                (None, 'Accommodatie')
-            )
-            opslaan_urlconf = 'Vereniging:accommodatie-details'
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, 'Accommodatie')
+        )
 
         if binnen_locatie or buiten_locatie:
-            context['opslaan_url'] = reverse(opslaan_urlconf,
+            context['opslaan_url'] = reverse('Locatie:accommodatie-details',
                                              kwargs={'ver_nr': ver.ver_nr})
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
@@ -225,11 +212,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             if buiten_locatie:
                 buiten_locatie.zichtbaar = False
                 buiten_locatie.save()
-            if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
-                urlconf = 'Vereniging:vereniging-accommodatie-details'
-            else:
-                urlconf = 'Vereniging:accommodatie-details'
-            url = reverse(urlconf, kwargs={'ver_nr': ver.ver_nr})
+            url = reverse('Locatie:accommodatie-details', kwargs={'ver_nr': ver.ver_nr})
             return HttpResponseRedirect(url)
 
         if request.POST.get('maak_buiten_locatie', None):
@@ -247,11 +230,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 buiten.save()
                 buiten.verenigingen.add(ver)
 
-            if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
-                urlconf = 'Vereniging:vereniging-accommodatie-details'
-            else:
-                urlconf = 'Vereniging:accommodatie-details'
-            url = reverse(urlconf, kwargs={'ver_nr': ver.ver_nr})
+            url = reverse('Locatie:accommodatie-details', kwargs={'ver_nr': ver.ver_nr})
             return HttpResponseRedirect(url)
 
         form = AccommodatieDetailsForm(request.POST)
@@ -371,25 +350,8 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 buiten_locatie.save()
 
-        if 'is_ver' in kwargs:
-            url = reverse('Vereniging:overzicht')
-        else:
-            url = reverse('Vereniging:lijst-verenigingen')
+        url = reverse('Vereniging:overzicht')
 
         return HttpResponseRedirect(url)
-
-
-class VerenigingAccommodatieDetailsView(AccommodatieDetailsView):
-    """ uitbreiding op AccommodatieDetailsView voor gebruik vanuit de vereniging
-        overzicht pagina voor de SEC/HWL. De vlag 'is_ver' resulteer in andere "terug" urls.
-    """
-    def get_context_data(self, **kwargs):
-        kwargs['is_ver'] = True
-        return super().get_context_data(**kwargs)
-
-    def post(self, request, *args, **kwargs):
-        kwargs['is_ver'] = True
-        return super().post(request, *args, **kwargs)
-
 
 # end of file
