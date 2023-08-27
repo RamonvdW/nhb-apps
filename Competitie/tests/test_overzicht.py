@@ -7,7 +7,7 @@
 from django.utils import timezone
 from django.test import TestCase
 from Competitie.models import Competitie
-from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_prep
+from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.definities import Rollen
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -75,8 +75,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         comp = comp_25
 
         # fase A
-        comp.begin_fase_C = now + datetime.timedelta(days=1)      # morgen
-        comp.save()
+        zet_competitie_fases(comp, 'A', 'A')
         comp.bepaal_fase()
         self.assertTrue(comp.fase_indiv < 'C', msg="comp.fase_indiv=%s (expected: below C)" % comp.fase_indiv)
         with self.assert_max_queries(20):
@@ -85,11 +84,10 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # zet competitie fase B zodat we in mogen schrijven
-        zet_competitie_fase_regio_prep(comp)
+        zet_competitie_fases(comp, 'B', 'B')
 
         # uitslagen met competitie in prep fase (C+)
-        comp.begin_fase_C = way_before   # fase B
-        comp.save()
+        zet_competitie_fases(comp, 'C', 'C')
         comp.bepaal_fase()
         self.assertTrue(comp.fase_indiv >= 'C', msg="comp.fase_indiv=%s (expected: not below C)" % comp.fase_indiv)
         with self.assert_max_queries(20):
@@ -98,8 +96,7 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # uitslagen met competitie in scorende fase (F+)
-        comp.begin_fase_F = way_before     # fase F
-        comp.save()
+        zet_competitie_fases(comp, 'F', 'F')
         comp.bepaal_fase()
         self.assertTrue(comp.fase_indiv >= 'F')
         with self.assert_max_queries(20):
