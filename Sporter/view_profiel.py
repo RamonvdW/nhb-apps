@@ -165,6 +165,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             boog_dict[boogtype.afkorting] = boogtype
         # for
 
+        objs = list()
         gebruik_knoppen = False
 
         # zoek alle inschrijvingen van deze sporter erbij
@@ -176,7 +177,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         if not voorkeuren.voorkeur_meedoen_competitie:
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
-                return None, gebruik_knoppen
+                return objs, gebruik_knoppen
 
         kampioenen = list(KampioenschapSporterBoog
                           .objects
@@ -185,8 +186,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                           'kampioenschap__rayon',
                                           'sporterboog')
                           .filter(sporterboog__sporter=sporter))
-
-        objs = list()
 
         comp_pks = [comp.pk for comp in comps]
 
