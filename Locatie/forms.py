@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import forms
+from Locatie.definities import BAAN_TYPE_ONBEKEND, BAAN_TYPE_BINNEN_BUITEN, BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT
 
 
 class AccommodatieDetailsForm(forms.Form):
@@ -68,7 +69,9 @@ class AccommodatieDetailsForm(forms.Form):
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
         if valid:
-            if self.cleaned_data.get('baan_type', '?') not in ('X', 'O', 'H'):
+            if self.cleaned_data.get('baan_type', '?') not in (BAAN_TYPE_ONBEKEND,
+                                                               BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT,
+                                                               BAAN_TYPE_BINNEN_BUITEN):
                 valid = False
 
         return valid
