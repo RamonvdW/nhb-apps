@@ -71,6 +71,7 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
         self.beheerder = self.e2e_create_account('100002', 'beheerder@test.not', 'Beheerdertje')
 
     def test_basis(self):
+        # TODO: vervang door evaluatie_datum.zet_test_datum('2019-08-01') uit Competitie/tijdlijn
         with patch('django.utils.timezone.localtime') as mock_timezone:
             # te vroeg/laat om een mail te sturen
             dt = datetime(year=2000, month=1, day=1, hour=19)
@@ -85,6 +86,8 @@ class TestCompInschrijvenCliMeldRcl(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('meld_rcl_nieuwe_inschrijvingen')
             self.assertEqual(f1.getvalue(), '')
             self.assertTrue('[INFO] Vandaag is 2000-01-01; gisteren is 1999-12-31' in f2.getvalue())
+
+            # TODO: test fase D toevoegen
 
             # juiste fase en tijdstip, maar geen nieuwe inschrijvingen
             zet_competitie_fase_regio_wedstrijden(self.comp_18m)
