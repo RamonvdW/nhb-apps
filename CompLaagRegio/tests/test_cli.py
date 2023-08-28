@@ -446,7 +446,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('verwijder_dupe_data')
 
         self.assertTrue(f1.getvalue() == '')
-        self.assertTrue(f2.getvalue() == '')
+        self.assertTrue(f2.getvalue() == 'Geen duplicate data gevonden\n')
 
         # maak een echte dupe aan
         dupe = RegiocompetitieSporterBoog(
