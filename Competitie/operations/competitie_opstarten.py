@@ -323,9 +323,10 @@ def competities_aanmaken(jaar=None):
     if not jaar:
         jaar = bepaal_startjaar_nieuwe_competitie()
 
-    einde_jaar = date(year=jaar, month=12, day=31)  # 31 december
-    begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
-    begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei
+    einde_jaar = date(year=jaar, month=12, day=31)          # 31 december
+    begin_rk = date(year=jaar + 1, month=2, day=1)          # 1 februari
+    begin_bk = date(year=jaar + 1, month=5, day=1)          # 1 mei
+    einde_inschrijving = date(year=jaar, month=8, day=15)   # 15 aug
 
     rayons = Rayon.objects.all()
     regios = Regio.objects.filter(is_administratief=False)
@@ -353,6 +354,7 @@ def competities_aanmaken(jaar=None):
                     afstand=afstand,      # 18/25
                     begin_jaar=jaar,
                     begin_fase_C=einde_jaar,
+                    begin_fase_D_indiv=einde_inschrijving,
                     begin_fase_F=einde_jaar,
                     einde_fase_F=begin_rk,
                     datum_klassengrenzen_rk_bk_teams=begin_rk,

@@ -48,6 +48,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
                                         kwargs={'comp_pk': comp.pk})
 
         comp.datum1 = comp.begin_fase_C
+        # note: begin_fase_D_indiv is nog niet in te stellen
         comp.datum2 = comp.begin_fase_F
         comp.datum3 = comp.einde_fase_F
         comp.datum4 = comp.datum_klassengrenzen_rk_bk_teams
@@ -98,6 +99,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
         datums.insert(0, None)      # dummy
         comp.begin_fase_C = datums[1]
+        # note: begin_fase_D_indiv is nog niet in te stellen
         comp.begin_fase_F = datums[2]
         comp.einde_fase_F = datums[3]
         comp.datum_klassengrenzen_rk_bk_teams = datums[4]

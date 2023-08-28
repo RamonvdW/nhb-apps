@@ -180,9 +180,9 @@ def bepaal_match_en_deelcomp_of_404(match_pk):
         else:
             uitslag.max_score = 250
             uitslag.afstand = 25
-        uitslag.save()
+        uitslag.save()            # TODO: mag niet tijdens GET
         match.uitslag = uitslag
-        match.save()
+        match.save()              # TODO: mag niet tijdens GET
 
     return match, deelcomp, ronde
 
