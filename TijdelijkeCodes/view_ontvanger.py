@@ -49,7 +49,8 @@ class OntvangerView(View):
                 context['activiteit'] = beschrijving_activiteit(obj)
             else:
                 # verlopen link
-                obj.delete()
+                # opruimen gebeurt dagelijks (zie models.py)
+                pass
         # for
 
         if not match:
@@ -82,7 +83,11 @@ class OntvangerView(View):
                 url_or_response = do_dispatch(request, obj)
 
             # verwijder de gebruikte tijdelijke url
-            obj.delete()
+            try:
+                obj.delete()
+            except TijdelijkeCode.DoesNotExist:                 # pragma: no cover
+                # waarschijnlijk door concurrency - ignore
+                pass
         # for
 
         if isinstance(url_or_response, HttpResponse):
