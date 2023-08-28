@@ -187,6 +187,8 @@
                             {% endif %}
 
                             <input class="btn-sv-rood" type="submit" value="Meld mij aan" id="submit">
+
+                            <p>Let op: bij aanmelden v&oacute;&oacute;r {{ deelcomp.competitie.begin_fase_D_indiv }} is je deelname gegarandeerd.<br>Bij latere aanmelding bepaalt de regiocompetitieleider (RCL) of er ruimte is in jouw regio.</p>
                         </div>
                     </form>
 
