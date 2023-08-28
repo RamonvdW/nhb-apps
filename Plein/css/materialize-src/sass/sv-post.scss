@@ -173,6 +173,33 @@
   opacity: 0.9;
 }
 
+.sv-card-content-webwinkel {
+    @extend .sv-card-content;
+    padding: 0 !important;     // let picture extend to the edge
+}
+
+.sv-card-image-webwinkel {
+    @extend .card-image;
+    top: 0;
+    left: 0;
+    width: 224px;
+    height: 224px;
+    overflow: hidden;
+}
+
+.sv-card-webwinkel-prijs {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: white;
+    background-color: rgba(0,0,0,.5);
+    padding: 3px;
+}
+
+.sv-card-image-onscherp {
+    opacity: 0.5;
+}
+
 .sv-card-schuine-banner {
   @extend .sv-card-vanaf;
   transform: rotate(-30deg);
