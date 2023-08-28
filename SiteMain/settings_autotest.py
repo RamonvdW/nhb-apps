@@ -22,6 +22,9 @@ PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 
 WEBWINKEL_FOTOS_DIR = 'data_test/webwinkel'
 
+# enable javascript validation using ESprima
+TEST_VALIDATE_JAVASCRIPT = True
+
 # enable html validation using the Nu Html Checker (v.Nu)
 # WARNING: increases test run duration significantly (triple!)
 #TEST_VALIDATE_HTML = True

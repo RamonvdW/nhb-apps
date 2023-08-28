@@ -11,7 +11,7 @@
 "exec" "python3" "-u" "$0" "$@"
 
 from django.core.management import execute_from_command_line
-from TestHelpers.e2estatus import validated_templates, included_templates, consistent_email_templates
+from TestHelpers.template_status import validated_templates, included_templates, consistent_email_templates
 from traceback import StackSummary
 from pathlib import Path
 import sys

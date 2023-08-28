@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-08-27'
+SITE_VERSIE = '2023-08-28'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -554,5 +554,8 @@ DEBUG = False
 
 # HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)
 TEST_VALIDATE_HTML = False
+
+# JS validation using ESprima
+TEST_VALIDATE_JAVASCRIPT = False
 
 # end of file
