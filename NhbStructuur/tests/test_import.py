@@ -271,6 +271,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100001: is_actief_lid: ja --> nee" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100024: para_classificatie: 'W1' --> ''" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100025 is overleden op 2018-05-05 en wordt op inactief gezet" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100098: adres_code '1111AA111' --> '1115AB5'" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100098: geboorteplaats 'Papendal' --> 'Arnhem'" in f2.getvalue())
@@ -295,6 +296,15 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         sporter = Sporter.objects.get(lid_nr=100025)
         self.assertFalse(sporter.is_actief_lid)      # want: overleden
+
+        # nog een keer hetzelfde commando geeft geen nieuwe log regels
+        with self.assert_max_queries(64):
+            f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                                 TESTFILE_09_LID_MUTATIES,
+                                                 OPTION_SIM)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertFalse("[INFO] Lid 100025 is overleden op 2018-05-05 en wordt op inactief gezet" in f2.getvalue())
 
     def test_haakjes(self):
         # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd
