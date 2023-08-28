@@ -250,42 +250,44 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
             with connection.execute_wrapper(tracer):
                 yield
         finally:
-            if check_duration:
-                duration = datetime.datetime.now() - tracer.started_at
-                duration_seconds = duration.seconds + (duration.microseconds / 1000000.0)
-            else:
-                duration_seconds = 0.0
+            if not tracer.found_500:
+                if check_duration:
+                    duration = datetime.datetime.now() - tracer.started_at
+                    duration_seconds = duration.seconds + (duration.microseconds / 1000000.0)
+                else:
+                    duration_seconds = 0.0
 
-            count = len(tracer.trace)
+                count = len(tracer.trace)
 
-            if num == -1:                         # pragma: no cover
-                print('[INFO] Operation resulted in %s queries' % count)
+                if num == -1:                         # pragma: no cover
+                    print('[INFO] Operation resulted in %s queries' % count)
 
-            elif count > num:                     # pragma: no cover
-                msg = "Too many queries: %s; maximum %d. %s" % (count, num, tracer)
-                self.fail(msg)
+                elif count > num:                     # pragma: no cover
+                    msg = "Too many queries: %s; maximum %d. %s" % (count, num, tracer)
+                    self.fail(msg)
 
-            if count <= num:
-                # kijk of het wat minder kan
-                if num > 20:
-                    ongebruikt = num - count
-                    if ongebruikt / num > 0.25:                                     # pragma: no cover
-                        self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
+                if count <= num:
+                    # kijk of het wat minder kan
+                    if num > 20:
+                        ongebruikt = num - count
+                        if ongebruikt / num > 0.25:                                     # pragma: no cover
+                            self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
 
-            if duration_seconds > 1.5:                                              # pragma: no cover
-                print("[WARNING] Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (
-                                    duration_seconds, len(tracer.trace), tracer.total_duration_us / 1000.0))
+                if duration_seconds > 1.5:                                              # pragma: no cover
+                    print("[WARNING] Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (
+                                        duration_seconds, len(tracer.trace), tracer.total_duration_us / 1000.0))
 
-            if len(tracer.trace) > 500:                                             # pragma: no cover
-                print("[WARNING] Operation required a lot of database interactions: %s queries" % len(tracer.trace))
+                if len(tracer.trace) > 500:                                             # pragma: no cover
+                    print("[WARNING] Operation required a lot of database interactions: %s queries" % len(tracer.trace))
 
-            if tracer.found_modify:
-                # more than just SELECT
-                self.check_concurrency_risks(tracer)
+                if tracer.found_modify:
+                    # more than just SELECT
+                    self.check_concurrency_risks(tracer)
 
-        report = tracer.report()
-        if report:
-            print(report)
+        if not tracer.found_500:
+            report = tracer.report()
+            if report:
+                print(report)
 
 
 # end of file

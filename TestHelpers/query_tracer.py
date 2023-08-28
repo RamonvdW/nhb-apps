@@ -26,7 +26,6 @@ Usage:
 
 """
 
-
 # debug optie: toon waar in de code de queries vandaan komen
 REPORT_QUERY_ORIGINS = False
 
@@ -40,6 +39,7 @@ class MyQueryTracer(object):
         self.modify_acceptable = modify_acceptable
         self.found_modify = False       # meer dan SELECT gevonden
         self.found_code = ""            # view function filename, line, name
+        self.found_500 = False
 
     def __call__(self, execute, sql, params, many, context):
         call = {'sql': sql}
@@ -60,12 +60,18 @@ class MyQueryTracer(object):
 
         call['stack'] = stack = list()
         for fname, line_nr, base, code in traceback.extract_stack():
+            # print(base, fname, line_nr, code)
             if (base != '__call__'
                     and not fname.startswith('/usr/lib')
                     and '<frozen' not in fname
                     and '/site-packages/' not in fname
                     and 'manage.py' not in fname):
                 stack.append((fname, line_nr, base))
+
+                if base == 'site_handler500_internal_server_error':
+                    self.found_500 = True
+                    break   # from the for
+
                 # houd bij vanuit welke view functie
                 if '/view' in fname and self.found_code == '':
                     if 'post' in base or 'get' in base or 'test_func' in base:
