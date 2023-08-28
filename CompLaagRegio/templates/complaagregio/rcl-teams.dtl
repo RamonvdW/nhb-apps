@@ -194,7 +194,7 @@
                 <th>Vereniging</th>
                 <th>Naam</th>
                 <th class="center">Team sterkte</th>
-                <th><!-- beschrijving --></th>
+                <th class="center">In poule?</th>
                 <th><!-- kolom voor knoppen --></th>
                 <td rowspan="{{ klasse.aantal_regels }}" class="sv-table-zijrand"></td>
             </tr>
@@ -207,7 +207,7 @@
                     <td>{{ team.vereniging }}</td>
                     <td>{{ team.team_naam }}</td>
                     <td class="center">{{ team.ag_str }}</td>
-                    <td><!-- beschrijving --></td>
+                    <td class="center">{% if team.in_poule %}Ja{% else %}<span class="sv-rood-text">Nee</span>{% endif %}</td>
                     <td class="center">
                         <!-- knoppen -->
                         {% if team.url_aanpassen %}
