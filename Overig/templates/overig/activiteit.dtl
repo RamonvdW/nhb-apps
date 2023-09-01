@@ -433,14 +433,14 @@
                             <p>Wil je de tweede factor voor <b>[{{ obj.inlog_naam_str }}] {{ obj.volledige_naam }}</b> resetten?</p>
                             <p>We sturen de gebruiker een e-mail met instructies hoe de tweede factor weer gekoppeld kan worden.</p>
 
-                            <form action="{{ url_reset_tweede_factor }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                            <form action="{{ url_reset_tweede_factor }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
                                 {% csrf_token %}
                                 <input type="hidden" name="reset_tweede_factor" value="1">
                                 <input type="hidden" name="inlog_naam" value="{{ obj.inlog_naam_str }}">
 
                                 <div class="modal-footer" style="text-align:center; display:block">
                                     <div style="display:inline-block; width:50%">
-                                        <button class="btn-sv-rood" id="submit_knop2" type="submit">Ja</button>
+                                        <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">Ja</button>
                                     </div>
                                     <div style="display:inline-block; width:50%">
                                         <a href="#" class="btn-sv-blauw modal-close">Nee</a>

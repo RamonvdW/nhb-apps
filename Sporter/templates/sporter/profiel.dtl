@@ -208,7 +208,7 @@
 
                     {% if hint_voorkeuren %}
                         <tr>
-                            <td colspan="3" class="center sv-rood-text">Niets gevonden<br>Controleer je voorkeuren (bogen)</></td>
+                            <td colspan="3" class="center sv-rood-text">Niets gevonden<br>Controleer je voorkeuren (bogen)</td>
                         </tr>
                     {% endif %}
                 </table>

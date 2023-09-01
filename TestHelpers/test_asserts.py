@@ -447,6 +447,7 @@ class MyTestAsserts(TestCase):
             # varianten:
             #  onsubmit="submit_knop.disabled=true; return true;"
             #  onsubmit="submit_knop1.disabled=true; return true;"
+            #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
             ok = True
             pos1 = form.find(' onsubmit="submit_knop')
             if pos1 < 0:
@@ -454,10 +455,12 @@ class MyTestAsserts(TestCase):
             else:
                 pos2 = form.find('"', pos1+11)
                 submit = form[pos1+11:pos2]
-                if '.disabled=true; return true;' not in submit:
+                if '.disabled=true;' not in submit:
+                    ok = False
+                if 'return true;' not in submit:
                     ok = False
             if not ok:
-                self.fail('Form without onsubmit for dubbelklik bescherming in template %s' % repr(dtl))
+                self.fail('Form without onsubmit for dubbelklik bescherming in template %s\n%s' % (repr(dtl), repr(submit)))
 
             pos_button = form.find('<button')
             button_count = 0
