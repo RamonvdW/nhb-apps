@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 import traceback
-import datetime
 import time
 
 """
@@ -20,7 +19,7 @@ Usage:
                 yield
         finally:
             # analyze results
-            duration = datetime.datetime.now() - tracer.started_at
+            duration = get_elapsed_seconds()
             count = len(tracer.trace)
             ...
 
@@ -33,7 +32,7 @@ REPORT_QUERY_ORIGINS = False
 class MyQueryTracer(object):
     def __init__(self, modify_acceptable=False):
         self.trace = list()             # [dict, dict, ..] Keys: sql, now, duration_us, stack
-        self.started_at = datetime.datetime.now()
+        self.started_at_ns = time.monotonic_ns()
         self.total_duration_us = 0
         self.stack_counts = dict()      # [stack] = count       requires REPORT_QUERY_ORIGINS = True
         self.modify_acceptable = modify_acceptable
@@ -181,5 +180,10 @@ class MyQueryTracer(object):
             # for
         return "\n".join(report)
 
+    def get_elapsed_seconds(self):
+        duration_ns = time.monotonic_ns() - self.started_at_ns
+        duration_sec = duration_ns / 1000000000
+        # print("duration_ns=%s --> duration_sec=%s" % (duration_ns, duration_sec))
+        return duration_sec
 
 # end of file

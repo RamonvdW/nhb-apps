@@ -252,8 +252,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         finally:
             if not tracer.found_500:
                 if check_duration:
-                    duration = datetime.datetime.now() - tracer.started_at
-                    duration_seconds = duration.seconds + (duration.microseconds / 1000000.0)
+                    duration_seconds = tracer.get_elapsed_seconds()
                 else:
                     duration_seconds = 0.0
 
