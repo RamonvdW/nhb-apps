@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function toevoegen(id)
         {
             // console.log('toevoegen: id=', id)
@@ -103,7 +103,7 @@
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3">
                     <div class="form-padding">
-                        <form action="{{ url_zoek }}" method="get">
+                        <form action="{{ url_zoek }}" method="get" onsubmit="submit_knop1.disabled=true; return true;">
 
                             <div class="input-field">
                                 <label for="id_bondsnr">Bondsnummer</label>
@@ -111,7 +111,7 @@
                             </div>
 
                             <p class="center">
-                                <button class="btn-sv-rood" type="submit">
+                                <button class="btn-sv-rood" id="submit_knop1" type="submit">
                                     <i class="notranslate material-icons-round left">search</i>Zoek</button>
                             </p>
 
@@ -302,7 +302,7 @@
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3">
                     <div style="padding:30px">
-                        <form action="{{ url_zoek }}" method="get">
+                        <form action="{{ url_zoek }}" method="get" onsubmit="submit_knop2.disabled=true; return true;">
 
                             <div class="input-field">
                                 <label for="id_bondsnr">Bondsnummer</label>
@@ -310,7 +310,7 @@
                             </div>
 
                             <p class="center">
-                                <button class="btn-sv-rood" type="submit">
+                                <button class="btn-sv-rood" id="submit_knop2" type="submit">
                                     <i class="notranslate material-icons-round left">search</i>Zoek</button>
                             </p>
 

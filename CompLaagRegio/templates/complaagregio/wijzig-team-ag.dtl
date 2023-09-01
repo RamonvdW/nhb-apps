@@ -19,12 +19,12 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function invoer() {
             const el = document.getElementById('id_ag')
 
             // enable de 'opslaan' knop
-            const el2 = document.getElementById("opslaan_knop")
+            const el2 = document.getElementById("submit_knop")
             el2.disabled = (el.value === "")
         }
     </script>
@@ -80,14 +80,14 @@
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3">
                     <div class="form-padding">
-                        <form action="{{ url_opslaan }}" method="post">
+                        <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                             {% csrf_token %}
 
 
                             <input id="id_ag" name="nieuw_ag" type="number" placeholder="1.234" min="1.000" max="9.999" step="0.001" oninput="invoer()">
 
                             <div class="center" style="margin-top:30px">
-                                <button id="opslaan_knop" class="btn-sv-rood" type="submit" disabled>
+                                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
                                     <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                             </div>
 

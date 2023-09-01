@@ -74,13 +74,13 @@
                     <p>Wil je <b>{{ obj.lid_nr_naam }}</b> toevoegen aan het RK van Rayon {{ obj.rayon_nr }}?</p>
                     <p>Sporter zal worden opgenomen in klasse <b>{{ obj.nieuwe_klasse.beschrijving }}</b> ({{ obj.nieuwe_klasse.min_ag }})</p>
 
-                    <form method="post" action="{{ obj.url }}">
+                    <form action="{{ obj.url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="toevoegen" value="1">
 
                         <div class="modal-footer" style="text-align:center; display:block">
                             <div style="display:inline-block; width:50%">
-                                <button class="btn-sv-rood" type="submit">Ja</button>
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Ja</button>
                             </div>
                             <div style="display:inline-block; width:50%">
                                 <a href="#" class="btn-sv-blauw modal-close">Nee</a>

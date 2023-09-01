@@ -24,7 +24,7 @@
         <div class="col s10 offset-s1 white z-depth-3">
 
             <!-- dialoog venster -->
-            <form action="{{ formulier_url }}" method="post">
+            <form action="{{ formulier_url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                 {% csrf_token %}
 
                 <table>
@@ -68,7 +68,7 @@
                     <tr>
                         <td></td>
                         <td>
-                            <button class="btn-sv-rood" type="submit">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
                                 <i class="notranslate material-icons-round left">done</i>Verstuur</button>
                         </td>
                     </tr>

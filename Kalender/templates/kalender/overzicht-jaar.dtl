@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function stuur_keuzes(url) {
             // construeer een url en navigeer daar naartoe
 

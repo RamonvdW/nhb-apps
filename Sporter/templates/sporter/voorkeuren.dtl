@@ -10,12 +10,12 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
+            const el = document.getElementById("submit_knop")
             el.disabled = false
             el.parentElement.style.display = "block"
         }
@@ -37,7 +37,7 @@
 
             <!-- dialoog venster -->
             <div style="margin:0px 30px 30px 30px">
-                <form method="post" action="{{ opslaan_url }}">
+                <form action="{{ opslaan_url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
 
                     {% if sporter_pk %}
@@ -294,7 +294,7 @@
                     </table>
 
                     <div class="fixed-action-btn" style="display: none">
-                        <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
+                        <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
                             <i class="notranslate material-icons-round left">check</i>Voorkeuren opslaan</button>
                     </div>
 

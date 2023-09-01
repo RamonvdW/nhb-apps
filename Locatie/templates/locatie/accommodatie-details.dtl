@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
@@ -21,7 +21,7 @@
             })
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
+            const el = document.getElementById("submit_knop2")
             el.disabled = false
             el.parentElement.style.display = "block"
         }
@@ -37,13 +37,13 @@
 
     {% if opslaan_url %}
         {% if not buiten_locatie %}
-            <form id="form1" action="{{ opslaan_url }}" method="post">
+            <form id="form1" action="{{ opslaan_url }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
                 {% csrf_token %}
                 <input hidden name="maak_buiten_locatie" value="1">
             </form>
         {% endif %}
 
-        <form id="form2" action="{{ opslaan_url }}" method="post">
+        <form id="form2" action="{{ opslaan_url }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
             {% csrf_token %}
     {% endif %}
 
@@ -200,7 +200,7 @@
                     <div class="row center">
                         <div class="col s12">
                             <h4>Buitenbaan?</h4>
-                            <button form="form1" class="btn-sv-rood wijzig_knop">Buitenbaan toevoegen</button>
+                            <button form="form1" class="btn-sv-rood wijzig_knop" id="submit_knop1" type="submit">Buitenbaan toevoegen</button>
                         </div>
                     </div>
 
@@ -468,7 +468,7 @@
 
         {% if not readonly %}
             <div class="fixed-action-btn" style="display: none">
-                <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
+                <button class="btn-sv-rood" id="submit_knop2" type="submit" disabled>
                     <i class="notranslate material-icons-round left">check</i>Wijzigingen opslaan</button>
             </div>
         {% endif %}
@@ -483,13 +483,13 @@
                 <h5>Verwijder buitenbaan?</h5>
                 <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
-                <form method="post" action="{{ url_verwijder_buitenbaan }}">
+                <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="submit_knop3.disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder_buitenbaan" value="1">
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" id="submit_knop3" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
                             <a href="#" class="btn-sv-blauw modal-close">Nee</a>

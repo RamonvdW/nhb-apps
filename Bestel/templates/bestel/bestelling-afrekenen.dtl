@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         let pogingen = 20;      // 20 seconden
 
         function status_ophalen_klaar(xhr)

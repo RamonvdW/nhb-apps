@@ -30,7 +30,19 @@
     </div>
 
     {% if regio_heeft_clusters %}
-        <form action="{{ opslaan_url }}" method="post">
+
+        <script>
+            function gewijzigd() {
+                // het formulier is aangepast en moet opgeslagen worden
+
+                // enable de 'opslaan' knop
+                const el = document.getElementById("submit_knop")
+                el.disabled = false
+                el.parentElement.style.display = "block"
+            }
+        </script>
+
+        <form action="{{ opslaan_url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
             {% csrf_token %}
 
             <!-- witruimte -->
@@ -48,35 +60,6 @@
                     <!-- dialoog venster -->
                     <div style="padding:20px" class="left-align">
 
-                        {% comment %}
-                        {% if foutmelding %}
-                            <p class="sv-rood-text">Fout: {{ foutmelding }}</p>
-                            <p>&nbsp;</p>
-                        {% endif %}
-
-
-                        <!-- form field -->
-                        <div class="input-field">
-                            {{ form.login_naam.label_tag }}{{ form.login_naam }}
-                        </div>
-
-                        <!-- manually constructed field -->
-                        <div class="input-field">
-                            <label>
-                                <input type="checkbox" class="filled-in" name="aangemeld_blijven">
-                                <span class="black-text">Aangemeld blijven</span>
-                            </label>
-                        </div>
-
-                        <!-- button -->
-                        <p class="center">
-                            <button class="btn-sv-rood" type="submit">
-                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                        </p>
-
-                        {% endcomment %}
-
-
                         <!-- naam van elk cluster in de regio -->
                         <table class="white">
                             <thead>
@@ -91,17 +74,12 @@
                                     <td>{{ obj.cluster_code_str }}</td>
 
                                     <td class="input-field">
-                                        <input type="text" name="{{ obj.veld_naam }}" placeholder="Hier invoeren" value="{{ obj.naam }}">
+                                        <input type="text" name="{{ obj.veld_naam }}" placeholder="Hier invoeren" value="{{ obj.naam }}" oninput="gewijzigd()">
                                     </td>
                                 </tr>
                             {% endfor %}
+
                         </table>
-
-                        <p class="center">
-                            <!-- TODO: make floating button -->
-                            <button class="btn-sv-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                        </p>
-
                     </div>
 
                 </div>
@@ -145,7 +123,7 @@
                                     <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 
                                     <td>
-                                        <select name="{{ obj.veld_naam }}">
+                                        <select name="{{ obj.veld_naam }}" onchange="gewijzigd()">
                                             {% for opt in obj.cluster_opties %}
                                                 <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>{{ opt.tekst }}</option>
                                             {% endfor %}
@@ -155,15 +133,16 @@
                             {% endfor %}
 
                         </table>
-
-                        <p class="center">
-                            <!-- TODO: make floating button -->
-                            <button class="btn-sv-rood" type="submit"><i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                        </p>
-
                     </div>
+
                 </div>
             </div>
+
+            <div class="fixed-action-btn" style="display:none">
+                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+            </div>
+
         </form>
 
         <!-- witruimte -->

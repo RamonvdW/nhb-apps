@@ -25,7 +25,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
 
-                    <form action="{{ url_opslaan }}" method="post">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -67,7 +67,7 @@
                         </table>
 
                         <div class="center" style="margin-top:30px">
-                            <button class="btn-sv-rood" type="submit">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </div>
 
@@ -94,13 +94,13 @@
                 <h5>Verwijder dit RK team?</h5>
                 <p>Wil je dit RK team van vereniging<br><b>{{ rk_team.vereniging }}</b><br>verwijderen?</p>
 
-                <form method="post" action="{{ url_verwijderen }}">
+                <form action="{{ url_verwijderen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijderen" value="1">
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
                             <a href="#" class="btn-sv-blauw modal-close">Nee</a>

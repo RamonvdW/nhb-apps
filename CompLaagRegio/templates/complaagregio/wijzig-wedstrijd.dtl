@@ -57,7 +57,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
 
         let ignore_changes = true;
 
@@ -72,7 +72,7 @@
                 })
 
                 // enable de 'opslaan' knop
-                const el = document.getElementById("opslaan_knop");
+                const el = document.getElementById("submit_knop1");
                 el.disabled = false;
                 el.parentElement.style.display = "block";
             }
@@ -147,7 +147,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
 
-                    <form method="post" action="{{ url_opslaan }}">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -263,7 +263,7 @@
 
                         <br>
                         <p class="center">
-                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 
@@ -302,13 +302,13 @@
                 <h5>Verwijder wedstrijd?</h5>
                 <p>Wil je deze wedstrijd echt verwijderen uit de planning?</p>
 
-                <form method="post" action="{{ url_verwijderen }}">
+                <form action="{{ url_verwijderen }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder_ronde" value="1">
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" id="submit_knop2" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
                             <a href="#" class="btn-sv-blauw modal-close">Nee</a>
@@ -321,7 +321,7 @@
     {% endif %}
 
     <!-- initialisatie van de datum/tijd kiezers -->
-    <script type="application/javascript">
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
                 let el1 = document.querySelector('#tijd1');
                 let options = {

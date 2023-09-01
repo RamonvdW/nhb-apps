@@ -69,9 +69,9 @@
 
                     <tr>
                         <td colspan="5" class="center">
-                            <form method="post" action="{{ url_vaststellen }}">
+                            <form action="{{ url_vaststellen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                                 {% csrf_token %}
-                                <input class="btn-sv-rood" name="button_vaststellen" type="submit" value="Ja, stel deze teams klassengrenzen vast">
+                                <input class="btn-sv-rood" name="button_vaststellen" id="submit_knop" type="submit" value="Ja, stel deze teams klassengrenzen vast">
                             </form>
                         </td>
                     </tr>

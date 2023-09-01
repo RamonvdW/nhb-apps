@@ -11,7 +11,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function do_uitschrijven(id)
         {
             // voer een POST uit om toe te voegen

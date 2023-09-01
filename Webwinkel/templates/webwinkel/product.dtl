@@ -43,7 +43,7 @@
     </div>
 
 
-    <script type="application/javascript">
+    <script>
 
         const volgordes = [
             {% for foto in fotos %}
@@ -104,7 +104,7 @@
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3">
                     <div class="form-padding">
-                        <form action="{{ url_toevoegen }}" method="post">
+                        <form action="{{ url_toevoegen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                             {% csrf_token %}
 
                             <div class="input-field">
@@ -120,7 +120,7 @@
 
                             <!-- button -->
                             <p class="center">
-                                <button class="btn-sv-rood">Leg in mijn mandje</button>
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">Leg in mijn mandje</button>
                             </p>
 
                         </form>

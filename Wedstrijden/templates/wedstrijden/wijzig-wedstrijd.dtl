@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd(code_blokkeer) {
             // het formulier is aangepast en moet opgeslagen worden
 
@@ -21,7 +21,7 @@
             })
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop");
+            const el = document.getElementById("submit_knop3");
             el.disabled = false;
             el.parentElement.style.display = "block";
 
@@ -57,24 +57,24 @@
         }
     </script>
 
+    {% if url_next_tekst %}
+        <form id="form_next" action="{{ url_next_status }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+            {% csrf_token %}
+            <input type="hidden" name="verder" value="1">
+        </form>
+    {% endif %}
+
+    {% if url_prev_tekst %}
+        <form id="form_prev" action="{{ url_next_status }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+            {% csrf_token %}
+            <input type="hidden" name="terug" value="1">
+        </form>
+    {% endif %}
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wijzig wedstrijd</h3>
-
-            {% if url_next_tekst %}
-                <form id="form_next" action="{{ url_next_status }}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="verder" value="1">
-                </form>
-            {% endif %}
-
-            {% if url_prev_tekst %}
-                <form id="form_prev" action="{{ url_next_status }}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="terug" value="1">
-                </form>
-            {% endif %}
         </div>
     </div>
 
@@ -86,7 +86,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding" style="padding-top:0px">
 
-                    <form method="post" action="{{ url_opslaan }}">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop3.disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -153,11 +153,11 @@
                                     {% endfor %}
                                     <br>
                                     {% if url_prev_tekst %}
-                                        <button form="form_prev" class="btn-sv-blauw vertrek_knop">{{ url_prev_tekst }}</button>
+                                        <button form="form_prev" class="btn-sv-blauw vertrek_knop" id="submit_knop2" type="submit">{{ url_prev_tekst }}</button>
                                         <span>&nbsp;&nbsp;</span>
                                     {% endif %}
                                     {% if url_next_tekst %}
-                                        <button form="form_next" class="btn-sv-rood vertrek_knop">{{ url_next_tekst }}</button>
+                                        <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
                                     {% endif %}
                                     {% if not wed.verkoopvoorwaarden_status_acceptatie %}
                                         <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
@@ -515,7 +515,7 @@
                         </div>
 
                         <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" id="submit_knop3" type="submit" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
                         </div>
 
@@ -541,13 +541,13 @@
                 <h5>Annuleren?</h5>
                 <p>Wil je deze wedstrijd echt annuleren?</p>
 
-                <form method="post" action="{{ url_annuleer }}">
+                <form action="{{ url_annuleer }}" method="post" onsubmit="submit_knop4.disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="annuleer" value="1">
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" id="submit_knop4" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
                             <a href="#" class="btn-sv-blauw modal-close">Nee</a>
@@ -573,13 +573,13 @@
                         <h5>Verwijderen?</h5>
                         <p>Wil je deze wedstrijd echt verwijderen?</p>
 
-                        <form method="post" action="{{ url_verwijder }}">
+                        <form action="{{ url_verwijder }}" method="post" onsubmit="submit_knop5.disabled=true; return true;">
                             {% csrf_token %}
                             <input type="hidden" name="verwijder_wedstrijd" value="ja">
 
                             <div class="modal-footer" style="text-align:center; display:block">
                                 <div style="display:inline-block; width:50%">
-                                    <button class="btn-sv-rood" type="submit">Ja</button>
+                                    <button class="btn-sv-rood" id="submit_knop5" type="submit">Ja</button>
                                 </div>
                                 <div style="display:inline-block; width:50%">
                                     <a href="#" class="btn-sv-blauw modal-close">Nee</a>
@@ -605,7 +605,7 @@
 
     <!-- initialisatie van de datum/tijd kiezers -->
 
-    <script type="application/javascript">
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
                 const minDate = new Date("{{ min_date|date:'Y-m-d' }}");
                 const maxDate = new Date("{{ max_date|date:'Y-m-d' }}");

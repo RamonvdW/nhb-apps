@@ -132,11 +132,11 @@ class Loader(AppDirectoriesLoader):
             pos2 = contents.find('</script>')
             if pos2 > pos:
                 # section of <script[...]>..</script>
-                pos3 = contents.find('<script type="application/javascript">')
+                pos3 = contents.find('<script>')
                 if pos3 == pos:
                     # javascript to minify
-                    clean += contents[:pos+38]   # eat complete start tag
-                    clean += self.minify_js(contents[pos+38:pos2])
+                    clean += contents[:pos+8]   # eat complete start tag
+                    clean += self.minify_js(contents[pos+8:pos2])
                     clean += contents[pos2:pos2+9]  # </script>
                 else:
                     # typically  <script src="..."></script>

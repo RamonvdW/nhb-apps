@@ -20,7 +20,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function wissel_naar_rol() {
             // vind de gekozen radiobutton
             const el = document.querySelector("input[type='radio'][name='rol']:checked")
@@ -95,9 +95,9 @@
                     <div class="white left-align" style="padding:10px; margin-bottom:15px">
                         <div class="center" style="margin-bottom:10px"><b>Indoor</b></div>
                         {% for obj in alle_18 %}
-                            <form method="post" action="{{ obj.url }}" style="display:inline">
+                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-rood">{{ obj.tekst_kort }}</button>
+                                <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>
                             {% if obj.do_break %}<br>{% endif %}
                         {% endfor %}
@@ -109,9 +109,9 @@
                     <div class="white left-align" style="padding:10px; margin-bottom:15px">
                         <div class="center" style="margin-bottom:10px"><b>25m1pijl</b></div>
                         {% for obj in alle_25 %}
-                            <form method="post" action="{{ obj.url }}" style="display:inline">
+                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-blauw">{{ obj.tekst_kort }}</button>
+                                <button class="btn-sv-blauw" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
                             </form>
                             {% if obj.do_break %}<br>{% endif %}
                         {% endfor %}
@@ -124,14 +124,14 @@
                         <h6 class="center" style="margin-bottom:10px">Verenigingen</h6>
 
                         <!-- vereniging naar keuze -->
-                        <form action="{{ url_hwl_naar_keuze }}" method="post" class="center">
+                        <form class="center" action="{{ url_hwl_naar_keuze }}" method="post" onsubmit="submit_knop00.disabled=true; return true;">
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col s4">
                                     <input type="text" name="ver_nr" placeholder="Ver nr" maxlength="4">
                                 </div>
                                 <div class="col s4">
-                                    <button class="btn-sv-rood">HWL</button>
+                                    <button class="btn-sv-rood" id="submit_knop00" type="submit">HWL</button>
                                 </div>
                             </div>
                         </form>

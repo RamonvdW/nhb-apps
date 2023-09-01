@@ -25,7 +25,7 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
-                    <form action="{{ url_opslaan }}" method="post">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
 
                         <p><b>Keuze voor transport:</b></p>
@@ -52,7 +52,7 @@
                         <br>
                         <!-- button -->
                         <p class="center">
-                            <button class="btn-sv-rood" type="submit">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
 

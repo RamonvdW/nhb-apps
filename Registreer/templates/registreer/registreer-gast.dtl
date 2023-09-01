@@ -39,7 +39,7 @@
                 <div class="white left-align z-depth-3">
                     <div class="form-padding">
 
-                        <form action="{{ url_aanmaken }}" method="post">
+                        <form action="{{ url_aanmaken }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                             {% csrf_token %}
 
                             <div class="input-field">
@@ -62,7 +62,7 @@
                             {% endif %}
 
                             <div class="center-align">
-                                <input class="btn-sv-rood" name="button_registreer" type="submit" value="Aanmaken">
+                                <input class="btn-sv-rood" name="button_registreer" id="submit_knop" type="submit" value="Aanmaken">
                             </div>
                         </form>
                     </div>

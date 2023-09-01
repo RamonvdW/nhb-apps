@@ -6,7 +6,7 @@
 
 <!-- dit bestand wordt ge-include in alle andere logboek pagina's -->
 
-<script type="application/javascript">
+<script>
     function activeer_deel() {
         // vind de gekozen radiobutton
         const el = document.querySelector("input[type='radio'][name='deel']:checked")
@@ -51,14 +51,15 @@
     <div class="col s12 m7">
         <div class="white left-align z-depth-3" style="padding:50px 30px 30px 30px">
             <!-- dialoog venster -->
-            <form method="get" action="{{ filter_url }}">
+            <form action="{{ filter_url }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
                 <div class="input-text">
                     <span>Zoek naar:</span>
                     <input type="text" name="zoekterm" value="{{ zoekterm }}">
                 </div>
 
                 <p>
-                    <button class="btn-sv-rood" type="submit"><i class="notranslate material-icons-round left">search</i>Zoek</button>
+                    <button class="btn-sv-rood" id="submit_knop" type="submit">
+                        <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     {% if unfiltered_url %}
                         <span>&nbsp;&nbsp;</span><a class="btn-sv-rood" href="{{ unfiltered_url }}"><i class="notranslate material-icons-round left">backspace</i>Toon alles</a>
                     {% endif %}

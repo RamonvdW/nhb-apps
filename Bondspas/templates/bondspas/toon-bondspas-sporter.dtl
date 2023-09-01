@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function ophalen_klaar(xhr, el_img)
         {
             // console.log('ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status);

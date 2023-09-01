@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function toevoegen(id)
         {
             const el = document.getElementById(id)
@@ -122,7 +122,7 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
-                    <form action="{{ url_zoek }}" method="get">
+                    <form action="{{ url_zoek }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
 
                         <div class="input-field">
                             <label for="id_bondsnr">Bondsnummer</label>
@@ -130,7 +130,7 @@
                         </div>
 
                         <p class="center">
-                            <button class="btn-sv-rood" type="submit">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
                                 <i class="notranslate material-icons-round left">search</i>Zoek</button>
                         </p>
 

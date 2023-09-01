@@ -429,6 +429,51 @@ class MyTestAsserts(TestCase):
 
         self.html_assert_no_csrf_except_in_script(html, dtl)
 
+    def html_assert_dubbelklik_beschrijving(self, html, dtl):
+        """ controleer het gebruik onsubmit in forms
+
+            <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+
+            <button class="btn-sv-rood" id="submit_knop" type="submit">
+        """
+        pos_form = html.find('<form')
+        while pos_form >= 0:
+            # controleer het hele formulier
+            html = html[pos_form:]
+            form_end = html.find('</form>')
+
+            form = html[:form_end]
+            pos1 = form.find(' onsubmit="submit_knop')
+            pos2 = form.find('.disabled=true; return true;"')
+            if pos1 < 0 or pos2 < 0:
+                self.fail('Form without onsubmit for dubbelklik bescherming in template %s' % repr(dtl))
+
+            pos_button = form.find('<button')
+            button_count = 0
+            pos1 = pos2 = -1
+            while pos_button >= 0:
+                form = form[pos_button:]
+                button_end = form.find('</button>')
+                button = form[:button_end]
+                button_count += 1
+
+                pos1 = button.find(' id="submit_knop')
+                pos2 = button.find(' type="submit"')
+                if pos1 > 0 and pos2 > 0:
+                    break   # from the while
+
+                form = form[button_end + 9:]
+                pos_button = form.find('<button')
+            # while
+
+            if button_count > 0:
+                if pos1 < 0 or pos2 < 0:
+                    self.fail('Form without dubbelklik bescherming in button template %s' % repr(dtl))
+
+            html = html[form_end+7:]
+            pos_form = html.find('<form')
+        # while
+
     def html_assert_notranslate(self, html, dtl):
         """ control gebruik notranslate class, bijvoorbeeld bij material-icons
         """
@@ -465,7 +510,7 @@ class MyTestAsserts(TestCase):
 
         self.html_assert_basics(html, dtl)
 
-        self.assertNotIn('<script>', html, msg='Missing type="application/javascript" in <script> in %s' % dtl)
+        # self.assertNotIn('<script>', html, msg='Missing type="application/javascript" in <script> in %s' % dtl)
 
         self.assert_link_quality(html, dtl)
         self.assert_scripts_clean(html, dtl)
@@ -473,6 +518,7 @@ class MyTestAsserts(TestCase):
         self.html_assert_no_col_white(html, dtl)
         self.html_assert_inputs(html, dtl)
         self.html_assert_csrf_token_usage(html, dtl)
+        self.html_assert_dubbelklik_beschrijving(html, dtl)
         self.html_assert_notranslate(html, dtl)
         self.html_assert_template_bug(html, dtl)
 

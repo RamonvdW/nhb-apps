@@ -34,9 +34,9 @@
                     <p>Dit is een eenmalige actie waardoor zowel de Indoor als 25m1pijl competities aangemaakt worden.</p>
                     <p>In een later stadium kan je de klassengrenzen vaststellen.</p>
 
-                    <form method="post" action="{% url 'CompBeheer:aanmaken' %}">
+                    <form action="{% url 'CompBeheer:aanmaken' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
-                        <input class="btn-sv-rood" name="button_aanmaken" type="submit" value="Maak de nieuwe competities aan">
+                        <input class="btn-sv-rood" name="button_aanmaken" id="submit_knop" type="submit" value="Maak de nieuwe competities aan">
                     </form>
 
                     <br>

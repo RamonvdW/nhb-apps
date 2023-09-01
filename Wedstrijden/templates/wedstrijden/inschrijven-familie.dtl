@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function toevoegen(id)
         {
             const el = document.getElementById(id)

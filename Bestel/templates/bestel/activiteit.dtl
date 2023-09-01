@@ -50,7 +50,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
-                <form action="{{ zoek_url }}" method="get">
+                <form action="{{ zoek_url }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
                     <!-- form field -->
                     <div class="input-field">
                         {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
@@ -72,7 +72,7 @@
 
                     <!-- button -->
                     <p class="center" style="margin-top:50px">
-                        <button class="btn-sv-rood" type="submit">
+                        <button class="btn-sv-rood" id="submit_knop" type="submit">
                             <i class="notranslate material-icons-round left">search</i>Zoek</button>
                     </p>
                 </form>

@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
 
         // de 'bezig' vlag voorkomt recursion
         let bezig = true
@@ -232,7 +232,7 @@
 
 
     <!-- initialisatie van de datum pickers -->
-    <script type="application/javascript">
+    <script>
         document.addEventListener('DOMContentLoaded', function()
         {
             const minDate = new Date({{ comp.begin_jaar }}, 2-1, 1)          // month is 0-based

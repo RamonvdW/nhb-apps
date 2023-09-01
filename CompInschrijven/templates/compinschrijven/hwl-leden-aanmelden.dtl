@@ -10,14 +10,14 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function tel_wedstrijden() {
             // tel hoeveel checkboxes aangekruist zijn
             const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length
             const el_aantal = document.getElementById('aantal')
             el_aantal.innerText = count.toString() + ' wedstrijden'
 
-            const el = document.getElementById('submit')
+            const el = document.getElementById('submit_knop')
             el.disabled = (count > 7)
             if (count > 7) {
                 el_aantal.classList.add('sv-rood-text')
@@ -64,7 +64,7 @@
     </div>
 
     {% if mag_aanmelden %}
-        <form method="post" action="{{ url_aanmelden }}">
+        <form action="{{ url_aanmelden }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
             {% csrf_token %}
     {% endif %}
 
@@ -272,7 +272,7 @@
 
                     {% if mag_aanmelden %}
                         <div class="fixed-action-btn">
-                            <input class="btn-sv-rood" type="submit" value="Geselecteerde sporters aanmelden" id="submit">
+                            <input class="btn-sv-rood" id="submit_knop" type="submit" value="Geselecteerde sporters aanmelden">
                         </div>
                     {% endif %}
 
@@ -289,7 +289,7 @@
 
     {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
         <!-- initialisatie -->
-        <script type="application/javascript">
+        <script>
             document.addEventListener('DOMContentLoaded', function()
             {
                 tel_wedstrijden()

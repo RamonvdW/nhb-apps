@@ -10,14 +10,14 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function tel_wedstrijden() {
             // tel hoeveel checkboxes aangekruist zijn
             const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length
             const el_aantal = document.getElementById('aantal')
             el_aantal.innerText = count.toString() + ' wedstrijden'
 
-            const el = document.getElementById('submit')
+            const el = document.getElementById('submit_knop')
             el.disabled = (count > 7)
             if (count > 7) {
                 el_aantal.classList.add('sv-rood-text')
@@ -48,7 +48,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
 
-                    <form method="post" action="{{ bevestig_url }}">
+                    <form action="{{ bevestig_url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
 
                         <input type="hidden" name="sporterboog_pk" value="{{ sporterboog.pk }}">
@@ -186,7 +186,7 @@
                                 <p>&nbsp;</p>
                             {% endif %}
 
-                            <input class="btn-sv-rood" type="submit" value="Meld mij aan" id="submit">
+                            <input class="btn-sv-rood" id="submit_knop" type="submit" value="Meld mij aan">
 
                             <p>Let op: bij aanmelden v&oacute;&oacute;r {{ deelcomp.competitie.begin_fase_D_indiv }} is je deelname gegarandeerd.<br>Bij latere aanmelding bepaalt de regiocompetitieleider (RCL) of er ruimte is in jouw regio.</p>
                         </div>
@@ -199,7 +199,7 @@
 
     {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
         <!-- initialisatie -->
-        <script type="application/javascript">
+        <script>
             document.addEventListener('DOMContentLoaded', function()
             {
                 tel_wedstrijden()

@@ -110,9 +110,9 @@
         </div>
 
         <div class="center">
-            <form method="post" action="{% url 'CompBeheer:klassengrenzen-vaststellen' comp_pk=comp.pk %}">
+            <form action="{% url 'CompBeheer:klassengrenzen-vaststellen' comp_pk=comp.pk %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                 {% csrf_token %}
-                <input class="btn-sv-rood" name="button_aanmaken" type="submit" value="Deze klassengrenzen vaststellen">
+                <input class="btn-sv-rood" name="button_aanmaken" id="submit_knop" type="submit" value="Deze klassengrenzen vaststellen">
             </form>
         </div>
 

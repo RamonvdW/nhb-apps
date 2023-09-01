@@ -26,14 +26,15 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
 
     # Clusters beheren
     if rol_nu == Rollen.ROL_RCL:
-        url = reverse('CompLaagRegio:clusters')
-        kaartje = SimpleNamespace(
-                    prio=5,
-                    titel="Clusters",
-                    icoon="group_work",
-                    tekst="Verenigingen groeperen in geografische clusters.",
-                    url=url)
-        kaartjes_algemeen.append(kaartje)
+        if comp.afstand == functie_nu.comp_type:
+            url = reverse('CompLaagRegio:clusters')
+            kaartje = SimpleNamespace(
+                        prio=5,
+                        titel="Clusters",
+                        icoon="group_work",
+                        tekst="Verenigingen groeperen in geografische clusters.",
+                        url=url)
+            kaartjes_algemeen.append(kaartje)
 
     # Toon klassengrenzen (is een openbaar kaartje)
     if comp.klassengrenzen_vastgesteld:

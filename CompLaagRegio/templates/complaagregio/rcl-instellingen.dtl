@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
@@ -33,7 +33,7 @@
             })
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
+            const el = document.getElementById("submit_knop")
             el.classList.remove('disabled')
         }
 
@@ -59,7 +59,7 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             {% if not readonly_blok_2 %}
                 <div class="white z-depth-3" style="padding:30px">
-                    <form method="post" action="{{ url_opslaan }}">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
             {% endif %}
 
@@ -150,7 +150,7 @@
 
             {% if not readonly_blok_2 %}
                         <p>
-                            <button id="opslaan_knop" class="btn-sv-rood disabled" type="submit">
+                            <button class="btn-sv-rood disabled" id="submit_knop" type="submit">
                                 <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                         </p>
                     </form>
@@ -162,7 +162,7 @@
     {% if not readonly_blok_2 %}
 
         <!-- initialisatie van de datum pickers -->
-        <script type="application/javascript">
+        <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const el = document.querySelector('#datum1');
                 let minDate = new Date("{{ deelcomp.competitie.begin_fase_C|date:'Y-m-d' }}")

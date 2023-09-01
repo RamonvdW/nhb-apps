@@ -27,9 +27,9 @@
 
                 {% if url_afsluiten %}
 
-                    <form method="post" action="{{ url_afsluiten }}">
+                    <form action="{{ url_afsluiten }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
-                        <input class="btn-sv-rood" name="afsluiten" type="submit" value="Seizoen afsluiten">
+                        <input class="btn-sv-rood" name="afsluiten" id="submit_knop" type="submit" value="Seizoen afsluiten">
                     </form>
 
                     <br>

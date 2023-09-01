@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
 
         function verplaats(ref) {
             // regel met de knoppen niet meer laten zien

@@ -10,12 +10,12 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
+            const el = document.getElementById("submit_knop")
             el.disabled = false
             el.parentElement.style.display = "block"
         }
@@ -30,7 +30,7 @@
     </div>
 
 
-    <form action="{{ url_opslaan }}" method="post">
+    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
         {% csrf_token %}
 
         <!-- witruimte -->
@@ -120,7 +120,7 @@
         </div>
 
         <div class="fixed-action-btn" style="display: none">
-            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
+            <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
                 <i class="notranslate material-icons-round left">check</i>Wijzigingen opslaan</button>
         </div>
     </form>

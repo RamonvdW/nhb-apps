@@ -28,7 +28,7 @@ class BestelMandjeAdmin(admin.ModelAdmin):
 
 class BestellingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'bestel_nr', 'aangemaakt',)
+    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten', 'transacties', 'ontvanger')
 
     search_fields = ('bestel_nr', 'account__username', 'account__unaccented_naam')
 
@@ -36,11 +36,13 @@ class BestellingAdmin(admin.ModelAdmin):
 
     auto_complete = ('account', 'ontvanger', 'betaal_mutatie', 'betaal_actief')
 
-    filter_horizontal = ('producten', 'transacties')
+    # filter_horizontal = ('producten', 'transacties')
 
     list_filter = ('status',)
 
     fieldsets = (
+        ('Inhoud',
+            {'fields': ('producten',)}),
         ('Koper',
             {'fields': ('bestel_nr',
                         'account',
@@ -71,11 +73,9 @@ class BestellingAdmin(admin.ModelAdmin):
                         'ontvanger',
                         'betaal_mutatie',       # BetaalMutatie
                         'betaal_actief',        # BetaalActief
+                        'transacties',
                         'log')
              }),
-        ('Niet wijzigen!',
-            {'fields': ('producten',
-                        'transacties')}),
     )
 
 
