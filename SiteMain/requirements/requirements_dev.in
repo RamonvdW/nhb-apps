@@ -29,7 +29,4 @@ html5validator
 # javascript/ecmascript validatie
 esprima
 
-# voor het maken van pdf's
-reportlab
-
 # end of file

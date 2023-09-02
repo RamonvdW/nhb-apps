@@ -81,16 +81,14 @@ openpyxl==3.1.2
 packaging==23.1
     # via pip-review
 pillow==10.0.0
-    # via
-    #   -r requirements.txt
-    #   reportlab
+    # via -r requirements.txt
 pip-licenses==4.3.2
     # via -r requirements_dev.in
 pip-review==1.3.0
     # via -r requirements_dev.in
 prettytable==3.8.0
     # via pip-licenses
-protobuf==4.24.1
+protobuf==4.24.2
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -112,7 +110,7 @@ pyparsing==3.1.1
     # via
     #   -r requirements.txt
     #   httplib2
-pypdf==3.15.2
+pypdf==3.15.4
     # via -r requirements.txt
 pypng==0.20220715.0
     # via
@@ -122,8 +120,6 @@ pyyaml==6.0.1
     # via html5validator
 qrcode==7.4.2
     # via -r requirements.txt
-reportlab==4.0.4
-    # via -r requirements_dev.in
 requests==2.31.0
     # via
     #   -r requirements.txt

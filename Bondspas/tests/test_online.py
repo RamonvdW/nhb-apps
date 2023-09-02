@@ -11,6 +11,7 @@ from Opleidingen.models import OpleidingDiploma
 from Sporter.models import Sporter, SporterVoorkeuren, Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from unittest.mock import patch
 import datetime
 
 
@@ -153,22 +154,22 @@ class TestBondspas(E2EHelpers, TestCase):
                     toon_op_pas=True).save()
 
         Speelsterkte(
-            sporter=self.sporter,
-            datum='2000-01-01',
-            beschrijving='test',
-            discipline='test',
-            category='test',
-            pas_code='TST',
-            volgorde=100).save()
+                sporter=self.sporter,
+                datum='2000-01-01',
+                beschrijving='test',
+                discipline='test',
+                category='test',
+                pas_code='TST',
+                volgorde=100).save()
 
         Speelsterkte(
-            sporter=self.sporter,
-            datum='2000-01-01',
-            beschrijving='test',
-            discipline='test',      # zelfde als hierboven
-            category='test',
-            pas_code='TST',
-            volgorde=101).save()
+                sporter=self.sporter,
+                datum='2000-01-01',
+                beschrijving='test',
+                discipline='test',      # zelfde als hierboven
+                category='test',
+                pas_code='TST',
+                volgorde=101).save()
 
         with override_settings(OPLEIDING_CODES=test_opleiding_codes):
             with self.assert_max_queries(20):
@@ -188,8 +189,8 @@ class TestBondspas(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        resp = self.client.get(self.url_toon_van % 99999)
-        self.assert404(resp, 'Geen valide parameter')
+        self.sporter.is_erelid = True
+        self.sporter.save(update_fields=['is_erelid'])
 
         url = self.url_toon_van % self.sporter.lid_nr
         with self.assert_max_queries(20):
@@ -204,6 +205,9 @@ class TestBondspas(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen bondspas voor gast-accounts')
+
+        resp = self.client.get(self.url_toon_van % 99999)
+        self.assert404(resp, 'Geen valide parameter')
 
     def test_speelsterkte(self):
 
@@ -225,6 +229,20 @@ class TestBondspas(E2EHelpers, TestCase):
             resp = self.client.post(self.url_ophalen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self._check_bondspas_resp(resp)
+
+    def test_begin_januari(self):
+        # sporter
+        self.e2e_login(self.account)
+
+        with patch('django.utils.timezone.localtime') as mock_timezone:
+            # te vroeg/laat om een mail te sturen
+            dt = datetime.datetime(year=2000, month=1, day=1, hour=19)
+            mock_timezone.return_value = dt
+
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_ophalen)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self._check_bondspas_resp(resp)
 
 
 # end of file
