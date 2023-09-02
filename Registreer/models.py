@@ -158,20 +158,21 @@ def registreer_opschonen(stdout):
     now = timezone.now()
     max_age = now - datetime.timedelta(days=7)
 
-    # TODO: activeer opschonen nadat wat ervaring opgedaan is
-    if GAST_LID_NUMMER_FIXED_PK < 1:        # aka: "never"
-        for obj in (GastRegistratie
-                    .objects
-                    .exclude(fase=REGISTRATIE_FASE_COMPLEET)
-                    .filter(aangemaakt__lt=max_age)):
+    for obj in (GastRegistratie
+                .objects
+                .filter(fase__lte=REGISTRATIE_FASE_COMPLEET,        # skip COMPLEET of AFGEWEZEN
+                        aangemaakt__lt=max_age)):
 
-            stdout.write('[INFO] Verwijder niet afgeronde gast-account registratie %s in fase %s' % (
-                            obj.lid_nr, repr(obj.fase)))
+        stdout.write('[INFO] Verwijder niet afgeronde gast-account registratie %s in fase %s' % (
+                        obj.lid_nr, repr(obj.fase)))
+
+        # TODO: activeer opschonen nadat wat ervaring opgedaan is
+        if GAST_LID_NUMMER_FIXED_PK < 1:  # aka: "never"
             obj.delete()
-        # for
+    # for
 
-        # alle rate trackers opruimen
-        GastRegistratieRateTracker.objects.all().delete()
+    # alle rate trackers opruimen
+    GastRegistratieRateTracker.objects.all().delete()
 
 
 # end of file

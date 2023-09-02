@@ -13,7 +13,7 @@ from Functie.operations import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Mailer.models import MailQueue
-from Registreer.definities import REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN
+from Registreer.definities import REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN, REGISTRATIE_FASE_BEGIN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -318,6 +318,57 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         # nog een keer (al afgewezen)
         resp = self.client.post(self.url_opheffen, {'lid_nr': self.gast_800001.lid_nr})
         self.assert_is_redirect(resp, self.url_gast_accounts)
+
+    def test_incompleet_opheffen(self):
+        # maak de registratie half af
+        # wel een account, geen sporter
+
+        self.gast_800001.sporter = None
+        self.gast_800001.save(update_fields=['sporter'])
+
+        self.sporterboog_800001.delete()
+        self.sporter_800001.delete()
+
+        # wordt SEC van de vereniging voor gast-accounts
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec_extern)
+        self.e2e_check_rol('SEC')
+
+        self.assertEqual(0, MailQueue.objects.count())
+
+        resp = self.client.post(self.url_opheffen, {'lid_nr': self.gast_800001.lid_nr})
+        self.assert_is_redirect(resp, self.url_gast_accounts)
+
+        self.assertEqual(1, MailQueue.objects.count())
+
+        gast = GastRegistratie.objects.get(lid_nr=self.gast_800001.lid_nr)
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_AFGEWEZEN)
+
+        # maak nog een gast-account aan
+        gast2 = GastRegistratie(
+                    lid_nr=800002,
+                    fase=REGISTRATIE_FASE_BEGIN,
+                    email="twee@gasten.not",
+                    email_is_bevestigd=True,
+                    voornaam="Twee",
+                    achternaam="van de Gasten",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    geslacht="M",
+                    eigen_sportbond_naam="Eigen bond",
+                    eigen_lid_nummer="EB-1235",
+                    club="Eigen club",
+                    club_plaats="Eigen plaats",
+                    land="Eigen land",
+                    telefoon="+998877665545",
+                    wa_id="",
+                    logboek="")
+        gast2.save()
+
+        resp = self.client.post(self.url_opheffen, {'lid_nr': gast2.lid_nr})
+        self.assert_is_redirect(resp, self.url_gast_accounts)
+
+        gast2 = GastRegistratie.objects.get(lid_nr=gast2.lid_nr)
+        self.assertEqual(gast.fase, REGISTRATIE_FASE_AFGEWEZEN)
 
 
 # end of file

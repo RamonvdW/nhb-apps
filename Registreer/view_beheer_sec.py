@@ -334,11 +334,13 @@ class GastAccountOpheffenView(UserPassesTestMixin, View):
                                         stamp_str, beheerder, self.functie_nu.beschrijving)
                 gast.save(update_fields=['fase', 'logboek'])
 
-                gast.account.is_active = False
-                gast.account.save(update_fields=['is_active'])
+                if gast.account:
+                    gast.account.is_active = False
+                    gast.account.save(update_fields=['is_active'])
 
-                gast.sporter.is_actief_lid = False
-                gast.sporter.save(update_fields=['is_actief_lid'])
+                if gast.sporter:
+                    gast.sporter.is_actief_lid = False
+                    gast.sporter.save(update_fields=['is_actief_lid'])
 
             # schrijf in syslog
             from_ip = get_safe_from_ip(request)
