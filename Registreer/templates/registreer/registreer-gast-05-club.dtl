@@ -24,7 +24,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
-                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post">
+                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
 
                     {% if foutmelding %}
@@ -43,7 +43,7 @@
                     </div>
 
                     <p class="center">
-                        <button class="btn-sv-rood" type="submit">
+                        <button class="btn-sv-rood" id="submit_knop" type="submit">
                             <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                     </p>
                 </form>

@@ -24,7 +24,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
-                <form action="{% url 'Account:wachtwoord-vergeten' %}" method="post">
+                <form action="{% url 'Account:wachtwoord-vergeten' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
 
                     {% if foutmelding %}
@@ -46,7 +46,7 @@
                     </div>
 
                     <p class="center-align">
-                        <button class="btn-sv-rood" type="submit">
+                        <button class="btn-sv-rood" id="submit_knop" type="submit">
                             <i class="notranslate material-icons-round left">email</i>Verstuur e-mail</button>
                     </p>
 

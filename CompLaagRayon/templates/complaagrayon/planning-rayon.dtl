@@ -100,9 +100,9 @@
                 {% if url_nieuwe_wedstrijd %}
                     <tr>
                         <td colspan="4" class="center">
-                            <form action="{{ url_nieuwe_wedstrijd }}" method="post">
+                            <form action="{{ url_nieuwe_wedstrijd }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-rood" type="submit">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>

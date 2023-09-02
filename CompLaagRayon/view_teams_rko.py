@@ -212,9 +212,7 @@ class RayonTeamsTemplateView(TemplateView):
                 klasse2teams[team.team_klasse].append(team)
             except KeyError:
                 # dit is geen acceptabele klasse (waarschijnlijk een regio klasse)
-                # pas dit meteen even aan
-                team.team_klasse = None
-                team.save(update_fields=['team_klasse'])
+                pass
         # for
 
         context['rk_teams'] = klasse2teams
@@ -243,7 +241,7 @@ class RayonTeamsTemplateView(TemplateView):
                 team.url_aanpassen = reverse('CompLaagRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': team.pk})
 
-            # TODO: url_verwijder (zie template)
+            # TODO: RKO moet team kunnen verwijderen. Zie url_verwijder in rko-teams.dtl.
 
             totaal_teams += 1
 

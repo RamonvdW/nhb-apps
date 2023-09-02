@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function alleen_medailles() {
             const tab = document.getElementById("medal-table");
             for(let row of tab.rows) {

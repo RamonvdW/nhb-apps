@@ -24,7 +24,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px">
-                <form action="{% url 'Account:login' %}" method="post">
+                <form action="{% url 'Account:login' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {{ form.next_url }}
                     {% csrf_token %}
 
@@ -56,11 +56,11 @@
                                 <a class="btn-sv-rood" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
                             </div>
                             <div class="col s4">
-                                <input class="btn-sv-rood center-align" type="submit" value="Log in">
+                                <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Log in">
                             </div>
                         {% else %}
                             <div class="col s12">
-                                <input class="btn-sv-rood center-align" type="submit" value="Log in">
+                                <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Log in">
                             </div>
                         {% endif %}
                     </div>
@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         // respond to browser auto-fill of login dialog, especially password field
         // no events are fired (for security) and the value itself is not accessible,
         // but we need to move the label out of the way to avoid visual overlap

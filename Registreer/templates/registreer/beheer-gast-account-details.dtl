@@ -164,13 +164,13 @@
                 <p>Je hebt gecontroleerd dat het gast-account overeenkomt met een bekend lid.</p>
                 <p>We blokkeren het gast-account en sturen een automatische e-mail waarin we kort uitleggen dat een normaal account gemaakt moet worden.</p>
 
-                <form method="post" action="{{ gast.url_ophef }}">
+                <form action="{{ gast.url_ophef }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="lid_nr" value="{{ gast.lid_nr }}">
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
                             <a href="#" class="btn-sv-blauw modal-close">Nee</a>

@@ -33,29 +33,27 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._pk2cluster = dict()
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        context['terug_url'] = reverse('Competitie:kies')
 
         # filter clusters die aangepast mogen worden op competitie type
         # waarvan de definitie heel handig overeen komt met cluster.gebruik
-        context['gebruik'] = gebruik_filter = functie_nu.comp_type
+        context['gebruik'] = gebruik_filter = self.functie_nu.comp_type
 
         # cluster namen
         objs = (Cluster
                 .objects
-                .filter(regio=functie_nu.regio, gebruik=gebruik_filter)
+                .filter(regio=self.functie_nu.regio, gebruik=gebruik_filter)
                 .select_related('regio')
                 .order_by('letter'))
         context['cluster_list'] = objs
@@ -82,7 +80,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # vereniging in de regio
         objs = (Vereniging
                 .objects
-                .filter(regio=functie_nu.regio)
+                .filter(regio=self.functie_nu.regio)
                 .prefetch_related('clusters')
                 .order_by('ver_nr'))
         context['object_list'] = objs
@@ -106,16 +104,41 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
 
         context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
 
-        context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (None, 'Clusters')
-        )
+        try:
+            regiocompetitie = (Regiocompetitie
+                               .objects
+                               .filter(regio=self.functie_nu.regio,
+                                       competitie__afstand=self.functie_nu.comp_type)
+                               .order_by('-competitie__begin_jaar')     # hoogste (nieuwste) eerst
+                               .first())
+        except Regiocompetitie.DoesNotExist:
+            # geen competitie gevonden, dus ga naar de keuze pagina
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (None, 'Clusters')
+            )
+        else:
+            # link terug naar de specifieke competitie
+            if regiocompetitie:
+                comp = regiocompetitie.competitie
+                context['kruimels'] = (
+                    (reverse('Competitie:kies'), 'Bondscompetities'),
+                    (reverse('Competitie:overzicht',
+                             kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace('competitie ', '')),
+                    (None, 'Clusters')
+                )
+            else:
+                # geen competitie gevonden, dus ga naar de keuze pagina
+                context['kruimels'] = (
+                    (reverse('Competitie:kies'), 'Bondscompetities'),
+                    (None, 'Clusters')
+                )
 
         menu_dynamics(self.request, context)
         return context
 
-    def _swap_cluster(self, ver, gebruik):
-        # vertaal de post value naar een NhbCluster object
+    def _update_vereniging_clusters(self, ver, gebruik):
+        # vertaal de post value naar een Cluster object
         # checkt ook meteen dat het een valide cluster is voor deze regio
 
         param_name = 'ver_' + str(ver.ver_nr)
@@ -137,7 +160,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             try:
                 huidige = ver.clusters.get(gebruik=gebruik)
             except Cluster.DoesNotExist:
-                # vereniging zit niet in een cluster voor de 18m
+                # vereniging zit niet in een cluster voor dit gebruik (type competitie)
                 # stop de vereniging in het gevraagde cluster
                 if new_cluster:
                     ver.clusters.add(new_cluster)
@@ -166,7 +189,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         # filter clusters die aangepast mogen worden op competitie type
-        # waarvan de definitie heel handig overeen komt met cluster.gebruik
+        # waarvan de definitie heel handig overeenkomt met cluster.gebruik
         gebruik_filter = functie_nu.comp_type
 
         clusters = (Cluster
@@ -193,10 +216,25 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                     .filter(regio=functie_nu.regio)
                     .prefetch_related('clusters')):
 
-            self._swap_cluster(obj, gebruik_filter)
+            self._update_vereniging_clusters(obj, gebruik_filter)
         # for
 
+        # indien geen competitie gevonden, ga dan naar de keuze pagina
         url = reverse('Competitie:kies')
+
+        try:
+            regiocompetitie = (Regiocompetitie
+                               .objects
+                               .filter(regio=self.functie_nu.regio,
+                                       competitie__afstand=self.functie_nu.comp_type)
+                               .order_by('-competitie__begin_jaar')     # hoogste (nieuwste) eerst
+                               .first())
+        except Regiocompetitie.DoesNotExist:
+            pass
+        else:
+            # link terug naar de specifieke competitie
+            if regiocompetitie:
+                url = reverse('Competitie:overzicht', kwargs={'comp_pk': regiocompetitie.competitie.pk})
 
         return HttpResponseRedirect(url)
 

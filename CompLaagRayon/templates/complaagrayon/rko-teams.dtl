@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function keuze_gemaakt(groep) {
 
             const selector = "input[type='radio'][name=" + groep + "]:checked"

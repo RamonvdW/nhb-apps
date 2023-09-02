@@ -41,9 +41,9 @@
                     <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 
                     <td>
-                        <form action="{{ obj.url_wordt_sec }}" method="post">
+                        <form action="{{ obj.url_wordt_sec }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
                             {% csrf_token %}
-                            <button class="btn-sv-rood">SEC {{ obj.ver_nr }}</button>
+                            <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">SEC {{ obj.ver_nr }}</button>
                         </form>
                     </td>
                 </tr>

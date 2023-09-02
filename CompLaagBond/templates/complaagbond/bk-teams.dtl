@@ -11,7 +11,7 @@
 {% block pagina %}
 
     {% if url_wijzig %}
-        <script type="application/javascript">
+        <script>
             function wijzig(team_pk, status) {
 
                 // voer een POST uit met de gekozen status wijziging

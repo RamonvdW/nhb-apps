@@ -389,10 +389,12 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
         # maak knoppen voor alle verenigingen
         vers = (Vereniging
                 .objects
-                .select_related('regio', 'regio__rayon')
+                .select_related('regio',
+                                'regio__rayon')
                 # .exclude(regio__regio_nr=100)
                 .prefetch_related('functie_set')
-                .order_by('regio__regio_nr', 'ver_nr'))
+                .order_by('regio__regio_nr',
+                          'ver_nr'))
         for ver in vers:
             try:
                 functie_sec = ver.functie_set.filter(rol='SEC')[0]

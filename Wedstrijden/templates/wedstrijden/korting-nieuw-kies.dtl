@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function keuze(optie) {
             // voer een POST uit om de keuze door te geven
             const form = document.createElement('form')

@@ -26,9 +26,9 @@
                 <p>Je hebt verzocht om {{ activiteit }}.</p>
                 <p>Als dit klopt, druk dan op onderstaande knop.</p>
 
-                <form method="post" action="{{ url }}" style="padding:30px">
+                <form style="padding:30px" action="{{ url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
-                    <button class="btn-sv-rood" type="submit" value="Ga door">
+                    <button class="btn-sv-rood" id="submit_knop" type="submit" value="Ga door">
                         <i class="notranslate material-icons-round left">check</i>Ga door</button>
                 </form>
 

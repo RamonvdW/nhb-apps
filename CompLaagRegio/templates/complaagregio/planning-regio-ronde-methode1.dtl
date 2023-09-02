@@ -58,11 +58,9 @@
                 <thead>
                     <tr>
                         <th>Wanneer</th>
-                        {% if not vaste_beschrijving %}     <!-- import -->
-                            <th>Waar</th>
-                            <th class="center">Aanmeldingen</th>
-                            <th><!-- kolom voor wijzig knoppen --></th>
-                        {% endif %}
+                        <th>Waar</th>
+                        <th class="center">Aanmeldingen</th>
+                        <th><!-- kolom voor wijzig knoppen --></th>
                     </tr>
                 </thead>
 
@@ -70,29 +68,27 @@
                     <tr>
                         <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
 
-                        {% if not vaste_beschrijving %}
-                            <td>
-                                {% if wedstrijd.vereniging %}
-                                    <span>{{ wedstrijd.vereniging }}</span>
-                                {% else %}
-                                    <i class="sv-rood-text">Onbekend</i>
-                                {% endif %}
-                            </td>
+                        <td>
+                            {% if wedstrijd.vereniging %}
+                                <span>{{ wedstrijd.vereniging }}</span>
+                            {% else %}
+                                <i class="sv-rood-text">Onbekend</i>
+                            {% endif %}
+                        </td>
 
-                            <td class="center">{{ wedstrijd.aantal_aanmeldingen }}</td>
+                        <td class="center">{{ wedstrijd.aantal_aanmeldingen }}</td>
 
-                            <!-- knop om wedstrijd te wijzigen -->
-                            <td class="center">
-                                {% if wedstrijd.url_wijzig %}
-                                    <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
-                                        <i class="notranslate material-icons-round">edit</i></a>
-                                {% endif %}
-                            </td>
-                        {% endif %}
+                        <!-- knop om wedstrijd te wijzigen -->
+                        <td class="center">
+                            {% if wedstrijd.url_wijzig %}
+                                <a class="btn-sv-rood" href="{{ wedstrijd.url_wijzig }}">
+                                    <i class="notranslate material-icons-round">edit</i></a>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
+                        <td colspan="4" class="center">
                             <i>Nog geen wedstrijden</i>
                         </td>
                     </tr>
@@ -101,10 +97,10 @@
                 <!-- knop om een regel toe te voegen -->
                 {% if url_nieuwe_wedstrijd %}
                     <tr>
-                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
-                            <form action="{{ url_nieuwe_wedstrijd }}" method="post">
+                        <td colspan="4" class="center">
+                            <form action="{{ url_nieuwe_wedstrijd }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-rood" type="submit">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>

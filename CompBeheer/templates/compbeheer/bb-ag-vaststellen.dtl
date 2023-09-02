@@ -54,9 +54,9 @@
                 <div class="white" style="padding:10px">
                     <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
 
-                    <form method="post" action="{{ url_vaststellen }}">
+                    <form action="{{ url_vaststellen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
-                        <input class="btn-sv-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
+                        <input class="btn-sv-rood" id="submit_knop" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
                     </form>
 
                     <br>

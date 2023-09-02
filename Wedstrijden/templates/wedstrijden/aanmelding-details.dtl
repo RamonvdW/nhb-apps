@@ -138,13 +138,13 @@
                 <h5>Verwijder aanmelding?</h5>
                 <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor de wedstrijd <b>{{ inschrijving.wedstrijd.titel }}</b><br>verwijderen uit het systeem?</p>
 
-                <form method="post" action="{{ inschrijving.url_afmelden }}">
+                <form action="{{ inschrijving.url_afmelden }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder" value="1">
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
                             <a href="#" class="btn-sv-blauw modal-close">Nee</a>

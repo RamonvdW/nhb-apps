@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function do_selecteer(id)
         {
             // voer een POST uit om toe te voegen
@@ -50,13 +50,13 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px">
-                <form action="{{ url }}" method="get">
+                <form action="{{ url }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
 
                     <div class="input-field">
                         {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
                     </div>
 
-                    <button class="btn-sv-rood" type="submit">
+                    <button class="btn-sv-rood" id="submit_knop" type="submit">
                         <i class="notranslate material-icons-round left">search</i>Zoek</button>
                 </form>
             </div>

@@ -66,5 +66,7 @@ class Command(BaseCommand):
 
         if uitleggen:
             self.stderr.write('Gebruik --commit om bovenstaande voorstellen echt te verwijderen')
+        else:
+            self.stdout.write('Geen duplicate data gevonden')
 
 # end of file

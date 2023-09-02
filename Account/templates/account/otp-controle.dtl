@@ -24,7 +24,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px">
-                <form action="{% url 'Account:otp-controle' %}" method="post">
+                <form action="{% url 'Account:otp-controle' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {{ form.next_url }}
                     {% csrf_token %}
 
@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="center" style="margin-top:30px">
-                        <input class="btn-sv-rood center-align" type="submit" value="Controleer">
+                        <input class="btn-sv-rood center-align" id="submit_knop" type="submit" value="Controleer">
                     </div>
                 </form>
             </div>

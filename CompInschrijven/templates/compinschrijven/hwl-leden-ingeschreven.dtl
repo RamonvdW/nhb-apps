@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function do_toggle(id)
         {
             // voer een POST uit om toe te voegen
@@ -61,7 +61,7 @@
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3">
                     <div class="form-padding">
-                        <form method="post" action="{{ afmelden_url }}">
+                        <form action="{{ afmelden_url }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
             {% endif %}
 
@@ -155,7 +155,7 @@
 
                             {% if mag_afmelden %}
                                 <div class="fixed-action-btn">
-                                    <input class="btn-sv-rood" type="submit" value="Geselecteerde leden afmelden">
+                                    <input class="btn-sv-rood" id="submit_knop" type="submit" value="Geselecteerde leden afmelden">
                                 </div>
                             {% endif %}
 

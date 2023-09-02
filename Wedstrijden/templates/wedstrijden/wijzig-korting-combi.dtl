@@ -10,12 +10,12 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop");
+            const el = document.getElementById("submit_knop1");
             el.disabled = false;
             el.parentElement.style.display = "block";
         }
@@ -50,7 +50,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding" style="padding-top:0px">
 
-                    <form method="post" action="{{ url_opslaan }}">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -86,7 +86,7 @@
                         </table>
 
                         <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
+                            <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
                                 <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
                         </div>
 
@@ -112,13 +112,13 @@
                 <h5>Korting verwijderen?</h5>
                 <p>Wil je deze korting echt verwijderen?</p>
 
-                <form method="post" action="{{ url_verwijder }}">
+                <form action="{{ url_verwijder }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder" value="1">
 
                     <div class="modal-footer" style="text-align:center; display:block">
                         <div style="display:inline-block; width:50%">
-                            <button class="btn-sv-rood" type="submit">Ja</button>
+                            <button class="btn-sv-rood" id="submit_knop2" type="submit">Ja</button>
                         </div>
                         <div style="display:inline-block; width:50%">
                             <a href="#" class="btn-sv-blauw modal-close">Nee</a>
@@ -136,7 +136,7 @@
 
     <!-- initialisatie van de datum/tijd kiezers -->
 
-    <script type="application/javascript">
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
                 const minDate = new Date("{{ min_date|date:'Y-m-d' }}");
                 const maxDate = new Date("{{ max_date|date:'Y-m-d' }}");

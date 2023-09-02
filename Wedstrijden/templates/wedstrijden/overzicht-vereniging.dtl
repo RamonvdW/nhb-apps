@@ -17,7 +17,7 @@
             <p>Wedstrijden bij vereniging <b>{{ ver }}</b></p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
             {% if geen_locatie %}
-                <p class="sv-rood-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>
+                <p class="sv-rood-text">Stel eerst de accommodatie van de vereniging in, of voeg een locatie toe.</p>
             {% endif %}
         </div>
     </div>

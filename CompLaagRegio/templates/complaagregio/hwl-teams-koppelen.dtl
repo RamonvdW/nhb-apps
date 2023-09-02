@@ -29,11 +29,11 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
             // enable/disable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
+            const el = document.getElementById("submit_knop")
 
             const els = document.querySelectorAll('input[type=checkbox].filled-in')
             let count = 0
@@ -54,7 +54,7 @@
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3">
                     <div class="form-padding">
-                        <form action="{{ url_opslaan }}" method="post">
+                        <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                             {% csrf_token %}
             {% endif %}
 
@@ -162,7 +162,7 @@
 
             {% if mag_wijzigen %}
                             <div class="fixed-action-btn" style="display: none">
-                                <button class="btn-sv-rood" type="submit" id="opslaan_knop" disabled>
+                                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
                                     <i class="notranslate material-icons-round left">check</i>Opslaan</button>
                             </div>
                         </form>

@@ -24,8 +24,9 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
-                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post">
+                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
                     {% csrf_token %}
+                    <input type="hidden" name="bevestigd" value="Nee">
 
                     <table>
                         <tr>
@@ -89,9 +90,7 @@
                         <a class="btn-sv-rood modal-trigger" style="margin:20px" href="#bevestig">
                             <i class="notranslate material-icons-round left">check</i>Bevestig</a>
 
-                        <input type="hidden" name="bevestigd" value="Nee">
-
-                        <button type="submit" class="btn-sv-blauw" style="margin:20px">
+                        <button class="btn-sv-blauw" style="margin:20px" id="submit_knop1" type="submit">
                             <i class="notranslate material-icons-round left">undo</i>Wijzig</button>
                     </p>
                 </form>
@@ -123,13 +122,13 @@
             <p>Door op 'Ja' te drukken geef je toestemming om de door jou ingevoerde gegevens op te slaan in ons systeem en te gebruiken voor de dienstverlening.<br>Details staan beschreven in het document Privacyverklaring.</p>
             <p>Wijzigen van de gegevens kan alleen door contact op te nemen met het Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>
 
-            <form method="post" action="{% url 'Registreer:gast-volgende-vraag' %}">
+            <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
                 {% csrf_token %}
                 <input type="hidden" name="bevestigd" value="Ja">
 
                 <div class="modal-footer" style="text-align:center; display:block">
                     <div style="display:inline-block; width:50%">
-                        <button class="btn-sv-rood" type="submit">Ja</button>
+                        <button class="btn-sv-rood" id="submit_knop2" type="submit">Ja</button>
                     </div>
                     <div style="display:inline-block; width:50%">
                         <a href="#" class="btn-sv-blauw modal-close">Nee</a>

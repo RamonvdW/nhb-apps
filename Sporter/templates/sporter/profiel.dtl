@@ -11,7 +11,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function do_uitschrijven(id)
         {
             // voer een POST uit om toe te voegen
@@ -208,7 +208,7 @@
 
                     {% if hint_voorkeuren %}
                         <tr>
-                            <td colspan="3" class="center sv-rood-text">Niets gevonden<br>Controleer je voorkeuren (bogen)</></td>
+                            <td colspan="3" class="center sv-rood-text">Niets gevonden<br>Controleer je voorkeuren (bogen)</td>
                         </tr>
                     {% endif %}
                 </table>

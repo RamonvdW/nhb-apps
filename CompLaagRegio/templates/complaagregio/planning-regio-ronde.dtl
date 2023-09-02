@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Weekplanning</h3>
+            <h3 class="page-banner">Wedstrijden blok</h3>
         </div>
     </div>
 
@@ -57,24 +57,25 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
             // disable alle knoppen waarmee de invoer verloren zou gaan
-            const els = document.getElementsByClassName("vertrek_knop")
+            const els = document.getElementsByClassName("vertrek_knop");
             Array.prototype.forEach.call(els, function(el) {
-                el.classList.add('disabled')
+                el.classList.add('disabled');
             })
 
-            // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
-            el.classList.remove('disabled')
+            // enable de 'opslaan' knoppen
+            const el = document.getElementById("submit_knop1");
+            el.classList.remove('disabled');
         }
     </script>
 
     {% if not readonly %}
 
+        <!-- als er nog geen rondes zijn, dan komt het instellingen blok bovenaan de pagina -->
         {% if ronde.beschrijving == '' %}
 
             <!-- witruimte -->
@@ -93,7 +94,7 @@
                     <div class="white left-align z-depth-3">
                         <div class="form-padding">
 
-                            <form method="post" action="{{ ronde_opslaan_url }}">
+                            <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
                                 {% csrf_token %}
 
                                 {% if readonly %}
@@ -120,7 +121,7 @@
 
                                 {% if not readonly %}
                                     <p class="center">
-                                        <button id="opslaan_knop" class="btn-sv-rood disabled" type="submit">
+                                        <button class="btn-sv-rood disabled" id="submit_knop1" type="submit">
                                             <i class="notranslate material-icons-round left">check</i>Instellingen opslaan</button>
                                     </p>
                                 {% endif %}
@@ -136,6 +137,7 @@
         {% endif %}
 
     {% endif %}
+
 
     <!-- witruimte -->
     <div class="row center">
@@ -210,9 +212,9 @@
                 {% if url_nieuwe_wedstrijd %}
                     <tr>
                         <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
-                            <form action="{{ url_nieuwe_wedstrijd }}" method="post">
+                            <form action="{{ url_nieuwe_wedstrijd }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
                                 {% csrf_token %}
-                                <button class="btn-sv-rood vertrek_knop" type="submit">
+                                <button class="btn-sv-rood vertrek_knop" id="submit_knop2" type="submit">
                                     <i class="notranslate material-icons-round">add</i></button>
                             </form>
                         </td>
@@ -238,6 +240,7 @@
 
     {% if not readonly %}
 
+        <!-- als er wel wedstrijden zijn, dan komt het instellingen blok onder aan de pagina -->
         {% if ronde.beschrijving != '' %}
 
             <!-- witruimte -->
@@ -256,7 +259,7 @@
                     <div class="white left-align z-depth-3">
                         <div style="padding:30px">
 
-                            <form method="post" action="{{ ronde_opslaan_url }}">
+                            <form action="{{ ronde_opslaan_url }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
                                 {% csrf_token %}
 
                                 {% if readonly %}
@@ -283,7 +286,7 @@
 
                                 {% if not readonly %}
                                     <p class="center">
-                                        <button id="opslaan_knop" class="btn-sv-rood disabled" type="submit">
+                                        <button class="btn-sv-rood disabled" id="submit_knop1" type="submit">
                                             <i class="notranslate material-icons-round left">check</i>Instellingen opslaan</button>
                                     </p>
                                 {% endif %}
@@ -317,13 +320,13 @@
                     <h5>Verwijder blok?</h5>
                     <p>Wil je dit blok echt verwijderen uit de planning?</p>
 
-                    <form method="post" action="{{ url_verwijderen }}">
+                    <form action="{{ url_verwijderen }}" method="post" onsubmit="submit_knop4.disabled=true; return true;">
                         {% csrf_token %}
                         <input type="hidden" name="verwijder_ronde" value="1">
 
                         <div class="modal-footer" style="text-align:center; display:block">
                             <div style="display:inline-block; width:50%">
-                                <button class="btn-sv-rood" type="submit">Ja</button>
+                                <button class="btn-sv-rood" id="submit_knop4" type="submit">Ja</button>
                             </div>
                             <div style="display:inline-block; width:50%">
                                 <a href="#" class="btn-sv-blauw modal-close">Nee</a>

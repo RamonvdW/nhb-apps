@@ -23,9 +23,9 @@
                 {% else %}
                     <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd controleren en accorderen, waarna de HWL/WL de uitslag niet meer aan kan passen. De RCL kan de uitslag altijd nog corrigeren.</p>
                     <p>
-                        <form method="post" action="{{ url_geef_akkoord }}">
+                        <form action="{{ url_geef_akkoord }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                             {% csrf_token %}
-                            <button class="btn-sv-rood" type="submit">Ik geef akkoord voor deze uitslag</button>
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">Ik geef akkoord voor deze uitslag</button>
                         </form>
                     </p>
                 {% endif %}
@@ -69,7 +69,7 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <script>
 
         {% if deelcomp.regio_organiseert_teamcompetitie %}
         // lijst met verenigingen
@@ -735,7 +735,7 @@
     </div>
 
 
-    <script type="application/javascript">
+    <script>
 
         // geef de <enter> door aan de zoekknop
         document.getElementById('id_lid_nr').addEventListener("keyup", function(event) {

@@ -1139,7 +1139,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # mag niet wijzigen
             raise PermissionDenied('Niet de beheerder')
 
-        ver_pk = request.POST.get('ver_pk', '')[:6]       # afkappen voor de veiligheid
+        ver_pk = request.POST.get('ver_pk', '')[:6]             # afkappen voor de veiligheid
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
 

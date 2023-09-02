@@ -80,10 +80,10 @@
                 {% if url_nieuwe_poule %}
                     <tr>
                         <td{% if poules.count > 0 %} colspan="3"{% endif %}>
-                            <form action="{{ url_nieuwe_poule }}" method="post">
+                            <form action="{{ url_nieuwe_poule }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                                 {% csrf_token %}
                                 <div class="center">
-                                    <button class="btn-sv-rood">
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">
                                         <i class="notranslate material-icons-round">add</i></button>
                                 </div>
                             </form>

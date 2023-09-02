@@ -42,13 +42,16 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
         context['ver'] = ver = self.functie_nu.vereniging
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
+        try:
+            instellingen = BetaalInstellingenVereniging.objects.get(vereniging=ver)
+        except BetaalInstellingenVereniging.DoesNotExist:
+            pass
+        else:
+            if instellingen.mollie_api_key:
+                context['huidige_api_key'] = instellingen.obfuscated_mollie_api_key()
 
-        if instellingen.mollie_api_key:
-            context['huidige_api_key'] = instellingen.obfuscated_mollie_api_key()
-
-        if instellingen.akkoord_via_bond:
-            context['akkoord_via_bond'] = True
+            if instellingen.akkoord_via_bond:
+                context['akkoord_via_bond'] = True
 
         context['url_opslaan'] = reverse('Betaal:vereniging-instellingen')
 

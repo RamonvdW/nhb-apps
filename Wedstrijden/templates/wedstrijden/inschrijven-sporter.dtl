@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script type="application/javascript">
+    <script>
         function toevoegen(id)
         {
             // console.log('toevoegen: id=', id)

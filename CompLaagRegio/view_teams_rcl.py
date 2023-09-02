@@ -189,6 +189,7 @@ class RegioTeamsTemplateView(TemplateView):
                                       'vereniging__regio',
                                       'team_type',
                                       'team_klasse')
+                      .prefetch_related('regiocompetitieteampoule_set')
                       .exclude(team_klasse=None)
                       .filter(regiocompetitie__in=deelcomp_pks)
                       .order_by('team_klasse__volgorde',
@@ -204,6 +205,9 @@ class RegioTeamsTemplateView(TemplateView):
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
+
+            poule = team.regiocompetitieteampoule_set.first()
+            team.in_poule = (poule is not None)
 
             if comp.fase_teams <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('CompLaagRegio:teams-regio-koppelen',
