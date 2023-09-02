@@ -285,7 +285,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
 
         if not tracer.found_500:
             report = tracer.report()
-            if report:
+            if report:                      # pragma: no cover
                 print(report)
 
 

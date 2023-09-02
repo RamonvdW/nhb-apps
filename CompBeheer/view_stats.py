@@ -74,7 +74,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
 
                 regio_nr, ag = values
 
-                if ag < floor:
+                if ag < floor:                  # pragma: no branch
                     aantal_teams_ag_nul += 1
 
                 if comp.afstand == '18':

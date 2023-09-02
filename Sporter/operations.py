@@ -211,7 +211,7 @@ def get_sporterboog(sporter, mag_database_wijzigen=False, geen_wedstrijden=False
                 with transaction.atomic():
                     try:
                         SporterBoog.objects.bulk_create(bulk)
-                    except IntegrityError:
+                    except IntegrityError:                                          # pragma: no cover
                         # omdat SporterBoog een unique_together constraint heeft
                         # kunnen we hier komen als concurrency optreedt
                         pass

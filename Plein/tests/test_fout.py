@@ -79,7 +79,8 @@ class TestPleinFout(E2EHelpers, TestCase):
 
         # nog een keer, zodat de email naar de ontwikkelaar er al is.
         # controleer dat er maar 1 mail geschreven wordt (per dag)
-        resp = self.client.get(self.url_speciale_pagina % '500')
+        with self.assert_max_queries(20):                               # provides code 500 support in query tracer
+            resp = self.client.get(self.url_speciale_pagina % '500')
         self.assertTrue(resp.status_code, 200)
         self.assertEqual(1, MailQueue.objects.count())
 
