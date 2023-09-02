@@ -49,7 +49,8 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
     regios = (Regio
               .objects
               .select_related('rayon')
-              .filter(is_administratief=False))
+              .filter(is_administratief=False)
+              .order_by('regio_nr'))
 
     rayons = Rayon.objects.all()
 
