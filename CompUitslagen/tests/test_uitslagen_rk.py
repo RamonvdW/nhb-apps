@@ -9,7 +9,7 @@ from django.utils import timezone
 from Competitie.definities import DEELNAME_NEE, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                KampioenschapIndivKlasseLimiet, KampioenschapSporterBoog, KampioenschapTeam)
-from Competitie.tests.tijdlijn import zet_competitie_fases
+from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 
@@ -100,7 +100,7 @@ class TestCompUitslagenRK(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert404(resp, 'Kampioenschap niet gevonden')
 
-        # maak een wedstrijdlocatie aan
+        # maak een locatie aan
         locatie = self.testdata.maak_wedstrijd_locatie(self.ver_nr)
 
         # maak een RK match aan

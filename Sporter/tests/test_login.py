@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Account.models import Account
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

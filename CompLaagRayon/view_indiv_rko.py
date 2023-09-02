@@ -59,7 +59,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         alles_afgesloten = True
         for obj in regio_deelcomps:
             obj.regio_str = str(obj.regio.regio_nr)
-            obj.rayon_str = str(obj.regio.rayon.rayon_nr)
+            obj.rayon_str = str(obj.regio.rayon_nr)
 
             if obj.is_afgesloten:
                 obj.status_str = "Afgesloten"

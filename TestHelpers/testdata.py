@@ -21,14 +21,14 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieTeamPoule,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
-from NhbStructuur.models import Rayon, Regio, Cluster
+from Geo.models import Rayon, Regio, Cluster
+from Locatie.models import Locatie
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 from bs4 import BeautifulSoup
 from decimal import Decimal
 import datetime
@@ -1206,11 +1206,11 @@ class TestData(object):
         ver = self.vereniging[ver_nr]
 
         if afstand == 18:
-            deelkamp = self.deelkamp18_rk[ver.regio.rayon.rayon_nr]
+            deelkamp = self.deelkamp18_rk[ver.regio.rayon_nr]
             klassen = self.comp18_klassen_indiv
             rk_deelnemers = self.comp18_rk_deelnemers
         else:
-            deelkamp = self.deelkamp25_rk[ver.regio.rayon.rayon_nr]
+            deelkamp = self.deelkamp25_rk[ver.regio.rayon_nr]
             klassen = self.comp25_klassen_indiv
             rk_deelnemers = self.comp25_rk_deelnemers
 
@@ -1335,8 +1335,8 @@ class TestData(object):
     def maak_voorinschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, ook_incomplete_teams=True):
         """ maak voor deze vereniging een paar teams aan voor de open RK teams inschrijving """
 
-        ver = Vereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
-        rayon_nr = ver.regio.rayon.rayon_nr
+        ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        rayon_nr = ver.regio.rayon_nr
 
         if afstand == 18:                                                           # pragma: no cover
             deelkamp = self.deelkamp18_rk[rayon_nr]
@@ -1480,8 +1480,8 @@ class TestData(object):
             en koppel er meteen een aantal RK deelnemers van de vereniging aan.
         """
 
-        ver = Vereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
-        rayon_nr = ver.regio.rayon.rayon_nr
+        ver = Vereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        rayon_nr = ver.regio.rayon_nr
 
         if afstand == 18:
             deelkamp = self.deelkamp18_rk[rayon_nr]
@@ -1572,7 +1572,7 @@ class TestData(object):
         # for
 
     def maak_wedstrijd_locatie(self, ver_nr):
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='locatie %s' % ver_nr,
                         discipline_25m1pijl=True,
                         discipline_outdoor=True,

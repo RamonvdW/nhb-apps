@@ -20,12 +20,12 @@ from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, Competitie
 from Competitie.operations import maak_regiocompetitie_ronde, competitie_week_nr_to_date
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
+from Geo.models import Cluster
+from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import Cluster
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
 
@@ -1024,11 +1024,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if not match.locatie and match.vereniging:
             # alle binnen accommodaties hebben discipline_indoor=True
             # externe locaties met dezelfde discipline komen ook mee
-            locaties = match.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_indoor=True)
+            locaties = match.vereniging.locatie_set.exclude(zichtbaar=False).filter(discipline_indoor=True)
 
             if is_25m:
                 # neem ook externe locaties mee met discipline=25m1pijl
-                locaties_25m1p = match.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_25m1pijl=True)
+                locaties_25m1p = match.vereniging.locatie_set.exclude(zichtbaar=False).filter(discipline_25m1pijl=True)
                 locaties = locaties.union(locaties_25m1p)
 
             if locaties.count() > 0:
@@ -1048,9 +1048,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         pks = [ver.pk for ver in verenigingen]
         for ver in (Vereniging
                     .objects
-                    .prefetch_related('wedstrijdlocatie_set')
+                    .prefetch_related('locatie_set')
                     .filter(pk__in=pks)):
-            for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
+            for loc in ver.locatie_set.exclude(zichtbaar=False):
                 keep = False
                 if is_25m:
                     if loc.banen_25m > 0 and (loc.discipline_indoor or loc.discipline_25m1pijl):
@@ -1153,13 +1153,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if loc_pk:
             try:
-                loc = ver.wedstrijdlocatie_set.get(pk=loc_pk)
-            except WedstrijdLocatie.DoesNotExist:
+                loc = ver.locatie_set.get(pk=loc_pk)
+            except Locatie.DoesNotExist:
                 raise Http404('Geen valide verzoek')
         else:
             # formulier stuurt niets als er niet gekozen hoeft te worden
             loc = None
-            locs = ver.wedstrijdlocatie_set.exclude(zichtbaar=False).all()
+            locs = ver.locatie_set.exclude(zichtbaar=False).all()
             if locs.count() == 1:
                 loc = locs[0]       # de enige keuze
 

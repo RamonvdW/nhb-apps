@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from Sporter.models import Sporter, SporterVoorkeuren, GESLACHT_ANDERS
-from NhbStructuur.models import Regio
+from BasisTypen.definities import GESLACHT_ANDERS
+from Geo.models import Regio
 from Opleidingen.models import OpleidingDiploma
-from Sporter.models import Speelsterkte
+from Sporter.models import Sporter, SporterVoorkeuren, Speelsterkte
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime

@@ -11,12 +11,12 @@ from Competitie.definities import DEEL_RK, DEEL_BK, TEAM_PUNTEN_MODEL_FORMULE1
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, Kampioenschap)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
-                                       zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten)
+from Competitie.test_utils.tijdlijn import (evaluatie_datum, zet_competitie_fases, zet_competitie_fase_regio_wedstrijden,
+                                            zet_competitie_fase_regio_inschrijven, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
-from NhbStructuur.models import Rayon, Regio, Cluster
+from Geo.models import Rayon, Regio, Cluster
+from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -86,9 +86,9 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         ver.save()
         self.ver_101 = ver
 
-        loc = WedstrijdLocatie(banen_18m=1,
-                               banen_25m=1,
-                               adres='De Spanning 1, Houtdorp')
+        loc = Locatie(banen_18m=1,
+                      banen_25m=1,
+                      adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc = loc

@@ -7,12 +7,13 @@
 from django.test import TestCase
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
+from Locatie.models import Locatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_DISCIPLINE_3D
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
+from Wedstrijden.models import Wedstrijd
 
 
 class TestWedstrijdenVereniging(E2EHelpers, TestCase):
@@ -59,7 +60,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
     @staticmethod
     def _maak_externe_locatie(ver):
         # voeg een locatie toe
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()
@@ -92,7 +93,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_vereniging)
 
-        # probeer een wedstrijd aan te maken zonder wedstrijdlocatie
+        # probeer een wedstrijd aan te maken zonder locatie
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
@@ -100,7 +101,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_maak_nieuw, post=True)
 
-        # maak een wedstrijdlocatie van deze vereniging aan
+        # maak een locatie van deze vereniging aan
         self._maak_externe_locatie(self.ver1)
 
         # haal het overzicht opnieuw op (geen wedstrijden)

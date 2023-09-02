@@ -8,12 +8,12 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import BOOGTYPE_AFKORTING_RECURVE
 from Functie.operations import maak_functie, Functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog,
                                Kampioenschap, RegiocompetitieRonde, CompetitieMatch)
 from Competitie.operations import competities_aanmaken
-from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
+from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan

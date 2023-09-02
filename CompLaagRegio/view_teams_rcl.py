@@ -19,8 +19,8 @@ from Competitie.models import (Competitie, CompetitieTeamKlasse, Regiocompetitie
 from Competitie.operations.poules import maak_poule_schema
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
+from Geo.models import Rayon
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import Rayon
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL
@@ -98,7 +98,7 @@ class RegioTeamsTemplateView(TemplateView):
                 deelcomp_pks = (Regiocompetitie
                                 .objects
                                 .filter(competitie=comp,
-                                        regio__rayon__rayon_nr=subset)
+                                        regio__rayon_nr=subset)
                                 .values_list('pk', flat=True))
 
             context['filters'] = filters = list()

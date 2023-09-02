@@ -36,7 +36,7 @@
 
             {% for obj in verenigingen %}
                 <tr>
-                    <td class="center">{{ obj.regio.rayon.rayon_nr }}</td>
+                    <td class="center">{{ obj.regio.rayon_nr }}</td>
                     <td class="center">{{ obj.regio.regio_nr }}</td>
                     <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 

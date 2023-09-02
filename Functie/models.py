@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.formats import date_format
 from Account.models import Account
-from NhbStructuur.models import Regio, Rayon
+from Geo.models import Regio, Rayon
 from Vereniging.models import Vereniging
 
 

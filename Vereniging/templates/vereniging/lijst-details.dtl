@@ -1,0 +1,305 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Vereniging{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Vereniging</h3>
+            <p>Details over vereniging <b>{{ ver }}</b></p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="white">
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ ver.regio }}</td>
+                </tr>
+
+                {% if ver.sorted_cluster_names %}
+                    <tr>
+                        <th>Cluster(s)</th>
+                        <td>
+                            {% for cluster in ver.sorted_cluster_names %}
+                                <span>{{ cluster }}</span><br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Secretaris</th>
+                    <td>
+                        {% if geen_sec %}
+                            <i class="grey-text">Geen secretaris bekend</i>
+                        {% else %}
+                            {% for name in sec_names %}
+                                <span>{{ name }}</span><br>
+                            {% empty %}
+                                <i class="grey-text">Nog geen account</i>
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% if toon_hwl %}
+                    <tr>
+                        <th>Hoofdwedstrijdleider(s)</th>
+                        <td>
+                            {% for name in hwl_names %}
+                                <span>{{ name }}</span><br>
+                            {% empty %}
+                                <i class="grey-text">Nog niet gekoppeld</i>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if toon_wl %}
+                    <tr>
+                        <th>Wedstrijdleider(s)</th>
+                        <td>
+                            {% for name in wl_names %}
+                                <span>{{ name }}</span><br>
+                            {% empty %}
+                                <i class="grey-text">Nog niet gekoppeld</i>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>E-mailadres secretaris</th>
+                    <td>
+                        {% if sec_email %}
+                            <code>{{ sec_email }}</code>
+                        {% else %}
+                            <i class="grey-text">Onbekend</i>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% if toon_hwl %}
+                    <tr>
+                        <th>E-mailadres hoofdwedstrijdleider</th>
+                        <td>
+                            {% if hwl_email %}
+                                <code>{{ hwl_email }}</code>
+                            {% else %}
+                                <i class="grey-text">Onbekend</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if toon_wl %}
+                    <tr>
+                        <th>E-mailadres wedstrijdleider</th>
+                        <td>
+                            {% if wl_email %}
+                                <code>{{ wl_email }}</code>
+                            {% else %}
+                                <i class="grey-text">Onbekend</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    {% if ver.regio.is_administratief %}
+        <p class="center">Deze gegevens kunnen worden aangepast door de secretaris.</p>
+    {% else %}
+        <p class="center">Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider).</p>
+    {% endif %}
+
+
+    {% if locatie %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Binnenbaan</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s10 offset-s1 m12">
+
+                <table class="white">
+                    <tr>
+                        <th>Adres van de accommodatie</th>
+                        <td>{{ locatie.adres|linebreaksbr }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Plaats (voor de wedstrijdkalender)</th>
+                        <td>{{ locatie.plaats }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Type baan voor 18m/25m wedstrijden</th>
+                        <td>{{ locatie.baan_type_str }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Aantal banen 18 meter</th>
+                        <td>{{ locatie.banen_18m }} banen</td>
+                    </tr>
+
+                    <tr>
+                        <th>Aantal banen 25 meter</th>
+                        <td>{{ locatie.banen_25m }} banen</td>
+                    </tr>
+
+                    <tr>
+                        <th>Maximum aantal sporters op 18 meter</th>
+                        <td>{{ locatie.max_sporters_18m }} sporters</td>
+                    </tr>
+
+                    <tr>
+                        <th>Maximum aantal sporters op 25 meter</th>
+                        <td>{{ locatie.max_sporters_25m }} sporters</td>
+                    </tr>
+
+                    {% if locatie.other_ver.count %}
+                        <tr>
+                            <th>Wordt ook gebruikt door vereniging</th>
+                            <td>
+                                {% for ver in locatie.other_ver.all %}
+                                    <span>{{ ver }}</span><br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>Bijzonderheden</th>
+                        <td style="vertical-align: top">{{ locatie.notities|linebreaksbr }}</td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+    {% endif %}     <!-- if locatie / binnenbaan -->
+
+
+    {% if buiten_locatie %}
+
+       <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Buitenbaan</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s10 offset-s1 m12">
+                <table class="white">
+
+                    <tr>
+                        <th>Adres van de accommodatie</th>
+                        <td>{{ buiten_locatie.adres|linebreaksbr }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Plaats (voor de wedstrijdkalender)</th>
+                        <td>{{ buiten_locatie.plaats }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Ondersteunt disciplines</th>
+                        <td>
+                            {% for sel, str, checked in disc %}
+                                {% if checked %}
+                                    <span class="sv-rood-text">&check;&nbsp;</span><span>{{ str }}</span><br>
+                                    <!-- else: discipline niet noemen -->
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Maximum aantal banen</th>
+                        <td>{{ buiten_locatie.buiten_banen }} banen</td>
+                    </tr>
+
+                    <tr>
+                        <th>Maximale afstand</th>
+                        <td>{{ buiten_locatie.buiten_max_afstand }} meter</td>
+                    </tr>
+
+                    <tr>
+                        <th>Bijzonderheden</th>
+                        <td>{{ buiten_locatie.notities|linebreaksbr }}</td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+    {% endif %}     <!-- buiten_locatie -->
+
+
+    {% if externe_locaties %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Externe locaties</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s10 offset-s1 m12">
+                <table class="white">
+                    <tr>
+                        <th>Naam</th>
+                        <th>Disciplines</th>
+                        <th>Plaats</th>
+                    </tr>
+
+                    {% for locatie in externe_locaties %}
+                        <tr>
+                            <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
+
+                            <td>
+                                {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
+                                {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
+                                {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
+                                {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
+                                {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
+                                {% if locatie.discipline_run %}<span>Run-archery</span><br>{% endif %}
+                                {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
+                            </td>
+
+                            <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% endif %}     <!-- externe_locaties -->
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-lijst-details" %}
+
+{% endblock %}

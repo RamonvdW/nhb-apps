@@ -10,8 +10,9 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
 from Functie.operations import maak_functie
+from Geo.models import Regio
+from Locatie.models import Locatie
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter, SporterBoog
@@ -19,7 +20,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF
-from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie, WedstrijdLocatie
+from Wedstrijden.models import WedstrijdInschrijving, Wedstrijd, WedstrijdSessie
 import datetime
 
 
@@ -183,7 +184,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         Bestelling(bestel_nr=1, account=self.account_800001).save()
 
         # maak een inschrijving op een wedstrijd aan
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='locatie',
                         adres='',
                         notities='')

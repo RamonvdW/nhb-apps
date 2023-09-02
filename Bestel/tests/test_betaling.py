@@ -13,14 +13,14 @@ from Bestel.models import BestelMandje, Bestelling
 from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Geo.models import Regio
 from Mailer.models import MailQueue
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_DEFINITIEF
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
-from NhbStructuur.models import Regio
+from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_DEFINITIEF
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from decimal import Decimal
 import re
 
@@ -96,7 +96,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

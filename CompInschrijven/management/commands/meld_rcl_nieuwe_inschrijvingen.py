@@ -42,8 +42,9 @@ class Command(BaseCommand):
             # en de competitie nog in de actieve wedstrijden periode is waarin mensen zich in kunnen schrijven
             comp = deelcomp.competitie
             comp.bepaal_fase()
-            if comp.fase_indiv == 'F':
-                # regio wedstrijden zijn begonnen
+            if 'D' <= comp.fase_indiv <= 'F':
+                # D = late inschrijvingen voordat wedstrijden beginnen
+                # F = late inschrijvingen tijdens wedstrijden
                 # tijdens deze periode willen we de RCL informeren over late inschrijvingen
                 tup = (deelcomp.competitie.afstand, deelcomp.regio.regio_nr)
                 afstand_regio2deelcomp[tup] = deelcomp

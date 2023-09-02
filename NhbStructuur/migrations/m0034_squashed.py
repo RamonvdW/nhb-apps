@@ -6,6 +6,8 @@
 
 from django.db import migrations, models
 
+
+# TODO: verplaats naar Geo/definities
 RAYONS = (
     (1, "Rayon 1"),     # Noord-Nederland
     (2, "Rayon 2"),     # Zuid-West Nederland
@@ -14,9 +16,10 @@ RAYONS = (
 )
 
 ADMINISTRATIEVE_REGIO = 100
-VER_NR = 1368
+VER_NR_BONDSBUREAU = 1368
 
 
+# TODO: verplaats naar Geo/migrations/squashed
 def init_rayons(apps, _):
     """ Maak de rayons aan """
 
@@ -34,6 +37,7 @@ def init_rayons(apps, _):
     rayon_klas.objects.bulk_create(bulk)
 
 
+# TODO: verplaats naar Geo/migrations/squashed
 def init_regios(apps, _):
     """ Maak de regios aan met korte namen
         De CRM import levert de feitelijke namen
@@ -78,6 +82,7 @@ def init_regios(apps, _):
     regio_klas.objects.bulk_create(bulk)
 
 
+# TODO: verplaats naar Geo/migrations/squashed
 def init_clusters(apps, _):
     """ Maak de standaard clusters aan in elke regio """
 
@@ -111,6 +116,7 @@ def init_clusters(apps, _):
     cluster_klas.objects.bulk_create(bulk)
 
 
+# TODO: verplaats naar Vereniging/migrations/squashed
 def maak_ver_bondsbureau(apps, _):
 
     """ Maak de vereniging Bondsbureau aan, want deze is nodig voor de functie MWW
@@ -123,7 +129,7 @@ def maak_ver_bondsbureau(apps, _):
 
     # alleen bij een lege database aanmaken
     ver, is_created = ver_klas.objects.get_or_create(
-                                    ver_nr=VER_NR,
+                                    ver_nr=VER_NR_BONDSBUREAU,
                                     regio=regio_klas.objects.get(regio_nr=ADMINISTRATIEVE_REGIO))
     if is_created:      # pragma: no branch
         ver.naam = 'Tijdelijk'
@@ -144,6 +150,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = []
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='NhbRayon',

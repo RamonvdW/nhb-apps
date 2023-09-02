@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio, Cluster
+from Geo.models import Regio, Cluster
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 
@@ -90,7 +90,7 @@ class TestCompLaagRegioClusters(E2EHelpers, TestCase):
         # plaats ver1 in een ander cluster
         # haal ver2 uit zijn cluster
         # stop ver3 in een cluster
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
                                                         'ver_1001': self.cluster2.pk,
                                                         'ver_1002': '0',

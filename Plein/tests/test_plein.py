@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Bestel.models import BestelMandje, BestelProduct
 from Functie.operations import maak_functie
-from NhbStructuur.models import Rayon, Regio
+from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
 from Registreer.models import GastRegistratie
 from TestHelpers.e2ehelpers import E2EHelpers

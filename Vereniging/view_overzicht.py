@@ -14,9 +14,9 @@ from Competitie.models import Competitie, Regiocompetitie, RegiocompetitieRonde,
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_inschrijven_rk_teams
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
+from Locatie.definities import BAAN_TYPE_EXTERN
 from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
-from Wedstrijden.definities import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
 
 
@@ -57,12 +57,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         else:
             context['toon_wedstrijden'] = self.rol_nu != Rollen.ROL_SEC
 
-        if ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
-            context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
+        if ver.locatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
+            context['accommodatie_details_url'] = reverse('Locatie:accommodatie-details',
                                                           kwargs={'ver_nr': ver.ver_nr})
 
         if not ver.is_extern:
-            context['url_externe_locaties'] = reverse('Vereniging:externe-locaties',
+            context['url_externe_locaties'] = reverse('Locatie:externe-locaties',
                                                       kwargs={'ver_nr': ver.ver_nr})
 
         comps = list()

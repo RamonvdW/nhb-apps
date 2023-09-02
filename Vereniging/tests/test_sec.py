@@ -6,14 +6,14 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Competitie.models import Competitie, CompetitieIndivKlasse, RegiocompetitieSporterBoog
-from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 from Competitie.operations import competities_aanmaken
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
+from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -324,9 +324,9 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert403(resp)          # SEC mag dit niet
 
-    def test_wedstrijdlocatie(self):
+    def test_locatie(self):
         # maak een locatie en koppel aan de vereniging
-        loc = WedstrijdLocatie()
+        loc = Locatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
         loc.verenigingen.add(self.ver1)
@@ -340,8 +340,8 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
         urls = self.extract_all_urls(resp)
-        urls2 = [url for url in urls if url.startswith('/vereniging/accommodatie-details/')]
-        self.assertEqual(len(urls2), 1)
+        urls2 = [url for url in urls if url.startswith('/vereniging/locatie/')]
+        self.assertEqual(len(urls2), 2)
 
         # ophalen en aanpassen: zie test_accommodatie
 

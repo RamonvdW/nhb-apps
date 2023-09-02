@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio, Rayon
+from Geo.models import Regio, Rayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_regio_nr, get_request_rayon_nr
 from TestHelpers.e2ehelpers import E2EHelpers

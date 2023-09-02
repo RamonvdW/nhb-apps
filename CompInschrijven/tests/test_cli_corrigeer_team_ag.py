@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType, TeamType, ORGANISATIE_WA
 from Competitie.models import (Competitie, Regiocompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam)
 from Competitie.operations import competities_aanmaken
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

@@ -61,13 +61,13 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
             emails = (Functie
                       .objects
                       .filter(rol__in=('HWL', 'SEC'),
-                              vereniging__regio__rayon__rayon_nr=rayon_nr)
+                              vereniging__regio__rayon_nr=rayon_nr)
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
             alle = (Functie
                     .objects
                     .filter(rol__in=('HWL', 'SEC'),
-                            vereniging__regio__rayon__rayon_nr=rayon_nr)
+                            vereniging__regio__rayon_nr=rayon_nr)
                     .exclude(bevestigde_email='')
                     .select_related('vereniging')
                     .order_by('vereniging__ver_nr',

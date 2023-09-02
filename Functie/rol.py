@@ -209,6 +209,7 @@ def rol_zet_sessionvars(account, request):
                 .only('rol',
                       'comp_type',
                       'regio__regio_nr',
+                      # 'regio__rayon_nr',      # warning: does not work!
                       'rayon__rayon_nr',
                       'regio__rayon__rayon_nr',
                       'vereniging__ver_nr',

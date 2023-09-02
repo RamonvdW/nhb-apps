@@ -10,15 +10,15 @@ from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
 from BasisTypen.models import BoogType
 from Functie.models import Functie
+from Geo.models import Regio
+from Locatie.definities import BAAN_TYPE_BUITEN
+from Locatie.models import Locatie
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from Opleidingen.models import OpleidingDiploma
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Vereniging.models2 import Secretaris
-from Wedstrijden.definities import BAAN_TYPE_BUITEN
-from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
@@ -191,12 +191,12 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                              OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan wedstrijdlocatie 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe locatie voor adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan locatie 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
 
         ver = Vereniging.objects.get(ver_nr=1000)
 
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam="Ergens buiten",
                         baan_type=BAAN_TYPE_BUITEN)
         locatie.save()
@@ -215,13 +215,13 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Vereniging 1001 secretarissen: geen --> 100001" in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van plaats van vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van secretaris email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
-        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van wedstrijdlocatie met adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
-        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan wedstrijdlocatie 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe locatie voor adres 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van locatie met adres 'Oude pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan locatie 'Nieuwe pijlweg 1\\n1234 AB Doelstad'" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1002 KvK nummer 'X15' moet 8 cijfers bevatten" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1042 KvK nummer '1234' moet 8 cijfers bevatten" in f2.getvalue())
 
-        locatie1 = ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_BUITEN).get(plaats='Stadia')
+        locatie1 = ver.locatie_set.exclude(baan_type=BAAN_TYPE_BUITEN).get(plaats='Stadia')
         locatie1.plaats = 'Ja maar'
         locatie1.save(update_fields=['plaats'])
 
@@ -231,9 +231,9 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                                  OPTION_SIM)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Vereniging 1000: Aanpassing wedstrijdlocatie plaats 'Ja maar' --> 'Stadia'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging 1000: Aanpassing locatie plaats 'Ja maar' --> 'Stadia'" in f2.getvalue())
 
-        locatie1 = WedstrijdLocatie.objects.get(pk=locatie1.pk)
+        locatie1 = Locatie.objects.get(pk=locatie1.pk)
         self.assertEqual(locatie1.plaats, 'Stadia')
 
     def test_lid_mutaties(self):
@@ -271,6 +271,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100001: is_actief_lid: ja --> nee" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100024: para_classificatie: 'W1' --> ''" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100025 is overleden op 2018-05-05 en wordt op inactief gezet" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100098: adres_code '1111AA111' --> '1115AB5'" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100098: geboorteplaats 'Papendal' --> 'Arnhem'" in f2.getvalue())
@@ -295,6 +296,15 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         sporter = Sporter.objects.get(lid_nr=100025)
         self.assertFalse(sporter.is_actief_lid)      # want: overleden
+
+        # nog een keer hetzelfde commando geeft geen nieuwe log regels
+        with self.assert_max_queries(64):
+            f1, f2 = self.run_management_command(IMPORT_COMMAND,
+                                                 TESTFILE_09_LID_MUTATIES,
+                                                 OPTION_SIM)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertFalse("[INFO] Lid 100025 is overleden op 2018-05-05 en wordt op inactief gezet" in f2.getvalue())
 
     def test_haakjes(self):
         # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd

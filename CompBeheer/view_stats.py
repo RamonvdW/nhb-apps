@@ -154,7 +154,7 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
         for values in (RegiocompetitieSporterBoog       # 14ms
                        .objects
                        .filter(regiocompetitie__competitie__pk__in=pks)
-                       .values_list('bij_vereniging__regio__rayon__rayon_nr',
+                       .values_list('bij_vereniging__regio__rayon_nr',
                                     'bij_vereniging__regio__regio_nr',
                                     'aangemeld_door',
                                     'sporterboog__sporter__account',

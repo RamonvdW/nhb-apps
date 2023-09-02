@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from NhbStructuur.models import Cluster
+from Geo.models import Cluster
 from Sporter.models import Sporter
 from Vereniging.models import Vereniging
 from Vereniging.models2 import Secretaris

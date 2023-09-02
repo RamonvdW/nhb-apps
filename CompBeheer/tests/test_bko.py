@@ -12,13 +12,13 @@ from Competitie.models import (Competitie, Regiocompetitie, Kampioenschap,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
-                                       zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
+from Competitie.test_utils.tijdlijn import (zet_competitie_fases, zet_competitie_fase_regio_inschrijven,
+                                            zet_competitie_fase_regio_wedstrijden, zet_competitie_fase_regio_afsluiten)
 from Functie.operations import maak_functie
+from Geo.models import Rayon, Regio
 from HistComp.models import HistCompSeizoen, HistCompRegioTeam
-from NhbStructuur.models import Rayon, Regio
+from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -106,9 +106,9 @@ class TestCompBeheerBko(E2EHelpers, TestCase):
         ver.save()
         self.ver_101 = ver
 
-        loc = WedstrijdLocatie(banen_18m=1,
-                               banen_25m=1,
-                               adres='De Spanning 1, Houtdorp')
+        loc = Locatie(banen_18m=1,
+                      banen_25m=1,
+                      adres='De Spanning 1, Houtdorp')
         loc.save()
         loc.verenigingen.add(ver)
         self.loc = loc

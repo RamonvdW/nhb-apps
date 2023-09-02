@@ -10,8 +10,8 @@ from Bestel.definities import BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_ST
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
+from Geo.models import Regio
 from Mailer.models import MailQueue
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from Vereniging.models import Vereniging
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze

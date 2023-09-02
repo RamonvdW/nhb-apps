@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist, Uitslag
 from Score.operations import score_indiv_ag_opslaan

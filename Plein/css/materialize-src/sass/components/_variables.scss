@@ -38,6 +38,7 @@ $primary-color: #0aa0e1 !default;             // blauw
 $primary-color-light: #5ebde7 !default;
 $primary-color-dark: #03628c !default;
 
+$secondary-color-dark: #ae0b03 !default;      // donker-rood
 $secondary-color: #f94137 !default;           // rood
 //$secondary-color: #0aa0e1 !default;         // medium blauw
 //$secondary-color: #03628c !default;         // donker blauw
@@ -115,7 +116,7 @@ $button-outline-text-focus: $button-raised-color;
 // 4. Cards
 // ==========================================================================
 
-$card-padding: 24px !default;
+$card-padding: 12px !default; //(2023-08-19)24px !default;
 $card-bg-color: #fff !default;
 $card-link-color: $sv-donkerblauw-color !default;
 $card-link-color-light: $sv-blauw-color !default;

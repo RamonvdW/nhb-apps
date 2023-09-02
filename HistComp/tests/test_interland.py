@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_25, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

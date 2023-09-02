@@ -11,7 +11,7 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.operations import maak_functie, account_needs_vhpg
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import Rayon, Regio
+from Geo.models import Rayon, Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging

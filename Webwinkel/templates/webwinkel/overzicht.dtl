@@ -58,11 +58,15 @@
 
             {% endif %}
 
-                    <div class="sv-card-content" style="padding:0">
+                    <!-- old: <div class="sv-card-content" style="padding:0"> -->
+                    <div class="sv-card-content-webwinkel">
 
-                        <div class="card-image" style="top:0px; left:0px; width:244px; height:244px; overflow:hidden">
+                        <!-- old: <div class="card-image" style="top:0; left:0; width:224px; height:224px; overflow:hidden"> -->
+                        <div class="sv-card-image-webwinkel">
+
                             <!-- achtergrondplaatje -->
-                            <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} style="opacity:0.5"{% endif %}>
+                            <!-- old: <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} style="opacity:0.5"{% endif %}> -->
+                            <img src="{{ product.omslag_foto_src }}" alt="product"{% if product.is_uitverkocht %} class="sv-card-image-onscherp"{% endif %}>
 
                             <!-- titel
                             <div class="card-title" style="bottom:revert; top:0; color:black; padding:0; width:100%">{{ title }}</div>
@@ -79,7 +83,8 @@
 
                         {% endif %}
 
-                        <div style="position:absolute; bottom:10px; right:10px; color: white; background-color:rgba(0,0,0,.5); padding:3px">&euro;&nbsp;{{ product.prijs_euro }}</div>
+                        <!-- old: <div style="position:absolute; bottom:10px; right:10px; color: white; background-color:rgba(0,0,0,.5); padding:3px">&euro;&nbsp;{{ product.prijs_euro }}</div> -->
+                        <div class="sv-card-webwinkel-prijs">&euro;&nbsp;{{ product.prijs_euro }}</div>
 
                     </div>
 

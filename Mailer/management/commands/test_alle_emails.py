@@ -20,14 +20,15 @@ from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
+from Geo.models import Regio
+from Locatie.models import Locatie
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
-from NhbStructuur.models import Regio
 from Sporter.models import Sporter, SporterBoog
 from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, INSCHRIJVING_STATUS_RESERVERING_BESTELD
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdLocatie
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from decimal import Decimal
 
 
@@ -42,7 +43,7 @@ class Command(BaseCommand):
     test_lid_nr = 99999
     test_bestel_nr = 999999
     test_functie_beschrijving = 'Test functie 9999'
-    test_wedstrijdlocatie_naam = 'Test wedstrijdlocatie 999999'
+    test_locatie_naam = 'Test locatie 999999'
     test_sessie_beschrijving = 'Test sessie 99999'
     test_wachtwoord = "qewretrytuyi"     # sterk genoeg default wachtwoord
     test_email = 'testertje@vander.test'
@@ -131,10 +132,10 @@ class Command(BaseCommand):
         now = timezone.now()
         wedstrijd_datum = now.date() + timezone.timedelta(days=30)
 
-        locatie = WedstrijdLocatie(
-                            naam=self.test_wedstrijdlocatie_naam,
-                            adres=ver.adres_regel1 + '\n' + ver.adres_regel2,
-                            plaats=ver.plaats)
+        locatie = Locatie(
+                        naam=self.test_locatie_naam,
+                        adres=ver.adres_regel1 + '\n' + ver.adres_regel2,
+                        plaats=ver.plaats)
         locatie.save()
         locatie.verenigingen.add(ver)
 
@@ -295,8 +296,8 @@ class Command(BaseCommand):
                 wedstrijd.delete()
 
             try:
-                locatie = WedstrijdLocatie.objects.get(naam=self.test_wedstrijdlocatie_naam)
-            except WedstrijdLocatie.DoesNotExist:      # pragma: no cover
+                locatie = Locatie.objects.get(naam=self.test_locatie_naam)
+            except Locatie.DoesNotExist:      # pragma: no cover
                 pass
             else:
                 locatie.delete()
@@ -327,10 +328,18 @@ class Command(BaseCommand):
         account_stuur_email_bevestig_nieuwe_email(self.to_email, 'dummy-url')
         self._check_mail_gemaakt()
 
+        self.stdout.write('Maak mail voor Account - OTP losgekoppeld')
+        otp_stuur_email_losgekoppeld(self.account)
+        self._check_mail_gemaakt()
+
     def _test_bestel(self):
-        self.stdout.write('Maak mail voor Bestel - Bevestiging aankoop')
+        # TODO: Bevestiging bestelling
+
+        self.stdout.write('Maak mail voor Bestel - Betaal bevestiging')
         stuur_email_naar_koper_betaalbevestiging(self.bestelling)
         self._check_mail_gemaakt()
+
+        # TODO: mail naar backoffice
 
     def _test_functie(self):
         self.stdout.write('Maak mail voor Functie - Bevestig toegang e-mail')
@@ -345,9 +354,15 @@ class Command(BaseCommand):
         functie_wijziging_stuur_email_notificatie(self.account, 'not used', 'Test functie', remove=True)
         self._check_mail_gemaakt()
 
-        self.stdout.write('Maak mail voor Functie - OTP losgekoppeld')
-        otp_stuur_email_losgekoppeld(self.account)
-        self._check_mail_gemaakt()
+    def test_registreer(self):
+        # TODO: lid-bevestig-toegang-email
+        pass
+
+    def test_registreer_gast(self):
+        # TODO: gast-bevestig-toegang-email
+        # TODO: gast-tijdelijk-bondsnummer
+        # TODO: gast-afgewezen
+        pass
 
     def _test_taken(self):
         self.stdout.write('Maak mail voor Taken - Nieuwe taak')

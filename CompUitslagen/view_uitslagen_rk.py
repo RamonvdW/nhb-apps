@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKl
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import Rayon
+from Geo.models import Rayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_rayon_nr
 from Plein.menu import menu_dynamics
@@ -178,7 +178,7 @@ class UitslagenRayonIndivView(TemplateView):
                             .objects
                             .filter(competitie__is_afgesloten=False,
                                     competitie=comp,
-                                    regio__rayon__rayon_nr=rayon_nr)
+                                    regio__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
             deelnemers = (RegiocompetitieSporterBoog

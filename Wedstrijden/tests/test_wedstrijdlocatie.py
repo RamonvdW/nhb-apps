@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Wedstrijden.models import WedstrijdLocatie
+from Locatie.models import Locatie
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestWedstrijdenLocatie(E2EHelpers, TestCase):
 
-    """ Tests voor de Wedstrijden applicatie, module wedstrijdlocatie """
+    """ Tests voor de Wedstrijden applicatie, module locatie """
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -20,8 +20,8 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         pass
 
     def test_locatie(self):
-        locatie = WedstrijdLocatie()
-        locatie.adres = 'Hallo\ndaar'
+        locatie = Locatie(
+                    adres='Hallo\ndaar')
         self.assertTrue(str(locatie) != '')
 
         locatie.discipline_25m1pijl = True

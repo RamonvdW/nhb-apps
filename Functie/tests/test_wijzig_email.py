@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import Rayon, Regio
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Regiocompetitie, Kampioenschap
 from Competitie.operations import competities_aanmaken
 from Functie.operations import maak_functie, Functie
+from Geo.models import Rayon, Regio
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
 from TijdelijkeCodes.models import TijdelijkeCode

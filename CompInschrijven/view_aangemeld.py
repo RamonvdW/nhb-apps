@@ -18,7 +18,7 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
                                RegiocompetitieSporterBoog)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from NhbStructuur.models import Rayon, Regio
+from Geo.models import Rayon, Regio
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from Vereniging.models import Vereniging
@@ -219,12 +219,12 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .objects
                 .select_related('indiv_klasse',
                                 'regiocompetitie',
-                                'regiocompetitie__regio__rayon',
+                                'regiocompetitie__regio',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging')
                 .filter(regiocompetitie__competitie=comp,
-                        regiocompetitie__regio__rayon=rayon)
+                        regiocompetitie__regio__rayon_nr=rayon.rayon_nr)
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 

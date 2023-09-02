@@ -10,9 +10,9 @@ from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.operations import maak_functie, Functie
+from Geo.models import Rayon, Regio
 from Logboek.models import LogboekRegel
 from Mailer.models import MailQueue
-from NhbStructuur.models import Rayon, Regio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata

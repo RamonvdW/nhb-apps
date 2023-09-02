@@ -50,6 +50,7 @@ urlpatterns = [
     path('taken/',                          include('Taken.urls')),
     path('tijdelijke-codes/',               include('TijdelijkeCodes.urls')),
     path('vereniging/',                     include('Vereniging.urls')),
+    path('vereniging/locatie/',             include('Locatie.urls')),
     path('webwinkel/',                      include('Webwinkel.urls')),
     path('wedstrijden/',                    include('Wedstrijden.urls')),
 

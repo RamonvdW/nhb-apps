@@ -23,16 +23,16 @@
 <div class="sv-card-disabled">
 
     <!-- padding om bij de rand weg te blijven -->
-    <div class="sv-card-content">
+    <div class="sv-card-content center-align">
 
         <!-- titel -->
         {% if title %}
-            <div class="card-title center-align grey-text">{{ title }}</div>
+            <div class="card-title grey-text">{{ title }}</div>
         {% endif %}
 
         <!-- icoon -->
-        <div style="margin-bottom:8px{% if not icon_font_size %}; height:64px{% endif %}">
-            <i class="notranslate material-icons-round medium grey-text">{{ icon }}</i>
+        <div style="margin-bottom:4px{% if not icon_font_size %}; height:64px{% endif %}">
+            <i class="notranslate material-icons-round medium grey-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
         </div>
 
         <div class="grey-text">{{ text }}</div>

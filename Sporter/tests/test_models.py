@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from Account.models import Account
 from BasisTypen.models import BoogType
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Sporter.models import Sporter, SporterBoog, Speelsterkte
 from Vereniging.models import Vereniging
 import datetime

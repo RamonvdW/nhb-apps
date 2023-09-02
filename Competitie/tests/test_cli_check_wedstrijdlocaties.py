@@ -9,10 +9,10 @@ from django.core import management
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Competitie, Kampioenschap, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Competitie.operations import competities_aanmaken
-from NhbStructuur.models import Regio, Rayon
+from Geo.models import Regio, Rayon
+from Locatie.models import Locatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 import io
 
 
@@ -48,7 +48,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
                     regio=regio_114)
         ver.save()
 
-        loc = WedstrijdLocatie(
+        loc = Locatie(
                 naam='loc1',
                 discipline_indoor=True,
                 banen_18m=10,
@@ -72,7 +72,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         wed1.indiv_klassen.add(indiv1)
         wed1.team_klassen.add(team1)
 
-        loc = WedstrijdLocatie(
+        loc = Locatie(
                 naam='loc2',
                 discipline_outdoor=True,
                 banen_18m=0,

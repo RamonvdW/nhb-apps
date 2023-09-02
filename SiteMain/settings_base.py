@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-
+SITE_VERSIE = '2023-09-02'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -47,8 +47,10 @@ INSTALLED_APPS = [
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',
     'Functie.apps.FunctieConfig',
+    'Geo.apps.GeoConfig',
     'HistComp.apps.HistCompConfig',
     'Kalender.apps.KalenderConfig',
+    'Locatie.apps.LocatieConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
     'NhbStructuur.apps.NhbStructuurConfig',
@@ -518,8 +520,8 @@ CRM_IMPORT_GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
 
 CRM_IMPORT_GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijden
 
-CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau
-                                    1377)      # persoonlijk lid, geen wedstrijden
+CRM_IMPORT_GEEN_LOCATIE = (1368,               # bondsbureau
+                           1377)               # persoonlijk lid, geen wedstrijden
 
 # voorkom verwijderen bepaalde leden tijdens CRM import
 CRM_IMPORT_BEHOUD_CLUB = (1999,                # voor demo
@@ -552,5 +554,8 @@ DEBUG = False
 
 # HTML validation using v.Nu (see TestHelpers/e2ehelpers.py)
 TEST_VALIDATE_HTML = False
+
+# JS validation using ESprima
+TEST_VALIDATE_JAVASCRIPT = False
 
 # end of file

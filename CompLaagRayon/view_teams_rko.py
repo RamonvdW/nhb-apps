@@ -14,7 +14,7 @@ from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from NhbStructuur.models import Rayon
+from Geo.models import Rayon
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL
 

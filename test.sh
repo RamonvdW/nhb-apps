@@ -58,6 +58,19 @@ echo
 STAMP=$(date +"%Y-%m-%d %H:%M:%S")
 echo "[INFO] Now is $STAMP"
 
+if [[ "$ARGS" =~ "-h" ]]
+then
+    echo "./test.sh [options] [testcase selector(s)]"
+    echo ""
+    echo "options:"
+    echo "  --force     Force generate of coverage, even when tests fail"
+    echo "  --fullcov   Do not focus the coverage report"
+    echo "  --clean     Remove database (automatic for full run)"
+    echo
+    echo "Example selector: App_dir.tests_dir.test_filename.TestCaseClass.test_func"
+    exit
+fi
+
 FORCE_REPORT=0
 if [[ "$ARGS" =~ "--force" ]]
 then

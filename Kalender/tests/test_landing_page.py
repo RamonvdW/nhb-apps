@@ -7,9 +7,10 @@
 from django.test import TestCase
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
+from Locatie.models import Locatie
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
-from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
+from Wedstrijden.models import Wedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 import datetime
@@ -44,7 +45,7 @@ class TestKalender(E2EHelpers, TestCase):
         self.functie_hwl.save()
 
         # voeg een locatie toe
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         baan_type='E',      # externe locatie
                         naam='Test locatie')
         locatie.save()

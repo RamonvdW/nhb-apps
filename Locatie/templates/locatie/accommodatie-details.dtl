@@ -1,0 +1,511 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Accommodatie details{% endblock %}
+
+{% block pagina %}
+
+    <script>
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // disable alle knoppen waarmee de invoer verloren zou gaan
+            const els = document.getElementsByClassName("wijzig_knop")
+            Array.prototype.forEach.call(els, function (el) {
+                el.classList.add('disabled')
+            })
+
+            // enable de 'opslaan' knop
+            const el = document.getElementById("submit_knop2")
+            el.disabled = false
+            el.parentElement.style.display = "block"
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Accommodatie</h3>
+            <p>Details van de accommodatie van vereniging <b>{{ ver }}</b>.</p>
+        </div>
+    </div>
+
+    {% if opslaan_url %}
+        {% if not buiten_locatie %}
+            <form id="form1" action="{{ opslaan_url }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                {% csrf_token %}
+                <input hidden name="maak_buiten_locatie" value="1">
+            </form>
+        {% endif %}
+
+        <form id="form2" action="{{ opslaan_url }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+            {% csrf_token %}
+    {% endif %}
+
+            {% if locatie %}
+
+                <!-- witruimte -->
+                <div class="row center">
+                    <div class="col s12">
+                        <h4>Binnenbaan</h4>
+                    </div>
+                </div>
+
+                <!-- blauwe balk met informatie in een tabel -->
+                <div class="row-sv-blauw">
+                    <div class="col s10 offset-s1 m12{% if not readonly %} white z-depth-3{% endif %}">
+
+                        {% if not readonly %}
+                            <!-- dialoog venster -->
+                            <div style="margin:30px 30px 30px 30px" class="left-align">
+                        {% endif %}
+
+                                <table class="white">
+                                    <tr>
+                                        <th>Adres van de accommodatie</th>
+                                        <td>{{ locatie.adres|linebreaksbr }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Plaats (voor de wedstrijdkalender)</th>
+                                        <td>{{ locatie.plaats }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Type baan voor 18m/25m wedstrijden</th>
+                                        <td>
+                                            {% if readonly %}
+                                                <span>{{ locatie.baan_type_str }}</span>
+                                            {% else %}
+                                                <ul id="id_baantype">
+                                                    <li>
+                                                        <label class="black-text" for="id_baantype_X">
+                                                            <input class="with-gap" type="radio" name="baan_type" value="X" required id="id_baantype_X"{%if locatie.baan_type == "X" %} checked{% endif %} onchange="gewijzigd()">
+                                                            <span>Onbekend</span>
+                                                        </label>
+                                                    </li>
+                                                    <li>
+                                                        <label class="black-text" for="id_baantype_O">
+                                                            <input class="with-gap" type="radio" name="baan_type" value="O" required id="id_baantype_O"{%if locatie.baan_type == "O" %} checked{% endif %} onchange="gewijzigd()">
+                                                            <span>Volledig overdekte binnenbaan</span>
+                                                        </label>
+                                                    </li>
+                                                    <li>
+                                                        <label class="black-text" for="id_baantype_H">
+                                                            <input class="with-gap" type="radio" name="baan_type" value="H" required id="id_baantype_H"{%if locatie.baan_type == "H" %} checked{% endif %} onchange="gewijzigd()">
+                                                            <span>Half overdekt (binnen-buiten schieten)</span>
+                                                        </label>
+                                                    </li>
+                                                </ul>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Aantal banen 18 meter</th>
+                                        <td>
+                                            {% if readonly %}
+                                                <span>{{ locatie.banen_18m }} banen</span>
+                                            {% else %}
+                                                <select id="banen_18" name="banen_18m" onchange="gewijzigd()">
+                                                    <option value="0"{%if locatie.banen_18m == 0 %} selected{% endif %}>Geen banen</option>
+                                                    <option value="1"{%if locatie.banen_18m == 1 %} selected{% endif %}>1 baan</option>
+                                                    {% for baan in banen %}
+                                                        <option value="{{ baan }}"{%if locatie.banen_18m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Aantal banen 25 meter</th>
+                                        <td>
+                                            {% if readonly %}
+                                                <span>{{ locatie.banen_25m }} banen</span>
+                                            {% else %}
+                                                <select id="banen_25" name="banen_25m" onchange="gewijzigd()">
+                                                    <option value="0"{%if locatie.banen_25m == 0 %} selected{% endif %}>Geen banen</option>
+                                                    <option value="1"{%if locatie.banen_25m == 1 %} selected{% endif %}>1 baan</option>
+                                                    {% for baan in banen %}
+                                                        <option value="{{ baan }}"{%if locatie.banen_25m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Maximum aantal sporters op 18 meter</th>
+                                        <td>
+                                            {% if readonly %}
+                                                <span>{{ locatie.max_sporters_18m }} sporters</span>
+                                            {% else %}
+                                                <input type="number" min="0" max="99" name="max_sporters_18m" value="{{ locatie.max_sporters_18m }}" onchange="gewijzigd()">
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>Maximum aantal sporters op 25 meter</th>
+                                        <td>
+                                            {% if readonly %}
+                                                <span>{{ locatie.max_sporters_25m }} sporters</span>
+                                            {% else %}
+                                                <input type="number" min="0" max="99" name="max_sporters_25m" value="{{ locatie.max_sporters_25m }}" onchange="gewijzigd()">
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    {% if locatie.other_ver.count %}
+                                        <tr>
+                                            <th>Wordt ook gebruikt door vereniging</th>
+                                            <td>
+                                                {% for ver in locatie.other_ver.all %}
+                                                    <span>{{ ver }}</span><br>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
+                                    <tr>
+                                        <th>Bijzonderheden</th>
+                                        <td style="vertical-align: top">
+                                            {% if readonly %}
+                                                <span>{{ locatie.notities|linebreaksbr }}</span>
+                                            {% else %}
+                                                <textarea name="notities" class="materialize-textarea" oninput="gewijzigd()">{{ locatie.notities }}</textarea>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                </table>
+                        {% if not readonly %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}     <!-- binnen locatie -->
+
+
+            {% if not readonly %}
+                {% if opslaan_url and not buiten_locatie %}
+
+                   <!-- witruimte -->
+                    <div class="row center">
+                        <div class="col s12">
+                            <h4>Buitenbaan?</h4>
+                            <button form="form1" class="btn-sv-rood wijzig_knop" id="submit_knop1" type="submit">Buitenbaan toevoegen</button>
+                        </div>
+                    </div>
+
+                {% endif %}
+            {% endif %}
+
+
+            {% if buiten_locatie %}
+
+               <!-- witruimte -->
+                <div class="row center">
+                    <div class="col s12">
+                        <h4>Buitenbaan</h4>
+                    </div>
+                </div>
+
+                <!-- blauwe balk met informatie in een tabel -->
+                <div class="row-sv-blauw">
+                    <div class="col s10 offset-s1 m12{% if not readonly %} white z-depth-3{% endif %}">
+                        <table class="white">
+
+                            <tr>
+                                <th>Adres van de accommodatie</th>
+                                <td>{{ buiten_locatie.adres|linebreaksbr }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>Plaats (voor de wedstrijdkalender)</th>
+                                <td>{{ buiten_locatie.plaats }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>Ondersteunt disciplines</th>
+                                <td>
+                                    {% if readonly %}
+                                        {% for sel, str, checked in disc %}
+                                            {% if checked %}
+                                                <span class="sv-rood-text">&check;&nbsp;</span><span>{{ str }}</span>
+                                                <!-- else: discipline niet noemen -->
+                                            {% endif %}
+                                            <!-- voeg een verstopte radiobutton toe die gecheckt kan worden door javascript -->
+                                            <div style="visibility:hidden">
+                                                <input type="radio" id="id_{{ sel }}" {% if checked %} checked{% endif %}>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for sel, str, checked in disc %}
+                                            <label>
+                                                <input type="checkbox" class="filled-in" id="id_{{ sel }}" name="{{ sel }}"{% if checked %} checked{% endif %} onchange="gewijzigd()">
+                                                <span class="black-text">{{ str }}</span><br>
+                                            </label>
+                                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Maximum aantal banen</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ buiten_locatie.buiten_banen }} banen</span>
+                                    {% else %}
+                                        <select name="buiten_banen" onchange="gewijzigd()">
+                                            <option value="1"{%if buiten_locatie.buiten_banen == 1 %} selected{% endif %}>1 baan</option>
+                                            {% for banen in buiten_banen %}
+                                                <option value="{{ banen }}"{%if buiten_locatie.buiten_banen == banen %} selected{% endif %}>{{ banen }} banen</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Maximale afstand</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ buiten_locatie.buiten_max_afstand }} meter</span>
+                                    {% else %}
+                                        <select name="buiten_max_afstand" onchange="gewijzigd()">
+                                            {% for afstand in buiten_max_afstand %}
+                                                <option value="{{ afstand }}"{%if buiten_locatie.buiten_max_afstand == afstand %} selected{% endif %}>{{ afstand }} meter</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Bijzonderheden</th>
+                                <td>
+                                    {% if readonly %}
+                                        <span>{{ buiten_locatie.notities|linebreaksbr }}</span>
+                                    {% else %}
+                                        <textarea name="buiten_notities" class="materialize-textarea" oninput="gewijzigd()">{{ buiten_locatie.notities }}</textarea>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% if url_verwijder_buitenbaan %}
+                                <tr>
+                                    <td>
+                                        <a class="btn-sv-blauw modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            {% endif %}
+
+                        </table>
+                    </div>
+                </div>
+
+            {% endif %}     <!-- buiten_locatie -->
+
+            {% if externe_locaties %}
+
+                <!-- witruimte -->
+                <div class="row center">
+                    <div class="col s12">
+                        <h4>Externe locaties</h4>
+                    </div>
+                </div>
+
+                <!-- blauwe balk met informatie in een tabel -->
+                <div class="row-sv-blauw">
+                    <div class="col s10 offset-s1 m12">
+                        <table class="white">
+                            <tr>
+                                <th>Naam</th>
+                                <th>Disciplines</th>
+                                <th>Plaats</th>
+                            </tr>
+
+                            {% for locatie in externe_locaties %}
+                                <tr>
+                                    <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
+
+                                    <td>
+                                        {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
+                                        {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
+                                        {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
+                                        {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
+                                        {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
+                                        {% if locatie.discipline_run %}<span>Run-archery</span><br>{% endif %}
+                                        {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
+                                    </td>
+
+                                    <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                    </table>
+                </div>
+            </div>
+
+        {% endif %}     <!-- externe_locaties -->
+
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Beheerders</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="white">
+                    <tr>
+                        <th>Regio</th>
+                        <td>{{ ver.regio }}</td>
+                    </tr>
+
+                    {% if ver.sorted_cluster_names %}
+                        <tr>
+                            <th>Cluster(s)</th>
+                            <td>
+                                {% for cluster in ver.sorted_cluster_names %}
+                                    <span>{{ cluster }}</span><br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>Secretaris</th>
+                        <td>
+                            {% if geen_sec %}
+                                <i class="grey-text">Geen secretaris bekend</i>
+                            {% else %}
+                                {% for name in sec_names %}
+                                    <span>{{ name }}</span><br>
+                                {% empty %}
+                                    <i class="grey-text">Nog geen account</i>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% if toon_hwl %}
+                        <tr>
+                            <th>Hoofdwedstrijdleider(s)</th>
+                            <td>
+                                {% for name in hwl_names %}
+                                    <span>{{ name }}</span><br>
+                                {% empty %}
+                                    <i class="grey-text">Nog niet gekoppeld</i>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% if toon_wl %}
+                        <tr>
+                            <th>Wedstrijdleider(s)</th>
+                            <td>
+                                {% for name in wl_names %}
+                                    <span>{{ name }}</span><br>
+                                {% empty %}
+                                    <i class="grey-text">Nog niet gekoppeld</i>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>E-mailadres secretaris</th>
+                        <td>
+                            {% if sec_email %}
+                                <code>{{ sec_email }}</code>
+                            {% else %}
+                                <i class="grey-text">Onbekend</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% if toon_hwl %}
+                        <tr>
+                            <th>E-mailadres hoofdwedstrijdleider</th>
+                            <td>
+                                {% if hwl_email %}
+                                    <code>{{ hwl_email }}</code>
+                                {% else %}
+                                    <i class="grey-text">Onbekend</i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% if toon_wl %}
+                        <tr>
+                            <th>E-mailadres wedstrijdleider</th>
+                            <td>
+                                {% if wl_email %}
+                                    <code>{{ wl_email }}</code>
+                                {% else %}
+                                    <i class="grey-text">Onbekend</i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                </table>
+            </div>
+        </div>
+
+        {% if not readonly %}
+            <div class="fixed-action-btn" style="display: none">
+                <button class="btn-sv-rood" id="submit_knop2" type="submit" disabled>
+                    <i class="notranslate material-icons-round left">check</i>Wijzigingen opslaan</button>
+            </div>
+        {% endif %}
+
+    {% if opslaan_url %}
+        </form>
+    {% endif %}
+
+    {% if url_verwijder_buitenbaan %}
+        <div class="modal" id="bevestig_verwijder_buitenbaan">
+            <div class="modal-content center">
+                <h5>Verwijder buitenbaan?</h5>
+                <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
+
+                <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="submit_knop3.disabled=true; return true;">
+                    {% csrf_token %}
+                    <input type="hidden" name="verwijder_buitenbaan" value="1">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-sv-rood" id="submit_knop3" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-sv-blauw modal-close">Nee</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if ver.regio.is_administratief %}
+        <p class="center">Deze gegevens kunnen worden aangepast door de secretaris.</p>
+    {% else %}
+        <p class="center">Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-accommodatie-details" %}
+
+{% endblock %}

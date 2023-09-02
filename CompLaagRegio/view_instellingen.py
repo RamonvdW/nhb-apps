@@ -248,7 +248,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
         for deelcomp in deelcomps:
 
             deelcomp.regio_str = str(deelcomp.regio.regio_nr)
-            deelcomp.rayon_str = str(deelcomp.regio.rayon.rayon_nr)
+            deelcomp.rayon_str = str(deelcomp.regio.rayon_nr)
 
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
                 deelcomp.short_inschrijfmethode_str = '1'

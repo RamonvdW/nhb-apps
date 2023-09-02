@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
                                    ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIE_WA)
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,

@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Plein.menu import menu_dynamics
 from BasisTypen.models import TemplateCompetitieIndivKlasse
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Sporter.models import Sporter
 
 

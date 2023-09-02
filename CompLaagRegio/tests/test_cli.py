@@ -8,9 +8,9 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, Leeftijdsklasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
-from Competitie.tests.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
+from Competitie.test_utils.tijdlijn import zet_competitie_fases, zet_competitie_fase_regio_inschrijven
 from Functie.models import Functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Score.definities import AG_DOEL_INDIV, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Score.models import Aanvangsgemiddelde, ScoreHist, Score
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -446,7 +446,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             f1, f2 = self.run_management_command('verwijder_dupe_data')
 
         self.assertTrue(f1.getvalue() == '')
-        self.assertTrue(f2.getvalue() == '')
+        self.assertTrue(f2.getvalue() == 'Geen duplicate data gevonden\n')
 
         # maak een echte dupe aan
         dupe = RegiocompetitieSporterBoog(

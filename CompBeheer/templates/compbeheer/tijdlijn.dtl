@@ -72,14 +72,26 @@
                         {% if comp.fase_indiv > 'C' %}
                             <span class="green-text">Afgerond</span>
                         {% else %}
-                            <span>vanaf {{ comp.begin_fase_C }}</span>   <!-- zelfstandig afmelden kan tot einde_fase_F -->
+                            <span>van {{ comp.begin_fase_C }} tot {{ comp.begin_fase_D_indiv }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="center{% if comp.fase_indiv == 'D' %} sv-rood white-text{% endif %}">D</td>
+                    <td>Late aanmeldingen / instroom nieuwe leden (sporter/HWL)</td>
+                    <td>
+                        {% if comp.fase_indiv > 'D' %}
+                            <span class="green-text">Afgerond</span>
+                        {% else %}
+                            <span>vanaf {{ comp.begin_fase_D_indiv }}</span>
                         {% endif %}
                     </td>
                 </tr>
 
                 <tr>
                     <td class="center{% if comp.fase_indiv == 'F' %} sv-rood white-text{% endif %}">F</td>
-                    <td>Regio wedstrijden (sporters)<br>Scores invoeren (HWL)<br>Publiceer tussenstand regiocompetitie (automatisch)<br>Publiceer voorlopige deelnemerslijst RK (automatisch)</td>
+                    <td>Regio wedstrijden (sporters)<br>Scores invoeren (HWL)<br>Late aanmeldingen / instroom nieuwe leden (sporter/HWL)<br>Publiceer tussenstand regiocompetitie (automatisch)<br>Publiceer voorlopige deelnemerslijst RK (automatisch)</td>
                     <td>
                         {% if comp.fase_indiv > 'F' %}
                             <span class="green-text">Afgerond</span>

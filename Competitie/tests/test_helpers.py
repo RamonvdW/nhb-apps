@@ -7,7 +7,7 @@
 from Competitie.models import Competitie
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                                    competitie_klassengrenzen_vaststellen)
-from Competitie.tests.tijdlijn import zet_competitie_fase_regio_inschrijven
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
 
 
 def maak_competities_en_zet_fase_c(startjaar=None):

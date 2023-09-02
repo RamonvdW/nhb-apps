@@ -15,17 +15,17 @@ from django.core.exceptions import ValidationError
 from Account.models import Account
 from Functie.models import Functie
 from Functie.operations import maak_functie, maak_account_vereniging_secretaris
+from Geo.models import Rayon, Regio
+from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
+from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
-from NhbStructuur.models import Rayon, Regio
 from Opleidingen.models import OpleidingDiploma
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Speelsterkte
 from Vereniging.models import Vereniging
 from Vereniging.models2 import Secretaris
-from Wedstrijden.definities import BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
-from Wedstrijden.models import WedstrijdLocatie
 import traceback
 import datetime
 import logging
@@ -122,7 +122,7 @@ class Command(BaseCommand):
                     .objects
                     .exclude(ver_nr__in=SKIP_VER_NR)
                     .select_related('regio')
-                    .prefetch_related('wedstrijdlocatie_set')
+                    .prefetch_related('locatie_set')
                     .all()):
             self._cache_ver[ver.ver_nr] = ver
         # for
@@ -1574,8 +1574,8 @@ class Command(BaseCommand):
             self._count_warnings += 1
         # for
 
-    def _import_wedstrijdlocaties(self, data):
-        """ Importeert data van verenigingen als basis voor wedstrijdlocaties """
+    def _import_locaties(self, data):
+        """ Importeert data van verenigingen als basis voor locaties """
 
         if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, (), "club"):
             return
@@ -1598,7 +1598,7 @@ class Command(BaseCommand):
         for club in data:
             ver_nr = club['club_number']
 
-            if ver_nr in settings.CRM_IMPORT_GEEN_WEDSTRIJDLOCATIE:
+            if ver_nr in settings.CRM_IMPORT_GEEN_LOCATIE:
                 continue
 
             ver = self._vind_vereniging(ver_nr)
@@ -1618,83 +1618,83 @@ class Command(BaseCommand):
 
             if not adres:
                 # vereniging heeft geen adres meer
-                # verwijder de koppeling met wedstrijdlocatie uit crm
-                for obj in ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
-                    ver.wedstrijdlocatie_set.remove(obj)
-                    self.stdout.write('[INFO] Wedstrijdlocatie %s ontkoppeld voor vereniging %s' % (repr(obj.adres), ver_nr))
+                # verwijder de koppeling met locatie uit crm
+                for obj in ver.locatie_set.filter(adres_uit_crm=True):
+                    ver.locatie_set.remove(obj)
+                    self.stdout.write('[INFO] Locatie %s ontkoppeld voor vereniging %s' % (repr(obj.adres), ver_nr))
                     self._count_wijzigingen += 1
                 continue
 
-            # zoek de wedstrijdlocatie bij dit adres
+            # zoek de locatie bij dit adres
             try:
-                wedstrijdlocatie = (WedstrijdLocatie
-                                    .objects
-                                    .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
-                                    .get(adres=adres))
-            except WedstrijdLocatie.MultipleObjectsReturned:            # pragma: no cover
+                locatie = (Locatie
+                           .objects
+                           .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
+                           .get(adres=adres))
+            except Locatie.MultipleObjectsReturned:            # pragma: no cover
                 # er is een ongelukje gebeurt
-                self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % ver)
+                self.stderr.write('[ERROR] Onverwacht meer dan 1 locatie voor vereniging %s' % ver)
                 self._count_errors += 1
                 continue
-            except WedstrijdLocatie.DoesNotExist:
+            except Locatie.DoesNotExist:
                 # nieuw aanmaken
-                wedstrijdlocatie = WedstrijdLocatie(
-                                        adres=adres,
-                                        plaats=plaats,
-                                        adres_uit_crm=True)
-                wedstrijdlocatie.save()
-                self.stdout.write('[INFO] Nieuwe wedstrijdlocatie voor adres %s' % repr(adres))
+                locatie = Locatie(
+                                adres=adres,
+                                plaats=plaats,
+                                adres_uit_crm=True)
+                locatie.save()
+                self.stdout.write('[INFO] Nieuwe locatie voor adres %s' % repr(adres))
                 self._count_toevoegingen += 1
             else:
                 # indien nog niet ingevuld, zet de plaats
-                if wedstrijdlocatie.plaats != plaats:
-                    self.stdout.write('[INFO] Vereniging %s: Aanpassing wedstrijdlocatie plaats %s --> %s' % (
-                                        ver_nr, repr(wedstrijdlocatie.plaats), repr(plaats)))
-                    wedstrijdlocatie.plaats = plaats
-                    wedstrijdlocatie.save(update_fields=['plaats'])
+                if locatie.plaats != plaats:
+                    self.stdout.write('[INFO] Vereniging %s: Aanpassing locatie plaats %s --> %s' % (
+                                        ver_nr, repr(locatie.plaats), repr(plaats)))
+                    locatie.plaats = plaats
+                    locatie.save(update_fields=['plaats'])
 
             # adres van locatie mag niet wijzigen
             # dus als vereniging een ander adres heeft, ontkoppel dan de oude locatie
             for obj in (ver
-                        .wedstrijdlocatie_set
+                        .locatie_set
                         .exclude(adres_uit_crm=False)           # niet extern/buitenbaan
-                        .exclude(pk=wedstrijdlocatie.pk)):
-                ver.wedstrijdlocatie_set.remove(obj)
-                self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (ver, repr(obj.adres)))
+                        .exclude(pk=locatie.pk)):
+                ver.locatie_set.remove(obj)
+                self.stdout.write('[INFO] Vereniging %s ontkoppeld van locatie met adres %s' % (ver, repr(obj.adres)))
                 self._count_wijzigingen += 1
             # for
 
-            if wedstrijdlocatie.verenigingen.filter(ver_nr=ver_nr).count() == 0:
-                # maak koppeling tussen vereniging en wedstrijdlocatie
-                wedstrijdlocatie.verenigingen.add(ver)
-                self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (ver, repr(adres)))
+            if locatie.verenigingen.filter(ver_nr=ver_nr).count() == 0:
+                # maak koppeling tussen vereniging en locatie
+                locatie.verenigingen.add(ver)
+                self.stdout.write('[INFO] Vereniging %s gekoppeld aan locatie %s' % (ver, repr(adres)))
                 self._count_toevoegingen += 1
 
             # zoek ook de buitenbaan van de vereniging erbij
             try:
                 buiten_locatie = (ver
-                                  .wedstrijdlocatie_set
+                                  .locatie_set
                                   .get(baan_type=BAAN_TYPE_BUITEN,
                                        zichtbaar=True))
-            except WedstrijdLocatie.DoesNotExist:
+            except Locatie.DoesNotExist:
                 # vereniging heeft geen buitenlocatie
                 pass
             else:
                 updated = list()
-                if buiten_locatie.plaats != wedstrijdlocatie.plaats:
-                    buiten_locatie.plaats = wedstrijdlocatie.plaats
+                if buiten_locatie.plaats != locatie.plaats:
+                    buiten_locatie.plaats = locatie.plaats
                     updated.append('plaats')
 
-                if buiten_locatie.adres != wedstrijdlocatie.adres:
-                    buiten_locatie.adres = wedstrijdlocatie.adres
+                if buiten_locatie.adres != locatie.adres:
+                    buiten_locatie.adres = locatie.adres
                     updated.append('adres')
 
                 if len(updated):
                     buiten_locatie.save(update_fields=updated)
         # for
 
-        # FUTURE: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
-        # FUTURE: zichtbaar=True zetten voor (revived) wedstrijdlocatie met vereniging
+        # FUTURE: zichtbaar=False zetten voor locatie zonder vereniging
+        # FUTURE: zichtbaar=True zetten voor (revived) locatie met vereniging
 
     def _import_bestand(self, fname):
         try:
@@ -1727,7 +1727,7 @@ class Command(BaseCommand):
         self._import_clubs(data['clubs'])
         self._import_members(data['members'])
         self._import_clubs_secretaris(data['clubs'])
-        self._import_wedstrijdlocaties(data['clubs'])
+        self._import_locaties(data['clubs'])
 
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))

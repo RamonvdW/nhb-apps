@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import CompetitieIndivKlasse, KampioenschapSporterBoog, CompetitieMutatie
-from Competitie.tests.tijdlijn import zet_competitie_fase_bk_klein, zet_competitie_fase_rk_wedstrijden
+from Competitie.test_utils.tijdlijn import zet_competitie_fase_bk_klein, zet_competitie_fase_rk_wedstrijden
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import json

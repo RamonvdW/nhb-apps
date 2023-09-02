@@ -200,7 +200,7 @@
 
             <!-- externe locaties -->
             {% if url_externe_locaties %}
-                {% include 'plein/card_icon.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
+                {% include 'plein/card_icon.dtl' with title="Locaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
             {% endif %}
         </div>
     </div>

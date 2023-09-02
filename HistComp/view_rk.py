@@ -7,13 +7,13 @@
 from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
+from Geo.models import Rayon
 from HistComp.definities import (HISTCOMP_RK, HISTCOMP_TYPE_18,
                                  HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE, HISTCOMP_TYPE2STR,
                                  HIST_BOOG_DEFAULT, HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG2STR,
                                  HIST_TEAM_DEFAULT, HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM2STR,
                                  HIST_KLASSE2VOLGORDE, HISTCOMP_TITEL2STR)
 from HistComp.models import HistCompSeizoen, HistKampIndiv, HistKampTeam
-from NhbStructuur.models import Rayon
 from Plein.menu import menu_dynamics
 from Sporter.operations import get_request_rayon_nr
 from types import SimpleNamespace

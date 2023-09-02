@@ -9,10 +9,10 @@ from django.utils import timezone
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
 from Competitie.models import (CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
                                RegiocompetitieRonde, CompetitieMatch)
-from Competitie.tests.tijdlijn import zet_competitie_fases
+from Competitie.test_utils.tijdlijn import zet_competitie_fases
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from Functie.models import Functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Score.definities import AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan

@@ -19,11 +19,11 @@ from Competitie.definities import (AFSTANDEN,
 from Competitie.tijdlijn import bepaal_fase_indiv, bepaal_fase_teams
 from Functie.definities import Rollen
 from Functie.models import Functie
-from NhbStructuur.models import Rayon, Regio, Cluster
+from Locatie.models import Locatie
+from Geo.models import Rayon, Regio, Cluster
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
 from Vereniging.models import Vereniging
-from Wedstrijden.models import WedstrijdLocatie
 import logging
 
 my_logger = logging.getLogger('NHBApps.Competitie')
@@ -66,9 +66,11 @@ class Competitie(models.Model):
     #         controle handmatig AG (RCL)
     #         poules voorbereiden
 
-    # Regiocompetitie bevat de (regio specifieke) begin_fase_D
+    begin_fase_D_indiv = models.DateField(default='2000-01-01')     # typisch: 15 augustus
+    # Regiocompetitie bevat de (regio specifieke) begin_fase_D voor de teamcompetitie
 
-    # fase D: incomplete teams verwijderen (RCL)
+    # fase D: late inschrijvingen individueel
+    #         incomplete teams verwijderen (RCL)
     #         alle teams in een poule plaatsen (RCL)
 
     # eerste datum wedstrijden
@@ -406,7 +408,7 @@ class CompetitieMatch(models.Model):
                                    blank=True, null=True)   # mag later ingevuld worden
 
     # waar
-    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT,
+    locatie = models.ForeignKey(Locatie, on_delete=models.PROTECT,
                                 blank=True, null=True)      # mag later ingevuld worden
 
     # datum en tijdstippen
@@ -921,17 +923,17 @@ class KampioenschapSporterBoog(models.Model):
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         if self.kampioenschap.deel == DEEL_BK:
-            substr = "BK"
+            deel_str = "BK"
         else:
-            substr = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
+            deel_str = "RK rayon %s" % self.kampioenschap.rayon.rayon_nr
 
-        substr += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
+        deel_str += ' (deelname=%s, rank=%s, volgorde=%s)' % (self.deelname, self.rank, self.volgorde)
 
         return "[%s] %s (%s) %s" % (
                     self.sporterboog.sporter.lid_nr,
                     self.sporterboog.sporter.volledige_naam(),
                     self.sporterboog.boogtype.beschrijving,
-                    substr)
+                    deel_str)
 
     class Meta:
         verbose_name = "Kampioenschap sporterboog"

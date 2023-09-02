@@ -8,11 +8,11 @@ from django.db import models
 from Account.models import Account
 from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from Locatie.models import Locatie
 from Score.models import Score, Uitslag
 from Sporter.models import Sporter, SporterBoog
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import (BAAN_TYPE, BAAN_TYPE_ONBEKEND, BAANTYPE2STR,
-                                    WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_TO_STR,
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING, WEDSTRIJD_BEGRENZING_LANDELIJK,
                                     WEDSTRIJD_DISCIPLINES, WEDSTRIJD_DISCIPLINE_OUTDOOR,
                                     WEDSTRIJD_WA_STATUS, WEDSTRIJD_WA_STATUS_B,
@@ -21,104 +21,6 @@ from Wedstrijden.definities import (BAAN_TYPE, BAAN_TYPE_ONBEKEND, BAANTYPE2STR,
                                     INSCHRIJVING_STATUS_CHOICES, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
                                     INSCHRIJVING_STATUS_TO_STR)
 from decimal import Decimal
-
-
-class WedstrijdLocatie(models.Model):
-    """ Een locatie waarop een wedstrijd gehouden kan worden.
-
-        Naast de accommodatie van de vereniging (binnen / buiten) ook externe locaties
-        waar de vereniging een wedstrijd kan organiseren.
-    """
-
-    # naam waaronder deze locatie getoond wordt
-    naam = models.CharField(max_length=50, blank=True)
-
-    # zichtbaar maakt het mogelijk een baan uit het systeem te halen
-    # zonder deze helemaal te verwijderen
-    zichtbaar = models.BooleanField(default=True)
-
-    # verenigingen die deze locatie gebruiken (kan gedeeld doel zijn)
-    verenigingen = models.ManyToManyField(Vereniging)
-
-    # eigen accommodatie binnenbaan (volledig overdekt of half overdekt), buitenbaan, extern of 'onbekend'
-    baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default=BAAN_TYPE_ONBEKEND)
-
-    # welke disciplines kunnen hier georganiseerd worden?
-    discipline_25m1pijl = models.BooleanField(default=False)
-    discipline_outdoor = models.BooleanField(default=False)
-    discipline_indoor = models.BooleanField(default=False)      # Indoor = 18m/25m 3pijl, True als banen_18m>0 of banen_25m>0
-    discipline_clout = models.BooleanField(default=False)
-    discipline_veld = models.BooleanField(default=False)
-    discipline_run = models.BooleanField(default=False)
-    discipline_3d = models.BooleanField(default=False)
-    # discipline_flight (zo ver mogelijk schieten)
-    # discipline_ski
-
-    # alleen voor indoor: beschikbare banen
-    banen_18m = models.PositiveSmallIntegerField(default=0)
-    banen_25m = models.PositiveSmallIntegerField(default=0)
-
-    # het maximum aantal sporters
-    # (noodzakelijk voor als max_sporters != banen * 4)
-    max_sporters_18m = models.PositiveSmallIntegerField(default=0)
-    max_sporters_25m = models.PositiveSmallIntegerField(default=0)
-
-    # alleen voor discipline_outdoor baan
-    buiten_banen = models.PositiveSmallIntegerField(default=0)
-    buiten_max_afstand = models.PositiveSmallIntegerField(default=0)
-
-    # adresgegevens van de locatie
-    adres = models.TextField(max_length=256, blank=True)
-
-    # plaats deze wedstrijdlocatie, om eenvoudig weer te kunnen geven op de wedstrijdkalender
-    plaats = models.CharField(max_length=50, blank=True, default='')
-
-    # handmatig ingevoerd of uit de CRM (=bevroren)
-    adres_uit_crm = models.BooleanField(default=False)
-
-    # vrije notitiegegevens voor zaken als "verbouwing tot", etc.
-    notities = models.TextField(max_length=1024, blank=True)
-
-    def disciplines_str(self):
-        disc = list()
-        if self.discipline_outdoor:
-            disc.append('outdoor')
-        if self.discipline_indoor:
-            disc.append('indoor(18+25)')
-        if self.discipline_25m1pijl:
-            disc.append('25m1pijl')
-        if self.discipline_clout:
-            disc.append('clout')
-        if self.discipline_veld:
-            disc.append('veld')
-        if self.discipline_run:
-            disc.append('run')
-        if self.discipline_3d:
-            disc.append('3d')
-        return ", ".join(disc)
-
-    def __str__(self):
-        if not self.zichtbaar:
-            msg = "(hidden) "
-        else:
-            msg = ""
-
-        msg += "[baantype: %s] " % BAANTYPE2STR[self.baan_type]
-
-        msg += self.adres.replace('\n', ', ')
-        # kost te veel database toegangen in admin interface
-        # msg += " (%s verenigingen)" % self.verenigingen.count()
-
-        msg += " [disciplines: %s]" % self.disciplines_str()
-
-        msg += " [banen: 18m=%s, 25m=%s]" % (self.banen_18m, self.banen_25m)
-
-        return msg
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Wedstrijd locatie"
-        verbose_name_plural = "Wedstrijd locaties"
 
 
 # class WedstrijdDeeluitslag(models.Model):
@@ -203,7 +105,7 @@ class Wedstrijd(models.Model):
     uitvoerende_vereniging = models.ForeignKey(Vereniging, on_delete=models.PROTECT,
                                                related_name='uitvoerend',
                                                blank=True, null=True)
-    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
+    locatie = models.ForeignKey(Locatie, on_delete=models.PROTECT)
 
     # begrenzing
     begrenzing = models.CharField(max_length=1, default=WEDSTRIJD_BEGRENZING_LANDELIJK, choices=WEDSTRIJD_BEGRENZING)

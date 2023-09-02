@@ -12,12 +12,13 @@ from Bestel.definities import BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_O
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
+from Locatie.models import Locatie
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORTING_VERENIGING
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdLocatie, WedstrijdInschrijving, WedstrijdKorting
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
 
@@ -93,7 +94,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         now = timezone.now()
         datum = now.date()      # pas op met testen ronde 23:59
 
-        locatie = WedstrijdLocatie(
+        locatie = Locatie(
                         naam='Test locatie',
                         discipline_outdoor=True,
                         buiten_banen=10,

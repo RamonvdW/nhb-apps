@@ -7,11 +7,11 @@
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from Functie.operations import maak_functie
-from NhbStructuur.models import Regio
+from Geo.models import Regio
 from Competitie.definities import DEEL_RK
 from Competitie.models import (Regiocompetitie, CompetitieIndivKlasse,
                                RegiocompetitieSporterBoog, KampioenschapTeam, Kampioenschap)
-from Competitie.tests.tijdlijn import evaluatie_datum, zet_competitie_fase_regio_wedstrijden
+from Competitie.test_utils.tijdlijn import evaluatie_datum, zet_competitie_fase_regio_wedstrijden
 from Competitie.tests.test_helpers import maak_competities_en_zet_fase_c
 from HistComp.definities import HISTCOMP_TYPE_18, HIST_BOGEN_DEFAULT
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv

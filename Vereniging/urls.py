@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Vereniging import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
-                        view_lijst_verenigingen)
+from Vereniging import view_overzicht, view_ledenlijst, view_lijst
 
 app_name = 'Vereniging'
 
@@ -28,33 +27,21 @@ urlpatterns = [
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
-    # accommodatie (voor gebruik van buiten Beheer vereniging)
-    path('accommodaties/lijst/',
-         view_lijst_verenigingen.LijstVerenigingenView.as_view(),
-         name='lijst-verenigingen'),
 
-    path('accommodaties/details/<ver_nr>/',
-         view_accommodatie.AccommodatieDetailsView.as_view(),
-         name='accommodatie-details'),
+    # lijst verenigingen
+    path('lijst/',
+         view_lijst.LijstView.as_view(),
+         name='lijst'),
 
-    # eigen accommodatie
-    path('accommodatie-details/<ver_nr>/',
-         view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
-         name='vereniging-accommodatie-details'),
-
-    # wedstrijdlocaties
-    path('externe-locaties/<ver_nr>/',
-         view_externe_locaties.ExterneLocatiesView.as_view(),
-         name='externe-locaties'),
-
-    path('externe-locaties/<ver_nr>/details/<locatie_pk>/',
-         view_externe_locaties.ExterneLocatieDetailsView.as_view(),
-         name='locatie-details'),
+    # voor gebruik vanuit de lijst van verenigingen
+    path('lijst/<ver_nr>/',
+         view_lijst.DetailsView.as_view(),
+         name='lijst-details'),
 
 
     # voor de BB
     path('contact-geen-beheerders/',
-         view_lijst_verenigingen.GeenBeheerdersView.as_view(),
+         view_lijst.GeenBeheerdersView.as_view(),
          name='contact-geen-beheerders')
 ]
 
