@@ -301,6 +301,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             if obj.rol == 'BKO':
                 obj.tekst_kort = obj.tekst_lang = 'BKO'
+                obj.do_break_selective = True
                 obj.ruimte = True
             elif obj.rol == 'RKO':
                 obj.tekst_kort = "RKO%s" % obj.rayon.rayon_nr

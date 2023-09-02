@@ -83,81 +83,6 @@
 
         <!-- volwaardige beheerder en tweede factor is gecontroleerd -->
 
-        {% if heeft_alle_rollen %}
-
-            <h4 class="center">Snel wisselen</h4>
-
-            <!-- blauwe balk -->
-            <div class="row-sv-blauw" style="padding:15px 0 0 0">
-
-                <!-- indoor -->
-                <div class="col s6 m3">
-                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
-                        <div class="center" style="margin-bottom:10px"><b>Indoor</b></div>
-                        {% for obj in alle_18 %}
-                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
-                                {% csrf_token %}
-                                <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
-                            </form>
-                            {% if obj.do_break %}<br>{% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- 25m1pijl -->
-                <div class="col s6 m3">
-                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
-                        <div class="center" style="margin-bottom:10px"><b>25m1pijl</b></div>
-                        {% for obj in alle_25 %}
-                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
-                                {% csrf_token %}
-                                <button class="btn-sv-blauw" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
-                            </form>
-                            {% if obj.do_break %}<br>{% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- verenigingen -->
-                <div class="col s12 m6">
-                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
-                        <h6 class="center" style="margin-bottom:10px">Verenigingen</h6>
-
-                        <!-- vereniging naar keuze -->
-                        <form class="center" action="{{ url_hwl_naar_keuze }}" method="post" onsubmit="submit_knop00.disabled=true; return true;">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="col s4">
-                                    <input type="text" name="ver_nr" placeholder="Ver nr" maxlength="4">
-                                </div>
-                                <div class="col s4">
-                                    <button class="btn-sv-rood" id="submit_knop00" type="submit">HWL</button>
-                                </div>
-                            </div>
-                        </form>
-
-                        {% if show_hwl_rollen %}
-                            <ul>
-                                {% for obj in hwl_rollen %}
-                                    <li>
-                                        <label class="black-text" for="id_{{ obj.pk }}">
-                                            <input class="with-gap" type="radio" name="rol" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
-                                            <span>{{ obj.beschrijving }}</span>
-                                        </label>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <p class="center">
-                                <a class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</a>
-                            </p>
-                        {% endif %}
-                    </div>
-                </div>
-
-            </div>
-
-        {% endif %}     <!-- springplanken -->
-
         {% if show_eigen_rollen %}
             <!-- rollen waarnaar gewisseld kan worden -->
 
@@ -191,15 +116,99 @@
                     </div>
                 </div>
 
-                <!-- kaartjes -->
-                {% if url_login_as %}
-                    <div class="col s12 l6 xl6">
-                        {% include 'plein/card_icon.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
+            {% if heeft_alle_rollen %}
+
+                <div class="col s12 m8 offset-m2 l6">
+
+                    <!-- verenigingen -->
+                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                        <h6 class="center" style="margin-bottom:10px">Verenigingen</h6>
+
+                        <!-- vereniging naar keuze -->
+                        <form class="center" action="{{ url_hwl_naar_keuze }}" method="post" onsubmit="submit_knop00.disabled=true; return true;">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col s4">
+                                    <input type="text" name="ver_nr" placeholder="Ver nr" maxlength="4">
+                                </div>
+                                <div class="col s4">
+                                    <button class="btn-sv-rood" id="submit_knop00" type="submit">HWL</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        {% if show_hwl_rollen %}
+                            <ul>
+                                {% for obj in hwl_rollen %}
+                                    <li>
+                                        <label class="black-text" for="id_{{ obj.pk }}">
+                                            <input class="with-gap" type="radio" name="rol" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                            <span>{{ obj.beschrijving }}</span>
+                                        </label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <p class="center">
+                                <a class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</a>
+                            </p>
+                        {% endif %}
                     </div>
-                {% endif %}
+
+                </div>
+
+            {% endif %}  <!-- heeft alle rollen -->
+
             </div>
 
         {% endif %}     <!-- show_eigen_rollen -->
+
+
+        {% if heeft_alle_rollen %}
+
+            <!-- blauwe balk -->
+            <div class="row-sv-blauw">
+
+                <!-- indoor -->
+                <div class="col s12 m6">
+                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                        <div class="center" style="margin-bottom:10px">
+                            <b>Indoor</b>
+                        </div>
+                        {% for obj in alle_18 %}
+                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
+                                {% csrf_token %}
+                                <button class="btn-sv-rood" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
+                            </form>
+                            {% if obj.do_break_selective %}<span class="hide-on-large-and-up"><br></span>{% endif %}
+                            {% if obj.do_break %}<br>{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 25m1pijl -->
+                <div class="col s12 m6">
+                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                        <div class="center" style="margin-bottom:10px">
+                            <b>25m1pijl</b>
+                        </div>
+                        {% for obj in alle_25 %}
+                            <form style="display:inline" action="{{ obj.url }}" method="post" onsubmit="submit_knop{{ obj.pk }}.disabled=true; return true;">
+                                {% csrf_token %}
+                                <button class="btn-sv-blauw" id="submit_knop{{ obj.pk }}" type="submit">{{ obj.tekst_kort }}</button>
+                            </form>
+                            {% if obj.do_break_selective %}<span class="hide-on-large-and-up"><br></span>{% endif %}
+                            {% if obj.do_break %}<br>{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- kaartjes -->
+                {% if url_login_as %}
+                    {% include 'plein/card_icon.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
+                {% endif %}
+            </div>
+
+        {% endif %}     <!-- springplanken -->
 
         {% if show_help_rollen or url_wissel_naar_sec %}
 
