@@ -8,6 +8,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sessions.models import Session
 from django.utils import timezone
+from Functie.definities import SCHEIDS_CHOICES, SCHEIDS_NIET
 import datetime
 
 
@@ -81,6 +82,8 @@ class Account(AbstractUser):
 
     # is dit een gast-account (minder minder mogelijkheden)?
     is_gast = models.BooleanField(default=False)
+
+    scheids = models.CharField(max_length=2, choices=SCHEIDS_CHOICES, default=SCHEIDS_NIET, blank=True)
 
     REQUIRED_FIELDS = ['password']
 

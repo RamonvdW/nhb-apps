@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
+from Functie.scheids import sporter_is_scheids
 from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Taken.operations import eval_open_taken
@@ -99,6 +100,7 @@ class PleinView(View):
         context['toon_opleidingen'] = settings.TOON_OPLEIDINGEN
 
         if request.user.is_authenticated:
+            account = request.user
             rol_nu = rol_get_huidige(request)
 
             if rol_nu == Rollen.ROL_SPORTER:
@@ -108,6 +110,9 @@ class PleinView(View):
 
                 # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
                 eval_mandje_inhoud(request)
+
+                if sporter_is_scheids(self.request):
+                    context['url_scheids'] = reverse('Scheidsrechter:overzicht')
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina

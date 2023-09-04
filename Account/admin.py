@@ -16,7 +16,7 @@ class AccountAdmin(UserAdmin):
     exclude = ('email', )
 
     # velden die niet gewijzigd mogen worden via de admin interface
-    readonly_fields = ('is_staff', 'gekoppelde_functies', 'otp_controle_gelukt_op',
+    readonly_fields = ('is_staff', 'is_superuser', 'gekoppelde_functies', 'otp_controle_gelukt_op',
                        'date_joined', 'last_login', 'laatste_inlog_poging')
 
     # volgorde van de te tonen velden
@@ -25,7 +25,8 @@ class AccountAdmin(UserAdmin):
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'unaccented_naam')}),
         (_('Email'), {'fields': ('email_is_bevestigd', 'bevestigde_email', 'nieuwe_email',
                                  'optout_nieuwe_taak', 'optout_herinnering_taken', 'laatste_email_over_taken')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_gast', 'is_BB', 'is_staff', 'is_superuser', 'gekoppelde_functies')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_gast', 'is_BB',
+                                       'scheids', 'gekoppelde_functies', 'is_staff', 'is_superuser')}),
         (_('Beveiliging'), {'fields': ('password',
                                        'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller',
                                        'is_geblokkeerd_tot',

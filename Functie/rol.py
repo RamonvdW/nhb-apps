@@ -14,6 +14,7 @@ from Competitie.models import Kampioenschap
 from Functie.definities import Rollen, rol2url, url2rol
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg, account_needs_otp
+from Functie.scheids import scheids_zet_sessionvars
 from Overig.helpers import get_safe_from_ip
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
@@ -536,6 +537,7 @@ def rol_bepaal_beschikbare_rollen(request, account):
         Geen return value
     """
     rol_zet_sessionvars(account, request)
+    scheids_zet_sessionvars(account, request)
 
 
 def rol_bepaal_beschikbare_rollen_opnieuw(request):
@@ -543,8 +545,11 @@ def rol_bepaal_beschikbare_rollen_opnieuw(request):
         zoals na het aanmaken van een nieuwe competitie.
         Hierdoor hoeft de gebruiker niet opnieuw in te loggen om deze mogelijkheden te krijgen.
     """
+    account = request.user
+
     rol, functie = rol_get_huidige_functie(request)
-    rol_zet_sessionvars(request.user, request)
+    rol_zet_sessionvars(account, request)
+    scheids_zet_sessionvars(account, request)
     if functie:
         rol_activeer_functie(request, functie)
     else:

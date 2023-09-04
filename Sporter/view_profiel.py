@@ -44,37 +44,58 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+        self.account = None
+        self.sporter = None
+        self.ver = None
+        self.voorkeuren = None
+        self.alle_bogen = BoogType.objects.all()
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
-        return rol_get_huidige(self.request) == Rollen.ROL_SPORTER
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu == Rollen.ROL_SPORTER
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
-
         if request.user.is_authenticated:
-            account = request.user
-            if account.is_gast:
-                gast = account.gastregistratie_set.first()
+            self.account = request.user
+
+            if self.account.is_gast:
+                gast = self.account.gastregistratie_set.first()
                 if gast and gast.fase != REGISTRATIE_FASE_COMPLEET:
                     # registratie is nog niet voltooid
                     # dwing terug naar de lijst met vragen
                     return redirect('Registreer:gast-meer-vragen')
 
+            self.sporter = (self.account
+                            .sporter_set
+                            .select_related('bij_vereniging',
+                                            'bij_vereniging__regio',
+                                            'bij_vereniging__regio__rayon')
+                            .prefetch_related('bij_vereniging__secretaris_set',
+                                              'opleidingdiploma_set')
+                            .first())
+
+            if self.sporter:
+                self.ver = self.sporter.bij_vereniging
+
         return super().dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def _find_histcomp_scores(sporter, alle_bogen):
+    def _find_histcomp_scores(self):
         """ Zoek alle scores van deze sporter """
         boogtype2str = dict()
-        for boog in alle_bogen:
+        for boog in self.alle_bogen:
             boogtype2str[boog.afkorting] = boog.beschrijving
         # for
 
         objs = list()
         for obj in (HistCompRegioIndiv
                     .objects
-                    .filter(sporter_lid_nr=sporter.lid_nr)
+                    .filter(sporter_lid_nr=self.sporter.lid_nr)
                     .exclude(totaal=0)
                     .select_related('seizoen')
                     .order_by('seizoen__comp_type',      # 18/25
@@ -97,8 +118,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         return objs
 
-    @staticmethod
-    def _find_records(sporter):
+    def _find_records(self):
         """ Zoek de records van deze sporter """
         mat2str = dict()
         for tup in MATERIAALKLASSE:
@@ -108,7 +128,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         show_loc = False
         objs = list()
-        for rec in IndivRecord.objects.filter(sporter=sporter).order_by('-datum'):
+        for rec in IndivRecord.objects.filter(sporter=self.sporter).order_by('-datum'):
             rec.url = reverse('Records:specifiek',
                               kwargs={'discipline': rec.discipline,
                                       'nummer': rec.volg_nr})
@@ -126,7 +146,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return objs, show_loc
 
     @staticmethod
-    def _find_competities(voorkeuren):
+    def _find_competities():
         comps = list()
         for comp in (Competitie
                      .objects.filter(is_afgesloten=False)
@@ -145,8 +165,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     comp.fase_str = 'Regiocompetitie'
 
                     if comp.fase_indiv == 'C':
-                        # TODO: 15 augustus opslaan in Competitie --> fase D?
-                        comp.inschrijven = 'De inschrijving is open tot 15 augustus'  # % localize(comp.datum_einde_inschrijvingen)
+                        comp.inschrijven = 'De inschrijving is open tot %s' % localize(comp.begin_fase_D_indiv)
                     elif comp.fase_indiv <= 'F':
                         # tijdens de hele wedstrijden fase kan er aangemeld worden
                         comp.inschrijven = 'Aanmelden kan nog tot %s' % localize(comp.einde_fase_F)
@@ -155,13 +174,12 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
         return comps
 
-    @staticmethod
-    def _find_regiocompetities(comps, sporter, voorkeuren, alle_bogen, boogafk2sporterboog, boog_afkorting_wedstrijd):
+    def _find_regiocompetities(self, comps, boogafk2sporterboog, boog_afkorting_wedstrijd):
         """ Zoek regiocompetities waar de sporter zich op aan kan melden """
 
         # stel vast welke boogtypen de sporter mee wil schieten (opt-in)
         boog_dict = dict()      # [afkorting] = BoogType()
-        for boogtype in alle_bogen:
+        for boogtype in self.alle_bogen:
             boog_dict[boogtype.afkorting] = boogtype
         # for
 
@@ -172,9 +190,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                               .objects
                               .select_related('regiocompetitie',
                                               'sporterboog')
-                              .filter(sporterboog__sporter=sporter))
+                              .filter(sporterboog__sporter=self.sporter))
 
-        if not voorkeuren.voorkeur_meedoen_competitie:
+        if not self.voorkeuren.voorkeur_meedoen_competitie:
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
                 return None, gebruik_knoppen
 
@@ -184,13 +202,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                           'kampioenschap__competitie',
                                           'kampioenschap__rayon',
                                           'sporterboog')
-                          .filter(sporterboog__sporter=sporter))
+                          .filter(sporterboog__sporter=self.sporter))
 
         objs = list()
         comp_pks = [comp.pk for comp in comps]
 
         # zoek regiocompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
-        regio = sporter.bij_vereniging.regio
+        regio = self.sporter.bij_vereniging.regio
         for deelcomp in (Regiocompetitie
                          .objects
                          .select_related('competitie')
@@ -252,10 +270,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                 obj.rk_inschrijving = kampioen
 
                                 if kampioen.deelname != DEELNAME_NEE:
+                                    kampioenschap = kampioen.kampioenschap
                                     obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                                                    kwargs={'comp_pk': kampioen.kampioenschap.competitie.pk,
+                                                                    kwargs={'comp_pk': kampioenschap.competitie.pk,
                                                                             'comp_boog': afk.lower(),
-                                                                            'rayon_nr': kampioen.kampioenschap.rayon.rayon_nr})
+                                                                            'rayon_nr': kampioenschap.rayon.rayon_nr})
                         # for
 
                     elif 'O' <= comp.fase_indiv < 'P':
@@ -285,20 +304,18 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         return objs, gebruik_knoppen
 
-    @staticmethod
-    def _find_gemiddelden(sporter, alle_bogen):
+    def _find_gemiddelden(self):
         # haal de SporterBoog records op van deze gebruiker
         objs = (SporterBoog
                 .objects
-                .filter(sporter=sporter)
+                .filter(sporter=self.sporter)
                 .select_related('boogtype')
                 .order_by('boogtype__volgorde'))
 
         # zoek de AG informatie erbij
         ags = (Aanvangsgemiddelde
                .objects
-               .filter(#sporterboog__in=pks,
-                       sporterboog__sporter=sporter,
+               .filter(sporterboog__sporter=self.sporter,
                        doel__in=(AG_DOEL_INDIV, AG_DOEL_TEAM))
                .select_related('sporterboog')
                .order_by('afstand_meter'))
@@ -332,20 +349,17 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         return objs, heeft_ags
 
-    @staticmethod
-    def _get_contact_gegevens(sporter, context):
+    def _get_contact_gegevens(self, context):
 
         context['sec_namen'] = list()
         context['hwl_namen'] = list()
         context['rcl18_namen'] = list()
         context['rcl25_namen'] = list()
 
-        if sporter.bij_vereniging:
+        if self.ver:
+            regio = self.ver.regio
 
-            if sporter.bij_vereniging.geen_wedstrijden:
-                context['geen_wedstrijden'] = True
-
-            regio = sporter.bij_vereniging.regio
+            context['geen_wedstrijden'] = self.ver.geen_wedstrijden
 
             functies = (Functie
                         .objects
@@ -353,7 +367,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         .filter(Q(rol='RCL',
                                   regio=regio) |
                                 Q(rol__in=('SEC', 'HWL'),
-                                  vereniging=sporter.bij_vereniging))
+                                  vereniging=self.ver))
                         .all())
 
             for functie in functies:
@@ -362,9 +376,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
                 if functie.rol == 'SEC':
                     # nog geen account aangemaakt, dus haal de naam op van de secretaris volgens CRM
-                    if len(namen) == 0 and sporter.bij_vereniging.secretaris_set.count() > 0:
-                        sec = sporter.bij_vereniging.secretaris_set.first()
-                        namen = [sporter.volledige_naam() for sporter in sec.sporters.all()]
+                    if len(namen) == 0 and self.ver.secretaris_set.count() > 0:
+                        sec = self.ver.secretaris_set.first()
+                        namen = [sec_sporter.volledige_naam() for sec_sporter in sec.sporters.all()]
                     context['sec_namen'] = namen
                     context['sec_email'] = functie.bevestigde_email
 
@@ -386,22 +400,19 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['bb_email'] = settings.EMAIL_BONDSBUREAU
         context['url_vcp_contact'] = settings.URL_VCP_CONTACTGEGEVENS
 
-    @staticmethod
-    def _find_speelsterktes(sporter):
-        sterktes = Speelsterkte.objects.filter(sporter=sporter).order_by('volgorde')
+    def _find_speelsterktes(self):
+        sterktes = Speelsterkte.objects.filter(sporter=self.sporter).order_by('volgorde')
         if sterktes.count() == 0:           # pragma: no branch
             sterktes = None
         return sterktes
 
-    @staticmethod
-    def _find_diplomas(sporter):
-        diplomas = list(sporter.opleidingdiploma_set.order_by('-datum_begin'))
+    def _find_diplomas(self):
+        diplomas = list(self.sporter.opleidingdiploma_set.order_by('-datum_begin'))
         if len(diplomas) == 0:           # pragma: no branch
             diplomas = None
         return diplomas
 
-    @staticmethod
-    def _find_scores(sporter):
+    def _find_scores(self):
         scores = list()
 
         for deelnemer in (RegiocompetitieSporterBoog
@@ -410,7 +421,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                           'regiocompetitie__competitie',
                                           'sporterboog',
                                           'sporterboog__boogtype')
-                          .filter(sporterboog__sporter=sporter)
+                          .filter(sporterboog__sporter=self.sporter)
                           .order_by('regiocompetitie__competitie__afstand')):
 
             comp = deelnemer.regiocompetitie.competitie
@@ -422,7 +433,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             deelnemer.seizoen_str = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
 
-            deelnemer.scores_str = "%s, %s, %s, %s, %s, %s, %s" % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)
+            deelnemer.scores_str = "%s, %s, %s, %s, %s, %s, %s" % (deelnemer.score1,
+                                                                   deelnemer.score2,
+                                                                   deelnemer.score3,
+                                                                   deelnemer.score4,
+                                                                   deelnemer.score5,
+                                                                   deelnemer.score6,
+                                                                   deelnemer.score7)
 
             deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
 
@@ -434,70 +451,59 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        account = self.request.user
-        sporter = (account
-                   .sporter_set
-                   .select_related('bij_vereniging',
-                                   'bij_vereniging__regio',
-                                   'bij_vereniging__regio__rayon')
-                   .all())[0]
-        voorkeuren = get_sporter_voorkeuren(sporter)
+        self.voorkeuren = get_sporter_voorkeuren(self.sporter)
 
-        alle_bogen = BoogType.objects.all()
-
-        if sporter.bij_vereniging:
-            is_administratief = sporter.bij_vereniging.regio.is_administratief      # dus helemaal geen wedstrijden
-            is_extern = sporter.bij_vereniging.is_extern                            # dus geen bondscompetities
+        if self.ver:
+            is_administratief = self.ver.regio.is_administratief      # dus helemaal geen wedstrijden
+            is_extern = self.ver.is_extern                            # dus geen bondscompetities
         else:
             is_administratief = False
             is_extern = False
 
-        context['sporter'] = sporter
-        context['records'], context['show_loc'] = self._find_records(sporter)
+        context['sporter'] = self.sporter
+        context['records'], context['show_loc'] = self._find_records()
 
-        if not sporter.is_gast:
+        if not self.sporter.is_gast:
             context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
-        boog_afk2sporterboog, boog_afkorting_wedstrijd = get_sporter_gekozen_bogen(sporter, alle_bogen)
+        boog_afk2sporterboog, boog_afkorting_wedstrijd = get_sporter_gekozen_bogen(self.sporter, self.alle_bogen)
         context['moet_bogen_kiezen'] = len(boog_afkorting_wedstrijd) == 0
 
         context['toon_bondscompetities'] = False
-        if (sporter.bij_vereniging
-                and not sporter.bij_vereniging.geen_wedstrijden
-                and not (is_extern or is_administratief)):
+        if self.ver and not self.ver.geen_wedstrijden and not (is_extern or is_administratief):
 
             context['toon_bondscompetities'] = True
 
-            context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
+            context['histcomp'] = self._find_histcomp_scores()
 
-            context['competities'] = comps = self._find_competities(voorkeuren)
+            context['competities'] = comps = self._find_competities()
 
-            regiocomps, gebruik_knoppen = self._find_regiocompetities(comps, sporter, voorkeuren, alle_bogen,
+            regiocomps, gebruik_knoppen = self._find_regiocompetities(comps,
                                                                       boog_afk2sporterboog, boog_afkorting_wedstrijd)
             context['regiocompetities'] = regiocomps
             context['hint_voorkeuren'] = regiocomps is not None and len(regiocomps) == 0
             context['gebruik_knoppen'] = gebruik_knoppen
 
-            context['regiocomp_scores'] = self._find_scores(sporter)
+            context['regiocomp_scores'] = self._find_scores()
 
-            context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(sporter, alle_bogen)
+            context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden()
 
-            if not voorkeuren.voorkeur_meedoen_competitie:
+            if not self.voorkeuren.voorkeur_meedoen_competitie:
                 if regiocomps is None:
                     # niet ingeschreven en geen interesse
                     context['toon_bondscompetities'] = False
 
-            context['speelsterktes'] = self._find_speelsterktes(sporter)
+            context['speelsterktes'] = self._find_speelsterktes()
 
-            context['diplomas'] = self._find_diplomas(sporter)
+            context['diplomas'] = self._find_diplomas()
 
-        if sporter.is_gast:
-            context['gast'] = sporter.gastregistratie_set.first()
+        if self.sporter.is_gast:
+            context['gast'] = self.sporter.gastregistratie_set.first()
 
-        if Bestelling.objects.filter(account=account).count() > 0:
+        if Bestelling.objects.filter(account=self.account).count() > 0:
             context['toon_bestellingen'] = True
 
-        self._get_contact_gegevens(sporter, context)
+        self._get_contact_gegevens(context)
 
         context['kruimels'] = (
             (None, 'Mijn pagina'),

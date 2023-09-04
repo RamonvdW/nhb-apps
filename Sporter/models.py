@@ -4,13 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import models, transaction, IntegrityError
-from django.db.models import ProtectedError
+from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, GESLACHT_ANDERS, ORGANISATIE_IFAA
+from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, ORGANISATIE_IFAA
 from BasisTypen.models import BoogType
+from Functie.definities import SCHEIDS_CHOICES, SCHEIDS_NIET
 # mag niet afhankelijk zijn van Competitie
 from Vereniging.models import Vereniging
 import datetime
@@ -136,6 +136,9 @@ class Sporter(models.Model):
 
     # is dit een gast-account (minder minder mogelijkheden)?
     is_gast = models.BooleanField(default=False)
+
+    # scheidsrechter status van deze sporter (opleiding gedaan en onderhouden)
+    scheids = models.CharField(max_length=2, choices=SCHEIDS_CHOICES, default=SCHEIDS_NIET, blank=True)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

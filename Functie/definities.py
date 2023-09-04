@@ -56,4 +56,18 @@ url2rol = {
 rol2url = {value: key for key, value in url2rol.items()}
 
 
+# rol van Scheidsrechter, bepaald via opleidingscodes
+SCHEIDS_NIET = 'N'
+SCHEIDS_BOND = 'B'
+SCHEIDS_VERENIGING = 'V'
+SCHEIDS_INTERNATIONAAL = 'I'
+
+SCHEIDS_CHOICES = (
+    (SCHEIDS_NIET, "Niet"),
+    (SCHEIDS_BOND, "Bondsscheidsrechter"),
+    (SCHEIDS_VERENIGING, "Verenigingsscheidsrechter"),
+    (SCHEIDS_INTERNATIONAAL, "Internationaal Scheidsrechter"),
+)
+
+
 # end of file

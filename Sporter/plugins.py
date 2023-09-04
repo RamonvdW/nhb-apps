@@ -21,7 +21,8 @@ def sporter_login_plugin(request, from_ip, account):
         (de koppeling wordt gelegd in Sporter.apps.ready)
 
         Hier controleren we of het lid wel in mag loggen
-        ook zetten we het AccountEmail nieuwe_email veld indien nodig
+        ook zetten we het nieuwe_email veld indien nodig
+        en nemen we het 'scheids' veld over
 
         Return: None = mag wel inloggen
     """
@@ -54,6 +55,10 @@ def sporter_login_plugin(request, from_ip, account):
             account.last_name = sporter.achternaam
             account.unaccented_naam = sporter.unaccented_naam
             updated.extend(['first_name', 'last_name', 'unaccented_naam'])
+
+        if account.scheids != sporter.scheids:
+            account.scheids = sporter.scheids
+            updated.append('scheids')
 
         # kijk of het email adres gewijzigd is
         if account.bevestigde_email != sporter.email:
