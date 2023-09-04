@@ -179,7 +179,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 if barebow_boog_pk:
                     self.assertTrue(sporter.bereken_wedstrijdleeftijd_wa(self.begin_jaar + 1) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 
-                # haal de schutter voorkeuren op, zodat de sporter-boog records aangemaakt worden
+                # haal de sporter voorkeuren op, zodat de sporter-boog records aangemaakt worden
                 url_voorkeuren = self.url_voorkeuren % lid_nr
 
                 # zet de recurve boog aan

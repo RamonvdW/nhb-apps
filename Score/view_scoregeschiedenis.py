@@ -22,7 +22,7 @@ TEMPLATE_SCORE_GESCHIEDENIS = 'score/score-geschiedenis.dtl'
 
 class ScoreGeschiedenisView(UserPassesTestMixin, View):
 
-    """ Django class-based view voor het de schutter """
+    """ Django class-based view voor het de sporter """
 
     # class variables shared by all instances
     template = TEMPLATE_SCORE_GESCHIEDENIS

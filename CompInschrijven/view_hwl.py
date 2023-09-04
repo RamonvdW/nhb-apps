@@ -222,13 +222,13 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 except KeyError:
                     obj.ag_team = obj.ag
 
-                # kijk of de schutter al aangemeld is
+                # kijk of de sporter al aangemeld is
                 try:
                     obj.is_aangemeld = is_aangemeld_dict[sporterboog.pk]
                 except KeyError:
                     obj.is_aangemeld = False
 
-                # kijk of de schutter wel mee wil doen met de competitie
+                # kijk of de sporter wel mee wil doen met de competitie
                 try:
                     obj.wil_competitie = wil_competitie[sporterboog.sporter.lid_nr]
                 except KeyError:
@@ -374,7 +374,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Geselecteerde schutters aanmelden' wordt gebruikt
+        """ Deze functie wordt aangeroepen als de knop 'Geselecteerde sporters aanmelden' wordt gebruikt
             het csrf token is al gecontroleerd
         """
         try:
@@ -499,7 +499,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 else:
                     wedstrijdgeslacht = sporter.geslacht                # M/V/X
 
-                # bepaal in welke wedstrijdklasse de schutter komt
+                # bepaal in welke wedstrijdklasse de sporter komt
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
                 aanmelding = RegiocompetitieSporterBoog(
@@ -739,7 +739,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                 if inschrijving.bij_vereniging != self.functie_nu.vereniging:
                     raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
 
-                # schrijf de schutter uit
+                # schrijf de sporter uit
                 inschrijving.delete()
         # for
 

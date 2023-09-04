@@ -466,7 +466,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         context['handmatige_ag'] = ag_lijst = list()
         context['geen_ag'] = geen_ag_lijst = list()
 
-        # zoek de schuttersboog met handmatig_ag voor de teamcompetitie
+        # zoek de sportersboog met handmatig_ag voor de teamcompetitie
         for obj in (RegiocompetitieSporterBoog
                     .objects
                     .filter(regiocompetitie=deelcomp,

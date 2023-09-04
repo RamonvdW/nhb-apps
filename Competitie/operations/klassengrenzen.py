@@ -141,7 +141,7 @@ def bepaal_klassengrenzen_indiv(comp):
     lkl_cache = [lkl for _, lkl in lkl_unsorted]
     del lkl_unsorted
 
-    # verdeel de schuttersboog (waar we een AG van hebben) over boogtype-leeftijdsklasse groepjes
+    # verdeel de sportersboog (waar we een AG van hebben) over boogtype-leeftijdsklasse groepjes
     done_nrs = list()
     boogtype_lkl2schutters = dict()      # [boogtype.afkorting + '_' + leeftijdsklasse.afkorting] = [lid_nr, lid_nr, ..]
     for boogtype_afkorting in boogtype2ags.keys():
@@ -269,7 +269,7 @@ def bepaal_klassengrenzen_teams(comp):
 
     # per boogtype (dus elke schutter-boog in zijn eigen team type):
     #   per vereniging:
-    #      - de schutters sorteren op AG
+    #      - de sporters sorteren op AG
     #      - per groepje van 4 som van beste 3 = team AG
 
     if comp.afstand == '18':

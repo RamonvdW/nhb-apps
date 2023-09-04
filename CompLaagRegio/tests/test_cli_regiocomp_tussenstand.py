@@ -528,7 +528,7 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
-        # controleer dat de schutter op zijn oude vereniging blijft staan
+        # controleer dat de sporter op zijn oude vereniging blijft staan
         deelnemer = RegiocompetitieSporterBoog.objects.get(sporterboog__sporter__lid_nr=100001)
         self.assertIsNone(deelnemer.sporterboog.sporter.bij_vereniging)
         self.assertIsNotNone(deelnemer.bij_vereniging)

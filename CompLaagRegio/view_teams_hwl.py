@@ -33,7 +33,7 @@ TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'complaagregio/hwl-teams-invallers-koppelen.
 
 
 def bepaal_team_sterkte_en_klasse(team):
-    """ gebruik AG van gekoppelde schutters om team aanvangsgemiddelde te berekenen
+    """ gebruik AG van gekoppelde sporters om team aanvangsgemiddelde te berekenen
         en bepaal aan de hand daarvan de team-wedstrijdklasse
     """
     ags = team.leden.values_list('ag_voor_team', flat=True)

@@ -342,7 +342,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
 class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
 
-    """ Deze klasse wordt gebruikt om de lijst van aangemelde schutters in een regio
+    """ Deze klasse wordt gebruikt om de lijst van aangemelde sporters in een regio
         te downloaden als csv bestand, inclusief voorkeur voor dagdelen (inschrijfmethode 3)
     """
 
@@ -651,7 +651,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
 class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
-    """ Deze klasse wordt gebruikt om de lijst van aangemelde schutters in een regio
+    """ Deze klasse wordt gebruikt om de lijst van aangemelde sporters in een regio
         te downloaden als csv bestand, inclusief voorkeur voor dagdelen (inschrijfmethode 3)
     """
 
@@ -882,7 +882,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
 class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
-    """ Deze klasse wordt gebruikt om de lijst van aangemelde schutters in een regio
+    """ Deze klasse wordt gebruikt om de lijst van aangemelde sporters in een regio
         te downloaden als csv bestand, inclusief gekozen wedstrijden (inschrijfmethode 1)
     """
 

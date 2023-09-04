@@ -315,7 +315,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         klasse2schutters = dict()
         for obj in (KampioenschapSporterBoog
                     .objects
-                    .exclude(deelname=DEELNAME_NEE)         # afgemelde schutters niet tellen
+                    .exclude(deelname=DEELNAME_NEE)         # afgemelde sporters niet tellen
                     .filter(kampioenschap=deelkamp)
                     .select_related('indiv_klasse')):
             try:

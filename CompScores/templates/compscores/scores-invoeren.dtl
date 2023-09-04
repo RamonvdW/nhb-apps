@@ -398,7 +398,7 @@
 
         function deelnemers_ophalen_toevoegen(rsp)
         {
-            // voeg de schuttersboog toe aan de tabel, tenzij al aanwezig
+            // voeg de sporterboog toe aan de tabel, tenzij al aanwezig
             //  (voorkomt verwijderen van al ingevoerde scores)
 
             const table = document.getElementById('table1');
