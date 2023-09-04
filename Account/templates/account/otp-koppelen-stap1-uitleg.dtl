@@ -52,12 +52,13 @@
             {% include 'plein/card_logo.dtl' with title="Authenticator" text="Wikipedia artikel over Google Authenticator.<br>(engelstalig)" img_src=img_src img_height=75 img_width=75 url="https://en.wikipedia.org/wiki/Google_Authenticator" extern_open=True %}
         </div>
 
-        <div class="col s8 offset-s2 xl6 offset-xl3 white" style="margin-top:40px">
+        <div class="col s8 offset-s2 xl6 offset-xl3 white" style="margin-top:30px; padding:10px">
             <p>Als je een applicatie of plug-in ge&iuml;nstalleerd hebt, dan kan je door naar de volgende stap.</p>
-            <p>
-                <a class="btn-sv-rood" href="{{ url_stap_2 }}">
-                    <i class="notranslate material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</a>
-            </p>
+            <form action="{{ url_stap_2 }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                {% csrf_token %}
+                <button class="btn-sv-rood" id="submit_knop" type="submit" style="margin:1em; margin-top:0">
+                    <i class="notranslate material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</button>
+            </form>
         </div>
     </div>
 

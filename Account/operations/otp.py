@@ -69,7 +69,7 @@ def otp_prepare_koppelen(account):
     # maak eenmalig het OTP geheim aan voor deze gebruiker
     if len(account.otp_code) not in (16, 32):
         account.otp_code = pyotp.random_base32()[:32]
-        account.save()
+        account.save(update_fields=['otp_code'])
 
 
 def otp_koppel_met_code(request, account, code):
@@ -93,7 +93,7 @@ def otp_koppel_met_code(request, account, code):
     if is_valid:
         # controle is gelukt --> koppeling maken
         account.otp_is_actief = True
-        account.save()
+        account.save(update_fields=['otp_is_actief'])
         my_logger.info('%s 2FA koppeling gelukt voor account %s' % (from_ip, account.username))
 
         otp_zet_controle_gelukt(request)

@@ -77,6 +77,13 @@ class OTPKoppelenStap2View(OTPKoppelenStapView):
 
     template_name = TEMPLATE_OTP_KOPPELEN_STAP2
 
+    def post(self, request, *args, **kwargs):
+        """ overgang vanuit stap 1
+            hier kunnen we database wijziging doen: de OTP code aanmaken voor het account.
+        """
+        otp_prepare_koppelen(self.account)
+        return self.get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -85,7 +92,6 @@ class OTPKoppelenStap2View(OTPKoppelenStapView):
         context['url_stap_3'] = reverse('Account:otp-koppelen-stap3')
 
         # haal de QR code op (en alles wat daar voor nodig is)
-        otp_prepare_koppelen(self.account)
         context['qrcode'] = qrcode_get(self.account)
 
         tmp = self.account.otp_code.lower()
