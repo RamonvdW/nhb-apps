@@ -16,7 +16,6 @@ def scheids_zet_sessionvars(account, request):
     """ zet een session variabele die onthoudt of de sporter ook scheidsrechter is
     """
 
-    print('scheids_zet_sessionvars')
     if account.is_authenticated:        # pragma: no branch
         is_scheids = account.scheids != SCHEIDS_NIET
     else:
