@@ -164,7 +164,7 @@ def registreer_opschonen(stdout):
                         aangemaakt__lt=max_age)):
 
         stdout.write('[INFO] Verwijder niet afgeronde gast-account registratie %s in fase %s' % (
-                        obj.lid_nr, repr(obj.fase)))
+                        obj.lid_nr, obj.fase))
 
         # TODO: moeten we een mail sturen voordat het gast-account hard weggooien?
 
