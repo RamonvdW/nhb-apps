@@ -259,7 +259,7 @@ class MyTestAsserts(TestCase):
         # while
 
     def assert_scripts_clean(self, html, template_name):
-        pos = html.find('<script ')
+        pos = html.find('<script')
         while pos >= 0:
             html = html[pos:]
             pos = html.find('</script>')
@@ -450,16 +450,16 @@ class MyTestAsserts(TestCase):
             #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
             ok = True
             pos1 = form.find(' onsubmit="submit_knop')
-            if pos1 < 0:
+            if pos1 < 0:                                # pragma: no cover
                 ok = False
             else:
                 pos2 = form.find('"', pos1+11)
                 submit = form[pos1+11:pos2]
-                if '.disabled=true;' not in submit:
+                if '.disabled=true;' not in submit:     # pragma: no cover
                     ok = False
-                if 'return true;' not in submit:
+                if 'return true;' not in submit:        # pragma: no cover
                     ok = False
-            if not ok:
+            if not ok:                                  # pragma: no cover
                 self.fail('Form without onsubmit for dubbelklik bescherming in template %s\n%s' % (repr(dtl), repr(submit)))
 
             pos_button = form.find('<button')
@@ -481,7 +481,7 @@ class MyTestAsserts(TestCase):
             # while
 
             if button_count > 0:
-                if pos1 < 0 or pos2 < 0:
+                if pos1 < 0 or pos2 < 0:                # pragma: no cover
                     self.fail('Form without dubbelklik bescherming in button template %s' % repr(dtl))
 
             html = html[form_end+7:]
