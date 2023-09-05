@@ -16,6 +16,6 @@
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
-from SiteMain.settings_base import *         # noqa
+from SiteMain.core.settings_base import *         # noqa
 
 # end of file

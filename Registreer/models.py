@@ -160,11 +160,13 @@ def registreer_opschonen(stdout):
 
     for obj in (GastRegistratie
                 .objects
-                .filter(fase__lte=REGISTRATIE_FASE_COMPLEET,        # skip COMPLEET of AFGEWEZEN
+                .filter(fase__lt=REGISTRATIE_FASE_COMPLEET,        # skip COMPLEET of AFGEWEZEN
                         aangemaakt__lt=max_age)):
 
         stdout.write('[INFO] Verwijder niet afgeronde gast-account registratie %s in fase %s' % (
                         obj.lid_nr, repr(obj.fase)))
+
+        # TODO: moeten we een mail sturen voordat het gast-account hard weggooien?
 
         # TODO: activeer opschonen nadat wat ervaring opgedaan is
         if GAST_LID_NUMMER_FIXED_PK < 1:  # aka: "never"

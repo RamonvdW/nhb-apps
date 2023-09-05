@@ -114,7 +114,7 @@ class MyQueryTracer(object):
         self.trace.append(call)
 
     @staticmethod
-    def _find_statement(query, start):                  # pragma: no cover
+    def _find_statement(query, start):          # pragma: no cover
         best = -1
         word_len = 0
         for word in (  # 'SELECT', 'DELETE FROM', 'INSERT INTO',
@@ -127,7 +127,7 @@ class MyQueryTracer(object):
         # for
         return best, word_len
 
-    def _reformat_sql(self, prefix, query):             # pragma: no cover
+    def _reformat_sql(self, prefix, query):     # pragma: no cover
         start = 0
         pos, word_len = self._find_statement(query, start)
         prefix = prefix[:-1]        # because pos starts with a space
@@ -138,8 +138,8 @@ class MyQueryTracer(object):
         # while
         return query
 
-    # TODO: wordt niet gebruikt?
-    def __str__(self):
+    def __str__(self):                          # pragma: no cover
+        """ wordt gebruikt als er te veel queries zijn """
         queries = 'Captured queries:'
         prefix = '\n       '
         limit = 200  # begrens aantal queries dat we printen

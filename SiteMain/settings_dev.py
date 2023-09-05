@@ -8,7 +8,7 @@
     Django settings for the NhbApps project during development runs.
 """
 
-from SiteMain.settings_base import *
+from SiteMain.core.settings_base import *         # noqa
 
 ENABLE_DEBUG_TOOLBAR = False
 ENABLE_DJANGO_EXTENSIONS = False

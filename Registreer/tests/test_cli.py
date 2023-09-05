@@ -23,5 +23,8 @@ class TestRegistreerCli(E2EHelpers, TestCase):
         f1, f2 = self.run_management_command('maak_gebruiker', str(ver.ver_nr), '199901', 'Voornaam', '2000-01-01', 'BB+C')
         self.assertEqual(f1.getvalue(), '')
 
+        f1, f2 = self.run_management_command('maak_gebruiker', '9999', '199901', 'Voornaam', '2000-01-01', 'BB+C')
+        self.assertTrue("[ERROR] Vereniging 9999 niet gevonden" in f1.getvalue())
+
 
 # end of file

@@ -28,6 +28,29 @@
 
             <table class="white">
                 <tr>
+                    <td colspan="2"><h5 class="sv-blauw-text center">Status</h5></td>
+                </tr>
+                <tr>
+                    <th>Registratie fase</th>
+                    <td>
+                        <span{% if gast.fase != 2 %} class="grey-text"{% endif %}>E-mail</span>&nbsp;
+                        <span{% if gast.fase != 4 %} class="grey-text"{% endif %}>Wachtwoord</span>&nbsp;
+                        <span{% if gast.fase != 5 %} class="grey-text"{% endif %}>Club+Plaats</span>
+                        <br>
+                        <span{% if gast.fase != 6 %} class="grey-text"{% endif %}>Bond+Land+Nr</span>&nbsp;
+                        <span{% if gast.fase != 7 %} class="grey-text"{% endif %}>Geboortedatum</span>&nbsp;
+                        <span{% if gast.fase != 8 %} class="grey-text"{% endif %}>Tel-nr</span>
+                        <br>
+                        <span{% if gast.fase != 9 %} class="grey-text"{% endif %}>WA ID</span>&nbsp;
+                        <span{% if gast.fase != 10 %} class="grey-text"{% endif %}>Geslacht</span>&nbsp;
+                        <span{% if gast.fase != 25 %} class="grey-text"{% endif %}>Bevestig</span>
+                        <br>
+                        <span{% if gast.fase != 99 %} class="grey-text"{% endif %}>Compleet</span>&nbsp;
+                        {% if gast.fase == 100 %}<span>Afgewezen</span>{% endif %}
+                    </td>
+                </tr>
+
+                <tr>
                     <td colspan="2"><h5 class="sv-blauw-text center">Persoonsgegevens</h5></td>
                 </tr>
                 <tr>

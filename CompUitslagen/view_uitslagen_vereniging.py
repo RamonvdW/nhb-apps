@@ -138,7 +138,7 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor de veiligheid
 
-        # ver_nr is optioneel en resulteert in het nummer van de schutter
+        # ver_nr is optioneel en resulteert in het nummer van de sporter
         try:
             ver_nr = kwargs['ver_nr'][:4]     # afkappen voor de veiligheid
             ver_nr = int(ver_nr)
