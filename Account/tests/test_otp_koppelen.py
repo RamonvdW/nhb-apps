@@ -99,7 +99,7 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_koppel_stap2)
+            resp = self.client.post(self.url_koppel_stap2)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/otp-koppelen-stap2-scan-qr-code.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

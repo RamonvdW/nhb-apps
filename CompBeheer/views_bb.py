@@ -173,7 +173,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kan de BB de aanvangsgemiddelden vaststellen
-        HistComp wordt doorzocht op bekende schutter-boog en de uitslag wordt overgenomen als AG
+        HistComp wordt doorzocht op bekende sporterboog en de uitslag wordt overgenomen als AG
     """
 
     template_name = TEMPLATE_COMPETITIE_AG_VASTSTELLEN

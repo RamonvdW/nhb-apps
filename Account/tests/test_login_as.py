@@ -120,7 +120,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # login als admin
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
-        # activeer een rol + vhpg voor de schutter
+        # activeer een rol + vhpg voor de beheerder
         self.account_normaal.is_BB = True
         self.account_normaal.save()
         self.e2e_account_accepteert_vhpg(self.account_normaal)

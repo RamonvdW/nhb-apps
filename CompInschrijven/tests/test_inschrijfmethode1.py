@@ -232,7 +232,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                 sporter.geslacht = 'M'
                 sporter.save()
 
-                # haal de schutter voorkeuren op, zodat de sporter-boog records aangemaakt worden
+                # haal de sporter voorkeuren op, zodat de sporter-boog records aangemaakt worden
                 url_voorkeuren = self.url_voorkeuren % lid_nr
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)

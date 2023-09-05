@@ -594,9 +594,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         # huidige: 2020
         # geboren: 2007
         # bereikt leeftijd: 2020-2007 = 13
-        # wedstrijdleeftijd 2020: 13 --> Aspirant 11-12
-        # wedstrijdleeftijd 2021: 14 --> Cadet
-        # als het programma het goed doet, komt de schutter dus in de cadetten klasse
+        # wedstrijdleeftijd 2020: 13 --> Onder14
+        # wedstrijdleeftijd 2021: 14 --> Onder18
+        # als het programma het goed doet, komt de sporter dus in de Onder18 klasse
         self.sporter1.geboorte_datum = datetime.date(year=timezone.now().year - 13, month=1, day=2)
         self.sporter1.save()
         self.client.logout()
@@ -617,7 +617,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Onder 14')
         self.assertContains(resp, 'Onder 18')
 
-        # probeer in te schrijven en controleer daarna de wedstrijdklasse waarin de schutter geplaatst is
+        # probeer in te schrijven en controleer daarna de wedstrijdklasse waarin de sporter geplaatst is
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):

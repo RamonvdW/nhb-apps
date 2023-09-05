@@ -187,7 +187,7 @@ class Command(BaseCommand):
         # for
 
         # sorteer op weeknummer, anders raken de scores in de war en berekenen we
-        # een verkeerd gemiddelde en verplaatsen we de schutter naar de verkeerde klasse
+        # een verkeerd gemiddelde en verplaatsen we de sporter naar de verkeerde klasse
         rondes.sort()
 
         for _, _, ronde in rondes:

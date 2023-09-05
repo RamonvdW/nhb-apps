@@ -257,7 +257,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
                                                              'schiet_BB': 'on',
                                                              'info_R': 'on'})
 
-            # verwijder de SchutterVoorkeur records
+            # verwijder de voorkeur records
             SporterVoorkeuren.objects.filter(sporter__lid_nr=100012).delete()
         else:
             resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
@@ -698,7 +698,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
-        # schrijf de schutters weer uit
+        # schrijf een sporter uit
         pk = RegiocompetitieSporterBoog.objects.first().pk
         url = self.url_ingeschreven % 0
         with self.assert_max_queries(20):
@@ -706,7 +706,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(RegiocompetitieSporterBoog.objects.count(), 1)    # 1 schutter
 
-        # schrijf een schutter uit van een andere vereniging
+        # schrijf een sporter uit van een andere vereniging
         inschrijving = RegiocompetitieSporterBoog.objects.first()
         inschrijving.bij_vereniging = self.ver2
         inschrijving.save()

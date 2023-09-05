@@ -16,7 +16,7 @@ class AccountAdmin(UserAdmin):
     exclude = ('email', )
 
     # velden die niet gewijzigd mogen worden via de admin interface
-    readonly_fields = ('is_staff', 'gekoppelde_functies', 'otp_controle_gelukt_op',
+    readonly_fields = ('is_staff', 'is_superuser', 'gekoppelde_functies', 'otp_controle_gelukt_op',
                        'date_joined', 'last_login', 'laatste_inlog_poging')
 
     # volgorde van de te tonen velden

@@ -442,7 +442,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         naam_str = "[" + str(inschrijving.sporterboog.sporter.lid_nr) + "] " + inschrijving.sporterboog.sporter.volledige_naam()
         ver_str = str(self._ver)            # [ver_nr] Vereniging
 
-        # controleer dat de schutter bij de juiste vereniging staat
+        # controleer dat de sporter bij de juiste vereniging staat
         url = self.url_aangemeld_alles % inschrijving.regiocompetitie.competitie.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -452,12 +452,12 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         self.assertEqual(None, self._vind_tabel_regel_met(resp, 'dit staat er for sure niet in'))
 
-        # schrijf de schutter over naar een andere vereniging
+        # schrijf de sporter over naar een andere vereniging
         sporter = inschrijving.sporterboog.sporter
         sporter.bij_vereniging = self._ver2
         sporter.save()
 
-        # controleer dat de schutter nog steeds bij dezelfde vereniging staat
+        # controleer dat de sporter nog steeds bij dezelfde vereniging staat
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
