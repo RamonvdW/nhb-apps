@@ -13,6 +13,7 @@ from django.core.management.base import BaseCommand
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from Account.models import Account
+from Functie.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie
 from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Geo.models import Rayon, Regio
@@ -57,6 +58,16 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'iso_abbr', 'latitude', 'longitude', 'blocked', 'wa_id', 'date_of_death')
 OPTIONAL_MEMBER_KEYS = ('skill_levels', 'educations')
 SKIP_VER_NR = (settings.EXTERN_VER_NR,)
+
+CODE_SR_VER = '040'
+CODE_SR_BOND = '041'
+CODE_SR_INTERNATIONAAL = '042'
+
+CODE2SCHEIDS = {
+    CODE_SR_VER: SCHEIDS_VERENIGING,
+    CODE_SR_BOND: SCHEIDS_BOND,
+    CODE_SR_INTERNATIONAAL: SCHEIDS_INTERNATIONAAL
+}
 
 
 class Command(BaseCommand):
@@ -1109,6 +1120,7 @@ class Command(BaseCommand):
             # "educations": [
             #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
             lid_edus = list()
+            lid_scheids = SCHEIDS_NIET
             try:
                 edus = member['educations']
             except KeyError:
@@ -1134,6 +1146,11 @@ class Command(BaseCommand):
                             date_stop = edu['date_stop']
                             tup = (code, beschrijving, toon_op_pas, date_start, date_stop)
                             lid_edus.append(tup)
+
+                            if code in (CODE_SR_VER, CODE_SR_BOND, CODE_SR_INTERNATIONAAL):
+                                if date_stop == '9999-12-31':
+                                    # scheidsrechter code en nog steeds valide
+                                    lid_scheids = CODE2SCHEIDS[code]
                     # for
 
             try:
@@ -1333,6 +1350,12 @@ class Command(BaseCommand):
                         updated.append('is_erelid')
                         self._count_wijzigingen += 1
 
+                    if obj.scheids != lid_scheids:
+                        self.stdout.write('[INFO] Lid %s: scheids %s --> %s' % (lid_nr, obj.scheids, lid_scheids))
+                        obj.scheids = lid_scheids
+                        updated.append('scheids')
+                        self._count_wijzigingen += 1
+
                     if not self.dryrun:
                         obj.save(update_fields=updated)
                         self._cache_sporter[obj.pk] = obj
@@ -1391,6 +1414,7 @@ class Command(BaseCommand):
                 obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
                 obj.adres_code = lid_adres_code
                 obj.is_overleden = lid_is_overleden
+                obj.scheids = lid_scheids
                 if not lid_ver:
                     obj.lid_tot_einde_jaar -= 1
                     obj.is_actief_lid = False

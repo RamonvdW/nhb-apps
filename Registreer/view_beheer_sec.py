@@ -326,12 +326,12 @@ class GastAccountOpheffenView(UserPassesTestMixin, View):
         if gast.fase != REGISTRATIE_FASE_AFGEWEZEN:
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-            beheerder = request.user.get_account_full_name()
+            beheerder_naam = request.user.get_account_full_name()
 
             with transaction.atomic():
                 gast.fase = REGISTRATIE_FASE_AFGEWEZEN
                 gast.logboek += '[%s] %s in de rol van %s heeft dit gast-account afgewezen\n' % (
-                                        stamp_str, beheerder, self.functie_nu.beschrijving)
+                                        stamp_str, beheerder_naam, self.functie_nu.beschrijving)
                 gast.save(update_fields=['fase', 'logboek'])
 
                 if gast.account:
@@ -345,11 +345,12 @@ class GastAccountOpheffenView(UserPassesTestMixin, View):
             # schrijf in syslog
             from_ip = get_safe_from_ip(request)
             my_logger.info('%s REGISTREER gast-account %s afgewezen door %s; stuur e-mail' % (
-                                from_ip, gast.lid_nr, beheerder))
+                                from_ip, gast.lid_nr, beheerder_naam))
 
             # stuur een e-mail over de afwijzing
             context = {
                 'voornaam': gast.voornaam,
+                'gast_lid_nr': gast.lid_nr,
                 'naam_site': settings.NAAM_SITE,
                 'contact_email': settings.EMAIL_BONDSBUREAU,
             }

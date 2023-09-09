@@ -7,6 +7,7 @@
 from django.http import Http404
 from django.db.models.query_utils import Q
 from django.urls import reverse
+from django.http import HttpRequest
 from django.utils import timezone
 from django.shortcuts import render
 from django.utils.formats import localize
@@ -121,8 +122,7 @@ def maak_soort_filter(context, gekozen_soort):
     return gekozen_soort
 
 
-def maak_bogen_filter(request, context, gekozen_bogen):
-
+def maak_bogen_filter(request: HttpRequest, context, gekozen_bogen):
     boog_pks = list()
     account = request.user
     if account.is_authenticated:                                    # pragma: no branch

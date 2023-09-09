@@ -26,7 +26,7 @@ class AccountAdmin(UserAdmin):
         (_('Email'), {'fields': ('email_is_bevestigd', 'bevestigde_email', 'nieuwe_email',
                                  'optout_nieuwe_taak', 'optout_herinnering_taken', 'laatste_email_over_taken')}),
         (_('Permissions'), {'fields': ('is_active', 'is_gast', 'is_BB',
-                                       'gekoppelde_functies', 'is_staff', 'is_superuser')}),
+                                       'scheids', 'gekoppelde_functies', 'is_staff', 'is_superuser')}),
         (_('Beveiliging'), {'fields': ('password',
                                        'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller',
                                        'is_geblokkeerd_tot',

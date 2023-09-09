@@ -39,7 +39,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = Rollen.ROL_NONE
-        self.sort_level = {'MO': 20000, 'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
+        self.sort_level = {'MO': 20000, 'CS': 20001, 'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -137,7 +137,10 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             totaal_level = 0
             functies = list()
             for functie in account.functie_set.all():
-                level = self.sort_level[functie.rol]
+                try:
+                    level = self.sort_level[functie.rol]
+                except KeyError:
+                    level = 999999
                 tup = (level, functie.rol)
                 functies.append(tup)
                 totaal_level += level
