@@ -13,7 +13,7 @@ from Account.models import get_account
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
-from Functie.scheids import sporter_is_scheids
+from Functie.scheids import gebruiker_is_scheids
 from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Taken.operations import eval_open_taken
@@ -111,7 +111,7 @@ class PleinView(View):
                 # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
                 eval_mandje_inhoud(request)
 
-                if sporter_is_scheids(self.request):
+                if gebruiker_is_scheids(self.request):
                     context['url_scheids'] = reverse('Scheidsrechter:overzicht')
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
@@ -124,6 +124,8 @@ class PleinView(View):
 
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
+                    context['url_scheids'] = reverse('Scheidsrechter:overzicht')
+
                 elif rol_nu == Rollen.ROL_MO:
                     context['rol_is_mo'] = True
                 elif rol_nu == Rollen.ROL_MWZ:

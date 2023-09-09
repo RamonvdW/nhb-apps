@@ -124,12 +124,11 @@ def maak_soort_filter(context, gekozen_soort):
 
 
 def maak_bogen_filter(request: HttpRequest, context, gekozen_bogen):
-
     boog_pks = list()
     if request.user.is_authenticated:                               # pragma: no branch
         account = get_account(request)
         sporter = get_sporter(account)
-        if sporter.is_actief_lid:
+        if sporter and sporter.is_actief_lid:
             boog_pks = list(SporterBoog
                             .objects
                             .filter(sporter=sporter,

@@ -14,7 +14,7 @@ from Competitie.models import Kampioenschap
 from Functie.definities import Rollen, rol2url, url2rol
 from Functie.models import Functie
 from Functie.operations import account_needs_vhpg, account_needs_otp
-from Functie.scheids import scheids_zet_sessionvars
+from Functie.scheids import zet_sessionvar_is_scheids
 from Overig.helpers import get_safe_from_ip
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
@@ -49,6 +49,8 @@ def functie_expandeer_rol(functie_cache, ver_cache, rol_in, functie_in):
                 yield Rollen.ROL_MWW, obj.pk
             elif obj.rol == 'SUP':
                 yield Rollen.ROL_SUP, obj.pk
+            elif obj.rol == 'CS':
+                yield Rollen.ROL_CS, obj.pk
         # for
 
         # deze functie mag de HWL van vereniging in regio 100 aannemen
@@ -537,7 +539,7 @@ def rol_bepaal_beschikbare_rollen(request, account):
         Geen return value
     """
     rol_zet_sessionvars(account, request)
-    scheids_zet_sessionvars(account, request)
+    zet_sessionvar_is_scheids(account, request)
 
 
 def rol_bepaal_beschikbare_rollen_opnieuw(request):
@@ -549,7 +551,7 @@ def rol_bepaal_beschikbare_rollen_opnieuw(request):
 
     rol, functie = rol_get_huidige_functie(request)
     rol_zet_sessionvars(account, request)
-    scheids_zet_sessionvars(account, request)
+    zet_sessionvar_is_scheids(account, request)
     if functie:
         rol_activeer_functie(request, functie)
     else:

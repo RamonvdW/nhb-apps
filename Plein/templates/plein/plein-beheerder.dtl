@@ -47,6 +47,11 @@
                     {% include 'plein/card_icon.dtl' with title="Webwinkel" text="Beheer de webwinkel." icon="local_mall" url=card_url %}
                 {% endif %}
 
+                <!-- scheids -->
+                {% if url_scheids %}
+                    {% include 'plein/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" icon="sports" url=url_scheids %}
+                {% endif %}
+
                 <!-- opleidingen -->
                 {% if rol_is_mo %}
                     {% url 'Opleidingen:overzicht' as card_url %}

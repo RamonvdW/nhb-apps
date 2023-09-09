@@ -75,25 +75,22 @@ INSTALLED_APPS = [
 ]
 
 
-# SecurityMiddleware
-# SessionMiddleware
-# AuthenticationMiddleware
-# CommonMiddleware
-# CsrfViewMiddleware: verifies POST belongs to GET
-# MessageMiddleware: message storage between requests, typically for form feedback
-# XFrameOptionsMiddleware
-
 # AuthenticationMiddleware must be after SessionMiddleware
 #        MessageMiddleware must be after SessionMiddleware
-
+#
+# SecurityMiddleware provides:  (see https://docs.djangoproject.com/en/4.2/ref/middleware/)
+# - Strict-Transport-Security header (max-age = settings.SECURE_HSTS_SECONDS)
+# - Referrer-Policy header (='same-origin')
+# - Cross-Origin-Opener-Policy header (='same-origin')
+# - X-Content-Type-Options header (='nosniff')
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',      # geeft request.user
+    'django.middleware.common.CommonMiddleware',                    # adds Content-Length header to http responses
     'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site request forgery)
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
+    'django.contrib.messages.middleware.MessageMiddleware',         # mandatory for admin
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security: ask browser to deny (i)frame embedding
 ]
 
 
@@ -124,10 +121,14 @@ TEMPLATES = [
         # 'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',      # permission checking
-                'django.contrib.messages.context_processors.messages',
+                # 'django.template.context_processors.debug',             # adds 'debug' and 'sql_queries'
+                # 'django.contrib.context_processors.csrf',               # always enabled
+
+                # request, auth and messages are required for the admin interface
+                'django.template.context_processors.request',           # adds 'request'
+                'django.contrib.auth.context_processors.auth',          # adds 'user' and 'perms
+                'django.contrib.messages.context_processors.messages',  # adds 'messages' and 'DEFAULT_MESSAGE_LEVELS'
+
             ],
             'loaders': [
                 ('django.template.loaders.cached.Loader', ['SiteMain.core.minify_dtl.Loader']),

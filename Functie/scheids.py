@@ -12,7 +12,7 @@ from Functie.definities import SCHEIDS_NIET
 SESSIONVAR_SCHEIDS = 'gebruiker_is_scheids'
 
 
-def scheids_zet_sessionvars(account, request):
+def zet_sessionvar_is_scheids(account, request):
     """ zet een session variabele die onthoudt of de sporter ook scheidsrechter is
     """
 
@@ -24,7 +24,7 @@ def scheids_zet_sessionvars(account, request):
     request.session[SESSIONVAR_SCHEIDS] = is_scheids
 
 
-def sporter_is_scheids(request):
+def gebruiker_is_scheids(request):
     is_scheids = False
     if request.user.is_authenticated:
         try:

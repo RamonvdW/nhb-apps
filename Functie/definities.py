@@ -69,5 +69,11 @@ SCHEIDS_CHOICES = (
     (SCHEIDS_INTERNATIONAAL, "Internationaal Scheidsrechter"),
 )
 
+SCHEIDS_TO_STR = {
+    SCHEIDS_BOND: "Bondsscheidsrechter",
+    SCHEIDS_VERENIGING: "Verenigingsscheidsrechter",
+    SCHEIDS_INTERNATIONAAL: "Internationaal Scheidsrechter",
+}
+
 
 # end of file

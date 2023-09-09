@@ -14,7 +14,15 @@ app_name = 'Scheidsrechter'
 urlpatterns = [
     path('',
          view_overzicht.OverzichtView.as_view(),
-         name='overzicht')
+         name='overzicht'),
+
+    path('korps/',
+         view_overzicht.KorpsView.as_view(),
+         name='korps'),
+
+    path('wedstrijden/',
+         view_overzicht.WedstrijdenView.as_view(),
+         name='wedstrijden'),
 ]
 
 

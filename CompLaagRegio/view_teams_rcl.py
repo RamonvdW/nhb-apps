@@ -260,7 +260,7 @@ class RegioTeamsTemplateView(TemplateView):
         context['aantal_regels_niet_af'] = len(regioteams) + 2
         context['totaal_teams'] = totaal_teams
 
-        context['cols'] = 5
+        context['cols'] = 7
         if self.subset_filter:       # rayon selectie
             context['cols'] += 1     # toon kolom met regio nummer
 

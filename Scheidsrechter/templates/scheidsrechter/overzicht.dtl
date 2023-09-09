@@ -14,7 +14,28 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Scheidsrechters</h3>
-            <p>Op deze pagina kan je zien waar scheidsrechters nodig zijn en je beschikbaarheid opgeven</p>
+            <!-- p>Op deze pagina kan je zien waar scheidsrechters nodig zijn en je beschikbaarheid opgeven</p -->
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- korps -->
+            <!-- TODO: begrenzen tot CS? -->
+            {% url 'Scheidsrechter:korps' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Korps" text="Bekijk de lijst van de scheidsrechters." icon="grade" url=card_url %}
+
+            <!-- wedstrijdkalender -->
+            {% url 'Scheidsrechter:wedstrijden' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden scheidsrechters nodig hebben." icon="event_note" url=card_url %}
+
+            <!-- beschikbaarheid -->
+            {% url 'Plein:plein' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Beschikbaarheid" text="Pas je beschikbaarheid voor aankomende wedstrijden aan." icon="event_available" url=card_url %}
+
         </div>
     </div>
 

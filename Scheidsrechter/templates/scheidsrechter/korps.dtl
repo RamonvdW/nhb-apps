@@ -1,0 +1,42 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Korps{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Korps scheidsrechters</h3>
+            <p>Hieronder volgt de lijst van alle {{ aantal }} scheidsrechters</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <table class="white">
+                {% for obj in korps %}
+                    {% if obj.is_break %}
+                        <tr>
+                            <td class="center sv-blauw-text"><h6>{{ obj.scheids_str }}</h6></td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td class="center">{{ obj.volledige_naam }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-korps" %}
+
+{% endblock %}

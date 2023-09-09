@@ -235,8 +235,9 @@ class RegiocompetitieAanmeldenView(View):
         if request.user.is_authenticated:
             account = get_account(request)
             sporter = get_sporter(account)
-            if not (sporter.is_actief_lid and sporter.bij_vereniging):
-                sporter = None
+            if sporter:
+                if not (sporter.is_actief_lid and sporter.bij_vereniging):
+                    sporter = None
         if not sporter:
             raise Http404('Sporter niet gevonden')
 
@@ -402,8 +403,9 @@ class RegiocompetitieAfmeldenView(View):
         if request.user.is_authenticated:
             account = get_account(request)
             sporter = get_sporter(account)
-            if not (sporter.is_actief_lid and sporter.bij_vereniging):
-                sporter = None
+            if sporter:
+                if not (sporter.is_actief_lid and sporter.bij_vereniging):
+                    sporter = None
         if not sporter:
             raise Http404('Sporter niet gevonden')
 
