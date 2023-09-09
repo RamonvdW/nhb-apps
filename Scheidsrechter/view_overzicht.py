@@ -12,6 +12,9 @@ from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
+from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR, ORGANISATIE_WA,
+                                    WEDSTRIJD_WA_STATUS_TO_STR)
+from Wedstrijden.models import Wedstrijd
 
 TEMPLATE_OVERZICHT = 'scheidsrechter/overzicht.dtl'
 TEMPLATE_KORPS = 'scheidsrechter/korps.dtl'
@@ -130,6 +133,23 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        wedstrijden = (Wedstrijd
+                       .objects
+                       .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
+                       .exclude(is_ter_info=True)
+                       .exclude(toon_op_kalender=False)
+                       .order_by('-datum_begin'))       # nieuwste bovenaan
+
+        for wedstrijd in wedstrijden:
+            wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
+            if wedstrijd.organisatie == ORGANISATIE_WA:
+                wedstrijd.organisatie_str += ' ' + WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+
+            wedstrijd.url_details = reverse('Wedstrijden:wedstrijd-details',
+                                            kwargs={'wedstrijd_pk': wedstrijd.pk})
+        # for
+
+        context['wedstrijden'] = wedstrijden
 
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),

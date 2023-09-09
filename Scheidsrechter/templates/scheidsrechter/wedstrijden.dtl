@@ -22,15 +22,23 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
-                {% for obj in korps %}
-                    {% if obj.is_break %}
-                        <tr>
-                            <td class="center sv-blauw-text"><h6>{{ obj.scheids_str }}</h6></td>
-                        </tr>
-                    {% endif %}
-
+                <thead>
+                    <th>Wanneer</th>
+                    <th>Plaats</th>
+                    <th>Banen</th>
+                    <th>Status</th>
+                    <th>Titel</th>
+                </thead>
+                {% for obj in wedstrijden %}
                     <tr>
-                        <td class="center">{{ obj.volledige_naam }}</td>
+                        <td>{{ obj.datum_begin }}{% if obj.datum_begin != obj.datum_einde %} - {{ obj.datum_einde }}{% endif %}</td>
+                        <td>{{ obj.locatie.plaats }}</td>
+                        <td>{{ obj.aantal_banen }}</td>
+                        <td>{{ obj.organisatie_str }}</td>
+                        <td>{{ obj.titel }}</td>
+                        <td>
+                            <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>
+                        </td>
                     </tr>
                 {% endfor %}
             </table>
