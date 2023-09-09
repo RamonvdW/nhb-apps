@@ -8,6 +8,7 @@ from django.http import JsonResponse, Http404
 from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Bondspas.operations import bepaal_jaar_bondspas_en_wedstrijden, maak_bondspas_regels, maak_bondspas_jpeg_en_pdf
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
@@ -40,7 +41,8 @@ class ToonBondspasView(UserPassesTestMixin, View):
         # bondspas wordt opgehaald nadat de pagina getoond kan worden
         context['url_dynamic'] = reverse('Bondspas:dynamic-ophalen')
 
-        lid_nr = request.user.username
+        account = get_account(request)
+        lid_nr = account.username
         sporter = Sporter.objects.get(lid_nr=lid_nr)
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
@@ -72,7 +74,8 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
             Dit is een POST by-design, om caching te voorkomen.
         """
 
-        lid_nr = request.user.username
+        account = get_account(request)
+        lid_nr = account.username
         sporter = Sporter.objects.get(lid_nr=lid_nr)
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')

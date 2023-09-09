@@ -13,7 +13,7 @@ from django.utils.timezone import make_aware, get_default_timezone
 from django.views.generic import TemplateView, View
 from django.utils.formats import date_format
 from django.db.models import F, Count
-from Account.models import Account, AccountSessions
+from Account.models import Account, AccountSessions, get_account
 from Account.operations.otp import otp_loskoppelen, otp_stuur_email_losgekoppeld
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
@@ -44,7 +44,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
-        account = self.request.user
+        account = get_account(self.request)
         if account.is_authenticated:
             self.rol_nu = rol_get_huidige(self.request)
             if self.rol_nu == Rollen.ROL_BB:

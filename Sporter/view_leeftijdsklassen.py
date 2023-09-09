@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import GESLACHT_MAN, GESLACHT_ANDERS
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
@@ -17,6 +18,7 @@ from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                       bereken_leeftijdsklassen_khsn,
                                       bereken_leeftijdsklassen_ifaa,
                                       bereken_leeftijdsklassen_bondscompetitie)
+from Sporter.models import get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from types import SimpleNamespace
 
@@ -54,8 +56,8 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # gegarandeerd ingelogd door test_func()
-        account = self.request.user
-        sporter = account.sporter_set.first()
+        account = get_account(self.request)
+        sporter = get_sporter(account)
         voorkeur = get_sporter_voorkeuren(sporter)
 
         context['is_gast'] = sporter.is_gast

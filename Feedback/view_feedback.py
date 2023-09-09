@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.http import Http404
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -47,7 +48,8 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
             # stuur ze weg
             raise Resolver404()
 
-        gebruiker_str = request.user.get_account_full_name()
+        account = get_account(request)
+        gebruiker_str = account.get_account_full_name()
         rol_str = rol_get_beschrijving(request)
 
         # bewaar twee parameters in de sessie - deze blijven server-side

@@ -14,6 +14,7 @@ from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import ORGANISATIE_WA, ORGANISATIE_IFAA
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
@@ -21,7 +22,7 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, SporterBoog
+from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                     INSCHRIJVING_STATUS_TO_STR,
@@ -352,7 +353,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
 
-        account = self.request.user
+        account = get_account(self.request)
         try:
             lid_nr = int(account.username)
         except ValueError:
@@ -692,8 +693,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
 
         # begrens de mogelijkheden tot leden met dezelfde adres_code als de ingelogde gebruiker
-        account = self.request.user
-        sporter = Sporter.objects.get(account=account)
+        account = get_account(self.request)
+        sporter = get_sporter(account)
         adres_code = sporter.adres_code
 
         # fall-back als dit de geselecteerde sporter is
@@ -899,7 +900,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         if sporter.is_overleden or not sporter.is_actief_lid or not sporter.bij_vereniging:
             raise Http404('Niet actief lid')
 
-        account_koper = request.user
+        account_koper = get_account(request)
 
         now = timezone.now()
 
@@ -1210,7 +1211,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         if sporter.is_overleden or not sporter.is_actief_lid or not sporter.bij_vereniging:
             raise Http404('Niet actief lid')
 
-        account_koper = request.user
+        account_koper = get_account(request)
 
         now = timezone.now()
 

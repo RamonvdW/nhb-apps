@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.http import HttpRequest
+from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 from Functie.definities import SCHEIDS_CHOICES, SCHEIDS_NIET
@@ -176,6 +177,15 @@ def accounts_opschonen(stdout):
         stdout.write('[INFO] Verwijder onvoltooid account %s' % obj)
         obj.delete()
     # for
+
+
+def get_account(request: HttpRequest) -> Account:
+    """ Deze functie vertaalt request.user naar een Account, zodat de editor het ook snapt
+        Account is gebaseerd op AbstractUser.
+        De authentication middleware zet request.user gelijk aan AUTH_USER_MODEL
+        Als request.user.is_authenticated == False dan wordt een AnonymousUser terug gegeven
+    """
+    return request.user         # compatible met Account (ook al klopt het type niet)
 
 
 # end of file

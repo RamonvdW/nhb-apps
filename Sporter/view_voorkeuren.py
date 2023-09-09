@@ -9,12 +9,13 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD,
                                    ORGANISATIE_IFAA)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter
+from Sporter.models import Sporter, get_sporter
 from Sporter.operations import get_sporter_voorkeuren, get_sporterboog
 from types import SimpleNamespace
 import logging
@@ -70,9 +71,9 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         else:
             # fallback naar ingelogde gebruiker
-            account = self.request.user
+            account = get_account(self.request)
             # ROL_SPORTER geeft bescherming tegen geen sporter
-            self.sporter = account.sporter_set.first()
+            self.sporter = get_sporter(account)
 
     def _update_sporterboog(self):
         objs = get_sporterboog(self.sporter, mag_database_wijzigen=True)
@@ -161,7 +162,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
 
         if rol_mag_wisselen(self.request):
-            account = request.user
+            account = get_account(request)
             updated = list()
 
             optout_nieuwe_taak = False

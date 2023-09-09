@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.views.generic import View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Competitie.definities import INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN
 from Competitie.models import Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch
@@ -18,7 +19,7 @@ from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde
-from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog
+from Sporter.models import SporterVoorkeuren, Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from decimal import Decimal
 
@@ -71,8 +72,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat regiocompetitie bij de juist regio hoort
-        account = self.request.user     # ROL_SPORTER geeft bescherming tegen geen Sporter
-        sporter = Sporter.objects.filter(account=account).first()
+        account = get_account(self.request)     # ROL_SPORTER geeft bescherming tegen geen Sporter
+        sporter = get_sporter(account)
         if sporterboog.sporter != sporter or deelcomp.regio != sporter.bij_vereniging.regio:
             raise Http404('Geen valide combinatie')
 
@@ -229,14 +230,13 @@ class RegiocompetitieAanmeldenView(View):
         """ Deze functie wordt aangeroepen als de sporter op zijn profiel pagina
             de knop Aanmelden gebruikt voor een specifieke regiocompetitie en boogtype.
         """
-        # voorkom misbruik: ingelogd als niet geblokkeerd nhblid vereist
+        # voorkom misbruik: ingelogd als niet geblokkeerde sporter vereist
         sporter = None
-        account = request.user
-        if account.is_authenticated:
-            if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.first()
-                if not (sporter.is_actief_lid and sporter.bij_vereniging):
-                    sporter = None
+        if request.user.is_authenticated:
+            account = get_account(request)
+            sporter = get_sporter(account)
+            if not (sporter.is_actief_lid and sporter.bij_vereniging):
+                sporter = None
         if not sporter:
             raise Http404('Sporter niet gevonden')
 
@@ -399,12 +399,11 @@ class RegiocompetitieAfmeldenView(View):
         """
         # voorkom misbruik: ingelogd als niet geblokkeerd nhblid vereist
         sporter = None
-        account = request.user
-        if account.is_authenticated:
-            if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.first()
-                if not (sporter.is_actief_lid and sporter.bij_vereniging):
-                    sporter = None
+        if request.user.is_authenticated:
+            account = get_account(request)
+            sporter = get_sporter(account)
+            if not (sporter.is_actief_lid and sporter.bij_vereniging):
+                sporter = None
         if not sporter:
             raise Http404('Sporter niet gevonden')
 

@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from Account.models import Account
+from Account.models import Account, get_account
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.operations.otp import otp_zet_control_niet_gelukt
 from Account.view_login import account_plugins_login_gate
@@ -214,10 +214,17 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.account = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn
-        return self.request.user.is_authenticated
+        if  self.request.user.is_authenticated:
+            self.account = get_account(self.request)
+            return True
+        return False
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -227,6 +234,8 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
         except KeyError:
             context['moet_oude_ww_weten'] = True
+
+        context['account'] = self.account
 
         context['kruimels'] = (
             (None, 'Wachtwoord wijzigen'),
@@ -241,7 +250,6 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
         """
         context = super().get_context_data(**kwargs)
 
-        account = request.user
         huidige_ww = request.POST.get('huidige', '')[:50]   # afkappen voor extra veiligheid
         nieuw_ww = request.POST.get('nieuwe', '')[:50]      # afkappen voor extra veiligheid
         from_ip = get_safe_from_ip(self.request)
@@ -252,24 +260,25 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             moet_oude_ww_weten = True
 
         # controleer het nieuwe wachtwoord
-        valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, account.username)
+        valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, self.account.username)
 
         # controleer het huidige wachtwoord
         if moet_oude_ww_weten and valid:
-            if not authenticate(username=account.username, password=huidige_ww):
+            if not authenticate(username=self.account.username, password=huidige_ww):
                 valid = False
                 errmsg = "Huidige wachtwoord komt niet overeen"
 
-                schrijf_in_logboek(account=account,
+                schrijf_in_logboek(account=self.account,
                                    gebruikte_functie="Wachtwoord",
                                    activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (
-                                                    from_ip, repr(account.username)))
+                                                    from_ip, repr(self.account.username)))
                 my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (
-                                    from_ip, repr(account.username)))
+                                    from_ip, repr(self.account.username)))
 
         if not valid:
             context['foutmelding'] = errmsg
             context['toon_tip'] = True
+            context['account'] = self.account
 
             try:
                 context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
@@ -281,11 +290,11 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
         # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
         # hierdoor blijft de gebruiker niet ingelogd op andere sessies
-        account.set_password(nieuw_ww)      # does not save the account
-        account.save()
+        self.account.set_password(nieuw_ww)      # does not save the account
+        self.account.save()
 
         # houd de gebruiker ingelogd in deze sessie
-        update_session_auth_hash(request, account)
+        update_session_auth_hash(request, self.account)
 
         try:
             del request.session['moet_oude_ww_weten']
@@ -293,9 +302,9 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             pass
 
         # schrijf in het logboek
-        schrijf_in_logboek(account=account,
+        schrijf_in_logboek(account=self.account,
                            gebruikte_functie="Wachtwoord",
-                           activiteit="Nieuw wachtwoord voor account %s" % repr(account.get_account_full_name()))
+                           activiteit="Nieuw wachtwoord voor account %s" % repr(self.account.get_account_full_name()))
 
         return HttpResponseRedirect(reverse('Plein:plein'))
 

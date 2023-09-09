@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
                                BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
                                BESTELLING_STATUS_GEANNULEERD,
@@ -91,7 +92,8 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        account = self.request.user
+
+        account = get_account(self.request)
 
         self._get_bestellingen(account, context)
 
@@ -214,7 +216,8 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        account = self.request.user
+
+        account = get_account(self.request)
 
         try:
             bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
@@ -293,8 +296,10 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             Let op: test_func is nog niet aangeroepen
         """
         self.rol_nu = rol_get_huidige(self.request)
+
         if self.rol_nu != Rollen.ROL_NONE:
-            account = self.request.user
+
+            account = get_account(self.request)
 
             try:
                 bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
@@ -360,7 +365,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
             Dit is een POST by-design, om caching te voorkomen.
         """
-        account = request.user
+        account = get_account(request)
 
         try:
             bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
@@ -452,7 +457,8 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        account = self.request.user
+
+        account = get_account(self.request)
 
         try:
             bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
@@ -518,7 +524,7 @@ class AnnuleerBestellingView(UserPassesTestMixin, View):
             de enige taak van deze functie is een bestelling aan te passen naar BESTEL_STATUS_.
         """
 
-        account = request.user
+        account = get_account(request)
         snel = str(request.POST.get('snel', ''))[:1]
 
         try:

@@ -7,11 +7,13 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
+from Account.models import get_account
 from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
 from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from Sporter.models import get_sporter
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 
@@ -36,11 +38,10 @@ def get_sporter_ver_nr(request):
 
         if ver_nr < 0:
             # pak de vereniging van de ingelogde gebruiker
-            account = request.user
-            if account.sporter_set.count() > 0:     # pragma: no branch
-                sporter = account.sporter_set.first()
-                if sporter.is_actief_lid and sporter.bij_vereniging:
-                    ver_nr = sporter.bij_vereniging.ver_nr
+            account = get_account(request)
+            sporter = get_sporter(account)
+            if sporter.is_actief_lid and sporter.bij_vereniging:
+                ver_nr = sporter.bij_vereniging.ver_nr
 
     ver_nrs = list(Vereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
     if ver_nr not in ver_nrs:

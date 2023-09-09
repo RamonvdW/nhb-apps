@@ -7,11 +7,11 @@
 from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from Plein.menu import menu_dynamics
+from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse
 from Geo.models import Regio
+from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-
 
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
 
@@ -33,7 +33,7 @@ class InfoCompetitieView(TemplateView):
                              .select_related('rayon')
                              .order_by('regio_nr'))
 
-        account = self.request.user
+        account = get_account(self.request)
         if account and account.is_authenticated:
             sporter = Sporter.objects.filter(account=account).first()
             if sporter:

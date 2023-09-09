@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
+from Account.models import get_account
 from Competitie.models import Competitie, get_competitie_boog_typen
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
@@ -31,7 +32,8 @@ class CompetitieOverzichtView(TemplateView):
         wed_boog = 'r'
 
         if self.request.user.is_authenticated:
-            account = self.request.user
+
+            account = get_account(self.request)
 
             # als deze sporter ingeschreven is voor de competitie, pak dan het boogtype waarmee hij ingeschreven is
 

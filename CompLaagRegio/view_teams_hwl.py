@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieTeamKlasse, Regiocompetitie,
                                RegiocompetitieSporterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
@@ -1274,7 +1275,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         now = timezone.localtime(now)
         now_str = now.strftime("%Y-%m-%d %H:%M")
 
-        account = request.user
+        account = get_account(request)
         wie_str = account.volledige_naam() + " (%s)" % account.username
 
         ronde_team.logboek += '\n\n[%s] Selectie is aangepast door %s:\n' % (now_str, wie_str)

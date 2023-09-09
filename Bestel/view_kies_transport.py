@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Bestel.definities import BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
 from Bestel.models import BestelMandje
 from Bestel.operations.mutaties import bestel_mutatieverzoek_transport
@@ -42,7 +43,8 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        account = self.request.user
+
+        account = get_account(self.request)
 
         try:
             mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
@@ -83,7 +85,7 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
 
         snel = str(request.POST.get('snel', ''))[:1]
         keuze = str(request.POST.get('keuze', ''))[:7]      # afkappen voor extra veiligheid
-        account = self.request.user
+        account = get_account(self.request)
 
         if keuze == 'verzend':
             bestel_mutatieverzoek_transport(account, BESTEL_TRANSPORT_VERZEND, snel == '1')

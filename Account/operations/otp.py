@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Account.models import AccountSessions
+from Account.models import Account, AccountSessions, get_account
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.operations import mailer_queue_email, render_email_template
@@ -26,7 +26,7 @@ def otp_zet_control_niet_gelukt(request):
         gedaan heeft.
     """
 
-    account = request.user
+    account = get_account(request)
 
     request.session[SESSIONVAR_ACCOUNT_OTP_CONTROL_IS_GELUKT] = False
 
@@ -43,7 +43,7 @@ def otp_zet_controle_gelukt(request):
     """ Deze functie wordt aangeroepen vanuit de OTPControleView en OTPKoppelenView om een sessie variabele
         te zetten die onthoudt dat de OTP-controle voor de gebruiker gelukt is
     """
-    account = request.user
+    account = get_account(request)
     account.otp_controle_gelukt_op = timezone.now()
     account.save(update_fields=['otp_controle_gelukt_op'])
 
@@ -63,7 +63,7 @@ def otp_is_controle_gelukt(request):
     return False
 
 
-def otp_prepare_koppelen(account):
+def otp_prepare_koppelen(account: Account):
     """ Als het account nog niet voorbereid is voor OTP, maak het dan in orde
     """
     # maak eenmalig het OTP geheim aan voor deze gebruiker

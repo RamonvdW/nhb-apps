@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import Account
+from Account.models import Account, get_account
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2
 from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, CompetitieMatch,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
@@ -1417,7 +1417,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             deelcomp.save()
 
             # maak het bericht voor een taak aan de RKO's en BKO's
-            account = request.user
+            account = get_account(request)
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             taak_deadline = now

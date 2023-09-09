@@ -10,6 +10,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE
 from Competitie.definities import MUTATIE_EXTRA_RK_DEELNEMER, DEEL_RK, DEELNAME_JA, DEELNAME_NEE, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, CompetitieMutatie, RegiocompetitieSporterBoog,
@@ -214,7 +215,7 @@ class ExtraDeelnemerView(UserPassesTestMixin, TemplateView):
                                     gemiddelde_scores=regio_scores)
         if created:
             # dit is geen dupe
-            account = request.user
+            account = get_account(request)
             schrijf_in_logboek(account, 'Competitie', 'Extra RK deelnemer %s toevoegen aan %s' % (deelnemer, comp))
 
             # laat de achtergrondtaak de volgorde bijwerken
@@ -373,7 +374,7 @@ class GeefBlancoResultaatView(UserPassesTestMixin, TemplateView):
         deelnemer.result_rank = KAMP_RANK_BLANCO
         deelnemer.save(update_fields=['result_rank'])
 
-        account = request.user
+        account = get_account(request)
         schrijf_in_logboek(account, 'Competitie', 'Blanco score voor RK deelnemer %s van %s' % (deelnemer, comp))
 
         url = reverse('CompLaagRayon:geef-blanco-resultaat', kwargs={'comp_pk': comp.pk})

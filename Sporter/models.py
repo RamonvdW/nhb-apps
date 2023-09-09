@@ -320,4 +320,11 @@ class SporterBoog(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+def get_sporter(account: Account) -> Sporter:
+    """ Centrale methode om de bij een Account behorende Sporter te vinden
+        Kan None terug geven, maar dat zou in de praktijk niet voor moeten komen
+    """
+    return account.sporter_set.select_related('bij_vereniging__regio').first()          # can return None!
+
+
 # end of file

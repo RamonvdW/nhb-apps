@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Bestel.definities import BESTEL_TRANSPORT_VERZEND, BESTEL_TRANSPORT_OPHALEN
 from Bestel.models import BestelMandje
 from Bestel.operations.mandje import mandje_tel_inhoud
@@ -49,7 +50,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
 
         if request.user.is_authenticated:
-            account = request.user
+            account = get_account(request)
             if account.is_gast:
                 gast = account.gastregistratie_set.first()
                 if gast and gast.fase != REGISTRATIE_FASE_COMPLEET:
@@ -168,7 +169,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        account = self.request.user
+        account = get_account(self.request)
 
         # omdat het heel raar is als het tellertje op het mandje niet overeenkomt
         # met de inhoud van het mandje, forceren we de telling hier nog een keer
@@ -216,7 +217,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         snel = str(request.POST.get('snel', ''))[:1]
 
-        account = self.request.user
+        account = get_account(self.request)
 
         bestel_mutatieverzoek_maak_bestellingen(account, snel == '1')
         # achtergrondtaak zet het mandje om in bestellingen
@@ -255,7 +256,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
             raise Http404('Verkeerde parameter')
 
         # zoek de regel op in het mandje van de ingelogde gebruiker
-        account = request.user
+        account = get_account(request)
         try:
             mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
         except BestelMandje.DoesNotExist:

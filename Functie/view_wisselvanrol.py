@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Account.operations.otp import otp_is_controle_gelukt
 from Functie.definities import Rollen, rol2url
 from Functie.models import Functie
@@ -56,7 +57,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            self.account = account = self.request.user
+            self.account = account = get_account(self.request)
             self.show_vhpg, self.vhpg = account_needs_vhpg(account)
             if self.show_vhpg and self.vhpg is not None:
                 # herhaling van VHPG acceptatie: meteen daarheen sturen

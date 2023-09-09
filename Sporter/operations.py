@@ -6,12 +6,13 @@
 
 from django.db import transaction, IntegrityError
 from django.db.models import ProtectedError
+from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ANDERS
 from BasisTypen.models import BoogType
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Regio
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter
 
 
 def get_request_regio_nr(request, allow_admin_regio=True):
@@ -42,11 +43,10 @@ def get_request_regio_nr(request, allow_admin_regio=True):
 
     elif rol_nu == Rollen.ROL_SPORTER:
         # sporter
-        account = request.user
-        if account.sporter_set.count() > 0:         # pragma: no branch
-            sporter = account.sporter_set.select_related('bij_vereniging__regio').first()
-            if sporter.is_actief_lid and sporter.bij_vereniging:
-                regio_nr = sporter.bij_vereniging.regio.regio_nr
+        account = get_account(request)
+        sporter = get_sporter(account)
+        if sporter.is_actief_lid and sporter.bij_vereniging:
+            regio_nr = sporter.bij_vereniging.regio.regio_nr
 
     if regio_nr == 100 and not allow_admin_regio:
         regio_nr = 101
@@ -74,12 +74,11 @@ def get_request_rayon_nr(request):
             rayon_nr = functie_nu.rayon.rayon_nr
 
     elif rol_nu == Rollen.ROL_SPORTER:
-        account = request.user
-        if account.is_authenticated:                                    # pragma: no branch
-            if account.sporter_set.count() > 0:                         # pragma: no branch
-                sporter = account.sporter_set.first()
-                if sporter.is_actief_lid and sporter.bij_vereniging:
-                    rayon_nr = sporter.bij_vereniging.regio.rayon_nr
+        if request.user.is_authenticated:                                    # pragma: no branch
+            account = get_account(request)
+            sporter = get_sporter(account)
+            if sporter.is_actief_lid and sporter.bij_vereniging:
+                rayon_nr = sporter.bij_vereniging.regio.rayon_nr
 
     return rayon_nr
 

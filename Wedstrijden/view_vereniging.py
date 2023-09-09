@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_ALLE,
                                    ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIES2SHORT_STR)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
@@ -127,8 +128,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
             met deze POST wordt een nieuwe wedstrijd aangemaakt
         """
 
-        account = request.user
-
+        account = get_account(request)
         ver = self.functie_nu.vereniging
         locaties = ver.locatie_set.exclude(zichtbaar=False)
         aantal = locaties.count()

@@ -11,6 +11,7 @@ from django.utils.formats import localize
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic import TemplateView
+from Account.models import get_account
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Plein.menu import menu_dynamics
@@ -145,7 +146,7 @@ class ProductView(TemplateView):
         if not self.request.user.is_authenticated:
             context['moet_inloggen'] = True
         else:
-            account = self.request.user
+            account = get_account(self.request)
             if not account.is_gast:
                 context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
 
@@ -161,7 +162,7 @@ class ProductView(TemplateView):
 
     def post(self, request, *args, **kwargs):
 
-        account = self.request.user
+        account = get_account(self.request)
         if not account.is_authenticated or account.is_gast:
             raise Http404('Geen toegang')
 
@@ -210,7 +211,7 @@ class ProductView(TemplateView):
         if not is_goed:
             raise Http404('Foutieve parameter (2)')
 
-        account_koper = request.user
+        account_koper = get_account(request)
         now = timezone.now()
         totaal_euro = product.prijs_euro * aantal
 

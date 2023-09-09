@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.shortcuts import render, reverse, redirect, Http404
 from django.contrib.auth import update_session_auth_hash
 from django.views.generic import View, TemplateView
+from Account.models import get_account
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.view_wachtwoord import auto_login_gast_account
@@ -319,7 +320,7 @@ class RegistreerGastVervolgView(TemplateView):
         if not request.user.is_authenticated:
             return redirect('Plein:plein')
 
-        account = request.user
+        account = get_account(request)
         gast = account.gastregistratie_set.first()
         if not gast:
             # dit is geen gast-account
@@ -356,7 +357,7 @@ class RegistreerGastVolgendeVraagView(View):
         if not request.user.is_authenticated:
             return redirect('Plein:plein')
 
-        self.account = request.user
+        self.account = get_account(request)
         gast = self.account.gastregistratie_set.first()
         if not gast:
             # dit is geen gast-account
@@ -377,6 +378,7 @@ class RegistreerGastVolgendeVraagView(View):
 
         if gast.fase == REGISTRATIE_FASE_PASS:
             template_name = TEMPLATE_REGISTREER_GAST_WACHTWOORD
+            context['account'] = self.account
 
         elif gast.fase == REGISTRATIE_FASE_CLUB:
             template_name = TEMPLATE_REGISTREER_GAST_CLUB
@@ -482,7 +484,6 @@ class RegistreerGastVolgendeVraagView(View):
             om een nieuw wachtwoord op te geven.
         """
         gast = self.gast
-        account = self.account
 
         now = timezone.now()
         stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
@@ -492,12 +493,13 @@ class RegistreerGastVolgendeVraagView(View):
             nieuw_ww = request.POST.get('pass', '')[:50]      # afkappen voor extra veiligheid
 
             # controleer het nieuwe wachtwoord
-            valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, account.username)
+            valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, self.account.username)
 
             if not valid:
                 context = {
                     'foutmelding': errmsg,
                     'toon_tip': True,
+                    'account': self.account
                 }
 
                 # noteer: geen kruimels
@@ -506,11 +508,11 @@ class RegistreerGastVolgendeVraagView(View):
 
             # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
             # hierdoor blijft de gebruiker niet ingelogd op andere sessies
-            account.set_password(nieuw_ww)      # does not save the account
-            account.save()
+            self.account.set_password(nieuw_ww)      # does not save the account
+            self.account.save()
 
             # houd de gebruiker ingelogd in deze sessie
-            update_session_auth_hash(request, account)
+            update_session_auth_hash(request, self.account)
 
             gast.logboek += '[%s] Wachtwoord is gezet\n' % stamp_str
             gast.fase = REGISTRATIE_FASE_CLUB
@@ -686,7 +688,7 @@ class RegistreerGastVolgendeVraagView(View):
             if bevestigd == 'Ja':
                 # gebruiker heeft op 'Ja' gedrukt
 
-                self._maak_sporter_gast(gast, account)
+                self._maak_sporter_gast(gast, self.account)
 
                 gast.logboek += '[%s] Toestemming opslaan ontvangen\n' % stamp_str
                 gast.fase = REGISTRATIE_FASE_COMPLEET
@@ -696,7 +698,7 @@ class RegistreerGastVolgendeVraagView(View):
                 self._informeer_sec(gast)
 
                 # doe de evaluatie opnieuw, nu met het Sporter record
-                rol_bepaal_beschikbare_rollen(self.request, account)
+                rol_bepaal_beschikbare_rollen(self.request, self.account)
 
                 # stuur de sporter door naar Mijn Pagina, om de voorkeuren aan te passen
                 return HttpResponseRedirect(reverse('Sporter:profiel'))

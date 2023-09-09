@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.definities import (DEEL_BK,
                                    DEELNAME_JA, DEELNAME_NEE,
                                    MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN)
@@ -399,7 +400,7 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
         afmelden = str(request.POST.get('afmelden', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
 
-        account = request.user
+        account = get_account(request)
         door_str = "BKO %s" % account.volledige_naam()
 
         if bevestig == "1":

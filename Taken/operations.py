@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from django.conf import settings
+from Account.models import get_account
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from Taken.models import Taak
@@ -22,7 +23,7 @@ EMAIL_TEMPLATE_HERINNERING = 'email_taken/herinnering.dtl'
 
 
 def get_taak_functie_pks(request):
-    account = request.user
+    account = get_account(request)
     functie_pks = list(account.functie_set.values_list('pk', flat=True))
 
     # huidige rol toevoegen, zodat taken van die rol er ook bij staan

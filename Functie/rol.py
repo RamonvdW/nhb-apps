@@ -8,7 +8,7 @@
 
 from django.contrib.sessions.backends.db import SessionStore
 from Account.operations.otp import otp_is_controle_gelukt
-from Account.models import AccountSessions
+from Account.models import AccountSessions, get_account
 from Competitie.definities import DEEL_RK, DEEL_BK
 from Competitie.models import Kampioenschap
 from Functie.definities import Rollen, rol2url, url2rol
@@ -516,9 +516,9 @@ def rol_activeer_functie(request, functie):
         # for
 
         # IT en BB mogen wisselen naar elke SEC (dit is niet aan het pallet toegevoegd)
-        account = request.user
-        if account.is_authenticated:                            # pragma: no branch
+        if request.user.is_authenticated:                       # pragma: no branch
             if otp_is_controle_gelukt(request):                 # pragma: no branch
+                account = get_account(request)
                 if account.is_staff or account.is_BB:
                     # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
                     if functie.rol == 'SEC':                    # pragma: no branch
@@ -545,7 +545,7 @@ def rol_bepaal_beschikbare_rollen_opnieuw(request):
         zoals na het aanmaken van een nieuwe competitie.
         Hierdoor hoeft de gebruiker niet opnieuw in te loggen om deze mogelijkheden te krijgen.
     """
-    account = request.user
+    account = get_account(request)
 
     rol, functie = rol_get_huidige_functie(request)
     rol_zet_sessionvars(account, request)
