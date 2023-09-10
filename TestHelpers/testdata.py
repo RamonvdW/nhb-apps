@@ -1056,7 +1056,7 @@ class TestData(object):
         # zet voor een paar deelnemers de inschrijfvoorkeur voor RK/BK uit
         voornamen = list()
         for _, _, voornaam, boogtype, flags in self.leden:
-            _, inschrijf_voorkeur_rk_bk, _, _, _ = flags
+            _, inschrijf_voorkeur_rk_bk, _, _, _, _ = flags
             if not inschrijf_voorkeur_rk_bk:
                 voornamen.append(voornaam)
         # for
