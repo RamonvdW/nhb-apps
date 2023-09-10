@@ -94,9 +94,10 @@ class KorpsView(UserPassesTestMixin, TemplateView):
         # for
 
         for lijst in (sr3, sr4, sr5):
-            sporter = lijst[0]
-            sporter.is_break = True
-            sporter.scheids_str = SCHEIDS_TO_STR[sporter.scheids]
+            if len(lijst) > 0:
+                sporter = lijst[0]
+                sporter.is_break = True
+                sporter.scheids_str = SCHEIDS_TO_STR[sporter.scheids]
         # for
 
         context['korps'] = sr5 + sr4 + sr3

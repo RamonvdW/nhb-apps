@@ -33,7 +33,7 @@
             {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden scheidsrechters nodig hebben." icon="event_note" url=card_url %}
 
             <!-- beschikbaarheid -->
-            {% url 'Plein:plein' as card_url %}
+            {% url 'Scheidsrechter:overzicht' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Beschikbaarheid" text="Pas je beschikbaarheid voor aankomende wedstrijden aan." icon="event_available" url=card_url %}
 
         </div>
