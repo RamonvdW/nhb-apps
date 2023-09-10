@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -13,12 +13,14 @@ from Bondspas.operations import bepaal_jaar_bondspas_en_wedstrijden, maak_bondsp
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter
+from Sporter.models import Sporter, get_sporter
 import base64
 
 
 TEMPLATE_BONDSPAS_TONEN = 'bondspas/toon-bondspas-sporter.dtl'
 TEMPLATE_BONDSPAS_VAN_TONEN = 'bondspas/toon-bondspas-van.dtl'
+
+CONTENT_TYPE_PDF = 'application/pdf'
 
 
 class ToonBondspasView(UserPassesTestMixin, View):
@@ -40,10 +42,10 @@ class ToonBondspasView(UserPassesTestMixin, View):
 
         # bondspas wordt opgehaald nadat de pagina getoond kan worden
         context['url_dynamic'] = reverse('Bondspas:dynamic-ophalen')
+        context['url_download'] = reverse('Bondspas:dynamic-download')
 
         account = get_account(request)
-        lid_nr = account.username
-        sporter = Sporter.objects.get(lid_nr=lid_nr)
+        sporter = get_sporter(account)
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
 
@@ -75,14 +77,13 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
         """
 
         account = get_account(request)
-        lid_nr = account.username
-        sporter = Sporter.objects.get(lid_nr=lid_nr)
+        sporter = get_sporter(account)
         if sporter.is_gast:
             raise Http404('Geen bondspas voor gast-accounts')
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
-        img_data, pdf_data = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
+        img_data, _ = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         # base64 is nodig voor img in html
         # alternatief is javascript laten tekenen op een canvas en base64 maken met dataToUrl
@@ -90,6 +91,40 @@ class DynamicBondspasOphalenView(UserPassesTestMixin, View):
         out['bondspas_base64'] = base64.b64encode(img_data).decode()
 
         return JsonResponse(out)
+
+
+class DynamicBondspasDownloadView(UserPassesTestMixin, View):
+
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # gebruiker moet ingelogd zijn. Rol is niet belangrijk.
+        return rol_get_huidige(self.request) != Rollen.ROL_NONE
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de gebruiker op de download knop druk.
+
+            Dit is een POST by-design, om caching te voorkomen.
+        """
+
+        account = get_account(request)
+        sporter = get_sporter(account)
+        if sporter.is_gast:
+            raise Http404('Geen bondspas voor gast-accounts')
+
+        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
+        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        _, pdf_data = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
+
+        fname = 'bondspas_%s_%s.pdf' % (sporter.lid_nr, jaar_pas)
+
+        response = HttpResponse(pdf_data, content_type=CONTENT_TYPE_PDF)
+        response['Content-Disposition'] = 'attachment; filename="%s"' % fname
+
+        return response
 
 
 class ToonBondspasBeheerderView(UserPassesTestMixin, View):
@@ -118,7 +153,7 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
         jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
         regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
-        img_data, pdf_data = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
+        img_data, _ = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
 
         # base64 is nodig voor img in html
         context['bondspas_base64'] = base64.b64encode(img_data).decode()

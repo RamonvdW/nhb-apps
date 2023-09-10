@@ -22,6 +22,7 @@ class TestBondspas(E2EHelpers, TestCase):
     url_toon_sporter = '/sporter/bondspas/toon/'
     url_toon_van = '/sporter/bondspas/toon/van-lid/%s/'    # lid_nr
     url_ophalen = '/sporter/bondspas/dynamic/ophalen/'
+    url_download = '/sporter/bondspas/dynamic/download/'
 
     def setUp(self):
 
@@ -104,6 +105,13 @@ class TestBondspas(E2EHelpers, TestCase):
         self.assertTrue(base64_len > 100000)        # minimaal 100kB image
         self.assertTrue(base64_len < 2000000)       # maximaal 2MB image
 
+    def _check_bondspas_pdf(self, resp):
+        # check het antwoord
+        self.assert_bestand(resp, 'application/pdf')
+        # print(repr(resp.content))
+        header = resp.content[:5]
+        self.assertEqual(header, b'%PDF-')
+
     def test_ophalen(self):
         # sporter
         self.e2e_login(self.account)
@@ -177,11 +185,21 @@ class TestBondspas(E2EHelpers, TestCase):
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self._check_bondspas_resp(resp)
 
+        # download de pdf
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_download)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self._check_bondspas_pdf(resp)
+
         # gast-account
         self.sporter.is_gast = True
         self.sporter.save(update_fields=['is_gast'])
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_ophalen)
+        self.assert404(resp, 'Geen bondspas voor gast-accounts')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_download)
         self.assert404(resp, 'Geen bondspas voor gast-accounts')
 
     def test_beheerder(self):

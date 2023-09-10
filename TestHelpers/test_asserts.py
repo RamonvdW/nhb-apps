@@ -452,6 +452,7 @@ class MyTestAsserts(TestCase):
             pos1 = form.find(' onsubmit="submit_knop')
             if pos1 < 0:                                # pragma: no cover
                 ok = False
+                submit = 'form heeft geen onsubmit=".."'
             else:
                 pos2 = form.find('"', pos1+11)
                 submit = form[pos1+11:pos2]
@@ -460,7 +461,8 @@ class MyTestAsserts(TestCase):
                 if 'return true;' not in submit:        # pragma: no cover
                     ok = False
             if not ok:                                  # pragma: no cover
-                self.fail('Form without onsubmit for dubbelklik bescherming in template %s\n%s' % (repr(dtl), repr(submit)))
+                self.fail('Form without onsubmit for dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                   repr(submit)))
 
             pos_button = form.find('<button')
             button_count = 0

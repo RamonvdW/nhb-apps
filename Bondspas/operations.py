@@ -391,5 +391,4 @@ def maak_bondspas_jpeg_en_pdf(jaar_pas, lid_nr, regels):
     return out_jpeg, out_pdf
 
 
-
 # end of file
