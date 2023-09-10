@@ -20,8 +20,12 @@ def maak_competities_en_zet_fase_c(startjaar=None):
     # competitie aanmaken
     competities_aanmaken(startjaar)
 
-    comp_18 = Competitie.objects.get(afstand='18')
-    comp_25 = Competitie.objects.get(afstand='25')
+    qset = Competitie.objects.all().order_by('begin_jaar')
+    if startjaar:
+        qset = qset.filter(begin_jaar=startjaar)
+
+    comp_18 = qset.filter(afstand='18').first()
+    comp_25 = qset.filter(afstand='25').first()
 
     # aanvangsgemiddelden vaststellen
     aanvangsgemiddelden_vaststellen_voor_afstand(18)

@@ -48,9 +48,9 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     """
     # zoek uit wat de meest recente HistComp is
     seizoenen_qset = (HistCompSeizoen
-                     .objects
-                     .filter(comp_type=afstand)
-                     .order_by('-seizoen'))
+                      .objects
+                      .filter(comp_type=afstand)
+                      .order_by('-seizoen'))
     if len(seizoenen_qset) == 0:
         schrijf_in_logboek(None, 'Competitie',
                            'Geen historisch uitslag om aanvangsgemiddelden vast te stellen voor %sm' % afstand)
@@ -140,7 +140,8 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                     # voorbeeld: eindjaar = 2019
                     #       geboortejaar = 2006 --> leeftijd was 13, dus aspirant
                     #       geboortejaar = 2005 --> leeftijd was 14, dus cadet
-                    was_aspirant = (eindjaar - sporterboog.sporter.geboorte_datum.year) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+                    leeftijd = (eindjaar - sporterboog.sporter.geboorte_datum.year)
+                    was_aspirant = (leeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 
                     if not was_aspirant:
                         # aanvangsgemiddelde voor deze afstand aanmaken
