@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2023 Ramon van der Winkel. All rights reserved. Licensed on BSD-3-Cause-Clear. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 512">
+<path d="M460,210H156L277,94c18-18,18-45,0-65c-18-18-45-18-65,0L13,224C4,232,0,244,0,256c0,12,4,24,13,32l200,194c18,18,45,18,65,0c18-18,18-45,0-65l-121-114h311c18,0,46-18,46-46C512,230,491,210,460,210z"/>
+</svg>

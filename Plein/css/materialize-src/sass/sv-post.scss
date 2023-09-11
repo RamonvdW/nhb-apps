@@ -362,6 +362,14 @@
   }
 }
 
+.broodkruimels-svg-back {
+  fill: $primary-color-dark;
+  &:hover, &:focus {
+    fill: $sv-card-focus-border-color;
+  }
+}
+
+
 .broodkruimels-back {
   padding: 3px;
   margin-right:5px;
