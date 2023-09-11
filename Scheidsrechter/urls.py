@@ -23,6 +23,10 @@ urlpatterns = [
     path('wedstrijden/',
          view_overzicht.WedstrijdenView.as_view(),
          name='wedstrijden'),
+
+    path('wedstrijden/details/<wedstrijd_pk>/',
+         view_overzicht.WedstrijdDetailsView.as_view(),
+         name='wedstrijd-details'),
 ]
 
 
