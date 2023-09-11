@@ -152,7 +152,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartjes.append(kaartje)
 
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
-            if comp.fase_indiv < 'F' and self.rol_nu != Rollen.ROL_WL:
+            if comp.fase_indiv <= 'F' and self.rol_nu != Rollen.ROL_WL:
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
