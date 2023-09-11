@@ -141,10 +141,16 @@
                 {% if kruimels %}
                     <div style="padding:10px; display:flex">
                         <button class="broodkruimels-btn-back" onclick="history.go(-1)">
+                            <!-- embedding the svg results in quicker rendering
+                                 (no waiting for the icons fonts to load) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-left-square" viewBox="0 0 16 16">
+                                <!-- source: https://github.com/twbs/icons (arrow left square) -->
+                                <path d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm11.5 5.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                            </svg>
+                            {% comment %}
                             <svg class="broodkruimels-svg-back" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16" width="16">
                                 <path d="M460,210H156L277,94c18-18,18-45,0-65c-18-18-45-18-65,0L13,224C4,232,0,244,0,256c0,12,4,24,13,32l200,194c18,18,45,18,65,0c18-18,18-45,0-65l-121-114h311c18,0,46-18,46-46C512,230,491,210,460,210z"/>
                             </svg>
-                            {% comment %}
                             <i class="notranslate material-icons-round">arrow_back</i>
                             {% endcomment %}
                         </button>
