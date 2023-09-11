@@ -243,7 +243,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
-            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
@@ -356,7 +356,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
-            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
@@ -587,7 +587,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
-            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
@@ -790,7 +790,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_HWL:
             # TODO: deze terug verwijzing klopt niet helemaal meer. Zou Beheer Vereniging kunnen zijn als we een nieuw kaartje maken om de planning in te zien
-            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         else:
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 

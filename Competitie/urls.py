@@ -26,7 +26,7 @@ urlpatterns = [
          views_klassengrenzen.KlassengrenzenTonenView.as_view(),
          name='klassengrenzen-tonen'),
 
-    path('<comp_pk>/',
+    path('<comp_pk_of_seizoen>/',
          views_overzicht.CompetitieOverzichtView.as_view(),
          name='overzicht'),
 

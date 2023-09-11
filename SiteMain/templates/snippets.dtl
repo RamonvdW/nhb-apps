@@ -131,7 +131,7 @@
 
         {% comment %}
             context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
-                                             kwargs={'comp_pk': comp.pk,
+                                             kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                      'comp_boog': '~1',
                                                      'regio_nr': '~2'})
 

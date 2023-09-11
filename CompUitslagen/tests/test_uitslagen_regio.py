@@ -16,12 +16,10 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
 
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
-    # url_uitslagen_regio_old = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/'             # comp_pk, comp_boog, zes/alle
-    url_uitslagen_regio = '/bondscompetities/uitslagen/%s/%s/regio-individueel/'                    # comp_pk, comp_boog
-    url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/%s/regio-individueel/%s/'               # comp_pk. comp_boog, regio_nr
-    # url_uitslagen_regio_n_old = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/%s/'        # comp_pk, comp_boog, zes/alle, regio_nr
-    url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/%s/regio-teams/'                    # comp_pk, team_type
-    url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/%s/regio-teams/%s/'               # comp_pk, team_type, regio_nr
+    url_uitslagen_regio = '/bondscompetities/uitslagen/%s/regio-individueel/%s/'                    # comp_pk, comp_boog
+    url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/regio-individueel/%s/%s/'               # comp_pk. regio_nr, comp_boog
+    url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/regio-teams/%s/'                    # comp_pk, team_type
+    url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/regio-teams/%s/%s/'               # comp_pk, regio_nr, team_type
 
     regio_nr = 101
     ver_nr = 0      # wordt in setUpTestData ingevuld
@@ -62,7 +60,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # lijst met onze deelnemers
-        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'TR', 101)
+        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 101, 'TR')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -77,7 +75,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         # lijst met onze deelnemers
-        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'TR', 101)
+        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 101, 'TR')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -145,14 +143,14 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert404(resp, 'Boogtype niet bekend')
 
     def test_regio_n(self):
-        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'R', 101)
+        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 101, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
-        url = self.url_uitslagen_regio_n % (self.testdata.comp25.pk, 'LB', 116)
+        url = self.url_uitslagen_regio_n % (self.testdata.comp25.pk, 116, 'LB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -160,7 +158,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # regio 100 is valide, maar heeft geen regiocompetitie
-        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'R', 100)
+        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 100, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -168,15 +166,15 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # bad
-        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'R', 999)
+        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 999, 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
-        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'R', "NaN")
+        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, "NaN", 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde regionummer')
 
-        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'BAD', 101)
+        url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 101, 'BAD')
         resp = self.client.get(url)
         self.assert404(resp, 'Boogtype niet bekend')
 
@@ -202,7 +200,7 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie niet gevonden')
 
         # regio 100 --> 101
-        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'R2', 100)
+        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 100, 'R2')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -210,22 +208,22 @@ class TestCompUitslagenRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         # bad regio nr
-        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'R2', "NaN")
+        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, "NaN", 'R2')
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerd regionummer')
 
         # niet bestaande regio
-        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'R2', 99999)
+        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 99999, 'R2')
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
         # verkeerd team type
-        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'X', 101)
+        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 101, 'X')
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerd team type')
 
         # regio 101 heeft teams in een poule
-        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'R2', 101)
+        url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 101, 'R2')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)

@@ -49,7 +49,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
 
     # Uitslagen / Deelnemers (is een openbaar kaartje)
     if comp.fase_indiv >= 'C':
-        url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+        url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
         kaartje = SimpleNamespace(
                     prio=9,
                     titel="Uitslagenlijsten",

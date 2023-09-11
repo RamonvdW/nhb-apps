@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.http import Http404
 from Account.models import get_account
 from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models import (Competitie, Regiocompetitie,
+from Competitie.models import (Competitie, Regiocompetitie, get_comp_pk,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -76,7 +76,7 @@ class UitslagenVerenigingIndivView(TemplateView):
                 # geen url --> knop disabled
 
             boogtype.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
-                                        kwargs={'comp_pk': comp.pk,
+                                        kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                 'comp_boog': boogtype.afkorting.lower(),
                                                 'ver_nr': ver_nr})
         # for
@@ -127,7 +127,7 @@ class UitslagenVerenigingIndivView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -164,7 +164,7 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         regio_nr = ver.regio.regio_nr
         context['url_terug'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
-                                       kwargs={'comp_pk': comp.pk,
+                                       kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                'comp_boog': comp_boog,
                                                'regio_nr': regio_nr})
 
@@ -176,7 +176,8 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (context['url_terug'], 'Uitslag regio individueel'),
             (None, 'Vereniging')
         )
@@ -207,7 +208,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
                 teamtype_afkorting = team.afkorting.lower()
 
             team.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
-                                    kwargs={'comp_pk': comp.pk,
+                                    kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                             'team_type': team.afkorting.lower(),
                                             'ver_nr': ver_nr})
         # for
@@ -217,7 +218,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -250,7 +251,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         regio_nr = ver.regio.regio_nr
         context['url_terug'] = reverse('CompUitslagen:uitslagen-regio-teams-n',
-                                       kwargs={'comp_pk': comp.pk,
+                                       kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                'team_type': teamtype.afkorting.lower(),
                                                'regio_nr': regio_nr})
 
@@ -439,7 +440,8 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (context['url_terug'], 'Uitslag regio teams'),
             (None, 'Vereniging')
         )

@@ -273,7 +273,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                 if kampioen.deelname != DEELNAME_NEE:
                                     kampioenschap = kampioen.kampioenschap
                                     obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                                                    kwargs={'comp_pk': kampioenschap.competitie.pk,
+                                                                    kwargs={'comp_pk_of_seizoen': kampioenschap.competitie.maak_seizoen_url(),
                                                                             'comp_boog': afk.lower(),
                                                                             'rayon_nr': kampioenschap.rayon.rayon_nr})
                         # for

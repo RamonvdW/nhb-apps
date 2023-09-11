@@ -10,7 +10,7 @@ from django.http import Http404
 from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES
 from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegiocompetitieSporterBoog)
+                               RegiocompetitieSporterBoog, get_comp_pk)
 from Competitie.operations.poules import maak_poule_schema
 from Geo.models import Regio
 from Plein.menu import menu_dynamics
@@ -29,7 +29,6 @@ class UitslagenRegioIndivView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV
-    url_name = 'CompUitslagen:uitslagen-regio-indiv-n'
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, gekozen_regio_nr, comp_boog):
@@ -84,7 +83,7 @@ class UitslagenRegioIndivView(TemplateView):
             for ver in vers:
                 ver.sel = 'ver_%s' % ver.ver_nr
                 ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
-                                       kwargs={'comp_pk': comp.pk,
+                                       kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                'comp_boog': comp_boog,
                                                'ver_nr': ver.ver_nr})
             # for
@@ -122,7 +121,7 @@ class UitslagenRegioIndivView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -164,7 +163,7 @@ class UitslagenRegioIndivView(TemplateView):
         self._maak_filter_knoppen(context, comp, regio_nr, comp_boog)
 
         context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
-                                         kwargs={'comp_pk': comp.pk,
+                                         kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                  'comp_boog': '~1',
                                                  'regio_nr': '~2'})
 
@@ -222,8 +221,8 @@ class UitslagenRegioIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio individueel')
         )
 
@@ -300,7 +299,7 @@ class UitslagenRegioTeamsView(TemplateView):
                 for ver in vers:
                     ver.sel = 'ver_%s' % ver.ver_nr
                     ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
-                                           kwargs={'comp_pk': comp.pk,
+                                           kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                    'team_type': context['teamtype'].afkorting.lower(),
                                                    'ver_nr': ver.ver_nr})
                 # for
@@ -312,7 +311,7 @@ class UitslagenRegioTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -362,7 +361,7 @@ class UitslagenRegioTeamsView(TemplateView):
             raise Http404('Verkeerd team type')
 
         context['url_filters'] = reverse('CompUitslagen:uitslagen-regio-teams-n',
-                                         kwargs={'comp_pk': comp.pk,
+                                         kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                  'team_type': '~1',
                                                  'regio_nr': '~2'})
 
@@ -507,8 +506,8 @@ class UitslagenRegioTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio teams')
         )
 

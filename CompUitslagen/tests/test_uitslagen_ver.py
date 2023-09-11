@@ -17,9 +17,9 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
     test_after = ('Competitie.tests.test_overzicht', 'Competitie.tests.test_tijdlijn')
 
     url_overzicht = '/bondscompetities/%s/'
-    url_uitslagen_ver = '/bondscompetities/uitslagen/%s/%s/vereniging/'                             # comp_pk, comp_boog
-    url_uitslagen_indiv_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/individueel/'      # comp_bk, boog_type, ver_nr
-    url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
+    url_uitslagen_ver = '/bondscompetities/uitslagen/%s/vereniging/%s/'                             # comp_pk, comp_boog
+    url_uitslagen_indiv_ver_n = '/bondscompetities/uitslagen/%s/vereniging/%s/individueel/%s/'      # comp_bk, ver_nr, boog_type
+    url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/vereniging/%s/teams/%s/'            # comp_pk, ver_nr, team_type
 
     regio_nr = 101
     ver_nr = 0      # wordt in setUpTestData ingevuld
@@ -60,7 +60,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
-        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 'R', self.ver_nr)
+        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, self.ver_nr, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -89,7 +89,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_ver_teams(self):
-        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, 'R2', self.ver_nr)
+        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, self.ver_nr, 'R2')
         with self.assert_max_queries(82):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -97,22 +97,22 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-teams.dtl', 'plein/site_layout.dtl'))
 
         # bad comp_pk
-        url = self.url_uitslagen_teams_ver_n % (999999, 'R', self.ver_nr)
+        url = self.url_uitslagen_teams_ver_n % (999999, self.ver_nr, 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
         # bad ver_nr
-        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, 'R2', 'xxx')
+        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, 'xxx', 'R2')
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerd verenigingsnummer')
 
         # niet bestaande ver_nr
-        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, 'R2', 999999)
+        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, 999999, 'R2')
         resp = self.client.get(url)
         self.assert404(resp, 'Vereniging niet gevonden')
 
         # bad team type
-        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, 'xxx', self.ver_nr)
+        url = self.url_uitslagen_teams_ver_n % (self.testdata.comp18.pk, self.ver_nr, 'xxx')
         resp = self.client.get(url)
         self.assert404(resp, 'Team type niet bekend')
 
@@ -141,7 +141,7 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
 
     def test_regio_100(self):
         ver_nr = self.testdata.regio_ver_nrs[100][0]
-        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 'R', ver_nr)
+        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, ver_nr, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -149,11 +149,11 @@ class TestCompUitslagenVer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         # bad
-        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 'R', 999999)
+        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 999999, 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Vereniging niet gevonden')
 
-        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 'R', 'nan')
+        url = self.url_uitslagen_indiv_ver_n % (self.testdata.comp18.pk, 'nan', 'R')
         resp = self.client.get(url)
         self.assert404(resp, 'Verkeerd verenigingsnummer')
 

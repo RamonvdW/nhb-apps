@@ -33,21 +33,20 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         ver.save()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        self.account_lid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
-        sporter.account = self.account_lid
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    email="rdetester@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
+        self.account_lid = sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
         self.sporter_100001 = sporter
 
-        self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@gmail.com', 'Testertje')
+        self.account_geen_lid = self.e2e_create_account('geen_lid', 'geen_lid@gmail.com', 'Testertje')
 
     def test_info(self):
         # anon
@@ -59,7 +58,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
 
         # geen lid
-        self.e2e_login(self.account_geenlid)
+        self.e2e_login(self.account_geen_lid)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

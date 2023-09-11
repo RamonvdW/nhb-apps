@@ -105,7 +105,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         if not deelkamp.heeft_deelnemerslijst:
             # situatie 1)
             context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                               kwargs={'comp_pk': deelkamp.competitie.pk,
+                                               kwargs={'comp_pk_of_seizoen': deelkamp.competitie.maak_seizoen_url(),
                                                        'comp_boog': 'r',
                                                        'rayon_nr': deelkamp.rayon.rayon_nr})
             deelnemers = list()

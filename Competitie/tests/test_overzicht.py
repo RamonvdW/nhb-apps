@@ -112,5 +112,11 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
+        # niet bestaande comp_pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht % 999999)
+        self.assert_is_redirect_not_plein(resp)
+
+
 
 # end of file
