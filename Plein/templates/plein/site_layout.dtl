@@ -141,8 +141,12 @@
                 {% if kruimels %}
                     <div style="padding:10px; display:flex">
                         <button class="broodkruimels-btn-back" onclick="history.go(-1)">
-                            <!--svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960" height="25" width="25"><path d="M447 875 169 597q-5-5-7-10t-2-11q0-6 2-11t7-10l279-279q8-8 20-8t21 9q9 9 9 21t-9 21L262 546h496q13 0 21.5 8.5T788 576q0 13-8.5 21.5T758 606H262l228 228q8 8 8 20t-9 21q-9 9-21 9t-21-9Z"/></svg-->
+                            <svg class="broodkruimels-svg-back" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16" width="16">
+                                <path d="M460,210H156L277,94c18-18,18-45,0-65c-18-18-45-18-65,0L13,224C4,232,0,244,0,256c0,12,4,24,13,32l200,194c18,18,45,18,65,0c18-18,18-45,0-65l-121-114h311c18,0,46-18,46-46C512,230,491,210,460,210z"/>
+                            </svg>
+                            {% comment %}
                             <i class="notranslate material-icons-round">arrow_back</i>
+                            {% endcomment %}
                         </button>
 
                         <!--div class="valign-wrapper" style="height:25px" -->
