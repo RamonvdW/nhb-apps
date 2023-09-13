@@ -294,14 +294,21 @@ class MyTestAsserts(TestCase):
     )
 
     def html_assert_no_div_in_p(self, html, dtl):
-        pos = html.find('<p')
+        pos1 = html.find('<p ')
+        pos2 = html.find('<p>')
+        pos = min(pos1, pos2)
+        if pos < 0:
+            pos = max(pos1, pos2)
+
         while pos >= 0:
             html = html[pos+2:]
-            pos = html.find('</p')
+            pos = html.find('</p>')
             sub = html[:pos]
             # see https://stackoverflow.com/questions/21084870/no-p-element-in-scope-but-a-p-end-tag-seen-w3c-validation
             for elem in self._BLOCK_LEVEL_ELEMENTS:
-                elem_pos = sub.find('<' + elem)
+                elem_pos = sub.find('<' + elem + ' ')   # prevent false-positive "<p class=" matching on "<path d="
+                if elem_pos < 0:
+                    elem_pos = sub.find('<' + elem + '>')
                 if elem_pos >= 0:                   # pragma: no cover
                     elem_pos -= 20
                     if elem_pos < 0:
@@ -311,8 +318,14 @@ class MyTestAsserts(TestCase):
                     msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
                     self.fail(msg)
             # for
+
             html = html[pos+3:]
-            pos = html.find('<p')
+
+            pos1 = html.find('<p ')
+            pos2 = html.find('<p>')
+            pos = min(pos1, pos2)
+            if pos < 0:
+                pos = max(pos1, pos2)
         # while
 
     def html_assert_no_col_white(self, text, dtl):
