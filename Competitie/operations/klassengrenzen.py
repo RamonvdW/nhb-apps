@@ -267,7 +267,7 @@ def bepaal_klassengrenzen_teams(comp):
         gesorteerd op volgorde (oplopend)
     """
 
-    # per boogtype (dus elke schutter-boog in zijn eigen team type):
+    # per boogtype (dus elke sporterboog in zijn eigen team type):
     #   per vereniging:
     #      - de sporters sorteren op AG
     #      - per groepje van 4 som van beste 3 = team AG
@@ -293,6 +293,7 @@ def bepaal_klassengrenzen_teams(comp):
     # haal de AG's op per boogtype
     boogtype2ags = dict()        # [boogtype.afkorting] = AG's
     for boogtype in comp.boogtypen.all():
+        # TODO: ooit ingevoerde handmatige AG uit filteren
         boogtype2ags[boogtype.afkorting] = (Aanvangsgemiddelde
                                             .objects
                                             .select_related('sporterboog',

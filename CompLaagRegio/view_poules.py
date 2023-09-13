@@ -20,6 +20,13 @@ TEMPLATE_COMPREGIO_RCL_TEAMS_POULES = 'complaagregio/rcl-teams-poules.dtl'
 TEMPLATE_COMPREGIO_RCL_WIJZIG_POULE = 'complaagregio/wijzig-poule.dtl'
 
 
+TEAM_C = 'C'
+TEAM_R = 'R2'
+TEAM_BB = 'BB2'
+TEAM_TR = 'TR'
+TEAM_LB = 'LB'
+
+
 class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
     """ Met deze view kan de RCL de poules hanteren """
@@ -57,12 +64,16 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder van deze regio')
 
         context['deelcomp'] = deelcomp
+        context['regio'] = deelcomp.regio
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        context['readonly'] = readonly = (comp.fase_teams > 'D')
 
-        context['regio'] = deelcomp.regio
+        readonly = (comp.fase_teams > 'D')
+        if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
+            readonly = False
+
+        context['readonly'] = readonly
 
         poules = (RegiocompetitieTeamPoule
                   .objects
@@ -131,7 +142,12 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase_teams > 'D':
+
+        readonly = (comp.fase_teams > 'D')
+        if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
+            readonly = False
+
+        if readonly:
             raise Http404('Poules kunnen niet meer aangepast worden')
 
         aantal = (RegiocompetitieTeamPoule
@@ -191,17 +207,24 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        context['mag_koppelen'] = (comp.fase_teams <= 'D')
+        readonly = (comp.fase_teams > 'D')
+        if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
+            readonly = False
+
+        context['mag_koppelen'] = not readonly
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
 
         teams = (RegiocompetitieTeam
                  .objects
                  .select_related('team_klasse',
-                                 'team_type')
+                                 'team_type',
+                                 'vereniging')
                  .prefetch_related('regiocompetitieteampoule_set')
                  .filter(regiocompetitie=deelcomp)
-                 .order_by('team_klasse__volgorde'))
+                 .order_by('team_klasse__volgorde',
+                           'vereniging__ver_nr',
+                           'volg_nr'))
         for team in teams:
             team.sel_str = 'team_%s' % team.pk
             if team.pk in team_pks:
@@ -209,6 +232,8 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             else:
                 if team.regiocompetitieteampoule_set.count():
                     team.in_andere_poule = True
+
+            team.team_str = '[%s] %s' % (team.vereniging.ver_nr, team.team_naam)
 
             if team.team_klasse:
                 team.klasse_str = team.team_klasse.beschrijving
@@ -252,7 +277,10 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        mag_koppelen = comp.fase_teams <= 'D'
+        readonly = (comp.fase_teams > 'D')
+        if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
+            readonly = False
+        mag_koppelen = not readonly
 
         if request.POST.get('verwijder_poule', ''):
             if mag_koppelen:
@@ -267,11 +295,12 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
             if mag_koppelen:
                 gekozen = list()
-                type_counts = dict()
+                afk2teams = dict()
                 for team in (RegiocompetitieTeam
                              .objects
-                             .prefetch_related('regiocompetitieteampoule_set')
-                             .filter(regiocompetitie=deelcomp)):
+                             .select_related('team_type')
+                             .filter(regiocompetitie=deelcomp)
+                             .prefetch_related('regiocompetitieteampoule_set')):
 
                     sel_str = 'team_%s' % team.pk
                     if request.POST.get(sel_str, ''):
@@ -289,22 +318,36 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                             gekozen.append(team)
 
                             try:
-                                type_counts[team.team_type] += 1
+                                afk2teams[team.team_type.afkorting].append(team)
                             except KeyError:
-                                type_counts[team.team_type] = 1
+                                afk2teams[team.team_type.afkorting] = [team]
                 # for
 
                 # kijk welk team type dit gaat worden
                 if len(gekozen) == 0:
                     poule.teams.clear()
                 else:
-                    tups = [(count, team_type.pk, team_type) for team_type, count in type_counts.items()]
-                    tups.sort(reverse=True)     # hoogste eerst
-                    # TODO: wat als er 2 even hoog zijn?
-                    team_type = tups[0][2]
+                    toegestane_typen = ()
+                    if TEAM_C in afk2teams.keys():
+                        toegestane_typen = (TEAM_C,)
+                    elif TEAM_R in afk2teams.keys():
+                        toegestane_typen = (TEAM_R, TEAM_BB, TEAM_TR, TEAM_LB)
+                    elif TEAM_BB in afk2teams.keys():
+                        toegestane_typen = (TEAM_BB, TEAM_TR, TEAM_LB)
+                    elif TEAM_TR in afk2teams.keys():
+                        toegestane_typen = (TEAM_TR, TEAM_LB)
+                    elif TEAM_LB in afk2teams.keys():
+                        toegestane_typen = (TEAM_LB,)
 
-                    # laat teams toe die binnen dit team type passen
-                    goede_teams = [team for team in gekozen if team.team_type == team_type]
+                    # laat teams toe die binnen de team typen
+                    goede_teams = list()
+                    for team_type in toegestane_typen:
+                        try:
+                            goede_teams.extend(afk2teams[team_type])
+                        except KeyError:
+                            pass
+                    # for
+
                     goede_teams = goede_teams[:8]       # maximaal 8 teams in een poule
 
                     # vervang door de overgebleven teams
