@@ -68,7 +68,7 @@
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>
-                                                    <td>{{ team.team_naam }}</td>
+                                                    <td>{{ team.team_str }}</td>
                                                     <td>{{ team.klasse_str }}</td>
                                                 </tr>
                                             {% else %}
