@@ -69,7 +69,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        readonly = (comp.fase_teams > 'F')
+        readonly = (comp.fase_teams > 'D')
         if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
             readonly = False
 
@@ -116,7 +116,8 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Poules')
         )
 
@@ -142,7 +143,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        readonly = (comp.fase_teams > 'F')
+        readonly = (comp.fase_teams > 'D')
         if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
             readonly = False
 
@@ -206,7 +207,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        readonly = (comp.fase_teams > 'F')
+        readonly = (comp.fase_teams > 'D')
         if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
             readonly = False
 
@@ -247,7 +248,8 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompBeheer:overzicht',
+                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-poules', kwargs={'deelcomp_pk': deelcomp.pk}), 'Poules'),
             (None, 'Wijzig')
         )
@@ -275,7 +277,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        readonly = (comp.fase_teams > 'F')
+        readonly = (comp.fase_teams > 'D')
         if comp.fase_teams == 'F' and deelcomp.huidige_team_ronde == 0:
             readonly = False
         mag_koppelen = not readonly
@@ -296,8 +298,9 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                 afk2teams = dict()
                 for team in (RegiocompetitieTeam
                              .objects
-                             .prefetch_related('regiocompetitieteampoule_set')
-                             .filter(regiocompetitie=deelcomp)):
+                             .select_related('team_type')
+                             .filter(regiocompetitie=deelcomp)
+                             .prefetch_related('regiocompetitieteampoule_set')):
 
                     sel_str = 'team_%s' % team.pk
                     if request.POST.get(sel_str, ''):
@@ -324,6 +327,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                 if len(gekozen) == 0:
                     poule.teams.clear()
                 else:
+                    toegestane_typen = ()
                     if TEAM_C in afk2teams.keys():
                         toegestane_typen = (TEAM_C,)
                     elif TEAM_R in afk2teams.keys():

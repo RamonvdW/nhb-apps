@@ -279,7 +279,7 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
-        # na fase D mag je nog kijken maar niet aanpassen
+        # vanaf fase F mag je nog steeds wijzigen zolang ronde 1 niet opgestart is
         comp = deelcomp.competitie
         zet_competitie_fase_regio_wedstrijden(comp)         # fase F
 
@@ -294,8 +294,38 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
+
+        # wijzig de poule
+        url = self.url_wijzig_poule % poule.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'beschrijving': 'test'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # vanaf ronde 1 actief mag je niet meer wijzigen
+        deelcomp.huidige_team_ronde = 1
+        deelcomp.save(update_fields=['huidige_team_ronde'])
+
+        url = self.url_regio_poules % deelcomp.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+
+        # bad: maak een poule aan
+        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
-        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
 
         # poule details (wijzig scherm, read-only)
         url = self.url_wijzig_poule % poule.pk
@@ -330,12 +360,12 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         zet_competitie_fases(comp, 'C', 'D')
 
         # verwijder een poule
-        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(2, RegiocompetitieTeamPoule.objects.count())
         url = self.url_wijzig_poule % poule.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verwijder_poule': 'aj'})
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(0, RegiocompetitieTeamPoule.objects.count())
+        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
 
     def test_poules_teams(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
@@ -399,13 +429,13 @@ class TestCompLaagRegioPoules(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
 
-        # compound team bij recurve-meerderheid wordt niet geaccepteerd (silently ignored)
+        # compound team heeft prio indien bij recurve team gestopt
         params['team_%s' % team_c.pk] = 1
         with self.assert_max_queries(20):
             resp = self.client.post(url, params)
         self.assert_is_redirect_not_plein(resp)
         poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
-        self.assertEqual(5, poule.teams.count())
+        self.assertEqual(1, poule.teams.count())
 
         # koppel 9 teams aan de poule
         self.assertEqual(9, len(team_pks))
