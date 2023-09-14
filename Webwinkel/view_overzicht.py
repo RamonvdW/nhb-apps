@@ -14,6 +14,8 @@ from django.views.generic import TemplateView
 from Account.models import get_account
 from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
+from Functie.definities import Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
@@ -60,7 +62,8 @@ class OverzichtView(TemplateView):
             product.url_details = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
         # for
 
-        context['menu_toon_mandje'] = True
+        if rol_get_huidige(self.request) == Rollen.ROL_SPORTER:
+            context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
             (None, 'Webwinkel'),
@@ -149,8 +152,7 @@ class ProductView(TemplateView):
             account = get_account(self.request)
             if not account.is_gast:
                 context['url_toevoegen'] = reverse('Webwinkel:product', kwargs={'product_pk': product.pk})
-
-        context['menu_toon_mandje'] = True
+                context['menu_toon_mandje'] = True
 
         context['kruimels'] = (
             (reverse('Webwinkel:overzicht'), 'Webwinkel'),
