@@ -1,0 +1,25 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+    |Hallo {{ voornaam }},
+    |
+    |Omdat de registratieprocedure niet afgerond is, hebben we je gast-account met nummer {{ gast_lid_nr }} verwijderd.
+    |Dat nummer is nu niet meer bruikbaar.
+    |
+    |Indien je hier vragen over hebt, neem dan contact met ons op via {{ contact_email }}
+
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }},</div>
+    <br>
+    <div>Omdat de registratieprocedure niet afgerond is, hebben we je gast-account met nummer {{ gast_lid_nr }} verwijderd.</div>
+    <div>Dat nummer is nu niet meer bruikbaar.</div>
+    <br>
+    <div>Indien je hier vragen over hebt, neem dan contact met ons op via {{ contact_email }}</div>
+{% endblock %}
