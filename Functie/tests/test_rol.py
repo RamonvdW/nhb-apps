@@ -24,7 +24,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
     """ tests voor de Functie applicatie, diverse corner-cases """
 
     url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
-    url_overzicht_sec_hwl = '/functie/overzicht/alle-lid-nrs/sec-hwl/'
+    url_overzicht_sec_hwl = '/functie/overzicht/beheerders/sec-hwl/'
     url_activeer_functie = '/functie/activeer-functie/%s/'          # functie_pk
 
     def setUp(self):

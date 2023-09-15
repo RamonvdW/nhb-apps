@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Beheerders overzicht{% endblock %}
+{% block title %}Beheerders e-mailadressen{% endblock %}
 
 {% block pagina %}
 
@@ -75,6 +75,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="functie-beheerders-lid-nrs" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-emails-sec-hwl" %}
 
 {% endblock %}

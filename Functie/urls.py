@@ -36,10 +36,13 @@ urlpatterns = [
          view_beheerders.LijstBeheerdersView.as_view(),
          name='overzicht'),
 
-    path('overzicht/alle-lid-nrs/sec-hwl/',
+    path('overzicht/beheerders/sec-hwl/',
          view_email_beheerders.OverzichtEmailsSecHwlView.as_view(),
-         name='sec-hwl-lid_nrs'),
+         name='emails-sec-hwl'),
 
+    path('overzicht/beheerders/rcl/',
+         view_email_beheerders.OverzichtEmailsRclView.as_view(),
+         name='emails-rcl'),
 
     path('activeer-functie/<str:functie_pk>/',
          view_activeer_rol.ActiveerRolView.as_view(),
