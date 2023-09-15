@@ -17,6 +17,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
     """ tests voor de Competitie applicatie, module Informatie over de Competitie """
 
     url_info = '/bondscompetities/info/'
+    url_info_teams = '/bondscompetities/info/teams/'
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -88,5 +89,12 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         # redirect oud naar nieuw
         resp = self.client.get('/bondscompetities/info/leeftijden/')
         self.assert_is_redirect(resp, '/sporter/leeftijden/')
+
+    def test_info_teams(self):
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_info_teams)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/info-teamcompetitie.dtl', 'plein/site_layout.dtl'))
 
 # end of file

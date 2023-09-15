@@ -484,6 +484,22 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
         </div>
     </div>
 
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Teams</h4>
+            <p>Naast de individuele competitie wordt er ook een teamcompetitie georganiseerd</p>
+        </div>
+    </div>
+
+    <div class="row-sv-blauw">
+        <div class="col s12">
+            <!-- algemene informatie over de teamcompetitie -->
+            {% url 'Competitie:info-teamcompetitie' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
+        </div>
+    </div>
+
     <br>
     <p class="center"><i>Er kunnen geen rechten ontleend worden aan de informatie op deze pagina. Het schiettechnisch reglement van de KHSN is leidend.</i></p>
 

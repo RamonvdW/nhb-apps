@@ -228,6 +228,10 @@
                 <!-- algemene informatie over de competities -->
                 {% url 'Competitie:info-competitie' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+
+                <!-- algemene informatie over de teamcompetitie -->
+                {% url 'Competitie:info-teamcompetitie' as card_url %}
+                {% include 'plein/card_icon.dtl' with title="Teams" text="Uitleg over de teamcompetities." icon="groups" url=card_url %}
             </div>
         </div>
 

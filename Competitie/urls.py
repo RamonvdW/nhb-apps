@@ -18,6 +18,10 @@ urlpatterns = [
          views_info.InfoCompetitieView.as_view(),
          name='info-competitie'),
 
+    path('info/teams/',
+         views_info.InfoTeamCompetitieView.as_view(),
+         name='info-teamcompetitie'),
+
     path('info/leeftijden/',
          views_info.redirect_leeftijden,  # oud; redirects naar nieuw
          name='info-leeftijden'),

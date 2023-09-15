@@ -13,7 +13,8 @@ from Geo.models import Regio
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 
-TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
+TEMPLATE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
+TEMPLATE_INFO_TEAMCOMPETITIE = 'competitie/info-teamcompetitie.dtl'
 
 
 class InfoCompetitieView(TemplateView):
@@ -21,7 +22,7 @@ class InfoCompetitieView(TemplateView):
     """ Django class-based view voor de Competitie Info """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_INFO_COMPETITIE
+    template_name = TEMPLATE_INFO_COMPETITIE
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -54,6 +55,26 @@ class InfoCompetitieView(TemplateView):
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (None, 'Informatie')
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+
+class InfoTeamCompetitieView(TemplateView):
+
+    """ Django class-based view voor de Competitie Info Teams """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_INFO_TEAMCOMPETITIE
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Info teamcompetitie')
         )
 
         menu_dynamics(self.request, context)
