@@ -21,32 +21,33 @@ def vul_geo(apps, _):
     nr2regio = dict()
     regio_letter2cluster = dict()
 
-    for rayon in geo_rayon_klas.objects.all():
-        nr2rayon[rayon.rayon_nr] = rayon
-    # for
+    if True:        # pragma: no cover
+        for rayon in geo_rayon_klas.objects.all():
+            nr2rayon[rayon.rayon_nr] = rayon
+        # for
 
-    for regio in geo_regio_klas.objects.all():
-        nr2regio[regio.regio_nr] = regio
-    # for
+        for regio in geo_regio_klas.objects.all():
+            nr2regio[regio.regio_nr] = regio
+        # for
 
-    for cluster in geo_cluster_klas.objects.select_related('regio').all():
-        regio_letter2cluster[(cluster.regio.regio_nr, cluster.letter)] = cluster
-    # for
+        for cluster in geo_cluster_klas.objects.select_related('regio').all():
+            regio_letter2cluster[(cluster.regio.regio_nr, cluster.letter)] = cluster
+        # for
 
-    for obj in fix1_klas.objects.select_related('regio').all():
-        obj.geo_regio = nr2regio[obj.regio.regio_nr]
-        obj.save(update_fields=['geo_regio'])
-    # obj
+        for obj in fix1_klas.objects.select_related('regio').all():
+            obj.geo_regio = nr2regio[obj.regio.regio_nr]
+            obj.save(update_fields=['geo_regio'])
+        # obj
 
-    for obj in fix2_klas.objects.exclude(cluster=None).select_related('cluster', 'cluster__regio').all():
-        obj.geo_cluster = regio_letter2cluster[(obj.cluster.regio.regio_nr, obj.cluster.letter)]
-        obj.save(update_fields=['geo_cluster'])
-    # obj
+        for obj in fix2_klas.objects.exclude(cluster=None).select_related('cluster', 'cluster__regio').all():
+            obj.geo_cluster = regio_letter2cluster[(obj.cluster.regio.regio_nr, obj.cluster.letter)]
+            obj.save(update_fields=['geo_cluster'])
+        # obj
 
-    for obj in fix3_klas.objects.exclude(rayon=None).select_related('rayon').all():
-        obj.geo_rayon = nr2rayon[obj.rayon.rayon_nr]
-        obj.save(update_fields=['geo_rayon'])
-    # obj
+        for obj in fix3_klas.objects.exclude(rayon=None).select_related('rayon').all():
+            obj.geo_rayon = nr2rayon[obj.rayon.rayon_nr]
+            obj.save(update_fields=['geo_rayon'])
+        # obj
 
 
 class Migration(migrations.Migration):

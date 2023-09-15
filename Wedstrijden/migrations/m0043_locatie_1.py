@@ -13,7 +13,7 @@ def kopieer_wedstrijd_locaties(apps, _):
 
     # TODO: controleer of locatie gebruikt wordt. Zo niet, dan verwijderen
 
-    for loc_oud in oud_klas.objects.prefetch_related('verenigingen').all():
+    for loc_oud in oud_klas.objects.prefetch_related('verenigingen').all():     # pragma: no cover
         loc_new = new_klas(
                         naam=loc_oud.naam,
                         zichtbaar=loc_oud.zichtbaar,

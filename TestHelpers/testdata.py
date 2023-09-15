@@ -13,7 +13,8 @@ from Account.models import Account
 from Account.operations.aanmaken import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
-                                   MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+                                   MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                                   SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_RESERVE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
@@ -22,7 +23,6 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_utils.tijdlijn import zet_competitie_fase_regio_inschrijven
-from Functie.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Geo.models import Rayon, Regio, Cluster
 from Locatie.models import Locatie

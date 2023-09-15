@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Account.models import Account
-from Functie.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie
 from Geo.models import Regio
 from Mailer.models import MailQueue

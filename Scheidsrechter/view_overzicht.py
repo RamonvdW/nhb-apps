@@ -9,8 +9,9 @@ from django.http import Http404
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.definities import ORGANISATIE_IFAA
-from Functie.definities import Rollen, SCHEIDS_NIET, SCHEIDS_TO_STR, SCHEIDS_INTERNATIONAAL, SCHEIDS_BOND
+from BasisTypen.definities import (ORGANISATIE_IFAA,
+                                   SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL, SCHEIDS_TO_STR)
+from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Plein.menu import menu_dynamics
