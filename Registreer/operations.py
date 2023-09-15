@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
-from Registreer.definities import GAST_LID_NUMMER_FIXED_PK, REGISTRATIE_FASE_COMPLEET
+from Registreer.definities import GAST_LID_NUMMER_FIXED_PK, REGISTRATIE_FASE_COMPLEET, REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastLidNummer, GastRegistratie, GastRegistratieRateTracker
 import datetime
 
@@ -90,10 +90,11 @@ def registreer_opschonen(stdout):
                                mail_body)
 
         # echt verwijderen
-        # TODO: activeer opschonen nadat wat ervaring opgedaan is
-        #gast.sporter.delete()
-        #gast.account.delete()
-        #gast.delete()
+        if gast.sporter:
+            gast.sporter.delete()
+        if gast.account:
+            gast.account.delete()
+        gast.delete()
     # for
 
     # alle rate trackers opruimen
