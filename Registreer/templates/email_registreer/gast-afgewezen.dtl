@@ -8,8 +8,8 @@
 {% block inhoud_text %}
     |Hallo {{ voornaam }},
     |
-    |We gaan je gast-account opheffen.
-    |Leden van de KHSN kunnen een gewoon account aanmaken.
+    |We gaan je gast-account met nummer {{ gast_lid_nr }} opheffen.
+    |Leden van de KHSN moeten een account aanmaken met hun eigen bondsnummer.
     |
     |Indien je hier vragen over hebt, neem dan contact met ons op via {{ contact_email }}
     |
@@ -19,8 +19,8 @@
 {% block inhoud_html %}
     <div>Hallo {{ voornaam }},</div>
     <br>
-    <div>We gaan je gast-account opheffen.</div>
-    <div>Leden van de KHSN kunnen een gewoon account aanmaken.</div>
+    <div>We gaan je gast-account met nummer {{ gast_lid_nr }} opheffen.</div>
+    <div>Leden van de KHSN moeten een account aanmaken met hun eigen bondsnummer.</div>
     <br>
     <div>Indien je hier vragen over hebt, neem dan contact met ons op via {{ contact_email }}</div>
     <br>
