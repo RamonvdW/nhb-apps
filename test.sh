@@ -271,11 +271,11 @@ then
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
         python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
-        res=$?
+        res=${PIPESTATUS[0]}
 
         python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
 
-        if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
+        if [ $res -gt 0 ] && [ -z "$ARGS" ]
         then
             COVERAGE_RED=1
         fi
