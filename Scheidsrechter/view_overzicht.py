@@ -206,7 +206,6 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
-
         wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
 
         wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
@@ -215,15 +214,14 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
             context['toon_wa_status'] = True
             wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
 
-        if wedstrijd.locatie:
-            toon_kaart = wedstrijd.locatie.plaats != '(diverse)' and wedstrijd.locatie.adres != '(diverse)'
-            if toon_kaart:
-                zoekterm = wedstrijd.locatie.adres
-                if wedstrijd.locatie.adres_uit_crm:
-                    # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
-                    zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + zoekterm
-                zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
-                context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
+        toon_kaart = wedstrijd.locatie.plaats != '(diverse)' and wedstrijd.locatie.adres != '(diverse)'
+        if toon_kaart:
+            zoekterm = wedstrijd.locatie.adres
+            if wedstrijd.locatie.adres_uit_crm:
+                # voeg de naam van de vereniging toe aan de zoekterm, voor beter resultaat
+                zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + zoekterm
+            zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
+            context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
         context['sessies'] = sessies = (WedstrijdSessie

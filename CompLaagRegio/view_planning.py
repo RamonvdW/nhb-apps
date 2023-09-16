@@ -459,10 +459,10 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             context['url_nieuwe_wedstrijd'] = reverse('CompLaagRegio:regio-ronde-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
-            for wedstrijd in context['wedstrijden']:
+            for match in context['wedstrijden']:
                 # TODO: vanaf welke datum dit niet meer aan laten passen?
-                wedstrijd.url_wijzig = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
-                                               kwargs={'match_pk': wedstrijd.pk})
+                match.url_wijzig = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
+                                           kwargs={'match_pk': match.pk})
             # for
 
             context['url_verwijderen'] = context['ronde_opslaan_url']
@@ -538,36 +538,36 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         is_18m = ronde.regiocompetitie.competitie.afstand == '18'
 
-        for wedstrijd in context['wedstrijden']:
-            wedstrijd.aantal_sporters = 0
+        for match in context['wedstrijden']:
+            match.aantal_sporters = 0
             if heeft_wkl:
-                wedstrijd.wkl_lijst = list()
+                match.wkl_lijst = list()
 
-                for wkl in wedstrijd.team_klassen.order_by('volgorde'):
-                    wedstrijd.aantal_sporters += 4
-                    wedstrijd.wkl_lijst.append(wkl)
+                for wkl in match.team_klassen.order_by('volgorde'):
+                    match.aantal_sporters += 4
+                    match.wkl_lijst.append(wkl)
                     niet_gebruikt[100000 + wkl.pk] = None
                 # for
 
-                for wkl in wedstrijd.indiv_klassen.order_by('volgorde'):
+                for wkl in match.indiv_klassen.order_by('volgorde'):
                     try:
-                        wedstrijd.aantal_sporters += klasse2schutters[wkl.pk]
+                        match.aantal_sporters += klasse2schutters[wkl.pk]
                     except KeyError:        # pragma: no cover
                         # geen schutters in deze klasse
                         pass
                     else:
-                        wedstrijd.wkl_lijst.append(wkl)
+                        match.wkl_lijst.append(wkl)
 
                     niet_gebruikt[200000 + wkl.pk] = None
                 # for
 
-            if wedstrijd.locatie:
+            if match.locatie:
                 if is_18m:
-                    wedstrijd.max_sporters = wedstrijd.locatie.max_sporters_18m
+                    match.max_sporters = match.locatie.max_sporters_18m
                 else:
-                    wedstrijd.max_sporters = wedstrijd.locatie.max_sporters_25m
+                    match.max_sporters = match.locatie.max_sporters_25m
             else:
-                wedstrijd.max_sporters = '?'
+                match.max_sporters = '?'
         # for
 
         niet_lijst = list()
@@ -761,15 +761,15 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         context['ronde'] = ronde
 
-        wedstrijden = (ronde.matches
+        matches = (ronde.matches
                        .select_related('vereniging')
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd'))
-        context['wedstrijden'] = wedstrijden
+        context['wedstrijden'] = matches
 
         # er zijn minder wedstrijden dan deelnemers
-        for wedstrijd in wedstrijden:
-            wedstrijd.aantal_aanmeldingen = wedstrijd.regiocompetitiesporterboog_set.count()
+        for match in matches:
+            match.aantal_aanmeldingen = wedstrijd.regiocompetitiesporterboog_set.count()
         # for
 
         rol_nu = rol_get_huidige(self.request)
@@ -777,7 +777,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             context['url_nieuwe_wedstrijd'] = reverse('CompLaagRegio:regio-methode1-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
-            for wedstrijd in wedstrijden:
+            for wedstrijd in matches:
                 # TODO: vanaf welke datum dit niet meer aan laten passen?
                 wedstrijd.url_wijzig = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
                                                kwargs={'match_pk': wedstrijd.pk})
@@ -871,7 +871,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         return rol_nu == Rollen.ROL_RCL
 
     @staticmethod
-    def _get_wedstrijdklassen(deelcomp, wedstrijd):
+    def _get_wedstrijdklassen(deelcomp, match):
 
         # wedstrijdklassen individueel
         klasse2aantal_sporters = dict()
@@ -885,7 +885,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 klasse2aantal_sporters[deelnemer.indiv_klasse.pk] = 1
         # for
 
-        wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
+        wedstrijd_indiv_pks = [obj.pk for obj in match.indiv_klassen.all()]
         wkl_indiv = (CompetitieIndivKlasse
                      .objects
                      .filter(competitie=deelcomp.competitie)
@@ -919,7 +919,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     klasse2teams[wkl.team_klasse.pk] = 1
             # for
 
-            wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
+            wedstrijd_team_pks = [obj.pk for obj in match.team_klassen.all()]
             wkl_team = (CompetitieTeamKlasse
                         .objects
                         .filter(competitie=deelcomp.competitie,
