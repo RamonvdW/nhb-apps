@@ -769,7 +769,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # er zijn minder wedstrijden dan deelnemers
         for match in matches:
-            match.aantal_aanmeldingen = wedstrijd.regiocompetitiesporterboog_set.count()
+            match.aantal_aanmeldingen = match.regiocompetitiesporterboog_set.count()
         # for
 
         rol_nu = rol_get_huidige(self.request)
