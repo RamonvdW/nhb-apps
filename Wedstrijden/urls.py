@@ -64,9 +64,22 @@ urlpatterns = [
 
 
     # vereniging
-    path('vereniging/',
+    path('vereniging/lijst/',
          view_vereniging.VerenigingWedstrijdenView.as_view(),
          name='vereniging'),
+
+    path('vereniging/lijst-zes-maanden/',
+         view_vereniging.VerenigingZesMaandenWedstrijdenView.as_view(),
+         name='vereniging-zes-maanden'),
+
+    path('vereniging/lijst-een-jaar/',
+         view_vereniging.VerenigingEenJaarWedstrijdenView.as_view(),
+         name='vereniging-een-jaar'),
+
+    path('vereniging/lijst-twee-jaar/',
+         view_vereniging.VerenigingTweeJaarWedstrijdenView.as_view(),
+         name='vereniging-twee-jaar'),
+
 
     path('vereniging/kies-type/',
          view_vereniging.NieuweWedstrijdKiesType.as_view(),

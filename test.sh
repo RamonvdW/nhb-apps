@@ -11,6 +11,7 @@ TEST_DIR="./SiteMain/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
+COV_AT_LEAST=97.01
 
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
@@ -270,7 +271,7 @@ then
 
     if [ -z "$FOCUS" ] || [ $FORCE_FULL_COV -ne 0 ]
     then
-        python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
+        python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
         res=${PIPESTATUS[0]}
 
         python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"

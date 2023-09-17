@@ -22,7 +22,7 @@ class TestKalender(E2EHelpers, TestCase):
 
     url_kalender = '/kalender/'
     url_kalender_manager = '/wedstrijden/manager/'
-    url_kalender_vereniging = '/wedstrijden/vereniging/'
+    url_kalender_vereniging = '/wedstrijden/vereniging/lijst/'
     url_kalender_maand = '/kalender/maand/##'          # startswith
 
     def setUp(self):

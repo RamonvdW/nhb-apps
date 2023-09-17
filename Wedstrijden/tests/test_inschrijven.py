@@ -26,6 +26,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
     test_after = ('Wedstrijden.tests.test_wedstrijd',)
 
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                               # wedstrijd_pk
+    url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'                       # wedstrijd_pk
     url_wedstrijden_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'               # wedstrijd_pk, sessie_pk
     url_wedstrijden_wedstrijd_details = '/wedstrijden/%s/details/'                     # wedstrijd_pk
     url_aanmeldingen = '/wedstrijden/%s/aanmeldingen/'                                 # wedstrijd_pk
@@ -123,9 +124,11 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
         self.assertEqual(1, Wedstrijd.objects.count())
         self.wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % self.wedstrijd.pk
+        self.assert_is_redirect(resp, url)
 
         # maak een R sessie aan
         sessie = WedstrijdSessie(
@@ -497,7 +500,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         inschrijving.save(update_fields=['status'])
 
         # opnieuw aanmelden
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk,
                                           'snel': 1})
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
