@@ -157,6 +157,7 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
         # base64 is nodig voor img in html
         context['bondspas_base64'] = base64.b64encode(img_data).decode()
+        context['url_download'] = reverse('Bondspas:toon-bondspas-van', kwargs={'lid_nr': sporter.lid_nr})
 
         context['kruimels'] = (
             (reverse('Overig:activiteit'), 'Account activiteit'),
@@ -165,6 +166,29 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
 
         menu_dynamics(request, context)
         return render(request, self.template_name, context)
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        try:
+            lid_nr = kwargs['lid_nr'][:6]       # afkappen voor de veiligheid
+            lid_nr = int(lid_nr)
+            sporter = Sporter.objects.get(lid_nr=lid_nr)
+        except Sporter.DoesNotExist:
+            raise Http404('Geen valide parameter')
+
+        if sporter.is_gast:
+            raise Http404('Geen bondspas voor gast-accounts')
+
+        jaar_pas, jaar_wedstrijden = bepaal_jaar_bondspas_en_wedstrijden()
+        regels = maak_bondspas_regels(sporter, jaar_pas, jaar_wedstrijden)
+        _, pdf_data = maak_bondspas_jpeg_en_pdf(jaar_pas, sporter.lid_nr, regels)
+
+        fname = 'bondspas_%s_%s.pdf' % (sporter.lid_nr, jaar_pas)
+
+        response = HttpResponse(pdf_data, content_type=CONTENT_TYPE_PDF)
+        response['Content-Disposition'] = 'attachment; filename="%s"' % fname
+
+        return response
 
 
 # end of file
