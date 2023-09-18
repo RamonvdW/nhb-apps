@@ -181,6 +181,27 @@
                                 </tr>
                             {% endif %}
 
+                            {% if wijzig_kwalificatie_scores %}
+                                <tr>
+                                    <th>Kwalificatie scores nodig?</th>
+                                    <td>
+                                        <ul id="id_kwalificatie_scores">
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" class="filled-in" name="kwalificatie_scores" onchange="gewijzigd()"{% if wed.eis_kwalificatie_scores %} checked{% endif %}>
+                                                    <span class="black-text">&nbsp;Ja, vraag om kwalificatie scores</span>
+                                                </label>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% elif wed.eis_kwalificatie_scores %}
+                                <tr>
+                                    <th>Kwalificatie scores nodig?</th>
+                                    <td>Ja, vraag om kwalificatie scores</td>
+                                </tr>
+                            {% endif %}
+
                             <tr>
                                 <th>Bijzonder<wbr>heden</th>
                                 <td>

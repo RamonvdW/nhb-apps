@@ -170,6 +170,9 @@ class Wedstrijd(models.Model):
     sessies = models.ManyToManyField(WedstrijdSessie,
                                      blank=True)        # mag leeg zijn
 
+    # moeten kwalificatie-scores opgegeven worden voor deze wedstrijd?
+    eis_kwalificatie_scores = models.BooleanField(default=False)
+
     # de losse uitslagen van deze wedstrijd
     # deeluitslagen = models.ManyToManyField(WedstrijdDeeluitslag,
     #                                        blank=True)        # mag leeg zijn
@@ -289,5 +292,27 @@ class WedstrijdInschrijving(models.Model):
             models.UniqueConstraint(fields=('sessie', 'sporterboog'),
                                     name='Geen dubbele wedstrijd inschrijving'),
         ]
+
+
+class Kwalificatiescore(models.Model):
+
+    # voor welke inschrijving is dit?
+    inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.CASCADE)
+
+    # wanneer was de wedstrijd
+    datum = models.DateField(default='2000-01-01')
+
+    # naam van de wedstrijd
+    naam = models.CharField(max_length=50)
+
+    # locatie van de wedstrijd (plaats + land)
+    waar = models.CharField(max_length=50)
+
+    # behaald resultaat
+    resultaat = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return "[%s] %s: %s (%s)" % (self.datum, self.resultaat, self.naam, self.waar)
+
 
 # end of file

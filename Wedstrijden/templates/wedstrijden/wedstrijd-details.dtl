@@ -90,6 +90,13 @@
                     </tr>
                 {% endif %}
 
+                {% if wed.eis_kwalificatie_scores %}
+                    <tr>
+                        <th>Kwalificatie scores</th>
+                        <td>Voor deze wedstrijd vragen we je om kwalificatie-scores door te geven.<br>Hogere scores plaatst je hoger op de deelnemerslijst.<br>Na inschrijving kan je deze doorgeven.</td>
+                    </tr>
+                {% endif %}
+
                 <tr>
                     <th>Wedstrijd locatie</th>
                     <td>

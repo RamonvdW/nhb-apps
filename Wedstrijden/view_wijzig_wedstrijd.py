@@ -105,6 +105,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 context['limit_edits'] = True
 
         if self.rol_nu == Rollen.ROL_BB:
+            context['wijzig_kwalificatie_scores'] = True
+
             if wedstrijd.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING:
                 context['url_prev_tekst'] = 'Afkeuren'
                 context['url_next_tekst'] = 'Accepteren'
@@ -619,6 +621,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     wedstrijd.is_ter_info = True
                 else:
                     wedstrijd.is_ter_info = False
+
+            if not limit_edits:
+                wedstrijd.eis_kwalificatie_scores = False
+                eis = request.POST.get('kwalificatie_scores', '')
+                if eis:
+                    wedstrijd.eis_kwalificatie_scores = True
 
             wedstrijd.save()
 

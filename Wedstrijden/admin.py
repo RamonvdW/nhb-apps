@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdKorting, WedstrijdInschrijving
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdKorting, WedstrijdInschrijving, Kwalificatiescore
 
 
 class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
@@ -84,10 +84,16 @@ class WedstrijdInschrijvingAdmin(admin.ModelAdmin):
     search_fields = ('sporterboog__sporter__lid_nr',)
 
 
+class KwalificatiescoreAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('inschrijving',)
+
+
 admin.site.register(Wedstrijd, WedstrijdAdmin)
 admin.site.register(WedstrijdSessie, WedstrijdSessieAdmin)
 admin.site.register(WedstrijdKorting, WedstrijdKortingAdmin)
 admin.site.register(WedstrijdInschrijving, WedstrijdInschrijvingAdmin)
+admin.site.register(Kwalificatiescore, KwalificatiescoreAdmin)
 
 # FUTURE: langzaam admin scherm for Wedstrijd str(Locatie) een self.verenigingen.count() doet
 #         nog niet op kunnen lossen met een get_queryset(). Even uitgezet.
