@@ -56,6 +56,10 @@ urlpatterns = [
          view_inschrijven.ToevoegenAanMandjeView.as_view(),
          name='inschrijven-toevoegen-aan-mandje'),
 
+    path('inschrijven/kwalificatie-scores-doorgeven/<inschrijving_pk>/',
+         view_inschrijven.KwalificatieScoresOpgevenView.as_view(),
+         name='inschrijven-kwalificatie-sores'),
+
 
     # afmelden
     path('afmelden/<inschrijving_pk>/',

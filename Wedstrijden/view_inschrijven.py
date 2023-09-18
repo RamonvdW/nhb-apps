@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
@@ -41,6 +40,7 @@ TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_GROEPJE = 'wedstrijden/inschrijven-groepje.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_FAMILIE = 'wedstrijden/inschrijven-familie.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_HANDMATIG = 'wedstrijden/inschrijven-handmatig.dtl'
 TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE = 'wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl'
+TEMPLATE_WEDSTRIJDEN_KWALIFICATIE_SCORES = 'wedstrijden/inschrijven-kwalificatie-scores.dtl'
 
 
 class WedstrijdDetailsView(TemplateView):
@@ -943,7 +943,16 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
             mandje_tel_inhoud(self.request)
 
+        if wedstrijd.eis_kwalificatie_scores:
+            url = reverse('Wedstrijden:inschrijven-kwalificatie-sores', kwargs={'inschrijving_pk': inschrijving.pk})
+            return HttpResponseRedirect(url)
+
+        # render de pagina "toegevoegd aan mandje"
+
         context = dict()
+
+        wedstrijd = inschrijving.wedstrijd
+        sporterboog = inschrijving.sporterboog
 
         url_maand = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
@@ -981,6 +990,104 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         menu_dynamics(self.request, context)
 
         return render(request, TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE, context)
+
+
+class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view wordt het opgeven van de kwalificatie-scores voor de sporter afgehandeld  """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WEDSTRIJDEN_KWALIFICATIE_SCORES
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu != Rollen.ROL_NONE
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+
+        context = super().get_context_data(**kwargs)
+
+        try:
+            inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
+            inschrijving = (WedstrijdInschrijving
+                            .objects
+                            .get(pk=inschrijving_pk,
+                                 wedstrijd__eis_kwalificatie_scores=True))
+        except WedstrijdInschrijving.DoesNotExist:
+            raise Http404('Inschrijving niet gevonden')
+
+        # controleer dat de inschrijving bij dit account hoort
+        account = get_account(self.request)
+
+        if account != inschrijving.koper:
+            raise Http404('Inschrijving niet gevonden')
+
+        wedstrijd = inschrijving.wedstrijd
+
+
+
+        # TODO: verbeter de broodkruimels
+        context['kruimels'] = (
+            (reverse('Kalender:landing-page'), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (None, 'Kwalificatie scores'),
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
+
+        context = dict()
+
+        wedstrijd = inschrijving.wedstrijd
+        sporterboog = inschrijving.sporterboog
+
+        url_maand = reverse('Kalender:maand',
+                            kwargs={'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month],
+                                    'soort': 'alle',
+                                    'bogen': 'auto'})
+
+        inschrijven_str = 'Inschrijven'
+        url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        if goto_str == 'S':
+            inschrijven_str += ' Sporter'
+
+        elif goto_str == 'G':
+            inschrijven_str += ' Groepje'
+
+        elif goto_str == 'F':
+            inschrijven_str += ' Familie'
+            # ga terug naar de familie pagina met dezelfde sporter geselecteerd
+            url = reverse('Wedstrijden:inschrijven-familie-lid-boog',
+                          kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                  'lid_nr': sporterboog.sporter.lid_nr,
+                                  'boog_afk': sporterboog.boogtype.afkorting.lower()})
+
+        context['url_verder'] = url
+        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+
+        context['kruimels'] = (
+            (url_maand, 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (url, inschrijven_str),
+            (None, 'Toegevoegd aan mandje')
+        )
+
+        menu_dynamics(self.request, context)
+
+        return render(request, self.template_name, context)
 
 
 class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):

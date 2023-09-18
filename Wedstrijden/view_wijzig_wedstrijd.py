@@ -55,7 +55,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_HWL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -104,7 +104,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             else:
                 context['limit_edits'] = True
 
-        if self.rol_nu == Rollen.ROL_BB:
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
             context['wijzig_kwalificatie_scores'] = True
 
             if wedstrijd.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING:
@@ -673,7 +673,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_HWL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
 
     @staticmethod
     def _maak_taak_voor_bb(wedstrijd, msg):
