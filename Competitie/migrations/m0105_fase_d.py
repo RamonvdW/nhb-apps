@@ -11,7 +11,7 @@ import datetime
 def zet_fase_d(apps, _):
 
     comp_klas = apps.get_model('Competitie', 'Competitie')
-    for comp in comp_klas.objects.all():
+    for comp in comp_klas.objects.all():                                    # pragma: no cover
         comp.begin_fase_D_indiv = datetime.date(comp.begin_jaar, 8, 15)     # 15 augustus
         comp.save(update_fields=['begin_fase_D_indiv'])
     # for

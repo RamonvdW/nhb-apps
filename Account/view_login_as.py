@@ -13,7 +13,7 @@ from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from Account.forms import ZoekAccountForm, KiesAccountForm
-from Account.models import Account
+from Account.models import Account, get_account
 from Account.operations.otp import otp_zet_controle_gelukt, otp_zet_control_niet_gelukt
 from Account.view_login import account_plugins_login_gate
 from Functie.rol import rol_bepaal_beschikbare_rollen
@@ -100,7 +100,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # deze functie wordt gebruikt voordat de GET of de POST afgehandeld wordt (getest bewezen)
-        account = self.request.user
+        account = get_account(self.request)
         if account.is_authenticated:
             return account.is_staff
         return False

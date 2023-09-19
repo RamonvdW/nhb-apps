@@ -9,6 +9,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
@@ -72,7 +73,7 @@ class PleinView(View):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
 
         if request.user.is_authenticated:
-            account = request.user
+            account = get_account(request)
             if account.is_gast:
                 gast = account.gastregistratie_set.first()
                 if gast and gast.fase != REGISTRATIE_FASE_COMPLEET:
@@ -200,8 +201,7 @@ class HandleidingenView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        account = self.request.user
-        if account.is_authenticated:
+        if self.request.user.is_authenticated:
             return rol_mag_wisselen(self.request)
 
     def get_context_data(self, **kwargs):

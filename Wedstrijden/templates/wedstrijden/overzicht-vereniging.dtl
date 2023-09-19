@@ -30,7 +30,13 @@
                 <table class="white" id="tabel1">
                     <thead>
                         <tr>        <!-- filter veld -->
-                            <td colspan="3"></td>
+                            {% if url_toon_meer %}
+                                <td colspan="3">
+                                    <a class="btn-sv-blauw" href="{{ url_toon_meer }}">Toon eerdere</a>
+                                </td>
+                            {% else %}
+                                <td colspan="3"></td>
+                            {% endif %}
                             <td class="table-filter">
                                 <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
                             </td>

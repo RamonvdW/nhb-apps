@@ -24,7 +24,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
     """ tests voor de Functie applicatie, diverse corner-cases """
 
     url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
-    url_overzicht_sec_hwl = '/functie/overzicht/alle-lid-nrs/sec-hwl/'
+    url_overzicht_sec_hwl = '/functie/overzicht/beheerders/sec-hwl/'
     url_activeer_functie = '/functie/activeer-functie/%s/'          # functie_pk
 
     def setUp(self):
@@ -89,7 +89,8 @@ class TestFunctieRol(E2EHelpers, TestCase):
         # probeer beveiliging tegen afwezigheid sessie variabelen
         # typisch tweedelijns, want views checken user.is_authenticated
 
-        request = self.client
+        resp = self.client.get('/plein/')
+        request = resp.wsgi_request
 
         self.assertTrue(SESSIONVAR_ROL_MAG_WISSELEN not in request.session.keys())
         res = rol_mag_wisselen(request)

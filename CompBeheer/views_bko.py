@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
                                    MUTATIE_KAMP_INDIV_DOORZETTEN_NAAR_BK, MUTATIE_KAMP_TEAMS_DOORZETTEN_NAAR_BK,
                                    MUTATIE_KAMP_INDIV_AFSLUITEN, MUTATIE_KAMP_TEAMS_AFSLUITEN)
@@ -139,7 +140,7 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
 
         # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
         # dit voorkomt ook race conditions / dubbel uitvoeren
-        account = self.request.user
+        account = get_account(self.request)
         door_str = "BKO %s" % account.volledige_naam()
 
         CompetitieMutatie(mutatie=MUTATIE_DOORZETTEN_REGIO_NAAR_RK,

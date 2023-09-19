@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.menu import get_url_voor_competitie
@@ -15,6 +15,7 @@ from Functie.rol import (rol_mag_wisselen, rol_get_huidige_functie, rol_get_besc
                          rol_activeer_rol, rol_activeer_functie)
 from Overig.helpers import get_safe_from_ip
 from Taken.operations import eval_open_taken
+from Wedstrijden.definities import WEDSTRIJD_STATUS_URL_WACHT_OP_GOEDKEURING
 import logging
 
 
@@ -113,7 +114,9 @@ class ActiveerRolView(UserPassesTestMixin, View):
         if rol_nu == Rollen.ROL_MWW:
             return redirect('Webwinkel:manager')
 
-        # TODO: add MWZ
+        if rol_nu == Rollen.ROL_MWZ:
+            url = reverse('Wedstrijden:manager-status', kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GOEDKEURING})
+            return redirect(url)
 
         return redirect('Functie:wissel-van-rol')
 

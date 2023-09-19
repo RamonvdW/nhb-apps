@@ -9,7 +9,7 @@ from Account.models import Account
 from BasisTypen.definities import BLAZOEN_CHOICES, BLAZOEN_40CM
 from BasisTypen.models import (BoogType, Leeftijdsklasse, TeamType,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse)
-from Competitie.definities import (AFSTANDEN,
+from Competitie.definities import (AFSTANDEN, AFSTAND2URL,
                                    DEEL_BK, DEEL_RK,
                                    INSCHRIJF_METHODES, INSCHRIJF_METHODE_2,
                                    TEAM_PUNTEN, TEAM_PUNTEN_MODEL_TWEE,
@@ -216,6 +216,9 @@ class Competitie(models.Model):
 
     def maak_seizoen_str(self):
         return "%s/%s" % (self.begin_jaar, self.begin_jaar + 1)
+
+    def maak_seizoen_url(self):
+        return '%s-%s-%s' % (AFSTAND2URL[self.afstand], self.begin_jaar, self.begin_jaar + 1)
 
     objects = models.Manager()      # for the editor only
 

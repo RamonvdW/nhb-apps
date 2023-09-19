@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.definities import MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN
 from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
 from Functie.definities import Rollen
@@ -130,7 +131,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.kampioenschap.functie:
             raise PermissionDenied('Geen toegang tot deze competitie')
 
-        account = request.user
+        account = get_account(request)
         door_str = "RKO %s" % account.volledige_naam()
 
         if bevestig == "1":

@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
@@ -348,7 +349,7 @@ class VerenigingAccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if not form.is_valid():
             raise Http404('Geen valide invoer')
 
-        account = request.user
+        account = get_account(request)
 
         if binnen_locatie:
             self._wijzig_binnenbaan(form, ver, binnen_locatie, account)

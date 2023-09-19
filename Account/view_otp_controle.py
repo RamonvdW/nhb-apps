@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from Account.forms import OTPControleForm
+from Account.models import get_account
 from Account.operations.otp import otp_controleer_code
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Plein.menu import menu_dynamics
@@ -30,7 +31,7 @@ class OTPControleView(TemplateView):
             # gebruiker is niet ingelogd, dus stuur terug naar af
             return HttpResponseRedirect(reverse('Plein:plein'))
 
-        account = request.user
+        account = get_account(request)
         if not account.otp_is_actief:
             # gebruiker heeft geen OTP koppeling
             return HttpResponseRedirect(reverse('Plein:plein'))
@@ -65,7 +66,7 @@ class OTPControleView(TemplateView):
             # gebruiker is niet ingelogd, dus stuur terug naar af
             return HttpResponseRedirect(reverse('Plein:plein'))
 
-        account = request.user
+        account = get_account(request)
         if not account.otp_is_actief:
             # gebruiker heeft geen OTP-koppeling
             return HttpResponseRedirect(reverse('Plein:plein'))

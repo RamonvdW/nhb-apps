@@ -13,6 +13,7 @@ from django.db.models import Count
 from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import GESLACHT_ALLE, ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
@@ -23,6 +24,7 @@ from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
 from Plein.menu import menu_dynamics
+from Sporter.models import get_sporter
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
@@ -53,7 +55,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_HWL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -102,7 +104,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             else:
                 context['limit_edits'] = True
 
-        if self.rol_nu == Rollen.ROL_BB:
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
             if wedstrijd.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING:
                 context['url_prev_tekst'] = 'Afkeuren'
                 context['url_next_tekst'] = 'Accepteren'
@@ -434,8 +436,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             if not limit_edits:
                 akkoord = request.POST.get('akkoord_verkoop', '')
                 if akkoord:
-                    account = request.user
-                    sporter = account.sporter_set.first()
+                    account = get_account(request)
+                    sporter = get_sporter(account)
                     wedstrijd.verkoopvoorwaarden_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     wedstrijd.verkoopvoorwaarden_status_when = timezone.now()
                     wedstrijd.verkoopvoorwaarden_status_acceptatie = True
@@ -494,8 +496,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     # moet eerst akkoord zijn gegaan met de voorwaarden
                     akkoord = request.POST.get('akkoord_a_status', '')
                     if akkoord:
-                        account = request.user
-                        sporter = account.sporter_set.first()
+                        account = get_account(request)
+                        sporter = get_sporter(account)
                         wedstrijd.voorwaarden_a_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                         wedstrijd.voorwaarden_a_status_when = timezone.now()
                         wedstrijd.voorwaarden_a_status_acceptatie = True
@@ -663,7 +665,7 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_HWL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_HWL)
 
     @staticmethod
     def _maak_taak_voor_bb(wedstrijd, msg):

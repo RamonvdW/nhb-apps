@@ -27,7 +27,7 @@
                     {% csrf_token %}
 
                     <!-- accessibility: zorg dat password managers weten bij welke user dit hoort -->
-                    <input type="text" name="username" value="{{ request.user.username }}" autocomplete="username" style="display:none">
+                    <input type="text" name="username" value="{{ account.username }}" autocomplete="username" style="display:none">
 
                     {% if foutmelding %}
                         <p class="sv-rood-text">Fout: {{ foutmelding }}</p>

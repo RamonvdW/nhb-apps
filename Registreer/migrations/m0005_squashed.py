@@ -6,7 +6,7 @@
 
 from django.db import migrations, models
 from django.conf import settings
-from Registreer.models import GAST_LID_NUMMER_FIXED_PK
+from Registreer.definities import GAST_LID_NUMMER_FIXED_PK
 from Sporter.models import validate_geboorte_datum
 
 

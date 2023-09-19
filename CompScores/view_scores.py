@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
 from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, RegiocompetitieSporterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
@@ -685,7 +686,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and uitslag.is_bevroren:
             raise Http404('Uitslag mag niet meer gewijzigd worden')
 
-        door_account = request.user
+        door_account = get_account(request)
         when = timezone.now()
 
         self.scores_opslaan(uitslag, data, when, door_account)

@@ -68,8 +68,9 @@
         <div class="col s12 xl8 offset-xl2">
             <div class="white" style="padding:10px">
                 <p>Dit zijn de mogelijkheden:</p>
-                <p><b>1.</b> Verzending naar jouw postadres (zoals bekend bij de bond).<br>Hiervoor worden kosten voor briefpost of pakketpost in rekening gebracht.</p>
-                <p><b>2.</b> Je haalt de bestelling op bij het bondsbureau op Papendal ({{ ophalen_ver.adres_regel1 }}, {{ ophalen_ver.adres_regel2 }}).<br>Hierbij vervallen de verzendkosten.</p>
+                <p><b>1.</b> Verzending naar jouw postadres (zoals bekend bij de bond).<br>Hiervoor worden kosten voor pakketpost in rekening gebracht.</p>
+                <p><b>2.</b> Je haalt de bestelling op bij het bondsbureau op Papendal<br>We berekenen dan geen verzendkosten.</p>
+                <p>Adres voor ophalen: {{ ophalen_ver.adres_regel1 }}, {{ ophalen_ver.adres_regel2 }}.<br>We nemen contact met je op om een tijd af te spreken.</p>
                 <p>De keuze kan niet meer aangepast worden nadat de de bestelling is afgerond en de betaling opgestart wordt.</p>
             </div>
         </div>

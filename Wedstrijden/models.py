@@ -6,7 +6,7 @@
 
 from django.db import models
 from Account.models import Account
-from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA
+from BasisTypen.definities import ORGANISATIES, ORGANISATIE_WA, SCHEIDS_CHOICES, SCHEIDS_NIET
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Locatie.models import Locatie
 from Score.models import Score, Uitslag

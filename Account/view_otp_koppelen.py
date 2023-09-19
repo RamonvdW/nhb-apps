@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.forms import OTPControleForm
+from Account.models import get_account
 from Account.operations.maak_qrcode import qrcode_get
 from Account.operations.otp import otp_prepare_koppelen, otp_koppel_met_code
 from Functie.rol import (rol_bepaal_beschikbare_rollen, rol_bepaal_beschikbare_rollen_opnieuw,
@@ -51,7 +52,7 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
         if not request.user.is_authenticated:
             return redirect('Plein:plein')
 
-        self.account = request.user
+        self.account = get_account(request)
         if self.account.otp_is_actief:
             # OTP is al actief, dus niet nodig om te koppelen
             return redirect('Plein:plein')

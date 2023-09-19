@@ -7,6 +7,7 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
+from Account.models import get_account
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
@@ -443,8 +444,8 @@ class UitslagenRayonTeamsView(TemplateView):
         # als de gebruiker ingelogd is, laat dan de voor de teams van zijn vereniging zien wie er in de teams zitten
         toon_team_leden_van_ver_nr = None
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        account = self.request.user
-        if account.is_authenticated:
+        if self.request.user.is_authenticated:
+            account = get_account(self.request)
             if functie_nu and functie_nu.vereniging:
                 # HWL, WL
                 toon_team_leden_van_ver_nr = functie_nu.vereniging.ver_nr

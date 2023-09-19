@@ -4,6 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+GAST_LID_NUMMER_FIXED_PK = 1
+
 REGISTRATIE_FASE_BEGIN = 0
 REGISTRATIE_FASE_EMAIL = 2      # wacht op bevestiging toegang e-mail
 REGISTRATIE_FASE_PASS = 4

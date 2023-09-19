@@ -73,7 +73,7 @@ def webwinkel_plugin_bepaal_verzendkosten_mandje(stdout, mandje):
 
         if mandje.transport == BESTEL_TRANSPORT_VERZEND:
             # zet de kosten voor het verzenden (ophalen is gratis)
-            mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO)
+            mandje.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
     else:
         # geen verzendkosten
         mandje.transport = BESTEL_TRANSPORT_NVT
@@ -98,7 +98,7 @@ def webwinkel_plugin_bepaal_verzendkosten_bestelling(stdout, transport, bestelli
     if transport == BESTEL_TRANSPORT_VERZEND:
         # wel verzendkosten
         # TODO: briefpost
-        bestelling.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_VERZENDKOSTEN_EURO)
+        bestelling.verzendkosten_euro = Decimal(settings.WEBWINKEL_PAKKET_GROOT_VERZENDKOSTEN_EURO)
     else:
         # geen verzendkosten
         bestelling.verzendkosten_euro = Decimal(0)

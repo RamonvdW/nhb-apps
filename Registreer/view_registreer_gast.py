@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.shortcuts import render, reverse, redirect, Http404
 from django.contrib.auth import update_session_auth_hash
 from django.views.generic import View, TemplateView
+from Account.models import get_account
 from Account.operations.aanmaken import AccountCreateError, account_create
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Account.view_wachtwoord import auto_login_gast_account
@@ -319,7 +320,7 @@ class RegistreerGastVervolgView(TemplateView):
         if not request.user.is_authenticated:
             return redirect('Plein:plein')
 
-        account = request.user
+        account = get_account(request)
         gast = account.gastregistratie_set.first()
         if not gast:
             # dit is geen gast-account
@@ -356,7 +357,7 @@ class RegistreerGastVolgendeVraagView(View):
         if not request.user.is_authenticated:
             return redirect('Plein:plein')
 
-        self.account = request.user
+        self.account = get_account(request)
         gast = self.account.gastregistratie_set.first()
         if not gast:
             # dit is geen gast-account

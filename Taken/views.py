@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Plein.menu import menu_dynamics
 from Functie.rol import rol_mag_wisselen, rol_get_beschrijving
 from Taken.models import Taak
@@ -135,7 +136,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
             raise Http404('Geen valide taak')
 
         # controleer dat deze taak bij de beheerder hoort
-        account = request.user
+        account = get_account(request)
         functie_pks, _ = get_taak_functie_pks(self.request)
         if taak.toegekend_aan_functie.pk not in functie_pks:
             raise PermissionDenied('Geen taak voor jou')

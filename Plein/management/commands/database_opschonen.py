@@ -13,7 +13,7 @@ from Beheer.views import beheer_opschonen
 from Feedback.models import feedback_opschonen
 from Logboek.models import logboek_opschonen
 from Mailer.models import mailer_opschonen
-from Registreer.models import registreer_opschonen
+from Registreer.operations import registreer_opschonen
 from Taken.models import taken_opschonen
 from TijdelijkeCodes.models import tijdelijke_url_opschonen
 

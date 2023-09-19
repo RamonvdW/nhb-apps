@@ -108,7 +108,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         'MO':  '/opleidingen/manager/',
         'SUP': '/feedback/inzicht/',
         'MWW': '/webwinkel/manager/',
-        'MWZ': '/functie/wissel-van-rol/',      # '/kalender/'
+        'MWZ': '/wedstrijden/manager/wacht/',
     }
 
     def e2e_wissel_naar_functie(self, functie):

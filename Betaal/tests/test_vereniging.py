@@ -16,7 +16,9 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
     """ tests voor de Betaal-applicatie, interactie achtergrond taak met CPSP """
 
+    url_login = '/account/login/'
     url_ver_instellingen = '/bestel/betaal/vereniging/instellingen/'
+    url_wedstrijden_vereniging = '/wedstrijden/vereniging/lijst/'
 
     def setUp(self):
         self.account = self.e2e_create_account_admin()
@@ -39,7 +41,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
     def test_instellen(self):
         # anon
         resp = self.client.get(self.url_ver_instellingen)
-        self.assert_is_redirect(resp, '/account/login/')
+        self.assert_is_redirect(resp, self.url_login)
 
         # login in en wissel naar HWL
         self.e2e_login_and_pass_otp(self.account)
@@ -56,13 +58,13 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # wijzigen in lege sleutel mag
         # (=verwijder sleutel, maar ook op Opslaan drukken zonder iets ingevuld te hebben)
         resp = self.client.post(self.url_ver_instellingen)
-        self.assert_is_redirect(resp, '/wedstrijden/vereniging/')
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         resp = self.client.post(self.url_ver_instellingen, {'apikey': 'blabla fout'})
         self.assert404(resp, 'Niet geaccepteerd')
 
         resp = self.client.post(self.url_ver_instellingen, {'apikey': 'test_12345'})
-        self.assert_is_redirect(resp, '/wedstrijden/vereniging/')
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         # ophalen met instellingen opgeslagen
         with self.assert_max_queries(20):

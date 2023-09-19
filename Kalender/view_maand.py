@@ -12,10 +12,11 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.utils.formats import localize
 from django.views.generic import TemplateView
+from Account.models import get_account
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Kalender.definities import MAANDEN, MAAND2URL
 from Plein.menu import menu_dynamics
-from Sporter.models import SporterBoog
+from Sporter.models import SporterBoog, get_sporter
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
                                     WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
@@ -124,16 +125,15 @@ def maak_soort_filter(context, gekozen_soort):
 
 def maak_bogen_filter(request: HttpRequest, context, gekozen_bogen):
     boog_pks = list()
-    account = request.user
-    if account.is_authenticated:                                    # pragma: no branch
-        if account.sporter_set.count() > 0:                         # pragma: no branch
-            sporter = account.sporter_set.first()
-            if sporter.is_actief_lid:
-                boog_pks = list(SporterBoog
-                                .objects
-                                .filter(sporter=sporter,
-                                        heeft_interesse=True)
-                                .values_list('boogtype__pk', flat=True))
+    if request.user.is_authenticated:                               # pragma: no branch
+        account = get_account(request)
+        sporter = get_sporter(account)
+        if sporter and sporter.is_actief_lid:
+            boog_pks = list(SporterBoog
+                            .objects
+                            .filter(sporter=sporter,
+                                    heeft_interesse=True)
+                            .values_list('boogtype__pk', flat=True))
 
     context['boog_pks'] = boog_pks
 

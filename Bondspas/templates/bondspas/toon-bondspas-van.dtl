@@ -14,6 +14,11 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">De bondspas van ...</h3>
+
+            <form action="{{ url_download }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                {% csrf_token %}
+                <button class="btn-sv-rood" id="submit_knop" type="submit">Download</button>
+            </form>
         </div>
     </div>
 

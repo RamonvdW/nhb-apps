@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from Functie.definities import SCHEIDS_NIET, SCHEIDS_VERENIGING, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie
 from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Geo.models import Rayon, Regio

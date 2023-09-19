@@ -81,11 +81,8 @@ class CompetitieKiesView(TemplateView):
                 if comp.fase_indiv >= 'C':
                     self.actuele_regio_comps.append(comp)
 
-            try:
-                if comp.afstand in eerdere_comp:
-                    comp.is_volgend_seizoen = True
-            except KeyError:
-                pass
+            if comp.afstand in eerdere_comp:
+                comp.is_volgend_seizoen = True
             eerdere_comp[comp.afstand] = True
         # for
 

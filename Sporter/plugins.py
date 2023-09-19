@@ -21,7 +21,7 @@ def sporter_login_plugin(request, from_ip, account):
         (de koppeling wordt gelegd in Sporter.apps.ready)
 
         Hier controleren we of het lid wel in mag loggen
-        ook zetten we het AccountEmail nieuwe_email veld indien nodig
+        ook zetten we het nieuwe_email veld indien nodig
 
         Return: None = mag wel inloggen
     """

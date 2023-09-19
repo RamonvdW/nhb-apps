@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
 from Bestel.definities import BESTELLING_STATUS2STR
 from Bestel.models import BestelMandje, Bestelling
@@ -326,7 +327,8 @@ class GastAccountOpheffenView(UserPassesTestMixin, View):
         if gast.fase != REGISTRATIE_FASE_AFGEWEZEN:
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
-            beheerder_naam = request.user.get_account_full_name()
+            account = get_account(request)
+            beheerder_naam = account.get_account_full_name()
 
             with transaction.atomic():
                 gast.fase = REGISTRATIE_FASE_AFGEWEZEN

@@ -12,7 +12,7 @@ from django.db.models.functions import Concat, Cast
 from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import Account
+from Account.models import Account, get_account
 from Functie.definities import Rollen
 from Functie.forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 from Functie.models import Functie
@@ -313,7 +313,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         functie.nieuwe_email = form.cleaned_data['email']
         functie.save()
 
-        account = self.request.user
+        account = get_account(self.request)
         schrijf_in_logboek(account, 'Rollen', 'Nieuw e-mailadres ingevoerd voor rol %s' % functie.beschrijving)
 
         # stuur email

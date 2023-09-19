@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import (GESLACHT_ALLE,
                                    ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_KHSN, ORGANISATIES2SHORT_STR)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
@@ -20,7 +21,8 @@ from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS,
                                     WEDSTRIJD_STATUS_TO_STR)
 from Wedstrijden.models import Wedstrijd
-from datetime import date
+import datetime
+
 
 TEMPLATE_WEDSTRIJDEN_KIES_TYPE = 'wedstrijden/nieuwe-wedstrijd-kies-type.dtl'
 TEMPLATE_WEDSTRIJDEN_OVERZICHT_VERENIGING = 'wedstrijden/overzicht-vereniging.dtl'
@@ -34,6 +36,8 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
     template_name = TEMPLATE_WEDSTRIJDEN_OVERZICHT_VERENIGING
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
+    toon_dagen = 31
+    toon_meer = 'Wedstrijden:vereniging-zes-maanden'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -51,9 +55,16 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
 
         context['huidige_rol'] = rol_get_beschrijving(request)
 
+        if self.toon_meer:
+            context['url_toon_meer'] = reverse(self.toon_meer)
+
+        datum = timezone.now().date()
+        datum -= datetime.timedelta(days=self.toon_dagen)
+
         wedstrijden = (Wedstrijd
                        .objects
-                       .filter(organiserende_vereniging=ver)
+                       .filter(organiserende_vereniging=ver,
+                               datum_begin__gt=datum)
                        .order_by('datum_begin',
                                  'pk'))
 
@@ -87,6 +98,21 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
 
         menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
+
+
+class VerenigingZesMaandenWedstrijdenView(VerenigingWedstrijdenView):
+    toon_dagen = 182            # vanaf 6 maanden geleden (182=365/2)
+    toon_meer = 'Wedstrijden:vereniging-een-jaar'
+
+
+class VerenigingEenJaarWedstrijdenView(VerenigingWedstrijdenView):
+    toon_dagen = 365            # vanaf 1 jaar terug
+    toon_meer = 'Wedstrijden:vereniging-twee-jaar'
+
+
+class VerenigingTweeJaarWedstrijdenView(VerenigingWedstrijdenView):
+    toon_dagen = 2 * 365        # vanaf 2 jaar terug
+    toon_meer = None
 
 
 class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
@@ -127,8 +153,9 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
             met deze POST wordt een nieuwe wedstrijd aangemaakt
         """
 
-        account = request.user
+        url = reverse('Wedstrijden:vereniging')
 
+        account = get_account(request)
         ver = self.functie_nu.vereniging
         locaties = ver.locatie_set.exclude(zichtbaar=False)
         aantal = locaties.count()
@@ -148,7 +175,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                 if month > 12:
                     month -= 12
                     year += 1
-                begin = date(year, month, day)
+                begin = datetime.date(year, month, day)
 
                 keuze2organisatie = {
                     'wa': ORGANISATIE_WA,
@@ -171,6 +198,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                     wed.discipline = WEDSTRIJD_DISCIPLINE_3D
 
                 wed.save()
+                url = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
 
                 bogen = get_organisatie_boogtypen(wed.organisatie)
                 wed.boogtypen.set(bogen)
@@ -183,7 +211,6 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
 
                 wed.wedstrijdklassen.set(klassen)
 
-        url = reverse('Wedstrijden:vereniging')
         return HttpResponseRedirect(url)
 
 

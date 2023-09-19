@@ -43,27 +43,33 @@ class Command(BaseCommand):
         vertel_commit = False
 
         sporterboog_pk2ag_indiv = dict()
-        for ag in (Aanvangsgemiddelde
-                   .objects
-                   .select_related('sporterboog')
-                   .filter(doel=AG_DOEL_INDIV,
-                           afstand_meter=afstand)):
-            sporterboog_pk2ag_indiv[ag.sporterboog.pk] = ag.waarde
+        for sporterboog_pk, waarde in (Aanvangsgemiddelde
+                                       .objects
+                                       .select_related('sporterboog')
+                                       .filter(doel=AG_DOEL_INDIV,
+                                               afstand_meter=afstand)
+                                       .values_list('sporterboog__pk',
+                                                    'waarde')):
+            sporterboog_pk2ag_indiv[sporterboog_pk] = waarde
         # for
 
+        indiv_pks = list(sporterboog_pk2ag_indiv.keys())
         sporterboog_pk2ag_teams = dict()
-        for ag_hist in (AanvangsgemiddeldeHist
-                        .objects
-                        .select_related('ag',
-                                        'ag__sporterboog')
-                        .filter(ag__doel=AG_DOEL_TEAM,
-                                ag__afstand_meter=afstand)
-                        .order_by('-when')):
-            ag = ag_hist.ag
-            # alleen het eerste (nieuwste) AG gebruiken
-            if ag.sporterboog.pk not in sporterboog_pk2ag_teams:
-                sporterboog_pk2ag_teams[ag.sporterboog.pk] = ag.waarde
+        for sporterboog_pk, ag_waarde in (AanvangsgemiddeldeHist
+                                          .objects
+                                          .select_related('ag',
+                                                          'ag__sporterboog')
+                                          .filter(ag__doel=AG_DOEL_TEAM,
+                                                  ag__afstand_meter=afstand)
+                                          .order_by('-when')
+                                          .values_list('ag__sporterboog__pk',
+                                                       'ag__waarde')):
+            if sporterboog_pk not in indiv_pks:
+                # alleen het eerste (nieuwste) AG gebruiken
+                if sporterboog_pk not in sporterboog_pk2ag_teams:
+                    sporterboog_pk2ag_teams[sporterboog_pk] = ag_waarde
         # for
+        del indiv_pks
 
         sporter_pk2wedstrijdgeslacht = dict()
         for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():

@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Beheerders overzicht{% endblock %}
+{% block title %}Beheerders e-mailadressen{% endblock %}
 
 {% block pagina %}
 
@@ -21,7 +21,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Beheerder e-mailadressen</h3>
-            <p>Hieronder staan de {{ aantal }} bij ons bekende e-mailadressen van de SEC en HWL{{ geo_str }}.</p>
+            <p>Hieronder staan de {{ aantal }} bij ons bekende e-mailadressen van de RCLs.</p>
 
             <a class="btn-sv-rood" href="#" onclick="copy_to_clipboard()"><i class="notranslate material-icons-round left">copy</i>Kopieer naar mijn klembord</a>
         </div>
@@ -40,11 +40,10 @@
         </div>
     </div>
 
-
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Details per vereniging</h4>
+            <h4>Details per regio</h4>
         </div>
     </div>
 
@@ -55,10 +54,9 @@
             <table class="white" id="table1">
                 <thead>
                     <tr>        <!-- filter veld -->
-                        <td colspan="3" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                        <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
                     </tr>
                     <tr>
-                        <th data-filter="on">Vereniging</th>
                         <th data-filter="on">Rol</th>
                         <th data-filter="on">E-mailadres</th>
                     </tr>
@@ -66,7 +64,6 @@
 
                 {% for functie in alle %}
                     <tr>
-                        <td>{{ functie.vereniging }}</td>
                         <td>{{ functie.beschrijving }}</td>
                         <td>{{ functie.bevestigde_email }}</td>
                     </tr>
@@ -75,6 +72,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="functie-beheerders-lid-nrs" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-emails-rcl" %}
 
 {% endblock %}

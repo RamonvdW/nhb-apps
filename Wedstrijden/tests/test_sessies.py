@@ -27,6 +27,7 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                  # wedstrijd_pk
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_wedstrijden_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'  # wedstrijd_pk, sessie_pk
+    url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'          # wedstrijd_pk
     url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
     def setUp(self):
@@ -113,10 +114,13 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self._maak_externe_locatie(self.ver1)
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
 
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        self.assert_is_redirect(resp, url)
+
         url = self.url_wedstrijden_sessies % wedstrijd.pk
 
         # haal de sessie op
@@ -171,9 +175,12 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         # maak een wedstrijd aan en wissel die naar een andere vereniging
         self._maak_externe_locatie(self.ver1)
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
+
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        self.assert_is_redirect(resp, url)
         wedstrijd.organiserende_vereniging = self.ver2
         wedstrijd.save()
 
@@ -195,11 +202,15 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.ver1)
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
+
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        self.assert_is_redirect(resp, url)
         wedstrijd.datum_einde = wedstrijd.datum_begin + datetime.timedelta(days=2)
         wedstrijd.save()
+
         url = self.url_wedstrijden_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
@@ -328,10 +339,13 @@ class TestWedstrijdenSessies(E2EHelpers, TestCase):
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.ver1)
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
-        self.assertEqual(1, Wedstrijd.objects.count())
+        self.assert_is_redirect_not_plein(resp)
 
+        self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % wedstrijd.pk
+        self.assert_is_redirect(resp, url)
+
         url = self.url_wedstrijden_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)

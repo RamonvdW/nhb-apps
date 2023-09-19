@@ -32,7 +32,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
     url_aanmeldingen_download_tsv = '/wedstrijden/%s/aanmeldingen/download/tsv/'    # wedstrijd_pk
     url_aanmeldingen_download_csv = '/wedstrijden/%s/aanmeldingen/download/csv/'    # wedstrijd_pk
 
-    url_wedstrijd_details = '/wedstrijden/%s/details/'                     # wedstrijd_pk
+    url_wedstrijd_details = '/wedstrijden/%s/details/'                              # wedstrijd_pk
+    url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'                    # wedstrijd_pk
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
     url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                  # wedstrijd_pk
@@ -126,10 +127,12 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
 
         self.assertEqual(1, Wedstrijd.objects.count())
         self.wedstrijd = Wedstrijd.objects.first()
+        url = self.url_wedstrijden_wijzig_wedstrijd % self.wedstrijd.pk
+        self.assert_is_redirect(resp, url)
 
         # maak een R sessie aan
         sessie = WedstrijdSessie(

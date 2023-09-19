@@ -8,6 +8,11 @@
 AFSTANDEN = [('18', 'Indoor'),
              ('25', '25m 1pijl')]
 
+AFSTAND2URL = {
+    '18': 'indoor',
+    '25': '25m1pijl'
+}
+
 DAGDELEN = [('GN', "Geen voorkeur"),
             ('AV', "'s Avonds"),
             ('MA', "Maandag"),

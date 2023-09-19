@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.definities import DEEL_RK, DEEL_BK, MUTATIE_KAMP_CUT, DEELNAME_NEE
 from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse,
                                CompetitieMatch, CompetitieMutatie,
@@ -884,7 +885,7 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
         # for
 
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
-        account = request.user
+        account = get_account(request)
         door_str = "BKO %s" % account.volledige_naam()
 
         mutatie = None

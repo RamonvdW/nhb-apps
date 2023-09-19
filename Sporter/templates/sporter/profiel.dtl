@@ -380,19 +380,19 @@
                 <table class="white">
                     <thead>
                         <tr>
-                            <th>Discipline</th>
-                            <th>Onder<wbr>scheiding</th>
-                            <th>Categorie</th>
-                            <th>Datum</th>
+                            <th class="center">Discipline</th>
+                            <th class="center">Onder<wbr>scheiding</th>
+                            <th class="center">Categorie</th>
+                            <th class="center">Datum</th>
                         </tr>
                     </thead>
 
                     {% for obj in speelsterktes %}
                         <tr>
-                            <td>{{ obj.discipline }}</td>
-                            <td>{{ obj.beschrijving }}</td>
-                            <td>{{ obj.category }}</td>
-                            <td>{{ obj.datum }}</td>
+                            <td class="center">{{ obj.discipline }}</td>
+                            <td class="center">{{ obj.beschrijving }}</td>
+                            <td class="center">{{ obj.category }}</td>
+                            <td class="center">{{ obj.datum }}</td>
                         </tr>
                     {% endfor %}
 
@@ -432,10 +432,10 @@
                         </tr>
 
                         <tr>
-                            <th>Competitie</th>
-                            <th>Seizoen</th>
-                            <th>Boog</th>
-                            <th>Scores</th>
+                            <th class="center">Competitie</th>
+                            <th class="center">Seizoen</th>
+                            <th class="center">Boog</th>
+                            <th class="center">Scores</th>
                             <th class="center">Gemiddelde pijl</th>
                         </tr>
 
@@ -451,10 +451,10 @@
 
                         {% for deelnemer in regiocomp_scores %}
                             <tr>
-                                <td>{{ deelnemer.competitie_str }}</td>
-                                <td>{{ deelnemer.seizoen_str }}</td>
-                                <td>{{ deelnemer.boog_str }}</td>
-                                <td>{{ deelnemer.scores_str }}</td>
+                                <td class="center">{{ deelnemer.competitie_str }}</td>
+                                <td class="center">{{ deelnemer.seizoen_str }}</td>
+                                <td class="center">{{ deelnemer.boog_str }}</td>
+                                <td class="center">{{ deelnemer.scores_str }}</td>
                                 <td class="center smal">{{ deelnemer.gemiddelde }}</td>
                             </tr>
                         {% endfor %}
@@ -475,10 +475,10 @@
                     </tr>
 
                     <tr>
-                        <th>Competitie</th>
-                        <th>Seizoen</th>
-                        <th>Boog</th>
-                        <th>Scores</th>
+                        <th class="center">Competitie</th>
+                        <th class="center">Seizoen</th>
+                        <th class="center">Boog</th>
+                        <th class="center">Scores</th>
                         <th class="center">Gemiddelde pijl</th>
                     </tr>
 
@@ -494,16 +494,16 @@
 
                     {% for obj in histcomp %}
                         <tr>
-                            <td>{{ obj.competitie_str }}</td>
-                            <td>{{ obj.seizoen_str }}</td>
-                            <td>{{ obj.beschrijving }}</td>     <!-- boog -->
-                            <td>{{ obj.scores_str }}</td>
+                            <td class="center">{{ obj.competitie_str }}</td>
+                            <td class="center">{{ obj.seizoen_str }}</td>
+                            <td class="center">{{ obj.beschrijving }}</td>     <!-- boog -->
+                            <td class="center">{{ obj.scores_str }}</td>
                             <td class="center">{{ obj.gemiddelde }}</td>
                         </tr>
                     {% endfor %}
 
                     <tr>
-                        <td colspan="5">De gemiddelde pijl is berekend over de beste 6 scores.</td>
+                        <td colspan="5" class="right-align">De gemiddelde pijl is berekend over de beste 6 scores.</td>
                     </tr>
                 </table>
             </div>
@@ -529,22 +529,22 @@
                 <table class="white">
                     <thead>
                         <tr>
-                            <th>Boog</th>
-                            <th>Afstand</th>
+                            <th class="center">Boog</th>
+                            <th class="center">Afstand</th>
                             <th class="center">Gemiddelde</th>
-                            <th>Vast<wbr>gesteld op</th>
-                            <th>Bron</th>
+                            <th class="center">Vast<wbr>gesteld op</th>
+                            <th class="center">Bron</th>
                         </tr>
                     </thead>
 
                     {% for sporterboog in gemiddelden %}
                         {% for ag in sporterboog.ags %}
                             <tr>
-                                <td>{{ sporterboog.boogtype.beschrijving }}</td>
-                                <td>{{ ag.afstand_meter }} meter</td>
+                                <td class="center">{{ sporterboog.boogtype.beschrijving }}</td>
+                                <td class="center">{{ ag.afstand_meter }} meter</td>
                                 <td class="center">{{ ag.waarde }}</td>
-                                <td>{{ ag.hist.when|date:"j F Y" }}</td>
-                                <td>{{ ag.hist.notitie }}</td>
+                                <td class="center">{{ ag.hist.when|date:"j F Y" }}</td>
+                                <td class="center">{{ ag.hist.notitie }}</td>
                             </tr>
                         {% endfor %}
                     {% endfor %}
@@ -773,7 +773,7 @@
                     </tr>
 
                     <tr>
-                        <td colspan="4">De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</td>
+                        <td colspan="4" class="center">De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</td>
                     </tr>
 
                     <tr class="sv-table-header">
@@ -825,7 +825,7 @@
                     </tr>
 
                     <tr>
-                        <td colspan="4">De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</td>
+                        <td colspan="4" class="center">De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</td>
                     </tr>
 
                     <tr class="sv-table-header">
@@ -873,7 +873,7 @@
                     </tr>
 
                     <tr>
-                        <td colspan="4">De secretaris is er voor vragen over je lidmaatschap, voor het wijziging van je e-mailadres, doorgeven van een verhuizing, etc.</td>
+                        <td colspan="4" class="center">De secretaris is er voor vragen over je lidmaatschap, voor het wijziging van je e-mailadres, doorgeven van een verhuizing, etc.</td>
                     </tr>
 
                     <tr class="sv-table-header">
@@ -909,7 +909,7 @@
                 </tr>
 
                 <tr>
-                    <td colspan="4">Voor alle overige vragen kan je contact opnemen met het bondsbureau</td>
+                    <td colspan="4" class="center">Voor alle overige vragen kan je contact opnemen met het bondsbureau</td>
                 </tr>
 
             </table>

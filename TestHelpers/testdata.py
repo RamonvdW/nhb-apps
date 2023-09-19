@@ -13,7 +13,8 @@ from Account.models import Account
 from Account.operations.aanmaken import account_create
 from BasisTypen.definities import (GESLACHT_ANDERS,
                                    ORGANISATIE_WA, ORGANISATIE_KHSN, ORGANISATIE_IFAA,
-                                   MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+                                   MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                                   SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_VERENIGING, SCHEIDS_INTERNATIONAAL)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.definities import DEEL_BK, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND, KAMP_RANK_RESERVE
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
@@ -68,67 +69,67 @@ class TestData(object):
 
     leden = [
         # wedstrijdleeftijd, geslacht, voornaam, boogtype, flags:
-        #                                                  (account, voorkeur_rk/bk, para_code, voorwerpen, notitie)
-        (10, 'M', 'Asp10',  'R',      (False, True,  '',    False, 0)),
-        (10, 'V', 'Asp10',  'R',      (False, True,  '',    False, 0)),
-        (11, 'M', 'Asp11',  'R',      (False, True,  '',    False, 0)),
-        (12, 'V', 'Asp12',  'R',      (False, True,  '',    False, 0)),
-        (13, 'M', 'Asp13',  'R',      (False, True,  '',    False, 0)),
-        (14, 'M', 'Cad14',  'R',      (False, True,  '',    False, 0)),
-        (14, 'M', 'Cad14b', 'C',      (False, True,  '',    False, 0)),
-        (14, 'M', 'Cad15',  'c',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur competitie
-        (15, 'V', 'Cad15',  'R',      (False, True,  '',    False, 0)),
-        (15, 'M', 'Cad15b', 'BB',     (False, True,  '',    False, 0)),
-        (15, 'V', 'Cad15b', 'C',      (False, True,  '',    False, 0)),
-        (16, 'M', 'Cad16',  'R',      (False, True,  '',    False, 0)),
-        (16, 'M', 'Cad16b', 'C',      (False, True,  '',    False, 0)),
-        (16, 'M', 'Cad16c', 'BB',     (False, True,  '',    False, 0)),
-        (17, 'V', 'Cad17',  'R',      (True,  True,  '',    False, 1)),       # account
-        (17, 'V', 'Cad17b', 'C',      (False, True,  '',    False, 0)),
-        (17, 'V', 'Cad17c', 'BB',     (False, True,  '',    False, 0)),
-        (18, 'M', 'Jun18',  'R',      (False, True,  '',    False, 0)),
-        (18, 'M', 'Jun18b', 'C',      (False, True,  '',    False, 0)),
-        (18, 'M', 'Jun18c', 'BB',     (False, True,  '',    False, 0)),
-        (18, 'V', 'Jun18',  'BB',     (False, True,  '',    False, 0)),
-        (19, 'V', 'Jun19',  'R',      (False, True,  '',    False, 0)),
-        (19, 'V', 'Jun19b', 'C',      (True,  True,  '',    False, 0)),       # account
-        (20, 'M', 'Jun20',  'R',      (False, True,  '',    False, 0)),
-        (20, 'M', 'Jun20b', 'LB',     (False, True,  '',    False, 0)),
-        (21, 'V', 'Sen21',  'R+C',    (False, True,  '',    False, 0)),       # schiet twee bogen
-        (21, 'V', 'Sen21b', 'C',      (False, True,  'DIS', False, 0)),
-        (22, 'M', 'Sen22',  'R',      (False, True,  'DIS', False, 1)),
-        (22, 'M', 'Sen22b', 'C',      (False, True,  '',    False, 1)),
-        (22, 'M', 'Sen23',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur competitie
-        (31, 'V', 'Sen31',  'R',      (False, True,  '',    True,  1)),
-        (32, 'M', 'Sen32',  'C',      (False, True,  '',    False, 0)),
-        (32, 'M', 'Sen32b', 'BB',     (True,  True,  '',    False, 0)),       # account
-        (33, 'V', 'Sen33',  'R',      (False, True,  '',    False, 0)),
-        (33, 'V', 'Sen33b', 'BB',     (False, True,  '',    False, 0)),
-        (34, 'M', 'Sen34',  'LB',     (True,  True,  '',    False, 0)),       # Sen34 = HWL
-        (35, 'V', 'Sen35',  'R+C+BB', (False, True,  '',    False, 0)),       # schiet 3 bogen
-        (36, 'M', 'Sen36',  'C',      (False, True,  'W2',  True,  0)),
-        (36, 'M', 'Sen36b', 'BB',     (False, True,  '',    False, 0)),
-        (37, 'V', 'Sen37',  'R',      (False, True,  'VI1', True,  0)),
-        (38, 'M', 'Sen38',  'LB',     (False, True,  '',    False, 0)),
-        (39, 'V', 'Sen39',  'R',      (True,  True,  '',    False, 0)),       # Sen39 = BKO/RKO/RCL
-        (40, 'M', 'Sen40',  'C+FSC',  (False, True,  '',    False, 0)),
-        (41, 'V', 'Sen41',  'R',      (False, False, '',    False, 0)),       # geen voorkeur rk/bk
-        (42, 'M', 'Sen42',  'R',      (False, True,  'DIS', True,  1)),
-        (42, 'M', 'Sen42b', 'C',      (False, True,  '',    False, 0)),
-        (49, 'V', 'Sen49',  'R',      (False, True,  '',    False, 0)),
-        (49, 'V', 'Sen49b', 'BB+BBR', (False, True,  '',    False, 0)),
-        (50, 'M', 'Mas50',  'R',      (True,  True,  '',    False, 0)),       # Mas50 = SEC
-        (51, 'V', 'Mas51',  'R',      (True,  True,  '',    False, 0)),       # account
-        (51, 'V', 'Mas51b', 'C',      (False, True,  '',    False, 0)),
-        (51, 'V', 'Mas52',  'r',      (False, True,  '',    False, 0)),       # kleine letter: geen voorkeur competitie
-        (59, 'M', 'Mas59',  'R',      (False, True,  '',    False, 0)),
-        (59, 'M', 'Mas59b', 'LB',     (False, True,  '',    False, 0)),
-        (60, 'V', 'Vet60',  'R',      (False, True,  '',    False, 0)),
-        (60, 'V', 'Vet60b', 'C',      (False, True,  '',    False, 0)),
-        (60, 'V', 'Vet60c', 'LB',     (True,  True,  '',    False, 0)),       # account
-        (61, 'M', 'Vet61',  'C',      (False, True,  '',    False, 0)),
-        (61, 'M', 'Vet61b', 'C',      (False, True,  '',    False, 0)),
-        (80, 'V', 'Vet80',  'R',      (False, True,  '',    False, 0)),
+        #                             (account, voorkeur_rk/bk, para_code, voorwerpen, notitie, scheids)
+        (10, 'M', 'Asp10',  'R',      (False, True,  '',    False, 0, 0)),
+        (10, 'V', 'Asp10',  'R',      (False, True,  '',    False, 0, 0)),
+        (11, 'M', 'Asp11',  'R',      (False, True,  '',    False, 0, 0)),
+        (12, 'V', 'Asp12',  'R',      (False, True,  '',    False, 0, 0)),
+        (13, 'M', 'Asp13',  'R',      (False, True,  '',    False, 0, 0)),
+        (14, 'M', 'Cad14',  'R',      (False, True,  '',    False, 0, 0)),
+        (14, 'M', 'Cad14b', 'C',      (False, True,  '',    False, 0, 0)),
+        (14, 'M', 'Cad15',  'c',      (False, True,  '',    False, 0, 0)),      # kleine c: geen voorkeur competitie
+        (15, 'V', 'Cad15',  'R',      (False, True,  '',    False, 0, 0)),
+        (15, 'M', 'Cad15b', 'BB',     (False, True,  '',    False, 0, 0)),
+        (15, 'V', 'Cad15b', 'C',      (False, True,  '',    False, 0, 0)),
+        (16, 'M', 'Cad16',  'R',      (False, True,  '',    False, 0, 0)),
+        (16, 'M', 'Cad16b', 'C',      (False, True,  '',    False, 0, 0)),
+        (16, 'M', 'Cad16c', 'BB',     (False, True,  '',    False, 0, 0)),
+        (17, 'V', 'Cad17',  'R',      (True,  True,  '',    False, 1, 0)),      # account
+        (17, 'V', 'Cad17b', 'C',      (False, True,  '',    False, 0, 0)),
+        (17, 'V', 'Cad17c', 'BB',     (False, True,  '',    False, 0, 0)),
+        (18, 'M', 'Jun18',  'R',      (False, True,  '',    False, 0, 0)),
+        (18, 'M', 'Jun18b', 'C',      (False, True,  '',    False, 0, 0)),
+        (18, 'M', 'Jun18c', 'BB',     (False, True,  '',    False, 0, 0)),
+        (18, 'V', 'Jun18',  'BB',     (False, True,  '',    False, 0, 0)),
+        (19, 'V', 'Jun19',  'R',      (False, True,  '',    False, 0, 0)),
+        (19, 'V', 'Jun19b', 'C',      (True,  True,  '',    False, 0, 3)),      # SR3 + account
+        (20, 'M', 'Jun20',  'R',      (False, True,  '',    False, 0, 3)),      # SR3
+        (20, 'M', 'Jun20b', 'LB',     (False, True,  '',    False, 0, 0)),
+        (21, 'V', 'Sen21',  'R+C',    (False, True,  '',    False, 0, 0)),      # schiet twee bogen
+        (21, 'V', 'Sen21b', 'C',      (False, True,  'DIS', False, 0, 0)),
+        (22, 'M', 'Sen22',  'R',      (False, True,  'DIS', False, 1, 0)),
+        (22, 'M', 'Sen22b', 'C',      (False, True,  '',    False, 1, 0)),
+        (22, 'M', 'Sen23',  'r',      (False, True,  '',    False, 0, 0)),      # kleine r: geen voorkeur competitie
+        (31, 'V', 'Sen31',  'R',      (False, True,  '',    True,  1, 0)),
+        (32, 'M', 'Sen32',  'C',      (False, True,  '',    False, 0, 4)),      # SR4
+        (32, 'M', 'Sen32b', 'BB',     (True,  True,  '',    False, 0, 0)),      # account
+        (33, 'V', 'Sen33',  'R',      (False, True,  '',    False, 0, 0)),
+        (33, 'V', 'Sen33b', 'BB',     (False, True,  '',    False, 0, 0)),
+        (34, 'M', 'Sen34',  'LB',     (True,  True,  '',    False, 0, 0)),      # Sen34 = HWL
+        (35, 'V', 'Sen35',  'R+C+BB', (False, True,  '',    False, 0, 0)),      # schiet 3 bogen
+        (36, 'M', 'Sen36',  'C',      (False, True,  'W2',  True,  0, 0)),
+        (36, 'M', 'Sen36b', 'BB',     (False, True,  '',    False, 0, 0)),
+        (37, 'V', 'Sen37',  'R',      (False, True,  'VI1', True,  0, 5)),      # SR5
+        (38, 'M', 'Sen38',  'LB',     (False, True,  '',    False, 0, 0)),
+        (39, 'V', 'Sen39',  'R',      (True,  True,  '',    False, 0, 0)),      # Sen39 = BKO/RKO/RCL
+        (40, 'M', 'Sen40',  'C+FSC',  (False, True,  '',    False, 0, 0)),
+        (41, 'V', 'Sen41',  'R',      (False, False, '',    False, 0, 0)),      # geen voorkeur rk/bk
+        (42, 'M', 'Sen42',  'R',      (False, True,  'DIS', True,  1, 0)),
+        (42, 'M', 'Sen42b', 'C',      (False, True,  '',    False, 0, 0)),
+        (49, 'V', 'Sen49',  'R',      (False, True,  '',    False, 0, 0)),
+        (49, 'V', 'Sen49b', 'BB+BBR', (False, True,  '',    False, 0, 0)),
+        (50, 'M', 'Mas50',  'R',      (True,  True,  '',    False, 0, 0)),      # Mas50 = SEC
+        (51, 'V', 'Mas51',  'R',      (True,  True,  '',    False, 0, 4)),      # SR4 + account
+        (51, 'V', 'Mas51b', 'C',      (False, True,  '',    False, 0, 0)),
+        (51, 'V', 'Mas52',  'r',      (False, True,  '',    False, 0, 0)),      # kleine r: geen voorkeur competitie
+        (59, 'M', 'Mas59',  'R',      (False, True,  '',    False, 0, 0)),
+        (59, 'M', 'Mas59b', 'LB',     (False, True,  '',    False, 0, 0)),
+        (60, 'V', 'Vet60',  'R',      (False, True,  '',    False, 0, 0)),
+        (60, 'V', 'Vet60b', 'C',      (False, True,  '',    False, 0, 0)),
+        (60, 'V', 'Vet60c', 'LB',     (True,  True,  '',    False, 0, 0)),      # account
+        (61, 'M', 'Vet61',  'C',      (False, True,  '',    False, 0, 0)),
+        (61, 'M', 'Vet61b', 'C',      (False, True,  '',    False, 0, 0)),
+        (80, 'V', 'Vet80',  'R',      (False, True,  '',    False, 0, 0)),
     ]
 
     def __init__(self):
@@ -152,6 +153,13 @@ class TestData(object):
         # leden
         self.ver_sporters = dict()              # [ver_nr] = list(Sporter)
         self.ver_sporters_met_account = dict()  # [ver_nr] = list(Sporter) met sporter.account != None
+
+        # scheidsrechters
+        self.sporters_scheids = {               # [scheids] = list(Sporter)
+            SCHEIDS_INTERNATIONAAL: [],
+            SCHEIDS_BOND: [],
+            SCHEIDS_VERENIGING: [],
+        }
 
         # competities
         self.comp18 = None                      # Competitie
@@ -530,7 +538,7 @@ class TestData(object):
         ver_unsorted.sort()     # sorteer op verenigingsnummer om de volgorde te garanderen
         for _, ver in ver_unsorted:
             for _, _, voornaam, _, flags in self.leden:
-                maak_account, _, _, _, _ = flags
+                maak_account, _, _, _, _, _ = flags
                 lid_nr += 1
 
                 if maak_account:
@@ -559,6 +567,13 @@ class TestData(object):
             lid_nr2account[account.username] = account
         # for
 
+        sr2scheids = {
+            0: SCHEIDS_NIET,
+            3: SCHEIDS_VERENIGING,
+            4: SCHEIDS_BOND,
+            5: SCHEIDS_INTERNATIONAAL,
+        }
+
         lid_nr = MIN_LID_NR
         bulk = list()
         geslacht_voornaam2para = dict()  # [geslacht + voornaam] = (voorwerpen, opmerking)
@@ -568,7 +583,7 @@ class TestData(object):
             self.ver_sporters_met_account[ver.ver_nr] = list()
 
             for wleeftijd, geslacht, voornaam, _, flags in self.leden:
-                _, _, para_code, para_voorwerpen, para_opmerking = flags
+                _, _, para_code, para_voorwerpen, para_opmerking, sr = flags
                 geslacht_voornaam2para[geslacht + voornaam] = (para_voorwerpen, para_opmerking)
 
                 lid_nr += 1
@@ -593,6 +608,7 @@ class TestData(object):
                         sinds_datum=lid_sinds_datum,
                         bij_vereniging=ver,
                         account=account,
+                        scheids=sr2scheids[sr],
                         lid_tot_einde_jaar=huidige_jaar)
                 bulk.append(sporter)
 
@@ -626,6 +642,8 @@ class TestData(object):
             self.ver_sporters[ver_nr].append(sporter)
             if sporter.account:
                 self.ver_sporters_met_account[ver_nr].append(sporter)
+            if sporter.scheids != SCHEIDS_NIET:
+                self.sporters_scheids[sporter.scheids].append(sporter)
 
             gewenste_boogtypen = geslacht_voornaam2boogtypen[sporter.geslacht + sporter.voornaam]
             para_voorwerpen, para_opmerking = geslacht_voornaam2para[sporter.geslacht + sporter.voornaam]
@@ -1038,7 +1056,7 @@ class TestData(object):
         # zet voor een paar deelnemers de inschrijfvoorkeur voor RK/BK uit
         voornamen = list()
         for _, _, voornaam, boogtype, flags in self.leden:
-            _, inschrijf_voorkeur_rk_bk, _, _, _ = flags
+            _, inschrijf_voorkeur_rk_bk, _, _, _, _ = flags
             if not inschrijf_voorkeur_rk_bk:
                 voornamen.append(voornaam)
         # for

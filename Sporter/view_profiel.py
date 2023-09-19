@@ -10,6 +10,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.formats import localize
 from django.db.models import Q
+from Account.models import get_account
 from BasisTypen.models import BoogType
 from Bestel.models import Bestelling
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, DEELNAME_NEE
@@ -62,7 +63,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als het we geen vragen meer hebben + bij oneigenlijk gebruik """
         if request.user.is_authenticated:
-            self.account = request.user
+            self.account = get_account(request)
 
             if self.account.is_gast:
                 gast = self.account.gastregistratie_set.first()

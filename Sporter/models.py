@@ -8,9 +8,9 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from BasisTypen.definities import GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, ORGANISATIE_IFAA
+from BasisTypen.definities import (GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, ORGANISATIE_IFAA,
+                                   SCHEIDS_NIET, SCHEIDS_CHOICES)
 from BasisTypen.models import BoogType
-from Functie.definities import SCHEIDS_CHOICES, SCHEIDS_NIET
 # mag niet afhankelijk zijn van Competitie
 from Vereniging.models import Vereniging
 import datetime

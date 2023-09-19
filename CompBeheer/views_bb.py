@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.definities import (MUTATIE_COMPETITIE_OPSTARTEN,
                                    MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
@@ -120,7 +121,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             (wat volgt uit het drukken op de knop)
             om de nieuwe competitie op te starten.
         """
-        account = request.user
+        account = get_account(request)
         jaar = bepaal_startjaar_nieuwe_competitie()
 
         # bescherm tegen dubbel aanmaken
@@ -233,7 +234,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil de AG's vaststellen
         """
-        account = request.user
+        account = get_account(request)
         afstand = str(kwargs['afstand'])
 
         if afstand == '18':

@@ -20,7 +20,10 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module vereniging """
 
-    url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
+    url_wedstrijden_vereniging = '/wedstrijden/vereniging/lijst/'
+    url_wedstrijden_vereniging_een_jaar = '/wedstrijden/vereniging/lijst-een-jaar/'
+    url_wedstrijden_vereniging_twee_jaar = '/wedstrijden/vereniging/lijst-twee-jaar/'
+    url_wedstrijden_vereniging_zes_maanden = '/wedstrijden/vereniging/lijst-zes-maanden/'
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
 
     def setUp(self):
@@ -121,7 +124,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         # maak een nieuwe wedstrijd aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_WA)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
@@ -136,7 +139,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         # maak nog een wedstrijd aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
         self.assertEqual(2, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_KHSN)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
@@ -145,7 +148,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         # maak nog een wedstrijd aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'ifaa'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
         self.assertEqual(3, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
         self.assertEqual(wedstrijd.boogtypen.count(), 12)
@@ -154,7 +157,19 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         # haal het overzicht opnieuw op (met de 2 wedstrijden)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijden_vereniging)
+            resp = self.client.get(self.url_wedstrijden_vereniging_zes_maanden)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden_vereniging_een_jaar)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden_vereniging_twee_jaar)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))

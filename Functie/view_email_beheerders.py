@@ -12,12 +12,13 @@ from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 
-TEMPLATE_OVERZICHT_EMAILS_SEC_HWL = 'functie/overzicht-emails-sec-hwl.dtl'
+TEMPLATE_OVERZICHT_EMAILS_SEC_HWL = 'functie/emails-sec-hwl.dtl'
+TEMPLATE_OVERZICHT_EMAILS_RCL = 'functie/emails-rcl.dtl'
 
 
 class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view is voor de BB en geeft een knip-en-plak-baar overzicht van
+    """ Deze view is voor de BB, MHZ, BKO, RKO en RCLs en geeft een knip-en-plak-baar overzicht van
         de lidnummers van alle SEC en HWL, zodat hier makkelijk een mailing voor te maken is.
     """
 
@@ -98,7 +99,79 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Functie:overzicht'), 'Beheerders'),
-            (None, 'Beheerder e-mailadressen')
+            (None, 'E-mailadressen SEC en HWL')
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+
+class OverzichtEmailsRclView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view is voor de BB, BKO, RKO en geeft een knip-en-plak-baar overzicht van
+        van de e-mailadressen van alle RCLs.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_OVERZICHT_EMAILS_RCL
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # alle competitie beheerders + HWL
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO):
+            context['geo_str'] = ''
+            emails = (Functie
+                      .objects
+                      .filter(rol='RCL')
+                      .exclude(bevestigde_email='')
+                      .distinct('bevestigde_email')
+                      .values_list('bevestigde_email', flat=True))
+            alle = (Functie
+                    .objects
+                    .filter(rol='RCL')
+                    .exclude(bevestigde_email='')
+                    .order_by('regio__regio_nr',
+                              'comp_type'))
+
+        else:   # self.rol_nu == Rollen.ROL_RKO:
+            rayon_nr = self.functie_nu.rayon.rayon_nr
+            context['geo_str'] = ' in Rayon %s' % rayon_nr
+            emails = (Functie
+                      .objects
+                      .filter(rol='RCL',
+                              regio__rayon_nr=rayon_nr)
+                      .exclude(bevestigde_email='')
+                      .distinct('bevestigde_email')
+                      .values_list('bevestigde_email', flat=True))
+            alle = (Functie
+                    .objects
+                    .filter(rol='RCL',
+                            regio__rayon_nr=rayon_nr)
+                    .exclude(bevestigde_email='')
+                    .order_by('regio__regio_nr',
+                              'comp_type'))
+
+        context['aantal'] = len(emails)
+        context['emails'] = "; ".join(emails)
+        context['alle'] = alle
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Functie:overzicht'), 'Beheerders'),
+            (None, 'E-mailadressen RCLs')
         )
 
         menu_dynamics(self.request, context)

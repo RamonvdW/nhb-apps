@@ -10,6 +10,7 @@ from django.http import JsonResponse, Http404, UnreadablePostError
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV
 from Competitie.models import (CompetitieIndivKlasse, CompetitieMutatie,
                                Kampioenschap, KampioenschapSporterBoog)
@@ -222,7 +223,7 @@ class VerplaatsDeelnemerView(UserPassesTestMixin, View):
         except (ValueError, KeyError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404("Klasse niet gevonden")
 
-        account = request.user
+        account = get_account(request)
         door_str = "BKO %s" % account.volledige_naam()
 
         msg = "Kleine klasse %s van %s: deelnemer %s verplaatsen van klasse %s naar klasse %s." % (

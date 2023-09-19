@@ -114,7 +114,7 @@
         {% for team in regioteams_niet_af %}
             {% if team.break_before %}
                 <tr>
-                    <td colspan="{{ cols }}">
+                    <td colspan="{{ hdr_cols }}">
                         <h5 class="sv-rood-text center">Nog niet geplaatste teams</h5>
                     </td>
                 </tr>
@@ -183,7 +183,7 @@
 
         {% for klasse, teams in regioteams.items %}
             <tr>
-                <td colspan="{{ cols }}" class="center">
+                <td colspan="{{ hdr_cols }}" class="center">
                     <h5>{{ klasse.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
             </tr>
             <tr class="sv-table-header">

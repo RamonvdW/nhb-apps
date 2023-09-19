@@ -65,7 +65,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         # wissel naar HWL en maak een wedstrijd aan
         self.e2e_wissel_naar_functie(self.functie_hwl)
         resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'khsn'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
+        self.assert_is_redirect_not_plein(resp)
 
         # wissel terug naar BB
         self.e2e_wisselnaarrol_bb()

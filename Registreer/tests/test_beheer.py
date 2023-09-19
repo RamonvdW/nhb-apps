@@ -259,7 +259,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('registreer/beheer-gast-account-details.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True)
-        #print('urls: %s' % repr(urls))
+        # print('urls: %s' % repr(urls))
         self.assertIn(self.url_opheffen, urls)
 
         # pas de wedstrijdinschrijving aan
@@ -340,6 +340,9 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_gast_accounts)
 
         self.assertEqual(1, MailQueue.objects.count())
+        mail = MailQueue.objects.first()
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         gast = GastRegistratie.objects.get(lid_nr=self.gast_800001.lid_nr)
         self.assertEqual(gast.fase, REGISTRATIE_FASE_AFGEWEZEN)
@@ -368,7 +371,7 @@ class TestRegistreerBeheer(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_gast_accounts)
 
         gast2 = GastRegistratie.objects.get(lid_nr=gast2.lid_nr)
-        self.assertEqual(gast.fase, REGISTRATIE_FASE_AFGEWEZEN)
+        self.assertEqual(gast2.fase, REGISTRATIE_FASE_AFGEWEZEN)
 
 
 # end of file

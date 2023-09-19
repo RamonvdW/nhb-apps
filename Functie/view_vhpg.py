@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.models import VerklaringHanterenPersoonsgegevens
 from Functie.operations import account_needs_vhpg
@@ -83,7 +84,7 @@ class VhpgAcceptatieView(TemplateView):
             # gebruiker is niet ingelogd, dus zou hier niet moeten komen
             return HttpResponseRedirect(reverse('Plein:plein'))
 
-        account = request.user
+        account = get_account(request)
         needs_vhpg, _ = account_needs_vhpg(account)
         if not needs_vhpg:
             # gebruiker heeft geen VHPG nodig
@@ -114,7 +115,7 @@ class VhpgAcceptatieView(TemplateView):
         form = AccepteerVHPGForm(request.POST)
         if form.is_valid():
             # hier komen we alleen als de checkbox gezet is
-            account = request.user
+            account = get_account(request)
             account_vhpg_is_geaccepteerd(account)
             schrijf_in_logboek(account, 'Rollen', 'VHPG geaccepteerd')
 

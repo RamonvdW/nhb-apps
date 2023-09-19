@@ -6,8 +6,7 @@
 
 """ Ondersteuning voor de extra rechten van sporters die niet vereisen om van rol te wisselen. """
 
-from Functie.definities import SCHEIDS_NIET
-
+from BasisTypen.definities import SCHEIDS_NIET
 
 SESSIONVAR_SCHEIDS = 'gebruiker_is_scheids'
 
@@ -18,7 +17,7 @@ def zet_sessionvar_is_scheids(account, request):
 
     if account.is_authenticated:        # pragma: no branch
         is_scheids = account.scheids != SCHEIDS_NIET
-    else:
+    else:                               # pragma: no cover
         is_scheids = False
 
     request.session[SESSIONVAR_SCHEIDS] = is_scheids

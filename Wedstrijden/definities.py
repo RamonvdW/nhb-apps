@@ -78,6 +78,15 @@ WEDSTRIJD_STATUS_TO_STR = {
     WEDSTRIJD_STATUS_GEANNULEERD: 'Geannuleerd'
 }
 
+# vertaling van wedstrijd status in een url parameter en terug
+WEDSTRIJD_STATUS2URL = {key: beschrijving.split()[0].lower() for key, beschrijving in WEDSTRIJD_STATUS_CHOICES}
+
+WEDSTRIJD_URL2STATUS = {value: key for key, value in WEDSTRIJD_STATUS2URL.items()}
+WEDSTRIJD_URL2STATUS['alle'] = None
+
+WEDSTRIJD_STATUS_URL_WACHT_OP_GOEDKEURING = WEDSTRIJD_STATUS2URL[WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING]
+
+
 WEDSTRIJD_WA_STATUS_A = 'A'
 WEDSTRIJD_WA_STATUS_B = 'B'
 

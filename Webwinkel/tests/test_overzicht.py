@@ -115,11 +115,19 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
 
+        # controleer dat het mandje niet getoond wordt
+        urls = self.extract_all_urls(resp)
+        self.assertNotIn(self.url_mandje_bestellen, urls)
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_webwinkel_product % self.product.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat het mandje niet getoond wordt
+        urls = self.extract_all_urls(resp)
+        self.assertNotIn(self.url_mandje_bestellen, urls)
 
         self.assertTrue(str(self.foto2) != '')
         self.assertTrue(str(self.product3) != '')
@@ -134,12 +142,20 @@ class TestWebwinkelOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('webwinkel/overzicht.dtl', 'plein/site_layout.dtl'))
 
+        # controleer dat het mandje wel getoond wordt
+        urls = self.extract_all_urls(resp)
+        self.assertIn(self.url_mandje_bestellen, urls)
+
         url = self.url_webwinkel_product % self.product.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('webwinkel/product.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat het mandje wel getoond wordt
+        urls = self.extract_all_urls(resp)
+        self.assertIn(self.url_mandje_bestellen, urls)
 
         url = self.url_webwinkel_product % self.product2.pk
         with self.assert_max_queries(20):

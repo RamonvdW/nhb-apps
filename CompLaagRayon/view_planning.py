@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, MUTATIE_KAMP_CUT, DEELNAME_NEE
 from Competitie.models import (Regiocompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
@@ -878,7 +879,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # for
 
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
-        account = request.user
+        account = get_account(request)
         door_str = "RKO %s" % account.volledige_naam()
 
         mutatie = None

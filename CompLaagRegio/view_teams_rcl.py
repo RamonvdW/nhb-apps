@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.definities import (TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
                                    MUTATIE_REGIO_TEAM_RONDE)
 from Competitie.models import (Competitie, CompetitieTeamKlasse, Regiocompetitie, RegiocompetitieSporterBoog,
@@ -259,9 +260,10 @@ class RegioTeamsTemplateView(TemplateView):
         context['aantal_regels_niet_af'] = len(regioteams) + 2
         context['totaal_teams'] = totaal_teams
 
-        context['cols'] = 7
+        context['cols'] = 5
         if self.subset_filter:       # rayon selectie
             context['cols'] += 1     # toon kolom met regio nummer
+        context['hdr_cols'] = context['cols'] + 2
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -816,7 +818,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                         ronde_team.save(update_fields=['team_punten'])
                     # for
 
-            account = request.user
+            account = get_account(request)
             schrijf_in_logboek(account, 'Competitie', 'Teamcompetitie doorzetten naar ronde %s voor %s' % (deelcomp.huidige_team_ronde+1, deelcomp))
 
             # voor concurrency protection, laat de achtergrondtaak de ronde doorzetten

@@ -15,7 +15,7 @@ from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 
 
-TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
+TEMPLATE_OVERZICHT = 'functie/beheerders.dtl'
 
 
 class LijstBeheerdersView(UserPassesTestMixin, ListView):
@@ -183,7 +183,10 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
                                       .order_by('username'))
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
-            context['url_sec_hwl'] = reverse('Functie:sec-hwl-lid_nrs')
+            context['url_sec_hwl'] = reverse('Functie:emails-sec-hwl')
+
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO):
+            context['url_rcl'] = reverse('Functie:emails-rcl')
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

@@ -20,6 +20,10 @@ urlpatterns = [
          view_online.DynamicBondspasOphalenView.as_view(),
          name='dynamic-ophalen'),
 
+    path('dynamic/download/',
+         view_online.DynamicBondspasDownloadView.as_view(),
+         name='dynamic-download'),
+
     path('toon/van-lid/<lid_nr>/',
          view_online.ToonBondspasBeheerderView.as_view(),
          name='toon-bondspas-van')

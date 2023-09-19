@@ -14,14 +14,15 @@ from Vereniging.models import Vereniging
 import datetime
 
 
-class TestFunctieOverzicht(E2EHelpers, TestCase):
+class TestFunctieBeheerders(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
     test_after = ('Account.tests.test_otp_controle',)
 
     url_overzicht = '/functie/overzicht/'
-    url_overzicht_lid_nrs = '/functie/overzicht/alle-lid-nrs/sec-hwl/'
+    url_beheerders_sec_hwl = '/functie/overzicht/beheerders/sec-hwl/'
+    url_beheerders_rcl = '/functie/overzicht/beheerders/rcl/'
     url_wijzig = '/functie/wijzig/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_activeer_rol = '/functie/activeer-rol/%s/'
@@ -143,7 +144,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/beheerders.dtl', 'plein/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if url.startswith('/functie/wijzig/')]
         self.assertEqual(len(urls), 6)      # MWZ, MWW, MO, CS, BKO 18m, BKO 25m
 
@@ -156,7 +157,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/beheerders.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "BKO Indoor")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 4)      # 4x RKO
@@ -168,7 +169,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/beheerders.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "RKO Rayon 3 Indoor")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 4)      # 4x RCL
@@ -182,7 +183,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/beheerders.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "RCL Regio 111 Indoor")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de RCL
@@ -203,7 +204,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/beheerders.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "HWL")
         urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de HWL
@@ -266,30 +267,55 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
-    def test_lid_nrs(self):
+    def test_sec_hwl(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht_lid_nrs)
+            resp = self.client.get(self.url_beheerders_sec_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_wissel_naar_functie(self.functie_rko3)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht_lid_nrs)
+            resp = self.client.get(self.url_beheerders_sec_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_wissel_naar_functie(self.functie_rcl111)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht_lid_nrs)
+            resp = self.client.get(self.url_beheerders_sec_hwl)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('functie/emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
+
+    def test_rcl(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_rcl)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/emails-rcl.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_wissel_naar_functie(self.functie_rko3)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_rcl)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/emails-rcl.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_wissel_naar_functie(self.functie_rcl111)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beheerders_rcl)
+        self.assert403(resp, 'Geen toegang')
+
 
 # end of file
