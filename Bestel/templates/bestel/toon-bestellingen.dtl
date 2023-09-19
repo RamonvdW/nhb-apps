@@ -60,7 +60,7 @@
 
     <!-- blauwe balk met informatie label : info -->
     <div class="row-sv-blauw">
-        <div class="col s12 m10 offset-m1 l8 offset-l2">
+        <div class="col s12 m10 offset-m1 xl8 offset-xl2">
             <table class="white">
                 <tr>
                     <td>Vragen over deelname aan een <b>wedstrijd of evenement</b></td>

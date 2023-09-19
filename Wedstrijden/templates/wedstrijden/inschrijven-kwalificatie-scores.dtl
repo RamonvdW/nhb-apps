@@ -6,84 +6,149 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Reservering{% endblock %}
+{% block title %}{% if eerste_keer %}Reservering{% else %}Kwalificatie-scores{% endif %}{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Reservering is gemaakt</h3>
-            <p>En toegevoegd aan je winkelmandje</p>
+            {% if eerste_keer %}
+                <h3 class="page-banner">Reservering is gemaakt</h3>
+                <p>En toegevoegd aan je winkelmandje</p>
+            {% else %}
+                <h3 class="page-banner">Kwalificatiescores</h3>
+                <p>Voor <b>{{ sporter.lid_nr_en_volledige_naam }}</b> voor de wedstrijd <b>{{ wedstrijd.titel }}</b> te {{ wedstrijd.plaats_str }} op <b>{{ wedstrijd.datum_begin }}</b>.</p>
+            {% endif %}
         </div>
     </div>
+
+    {% if eerste_keer %}
+
+        <!-- blauwe balk met informatie -->
+        <div class="row-sv-blauw">
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                <div class="white" style="padding:10px">
+                    <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen wedstrijd.</p>
+                    <p>Voor deze wedstrijd vragen we om <b>kwalificatie scores</b> door te geven (zie uitleg hieronder).<br>Als er te veel inschrijvingen zijn, dan wordt er geselecteerd op basis van deze scores.</p>
+                    <p>Het is mogelijk om deze scores later nog bij te werken<br>(via Mijn pagina of de link in de e-mail).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Kwalificatie scores</h4>
+            </div>
+        </div>
+
+    {% endif %}
 
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="white" style="padding:10px">
-                <p>We hebben een plekje voor je <b>gereserveerd</b> voor de gekozen wedstrijd.</p>
-                <br>
-                <p>Voor deze wedstrijd vragen we om <b>kwalificatie-scores</b> door te geven (zie uitleg hieronder).<br>Als er te veel inschrijvingen zijn, dan wordt er geselecteerd op basis van hoge kwalificatie-scores.</p>
-
-                {% comment %}
-                <p>Rechts bovenin vind je de knop voor je <b>winkelmandje</b>.</p>
-                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer <b>bestellen</b> en afrekenen.</p>
-                <br>
-                <p>Let op: na <b>betaling</b> is je inschrijving voor de wedstrijd pas definitief.</p>
-                {% endcomment %}
+                <p>Je kan je scores van 180 pijlen opgeven. Het totaal bepaalt je ranking op de deelnemerlijst.</p>
+                <p>Je kan 3 resultaten van een 60 pijlen A-status Indoor wedstrijd doorgeven.<br>De wedstrijden moeten tussen {{ begin_datum }} en {{ eind_datum }} gehouden zijn.</p>
+                <p>Je mag ook 4 scores uit de bondscompetitie Indoor gebruiken. Dit gaat automatisch.{% if indoor_scores %}<br>(jouw 4 beste scores op dit moment zijn: {{ indoor_scores }}){% else %}<br>(we hebben nog geen scores gevonden){% endif %}</p>
             </div>
         </div>
     </div>
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Kwalificatie-scores</h4>
-        </div>
-    </div>
-
-    <!-- blauwe balk met informatie -->
+    <script>
+        // slave de datum op in numeriek format (anders krijg je ("9 september 2023")
+        // deze functie wordt meteen aangeroepen als Datepicker.init() aangeroepen wordt
+        function converteer_datum(id1, id2) {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            el2.value = el1.M_Datepicker.toString('yyyy-mm-dd');
+        }
+    </script>
+    <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <div class="white" style="padding:10px">
-                <p>Je kan 3 resultaten van een 60 pijlen A-status Indoor wedstrijd doorgeven.</p>
-                <p>Ook mag je maximaal 4 scores uit de bondscompetities Indoor gebruiken. Dit gaat automatisch.</p>
+        <div class="col s12">
 
-                {% comment %}
-                <p>Rechts bovenin vind je de knop voor je <b>winkelmandje</b>.</p>
-                <p>Je kan meerdere producten toevoegen aan je mandje en daarna in &eacute;&eacute;n keer <b>bestellen</b> en afrekenen.</p>
-                <br>
-                <p>Let op: na <b>betaling</b> is je inschrijving voor de wedstrijd pas definitief.</p>
-                {% endcomment %}
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div class="form-padding">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                        {% csrf_token %}
+
+                        <table>
+                            {% for score in kwalificatie_scores %}
+                                <tr>
+                                    <td colspan="2"><h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6></td>
+                                </tr>
+
+                                <tr>
+                                    <th>Datum</th>
+                                    <td>
+                                        <input type="hidden" id="{{ score.datum_id }}b" name="{{ score.name_str }}_datum">
+                                        <input type="text" class="nl_datepicker" id="{{ score.datum_id }}" onchange="converteer_datum('{{ score.datum_id }}', '{{ score.datum_id }}b')">
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Beschrijving</th>
+                                    <td>
+                                        <input type="text" name="{{ score.name_str }}_naam" value="{{ score.naam }}" maxlength="50" placeholder="Hoe heet de wedstrijd?">
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Waar</th>
+                                    <td>
+                                        <input type="text" name="{{ score.name_str }}_waar" value="{{ score.waar }}" maxlength="50" placeholder="Plaats (en eventueel land)">
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Resultaat (totaal 60 pijlen)</th>
+                                    <td>
+                                        <input type="number" name="{{ score.name_str }}_result" value="{{ score.resultaat }}" min="0" max="600">
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                            <!-- button -->
+                            <tr>
+                                <td colspan="2" class="center">
+                                    <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                        <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </form>
+                </div>
             </div>
-        </div>
-    </div>
-
-
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Wat wil je doen?</h4>
-        </div>
-    </div>
-
-
-    <!-- blauwe balk met kaartjes -->
-    <div class="row-sv-blauw">
-        <div class="col s12">
-
-            <!-- verder winkelen -->
-            {% include 'plein/card_icon.dtl' with title="Verder winkelen" text="Terug naar de wedstrijd waar je mee bezig was." icon="event_note" url=url_verder %}
-
-            <!-- mandje -->
-            {% url 'Bestel:toon-inhoud-mandje' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Naar mijn mandje" text="Mandje bekijken, bestelling afronden en betalen." icon="shopping_cart" url=card_url %}
 
         </div>
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-toegevoegd-aan-mandje" %}
+    <!-- initialisatie van de datum pickers -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function()
+        {
+            const minDate = new Date("{{ begin_datum|date:'Y-m-d' }}");
+            const maxDate = new Date("{{ eind_datum|date:'Y-m-d' }}");
+            const jarenRange = [{{ begin_jaar }}, {{ eind_jaar }}];
+            let el = null;
+
+            {% for score in kwalificatie_scores %}
+                el = document.querySelector("#{{ score.datum_id }}");
+                M.Datepicker.init(el, { defaultDate: new Date("{{ score.datum|date:'Y-m-d' }}"),
+                                        setDefaultDate: true,
+                                        minDate: minDate, maxDate: maxDate,
+                                        yearRange: jarenRange});
+            {% endfor %}
+        })
+    </script>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-kwalificatie-scores" %}
 
 {% endblock %}

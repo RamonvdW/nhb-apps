@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.utils import timezone
 from django.shortcuts import redirect, reverse
+from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.utils.formats import localize
 from django.db.models import Q
 from Account.models import get_account
 from BasisTypen.models import BoogType
@@ -20,6 +21,7 @@ from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE2STR
 from HistComp.models import HistCompRegioIndiv
+from Kalender.view_maand import maak_compacte_wanneer_str
 from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
@@ -28,6 +30,7 @@ from Score.definities import AG_DOEL_TEAM, AG_DOEL_INDIV
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import SporterBoog, Speelsterkte
 from Sporter.operations import get_sporter_gekozen_bogen, get_sporter_voorkeuren
+from Wedstrijden.models import WedstrijdInschrijving
 import logging
 import copy
 
@@ -448,6 +451,37 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
         return scores
 
+    def _find_wedstrijden(self):
+        heeft_wedstrijden = False
+
+        vandaag = timezone.now().date()
+        wedstrijden = (WedstrijdInschrijving
+                       .objects
+                       .filter(sporterboog__sporter=self.sporter,
+                               wedstrijd__datum_begin__gte=vandaag)
+                       .select_related('wedstrijd',
+                                       'wedstrijd__locatie')
+                       .order_by('wedstrijd__datum_begin'))
+
+        for inschrijving in wedstrijden:
+            wedstrijd = inschrijving.wedstrijd
+
+            inschrijving.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
+
+            inschrijving.plaats_str = wedstrijd.locatie.plaats
+
+            if wedstrijd.eis_kwalificatie_scores:
+                inschrijving.url_kwalificatie_scores = reverse('Wedstrijden:inschrijven-kwalificatie-scores',
+                                                               kwargs={'inschrijving_pk': inschrijving.pk})
+
+            inschrijving.url_details = reverse('Wedstrijden:wedstrijd-details',
+                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+            heeft_wedstrijden = True
+        # for
+
+        return heeft_wedstrijden, wedstrijden
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -497,6 +531,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             context['speelsterktes'] = self._find_speelsterktes()
 
             context['diplomas'] = self._find_diplomas()
+
+            context['toon_wedstrijden'], context['wedstrijden'] = self._find_wedstrijden()
 
         if self.sporter.is_gast:
             context['gast'] = self.sporter.gastregistratie_set.first()
