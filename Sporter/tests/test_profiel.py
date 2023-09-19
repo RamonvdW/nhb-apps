@@ -6,7 +6,9 @@
 
 from django.utils.dateparse import parse_date
 from django.test import TestCase
-from BasisTypen.models import BoogType
+from django.utils import timezone
+from BasisTypen.definities import ORGANISATIE_KHSN
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import Bestelling
 from Competitie.definities import DEELNAME_JA, DEELNAME_NEE, INSCHRIJF_METHODE_1
 from Competitie.models import (Regiocompetitie, RegiocompetitieSporterBoog,
@@ -20,6 +22,8 @@ from Functie.operations import maak_functie
 from Geo.models import Regio
 from HistComp.definities import HISTCOMP_TYPE_18
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
+from Locatie.definities import BAAN_TYPE_EXTERN
+from Locatie.models import Locatie
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
@@ -29,6 +33,8 @@ from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 from Vereniging.models import Vereniging
+from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINE_INDOOR
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 import datetime
 
 
@@ -667,5 +673,91 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+
+    def test_wedstrijden(self):
+        # log in as sporter
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(self.sporter1)
+
+        now = timezone.now()
+        volgende_week = (now + datetime.timedelta(days=7)).date()
+        sporterboog = SporterBoog.objects.select_related('boogtype').filter(sporter=self.sporter1).first()
+        boogtype = sporterboog.boogtype
+        klasse = KalenderWedstrijdklasse.objects.filter(boogtype=sporterboog.boogtype).first()
+
+        locatie = Locatie(
+                        naam='Test locatie',
+                        baan_type=BAAN_TYPE_EXTERN,
+                        discipline_indoor=True,
+                        banen_18m=15,
+                        max_sporters_18m=15*4,
+                        adres='Sportstraat 1, Pijlstad',
+                        plaats='Pijlstad')
+        locatie.save()
+        locatie.verenigingen.add(self.ver)
+
+        sessie = WedstrijdSessie(
+                        datum=volgende_week,
+                        tijd_begin='10:00',
+                        tijd_einde='15:00',
+                        beschrijving='test',
+                        max_sporters=20)
+        sessie.save()
+        sessie.wedstrijdklassen.add(klasse)
+
+        wedstrijd = Wedstrijd(
+                        titel='Test wedstrijd',
+                        status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                        datum_begin=volgende_week,
+                        datum_einde=volgende_week,
+                        inschrijven_tot=1,
+                        organiserende_vereniging=self.ver,
+                        locatie=locatie,
+                        organisatie=ORGANISATIE_KHSN,
+                        discipline=WEDSTRIJD_DISCIPLINE_INDOOR,
+                        aantal_banen=locatie.banen_18m)
+        wedstrijd.save()
+        wedstrijd.boogtypen.add(boogtype)
+        wedstrijd.wedstrijdklassen.add(klasse)
+        wedstrijd.sessies.add(sessie)
+
+        inschrijving = WedstrijdInschrijving(
+                            wanneer=now,
+                            status=INSCHRIJVING_STATUS_DEFINITIEF,
+                            wedstrijd=wedstrijd,
+                            sessie=sessie,
+                            sporterboog=sporterboog,
+                            wedstrijdklasse=klasse,
+                            koper=self.account_normaal,
+                            log='test')
+        inschrijving.save()
+
+        with self.assert_max_queries(22):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Wedstrijden')
+        self.assertContains(resp, 'Pijlstad')
+        urls = self.extract_all_urls(resp)
+        # print('urls: %s' % repr(urls))
+        urls = [url for url in urls if url.startswith('/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/')]
+        self.assertEqual(0, len(urls))
+
+        # herhaal met kwalificatie scores
+        wedstrijd.eis_kwalificatie_scores = True
+        wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
+
+        with self.assert_max_queries(22):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Wedstrijden')
+        self.assertContains(resp, 'Pijlstad')
+        urls = self.extract_all_urls(resp)
+        # print('urls: %s' % repr(urls))
+        urls = [url for url in urls if url.startswith('/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/')]
+        self.assertEqual(1, len(urls))
 
 # end of file
