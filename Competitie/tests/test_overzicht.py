@@ -118,5 +118,4 @@ class TestCompetitieOverzicht(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
 
-
 # end of file
