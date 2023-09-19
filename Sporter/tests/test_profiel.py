@@ -33,7 +33,8 @@ from Vereniging.models2 import Secretaris
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_DISCIPLINE_INDOOR
+from Wedstrijden.definities import (INSCHRIJVING_STATUS_DEFINITIEF, WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                    WEDSTRIJD_DISCIPLINE_INDOOR)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 import datetime
 

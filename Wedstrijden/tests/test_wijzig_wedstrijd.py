@@ -17,7 +17,7 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 import datetime
 
 
-class TestWedstrijd(E2EHelpers, TestCase):
+class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module wedstrijd wijzigen """
 
@@ -162,7 +162,8 @@ class TestWedstrijd(E2EHelpers, TestCase):
                                           'scheidsrechters': 'Scheids1\nScheids2',
                                           'begrenzing': 'begrenzing_L',
                                           'extern': 'ja',
-                                          'sluit': 'sluit_5'})
+                                          'sluit': 'sluit_5',
+                                          'kwalificatie_scores': 'X'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
@@ -180,6 +181,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.begrenzing, 'L')
         self.assertEqual(wedstrijd.inschrijven_tot, 5)
         self.assertTrue(wedstrijd.extern_beheerd)
+        self.assertTrue(wedstrijd.eis_kwalificatie_scores)
 
         datum = '%s-1-1' % (wedstrijd.datum_begin.year + 1)
         with self.assert_max_queries(20):

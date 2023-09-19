@@ -61,7 +61,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         # controleer dat de wijziging door de koper of de sporter zelf gedaan wordt
         account = get_account(self.request)
         if account != inschrijving.koper and inschrijving.sporterboog.sporter.account != account:
-            raise Http404('Inschrijving niet gevonden')
+            raise Http404('Mag niet wijzigen')
 
         context['sporter'] = inschrijving.sporterboog.sporter
 
@@ -116,8 +116,14 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Wedstrijden:inschrijven-kwalificatie-scores',
                                          kwargs={'inschrijving_pk': inschrijving.pk})
 
+        url_kalender = reverse('Kalender:maand',
+                               kwargs={'jaar': wedstrijd.datum_begin.year,
+                                       'maand': MAAND2URL[wedstrijd.datum_begin.month],
+                                       'soort': 'alle',
+                                       'bogen': 'auto'})
+
         context['kruimels'] = (
-            (reverse('Kalender:landing-page'), 'Wedstrijdkalender'),
+            (url_kalender, 'Wedstrijdkalender'),
             (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (None, 'Kwalificatie scores'),
         )
@@ -160,14 +166,22 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
             inschrijving = (WedstrijdInschrijving
                             .objects
+                            .select_related('sporterboog__sporter',
+                                            'koper')
                             .get(pk=inschrijving_pk,
                                  wedstrijd__eis_kwalificatie_scores=True))
         except WedstrijdInschrijving.DoesNotExist:
             raise Http404('Inschrijving niet gevonden')
 
+        # controleer dat de wijziging door de koper of de sporter zelf gedaan wordt
+        account = get_account(self.request)
+        if account != inschrijving.koper and inschrijving.sporterboog.sporter.account != account:
+            raise Http404('Mag niet wijzigen')
+
         wedstrijd = inschrijving.wedstrijd
         jaar = wedstrijd.datum_begin.year - 1
         begin_datum = datetime.date(jaar, 9, 1)      # 1 september
+        eind_datum = wedstrijd.datum_begin - datetime.timedelta(days=1 + wedstrijd.datum_begin.weekday())
 
         eerste_keer = False
         qset = Kwalificatiescore.objects.filter(inschrijving=inschrijving)
@@ -196,9 +210,12 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             result_str = request.POST.get(name_str + '_result', '')[:5]     # afkappen voor de veiligheid
 
             try:
-                datum = datetime.datetime.strptime(datum_str, '%Y-%m-%d')
+                datum = datetime.datetime.strptime(datum_str, '%Y-%m-%d').date()
             except ValueError:
                 datum = begin_datum
+            else:
+                if datum < begin_datum or datum > eind_datum:
+                    datum = begin_datum
 
             naam_str = naam_str.strip()
             waar_str = waar_str.strip()
