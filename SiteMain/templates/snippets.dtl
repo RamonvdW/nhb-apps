@@ -213,22 +213,20 @@
             </tr>
         </thead>
 
-        <tbody>
-            {% for account in hulp %}
-                <tr>
-                    <td>{{ account.username }}</td>
-                    <td>{{ account.volledige_naam }}</td>
-                    <td>{{ account.functies_str }}</td>
-                    <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="4">
-                        <i>Geen accounts gevonden die hulp nodig hebben</i>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
+        {% for account in hulp %}
+            <tr>
+                <td>{{ account.username }}</td>
+                <td>{{ account.volledige_naam }}</td>
+                <td>{{ account.functies_str }}</td>
+                <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">
+                    <i>Geen accounts gevonden die hulp nodig hebben</i>
+                </td>
+            </tr>
+        {% endfor %}
     </table>
 
 

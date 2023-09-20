@@ -279,6 +279,8 @@ def rol_zet_sessionvars(account, request):
                     rol = Rollen.ROL_MWW
                 elif functie.rol == "SUP":
                     rol = Rollen.ROL_SUP
+                elif functie.rol == "CS":
+                    rol = Rollen.ROL_CS
 
                 if rol:
                     child_tup = (rol, functie.pk)

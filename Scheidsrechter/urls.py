@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Scheidsrechter import view_overzicht
+from Scheidsrechter import view_overzicht, view_korps
 
 app_name = 'Scheidsrechter'
 
@@ -17,8 +17,12 @@ urlpatterns = [
          name='overzicht'),
 
     path('korps/',
-         view_overzicht.KorpsView.as_view(),
+         view_korps.KorpsView.as_view(),
          name='korps'),
+
+    path('korps-met-contactgegevens/',
+         view_korps.KorpsMetContactGegevensView.as_view(),
+         name='korps-met-contactgegevens'),
 
     path('wedstrijden/',
          view_overzicht.WedstrijdenView.as_view(),

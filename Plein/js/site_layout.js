@@ -76,7 +76,7 @@ function myTableFilter(zoekveld, tableId)
 {
     'use strict';
     const table = document.getElementById(tableId);
-    if (table === undefined) {
+    if (table === null) {
         return;
     }
 

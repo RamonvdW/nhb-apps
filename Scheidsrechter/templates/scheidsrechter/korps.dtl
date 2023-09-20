@@ -22,15 +22,15 @@
     <div class="row-sv-blauw">
         <div class="col s12">
             <table class="white">
-                {% for obj in korps %}
-                    {% if obj.is_break %}
+                {% for sporter in korps %}
+                    {% if sporter.is_break %}
                         <tr>
-                            <td class="center sv-blauw-text"><h6>{{ obj.scheids_str }}</h6></td>
+                            <td class="center sv-blauw-text"><h6>{{ sporter.scheids_str }}</h6></td>
                         </tr>
                     {% endif %}
 
                     <tr>
-                        <td class="center">{{ obj.volledige_naam }}</td>
+                        <td class="center">{{ sporter.volledige_naam }}</td>
                     </tr>
                 {% endfor %}
             </table>

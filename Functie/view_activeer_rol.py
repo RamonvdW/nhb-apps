@@ -118,6 +118,10 @@ class ActiveerRolView(UserPassesTestMixin, View):
             url = reverse('Wedstrijden:manager-status', kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GOEDKEURING})
             return redirect(url)
 
+        if rol_nu == Rollen.ROL_CS:
+            url = reverse('Scheidsrechter:overzicht')
+            return redirect(url)
+
         return redirect('Functie:wissel-van-rol')
 
 
