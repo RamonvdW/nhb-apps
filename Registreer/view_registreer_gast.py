@@ -523,9 +523,9 @@ class RegistreerGastVolgendeVraagView(View):
             club = request.POST.get('club', '')[:100]       # afkappen voor extra veiligheid
             plaats = request.POST.get('plaats', '')[:50]    # afkappen voor extra veiligheid
 
-            # naam: OGIO
+            # naam: ARC, NHB, OGIO
             # plaats: Epe, Ede, Ee, As
-            is_valid = len(club) >= 4 and len(plaats) >= 2
+            is_valid = len(club) >= 3 and len(plaats) >= 2
 
             if not is_valid:
                 context = {

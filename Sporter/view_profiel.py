@@ -470,7 +470,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             inschrijving.plaats_str = wedstrijd.locatie.plaats
 
-            if wedstrijd.eis_kwalificatie_scores:
+            if wedstrijd.eis_kwalificatie_scores:       # TODO: einddatum voor wijzigingen
                 inschrijving.url_kwalificatie_scores = reverse('Wedstrijden:inschrijven-kwalificatie-scores',
                                                                kwargs={'inschrijving_pk': inschrijving.pk})
 

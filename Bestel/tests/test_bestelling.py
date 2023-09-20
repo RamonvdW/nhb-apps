@@ -781,6 +781,40 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.first()
         # TODO: niet af?
 
+    def test_kwalificatie_scores(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # wedstrijd eis kwalificatie scores
+        self.wedstrijd.eis_kwalificatie_scores = True
+        self.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.first()
+
+        # bekijk de bestelling waarop nu de sectie kwalificatie scores getoond wordt
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Kwalificatie scores')
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        urls = [url for url in urls if url.startswith('/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/')]
+        self.assertEquals(1, len(urls))
+
     def test_mutatie(self):
         # een paar corner cases
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)

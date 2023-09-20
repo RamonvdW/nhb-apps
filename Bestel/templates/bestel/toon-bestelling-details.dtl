@@ -211,6 +211,7 @@
 
 
     {% if toon_kwalificatie_scores %}
+
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">

@@ -266,7 +266,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                         .all()):
             inschrijving = product.wedstrijd_inschrijving
             wedstrijd = inschrijving.wedstrijd
-            if wedstrijd.eis_kwalificatie_scores:
+            if wedstrijd.eis_kwalificatie_scores:       # TODO: einddatum voor wijzigingen
                 wedstrijd.url_kwalificatie_scores = reverse('Wedstrijden:inschrijven-kwalificatie-scores',
                                                             kwargs={'inschrijving_pk': inschrijving.pk})
                 wedstrijd.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
