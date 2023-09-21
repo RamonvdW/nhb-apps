@@ -47,7 +47,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_BB:
             self.is_staff = self.request.user.is_staff
 
-        return self.rol_nu in (Rollen.ROL_BB,
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_CS,
                                Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                                Rollen.ROL_HWL, Rollen.ROL_SEC)
 
@@ -103,7 +103,7 @@ class LijstView(UserPassesTestMixin, TemplateView):
             # for
             return objs
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_CS):
             # toon de landelijke lijst)
             return (Vereniging
                     .objects

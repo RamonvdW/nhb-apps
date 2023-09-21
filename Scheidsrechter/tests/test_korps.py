@@ -31,7 +31,7 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         data.maak_accounts_admin_en_bb()
         data.maak_clubs_en_sporters()
 
-        for sporter in data.sporters_scheids[SCHEIDS_BOND]:
+        for sporter in data.sporters_scheids[SCHEIDS_BOND]:             # pragma: no branch
             if sporter.account is not None:
                 cls.scheids_met_account = sporter
                 break

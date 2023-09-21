@@ -146,9 +146,11 @@ class PleinView(View):
                     context['rol_is_sec'] = True
                 elif rol_nu == Rollen.ROL_SUP:
                     context['rol_is_sup'] = True
+                elif rol_nu == Rollen.ROL_CS:
+                    context['rol_is_cs'] = True
                 else:                               # pragma: no cover
                     # vangnet voor nieuwe rollen
-                    raise Http404("Onbekende rol %s" % rol_nu)
+                    raise Http404("Onbekende rol %s (interne fout)" % rol_nu)
 
                 if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
                     context['toon_manager_sectie'] = True
