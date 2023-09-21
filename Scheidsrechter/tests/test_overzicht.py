@@ -8,11 +8,11 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
 from BasisTypen.models import KalenderWedstrijdklasse
+from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-from Sporter.models import Sporter
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, ORGANISATIE_IFAA
 from Wedstrijden.models import WedstrijdSessie, Wedstrijd
@@ -49,6 +49,7 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.assertIsNotNone(self.scheids_met_account)
+        self.functie_cs = Functie.objects.get(rol='CS')
 
         # maak een wedstrijd aan waar scheidsrechters op nodig zijn
         ver = Vereniging(
@@ -147,10 +148,10 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details)
 
-    def test_bb(self):
+    def test_cs(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
 
         # plein heeft kaartje voor scheidsrechters
         resp = self.client.get(self.url_plein)

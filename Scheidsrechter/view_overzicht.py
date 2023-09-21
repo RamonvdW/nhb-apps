@@ -40,7 +40,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_CS):
+        if self.rol_nu == Rollen.ROL_CS:
             return True
         if self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True
@@ -75,7 +75,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_BB:
+        if rol_nu == Rollen.ROL_CS:
             return True
         if rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True
@@ -124,7 +124,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_BB:
+        if rol_nu == Rollen.ROL_CS:
             return True
         if rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True

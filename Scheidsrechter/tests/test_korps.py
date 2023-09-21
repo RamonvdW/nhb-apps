@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
 from Functie.models import Functie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -63,30 +63,13 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         resp = self.client.get(self.url_korps_met_contact)
         self.assert403(resp, 'Geen toegang')
 
-    def test_bb(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-
-        # corner case: geen SR5
-        Sporter.objects.filter(scheids=SCHEIDS_INTERNATIONAAL).delete()
-
-        # korps
+        # corner case: geen scheidsrechters
+        Sporter.objects.exclude(scheids=SCHEIDS_INTERNATIONAAL).update(scheids=SCHEIDS_NIET)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_korps)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/korps.dtl', 'plein/site_layout.dtl'))
-
-        # korps met contactgegevens
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_korps_met_contact)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/korps-contactgegevens.dtl', 'plein/site_layout.dtl'))
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_korps)
-        self.e2e_assert_other_http_commands_not_supported(self.url_korps_met_contact)
 
     def test_cs(self):
         self.functie_cs.accounts.add(self.scheids_met_account.account)
@@ -108,5 +91,9 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/korps-contactgegevens.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_korps)
+        self.e2e_assert_other_http_commands_not_supported(self.url_korps_met_contact)
+
 
 # end of file
