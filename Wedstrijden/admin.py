@@ -11,7 +11,8 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdKorting, Wed
 class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
     """ Admin configuratie voor Wedstrijd """
 
-    list_filter = ('status', 'extern_beheerd', 'is_ter_info', 'organisatie', 'wa_status', 'discipline')
+    list_filter = ('status', 'extern_beheerd', 'is_ter_info', 'organisatie', 'wa_status', 'discipline',
+                   'aantal_scheids')
 
     readonly_fields = ('sessies', 'boogtypen', 'wedstrijdklassen')
 

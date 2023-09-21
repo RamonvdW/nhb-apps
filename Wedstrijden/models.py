@@ -19,7 +19,7 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
                                     INSCHRIJVING_STATUS_CHOICES, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                    INSCHRIJVING_STATUS_TO_STR)
+                                    INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
 from decimal import Decimal
 
 
@@ -153,6 +153,9 @@ class Wedstrijd(models.Model):
 
     # hoe lang voor het begin van hun sessie moeten de sporters aanwezig zijn
     minuten_voor_begin_sessie_aanwezig_zijn = models.PositiveSmallIntegerField(default=45)
+
+    # benodigde scheidsrechters
+    aantal_scheids = models.PositiveSmallIntegerField(default=AANTAL_SCHEIDS_GEEN_KEUZE)
 
     # tekstveld voor namen scheidsrechters door organisatie aangedragen
     scheidsrechters = models.TextField(max_length=500, default='',

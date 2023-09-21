@@ -157,7 +157,12 @@
                                         <span>&nbsp;&nbsp;</span>
                                     {% endif %}
                                     {% if url_next_tekst %}
-                                        <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
+                                        {% if wed.wacht_op_keuze_scheids %}
+                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
+                                            <br><p class="sv-rood-text">Eerst een keuze maken voor de scheidsrechters behoefte.</p>
+                                        {% else %}
+                                            <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
+                                        {% endif %}
                                     {% endif %}
                                     {% if not wed.verkoopvoorwaarden_status_acceptatie %}
                                         <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
@@ -497,6 +502,25 @@
                                         <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
                                     {% else %}
                                         <textarea name="scheidsrechters" class="materialize-textarea" oninput="gewijzigd()">{{ wed.scheidsrechters }}</textarea>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th{% if wed.wacht_op_keuze_scheids %} class="sv-rood"{% endif %}>Toekenning scheidsrechters</th>
+                                <td>
+                                    {% if keuze_aantal_scheids %}
+                                        <select name="aantal_scheids" onchange="gewijzigd()">
+                                            {% for value, tekst in keuze_aantal_scheids %}
+                                                <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        {% if wed.aantal_scheids_str %}
+                                            <span>{{ wed.aantal_scheids_str }}</span>
+                                        {% else %}
+                                            <i>Nog niet bekend</i>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                             </tr>

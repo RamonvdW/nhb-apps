@@ -28,10 +28,10 @@ from Sporter.models import get_sporter
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
-                                    WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP,
+                                    WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS2URL,
                                     WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                     WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
-                                    WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
+                                    WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
 from Wedstrijden.models import Wedstrijd
 import datetime
 from types import SimpleNamespace
@@ -103,6 +103,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 context['limit_edits'] = True
+
+        wedstrijd.wacht_op_keuze_scheids = wedstrijd.aantal_scheids == AANTAL_SCHEIDS_GEEN_KEUZE
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
             context['wijzig_kwalificatie_scores'] = True
@@ -348,6 +350,34 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
             context['toon_ter_info'] = True
+
+            context['keuze_aantal_scheids'] = [
+                (AANTAL_SCHEIDS_GEEN_KEUZE, 'Nog geen keuze gemaakt'),
+                (0, 'Geen scheidsrechters'),
+                (1, '1 scheidsrechter'),
+                (2, '2 scheidsrechters'),
+                (3, '3 scheidsrechters'),
+                (4, '4 scheidsrechters'),
+                (5, '5 scheidsrechters'),
+                (6, '6 scheidsrechters'),
+            ]
+
+            if wedstrijd.aantal_scheids != AANTAL_SCHEIDS_GEEN_KEUZE:
+                context['keuze_aantal_scheids'].pop(0)
+
+        else:
+            if wedstrijd.aantal_scheids == AANTAL_SCHEIDS_GEEN_KEUZE:
+                wedstrijd.aantal_scheids_str = ''
+            elif wedstrijd.aantal_scheids == 0:
+                wedstrijd.aantal_scheids_str = 'Geen scheidsrechters'
+            elif wedstrijd.aantal_scheids == 1:
+                # TODO: duidelijker maken: SR4, SR3?
+                wedstrijd.aantal_scheids_str = '1 scheidsrechter'
+            else:   # wedstrijd.aantal_scheids > 1:
+                # TODO: duidelijker maken: 1x SR4 + 2x SR3, eventueel "hoofdscheidsrechter" noemen
+                wedstrijd.aantal_scheids_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
+
+            # TODO: namen van de scheidsrechters toevoegen indien bekend
 
         context['url_opslaan'] = reverse('Wedstrijden:wijzig-wedstrijd',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -622,6 +652,15 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 else:
                     wedstrijd.is_ter_info = False
 
+                aantal_scheids_str = request.POST.get('aantal_scheids', '')
+                try:
+                    aantal_scheids = int(aantal_scheids_str[:3])        # afkappen voor de veiligheid
+                except ValueError:
+                    wedstrijd.aantal_scheids = AANTAL_SCHEIDS_GEEN_KEUZE
+                else:
+                    if 0 <= aantal_scheids <= 9:
+                        wedstrijd.aantal_scheids = aantal_scheids
+
             if not limit_edits:
                 wedstrijd.eis_kwalificatie_scores = False
                 eis = request.POST.get('kwalificatie_scores', '')
@@ -653,7 +692,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         if self.rol_nu == Rollen.ROL_HWL:
             url = reverse('Wedstrijden:vereniging')
         else:
-            url = reverse('Wedstrijden:manager')
+            url = reverse('Wedstrijden:manager-status', kwargs={'status': WEDSTRIJD_STATUS2URL[wedstrijd.status]})
 
         return HttpResponseRedirect(url)
 
