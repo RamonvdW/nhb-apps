@@ -43,6 +43,12 @@
                             <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>
                         </td>
                     </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <i>Geen toekomstige wedstrijden met scheidsrechter behoefte</i>
+                        </td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>

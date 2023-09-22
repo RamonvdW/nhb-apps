@@ -155,7 +155,7 @@ class Wedstrijd(models.Model):
     minuten_voor_begin_sessie_aanwezig_zijn = models.PositiveSmallIntegerField(default=45)
 
     # benodigde scheidsrechters
-    aantal_scheids = models.PositiveSmallIntegerField(default=AANTAL_SCHEIDS_GEEN_KEUZE)
+    aantal_scheids = models.IntegerField(default=AANTAL_SCHEIDS_GEEN_KEUZE)
 
     # tekstveld voor namen scheidsrechters door organisatie aangedragen
     scheidsrechters = models.TextField(max_length=500, default='',

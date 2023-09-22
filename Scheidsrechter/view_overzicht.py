@@ -16,7 +16,7 @@ from Functie.scheids import gebruiker_is_scheids
 from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
-                                    WEDSTRIJD_BEGRENZING_TO_STR)
+                                    WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 
 TEMPLATE_OVERZICHT = 'scheidsrechter/overzicht.dtl'
@@ -90,6 +90,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                        .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
                        .exclude(is_ter_info=True)
                        .exclude(toon_op_kalender=False)
+                       .exclude(aantal_scheids__lt=1)
                        .order_by('-datum_begin'))       # nieuwste bovenaan
 
         for wedstrijd in wedstrijden:

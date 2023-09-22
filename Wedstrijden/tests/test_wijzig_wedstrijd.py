@@ -12,7 +12,7 @@ from Locatie.models import Locatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD, AANTAL_SCHEIDS_GEEN_KEUZE
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 import datetime
 
@@ -263,7 +263,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.begrenzing, 'V')
         self.assertEqual(wedstrijd.inschrijven_tot, 5)
         self.assertTrue(wedstrijd.extern_beheerd)
-        self.assertEqual(wedstrijd.aantal_scheids, 666)     # mag niet
+        self.assertEqual(wedstrijd.aantal_scheids, AANTAL_SCHEIDS_GEEN_KEUZE)     # mag niet
 
         # zet de wedstrijd door 'Geaccepteerd' en haal de pagina opnieuw op
         wedstrijd.aantal_scheids = 0
@@ -294,7 +294,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # zet de wedstrijd door 'Geannuleerd' en haal de pagina opnieuw op
-        wedstrijd.aantal_scheids = 666
+        wedstrijd.aantal_scheids = AANTAL_SCHEIDS_GEEN_KEUZE
         wedstrijd.status = WEDSTRIJD_STATUS_GEANNULEERD
         wedstrijd.save(update_fields=['aantal_scheids', 'status'])
         with self.assert_max_queries(20):
@@ -358,7 +358,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # stel het aantal scheidsrechters in
-        self.assertEqual(wedstrijd.aantal_scheids, 666)
+        self.assertEqual(wedstrijd.aantal_scheids, AANTAL_SCHEIDS_GEEN_KEUZE)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal_scheids': '1'})
         self.assert_is_redirect(resp, self.url_wedstrijden_manager_wacht)

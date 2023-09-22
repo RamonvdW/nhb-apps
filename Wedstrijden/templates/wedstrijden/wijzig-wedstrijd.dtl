@@ -507,7 +507,7 @@
                             </tr>
 
                             <tr>
-                                <th{% if wed.wacht_op_keuze_scheids %} class="sv-rood"{% endif %}>Toekenning scheidsrechters</th>
+                                <th{% if wed.wacht_op_keuze_scheids and keuze_aantal_scheids %} class="sv-rood"{% endif %}>Toekenning scheidsrechters</th>
                                 <td>
                                     {% if keuze_aantal_scheids %}
                                         <select name="aantal_scheids" onchange="gewijzigd()">

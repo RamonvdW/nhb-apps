@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='wedstrijd',
             name='aantal_scheids',
-            field=models.PositiveSmallIntegerField(default=AANTAL_SCHEIDS_GEEN_KEUZE),
+            field=models.IntegerField(default=AANTAL_SCHEIDS_GEEN_KEUZE),
         ),
     ]
 

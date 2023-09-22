@@ -172,6 +172,6 @@ WEDSTRIJD_KORTING_SOORT_TO_STR = {
 }
 
 # speciale waarde voor Wedstrijd.aantal_scheids
-AANTAL_SCHEIDS_GEEN_KEUZE = 666
+AANTAL_SCHEIDS_GEEN_KEUZE = -1
 
 # end of file

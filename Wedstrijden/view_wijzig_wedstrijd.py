@@ -375,7 +375,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.aantal_scheids_str = '1 scheidsrechter'
             else:   # wedstrijd.aantal_scheids > 1:
                 # TODO: duidelijker maken: 1x SR4 + 2x SR3, eventueel "hoofdscheidsrechter" noemen
-                wedstrijd.aantal_scheids_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
+                wedstrijd.aantal_scheids_str = '%s scheidsrechters' % wedstrijd.aantal_scheids
 
             # TODO: namen van de scheidsrechters toevoegen indien bekend
 
