@@ -97,8 +97,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
         context['alle'] = alle
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Functie:overzicht'), 'Beheerders'),
+            (reverse('Vereniging:lijst'), 'Verenigingen'),
             (None, 'E-mailadressen SEC en HWL')
         )
 

@@ -21,6 +21,13 @@
                 <p>Hieronder volgt de lijst van {{ verenigingen.count }} verenigingen in jouw gebied.</p>
             {% endif %}
 
+            {% if url_sec_hwl %}
+                <p>
+                    <a class="btn-sv-rood" href="{{ url_sec_hwl }}">
+                        <i class="notranslate material-icons-round left">email</i>E-mailadressen van SEC en HWL</a>
+                </p>
+            {% endif %}
+
             {% if contact_geen_beheerders %}
                 <p><a class="btn-sv-rood" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
             {% endif %}

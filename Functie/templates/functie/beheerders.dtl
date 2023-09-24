@@ -21,13 +21,6 @@
             {% endif %}
             <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
 
-            {% if url_sec_hwl %}
-                <p>
-                    <a class="btn-sv-rood" href="{{ url_sec_hwl }}">
-                        <i class="notranslate material-icons-round left">email</i>E-mailadressen van SEC en HWL</a>
-                </p>
-            {% endif %}
-
             {% if url_rcl %}
                 <p>
                     <a class="btn-sv-rood" href="{{ url_rcl }}">

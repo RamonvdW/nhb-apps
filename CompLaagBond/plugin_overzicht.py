@@ -38,7 +38,7 @@ def get_kaartjes_bond(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_indi
         if comp.fase_indiv == 'N':
             url = reverse('CompLaagBond:kleine-klassen-samenvoegen-indiv', kwargs={'deelkamp_pk': deelkamp_bk.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=2,
                         titel="Kleine klassen",
                         icoon="merge",
                         tekst="Kleine wedstrijdklassen samenvoegen voor de individuele Bondskampioenschappen.",

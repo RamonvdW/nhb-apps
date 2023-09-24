@@ -41,7 +41,7 @@
             </div>
 
             <!-- wit informatie veld -->
-            <div class="col s12 m10 offset-m1" style="margin-top:50px; margin-bottom:50px">
+            <div class="col s12 m10 offset-m1" style="margin-top:30px; margin-bottom:30px">
                 <div class="white" style="padding:10px">
                     <h5 class="sv-rood-text">Controleer dat onderstaande gegevens juist zijn.</h5>
                     <p>Gebruik uitslag <b>seizoen {{ seizoen }}</b>, afstand <b>{{ afstand }}m</b>.</p>

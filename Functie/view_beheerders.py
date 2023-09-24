@@ -182,9 +182,6 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
                                       .filter(is_BB=True)
                                       .order_by('username'))
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
-            context['url_sec_hwl'] = reverse('Functie:emails-sec-hwl')
-
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO):
             context['url_rcl'] = reverse('Functie:emails-rcl')
 

@@ -193,6 +193,9 @@ class LijstView(UserPassesTestMixin, TemplateView):
                     ver.cluster_letters = str(ver.regio.regio_nr) + ver.cluster_letters
         # for
 
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+            context['url_sec_hwl'] = reverse('Functie:emails-sec-hwl')
+
         context['kruimels'] = (
             (None, 'Verenigingen'),
         )
