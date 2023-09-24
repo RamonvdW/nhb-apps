@@ -24,12 +24,28 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
                     url=url)
     kaartjes_algemeen.append(kaartje)
 
+    # Verenigingen
+    url = reverse('Vereniging:lijst')
+    if rol_nu == Rollen.ROL_RCL:
+        tekst = "Overzicht van de verenigingen in jouw regio"
+    elif rol_nu == Rollen.ROL_RKO:
+        tekst = "Overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon."
+    else:
+        tekst = "Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters."
+    kaartje = SimpleNamespace(
+                    prio=7,
+                    titel="Verenigingen",
+                    icoon="share_location",
+                    tekst=tekst,
+                    url=url)
+    kaartjes_algemeen.append(kaartje)
+
     # Clusters beheren
     if rol_nu == Rollen.ROL_RCL:
         if comp.afstand == functie_nu.comp_type:
             url = reverse('CompLaagRegio:clusters')
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=8,
                         titel="Clusters",
                         icoon="group_work",
                         tekst="Verenigingen groeperen in geografische clusters.",
@@ -40,7 +56,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     if comp.klassengrenzen_vastgesteld:
         url = reverse('Competitie:klassengrenzen-tonen', kwargs={'comp_pk': comp.pk})
         kaartje = SimpleNamespace(
-                    prio=5,
+                    prio=9,
                     titel="Wedstrijdklassen",
                     icoon="equalizer",
                     tekst="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie.",
@@ -51,7 +67,7 @@ def get_kaartjes_beheer(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_in
     if comp.fase_indiv >= 'C':
         url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
         kaartje = SimpleNamespace(
-                    prio=9,
+                    prio=4,
                     titel="Uitslagenlijsten",
                     icoon="scoreboard",
                     tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",

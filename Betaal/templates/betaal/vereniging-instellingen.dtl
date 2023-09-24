@@ -46,7 +46,7 @@
                     <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                         {% csrf_token %}
 
-                        <div class="center" style="margin-bottom:50px">
+                        <div class="center" style="margin-bottom:30px">
                             <h6 class="sv-blauw-text">Koppeling met Mollie</h6>
                             <p>Alleen invullen als jullie vereniging een account bij Mollie heeft</p>
                         </div>

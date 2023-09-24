@@ -13,8 +13,7 @@ from Geo.models import Regio
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 
-
-TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
+TEMPLATE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
 
 
 class InfoCompetitieView(TemplateView):
@@ -22,7 +21,7 @@ class InfoCompetitieView(TemplateView):
     """ Django class-based view voor de Competitie Info """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_INFO_COMPETITIE
+    template_name = TEMPLATE_INFO_COMPETITIE
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

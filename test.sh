@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 ARGS="$*"
+COV_AT_LEAST=97.03
 RED="\e[31m"
 RESET="\e[0m"
 TEST_DIR="./SiteMain/tmp_test_data"
 TEST_DIR_FOTOS_WEBWINKEL="$TEST_DIR/webwinkel"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
-COV_AT_LEAST=97.01
 
 # -Wa = enable deprecation warnings
 PY_OPTS="-Wa"
@@ -273,13 +273,12 @@ then
     then
         python3 -m coverage report --precision=$PRECISION --skip-covered --fail-under=$COV_AT_LEAST $OMIT 2>&1 | tee -a "$LOG"
         res=${PIPESTATUS[0]}
-
-        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
-
         if [ $res -gt 0 ] && [ -z "$ARGS" ]
         then
             COVERAGE_RED=1
         fi
+
+        python3 -m coverage html -d "$REPORT_DIR" --precision=$PRECISION --skip-covered $OMIT &>>"$LOG"
     else
         [ -n "$COV_INCLUDE" ] && COV_INCLUDE="--include=$COV_INCLUDE"
         python3 -m coverage report --precision=$PRECISION $COV_INCLUDE $OMIT
@@ -310,7 +309,7 @@ then
     echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
-    read -t 5
+    read -r -t 5
     RES=$?
     if [ $RES -ne 0 ]
     then

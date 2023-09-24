@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    {% if toon_bondscompetities or rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_mww or rol_is_mo or rol_is_wl%}
+    {% if toon_bondscompetities or rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl or rol_is_mww or rol_is_mo or rol_is_cs %}
         <!-- blauwe balk met kaartjes -->
         <div class="row-sv-blauw">
             <div class="col s12">
@@ -54,7 +54,7 @@
                 {% endif %}
 
                 <!-- records -->
-                {% if rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl %}
+                {% if rol_is_bb or rol_is_mwz or rol_is_hwl or rol_is_wl or rol_is_cs %}
                     {% url 'Records:overzicht' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
                 {% endif %}
@@ -85,21 +85,9 @@
             {% include 'plein/card_icon.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." icon="face" url=card_url %}
 
             <!-- verenigingen/accommodaties overzicht BB/BKO/MWZ -->
-            {% if rol_is_bko or rol_is_bb or rol_is_mwz %}
+            {% if rol_is_bb or rol_is_mwz or rol_is_mo or rol_is_cs %}
                 {% url 'Vereniging:lijst' as card_url %}
                 {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="share_location" url=card_url %}
-            {% endif %}
-
-            <!-- verenigingen/accommodaties overzicht RKO -->
-            {% if rol_is_rko %}
-                {% url 'Vereniging:lijst' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon." icon="share_location" url=card_url %}
-            {% endif %}
-
-            <!-- verenigingen/accommodaties overzicht RCL en HWL -->
-            {% if rol_is_rcl %}
-                {% url 'Vereniging:lijst' as card_url %}
-                {% include 'plein/card_icon.dtl' with title="Verenigingen" text="Overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodaties." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht SEC en HWL -->

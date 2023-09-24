@@ -279,6 +279,8 @@ def rol_zet_sessionvars(account, request):
                     rol = Rollen.ROL_MWW
                 elif functie.rol == "SUP":
                     rol = Rollen.ROL_SUP
+                elif functie.rol == "CS":
+                    rol = Rollen.ROL_CS
 
                 if rol:
                     child_tup = (rol, functie.pk)
@@ -444,6 +446,8 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
                  Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_MWW,
                  Rollen.ROL_SUP):
         beschr = functie_naam
+    elif rol == Rollen.ROL_CS:
+        beschr = 'Commissie Scheidsrechters'
     elif rol == Rollen.ROL_SPORTER:
         beschr = 'Sporter'
     else:   # ook rol == None

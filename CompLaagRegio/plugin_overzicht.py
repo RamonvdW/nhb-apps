@@ -33,7 +33,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
 
             url = reverse('CompBeheer:ag-vaststellen-afstand', kwargs={'afstand': comp.afstand})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=6,
                         titel="Aanvangsgemiddelden",
                         icoon="how_to_reg",
                         tekst=tekst,
@@ -43,7 +43,7 @@ def get_kaartjes_regio(rol_nu, functie_nu, comp, kaartjes_algemeen, kaartjes_ind
             # klassengrenzen vaststellen
             url = reverse('CompBeheer:klassengrenzen-vaststellen', kwargs={'comp_pk': comp.pk})
             kaartje = SimpleNamespace(
-                        prio=5,
+                        prio=6,
                         titel="Zet klassengrenzen",
                         icoon="equalizer",
                         tekst="Klassengrenzen vaststellen (eenmalige actie).",
