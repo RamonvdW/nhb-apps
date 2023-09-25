@@ -281,7 +281,7 @@
         </div>
     </div>
 
-    <p class="center">Sporters met grijze naam hebben aangegeven niet mee te willen doen met de bondscompetities.</p>
+    <p class="center">Sporter naam in grijs: die heeft "voorkeur voor de bondscompetities" niet aangevinkt staan (onder voorkeuren).</p>
 
     {% if mag_aanmelden %}
         </form>
