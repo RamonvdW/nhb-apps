@@ -97,6 +97,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         if self.rol_nu == Rollen.ROL_HWL:
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
+                if not wedstrijd.is_ter_info:
+                    wedstrijd.wacht_op_sessies = wedstrijd.sessies.count() == 0
+
                 if wedstrijd.verkoopvoorwaarden_status_acceptatie:
                     context['url_next_tekst'] = 'Vraag om goedkeuring'
                     context['url_next_status'] = reverse('Wedstrijden:zet-status',
@@ -104,12 +107,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             else:
                 context['limit_edits'] = True
 
-        wedstrijd.wacht_op_keuze_scheids = wedstrijd.aantal_scheids == AANTAL_SCHEIDS_GEEN_KEUZE
-
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ):
+
             context['wijzig_kwalificatie_scores'] = True
 
             if wedstrijd.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING:
+                wedstrijd.wacht_op_keuze_scheids = wedstrijd.aantal_scheids == AANTAL_SCHEIDS_GEEN_KEUZE
+
                 context['url_prev_tekst'] = 'Afkeuren'
                 context['url_next_tekst'] = 'Accepteren'
                 context['url_next_status'] = reverse('Wedstrijden:zet-status',
@@ -290,7 +294,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
 
         # blokkeer checkbox als de te blokkeren klassen niet uit te zetten zijn
         for klasse in opt_klasse:
-            if klasse.gebruikt:
+            if klasse.gebruikt and klasse.code_blokkeer > 0:
                 klasse2 = code2klasse[klasse.code_blokkeer]
                 if not klasse2.selected:
                     klasse2.disabled = True

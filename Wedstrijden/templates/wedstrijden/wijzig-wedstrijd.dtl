@@ -160,6 +160,9 @@
                                         {% if wed.wacht_op_keuze_scheids %}
                                             <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
                                             <br><p class="sv-rood-text">Eerst een keuze maken voor de scheidsrechters behoefte.</p>
+                                        {% elif wed.wacht_op_sessies %}
+                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
+                                            <br><p class="sv-rood-text">Eerst sessies aanmaken.</p>
                                         {% else %}
                                             <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
                                         {% endif %}
