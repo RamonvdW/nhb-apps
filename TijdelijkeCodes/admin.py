@@ -15,9 +15,11 @@ class TijdelijkeUrlAdmin(admin.ModelAdmin):
     readonly_fields = ('hoort_bij_account',
                        'hoort_bij_functie',
                        'hoort_bij_gast_reg',
-                       'hoort_bij_kampioen')
+                       'hoort_bij_kampioen',
+                       'hoort_bij_wedstrijd')
 
-    list_select_related = ('hoort_bij_functie', 'hoort_bij_account', 'hoort_bij_gast_reg', 'hoort_bij_kampioen')
+    list_select_related = ('hoort_bij_functie', 'hoort_bij_account', 'hoort_bij_gast_reg', 'hoort_bij_kampioen',
+                           'hoort_bij_wedstrijd')
 
 
 admin.site.register(TijdelijkeCode, TijdelijkeUrlAdmin)

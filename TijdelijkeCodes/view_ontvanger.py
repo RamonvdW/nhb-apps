@@ -18,8 +18,8 @@ TEMPLATE_CODE_FOUT = 'tijdelijkecodes/code-fout.dtl'
 
 
 class OntvangerView(View):
-    """ Op deze view komen de tijdelijke url's uit
-        We dispatchen naar de juiste afhandelaar
+    """ Op deze view komen de tijdelijke URLs uit
+        We sturen door naar de juiste afhandelaar
     """
 
     @staticmethod
