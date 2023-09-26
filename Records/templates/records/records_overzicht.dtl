@@ -6,6 +6,12 @@
 {% endcomment %}
 {% load static %}
 
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="Handboogsport records, Nederlandse records">
+    <meta name="description" content="Handboogsport records">
+{% endblock %}
+
 {% block title %}Handboogsport Records{% endblock %}
 
 {% block pagina %}

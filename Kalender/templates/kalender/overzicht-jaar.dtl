@@ -8,6 +8,12 @@
 
 {% block title %}Wedstrijdkalender{% endblock %}
 
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="Handboogsport, handboog, kalender, wedstrijden, wedstrijdkalender">
+    <meta name="description" content="Wedstrijdkalender handboogsport">
+{% endblock %}
+
 {% block pagina %}
 
     <script>
