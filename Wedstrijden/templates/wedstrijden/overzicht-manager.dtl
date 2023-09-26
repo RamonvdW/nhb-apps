@@ -27,9 +27,8 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wedstrijdkalender</h3>
-            <p>Beheer door de Manager Competitiezaken</p>
+            <p>Beheer van de wedstrijdkalender</p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
-            <p>Wedstrijden worden aangemaakt door de verenigingen</p>
         </div>
     </div>
 
@@ -104,6 +103,8 @@
             </table>
         </div>
     </div>
+
+    <p class="center">Wedstrijden worden aangemaakt door de verenigingen</p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-overzicht-manager" %}
 
