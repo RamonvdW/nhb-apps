@@ -10,6 +10,73 @@
 
 {% block pagina %}
 
+    {% if url_wijzigen %}
+        <!-- banner -->
+        <div class="row center">
+            <div class="col s12">
+                <h3 class="page-banner">Keuze scheidsrechters</h3>
+            </div>
+        </div>
+
+        <script>
+            function gewijzigd() {
+                // het formulier is aangepast en moet opgeslagen worden
+
+                // enable de 'opslaan' knop
+                const el = document.getElementById("submit_knop");
+                el.disabled = false;
+                el.parentElement.style.display = "block";
+            }
+        </script>
+
+        <div class="row-sv-blauw">
+            <div class="col s12">
+
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3" style="margin-top:30px">
+                    <div class="form-padding">
+                        <form action="{{ url_wijzigen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                            {% csrf_token %}
+
+                            <table>
+                                <tr>
+                                    <th>Aantal scheidsrechters</th>
+                                    <td>
+                                        <select name="aantal_scheids" onchange="gewijzigd()">
+                                            {% for value, tekst in keuze_aantal_scheids %}
+                                                <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Hoofdscheidsrechter</th>
+                                    <td>tbd</td>
+                                </tr>
+
+                                {% for sr in hulp_sr %}
+                                    <tr>
+                                        <th>Assistent SR</th>
+                                        <td>tbd</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+
+                            <div class="fixed-action-btn" style="display: none">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                                    <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    {% endif %}
+
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -120,11 +187,32 @@
                     <td>{{ wed.contact_email }}</td>
                 </tr>
 
-            </table>
 
-            {% if toon_sessies %}
+                <tr>
+                    <td colspan="2" class="center sv-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                </tr>
+
+                <tr>
+                    <th>Aantal banen tegelijk actief</th>
+                    <td>{{ wed.aantal_banen }} banen</td>
+                </tr>
+
+                <tr>
+                    <th>Eigen scheids<wbr>rechters (namen)</th>
+                    <td>{{ wed.scheidsrechters|linebreaksbr }}</td>
+                </tr>
+
+                <tr>
+                    <th>Behoefte scheidsrechters</th>
+                    <td>{{ wed.behoefte_str }}</td>
+                </tr>
+            </table>
+        </div>
+
+        {% if toon_sessies %}
+            <div class="col s12">
                                         <!-- not: popout !! -->
-                <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
+                <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:30px; margin-bottom:0">
                     <li>
                         <div class="collapsible-header white center" style="display:block; cursor:inherit">
                             <h6 class="sv-blauw-text">Sessies</h6>
@@ -157,9 +245,9 @@
                     {% endfor %}
                 </ul>
 
-            {% endif %}
+            </div>
+        {% endif %}
 
-        </div>
     </div>
 
 

@@ -26,8 +26,7 @@
                     <tr>
                         <th>Wanneer</th>
                         <th>Plaats</th>
-                        <th>Banen</th>
-                        <th>Status</th>
+                        <th class="center">Scheidsrechters</th>
                         <th>Titel</th>
                         <th><!-- knoppen --></th>
                     </tr>
@@ -36,8 +35,7 @@
                     <tr>
                         <td>{{ obj.datum_begin }}{% if obj.datum_begin != obj.datum_einde %} - {{ obj.datum_einde }}{% endif %}</td>
                         <td>{{ obj.locatie.plaats }}</td>
-                        <td>{{ obj.aantal_banen }}</td>
-                        <td>{{ obj.organisatie_str }}</td>
+                        <td class="center">{{ obj.aantal_scheids }}</td>
                         <td>{{ obj.titel }}</td>
                         <td>
                             <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>

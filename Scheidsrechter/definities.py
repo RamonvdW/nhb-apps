@@ -14,4 +14,24 @@ SCHEIDS2LEVEL = {
 }
 
 
+BESCHIKBAAR_JA = 'J'
+BESCHIKBAAR_NEE = 'N'
+BESCHIKBAAR_DENK = 'D'
+BESCHIKBAAR_LEEG = '?'
+
+BESCHIKBAAR_CHOICES = (
+    (BESCHIKBAAR_LEEG, "Niet ingevuld"),
+    (BESCHIKBAAR_JA, "Ja"),
+    (BESCHIKBAAR_DENK, "Onzeker"),
+    (BESCHIKBAAR_NEE, "Nee"),
+)
+
+BESCHIKBAAR2STR = {
+    BESCHIKBAAR_LEEG: "Niet ingevuld",
+    BESCHIKBAAR_JA: "Ja",
+    BESCHIKBAAR_DENK: "Onzeker",
+    BESCHIKBAAR_NEE: "Nee",
+}
+
+
 # end of file

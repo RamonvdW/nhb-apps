@@ -1132,17 +1132,33 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         uniq_nr = 999000
         while len(unsorted_uitvallers) > 0:
-            _, _, uitvaller = unsorted_uitvallers.pop(-1)              # begin bij de laagste
+            _, _, uitvaller = unsorted_uitvallers.pop(-1)               # begin bij de laagste
             group_str = "invaller_%s" % (1 + len(unsorted_uitvallers))  # laagste invaller heeft hoogste nummer
             invallers = list()
             tup = (uitvaller.naam_str, uitvaller.uitvaller_gem_str, group_str, invallers)
             uitvallers.insert(0, tup)
 
             zoek_checked = True
+
+            # zet de sporter zelf bovenaan in het lijstje
             for deelnemer in deelnemers:
                 # mag deze persoon invallen?
                 if deelnemer.pk not in deelnemers_bezet_pks:
-                    if deelnemer.pk == uitvaller.pk or deelnemer.gemiddelde_begin_team_ronde <= uitvaller.gemiddelde_begin_team_ronde:
+                    if deelnemer.pk == uitvaller.pk:
+                        is_uitvaller = "1" if deelnemer.origineel_team_lid else "0"
+                        id_invaller = group_str + '_door_%s' % deelnemer.pk
+                        toon_checked = True
+                        zoek_checked = False
+                        deelnemers_feitelijk_pks.remove(deelnemer.pk)
+                        tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str, toon_checked)
+                        invallers.append(tup)
+                        break
+            # for
+
+            for deelnemer in deelnemers:
+                # mag deze persoon invallen?
+                if deelnemer.pk not in deelnemers_bezet_pks:
+                    if deelnemer.pk != uitvaller.pk and deelnemer.gemiddelde_begin_team_ronde <= uitvaller.gemiddelde_begin_team_ronde:
                         is_uitvaller = "1" if deelnemer.origineel_team_lid else "0"
                         id_invaller = group_str + '_door_%s' % deelnemer.pk
                         toon_checked = False

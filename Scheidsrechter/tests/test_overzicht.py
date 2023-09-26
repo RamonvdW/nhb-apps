@@ -146,7 +146,7 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
-        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details)
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details % 999999)
 
     def test_cs(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)

@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import Http404
+from django.http import HttpResponseRedirect, Http404
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Functie.definities import Rollen
@@ -16,8 +17,9 @@ from Functie.scheids import gebruiker_is_scheids
 from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
-                                    WEDSTRIJD_BEGRENZING_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
+                                    WEDSTRIJD_BEGRENZING_TO_STR)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
+from types import SimpleNamespace
 
 TEMPLATE_OVERZICHT = 'scheidsrechter/overzicht.dtl'
 TEMPLATE_WEDSTRIJDEN = 'scheidsrechter/wedstrijden.dtl'
@@ -122,12 +124,16 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_CS:
+        self.rol_nu = rol_get_huidige(self.request)
+        if self.rol_nu == Rollen.ROL_CS:
             return True
-        if rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
+        if self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True
         return False
 
@@ -192,6 +198,33 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         # for
         context['toon_sessies'] = heeft_sessies
 
+        wedstrijd.behoefte_str = '%s scheidsrechter' % wedstrijd.aantal_scheids
+        if wedstrijd.aantal_scheids > 1:
+            wedstrijd.behoefte_str += 's'
+
+        if self.rol_nu == Rollen.ROL_CS:
+            context['url_wijzigen'] = reverse('Scheidsrechter:wedstrijd-details',
+                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+            context['keuze_aantal_scheids'] = [
+                (1, '1 scheidsrechter'),
+                (2, '2 scheidsrechters'),
+                (3, '3 scheidsrechters'),
+                (4, '4 scheidsrechters'),
+                (5, '5 scheidsrechters'),
+                (6, '6 scheidsrechters'),
+            ]
+
+            context['hulp_sr'] = hulp_sr = list()
+            for lp in range(wedstrijd.aantal_scheids-1):
+                sr = SimpleNamespace()
+                hulp_sr.append(sr)
+            # for
+
+            # TODO: knop om behoefte op te vragen
+            # TODO: selecteer de hoofdscheidsrechter
+            # TODO: selecteer hulpscheidsrechters
+
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
             (reverse('Scheidsrechter:wedstrijden'), 'Wedstrijden'),
@@ -201,5 +234,33 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen om de POST request af te handelen """
+
+        try:
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .get(pk=wedstrijd_pk))
+        except (ValueError, Wedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        if self.rol_nu != Rollen.ROL_CS:
+            raise PermissionDenied('Mag niet wijzigen')
+
+        # aantal scheidsrechters
+        aantal_scheids_str = request.POST.get('aantal_scheids', '')
+        try:
+            aantal_scheids = int(aantal_scheids_str[:3])  # afkappen voor de veiligheid
+        except ValueError:
+            wedstrijd.aantal_scheids = 1        # minimum is 1, anders verdwijnt de wedstrijd uit de lijst
+        else:
+            if 0 <= aantal_scheids <= 9:
+                wedstrijd.aantal_scheids = aantal_scheids
+
+        wedstrijd.save(update_fields=['aantal_scheids'])
+
+        url = reverse('Scheidsrechter:wedstrijden')
+        return HttpResponseRedirect(url)
 
 # end of file
