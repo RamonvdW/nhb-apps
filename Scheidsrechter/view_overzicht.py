@@ -111,6 +111,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                        .exclude(toon_op_kalender=False)
                        .filter(aantal_scheids__gte=1,
                                datum_begin__gte=vorige_week)
+                       .select_related('locatie')
                        .order_by('-datum_begin'))       # nieuwste bovenaan
 
         for wedstrijd in wedstrijden:

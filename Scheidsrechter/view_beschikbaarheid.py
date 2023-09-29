@@ -325,18 +325,34 @@ class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
             BESCHIKBAAR_LEEG: 99,
         }
 
-        context['dagen'] = dagen
+        wedstrijd_pks = list()
         for dag in dagen:
             dag.datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-
             dag.beschikbaar = list()
+            if dag.wedstrijd.pk not in wedstrijd_pks:
+                wedstrijd_pks.append(dag.wedstrijd.pk)
+        # for
 
-            for keuze in (ScheidsBeschikbaarheid
-                          .objects
-                          .filter(datum=dag.datum,
-                                  wedstrijd=dag.wedstrijd)
-                          .select_related('scheids')):
+        # alle beschikbaarheid in 1x ophalen
+        wedstrijd_dag2beschikbaar = dict()  # [wedstrijd.pk, datum] = [ScheidsBeschikbaar, ..]
+        for keuze in (ScheidsBeschikbaarheid
+                      .objects
+                      .filter(wedstrijd__pk__in=wedstrijd_pks)
+                      .select_related('wedstrijd',
+                                      'scheids')):
 
+            tup = (keuze.wedstrijd.pk, keuze.datum)
+            try:
+                wedstrijd_dag2beschikbaar[tup].append(keuze)
+            except KeyError:
+                wedstrijd_dag2beschikbaar[tup] = [keuze]
+        # for
+
+        # beschikbaarheid per dag bepalen
+        context['dagen'] = dagen
+        for dag in dagen:
+            tup = (dag.wedstrijd.pk, dag.datum)
+            for keuze in wedstrijd_dag2beschikbaar[tup]:
                 tup = (opgaaf2order[keuze.opgaaf], keuze.scheids.volledige_naam(), BESCHIKBAAR2STR[keuze.opgaaf])
                 dag.beschikbaar.append(tup)
             # for
