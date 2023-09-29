@@ -351,8 +351,13 @@ class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
         # beschikbaarheid per dag bepalen
         context['dagen'] = dagen
         for dag in dagen:
-            tup = (dag.wedstrijd.pk, dag.datum)
-            for keuze in wedstrijd_dag2beschikbaar[tup]:
+            try:
+                tup = (dag.wedstrijd.pk, dag.datum)
+                keuzes = wedstrijd_dag2beschikbaar[tup]
+            except KeyError:
+                keuzes = list()
+
+            for keuze in keuzes:
                 tup = (opgaaf2order[keuze.opgaaf], keuze.scheids.volledige_naam(), BESCHIKBAAR2STR[keuze.opgaaf])
                 dag.beschikbaar.append(tup)
             # for

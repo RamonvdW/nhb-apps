@@ -134,9 +134,6 @@
         })
     </script>
 
-    {% comment %}
-        Geen inlog, dus geen feedback tonen!
-        {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-beschikbaarheid" %}
-    {% endcomment %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-beschikbaarheid-wijzigen" %}
 
 {% endblock %}

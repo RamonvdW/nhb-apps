@@ -317,10 +317,44 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_cs)
         self.e2e_check_rol('CS')
 
+        # beschikbaarheid inzien voor een wedstrijd (geen wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beschikbaarheid_inzien)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien.dtl', 'plein/site_layout.dtl'))
+
+        # beschikbaarheid opvragen voor een wedstrijd
+        self.assertEqual(0, WedstrijdDagScheids.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+        self.assert_is_redirect(resp, self.url_overzicht)
+        self.assertEqual(4, WedstrijdDagScheids.objects.count())
+
         # beschikbaarheid inzien voor een wedstrijd
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beschikbaarheid_inzien)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien.dtl', 'plein/site_layout.dtl'))
 
+        # SR4 geeft beschikbaarheid door
+        self.e2e_login(self.sr4_met_account.account)
+        name = 'wedstrijd_%s_dag_%s' % (self.wedstrijd.pk, 0)
+        resp = self.client.post(self.url_beschikbaarheid_wijzigen, {name: '1'})
+        self.assert_is_redirect(resp, self.url_overzicht)
 
-    # TODO: keuze maken
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
 
+        # beschikbaarheid inzien voor een wedstrijd
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_beschikbaarheid_inzien)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien.dtl', 'plein/site_layout.dtl'))
+
+    # TODO: keuze SR maken
 
 # end of file
