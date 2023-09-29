@@ -43,6 +43,10 @@ urlpatterns = [
     path('beschikbaarheid-doorgeven/dynamic/',
          view_beschikbaarheid.BeschikbaarheidOpslaanView.as_view(),
          name='beschikbaarheid-doorgeven'),
+
+    path('beschikbaarheid-inzien/',
+         view_beschikbaarheid.BeschikbaarheidInzienView.as_view(),
+         name='beschikbaarheid-inzien'),
 ]
 
 

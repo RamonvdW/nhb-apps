@@ -26,7 +26,8 @@ from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD
 from Wedstrijden.models import Wedstrijd
 import datetime
 
-TEMPLATE_BESCHIKBAARHEID = 'scheidsrechter/beschikbaarheid-wijzigen.dtl'
+TEMPLATE_BESCHIKBAARHEID_WIJZIGEN = 'scheidsrechter/beschikbaarheid-wijzigen.dtl'
+TEMPLATE_BESCHIKBAARHEID_INZIEN = 'scheidsrechter/beschikbaarheid-inzien.dtl'
 
 
 class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
@@ -108,7 +109,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
     """ Django class-based view voor de scheidsrechters """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_BESCHIKBAARHEID
+    template_name = TEMPLATE_BESCHIKBAARHEID_WIJZIGEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -151,14 +152,16 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                  .select_related('wedstrijd',
                                  'wedstrijd__locatie')
                  .filter(wedstrijd__pk__in=wedstrijd_pks,
-                         volgorde__lte=2)       # 1=hoofd, 2=assistent#1
+                         volgorde__lte=2)       # 1=hoofd, >1=assistent
                  .order_by('wedstrijd__datum_begin',
-                           'wedstrijd__pk',
-                           'volgorde'))
+                           'wedstrijd__pk'))
 
         if not self.is_sr4_of_hoger:
             # deze scheidsrechter is geen hoofdscheidsrechter
             dagen = dagen.filter(is_hoofd_sr=False)
+        else:
+            # voorkom dubbelen
+            dagen = dagen.filter(is_hoofd_sr=True)
 
         datums = list()
         for dag in dagen:
@@ -168,7 +171,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         # for
 
         keuzes = dict()     # [datum] = keuze
-        for keuze in ScheidsBeschikbaarheid.objects.filter(datum__in=datums):
+        for keuze in ScheidsBeschikbaarheid.objects.filter(datum__in=datums, scheids=self.sporter):
             datum = keuze.datum
             if keuze.opgaaf == BESCHIKBAAR_JA:
                 keuzes[datum] = 1
@@ -228,6 +231,9 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         if not self.is_sr4_of_hoger:
             # deze scheidsrechter is geen hoofdscheidsrechter
             dagen = dagen.filter(is_hoofd_sr=False)
+        else:
+            # voorkom dubbelen
+            dagen = dagen.filter(is_hoofd_sr=True)
 
         datums = list()
         for dag in dagen:
@@ -283,6 +289,68 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
 
         url = reverse('Scheidsrechter:overzicht')
         return HttpResponseRedirect(url)
+
+
+class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
+    """ Django class-based view voor de scheidsrechters """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_BESCHIKBAARHEID_INZIEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_get_huidige(self.request) == Rollen.ROL_CS
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        vorige_week = (timezone.now() - datetime.timedelta(days=7)).date()
+
+        dagen = (WedstrijdDagScheids
+                 .objects
+                 .select_related('wedstrijd',
+                                 'wedstrijd__locatie')
+                 .filter(wedstrijd__datum_begin__gte=vorige_week,
+                         is_hoofd_sr=True)
+                 .order_by('wedstrijd__datum_begin',
+                           'wedstrijd__pk'))
+
+        opgaaf2order = {
+            BESCHIKBAAR_JA: 1,
+            BESCHIKBAAR_DENK: 2,
+            BESCHIKBAAR_NEE: 3,
+            BESCHIKBAAR_LEEG: 99,
+        }
+
+        context['dagen'] = dagen
+        for dag in dagen:
+            dag.datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
+
+            dag.beschikbaar = list()
+
+            for keuze in (ScheidsBeschikbaarheid
+                          .objects
+                          .filter(datum=dag.datum,
+                                  wedstrijd=dag.wedstrijd)
+                          .select_related('scheids')):
+
+                tup = (opgaaf2order[keuze.opgaaf], keuze.scheids.volledige_naam(), BESCHIKBAAR2STR[keuze.opgaaf])
+                dag.beschikbaar.append(tup)
+            # for
+
+            dag.beschikbaar.sort()   # sorteer op opgaaf, dan op naam
+        # for
+
+        context['kruimels'] = (
+            (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
+            (None, 'Beschikbaarheid')
+        )
+
+        menu_dynamics(self.request, context)
+        return context
 
 
 class BeschikbaarheidOpslaanView(View):

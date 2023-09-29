@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Scheidsrechters</h3>
-            <!-- p>Op deze pagina kan je zien waar scheidsrechters nodig zijn en je beschikbaarheid opgeven</p -->
+            <p>Jouw huidige rol is <b>{{ rol }}</b></p>
         </div>
     </div>
 

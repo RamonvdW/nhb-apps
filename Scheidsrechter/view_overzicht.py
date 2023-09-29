@@ -61,12 +61,16 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
             context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-wijzigen')
             context['tekst_beschikbaarheid'] = "Pas je beschikbaarheid aan voor wedstrijden."
+
+            context['rol'] = 'sporter / scheidsrechter'
         else:
             context['url_korps'] = reverse('Scheidsrechter:korps-met-contactgegevens')
             context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters met contextgegevens."
 
-            context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-wijzigen')
+            context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-inzien')
             context['tekst_beschikbaarheid'] = "Bekijk de opgegeven beschikbaarheid."
+
+            context['rol'] = 'Commissie Scheidsrechters'
 
         context['kruimels'] = (
             (None, 'Scheidsrechters'),

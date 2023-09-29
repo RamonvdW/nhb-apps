@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 from Scheidsrechter.definities import BESCHIKBAAR_CHOICES, BESCHIKBAAR2STR, BESCHIKBAAR_LEEG
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd
@@ -35,6 +36,12 @@ class ScheidsBeschikbaarheid(models.Model):
 
     class Meta:
         verbose_name_plural = verbose_name = "Scheids beschikbaarheid"
+
+        constraints = [
+            UniqueConstraint(
+                fields=['scheids', 'wedstrijd', 'datum'],
+                name='Een per scheidsrechter en wedstrijd dag')
+        ]
 
     objects = models.Manager()      # for the editor only
 

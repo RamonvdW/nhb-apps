@@ -1,0 +1,104 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Beschikbaarheid{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Beschikbaarheid</h3>
+            <p>Bekijk de beschikbaarheid opgegeven door de scheidsrechters.</p>
+        </div>
+    </div>
+
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3" style="margin-top:30px">
+                <div class="form-padding">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Wedstrijd</th>
+                                <th>Nodig</th>
+                                <th>Naam</th>
+                                <th>Beschikbaarheid</th>
+                            </tr>
+                        </thead>
+
+                        {% for dag in dagen %}
+                            <tr>
+                                <td>{{ dag.datum }}</td>
+
+                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
+
+                                <td>{{ dag.wedstrijd.aantal_scheids }}</td>
+
+                                <td>
+                                    {% for code, naam, beschikbaar in dag.beschikbaar%}
+                                        <span>{{ naam }}</span><br>
+                                    {% endfor %}
+                                </td>
+
+                                <td>
+                                    {% for code, naam, beschikbaar in dag.beschikbaar %}
+                                        <span>{{ beschikbaar }}</span><br>
+                                    {% endfor %}
+                                </td>
+
+                                {% comment %}
+                                    <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-ja" style="margin:2px" onclick="wijzig('{{ dag.id }}', 1)">
+                                        <i class="material-icons-round">done</i>
+                                    </a>
+                                    <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-mss" style="margin:2px" onclick="wijzig('{{ dag.id }}', 2)">
+                                        <i class="material-icons-round">question_mark</i>
+                                    </a>
+                                    <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-nee" style="margin:2px" onclick="wijzig('{{ dag.id }}', 3)">
+                                        <i class="material-icons-round">close</i>
+                                    </a>
+                                {% endcomment %}
+                            </tr>
+
+                        {% endfor %}
+
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const init = [
+            {% for dag in dagen %}
+                ["{{ dag.id }}", {{ dag.keuze }}],
+            {% endfor %}
+        ];
+
+        const el_opslaan = document.getElementById("submit_knop");
+
+        document.addEventListener("DOMContentLoaded", function() {
+            init.forEach(function(tup) {
+                wijzig(tup[0], tup[1]);
+            });
+
+            // disable de 'opslaan' knop
+            el_opslaan.disabled = true;
+        })
+    </script>
+
+    {% comment %}
+        Geen inlog, dus geen feedback tonen!
+        {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-beschikbaarheid" %}
+    {% endcomment %}
+
+{% endblock %}
