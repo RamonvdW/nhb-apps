@@ -24,15 +24,14 @@
         <div class="col s12">
 
             <!-- korps -->
-            {% include 'plein/card_icon.dtl' with title="Korps" text="Bekijk de lijst van de scheidsrechters." icon="grade" url=url_korps %}
+            {% include 'plein/card_icon.dtl' with title="Korps" text=tekst_korps icon="grade" url=url_korps %}
 
             <!-- wedstrijdkalender -->
             {% url 'Scheidsrechter:wedstrijden' as card_url %}
             {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden scheidsrechters nodig hebben." icon="event_note" url=card_url %}
 
             <!-- beschikbaarheid -->
-            {% url 'Scheidsrechter:overzicht' as card_url %}
-            {% include 'plein/card_icon.dtl' with title="Beschikbaarheid" text="Pas je beschikbaarheid aan voor wedstrijden." icon="event_available" url=card_url %}
+            {% include 'plein/card_icon.dtl' with title="Beschikbaarheid" text=tekst_beschikbaarheid icon="event_available" url=url_beschikbaarheid %}
 
         </div>
     </div>

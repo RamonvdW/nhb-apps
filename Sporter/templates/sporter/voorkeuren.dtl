@@ -15,9 +15,9 @@
             // het formulier is aangepast en moet opgeslagen worden
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("submit_knop")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("submit_knop");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
         }
     </script>
 

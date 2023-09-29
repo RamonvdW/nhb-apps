@@ -6,6 +6,7 @@
 
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
+from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -15,11 +16,13 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Plein.menu import menu_dynamics
+from Scheidsrechter.models import WedstrijdDagScheids
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING_TO_STR)
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 from types import SimpleNamespace
+import datetime
 
 TEMPLATE_OVERZICHT = 'scheidsrechter/overzicht.dtl'
 TEMPLATE_WEDSTRIJDEN = 'scheidsrechter/wedstrijden.dtl'
@@ -54,8 +57,16 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_SPORTER:
             context['url_korps'] = reverse('Scheidsrechter:korps')
+            context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters."
+
+            context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-wijzigen')
+            context['tekst_beschikbaarheid'] = "Pas je beschikbaarheid aan voor wedstrijden."
         else:
             context['url_korps'] = reverse('Scheidsrechter:korps-met-contactgegevens')
+            context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters met contextgegevens."
+
+            context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-wijzigen')
+            context['tekst_beschikbaarheid'] = "Bekijk de opgegeven beschikbaarheid."
 
         context['kruimels'] = (
             (None, 'Scheidsrechters'),
@@ -87,12 +98,15 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        vorige_week = timezone.now().date() - datetime.timedelta(days=7)
+
         wedstrijden = (Wedstrijd
                        .objects
                        .exclude(status=WEDSTRIJD_STATUS_ONTWERP)
                        .exclude(is_ter_info=True)
                        .exclude(toon_op_kalender=False)
-                       .exclude(aantal_scheids__lt=1)
+                       .filter(aantal_scheids__gte=1,
+                               datum_begin__gte=vorige_week)
                        .order_by('-datum_begin'))       # nieuwste bovenaan
 
         for wedstrijd in wedstrijden:
@@ -221,7 +235,12 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                 hulp_sr.append(sr)
             # for
 
-            # TODO: knop om behoefte op te vragen
+            # knop om behoefte op te vragen
+            aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
+            benodigd = wedstrijd.aantal_scheids * aantal_dagen
+            if WedstrijdDagScheids.objects.filter(wedstrijd=wedstrijd).count() < benodigd:
+                context['url_uitzetten'] = reverse('Scheidsrechter:beschikbaarheid-opvragen')
+
             # TODO: selecteer de hoofdscheidsrechter
             # TODO: selecteer hulpscheidsrechters
 

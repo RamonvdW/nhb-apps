@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from Scheidsrechter.definities import BESCHIKBAAR_CHOICES, BESCHIKBAAR_LEEG, BESCHIKBAAR2STR
+from Scheidsrechter.definities import BESCHIKBAAR_CHOICES, BESCHIKBAAR2STR, BESCHIKBAAR_LEEG
 from Sporter.models import Sporter
 from Wedstrijden.models import Wedstrijd
 
@@ -15,6 +15,10 @@ class ScheidsBeschikbaarheid(models.Model):
 
     # over welke scheidsrechter gaat dit?
     scheids = models.ForeignKey(Sporter, on_delete=models.CASCADE)
+
+    # voor welke wedstrijd is de behoefte?
+    # (dit is nodig om meerdere wedstrijden per dag te ondersteunen)
+    wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.CASCADE)
 
     # over welke datum gaat dit?
     # deze zetten we hier vast voor het geval de wedstrijd verplaatst wordt
@@ -27,7 +31,7 @@ class ScheidsBeschikbaarheid(models.Model):
     log = models.TextField(default='')
 
     def __str__(self):
-        return "%s: %s" % (self.scheids.lid_nr_en_volledige_naam, BESCHIKBAAR2STR[self.opgaaf])
+        return "%s  %s: %s (%s)" % (self.scheids.lid_nr, self.datum, BESCHIKBAAR2STR[self.opgaaf], self.wedstrijd.titel)
 
     class Meta:
         verbose_name_plural = verbose_name = "Scheids beschikbaarheid"
@@ -54,12 +58,14 @@ class WedstrijdDagScheids(models.Model):
     # Hoofdscheidsrechter / Assistent SR, etc.
     titel = models.CharField(max_length=20, default='')
 
+    is_hoofd_sr = models.BooleanField(default=False)
+
     # welke scheidsrechter is gekozen voor deze positie?
     gekozen = models.ForeignKey(Sporter, on_delete=models.SET_NULL,
                                 null=True, blank=True)              # mag leeg zijn
 
     def __str__(self):
-        msg = "[%s +%s] %s = " % (self.wedstrijd, self.dag_offset, self.titel)
+        msg = "[%s +%s] %s = " % (self.wedstrijd.datum_begin, self.dag_offset, self.titel)
         if self.gekozen:
             msg += self.gekozen.lid_nr_en_volledige_naam()
         else:

@@ -527,6 +527,44 @@ input.table-filter {
     padding: 20px;
 }
 
+.keuze-open {
+  background: $sv-open-color;
+  color: $sv-open-text-color;
+
+  &:hover {
+    background-color: $sv-open-hover;
+  }
+}
+
+
+.keuze-ja {
+  background: $sv-ja-color;
+  color: white;
+
+  &:hover {
+    background-color: $sv-ja-hover;
+  }
+}
+
+.keuze-mss {
+  background: $sv-mss-color;
+  color: white;
+
+  &:hover {
+    background-color: $sv-mss-hover;
+  }
+}
+
+.keuze-nee {
+  background: #f94137;     /* rood */
+  color: white;
+
+  &:hover {
+    background-color: $sv-nee-hover;
+  }
+}
+
+
 .material-icons-round {
     font-family: "Material Icons Round";
     font-weight: normal;

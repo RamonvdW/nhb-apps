@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Scheidsrechter import view_overzicht, view_korps
+from Scheidsrechter import view_overzicht, view_korps, view_beschikbaarheid
 
 app_name = 'Scheidsrechter'
 
@@ -31,6 +31,18 @@ urlpatterns = [
     path('wedstrijden/details/<wedstrijd_pk>/',
          view_overzicht.WedstrijdDetailsView.as_view(),
          name='wedstrijd-details'),
+
+    path('beschikbaarheid-opvragen/',
+         view_beschikbaarheid.BeschikbaarheidOpvragenView.as_view(),
+         name='beschikbaarheid-opvragen'),
+
+    path('beschikbaarheid-wijzigen/',
+         view_beschikbaarheid.WijzigBeschikbaarheidView.as_view(),
+         name='beschikbaarheid-wijzigen'),
+
+    path('beschikbaarheid-doorgeven/dynamic/',
+         view_beschikbaarheid.BeschikbaarheidOpslaanView.as_view(),
+         name='beschikbaarheid-doorgeven'),
 ]
 
 

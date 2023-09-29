@@ -15,6 +15,7 @@
         <div class="row center">
             <div class="col s12">
                 <h3 class="page-banner">Keuze scheidsrechters</h3>
+                <p>door de Commissie Scheidsrechters</p>
             </div>
         </div>
 
@@ -35,7 +36,7 @@
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3" style="margin-top:30px">
                     <div class="form-padding">
-                        <form action="{{ url_wijzigen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                        <form action="{{ url_wijzigen }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
                             {% csrf_token %}
 
                             <table>
@@ -64,11 +65,23 @@
                             </table>
 
                             <div class="fixed-action-btn" style="display: none">
-                                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                                <button class="btn-sv-rood" id="submit_knop1" type="submit" disabled>
                                     <i class="notranslate material-icons-round left">check</i>Wijzigen opslaan</button>
                             </div>
 
                         </form>
+
+                        {% if url_uitzetten %}
+                            <div class="center" style="margin-top:30px">
+                                <form action="{{ url_uitzetten }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="wedstrijd" value="{{ wed.pk }}">
+                                    <button class="btn-sv-rood" id="submit_knop2" type="submit">Beschikbaarheid opvragen</button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <p class="center">Beschikbaarheid is al opgevraagd</p>
+                        {% endif %}
                     </div>
                 </div>
 

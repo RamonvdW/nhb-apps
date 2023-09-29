@@ -5,24 +5,34 @@
 
 // Specific classes for our website
 
-$sv-blauw-color: #0aa0e1 !default;
-$sv-rood-color:  #f94137 !default;
-$sv-donkerblauw-color: #03628c !default;
-
-$sv-blauw-default: $sv-donkerblauw-color !default;
-$sv-blauw-focus: lighten($sv-blauw-default, 10%) !default;
-$sv-blauw-hover: lighten($sv-blauw-default, 10%) !default;
-
-$sv-rood-default: $sv-rood-color !default;
-$sv-rood-focus: lighten($sv-rood-color, 5%) !default;
-$sv-rood-hover: darken($sv-rood-color, 25%) !default;
+$sv-blauw-color: #0aa0e1;
+$sv-rood-color:  #f94137;
+$sv-donkerblauw-color: #03628c;
 
 $sv-grijs: #eee;
-
 $sv-card-hover-background: #f5f5f5;
+
+$sv-ja-color: #34cc54;          /* soft green */
+$sv-mss-color: #f5a635;         /* bruin-geel */
+$sv-nee-color: $sv-rood-color;  /* rood */
+$sv-open-color: #dadada;        /* midden-grijs */
+$sv-open-text-color: #808285;   /* licht-grijs */
+
+$sv-blauw-default: $sv-donkerblauw-color;
+$sv-blauw-focus: lighten($sv-blauw-default, 10%);
+$sv-blauw-hover: lighten($sv-blauw-default, 10%);
+
+$sv-rood-default: $sv-rood-color;
+$sv-rood-focus: lighten($sv-rood-color, 5%);
+$sv-rood-hover: darken($sv-rood-color, 25%);
+
 //$sv-card-focus-border-color: $sv-blauw-color !default;
-$sv-card-focus-border-color: $sv-rood-color !default;
+$sv-card-focus-border-color: $sv-rood-color;
 $sv-collection-hover-background: $sv-card-hover-background;
 
+$sv-ja-hover: darken($sv-ja-color, 25%);
+$sv-mss-hover: darken($sv-mss-color, 25%);
+$sv-nee-hover: darken($sv-nee-color, 25%);
+$sv-open-hover: darken($sv-open-color, 25%);
 
 // end of file

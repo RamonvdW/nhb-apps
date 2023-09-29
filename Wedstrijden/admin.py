@@ -18,7 +18,7 @@ class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
 
     search_fields = ('titel',)
 
-    ordering = ('datum_begin',)
+    ordering = ('-datum_begin',)        # nieuwste bovenaan
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
