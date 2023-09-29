@@ -166,7 +166,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         datums = list()
         for dag in dagen:
             datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-            if datum not in dagen:
+            if datum not in datums:
                 datums.append(datum)
         # for
 
@@ -238,7 +238,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
         datums = list()
         for dag in dagen:
             dag.datum = dag.wedstrijd.datum_begin + datetime.timedelta(days=dag.dag_offset)
-            if dag.datum not in dagen:
+            if dag.datum not in datums:
                 datums.append(dag.datum)
         # for
 
@@ -276,7 +276,7 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
                     opgaaf = BESCHIKBAAR_JA
                 elif keuze == '2':
                     opgaaf = BESCHIKBAAR_DENK
-                elif keuze == '3':
+                else:   # keuze == '3':
                     opgaaf = BESCHIKBAAR_NEE
 
                 if opgaaf != beschikbaar.opgaaf:

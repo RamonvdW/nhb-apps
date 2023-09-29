@@ -86,13 +86,13 @@
                                         <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">
 
                                         <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-ja" style="margin:2px" onclick="wijzig('{{ dag.id }}', 1)">
-                                            <i class="material-icons-round">done</i>
+                                            <i class="material-icons-round notranslate">done</i>
                                         </a>
                                         <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-mss" style="margin:2px" onclick="wijzig('{{ dag.id }}', 2)">
-                                            <i class="material-icons-round">question_mark</i>
+                                            <i class="material-icons-round notranslate">question_mark</i>
                                         </a>
                                         <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-nee" style="margin:2px" onclick="wijzig('{{ dag.id }}', 3)">
-                                            <i class="material-icons-round">close</i>
+                                            <i class="material-icons-round notranslate">close</i>
                                         </a>
                                     </td>
 
