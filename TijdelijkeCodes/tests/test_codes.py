@@ -263,7 +263,7 @@ class TestTijdelijkeCodes(E2EHelpers, TestCase):
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
         self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_code % '0')
+        self.e2e_assert_other_http_commands_not_supported(self.url_code % '0', post=False)
 
     def test_registreer_lid(self):
         set_tijdelijke_codes_receiver(RECEIVER_BEVESTIG_EMAIL_REG_LID, self._my_receiver_func_1_arg)

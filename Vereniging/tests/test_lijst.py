@@ -152,7 +152,6 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst)
         self.assert403(resp)
-        self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
     def test_it(self):
         # landelijke lijst met rayon & regio + leden aantallen
@@ -168,6 +167,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
     def test_bb(self):
         # landelijke lijst met rayon & regio

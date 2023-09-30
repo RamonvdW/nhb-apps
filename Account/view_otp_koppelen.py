@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.urls import reverse
+from django.http import HttpResponseNotAllowed
 from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
@@ -48,6 +49,9 @@ class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen als de tweede factor niet meer gekoppeld hoeft te worden """
+
+        if request.method not in ('GET', 'POST'):
+            return HttpResponseNotAllowed(permitted_methods=('GET', 'POST'))
 
         if not request.user.is_authenticated:
             return redirect('Plein:plein')

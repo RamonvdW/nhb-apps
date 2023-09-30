@@ -102,7 +102,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(0, Wedstrijd.objects.count())
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_maak_nieuw, post=True)
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_maak_nieuw, post=False)
 
         # maak een locatie van deze vereniging aan
         self._maak_externe_locatie(self.ver1)

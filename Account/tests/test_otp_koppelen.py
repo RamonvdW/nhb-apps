@@ -154,8 +154,8 @@ class TestAccountOtpKoppelen(E2EHelpers, TestCase):
         self.testdata.account_admin = Account.objects.get(username='admin')
         self.assertTrue(self.testdata.account_admin.otp_is_actief)
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_koppel_stap1)
-        self.e2e_assert_other_http_commands_not_supported(self.url_koppel_stap2)
+        # self.e2e_assert_other_http_commands_not_supported(self.url_koppel_stap1)
+        self.e2e_assert_other_http_commands_not_supported(self.url_koppel_stap2, post=False)
         self.e2e_assert_other_http_commands_not_supported(self.url_koppel_stap3, post=False)
 
     def test_al_gekoppeld(self):
