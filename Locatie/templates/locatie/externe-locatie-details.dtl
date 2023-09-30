@@ -333,6 +333,6 @@
         })
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-externe-locatie-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-extern-details" %}
 
 {% endblock %}

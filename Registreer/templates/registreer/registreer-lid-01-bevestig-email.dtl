@@ -32,6 +32,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-nhb-aangemaakt" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="registreer-lid-bevestig-email" %}
 
 {% endblock %}
