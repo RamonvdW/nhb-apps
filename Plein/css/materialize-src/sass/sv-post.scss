@@ -64,9 +64,9 @@
 
   background-color: $sv-blauw-default;
 
-  &:focus {
-    background-color: $sv-blauw-focus;
-  }
+  //&:focus {
+  //  background-color: $sv-blauw-focus;
+  //}
 
   &:hover {
     background-color: $sv-blauw-hover;
@@ -86,9 +86,9 @@
   background-color: $secondary-color;
   //background-color: $secondary-color-dark;
 
-  &:focus {
-    background-color: $sv-rood-focus;
-  }
+  //&:focus {
+  //  background-color: $sv-rood-focus;
+  //}
 
   &:hover {
     background-color: $sv-rood-hover;
@@ -358,7 +358,8 @@
   &:hover, &:focus {
     //border-color: $sv-card-focus-border-color;
     color: $sv-card-focus-border-color;
-    background-color: transparent;
+    //background-color: transparent;
+    background-image: none;
   }
 }
 
@@ -527,41 +528,63 @@ input.table-filter {
     padding: 20px;
 }
 
-.keuze-open {
+
+.btn-sv-keuze {
+  border: $button-border;
+  border-radius: $button-radius;
+  display: inline-block;
+  white-space: nowrap;      // added to prevent text after icon from wrapping
+  height: $button-height;
+  line-height: $button-height;
+  padding: $button-padding;
+  text-transform: uppercase;
+  // vertical-align: middle;    // geeft verspringing bij vertaling (+extra styling) door Google Translate
+  -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
+
+  font-size: $button-font-size;
+  font-weight: bold;            // toegevoegd voor betere leesbaarheid met sv-rood
+  outline: 0;
+
+  // support for materialize icons
+  i {
+    font-size: $button-icon-font-size;
+    line-height: inherit;
+  }
+
+  text-decoration: none;
+  text-align: center;
+  letter-spacing: .5px;
+  @extend .z-depth-1;
+  transition: background-color .2s ease-out;
+  cursor: pointer;
+  &:hover {
+    @extend .z-depth-1-half;
+  }
+  &:focus {
+    outline: none;        // prevent border (see _forms.scss) after clicking non-navigating button
+    //outline: $select-focus;   // soft version, same as for drop-down menu button in navbar, but effect is weird
+  }
+
+  margin: 2px;    // voorkom dat de knoppen aan elkaar plakken (horizontaal of verticaal)
+
+  // standaard is grijs; override met extra btn-keuze-ja/mss/nee
   background: $sv-open-color;
   color: $sv-open-text-color;
-
-  &:hover {
-    background-color: $sv-open-hover;
-  }
 }
-
 
 .keuze-ja {
   background: $sv-ja-color;
   color: white;
-
-  &:hover {
-    background-color: $sv-ja-hover;
-  }
 }
 
 .keuze-mss {
   background: $sv-mss-color;
   color: white;
-
-  &:hover {
-    background-color: $sv-mss-hover;
-  }
 }
 
 .keuze-nee {
   background: #f94137;     /* rood */
   color: white;
-
-  &:hover {
-    background-color: $sv-nee-hover;
-  }
 }
 
 
@@ -672,6 +695,17 @@ input.table-filter {
     .hide-unless-small, .hide-unless-medium, .hide-unless-large, .hide-unless-xlarge {
         display: none;
     }
+}
+
+
+/* from: https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
+.no_select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 }
 
 // end of file

@@ -11,6 +11,7 @@ from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie
+from Scheidsrechter.models import WedstrijdDagScheids
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -25,10 +26,11 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
     test_after = ('Account',)
 
     url_plein = '/plein/'
-    url_scheids = '/scheidsrechter/'
 
+    url_overzicht = '/scheidsrechter/'
     url_wedstrijden = '/scheidsrechter/wedstrijden/'
     url_wedstrijd_details = '/scheidsrechter/wedstrijden/details/%s/'     # wedstrijd_pk
+    url_beschikbaarheid_opvragen = '/scheidsrechter/beschikbaarheid-opvragen/'
 
     testdata = None
 
@@ -90,7 +92,8 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
                         organiserende_vereniging=ver,
                         voorwaarden_a_status_when=now,
                         prijs_euro_normaal=10.00,
-                        prijs_euro_onder18=10.00)
+                        prijs_euro_onder18=10.00,
+                        aantal_scheids=2)
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()
@@ -103,9 +106,9 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
     def test_anon(self):
         resp = self.client.get(self.url_plein)
         urls = self.extract_all_urls(resp)
-        self.assertNotIn(self.url_scheids, urls)
+        self.assertNotIn(self.url_overzicht, urls)
 
-        resp = self.client.get(self.url_scheids)
+        resp = self.client.get(self.url_overzicht)
         self.assert403(resp)
 
         resp = self.client.get(self.url_wedstrijden)
@@ -120,43 +123,16 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         # plein heeft kaartje voor scheidsrechters
         resp = self.client.get(self.url_plein)
         urls = self.extract_all_urls(resp)
-        self.assertIn(self.url_scheids, urls)
+        self.assertIn(self.url_overzicht, urls)
 
         # scheids overzicht
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_scheids)
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/overzicht.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_scheids)
-
-        # wedstrijden
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijden)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijden.dtl', 'plein/site_layout.dtl'))
-
-        # wedstrijd details
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijd_details % self.wedstrijd.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
-        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details % 999999)
-
-    def test_cs(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_cs)
-        self.e2e_check_rol('CS')
-
-        # plein heeft kaartje voor scheidsrechters
-        resp = self.client.get(self.url_plein)
-        urls = self.extract_all_urls(resp)
-        self.assertIn(self.url_scheids, urls)
+        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
         # wedstrijden
         with self.assert_max_queries(20):
@@ -167,15 +143,84 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
 
         # wedstrijd details
         url = self.url_wedstrijd_details % self.wedstrijd.pk
-
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
 
+        # corner case
+        resp = self.client.post(url)
+        self.assert404(resp, 'Mag niet wijzigen')
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details % 999999, post=False)
+
+    def test_cs(self):
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
+
+        # plein heeft kaartje voor scheidsrechters
+        resp = self.client.get(self.url_plein)
+        urls = self.extract_all_urls(resp)
+        self.assertIn(self.url_overzicht, urls)
+
+        # wedstrijden
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijden.dtl', 'plein/site_layout.dtl'))
+
+        # wedstrijd details
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # beschikbaarheid opvragen
+        self.assertEqual(0, WedstrijdDagScheids.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
+        self.assert_is_redirect(resp, self.url_overzicht)
+        # +2, want 1 dag, 2 scheidsrechters
+        self.assertEqual(0+2, WedstrijdDagScheids.objects.count())
+
+        # wedstrijd details (beschikbaarheid opgevraagd)
+        url = self.url_wedstrijd_details % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
+
+        # wijzig het aantal benodigde scheidsrechters
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal_scheids': 5})
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+        wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd.pk)
+        self.assertEqual(5, wedstrijd.aantal_scheids)
+
         # corner cases
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal_scheids': 99})
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+        wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd.pk)
+        self.assertEqual(5, wedstrijd.aantal_scheids)       # no change
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal_scheids': 'X'})
+        self.assert_is_redirect(resp, self.url_wedstrijden)
+        wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd.pk)
+        self.assertEqual(1, wedstrijd.aantal_scheids)       # default
+
         resp = self.client.get(self.url_wedstrijd_details % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        resp = self.client.post(self.url_wedstrijd_details % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         self.wedstrijd.locatie.adres_uit_crm = True

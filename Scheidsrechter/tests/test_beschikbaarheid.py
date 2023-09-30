@@ -44,13 +44,13 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         data.maak_clubs_en_sporters()
 
         for sporter in data.sporters_scheids[SCHEIDS_BOND]:             # pragma: no branch
-            if sporter.account is not None:
+            if sporter.account is not None:                             # pragma: no branch
                 cls.sr4_met_account = sporter
                 break
         # for
 
         for sporter in data.sporters_scheids[SCHEIDS_VERENIGING]:       # pragma: no branch
-            if sporter.account is not None:
+            if sporter.account is not None:                             # pragma: no branch
                 cls.sr3_met_account = sporter
                 break
         # for
@@ -164,7 +164,7 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        # +4, want 2 dagen, 2 scheidsrechters
+        # +4, want 1 dag, 2 scheidsrechters
         self.assertEqual(0+4, WedstrijdDagScheids.objects.count())
 
         self.client.logout()
@@ -186,6 +186,8 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.assertEqual(1, ScheidsBeschikbaarheid.objects.count())
         beschikbaar = ScheidsBeschikbaarheid.objects.first()
         self.assertEqual(beschikbaar.opgaaf, 'N')       # 3 = Nee
+
+        self.assertTrue(str(beschikbaar) != '')
 
         # opgegeven beschikbaarheid inzien
         with self.assert_max_queries(20):
@@ -225,6 +227,9 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
         # +4, want 2 dagen, 2 scheidsrechters
         self.assertEqual(0+4, WedstrijdDagScheids.objects.count())
+
+        dag = WedstrijdDagScheids.objects.first()
+        self.assertTrue(str(dag) != '')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd2.pk})

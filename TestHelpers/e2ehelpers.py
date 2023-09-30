@@ -216,7 +216,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         #   403 (not allowed)
         #   404 (not found)
         #   405 (not allowed)
-        accepted_status_codes = (302, 403, 404, 405)
+        accepted_status_codes = (405,)  # (302, 403, 404, 405)
 
         if get:
             resp = self.client.get(url)

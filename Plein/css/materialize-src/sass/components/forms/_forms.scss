@@ -4,9 +4,18 @@ select:focus {
 }
 
 button:focus {
-  outline: none;
-  background-color: $button-background-focus;
+  outline: 2px solid black;
 }
+
+// note: do not use the same focus effects as for hover --> it is confusing because focus sticks after click!
+
+// only on devices that support a real mouse-like primary input device, support hover effects (not on touch devices)
+@media (hover: hover) {
+  button:hover {
+    background-image: linear-gradient(rgba(0, 0, 0, 25%), rgba(0, 0, 0, 25%)); // make darker for any color
+  }
+}
+
 
 label {
   font-size: $label-font-size;
