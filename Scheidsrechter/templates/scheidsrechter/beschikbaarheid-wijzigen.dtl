@@ -35,20 +35,13 @@
             el2.classList.remove('keuze-mss');
             el3.classList.remove('keuze-nee');
 
-            el1.classList.add('keuze-open');
-            el2.classList.add('keuze-open');
-            el3.classList.add('keuze-open');
-
             if (keuze === 1) {
-                el1.classList.remove('keuze-open');
                 el1.classList.add('keuze-ja');
                 el4.innerHTML = "Ja, ik kan";
             } else if (keuze === 2) {
-                el2.classList.remove('keuze-open');
                 el2.classList.add('keuze-mss');
                 el4.innerHTML = "Nog niet zeker";
             } else if (keuze === 3) {
-                el3.classList.remove('keuze-open');
                 el3.classList.add('keuze-nee');
                 el4.innerHTML = "Niet beschikbaar";
             }
@@ -61,14 +54,15 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3" style="margin-top:30px">
                 <div class="form-padding">
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
-                        {% csrf_token %}
                         <table>
                             <thead>
                                 <tr>
                                     <th>Datum</th>
                                     <th>Wedstrijd</th>
-                                    <th class="center">Scheidsrechters</th>
+                                    <th class="center">
+                                        <span class="hide-on-med-and-down">Scheidsrechters</span>
+                                        <span class="hide-on-large-and-up">#SR</span>
+                                    </th>
                                     <th class="center">Maak je keuze</th>
                                     <th class="center">Jouw beschikbaarheid</th>
                                 </tr>
@@ -83,17 +77,17 @@
                                     <td class="center">{{ dag.wedstrijd.aantal_scheids }}</td>
 
                                     <td class="center">
-                                        <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">
-
-                                        <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-ja" style="margin:2px" onclick="wijzig('{{ dag.id }}', 1)">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
                                             <i class="material-icons-round notranslate">done</i>
-                                        </a>
-                                        <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-mss" style="margin:2px" onclick="wijzig('{{ dag.id }}', 2)">
+                                        </button>
+                                        <br class="hide-on-large-and-up">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
                                             <i class="material-icons-round notranslate">question_mark</i>
-                                        </a>
-                                        <a class="btn-sv-rood keuze-open" id="{{ dag.id }}-nee" style="margin:2px" onclick="wijzig('{{ dag.id }}', 3)">
+                                        </button>
+                                        <br class="hide-on-large-and-up">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
                                             <i class="material-icons-round notranslate">close</i>
-                                        </a>
+                                        </button>
                                     </td>
 
                                     <td class="center" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
@@ -103,12 +97,19 @@
 
                         </table>
 
-                        <div class="center" style="margin-top:30px">
-                            <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
-                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                        </div>
+                        <!-- het is belangrijk dat de keuze knoppen niet in het formulier zitten
+                             anders krijgen ze extra (ongewenst) focus-gedrag, zie material _forms.scss button:focus -->
+                        <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                            {% csrf_token %}
+                            {% for dag in dagen %}
+                                <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">
+                            {% endfor %}
 
-                    </form>
+                            <div class="center" style="margin-top:30px">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                            </div>
+                        </form>
                 </div>
             </div>
 

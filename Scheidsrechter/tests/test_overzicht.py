@@ -34,7 +34,7 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
 
     testdata = None
 
-    scheids_met_account = None
+    sr3_met_account = None
 
     @classmethod
     def setUpTestData(cls):
@@ -44,13 +44,13 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
 
         for sporter in data.sporters_scheids[SCHEIDS_BOND]:             # pragma: no branch
             if sporter.account is not None:
-                cls.scheids_met_account = sporter
+                cls.sr3_met_account = sporter
                 break
         # for
 
     def setUp(self):
         """ initialisatie van de test case """
-        self.assertIsNotNone(self.scheids_met_account)
+        self.assertIsNotNone(self.sr3_met_account)
         self.functie_cs = Functie.objects.get(rol='CS')
 
         # maak een wedstrijd aan waar scheidsrechters op nodig zijn
@@ -117,8 +117,8 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wedstrijd_details % self.wedstrijd.pk)
         self.assert403(resp)
 
-    def test_scheids(self):
-        self.e2e_login(self.scheids_met_account.account)
+    def test_sr3(self):
+        self.e2e_login(self.sr3_met_account.account)
 
         # plein heeft kaartje voor scheidsrechters
         resp = self.client.get(self.url_plein)
@@ -151,7 +151,7 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
 
         # corner case
         resp = self.client.post(url)
-        self.assert404(resp, 'Mag niet wijzigen')
+        self.assert403(resp, 'Mag niet wijzigen')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijd_details % 999999, post=False)

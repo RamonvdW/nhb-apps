@@ -38,7 +38,12 @@
                         <td class="center">{{ obj.aantal_scheids }}</td>
                         <td>{{ obj.titel }}</td>
                         <td>
-                            <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>
+                            {% if obj.nog_opvragen %}
+                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">
+                                    <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
+                            {% else %}
+                                <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% empty %}
@@ -52,6 +57,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-korps" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-wedstrijden" %}
 
 {% endblock %}

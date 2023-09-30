@@ -16,7 +16,8 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
 from Plein.menu import menu_dynamics
-from Scheidsrechter.models import WedstrijdDagScheids
+from Scheidsrechter.definities import SCHEIDS_VERENIGING, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE
+from Scheidsrechter.models import WedstrijdDagScheids, ScheidsBeschikbaarheid
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
                                     ORGANISATIE_WA, WEDSTRIJD_WA_STATUS_TO_STR,
                                     WEDSTRIJD_BEGRENZING_TO_STR)
@@ -89,10 +90,15 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.is_cs = False
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         if rol_nu == Rollen.ROL_CS:
+            self.is_cs = True
             return True
         if rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
             return True
@@ -103,6 +109,15 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         vorige_week = timezone.now().date() - datetime.timedelta(days=7)
+
+        if self.is_cs:
+            wedstrijd_pks = list(WedstrijdDagScheids
+                                 .objects
+                                 .order_by('wedstrijd__pk')
+                                 .distinct('wedstrijd__pk')
+                                 .values_list('wedstrijd__pk', flat=True))
+        else:
+            wedstrijd_pks = list()
 
         wedstrijden = (Wedstrijd
                        .objects
@@ -121,6 +136,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
             wedstrijd.url_details = reverse('Scheidsrechter:wedstrijd-details',
                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+            wedstrijd.nog_opvragen = (wedstrijd.pk not in wedstrijd_pks)
         # for
 
         context['wedstrijden'] = wedstrijden
@@ -244,10 +261,43 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
             aantal_dagen = (wedstrijd.datum_einde - wedstrijd.datum_begin).days + 1
             benodigd = wedstrijd.aantal_scheids * aantal_dagen
             if WedstrijdDagScheids.objects.filter(wedstrijd=wedstrijd).count() < benodigd:
-                context['url_uitzetten'] = reverse('Scheidsrechter:beschikbaarheid-opvragen')
+                context['url_opvragen'] = reverse('Scheidsrechter:beschikbaarheid-opvragen')
 
-            # TODO: selecteer de hoofdscheidsrechter
-            # TODO: selecteer hulpscheidsrechters
+            context['dagen'] = dagen = list()
+            for dag_offset in range(aantal_dagen):
+                datum = wedstrijd.datum_begin + datetime.timedelta(days=dag_offset)
+
+                hsr = list()
+                sr = list()
+
+                for beschikbaar in (ScheidsBeschikbaarheid
+                                    .objects
+                                    .filter(wedstrijd=wedstrijd,
+                                            datum=datum)
+                                    .exclude(opgaaf=BESCHIKBAAR_NEE)
+                                    .select_related('scheids')
+                                    .order_by('scheids__lid_nr')):
+
+                    # TODO: zet is_selected indien al gekozen
+                    beschikbaar.is_selected = False
+                    beschikbaar.id_li1 = 'id_%s_1' % beschikbaar.pk
+                    beschikbaar.id_li2 = 'id_%s_2' % beschikbaar.pk
+                    beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+
+                    sr.append(beschikbaar)
+                    if beschikbaar.scheids.scheids != SCHEIDS_VERENIGING:
+                        hsr.append(beschikbaar)
+                # for
+
+                if len(hsr) > 0 or len(sr) > 0:
+                    dag = SimpleNamespace(
+                            datum=datum,
+                            nr_hsr="hsr_%s" % dag_offset,
+                            nr_sr="sr_%s" % dag_offset,
+                            beschikbaar_hoofd_sr=hsr,
+                            beschikbaar_sr=sr)
+                    dagen.append(dag)
+            # for
 
         context['kruimels'] = (
             (reverse('Scheidsrechter:overzicht'), 'Scheidsrechters'),
