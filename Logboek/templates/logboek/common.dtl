@@ -42,7 +42,7 @@
                 {% endfor %}
             </ul>
             <p class="center">
-                <a class="btn-sv-rood" onclick="activeer_deel()">Activeer</a>
+                <button class="btn-sv-rood" onclick="activeer_deel()">Activeer</button>
             </p>
         </div>
     </div>

@@ -520,6 +520,39 @@ class MyTestAsserts(TestCase):
             pos_class = html.find(' class="', pos_end)
         # while
 
+    def html_assert_button_vs_hyperlink(self, html, dtl, skip_menu=True, skip_broodkruimels=True):
+        """ controleer gebruik van <a> waar <button> gebruik moet worden.
+        """
+        html = self.remove_debug_toolbar(html)
+
+        if skip_menu:                                                           # pragma: no branch
+            # menu is the in the navbar at the top of the page
+            # it ends with the nav-content-scrollbar div
+            pos = html.find('<div class="nav-content-scrollbar">')
+            if pos >= 0:                                                        # pragma: no branch
+                html = html[pos:]
+
+        if skip_broodkruimels:                                                  # pragma: no branch
+            pos_kruimel = html.find('broodkruimels-link')
+            while pos_kruimel > 0:
+                html = html[pos_kruimel+18:]
+                pos_kruimel = html.find('broodkruimels-link')
+            # while
+
+        pos_a = html.find('<a')
+        while pos_a > 0:
+            pos_end = html.find('</a>', pos_a+2)
+            link = html[pos_a:pos_end+4]
+
+            if link.find(' href="') < 0:
+                # geen href
+                # print('link: %s' % repr(link))
+                msg = "Link should <button> in %s:\n%s" % (dtl, link)
+                self.fail(msg)
+
+            pos_a = html.find('<a', pos_end+4)
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
 
@@ -545,6 +578,7 @@ class MyTestAsserts(TestCase):
         self.assert_scripts_clean(html, dtl)
         self.html_assert_no_div_in_p(html, dtl)
         self.html_assert_no_col_white(html, dtl)
+        self.html_assert_button_vs_hyperlink(html, dtl)
         self.html_assert_inputs(html, dtl)
         self.html_assert_csrf_token_usage(html, dtl)
         self.html_assert_dubbelklik_bescherming(html, dtl)

@@ -83,7 +83,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                 </p>
             </div>
         </div>
@@ -102,7 +102,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                 </p>
             </div>
         </div>
@@ -128,7 +128,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-sv-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+                        <button class="btn-sv-rood" onclick="keuze_gemaakt('ver')">Activeer</button>
                     </p>
                 </div>
             </div>

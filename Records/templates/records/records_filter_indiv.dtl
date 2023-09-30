@@ -36,7 +36,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                 </p>
             </div>
         </div>
@@ -57,7 +57,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>
@@ -81,7 +81,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                 </p>
             </div>
         </div>
@@ -102,7 +102,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                     </p>
                 </div>
             </div>
@@ -129,7 +129,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                 </p>
             </div>
         </div>
@@ -150,7 +150,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                     </p>
                 </div>
             </div>
@@ -174,7 +174,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                 </p>
             </div>
         </div>
@@ -194,7 +194,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                    <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                 </p>
             </div>
         </div>
@@ -215,7 +215,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-sv-rood" onclick="filters_activate()">Activeer</a>
+                        <button class="btn-sv-rood" onclick="filters_activate()">Activeer</button>
                     </p>
                 {% else %}
                     <p class="grey-text">Niet van toepassing</p>

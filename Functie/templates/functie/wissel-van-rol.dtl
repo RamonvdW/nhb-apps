@@ -111,7 +111,7 @@
                         {% endfor %}
                         </ul>
                         <p class="center">
-                            <a class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</a>
+                            <button class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</button>
                         </p>
                     </div>
                 </div>
@@ -149,7 +149,7 @@
                                 {% endfor %}
                             </ul>
                             <p class="center">
-                                <a class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</a>
+                                <button class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</button>
                             </p>
                         {% endif %}
                     </div>
@@ -260,7 +260,7 @@
                                 {% endfor %}
                             </ul>
                             <p class="center">
-                                <a class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</a>
+                                <button class="btn-sv-rood" onclick="wissel_naar_rol()">Activeer</button>
                             </p>
                         </div>
                     </div>

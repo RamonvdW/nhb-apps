@@ -202,7 +202,7 @@ function myTableFilter(zoekveld, tableId)
 //             </li>
 //         {% endfor %}
 //     </ul>
-//     <a onclick="filter_activate()">Activeer</a>
+//     <button class="btn-sv-rood" onclick="filter_activate()">Activeer</button>
 
 function filters_activate() {
     'use strict';
