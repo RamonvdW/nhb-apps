@@ -28,7 +28,7 @@
 
                 <form action="{% url 'Account:logout' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
                     {% csrf_token %}
-                    <input class="btn-sv-rood" id="submit_knop" type="submit" value="Uitloggen">
+                    <input class="btn-sv-rood" id="submit_knop" type="submit" value="Uitloggen" autofocus>
                 </form>
 
                 <p>&nbsp;</p>
