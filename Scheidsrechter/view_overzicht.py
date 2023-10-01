@@ -137,7 +137,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             wedstrijd.url_details = reverse('Scheidsrechter:wedstrijd-details',
                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-            wedstrijd.nog_opvragen = (wedstrijd.pk not in wedstrijd_pks)
+            wedstrijd.nog_opvragen = self.is_cs and (wedstrijd.pk not in wedstrijd_pks)
         # for
 
         context['wedstrijden'] = wedstrijden

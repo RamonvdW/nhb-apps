@@ -42,18 +42,20 @@
                             {% csrf_token %}
 
                             <table>
-                                <tr>
-                                    <th colspan="2">Aantal scheidsrechters</th>
-                                    <td>
-                                        <select name="aantal_scheids" onchange="gewijzigd()">
-                                            {% for value, tekst in keuze_aantal_scheids %}
-                                                <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                </tr>
-
                                 {% for dag in dagen %}
+                                    {% if forloop.first %}
+                                        <tr>
+                                            <th colspan="2">Aantal scheidsrechters</th>
+                                            <td>
+                                                <select name="aantal_scheids" onchange="gewijzigd()">
+                                                    {% for value, tekst in keuze_aantal_scheids %}
+                                                        <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+
                                     <tr>
                                         <th>Hoofdscheidsrechter</th>
                                         <td>{{ dag.datum }}</td>
