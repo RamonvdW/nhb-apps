@@ -5,9 +5,9 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/nhbapps/requirements/"
+    directory: "/SiteMain/requirements/"
     schedule:
       interval: "weekly"
       day: "friday"
     open-pull-requests-limit: 0
-    target-branch: "dev_v14"
+    target-branch: "dev_v20"
