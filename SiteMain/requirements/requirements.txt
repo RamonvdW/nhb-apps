@@ -10,7 +10,7 @@ cachetools==5.3.1
     # via google-auth
 certifi==2023.7.22
     # via requests
-charset-normalizer==3.2.0
+charset-normalizer==3.3.0
     # via requests
 django==4.2.5
     # via
@@ -18,11 +18,11 @@ django==4.2.5
     #   -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-google-api-core==2.11.1
+google-api-core==2.12.0
     # via google-api-python-client
-google-api-python-client==2.99.0
+google-api-python-client==2.101.0
     # via -r requirements.in
-google-auth==2.23.0
+google-auth==2.23.2
     # via
     #   -r requirements.in
     #   google-api-core
@@ -46,13 +46,13 @@ oauthlib==3.2.2
     # via requests-oauthlib
 openpyxl==3.1.2
     # via -r requirements.in
-pillow==10.0.0
+pillow==10.0.1
     # via -r requirements.in
 protobuf==4.24.3
     # via
     #   google-api-core
     #   googleapis-common-protos
-psycopg==3.1.10
+psycopg==3.1.12
     # via -r requirements.in
 pyasn1==0.5.0
     # via
@@ -64,7 +64,7 @@ pyotp==2.9.0
     # via -r requirements.in
 pyparsing==3.1.1
     # via httplib2
-pypdf==3.16.0
+pypdf==3.16.2
     # via -r requirements.in
 pypng==0.20220715.0
     # via qrcode
@@ -81,14 +81,13 @@ rsa==4.9
     # via google-auth
 sqlparse==0.4.4
     # via django
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   psycopg
     #   qrcode
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.26.16
+urllib3==2.0.5
     # via
-    #   google-auth
     #   mollie-api-python
     #   requests
