@@ -35,18 +35,10 @@
   font-style: normal;
   font-weight: 400;
   font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url({% static 'fonts/Material-Icons-Round-v108.otf' %}) format('opentype');
+                  /* 'fonts/Material-Icons-Round-v108.otf' */
+  src: url({% static 'fonts/material-icons-subset-mh-v3.otf' %}) format('opentype');
 }
 </style>
-
-{% comment %}
-Oud:
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-{% endcomment %}
 
 
 <!-- end of file -->
