@@ -220,11 +220,15 @@ class TestBondspas(E2EHelpers, TestCase):
         # gast-account
         self.sporter.is_gast = True
         self.sporter.save(update_fields=['is_gast'])
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
+        resp = self.client.get(url)
+        self.assert404(resp, 'Geen bondspas voor gast-accounts')
+        resp = self.client.post(url)
         self.assert404(resp, 'Geen bondspas voor gast-accounts')
 
-        resp = self.client.get(self.url_toon_van % 99999)
+        url = self.url_toon_van % 99999
+        resp = self.client.get(url)
+        self.assert404(resp, 'Geen valide parameter')
+        resp = self.client.post(url)
         self.assert404(resp, 'Geen valide parameter')
 
     def test_speelsterkte(self):

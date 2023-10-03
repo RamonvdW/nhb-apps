@@ -171,5 +171,7 @@ WEDSTRIJD_KORTING_SOORT_TO_STR = {
     WEDSTRIJD_KORTING_COMBI: 'Combi'
 }
 
+# speciale waarde voor Wedstrijd.aantal_scheids
+AANTAL_SCHEIDS_GEEN_KEUZE = -1
 
 # end of file

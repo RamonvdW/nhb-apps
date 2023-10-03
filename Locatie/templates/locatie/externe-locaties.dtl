@@ -84,6 +84,6 @@
 
     <p class="center">Deze gegevens kunnen worden aangepast door de hoofdwedstrijdleider van de vereniging.</p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-externe-locaties" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="locatie-extern" %}
 
 {% endblock %}

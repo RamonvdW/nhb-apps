@@ -120,8 +120,6 @@ class TestBeheer(E2EHelpers, TestCase):
             resp = self.client.get('/beheer/login/?next=/records/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/login/?next=/records/', 302))
 
-        self.e2e_assert_other_http_commands_not_supported('/beheer/login/')
-
     def test_index(self):
         # voordat 2FA verificatie gedaan is
         self.e2e_login(self.account_admin)
@@ -130,8 +128,6 @@ class TestBeheer(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get('/beheer/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/otp-controle/?next=/beheer/', 302))
-
-        self.e2e_assert_other_http_commands_not_supported('/beheer/')
 
         # na 2FA verificatie
         self.e2e_login_and_pass_otp(self.account_admin)

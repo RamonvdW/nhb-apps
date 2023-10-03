@@ -81,7 +81,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                               'opleidingdiploma_set')
                             .first())
 
-            if self.sporter:
+            if self.sporter:                                    # pragma: no branch
                 self.ver = self.sporter.bij_vereniging
 
         return super().dispatch(request, *args, **kwargs)

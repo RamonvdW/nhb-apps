@@ -42,6 +42,6 @@
         </div>
     </div>
 
-    <!-- geen feedback: with op_pagina="account-bevestigd" -->
+    <!-- geen feedback: with op_pagina="registreer-lid-email-bevestigd" -->
 
 {% endblock %}

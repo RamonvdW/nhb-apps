@@ -17,7 +17,7 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 import datetime
 
 
-class TestWedstrijd(E2EHelpers, TestCase):
+class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module wedstrijd wijzigen """
 

@@ -29,4 +29,7 @@ html5validator
 # javascript/ecmascript validatie
 esprima
 
+# verkleinen van font files
+fonttools
+
 # end of file
