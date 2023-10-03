@@ -18,6 +18,10 @@ import json
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
+MATERIAL_ICON_GLYPH_NAMES = 'Plein/fonts/reduce/needed-glyphs_material-icons-round.txt'
+
+GLYPH_NAMES_PRESENT = [name.strip() for name in open(MATERIAL_ICON_GLYPH_NAMES, 'r').readlines()]
+
 
 class MyTestAsserts(TestCase):
 
@@ -553,6 +557,25 @@ class MyTestAsserts(TestCase):
             pos_a = html.find('<a', pos_end+4)
         # while
 
+    def html_assert_material_icons(self, html, dtl):
+        pos = html.find('<i class=')
+        while pos > 0:
+            pos2 = html.find('</i>', pos+1)
+            if pos2 > 0:
+                tag_i = html[pos:pos2]
+                if 'material-icons' in tag_i:
+                    # class secondary-content is used to dynamically plug an icon from within a script
+                    if 'secondary-content' not in tag_i:
+                        pos2 = tag_i.rfind('>')
+                        icon_name = tag_i[pos2+1:]
+                        # print('icon_name: %s' % repr(icon_name))
+                        if icon_name not in GLYPH_NAMES_PRESENT:
+                            self.fail('Bug in template %s: Material Icon name %s is not in the reduced font!' % (
+                                        repr(dtl), repr(icon_name)))
+
+            pos = html.find('<i class=', pos+1)
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
 
@@ -584,6 +607,7 @@ class MyTestAsserts(TestCase):
         self.html_assert_dubbelklik_bescherming(html, dtl)
         self.html_assert_notranslate(html, dtl)
         self.html_assert_template_bug(html, dtl)
+        self.html_assert_material_icons(html, dtl)
 
         urls = self.extract_all_urls(response)
         for url in urls:

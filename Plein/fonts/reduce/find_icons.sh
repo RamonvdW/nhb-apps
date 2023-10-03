@@ -23,17 +23,12 @@ grep icon= */templates/*/*dtl | sed 's/icon=/@/' | cut -d@ -f2 | cut -d\" -f2 >>
 HANDLED+="|{{ icon }}"       # in Plein/templates/plain/card_*dtl
 
 # handle {{ korting.icon_name }}
-grep icon_name */view*py | cut -d= -f2 | cut -d\' -f2 >> "$OUT_TMP"
-HANDLED+="|{{ korting.icon_name }}"
+# handle icon/icoon gezet in view
+find . -name \*py ! -name models.py ! -name test_asserts.py -exec grep -E 'icon=|icoon=|icon =|icoon =|icon_name' {} \+ | grep -v 'admin_list._boolean_icon' | cut -d= -f2- | tr \" \' | cut -d\' -f2 >> "$OUT_TMP"
+HANDLED+="|kaartje.icon|kaartje.icoon|ander.icoon|{{ korting.icon_name }}"
 
-# handle kaartje.icon
-grep kaartje.icon */view*py | cut -d= -f2- | cut -d\' -f2 >> "$OUT_TMP"
-HANDLED+="|kaartje.icon"
-
-# handle kaartje.icoon
-grep 'icoon=' */view*py | cut -d= -f2- | cut -d\" -f2 >> "$OUT_TMP"
-HANDLED+="|kaartje.icoon|ander.icoon"
-
+# dynamische icons vanuit script
+grep set_collapsible_icon\(id, Plein/js/site_layout.js | tr \" \' |cut -d\' -f2 >> "$OUT_TMP"
 
 echo "[INFO] Checking for missed situations"
 grep -vE "$HANDLED" "$OUT_TMP" | sort -u > "$OUT"

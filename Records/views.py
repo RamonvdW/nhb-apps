@@ -22,7 +22,7 @@ TEMPLATE_RECORDS_SPECIFIEK = 'records/records_specifiek.dtl'
 TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
 
 
-DISCIPLINE_TO_ICON = {
+DISCIPLINE_TO_IMG = {
     'OD': static('plein/badge_discipline_outdoor.png'),
     '18': static('plein/badge_discipline_indoor.png'),
     '25': static('plein/badge_discipline_25m1p.png')
@@ -40,7 +40,7 @@ class RecordsOverzichtView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
-        obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
+        obj.img = DISCIPLINE_TO_IMG[obj.discipline]
 
         if obj.is_world_record:
             obj.title_str = "Wereld Record"
