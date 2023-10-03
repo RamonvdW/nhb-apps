@@ -66,7 +66,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             context['rol'] = 'sporter / scheidsrechter'
         else:
             context['url_korps'] = reverse('Scheidsrechter:korps-met-contactgegevens')
-            context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters met contextgegevens."
+            context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters met contactgegevens."
 
             context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-inzien')
             context['tekst_beschikbaarheid'] = "Bekijk de opgegeven beschikbaarheid."
