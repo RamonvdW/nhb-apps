@@ -20,7 +20,8 @@
   font-style: normal;
   font-weight: 500;
   font-display: block;  /* liever later tonen dan verspringende layout */
-  src: url({% static 'fonts/FiraSans-Medium-v17.ttf' %}) format('truetype');
+                  /* 'fonts/FiraSans-Medium-v17.ttf' */
+  src: url({% static 'fonts/firasans-medium-subset-mh-v3.ttf' %}) format('truetype');
 }
 @font-face {
   font-family: 'Open Sans';
@@ -36,7 +37,7 @@
   font-weight: 400;
   font-display: block;  /* liever later tonen dan verspringende layout */
                   /* 'fonts/Material-Icons-Round-v108.otf' */
-  src: url({% static 'fonts/material-icons-subset-mh-v4.otf' %}) format('opentype');
+  src: url({% static 'fonts/material-icons-subset-mh-v5.otf' %}) format('opentype');
 }
 </style>
 

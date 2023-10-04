@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 FONTS_DIR="../../static/fonts"
-GLYPH_NAMES="needed-glyphs_material-icons-round.txt"
-DEST="material-icons-subset-mh-v"
-OTF_DEST="$FONTS_DIR/$DEST.otf"
+
+DEST="firasans-medium-subset-mh-v"
+TTF_DEST="$FONTS_DIR/$DEST.ttf"
 TTX_DEST="$FONTS_DIR/$DEST.ttx"
 DTL_FONTS="../../templates/plein/site_layout_fonts.dtl"
 
@@ -15,31 +15,23 @@ DTL_FONTS="../../templates/plein/site_layout_fonts.dtl"
 SCRIPT_DIR=$(dirname "$0")
 cd "$SCRIPT_DIR"
 
-OTF_SOURCE=$(find "$FONTS_DIR" -name Material-Icons-Round-\*.otf)
-if [ ! -e "$OTF_SOURCE" ]
+TTF_SOURCE=$(find "$FONTS_DIR" -name FiraSans-Medium\*.ttf)
+if [ ! -e "$TTF_SOURCE" ]
 then
-    echo "[ERROR] Cannot find otf file for Material-Icons-Round"
+    echo "[ERROR] Cannot find ttf file for FiraSans-Medium"
     exit 1
 fi
 
-FULL=$(realpath "$OTF_SOURCE")
+FULL=$(realpath "$TTF_SOURCE")
 echo "[INFO] Source: $FULL"
 
 # reduceer
-rm -f "$OTF_DEST"
-pyftsubset "$OTF_SOURCE" --output-file="$OTF_DEST" --glyphs-file="$GLYPH_NAMES" --unicodes=5f-7a,30-39 --no-layout-closure
-
-if [ -e "$OTF_DEST" ]
-then
-    FULL=$(realpath "$OTF_DEST")
-    echo "[INFO] Created $FULL"
-else
-    echo "[ERROR] Failed to create $OTF_DEST"
-fi
+rm -f "$TTF_DEST"
+pyftsubset "$TTF_SOURCE" --output-file="$TTF_DEST" --unicodes=20-7e --no-layout-closure
 
 # get the sequence number
 LINE=$(grep "$DEST" "$DTL_FONTS")
-# src: url({% static 'fonts/material-icons-subset-mh-v1.otf' %}) format('opentype');
+# src: url({% static 'fonts/firasans-medium-subset-mh-v1.ttf' %}) format('truetype');
 NR=$(echo "$LINE" | cut -d. -f1 | sed 's/mh-v/@/' | cut -d@ -f2)
 echo "[INFO] Found current sequence number: $NR"
 NEW_NR=$(( NR + 1 ))
@@ -49,14 +41,15 @@ echo "[INFO] Decided sequence number: $NEW_NR"
 rm "$FONTS_DIR/$DEST$NR.otf"
 
 # rename the destination
-OTF_DEST_NEW="$FONTS_DIR/$DEST$NEW_NR.otf"
-mv "$OTF_DEST" "$OTF_DEST_NEW"
+TTF_DEST_NEW="$FONTS_DIR/$DEST$NEW_NR.tf"
+mv "$TTF_DEST" "$TTF_DEST_NEW"
 
 # replace the sequence number in the referencing django template
-sed -i "s/material-icons-subset-mh-v.*\.otf/material-icons-subset-mh-v$NEW_NR.otf/" "$DTL_FONTS"
+sed -i "s/firasans-medium-subset-mh-v.*\.ttf/firasans-medium-subset-mh-v$NEW_NR.ttf/" "$DTL_FONTS"
 
 # maak een dump van de nieuwe subset
 rm -f "$TTX_DEST"     # avoids incremental filenames
-# ttx "$OTF_DEST_NEW"
+# ttx "$TTF_DEST_NEW"
 
 # end of file
+
