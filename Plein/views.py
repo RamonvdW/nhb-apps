@@ -111,7 +111,7 @@ class PleinView(View):
                 # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
                 eval_mandje_inhoud(request)
 
-                if gebruiker_is_scheids(self.request):
+                if gebruiker_is_scheids(self.request) and settings.IS_TEST_SERVER:
                     context['url_scheids'] = reverse('Scheidsrechter:overzicht')
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:

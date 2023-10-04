@@ -48,7 +48,7 @@
                 {% endif %}
 
                 <!-- scheids -->
-                {% if rol_is_cs %}
+                {% if rol_is_cs and is_test_server %}
                     {% url 'Scheidsrechter:overzicht' as card_url %}
                     {% include 'plein/card_icon.dtl' with title="Scheidsrechters" text="Voor leden van het scheidsrechterskorps" icon="sports" url=card_url %}
                 {% endif %}
