@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,6 +34,9 @@ try:
         result = request.execute()
     except socket.timeout as exc:
         print('[ERROR] Socket timeout: %s' % exc)
+    except socket.gaierror as exc:
+        # example: [Errno -3] Temporary failure in name resolution
+        print('[ERROR] Socket error: %s' % exc)
     except googleapiclient.errors.HttpError as exc:
         print('[ERROR] HttpError from API: %s' % exc)
     else:
