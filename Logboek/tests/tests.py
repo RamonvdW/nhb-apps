@@ -29,15 +29,15 @@ class TestLogboek(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
-        sporter = Sporter()
-        sporter.lid_nr = 100042
-        sporter.geslacht = "M"
-        sporter.voornaam = "Beh"
-        sporter.achternaam = "eerder"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100042,
+                    geslacht="M",
+                    voornaam="Beh",
+                    achternaam="eerder",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    account=self.account_normaal,
+                    email=self.account_normaal.email)
         sporter.save()
 
         LogboekRegel.objects.all().delete()

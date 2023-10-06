@@ -67,15 +67,15 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
         self.functie_sec.save()
 
         # maak het lid aan dat SEC wordt
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Secretaris"
-        sporter.email = "rdesecretaris@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Secretaris",
+                    email="rdesecretaris@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
 
         self.account_sec = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -360,7 +360,6 @@ class TestVerenigingSEC(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
-
 
 
 # end of file

@@ -46,15 +46,15 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         lid_nr = self._next_lid_nr
         self._next_lid_nr += 1
 
-        sporter = Sporter()
-        sporter.lid_nr = lid_nr
-        sporter.geslacht = "M"
-        sporter.voornaam = voornaam
-        sporter.achternaam = "Tester"
-        sporter.email = voornaam.lower() + "@test.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = self._ver
+        sporter = Sporter(
+                    lid_nr=lid_nr,
+                    geslacht="M",
+                    voornaam=voornaam,
+                    achternaam="Tester",
+                    email=voornaam.lower() + "@test.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self._ver)
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -218,18 +218,17 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             # maak 5 leden aan
             for lp in range(5):
                 lid_nr += 1
-                sporter = Sporter()
-                sporter.lid_nr = lid_nr
-                sporter.voornaam = "Lid %s" % lid_nr
-                sporter.achternaam = "de Tester"
-                sporter.bij_vereniging = ver
-                sporter.is_actief_lid = True
+                sporter = Sporter(
+                            lid_nr=lid_nr,
+                            voornaam="Lid %s" % lid_nr,
+                            achternaam="de Tester",
+                            bij_vereniging=ver,
+                            is_actief_lid=True,
+                            geslacht='M',
+                            geboorte_datum=datetime.date(2000, 1, 1),  # senior
+                            sinds_datum=datetime.date(2010, 1, 1))
                 if barebow_boog_pk:
                     sporter.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
-                else:
-                    sporter.geboorte_datum = datetime.date(2000, 1, 1)      # senior
-                sporter.sinds_datum = datetime.date(2010, 1, 1)
-                sporter.geslacht = 'M'
                 sporter.save()
 
                 # haal de sporter voorkeuren op, zodat de sporter-boog records aangemaakt worden

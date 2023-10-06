@@ -71,29 +71,29 @@ class TestPlein(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_100001
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.account_100001,
+                    email=self.account_100001.email)
         sporter.save()
 
         # maak een lid aan voor de admin
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ad"
-        sporter.achternaam = "Min"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.testdata.account_admin
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="M",
+                    voornaam="Ad",
+                    achternaam="Min",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.testdata.account_admin,
+                    email=self.testdata.account_admin.email)
         sporter.save()
 
         self.functie_mo = maak_functie('Manager Opleidingen', 'MO')

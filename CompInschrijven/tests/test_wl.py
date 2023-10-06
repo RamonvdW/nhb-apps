@@ -61,15 +61,15 @@ class TestCompInschrijvenWL(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak het lid aan dat WL wordt
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    email="rdetester@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
 
         self.account_wl = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -80,41 +80,41 @@ class TestCompInschrijvenWL(E2EHelpers, TestCase):
         self.sporter_100001 = sporter
 
         # maak een jeugdlid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Jeugdschutter",
+                    email="",
+                    geboorte_datum=datetime.date(year=2010, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100002 = sporter
 
         # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
-        sporter = Sporter()
-        sporter.lid_nr = 100012
-        sporter.geslacht = "V"
-        sporter.voornaam = "Andrea"
-        sporter.achternaam = "de Jeugdschutter"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=10, day=10)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100012,
+                    geslacht="V",
+                    voornaam="Andrea",
+                    achternaam="de Jeugdschutter",
+                    email="",
+                    geboorte_datum=datetime.date(year=2010, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=10, day=10),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100012 = sporter
 
         # maak een senior lid aan, om inactief te maken
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ramona"
-        sporter.achternaam = "de Testerin"
-        sporter.email = ""
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100003,
+                    geslacht="V",
+                    voornaam="Ramona",
+                    achternaam="de Testerin",
+                    email="",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100003 = sporter
 

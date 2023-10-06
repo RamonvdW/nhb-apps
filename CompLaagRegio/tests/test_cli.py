@@ -94,16 +94,16 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         ver.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 123456
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = None
-        sporter.email = ''
+        sporter = Sporter(
+                    lid_nr=123456,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=None,
+                    email='')
         sporter.save()
         self.sporter = sporter
 

@@ -20,7 +20,10 @@ FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
 MATERIAL_ICON_GLYPH_NAMES = 'Plein/fonts/reduce/needed-glyphs_material-icons-round.txt'
 
-GLYPH_NAMES_PRESENT = [name.strip() for name in open(MATERIAL_ICON_GLYPH_NAMES, 'r').readlines()]
+GLYPH_NAMES_PRESENT = list()
+with open(MATERIAL_ICON_GLYPH_NAMES, 'r') as f:
+    GLYPH_NAMES_PRESENT.extend([name.strip() for name in f.readlines()])
+# with
 
 
 class MyTestAsserts(TestCase):

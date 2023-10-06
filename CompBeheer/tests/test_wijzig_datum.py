@@ -59,15 +59,15 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
         ver.save()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    email="rdetester@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver)
         self.account_lid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.account = self.account_lid
         sporter.save()
@@ -79,15 +79,15 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_lid)
 
         # maak een jeugdlid aan (komt in BB jeugd zonder klasse onbekend)
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "het Testertje"
-        sporter.email = "rdetestertje@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="het Testertje",
+                    email="rdetestertje@gmail.not",
+                    geboorte_datum=datetime.date(year=2008, month=3, day=4),
+                    sinds_datum=datetime.date(year=2015, month=11, day=12),
+                    bij_vereniging=ver)
         self.account_jeugdlid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.account = self.account_jeugdlid
         sporter.save()
@@ -101,15 +101,15 @@ class TestCompBeheerTestWijzigDatum(E2EHelpers, TestCase):
         sporterboog.save()
         self.sporterboog_100002 = sporterboog
 
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "V"
-        sporter.voornaam = "Zus"
-        sporter.achternaam = "de Testerin"
-        sporter.email = "zus@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        sporter.bij_vereniging = ver
+        sporter = Sporter(
+                    lid_nr=100003,
+                    geslacht="V",
+                    voornaam="Zus",
+                    achternaam="de Testerin",
+                    email="zus@gmail.not",
+                    geboorte_datum=datetime.date(year=2008, month=3, day=4),
+                    sinds_datum=datetime.date(year=2015, month=11, day=12),
+                    bij_vereniging=ver)
         sporter.save()
         self.sporter_100003 = sporter
 

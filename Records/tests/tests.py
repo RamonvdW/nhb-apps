@@ -18,33 +18,33 @@ class TestRecordsRest(TestCase):
         """ initialisatie van de test case """
 
         # NhbLib
-        sporter = Sporter()
-        sporter.lid_nr = 123457
-        sporter.voornaam = 'Petra'
-        sporter.achternaam = 'Schutter'
-        sporter.email = 'petra@test.nl'
-        sporter.geboorte_datum = parse_date('1970-01-30')
-        sporter.woon_straatnaam = 'Arnhem'
-        sporter.geslacht = 'V'
-        sporter.sinds_datum = parse_date("1991-02-05")  # Y-M-D
+        sporter = Sporter(
+                    lid_nr=123457,
+                    voornaam='Petra',
+                    achternaam='Schutter',
+                    email='petra@test.nl',
+                    geboorte_datum=parse_date('1970-01-30'),
+                    adres_code='Arnhem',
+                    geslacht='V',
+                    sinds_datum=parse_date("1991-02-05"))  # Y-M-D
         sporter.save()
 
         # Record 42
-        rec = IndivRecord()
-        rec.volg_nr = 42
-        rec.discipline = DISCIPLINE[0][0]   # OD
-        rec.soort_record = 'Test record'
-        rec.geslacht = GESLACHT[0][0]   # M
-        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
-        rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
-        rec.sporter = sporter
-        rec.naam = 'Top Schutter'
-        rec.datum = parse_date('2017-08-27')
-        rec.plaats = 'Papendal'
-        rec.land = 'Nederland'
-        rec.score = 1234
-        rec.max_score = 5678
-        rec.x_count = 56
+        rec = IndivRecord(
+                    volg_nr=42,
+                    discipline=DISCIPLINE[0][0],   # OD
+                    soort_record='Test record',
+                    geslacht=GESLACHT[0][0],   # M
+                    leeftijdscategorie=LEEFTIJDSCATEGORIE[0][0],   # M
+                    materiaalklasse=MATERIAALKLASSE[0][0],     # R
+                    sporter=sporter,
+                    naam='Top Schutter',
+                    datum=parse_date('2017-08-27'),
+                    plaats='Papendal',
+                    land='Nederland',
+                    score=1234,
+                    max_score=5678,
+                    x_count=56)
         rec.save()
 
     def test_create(self):

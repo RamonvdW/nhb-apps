@@ -84,80 +84,84 @@ class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
 
     def _maak_leden_aan(self):
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.email = "rdetester@test.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = self.ver
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    email="rdetester@test.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self.ver)
         self.account_lid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.account = self.account_lid
         sporter.save()
         self.sporter_100001 = sporter
+
         sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100001 = sporterboog
 
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "het Testertje"
-        sporter.email = "rdetestertje@test.not"
-        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        sporter.bij_vereniging = self.ver
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="het Testertje",
+                    email="rdetestertje@test.not",
+                    geboorte_datum=datetime.date(year=2008, month=3, day=4),
+                    sinds_datum=datetime.date(year=2015, month=11, day=12),
+                    bij_vereniging=self.ver)
         self.account_jeugdlid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.account = self.account_jeugdlid
         sporter.save()
         self.sporter_100002 = sporter
+        
         sporterboog = SporterBoog(sporter=self.sporter_100002, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100002 = sporterboog
 
-        sporter = Sporter()
-        sporter.lid_nr = 100003
-        sporter.geslacht = "M"
-        sporter.voornaam = "Geen"
-        sporter.achternaam = "Vereniging"
-        sporter.email = "geenver@test.not"
-        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        sporter = Sporter(
+                    lid_nr=100003,
+                    geslacht="M",
+                    voornaam="Geen",
+                    achternaam="Vereniging",
+                    email="geenver@test.not",
+                    geboorte_datum=datetime.date(year=2008, month=3, day=4),
+                    sinds_datum=datetime.date(year=2015, month=11, day=12))
         # lid.bij_vereniging =
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
 
-        sporter = Sporter()
-        sporter.lid_nr = 100004
-        sporter.geslacht = "V"
-        sporter.voornaam = "Juf"
-        sporter.achternaam = "de Schutter"
-        sporter.email = "jufschut@test.not"
-        sporter.geboorte_datum = datetime.date(year=1988, month=12, day=4)
-        sporter.sinds_datum = datetime.date(year=2015, month=7, day=15)
-        sporter.bij_vereniging = self.ver
+        sporter = Sporter(
+                    lid_nr=100004,
+                    geslacht="V",
+                    voornaam="Juf",
+                    achternaam="de Schutter",
+                    email="jufschut@test.not",
+                    geboorte_datum=datetime.date(year=1988, month=12, day=4),
+                    sinds_datum=datetime.date(year=2015, month=7, day=15),
+                    bij_vereniging=self.ver)
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
         self.sporter_100004 = sporter
+
         sporterboog = SporterBoog(sporter=self.sporter_100004, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100004 = sporterboog
 
-        sporter = Sporter()
-        sporter.lid_nr = 100005
-        sporter.geslacht = "V"
-        sporter.voornaam = "Jans"
-        sporter.achternaam = "de Schutter"
-        sporter.email = "jufschut@test.not"
-        sporter.geboorte_datum = datetime.date(year=1977, month=12, day=4)
-        sporter.sinds_datum = datetime.date(year=2015, month=7, day=15)
-        sporter.bij_vereniging = self.ver
+        sporter = Sporter(
+                    lid_nr=100005,
+                    geslacht="V",
+                    voornaam="Jans",
+                    achternaam="de Schutter",
+                    email="jufschut@test.not",
+                    geboorte_datum=datetime.date(year=1977, month=12, day=4),
+                    sinds_datum=datetime.date(year=2015, month=7, day=15),
+                    bij_vereniging=self.ver)
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
         self.sporter_100005 = sporter
+
         sporterboog = SporterBoog(sporter=self.sporter_100005, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100005 = sporterboog

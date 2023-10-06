@@ -372,16 +372,16 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # mutatie van inactief lid naar actief lid
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 110000
-        sporter.geslacht = "M"
-        sporter.voornaam = "Zweven"
-        sporter.achternaam = "de Tester"
-        sporter.email = "zdetester@gmail.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = None
-        sporter.is_actief_lid = False
+        sporter = Sporter(
+                    lid_nr=110000,
+                    geslacht="M",
+                    voornaam="Zweven",
+                    achternaam="de Tester",
+                    email="zdetester@gmail.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=None,
+                    is_actief_lid=False)
         sporter.save()
 
         with self.assert_max_queries(63):
