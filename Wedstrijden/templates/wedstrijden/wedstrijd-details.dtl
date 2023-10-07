@@ -24,7 +24,7 @@
                     <p>Het is niet meer mogelijk om te schrijven</p>
                 {% else %}
                     <a class="btn-sv-rood" href="#inschrijven">
-                        <i class="material-icons-round left">close</i>Inschrijven</a>
+                        <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
                 {% endif %}
             {% endif %}
         </div>
