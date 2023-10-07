@@ -11,7 +11,6 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIO
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
-from Plein.menu import menu_dynamics
 from Scheidsrechter.definities import SCHEIDS2LEVEL
 from Sporter.models import Sporter
 
@@ -76,7 +75,6 @@ class KorpsView(UserPassesTestMixin, TemplateView):
             (None, 'Korps')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -122,7 +120,6 @@ class KorpsMetContactGegevensView(UserPassesTestMixin, TemplateView):
             (None, 'Korps')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

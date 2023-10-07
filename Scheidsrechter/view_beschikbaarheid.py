@@ -16,7 +16,6 @@ from BasisTypen.definities import SCHEIDS_NIET, SCHEIDS_BOND, SCHEIDS_INTERNATIO
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
-from Plein.menu import menu_dynamics
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG, BESCHIKBAAR_JA, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE, BESCHIKBAAR2STR
 from Scheidsrechter.models import WedstrijdDagScheids, ScheidsBeschikbaarheid
 from Sporter.models import Sporter, get_sporter
@@ -201,7 +200,6 @@ class WijzigBeschikbaarheidView(UserPassesTestMixin, TemplateView):
             (None, 'Beschikbaarheid')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -370,7 +368,6 @@ class BeschikbaarheidInzienView(UserPassesTestMixin, TemplateView):
             (None, 'Beschikbaarheid')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
