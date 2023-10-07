@@ -13,7 +13,7 @@ from Competitie.definities import (DEEL_RK, DEEL_BK,
                                    KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
 from Competitie.models import (Competitie, CompetitieMatch, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
-from seizoenen import get_comp_pk
+from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter

@@ -11,7 +11,7 @@ from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_
 from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegiocompetitieSporterBoog)
-from seizoenen import get_comp_pk
+from Competitie.seizoenen import get_comp_pk
 from Competitie.operations.poules import maak_poule_schema
 from Geo.models import Regio
 from Plein.menu import menu_dynamics

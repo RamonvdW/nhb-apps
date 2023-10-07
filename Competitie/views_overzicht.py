@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from Account.models import get_account
 from Competitie.models import Competitie, get_competitie_boog_typen
-from seizoenen import get_comp_pk
+from Competitie.seizoenen import get_comp_pk
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics

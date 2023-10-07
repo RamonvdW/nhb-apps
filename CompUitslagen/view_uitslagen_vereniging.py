@@ -9,8 +9,9 @@ from django.urls import reverse
 from django.http import Http404
 from Account.models import get_account
 from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
-from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
-from seizoenen import get_comp_pk
+from Competitie.models import (Competitie, Regiocompetitie,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
+from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import get_sporter

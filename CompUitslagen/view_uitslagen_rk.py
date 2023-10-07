@@ -12,7 +12,7 @@ from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
-from seizoenen import get_comp_pk
+from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from Sporter.models import Sporter
