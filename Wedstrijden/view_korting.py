@@ -13,7 +13,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Sporter.models import Sporter
-from Plein.menu import menu_dynamics
 from Wedstrijden.definities import WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI
 from Wedstrijden.models import Wedstrijd, WedstrijdKorting
 import datetime
@@ -93,7 +92,6 @@ class KortingenView(UserPassesTestMixin, TemplateView):
             (None, 'Kortingen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -128,7 +126,6 @@ class KiesNieuweKortingView(UserPassesTestMixin, View):
             (None, 'Nieuwe aanmaken')
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -250,7 +247,6 @@ class WijzigKortingView(UserPassesTestMixin, View):
             (None, 'Wijzig'),
         )
 
-        menu_dynamics(self.request, context)
         return render(request, template_name, context)
 
     def post(self, request, *args, **kwargs):

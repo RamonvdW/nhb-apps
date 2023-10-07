@@ -19,7 +19,6 @@ from Bestel.models import BestelMandje, Bestelling
 from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import render_email_template, mailer_queue_email
 from Overig.helpers import get_safe_from_ip
-from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_AFGEWEZEN
 from Registreer.models import GastRegistratie
 from Sporter.models import Sporter
@@ -93,7 +92,6 @@ class GastAccountsView(UserPassesTestMixin, TemplateView):
             (None, "Gast accounts")
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -296,7 +294,6 @@ class GastAccountDetailsView(UserPassesTestMixin, TemplateView):
             (None, "Gast account details")
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

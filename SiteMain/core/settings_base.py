@@ -122,13 +122,13 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 # 'django.template.context_processors.debug',             # adds 'debug' and 'sql_queries'
-                # 'django.contrib.context_processors.csrf',               # always enabled
 
                 # request, auth and messages are required for the admin interface
                 'django.template.context_processors.request',           # adds 'request'
                 'django.contrib.auth.context_processors.auth',          # adds 'user' and 'perms
                 'django.contrib.messages.context_processors.messages',  # adds 'messages' and 'DEFAULT_MESSAGE_LEVELS'
 
+                'Plein.context_processors.site_layout',                 # voor het menu en fonts
             ],
             'loaders': [
                 ('django.template.loaders.cached.Loader', ['SiteMain.core.minify_dtl.Loader']),

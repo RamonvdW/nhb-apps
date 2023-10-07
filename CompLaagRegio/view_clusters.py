@@ -5,15 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Regiocompetitie
 from Functie.definities import Rollen
-from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Geo.models import Cluster
-from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Vereniging.models import Vereniging
 import copy
@@ -115,7 +115,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         except Regiocompetitie.DoesNotExist:
             # geen competitie gevonden, dus ga naar de keuze pagina
             context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (None, 'Clusters')
             )
         else:
@@ -123,7 +123,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             if regiocompetitie:
                 comp = regiocompetitie.competitie
                 context['kruimels'] = (
-                    (reverse('Competitie:kies'), 'Bondscompetities'),
+                    (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                     (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                         comp.beschrijving.replace('competitie ', '')),
                     (None, 'Clusters')
@@ -131,11 +131,10 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             else:
                 # geen competitie gevonden, dus ga naar de keuze pagina
                 context['kruimels'] = (
-                    (reverse('Competitie:kies'), 'Bondscompetities'),
+                    (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                     (None, 'Clusters')
                 )
 
-        menu_dynamics(self.request, context)
         return context
 
     def _update_vereniging_clusters(self, ver, gebruik):

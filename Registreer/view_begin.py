@@ -7,7 +7,6 @@
 from django.urls import reverse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
-from Plein.menu import menu_dynamics
 from Registreer.operations import registratie_gast_is_open
 
 
@@ -38,8 +37,6 @@ class RegistreerBeginView(TemplateView):
 
         context['url_registreer_nhb'] = reverse('Registreer:lid')
         context['url_registreer_gast'] = reverse('Registreer:gast')
-
-        menu_dynamics(self.request, context)
 
         context['kruimels'] = (
             (None, 'Account aanmaken'),

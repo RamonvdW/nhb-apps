@@ -15,7 +15,6 @@ from BasisTypen.definities import ORGANISATIE_IFAA
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
-from Plein.menu import menu_dynamics
 from Scheidsrechter.definities import SCHEIDS_VERENIGING, BESCHIKBAAR_DENK, BESCHIKBAAR_NEE
 from Scheidsrechter.models import WedstrijdDagScheids, ScheidsBeschikbaarheid
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_ORGANISATIE_TO_STR,
@@ -77,7 +76,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             (None, 'Scheidsrechters'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -147,7 +145,6 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             (None, 'Wedstrijden')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -305,7 +302,6 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
             (None, 'Details'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

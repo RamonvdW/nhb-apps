@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIE_WA
 from BasisTypen.models import BoogType
@@ -17,7 +18,6 @@ from Competitie.models import Kampioenschap, KampioenschapTeam
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 
 TEMPLATE_COMPBOND_BK_TEAMS = 'complaagbond/bk-teams.dtl'
 
@@ -143,12 +143,11 @@ class LijstBkTeamsView(UserPassesTestMixin, TemplateView):
         context['aantal_onbekend'] = aantal_onbekend
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'BK teams')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

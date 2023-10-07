@@ -4,13 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView
-from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.http import HttpResponseRedirect
+from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse
 from Geo.models import Regio
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 
 TEMPLATE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
@@ -53,11 +53,10 @@ class InfoCompetitieView(TemplateView):
                                     .count())
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, 'Informatie')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -73,11 +72,10 @@ class InfoTeamCompetitieView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, 'Info teamcompetitie')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

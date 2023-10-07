@@ -14,7 +14,6 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
-from Plein.menu import menu_dynamics
 from Vereniging.models import Vereniging
 
 
@@ -89,7 +88,6 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
                 (None, 'Locaties')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -195,7 +193,6 @@ class ExterneLocatieDetailsView(TemplateView):
             (None, 'Locatie details')
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

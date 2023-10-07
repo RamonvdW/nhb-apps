@@ -12,7 +12,6 @@ from Account.models import get_account
 from Bondspas.operations import bepaal_jaar_bondspas_en_wedstrijden, maak_bondspas_regels, maak_bondspas_jpeg_en_pdf
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, get_sporter
 import base64
 
@@ -54,7 +53,6 @@ class ToonBondspasView(UserPassesTestMixin, View):
         )
 
         # toon een pagina die wacht op de download
-        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 
@@ -164,7 +162,6 @@ class ToonBondspasBeheerderView(UserPassesTestMixin, View):
             (None, 'Bondspas tonen'),
         )
 
-        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
     @staticmethod

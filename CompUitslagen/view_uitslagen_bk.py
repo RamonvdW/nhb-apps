@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Account.models import get_account
 from Competitie.definities import (DEEL_RK, DEEL_BK,
                                    DEELNAME_NEE,
@@ -15,7 +16,6 @@ from Competitie.models import (Competitie, CompetitieMatch, KampioenschapIndivKl
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from types import SimpleNamespace
 import datetime
@@ -209,13 +209,12 @@ class UitslagenBKIndivView(TemplateView):
             context['heeft_deelnemers'] = (len(deelnemers) > 0)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen BK individueel')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -536,13 +535,12 @@ class UitslagenBKTeamsView(TemplateView):
         context['geen_teams'] = len(totaal_lijst) == 0
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen BK teams')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

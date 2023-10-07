@@ -17,7 +17,6 @@ from BasisTypen.definities import (GESLACHT_ALLE,
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS,
                                     WEDSTRIJD_STATUS_TO_STR)
 from Wedstrijden.models import Wedstrijd
@@ -96,7 +95,6 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
             (None, 'Wedstrijdkalender'),
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
 
@@ -145,7 +143,6 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
             (None, 'Nieuwe wedstrijd')
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

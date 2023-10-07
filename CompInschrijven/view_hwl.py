@@ -18,7 +18,6 @@ from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -370,7 +369,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             (None, 'Aanmelden')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -694,7 +692,6 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             (None, 'Ingeschreven')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

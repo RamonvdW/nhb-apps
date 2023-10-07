@@ -12,7 +12,6 @@ from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog, CompetitieMatch
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPREGIO_WIESCHIETWAAR = 'complaagregio/wieschietwaar-methode1.dtl'
@@ -144,7 +143,6 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
             (None, 'Wie schiet waar?')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 # end of file

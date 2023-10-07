@@ -8,13 +8,13 @@ from django.urls import reverse
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import (Regiocompetitie,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapIndivKlasseLimiet)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from codecs import BOM_UTF8
 import textwrap
@@ -213,12 +213,11 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             context['aantal_attentie'] = aantal_attentie
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'RK selectie')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

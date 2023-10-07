@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account, get_account
 from Competitie.definities import DEEL_RK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2
@@ -23,7 +24,6 @@ from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Geo.models import Cluster
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
-from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
@@ -248,12 +248,11 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (comp_url, comp.beschrijving.replace(' competitie', '')),
             (None, 'Planning'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -361,13 +360,12 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (comp_url, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk}), 'Planning'),
             (None, 'Cluster')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -592,7 +590,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = [
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (comp_url, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
             (None, 'Week')
@@ -604,7 +602,6 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                    'Cluster')
             context['kruimels'].insert(-1, tup)
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -796,20 +793,19 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         if ronde.cluster:
             context['kruimels'] = [
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (comp_url, comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
                 (None, 'Cluster wedstrijden')
             ]
         else:
             context['kruimels'] = [
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (comp_url, comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
                 (None, 'Wedstrijden')
             ]
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1097,7 +1093,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                                                  kwargs={'match_pk': match.pk})
 
         context['kruimels'] = [
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-planning', kwargs={'deelcomp_pk': ronde.regiocompetitie.pk}), 'Planning'),
             (url_planning_week, 'Week'),
@@ -1110,7 +1106,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                    'Cluster')
             context['kruimels'].insert(-2, tup)
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1384,13 +1379,12 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
                                                    kwargs={'deelcomp_pk': deelcomp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': deelcomp.competitie.pk}),
                 deelcomp.competitie.beschrijving.replace(' competitie', '')),
             (None, 'Sluit regiocompetitie')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

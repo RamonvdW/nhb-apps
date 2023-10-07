@@ -6,7 +6,6 @@
 
 from django.urls import reverse
 from django.views.generic import ListView
-from Plein.menu import menu_dynamics
 from Records.definities import makl2str
 from Records.models import IndivRecord
 
@@ -39,7 +38,6 @@ class RecordsSpecialView(ListView):
             (None, self.kruimel)
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

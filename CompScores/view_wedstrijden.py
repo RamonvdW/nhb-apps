@@ -11,7 +11,6 @@ from Competitie.definities import DEEL_RK
 from Competitie.models import RegiocompetitieRonde, CompetitieMatch, Kampioenschap
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 
 TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
 
@@ -153,7 +152,6 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             (None, self.kruimel)
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

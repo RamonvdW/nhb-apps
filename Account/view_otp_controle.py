@@ -14,7 +14,6 @@ from Account.forms import OTPControleForm
 from Account.models import get_account
 from Account.operations.otp import otp_controleer_code
 from Functie.rol import rol_bepaal_beschikbare_rollen
-from Plein.menu import menu_dynamics
 
 TEMPLATE_OTP_CONTROLE = 'account/otp-controle.dtl'
 
@@ -54,7 +53,6 @@ class OTPControleView(TemplateView):
             (None, 'Controle tweede factor')
         )
 
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
     @staticmethod
@@ -111,7 +109,6 @@ class OTPControleView(TemplateView):
             (None, 'Controle tweede factor')
         )
 
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
 

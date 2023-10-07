@@ -13,7 +13,6 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, BAANTYPE2STR
-from Plein.menu import menu_dynamics
 from Vereniging.models import Vereniging
 from Vereniging.models2 import Secretaris
 
@@ -200,7 +199,6 @@ class LijstView(UserPassesTestMixin, TemplateView):
             (None, 'Verenigingen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -344,7 +342,6 @@ class DetailsView(UserPassesTestMixin, TemplateView):
             (None, 'Details')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -425,7 +422,6 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
             (None, 'Zonder beheerders')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

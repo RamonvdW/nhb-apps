@@ -18,7 +18,6 @@ from Account.plugin_manager import account_plugins_login_gate, account_plugins_p
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
-from Plein.menu import menu_dynamics
 from datetime import timedelta
 import logging
 
@@ -81,7 +80,6 @@ class LoginView(TemplateView):
                     my_logger.info(
                         '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
                     context = {'account': account}
-                    menu_dynamics(self.request, context)
                     httpresp = render(self.request, TEMPLATE_GEBLOKKEERD, context)
                     return httpresp, None
 
@@ -131,7 +129,6 @@ class LoginView(TemplateView):
                                        account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
 
                 context = {'account': account}
-                menu_dynamics(self.request, context)
                 httpresp = render(self.request, TEMPLATE_GEBLOKKEERD, context)
                 return False, httpresp
 
@@ -243,7 +240,6 @@ class LoginView(TemplateView):
         if account and account.verkeerd_wachtwoord_teller > 0:
             context['show_wachtwoord_vergeten'] = True
 
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_LOGIN, context)
 
     def get(self, request, *args, **kwargs):
@@ -280,7 +276,6 @@ class LoginView(TemplateView):
             (None, 'Inloggen'),
         )
 
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_LOGIN, context)
 
 

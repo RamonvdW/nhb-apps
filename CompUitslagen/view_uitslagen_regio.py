@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
+from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Competitie.definities import TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES
 from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
@@ -14,7 +15,6 @@ from Competitie.models import (Competitie, Regiocompetitie,
 from Competitie.seizoenen import get_comp_pk
 from Competitie.operations.poules import maak_poule_schema
 from Geo.models import Regio
-from Plein.menu import menu_dynamics
 from Sporter.operations import get_request_regio_nr
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
@@ -221,13 +221,12 @@ class UitslagenRegioIndivView(TemplateView):
         context['heeft_deelnemers'] = (len(objs) > 0)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio individueel')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -506,13 +505,12 @@ class UitslagenRegioTeamsView(TemplateView):
             teams.append(afsluiter)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen regio teams')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

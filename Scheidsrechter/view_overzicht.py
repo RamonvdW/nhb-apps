@@ -10,7 +10,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Functie.scheids import gebruiker_is_scheids
-from Plein.menu import menu_dynamics
 
 TEMPLATE_OVERZICHT = 'scheidsrechter/overzicht.dtl'
 
@@ -62,7 +61,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             (None, 'Scheidsrechters'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

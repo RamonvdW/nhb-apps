@@ -21,7 +21,6 @@ from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip, maak_unaccented
-from Plein.menu import menu_dynamics
 from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS, REGISTRATIE_FASE_CLUB,
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
                                    REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
@@ -117,7 +116,6 @@ class RegistreerGastView(TemplateView):
                 (None, 'Gast')),
         }
 
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_REGISTREER_GAST, context)
 
     def post(self, request, *args, **kwargs):
@@ -140,8 +138,6 @@ class RegistreerGastView(TemplateView):
                 (reverse('Registreer:begin'), 'Account aanmaken'),
                 (None, 'Gast')),
         }
-
-        menu_dynamics(request, context)
 
         if not gast_is_open:
             return render(request, TEMPLATE_REGISTREER_GAST, context)
@@ -299,7 +295,6 @@ def receive_bevestiging_gast_email(request, gast):
         'url_volgende_vraag': reverse('Registreer:gast-volgende-vraag'),
     }
 
-    menu_dynamics(request, context)
     return render(request, TEMPLATE_REGISTREER_GAST_EMAIL_BEVESTIGD, context)
 
 
@@ -337,7 +332,6 @@ class RegistreerGastVervolgView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         # geen kruimels
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -424,7 +418,6 @@ class RegistreerGastVolgendeVraagView(View):
             raise Http404('Verkeerde fase')
 
         # noteer: geen kruimels
-        menu_dynamics(self.request, context)
         return render(request, template_name, context)
 
     @staticmethod
@@ -503,7 +496,6 @@ class RegistreerGastVolgendeVraagView(View):
                 }
 
                 # noteer: geen kruimels
-                menu_dynamics(self.request, context)
                 return render(request, TEMPLATE_REGISTREER_GAST_WACHTWOORD, context)
 
             # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
@@ -535,7 +527,6 @@ class RegistreerGastVolgendeVraagView(View):
                 }
 
                 # noteer: geen kruimels
-                menu_dynamics(self.request, context)
                 return render(request, TEMPLATE_REGISTREER_GAST_CLUB, context)
 
             gast.club = club
@@ -563,7 +554,6 @@ class RegistreerGastVolgendeVraagView(View):
                 }
 
                 # noteer: geen kruimels
-                menu_dynamics(self.request, context)
                 return render(request, TEMPLATE_REGISTREER_GAST_LAND_BOND_NR, context)
 
             gast.land = land
@@ -617,7 +607,6 @@ class RegistreerGastVolgendeVraagView(View):
                 }
 
                 # noteer: geen kruimels
-                menu_dynamics(self.request, context)
                 return render(request, TEMPLATE_REGISTREER_GAST_AGE, context)
 
             gast.geboorte_datum = datum
@@ -644,7 +633,6 @@ class RegistreerGastVolgendeVraagView(View):
                 }
 
                 # noteer: geen kruimels
-                menu_dynamics(self.request, context)
                 return render(request, TEMPLATE_REGISTREER_GAST_TEL, context)
 
             gast.telefoon = tel
@@ -673,7 +661,6 @@ class RegistreerGastVolgendeVraagView(View):
                 }
 
                 # noteer: geen kruimels
-                menu_dynamics(self.request, context)
                 return render(request, TEMPLATE_REGISTREER_GAST_GENDER, context)
 
             gast.geslacht = gender

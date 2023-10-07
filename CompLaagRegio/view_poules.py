@@ -9,11 +9,11 @@ from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Regiocompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPREGIO_RCL_TEAMS_POULES = 'complaagregio/rcl-teams-poules.dtl'
@@ -115,13 +115,12 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
                                                   kwargs={'deelcomp_pk': deelcomp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Poules')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -247,14 +246,13 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                                          kwargs={'poule_pk': poule.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:regio-poules', kwargs={'deelcomp_pk': deelcomp.pk}), 'Poules'),
             (None, 'Wijzig')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

@@ -22,7 +22,6 @@ from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE2STR
 from HistComp.models import HistCompRegioIndiv
 from Kalender.view_maand import maak_compacte_wanneer_str
-from Plein.menu import menu_dynamics
 from Records.definities import MATERIAALKLASSE
 from Records.models import IndivRecord
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
@@ -276,7 +275,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                 if kampioen.deelname != DEELNAME_NEE:
                                     kampioenschap = kampioen.kampioenschap
                                     obj.url_rk_deelnemers = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                                                    kwargs={'comp_pk': kampioenschap.competitie.pk,
+                                                                    kwargs={'comp_pk_of_seizoen': kampioenschap.competitie.maak_seizoen_url(),
                                                                             'comp_boog': afk.lower(),
                                                                             'rayon_nr': kampioenschap.rayon.rayon_nr})
                         # for
@@ -523,7 +522,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             (None, 'Mijn pagina'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

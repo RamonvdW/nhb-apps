@@ -7,6 +7,7 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie, Regiocompetitie, Kampioenschap
 from Competitie.tijdlijn import maak_comp_fase_beschrijvingen
@@ -16,7 +17,6 @@ from CompLaagRayon.plugin_overzicht import get_kaartjes_rayon
 from CompLaagBond.plugin_overzicht import get_kaartjes_bond
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 
 
@@ -111,13 +111,12 @@ class CompetitieBeheerView(UserPassesTestMixin, TemplateView):
         eval_open_taken(self.request)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Beheer')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

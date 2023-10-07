@@ -6,6 +6,7 @@
 
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE
 from Competitie.models import (Competitie, Regiocompetitie,
@@ -13,7 +14,6 @@ from Competitie.models import (Competitie, Regiocompetitie,
                                KampioenschapSporterBoog, KampioenschapTeam)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from decimal import Decimal
 
@@ -361,11 +361,10 @@ class CompetitieStatistiekView(UserPassesTestMixin, TemplateView):
             self._tel_aantallen(context, actuele_comps)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, 'Statistiek')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

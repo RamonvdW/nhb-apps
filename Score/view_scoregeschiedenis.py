@@ -14,8 +14,6 @@ from Sporter.models import SporterBoog
 from Score.definities import SCORE_WAARDE_VERWIJDERD
 from Score.forms import ScoreGeschiedenisForm
 from Score.models import AanvangsgemiddeldeHist, ScoreHist
-from Plein.menu import menu_dynamics
-
 
 TEMPLATE_SCORE_GESCHIEDENIS = 'score/score-geschiedenis.dtl'
 
@@ -179,7 +177,6 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
             (None, 'Score geschiedenis'),
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template, context)
 
 

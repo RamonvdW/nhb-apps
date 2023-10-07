@@ -11,7 +11,6 @@ from Competitie.models import Competitie
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
@@ -115,7 +114,6 @@ class CompetitieKiesView(TemplateView):
             (None, 'Bondscompetities'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

@@ -16,7 +16,6 @@ from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD,
@@ -159,7 +158,6 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
                 (None, 'Aanmeldingen'),
             )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -513,7 +511,6 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
                 (None, 'Details aanmelding')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
 

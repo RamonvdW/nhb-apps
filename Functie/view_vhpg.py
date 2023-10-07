@@ -17,7 +17,6 @@ from Functie.operations import account_needs_vhpg
 from Functie.rol import rol_get_huidige, rol_bepaal_beschikbare_rollen
 from Functie.forms import AccepteerVHPGForm
 from Logboek.models import schrijf_in_logboek
-from Plein.menu import menu_dynamics
 
 
 TEMPLATE_VHPG_ACCEPTATIE = 'functie/vhpg-acceptatie.dtl'
@@ -58,7 +57,6 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
             (None, 'Afspraken inzien')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -100,7 +98,6 @@ class VhpgAcceptatieView(TemplateView):
             (None, 'Persoonsgegevens')
         )
 
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 
     @staticmethod
@@ -126,7 +123,6 @@ class VhpgAcceptatieView(TemplateView):
 
         # checkbox is verplicht --> nog een keer
         context = {'form': form}
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 
 
@@ -162,7 +158,6 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
             (None, 'VHPG status'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

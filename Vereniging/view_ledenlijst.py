@@ -12,7 +12,6 @@ from BasisTypen.definities import MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_KHSN
 from BasisTypen.models import Leeftijdsklasse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog
 
 TEMPLATE_LEDENLIJST = 'vereniging/ledenlijst.dtl'
@@ -196,7 +195,6 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             (None, self.kruimel)
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

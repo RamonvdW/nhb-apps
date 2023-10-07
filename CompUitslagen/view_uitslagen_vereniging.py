@@ -4,16 +4,16 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
+from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Account.models import get_account
 from Competitie.definities import TEAM_PUNTEN_MODEL_SOM_SCORES
 from Competitie.models import (Competitie, Regiocompetitie,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieSporterBoog)
 from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Sporter.models import get_sporter
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
@@ -176,14 +176,13 @@ class UitslagenVerenigingIndivView(TemplateView):
         context['aantal_regels'] = len(deelnemers) + 2
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (context['url_terug'], 'Uitslag regio individueel'),
             (None, 'Vereniging')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -440,14 +439,13 @@ class UitslagenVerenigingTeamsView(TemplateView):
             context['aantal_regels'] += len(team.leden_lijst)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (context['url_terug'], 'Uitslag regio teams'),
             (None, 'Vereniging')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

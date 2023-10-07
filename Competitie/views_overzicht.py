@@ -7,12 +7,12 @@
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Account.models import get_account
 from Competitie.models import Competitie, get_competitie_boog_typen
 from Competitie.seizoenen import get_comp_pk
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterBoog
 
 
@@ -76,24 +76,24 @@ class CompetitieOverzichtView(TemplateView):
                          .values_list('afkorting', flat=True))[0].lower()    # r/r2
 
         context['url_regio_indiv'] = reverse('CompUitslagen:uitslagen-regio-indiv',
-                                             kwargs={'comp_pk': comp.pk,
+                                             kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                      'comp_boog': wed_boog})
         context['url_regio_teams'] = reverse('CompUitslagen:uitslagen-regio-teams',
-                                             kwargs={'comp_pk': comp.pk,
+                                             kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                      'team_type': team_type})
 
         context['url_rayon_indiv'] = reverse('CompUitslagen:uitslagen-rk-indiv',
-                                             kwargs={'comp_pk': comp.pk,
+                                             kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                      'comp_boog': wed_boog})
         context['url_rayon_teams'] = reverse('CompUitslagen:uitslagen-rk-teams',
-                                             kwargs={'comp_pk': comp.pk,
+                                             kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                      'team_type': team_type})
 
         context['url_bond_indiv'] = reverse('CompUitslagen:uitslagen-bk-indiv',
-                                            kwargs={'comp_pk': comp.pk,
+                                            kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                     'comp_boog': wed_boog})
         context['url_bond_teams'] = reverse('CompUitslagen:uitslagen-bk-teams',
-                                            kwargs={'comp_pk': comp.pk,
+                                            kwargs={'comp_pk_of_seizoen': self.comp.maak_seizoen_url(),
                                                     'team_type': team_type})
 
         tussen_eind = "Tussen" if self.comp.fase_indiv <= 'G' else "Eind"
@@ -139,11 +139,10 @@ class CompetitieOverzichtView(TemplateView):
             context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': self.comp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, self.comp.beschrijving.replace(' competitie', ''))
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

@@ -6,12 +6,12 @@
 
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from HistComp.definities import (HISTCOMP_TYPE, HISTCOMP_TYPE_18,
                                  HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE,
                                  HIST_BOOG2URL, HIST_BOOG_DEFAULT,
                                  HIST_TEAM2URL, HIST_TEAM_DEFAULT)
 from HistComp.models import HistCompSeizoen
-from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
 TEMPLATE_HISTCOMP_TOP = 'histcomp/uitslagen-top.dtl'
@@ -147,11 +147,10 @@ class HistCompTop(TemplateView):
         context['waarom'] = "Geen gegevens"
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, 'Uitslag vorig seizoen')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

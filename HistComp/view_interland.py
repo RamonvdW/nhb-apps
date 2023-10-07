@@ -13,7 +13,6 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from HistComp.definities import HISTCOMP_TYPE_25, HIST_INTERLAND_BOGEN, HIST_BOOG2STR
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from decimal import Decimal
 from codecs import BOM_UTF8
@@ -132,7 +131,6 @@ class InterlandView(UserPassesTestMixin, TemplateView):
             (None, 'Interland lijst'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

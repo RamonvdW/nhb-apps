@@ -7,13 +7,13 @@
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Geo.models import Regio
 from HistComp.definities import (HISTCOMP_TYPE_18, HISTCOMP_TYPE2STR, HIST_KLASSE2VOLGORDE,
                                  HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE,
                                  HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG_DEFAULT, HIST_BOOG2STR,
                                  HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM_DEFAULT, HIST_TEAM2STR)
 from HistComp.models import HistCompSeizoen, HistCompRegioIndiv, HistCompRegioTeam
-from Plein.menu import menu_dynamics
 from Sporter.operations import get_request_regio_nr
 from types import SimpleNamespace
 
@@ -223,12 +223,11 @@ class HistRegioIndivView(TemplateView):
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (url_top, 'Uitslag vorig seizoen'),
             (None, 'Uitslagen regio individueel')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -372,12 +371,11 @@ class HistRegioTeamsView(TemplateView):
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (url_top, 'Uitslag vorig seizoen'),
             (None, 'Uitslagen regio teams')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

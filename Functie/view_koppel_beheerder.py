@@ -11,6 +11,7 @@ from django.db.models import Q, Value, CharField
 from django.db.models.functions import Concat, Cast
 from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account, get_account
 from Functie.definities import Rollen
@@ -21,7 +22,6 @@ from Functie.rol import (rol_get_huidige, rol_get_huidige_functie, rol_get_besch
                          rol_activeer_wissel_van_rol_menu_voor_account)
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_FUNCTIE
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
@@ -264,7 +264,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
             # komt van Bondscompetities
             context['terug_url'] = reverse('Functie:overzicht')
             context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('Functie:overzicht'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
@@ -279,7 +279,6 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['form'] = form
         context['form_submit_url'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie.pk})
 
-        menu_dynamics(self.request, context)
         return render(self.request, TEMPLATE_WIJZIG_EMAIL, context)
 
     def get(self, request, *args, **kwargs):
@@ -533,7 +532,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         elif self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             # komt van Bondscompetities
             context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('Functie:overzicht'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )
@@ -544,7 +543,6 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 (None, 'Wijzig beheerder')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
 

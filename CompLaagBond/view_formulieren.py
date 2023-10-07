@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_BK, DEEL_RK, DEELNAME_NEE, DEELNAME2STR
 from Competitie.models import (Kampioenschap, CompetitieMatch,
@@ -16,7 +17,6 @@ from Competitie.models import (Kampioenschap, CompetitieMatch,
                                CompetitieTeamKlasse, KampioenschapTeamKlasseLimiet, KampioenschapTeam)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
@@ -104,11 +104,11 @@ class DownloadBkFormulierenView(TemplateView):
         comp = deelkamp.competitie
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, "BK programma's")
         )
-        menu_dynamics(self.request, context)
+
         return context
 
 

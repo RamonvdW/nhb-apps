@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import MUTATIE_KAMP_AFMELDEN, MUTATIE_KAMP_AANMELDEN
@@ -16,7 +17,6 @@ from Competitie.models import KampioenschapSporterBoog, CompetitieMutatie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 import time
 
 
@@ -85,7 +85,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_RKO:
             context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRayon:lijst-rk', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'RK selectie'),
                 (None, 'Wijzig sporter status')
@@ -101,7 +101,6 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
                 (None, 'Wijzig sporter status')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

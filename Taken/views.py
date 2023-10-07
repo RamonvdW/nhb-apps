@@ -11,7 +11,6 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Plein.menu import menu_dynamics
 from Functie.rol import rol_mag_wisselen, rol_get_beschrijving
 from Taken.models import Taak
 from Taken.operations import eval_open_taken, get_taak_functie_pks
@@ -78,7 +77,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             (None, 'Taken'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -124,7 +122,6 @@ class DetailsView(UserPassesTestMixin, TemplateView):
             (None, 'Details')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

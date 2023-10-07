@@ -11,7 +11,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Betaal.models import BetaalInstellingenVereniging, MOLLIE_API_KEY_MAXLENGTH
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 from mollie.api.client import RequestSetupError, Client
 
 TEMPLATE_BETALING_INSTELLINGEN = 'betaal/vereniging-instellingen.dtl'
@@ -61,7 +60,6 @@ class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
             (None, 'Instellingen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

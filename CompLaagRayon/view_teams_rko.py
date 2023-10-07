@@ -9,13 +9,13 @@ from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam, Kampioenschap
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
-from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'complaagrayon/rko-teams.dtl'
@@ -254,12 +254,11 @@ class RayonTeamsTemplateView(TemplateView):
         context['toon_klassen'] = comp.klassengrenzen_vastgesteld_rk_bk
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'RK Teams')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

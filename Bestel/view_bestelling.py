@@ -23,7 +23,6 @@ from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import maak_compacte_wanneer_str
-from Plein.menu import menu_dynamics
 from decimal import Decimal
 
 
@@ -108,7 +107,6 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
             (None, 'Bestellingen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -288,7 +286,6 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             (None, 'Bestelling'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -355,7 +352,6 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             (None, 'Afrekenen')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -524,7 +520,6 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
             (None, 'Status betaling')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

@@ -10,7 +10,6 @@ from django.http import Http404
 from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
-from Plein.menu import menu_dynamics
 from Records.definities import disc2str, gesl2str, makl2str, lcat2str
 from Records.models import IndivRecord, AnderRecord
 from Records.forms import ZoekForm
@@ -90,7 +89,6 @@ class RecordsOverzichtView(ListView):
             (None, 'Records'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -153,7 +151,6 @@ class RecordsIndivSpecifiekView(TemplateView):
             (None, 'Details')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -236,7 +233,6 @@ class RecordsZoekView(ListView):
             (None, 'Zoeken')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 # end of file

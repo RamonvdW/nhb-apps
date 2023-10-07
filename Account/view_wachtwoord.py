@@ -19,7 +19,6 @@ from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
-from Plein.menu import menu_dynamics
 from TijdelijkeCodes.definities import RECEIVER_WACHTWOORD_VERGETEN
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_wachtwoord_vergeten
 import logging
@@ -73,7 +72,6 @@ class WachtwoordVergetenView(TemplateView):
             (None, 'Wachtwoord vergeten')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -103,8 +101,6 @@ class WachtwoordVergetenView(TemplateView):
                     # geen match
                     context['foutmelding'] = 'Voer het e-mailadres en bondsnummer in van een bestaand account'
                     # (niet te veel wijzer maken over de combi bondsnummer en e-mailadres)
-
-        menu_dynamics(self.request, context)
 
         if account and not context['foutmelding']:
             # success: stuur nu een e-mail naar het account
@@ -241,7 +237,6 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             (None, 'Wachtwoord wijzigen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -285,7 +280,6 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             except KeyError:
                 context['moet_oude_ww_weten'] = True
 
-            menu_dynamics(self.request, context)
             return render(request, self.template_name, context)
 
         # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen

@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.shortcuts import render, redirect
 from django.utils.formats import localize
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
@@ -23,7 +24,6 @@ from Functie.rol import rol_get_huidige
 from HistComp.models import HistCompSeizoen
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 import time
 
@@ -93,11 +93,10 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         context['teamklassen'] = self._get_queryset_teamklassen()
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, 'Start competitie')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -162,12 +161,11 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             context['bestaat_al'] = True
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:instellingen-volgende-competitie'), 'Start competitie'),
             (None, 'Aanmaken')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -220,13 +218,12 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             context['seizoen'] = histcomps[0].seizoen
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Aanvangsgemiddelden')
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod
@@ -317,13 +314,12 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             context['bb_ag_nieuwste_datum'] = '????'
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Klassengrenzen')
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod
@@ -393,11 +389,10 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
         # for
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, 'Seizoen afsluiten'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     @staticmethod

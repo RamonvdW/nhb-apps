@@ -16,7 +16,6 @@ from Bestel.operations.mandje import mandje_tel_inhoud
 from Bestel.operations.mutaties import bestel_mutatieverzoek_webwinkel_keuze
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 
 
@@ -69,7 +68,6 @@ class OverzichtView(TemplateView):
             (None, 'Webwinkel'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -159,7 +157,6 @@ class ProductView(TemplateView):
             (None, 'Product')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -252,8 +249,6 @@ class ProductView(TemplateView):
             (url_product, 'Product'),
             (None, 'Toegevoegd aan mandje')
         )
-
-        menu_dynamics(self.request, context)
 
         return render(request, TEMPLATE_WEBWINKEL_TOEGEVOEGD_AAN_MANDJE, context)
 

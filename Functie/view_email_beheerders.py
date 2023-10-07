@@ -6,11 +6,11 @@
 
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 
 TEMPLATE_OVERZICHT_EMAILS_SEC_HWL = 'functie/emails-sec-hwl.dtl'
 TEMPLATE_OVERZICHT_EMAILS_RCL = 'functie/emails-rcl.dtl'
@@ -101,7 +101,6 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
             (None, 'E-mailadressen SEC en HWL')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -168,12 +167,11 @@ class OverzichtEmailsRclView(UserPassesTestMixin, TemplateView):
         context['alle'] = alle
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Functie:overzicht'), 'Beheerders'),
             (None, 'E-mailadressen RCLs')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

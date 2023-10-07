@@ -14,7 +14,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIE_IFAA
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Wedstrijden.definities import WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN, WEDSTRIJD_STATUS_GEANNULEERD
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 from types import SimpleNamespace
@@ -94,7 +93,6 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
                 (None, 'Wedstrijd sessies'),
             )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -283,7 +281,6 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
             (None, 'Wijzig sessie')
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

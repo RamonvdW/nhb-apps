@@ -19,7 +19,6 @@ from Account.view_login import account_plugins_login_gate
 from Functie.rol import rol_bepaal_beschikbare_rollen
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
-from Plein.menu import menu_dynamics
 from TijdelijkeCodes.definities import RECEIVER_ACCOUNT_WISSEL
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver, maak_tijdelijke_code_accountwissel
 import logging
@@ -148,7 +147,6 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
             (None, 'Account wissel'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -185,7 +183,6 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
             (None, 'Activeer'),
         )
 
-        menu_dynamics(self.request, context)
         return render(self.request, TEMPLATE_LOGIN_AS_GO, context)
 
 
