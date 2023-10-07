@@ -1,0 +1,140 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Beschikbaarheid{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Beschikbaarheid</h3>
+            <p>Pas je beschikbaarheid aan voor de toekomstige wedstrijden.</p>
+        </div>
+    </div>
+
+    <script>
+        function wijzig(groep, keuze) {
+            let el1 = document.getElementById(groep + '-ja');
+            let el2 = document.getElementById(groep + '-mss');
+            let el3 = document.getElementById(groep + '-nee');
+            let el4 = document.getElementById(groep + '-gekozen');
+            let el5 = document.getElementById(groep);
+
+            el5.value = keuze;
+
+            // enable de 'opslaan' knop
+            el_opslaan.disabled = false;
+
+            el1.classList.remove('keuze-ja');
+            el2.classList.remove('keuze-mss');
+            el3.classList.remove('keuze-nee');
+
+            if (keuze === 1) {
+                el1.classList.add('keuze-ja');
+                el4.innerHTML = "Ja, ik kan";
+            } else if (keuze === 2) {
+                el2.classList.add('keuze-mss');
+                el4.innerHTML = "Nog niet zeker";
+            } else if (keuze === 3) {
+                el3.classList.add('keuze-nee');
+                el4.innerHTML = "Niet beschikbaar";
+            }
+        }
+    </script>
+
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3" style="margin-top:30px">
+                <div class="form-padding">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>Wedstrijd</th>
+                                    <th class="center">
+                                        <span class="hide-on-med-and-down">Scheidsrechters</span>
+                                        <span class="hide-on-large-and-up">#SR</span>
+                                    </th>
+                                    <th class="center">Maak je keuze</th>
+                                    <th class="center">Jouw beschikbaarheid</th>
+                                </tr>
+                            </thead>
+
+                            {% for dag in dagen %}
+                                <tr>
+                                    <td>{{ dag.datum }}</td>
+
+                                    <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
+
+                                    <td class="center">{{ dag.wedstrijd.aantal_scheids }}</td>
+
+                                    <td class="center">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
+                                            <i class="material-icons-round notranslate">done</i>
+                                        </button>
+                                        <br class="hide-on-large-and-up">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
+                                            <i class="material-icons-round notranslate">question_mark</i>
+                                        </button>
+                                        <br class="hide-on-large-and-up">
+                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
+                                            <i class="material-icons-round notranslate">close</i>
+                                        </button>
+                                    </td>
+
+                                    <td class="center" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </table>
+
+                        <!-- het is belangrijk dat de keuze knoppen niet in het formulier zitten
+                             anders krijgen ze extra (ongewenst) focus-gedrag, zie material _forms.scss button:focus -->
+                        <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                            {% csrf_token %}
+                            {% for dag in dagen %}
+                                <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">
+                            {% endfor %}
+
+                            <div class="center" style="margin-top:30px">
+                                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                            </div>
+                        </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const init = [
+            {% for dag in dagen %}
+                ["{{ dag.id }}", {{ dag.keuze }}],
+            {% endfor %}
+        ];
+
+        const el_opslaan = document.getElementById("submit_knop");
+
+        document.addEventListener("DOMContentLoaded", function() {
+            init.forEach(function(tup) {
+                wijzig(tup[0], tup[1]);
+            });
+
+            // disable de 'opslaan' knop
+            el_opslaan.disabled = true;
+        })
+    </script>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-beschikbaarheid-wijzigen" %}
+
+{% endblock %}

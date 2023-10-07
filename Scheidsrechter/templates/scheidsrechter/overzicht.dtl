@@ -1,0 +1,42 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Scheidsrechters{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Scheidsrechters</h3>
+            <p>Jouw huidige rol is <b>{{ rol }}</b></p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- korps -->
+            {% include 'plein/card_icon.dtl' with title="Korps" text=tekst_korps icon="grade" url=url_korps %}
+
+            <!-- wedstrijdkalender -->
+            {% url 'Scheidsrechter:wedstrijden' as card_url %}
+            {% include 'plein/card_icon.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden scheidsrechters nodig hebben." icon="event_note" url=card_url %}
+
+            <!-- beschikbaarheid -->
+            {% include 'plein/card_icon.dtl' with title="Beschikbaarheid" text=tekst_beschikbaarheid icon="event_available" url=url_beschikbaarheid %}
+
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="scheidsrechter-overzicht" %}
+
+{% endblock %}
