@@ -44,6 +44,7 @@ urlpatterns = [
     path('overig/',                         include('Overig.urls')),
     path('plein/',                          include('Plein.urls')),
     path('records/',                        include('Records.urls')),
+    path('scheidsrechter/',                 include('Scheidsrechter.urls')),
     path('sporter/',                        include('Sporter.urls')),
     path('sporter/bondspas/',               include('Bondspas.urls')),
     path('score/',                          include('Score.urls')),

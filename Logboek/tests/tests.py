@@ -29,15 +29,15 @@ class TestLogboek(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
-        sporter = Sporter()
-        sporter.lid_nr = 100042
-        sporter.geslacht = "M"
-        sporter.voornaam = "Beh"
-        sporter.achternaam = "eerder"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100042,
+                    geslacht="M",
+                    voornaam="Beh",
+                    achternaam="eerder",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    account=self.account_normaal,
+                    email=self.account_normaal.email)
         sporter.save()
 
         LogboekRegel.objects.all().delete()
@@ -46,7 +46,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(None, 'Logboek unittest', 'zonder account')
         schrijf_in_logboek(None, 'Records', 'import gelukt')
         schrijf_in_logboek(None, 'Rollen', 'Jantje is de baas')
-        schrijf_in_logboek(None, 'NhbStructuur', 'weer een nieuw lid')
+        schrijf_in_logboek(None, 'CRM-import', 'weer een nieuw lid')
         schrijf_in_logboek(None, 'Betalingen', 'Betalen maar')
         schrijf_in_logboek(None, 'Uitrol', 'Rollen met die hap')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
@@ -55,7 +55,6 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(self.account_same, 'Accommodaties', 'Weer een clubhuis')
         schrijf_in_logboek(self.account_same, 'Clusters', 'Groepeer ze maar')
         schrijf_in_logboek(None, 'Iets anders', 'Valt onder Rest')
-        schrijf_in_logboek(None, 'oude_site_overnemen (command line)', 'Valt onder Import')
 
     def test_anon(self):
         # do een get van het logboek zonder ingelogd te zijn
@@ -123,11 +122,11 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Jantje is de baas')
 
-        # nhbstructuur / crm import
+        # crm import
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'crm-import/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
 
@@ -182,7 +181,7 @@ class TestLogboek(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
         self.assertNotContains(resp, 'chevron_')      # icoon van pagination pijltje
@@ -199,14 +198,14 @@ class TestLogboek(E2EHelpers, TestCase):
         # voeg wat extra regels toe aan het logboek
         # zorg voor 10+ pagina's
         for regel in range(11 * RESULTS_PER_PAGE):
-            schrijf_in_logboek(self.account_same, 'NhbStructuur', 'CRM import nummer %s' % regel)
+            schrijf_in_logboek(self.account_same, 'CRM-import', 'CRM import nummer %s' % regel)
         # for
 
         # haal pagina 1 op en check dat de pagination nu getoond wordt
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/crm-import.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'chevron_')      # icoon van pagination pijltje
 

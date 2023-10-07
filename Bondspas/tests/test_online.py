@@ -217,6 +217,12 @@ class TestBondspas(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bondspas/toon-bondspas-van.dtl', 'plein/site_layout.dtl'))
 
+        # download de pdf
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self._check_bondspas_pdf(resp)
+
         # gast-account
         self.sporter.is_gast = True
         self.sporter.save(update_fields=['is_gast'])

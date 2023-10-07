@@ -18,6 +18,13 @@ import json
 # debug optie: toon waar in de code de queries vandaan komen
 FAIL_UNSAFE_DATABASE_MODIFICATION = False
 
+MATERIAL_ICON_GLYPH_NAMES = 'Plein/fonts/reduce/needed-glyphs_material-icons-round.txt'
+
+GLYPH_NAMES_PRESENT = list()
+with open(MATERIAL_ICON_GLYPH_NAMES, 'r') as f:
+    GLYPH_NAMES_PRESENT.extend([name.strip() for name in f.readlines()])
+# with
+
 
 class MyTestAsserts(TestCase):
 
@@ -520,6 +527,58 @@ class MyTestAsserts(TestCase):
             pos_class = html.find(' class="', pos_end)
         # while
 
+    def html_assert_button_vs_hyperlink(self, html, dtl, skip_menu=True, skip_broodkruimels=True):
+        """ controleer gebruik van <a> waar <button> gebruik moet worden.
+        """
+        html = self.remove_debug_toolbar(html)
+
+        if skip_menu:                                                           # pragma: no branch
+            # menu is the in the navbar at the top of the page
+            # it ends with the nav-content-scrollbar div
+            pos = html.find('<div class="nav-content-scrollbar">')
+            if pos >= 0:                                                        # pragma: no branch
+                html = html[pos:]
+
+        if skip_broodkruimels:                                                  # pragma: no branch
+            pos_kruimel = html.find('broodkruimels-link')
+            while pos_kruimel > 0:
+                html = html[pos_kruimel+18:]
+                pos_kruimel = html.find('broodkruimels-link')
+            # while
+
+        pos_a = html.find('<a')
+        while pos_a > 0:
+            pos_end = html.find('</a>', pos_a+2)
+            link = html[pos_a:pos_end+4]
+
+            if link.find(' href="') < 0:
+                # geen href
+                # print('link: %s' % repr(link))
+                msg = "Link should <button> in %s:\n%s" % (dtl, link)
+                self.fail(msg)
+
+            pos_a = html.find('<a', pos_end+4)
+        # while
+
+    def html_assert_material_icons(self, html, dtl):
+        pos = html.find('<i class=')
+        while pos > 0:
+            pos2 = html.find('</i>', pos+1)
+            if pos2 > 0:
+                tag_i = html[pos:pos2]
+                if 'material-icons' in tag_i:
+                    # class secondary-content is used to dynamically plug an icon from within a script
+                    if 'secondary-content' not in tag_i:
+                        pos2 = tag_i.rfind('>')
+                        icon_name = tag_i[pos2+1:]
+                        # print('icon_name: %s' % repr(icon_name))
+                        if icon_name not in GLYPH_NAMES_PRESENT:
+                            self.fail('Bug in template %s: Material Icon name %s is not in the reduced font!' % (
+                                        repr(dtl), repr(icon_name)))
+
+            pos = html.find('<i class=', pos+1)
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
 
@@ -545,11 +604,13 @@ class MyTestAsserts(TestCase):
         self.assert_scripts_clean(html, dtl)
         self.html_assert_no_div_in_p(html, dtl)
         self.html_assert_no_col_white(html, dtl)
+        self.html_assert_button_vs_hyperlink(html, dtl)
         self.html_assert_inputs(html, dtl)
         self.html_assert_csrf_token_usage(html, dtl)
         self.html_assert_dubbelklik_bescherming(html, dtl)
         self.html_assert_notranslate(html, dtl)
         self.html_assert_template_bug(html, dtl)
+        self.html_assert_material_icons(html, dtl)
 
         urls = self.extract_all_urls(response)
         for url in urls:

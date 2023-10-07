@@ -270,7 +270,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                 tekst="Toon de deelnemerslijsten en uitslagen van deze competitie.",
                                 icon='scoreboard',
                                 url=reverse('Competitie:overzicht',
-                                            kwargs={'comp_pk': comp.pk}))
+                                            kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}))
                 kaartjes.append(kaartje)
         # for
 

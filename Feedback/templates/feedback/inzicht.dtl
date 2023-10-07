@@ -50,7 +50,7 @@
                                 {% endif %}
 
                                 <!-- button for admin site -->
-                                <a class="btn-sv-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/">
+                                <a class="btn-sv-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/" target="_blank" rel="noopener noreferrer">
                                     <i class="notranslate material-icons-round">edit</i></a>
                             </td>
                         </tr>

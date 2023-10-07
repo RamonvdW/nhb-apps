@@ -11,9 +11,9 @@ from Account.models import get_account
 from Competitie.definities import (DEEL_RK, DEEL_BK,
                                    DEELNAME_NEE,
                                    KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO)
-from Competitie.models import (Competitie, CompetitieMatch,
-                               KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
+from Competitie.models import (Competitie, CompetitieMatch, KampioenschapIndivKlasseLimiet, KampioenschapTeamKlasseLimiet,
                                Kampioenschap, KampioenschapSporterBoog, KampioenschapTeam)
+from seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
@@ -50,7 +50,7 @@ class UitslagenBKIndivView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
 
             boogtype.zoom_url = reverse('CompUitslagen:uitslagen-bk-indiv',
-                                        kwargs={'comp_pk': comp.pk,
+                                        kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                 'comp_boog': boogtype.afkorting.lower()})
         # for
 
@@ -59,7 +59,7 @@ class UitslagenBKIndivView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -210,8 +210,8 @@ class UitslagenBKIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen BK individueel')
         )
 
@@ -244,7 +244,7 @@ class UitslagenBKTeamsView(TemplateView):
                 team.selected = False
 
             team.zoom_url = reverse('CompUitslagen:uitslagen-bk-teams',
-                                    kwargs={'comp_pk': comp.pk,
+                                    kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                             'team_type': team.afkorting.lower()})
         # for
 
@@ -297,7 +297,7 @@ class UitslagenBKTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -537,8 +537,8 @@ class UitslagenBKTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen BK teams')
         )
 

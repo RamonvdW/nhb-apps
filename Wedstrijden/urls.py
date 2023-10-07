@@ -6,7 +6,7 @@
 
 from django.urls import path
 from Wedstrijden import (view_vereniging, view_manager, view_wijzig_wedstrijd, view_wijzig_sessies,
-                         view_inschrijven, view_aanmeldingen, view_korting)
+                         view_inschrijven, view_kwalificatie_scores, view_aanmeldingen, view_korting)
 
 app_name = 'Wedstrijden'
 
@@ -55,6 +55,10 @@ urlpatterns = [
     path('inschrijven/toevoegen-mandje/',
          view_inschrijven.ToevoegenAanMandjeView.as_view(),
          name='inschrijven-toevoegen-aan-mandje'),
+
+    path('inschrijven/kwalificatie-scores-doorgeven/<inschrijving_pk>/',
+         view_kwalificatie_scores.KwalificatieScoresOpgevenView.as_view(),
+         name='inschrijven-kwalificatie-scores'),
 
 
     # afmelden

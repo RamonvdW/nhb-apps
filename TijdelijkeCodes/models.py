@@ -34,24 +34,24 @@ class TijdelijkeCode(models.Model):
 
     # extra velden voor de dispatcher
     hoort_bij_account = models.ForeignKey(
-                                Account,
-                                on_delete=models.CASCADE,
-                                blank=True, null=True)        # optional
+                                        Account,
+                                        on_delete=models.CASCADE,
+                                        blank=True, null=True)          # optional
 
     hoort_bij_gast_reg = models.ForeignKey(
-                                GastRegistratie,
-                                on_delete=models.CASCADE,
-                                blank=True, null=True)  # optional
+                                        GastRegistratie,
+                                        on_delete=models.CASCADE,
+                                        blank=True, null=True)          # optional
 
     hoort_bij_functie = models.ForeignKey(
-                                Functie,
-                                on_delete=models.CASCADE,
-                                blank=True, null=True)        # optional
+                                        Functie,
+                                        on_delete=models.CASCADE,
+                                        blank=True, null=True)          # optional
 
     hoort_bij_kampioen = models.ForeignKey(
-                                KampioenschapSporterBoog,
-                                on_delete=models.CASCADE,
-                                blank=True, null=True)        # optioneel
+                                        KampioenschapSporterBoog,
+                                        on_delete=models.CASCADE,
+                                        blank=True, null=True)          # optioneel
 
     # in de toekomst meer mogelijkheden, zoals taken
 

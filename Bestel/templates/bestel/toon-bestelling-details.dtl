@@ -210,6 +210,46 @@
     {% endif %}
 
 
+    {% if toon_kwalificatie_scores %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Kwalificatie scores</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Wanneer</th>
+                            <th>Beschrijving</th>
+                            <th>Locatie</th>
+                            <th>Sporter</th>
+                            <th><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in kwalificatie_scores %}
+                        <tr>
+                            <td>{{ obj.datum_str }}</td>
+                            <td>{{ obj.titel }}</td>
+                            <td>{{ obj.plaats_str }}</td>
+                            <td>{{ obj.sporter_str }}</td>
+                            <td>
+                                <a class="btn-sv-rood" href="{{ obj.url_kwalificatie_scores }}">Kwalificatiescores</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% endif %}
+
 
     <!-- witruimte -->
     <div class="row center">

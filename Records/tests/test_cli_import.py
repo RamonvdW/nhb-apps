@@ -20,93 +20,93 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         """ initialisatie van de test case """
 
         # NhbLib
-        sporter = Sporter()
-        sporter.lid_nr = 123456
-        sporter.voornaam = 'Jan'
-        sporter.achternaam = 'Schutter'
-        sporter.email = 'jan@test.nl'
-        sporter.geboorte_datum = parse_date('1970-03-03')
-        sporter.woon_straatnaam = 'Papendal'
-        sporter.geslacht = 'M'
-        sporter.sinds_datum = parse_date("1991-02-03")  # Y-M-D
+        sporter = Sporter(
+                    lid_nr=123456,
+                    voornaam='Jan',
+                    achternaam='Schutter',
+                    email='jan@test.nl',
+                    geboorte_datum=parse_date('1970-03-03'),
+                    adres_code='Papendal',
+                    geslacht='M',
+                    sinds_datum=parse_date("1991-02-03"))  # Y-M-D
         sporter.save()
 
-        sporter = Sporter()
-        sporter.lid_nr = 123457
-        sporter.voornaam = 'Petra'
-        sporter.achternaam = 'Schutter'
-        sporter.email = 'petra@test.nl'
-        sporter.geboorte_datum = parse_date('1970-01-30')
-        sporter.woon_straatnaam = 'Arnhem'
-        sporter.geslacht = 'V'
-        sporter.sinds_datum = parse_date("1991-02-05")  # Y-M-D
+        sporter = Sporter(
+                    lid_nr=123457,
+                    voornaam='Petra',
+                    achternaam='Schutter',
+                    email='petra@test.nl',
+                    geboorte_datum=parse_date('1970-01-30'),
+                    adres_code='Arnhem',
+                    geslacht='V',
+                    sinds_datum=parse_date("1991-02-05"))  # Y-M-D
         sporter.save()
 
         # Record 42
-        rec = IndivRecord()
-        rec.volg_nr = 42
-        rec.discipline = DISCIPLINE[0][0]   # OD
-        rec.soort_record = 'Test record'
-        rec.geslacht = GESLACHT[0][0]   # M
-        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
-        rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
-        # rec.materiaalklasse_overig =
-        rec.sporter = sporter
-        rec.naam = 'Top Schutter'
-        rec.datum = parse_date('2017-08-27')
-        rec.plaats = 'Papendal'
-        rec.land = 'Nederland'
-        rec.score = 1234
-        rec.max_score = 5678
-        rec.x_count = 56
-        # rec.score_notitie =
-        # rec.is_european_record =
-        # rec.is_world_record =
+        rec = IndivRecord(
+                    volg_nr=42,
+                    discipline=DISCIPLINE[0][0],   # OD
+                    soort_record='Test record',
+                    geslacht=GESLACHT[0][0],   # M
+                    leeftijdscategorie=LEEFTIJDSCATEGORIE[0][0],   # M
+                    materiaalklasse=MATERIAALKLASSE[0][0],     # R
+                    # materiaalklasse_overig
+                    sporter=sporter,
+                    naam='Top Schutter',
+                    datum=parse_date('2017-08-27'),
+                    plaats='Papendal',
+                    land='Nederland',
+                    # score_notitie
+                    # is_european_record
+                    # is_world_record
+                    score=1234,
+                    max_score=5678,
+                    x_count=56)
         rec.save()
 
         self.assertEqual(rec.score_str(), '1234 (56X)')
         self.assertEqual(rec.max_score_str(), '5678 (567X)')
 
         # Record 43
-        rec = IndivRecord()
-        rec.volg_nr = 43
-        rec.discipline = DISCIPLINE[1][0]   # 18
-        rec.soort_record = 'Test record para'
-        rec.geslacht = GESLACHT[1][0]   # V
-        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # S
-        rec.materiaalklasse = 'R'       # Recurve
-        rec.para_klasse = 'Open'
-        # rec.sporter =
-        rec.naam = 'Top Schutter 2'
-        rec.datum = datetime.datetime.now()
-        rec.plaats = 'Ergens Anders'
-        rec.land = 'Nederland'
-        rec.score = 1235
-        # rec.score_notitie =
-        # rec.is_european_record =
-        # rec.is_world_record =
+        rec = IndivRecord(
+                    volg_nr=43,
+                    discipline=DISCIPLINE[1][0],   # 18
+                    soort_record='Test record para',
+                    geslacht=GESLACHT[1][0],       # V
+                    leeftijdscategorie=LEEFTIJDSCATEGORIE[1][0],   # S
+                    materiaalklasse='R',           # Recurve
+                    para_klasse='Open',
+                    # rec.sporter,
+                    naam='Top Schutter 2',
+                    datum=datetime.datetime.now(),
+                    plaats='Ergens Anders',
+                    land='Nederland',
+                    # score_notitie
+                    # is_european_record
+                    # is_world_record
+                    score=1235)
         rec.save()
 
         self.assertIsNotNone(str(rec))
         self.assertEqual(rec.score_str(), '1235')
 
         # Record 44
-        rec = IndivRecord()
-        rec.volg_nr = 44
-        rec.discipline = DISCIPLINE[2][0]   # 25
-        rec.soort_record = '25m'
-        rec.geslacht = GESLACHT[1][0]   # V
-        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # C
-        rec.materiaalklasse = 'R'       # Recurve
-        rec.sporter = sporter
-        rec.naam = 'Petra Schutter'
-        rec.datum = parse_date('2017-08-27')
-        rec.plaats = 'Nergens'
-        rec.land = 'Niederland'
-        rec.score = 249
-        # rec.score_notitie =
-        # rec.is_european_record =
-        # rec.is_world_record =
+        rec = IndivRecord(
+                volg_nr=44,
+                discipline=DISCIPLINE[2][0],   # 25
+                soort_record='25m',
+                geslacht=GESLACHT[1][0],   # V
+                leeftijdscategorie=LEEFTIJDSCATEGORIE[3][0],   # C
+                materiaalklasse='R',       # Recurve
+                sporter=sporter,
+                naam='Petra Schutter',
+                datum=parse_date('2017-08-27'),
+                plaats='Nergens',
+                land='Niederland',
+                # score_notitie
+                # is_european_record
+                # is_world_record
+                score=249)
         rec.save()
 
         self.assertIsNotNone(str(rec))

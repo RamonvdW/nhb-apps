@@ -9,6 +9,7 @@ from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieT
 from Competitie.definities import AFSTANDEN, DEEL_RK, DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                Regiocompetitie, Kampioenschap, RegiocompetitieRonde)
+from Competitie.seizoenen import seizoen_cache
 from Functie.models import Functie
 from Geo.models import Rayon, Regio
 from Score.definities import AG_NUL
@@ -385,6 +386,8 @@ def competities_aanmaken(jaar=None):
 
         _maak_competitieklassen(comp)
     # for
+
+    seizoen_cache.reset()
 
 
 # end of file

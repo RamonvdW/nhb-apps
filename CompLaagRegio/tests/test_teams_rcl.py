@@ -52,15 +52,15 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         lid_nr = self._next_lid_nr
         self._next_lid_nr += 1
 
-        sporter = Sporter()
-        sporter.lid_nr = lid_nr
-        sporter.geslacht = "M"
-        sporter.voornaam = voornaam
-        sporter.achternaam = "Tester"
-        sporter.email = voornaam.lower() + "@test.not"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = self.ver_101
+        sporter = Sporter(
+                    lid_nr=lid_nr,
+                    geslacht="M",
+                    voornaam=voornaam,
+                    achternaam="Tester",
+                    email=voornaam.lower() + "@test.not",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self.ver_101)
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)

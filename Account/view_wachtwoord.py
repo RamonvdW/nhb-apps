@@ -163,7 +163,7 @@ def receive_wachtwoord_vergeten(request, account):
 
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
-                       gebruikte_functie="Wachtwoord",
+                       gebruikte_functie="Inloggen (code)",
                        activiteit="Automatische inlog op account %s vanaf IP %s" % (
                                         repr(account.get_account_full_name()), from_ip))
 
@@ -196,7 +196,7 @@ def auto_login_gast_account(request, account):
 
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
-                       gebruikte_functie="Login",
+                       gebruikte_functie="Inloggen (code)",
                        activiteit="Automatische inlog op gast-account %s vanaf IP %s" % (
                                         repr(account.get_account_full_name()), from_ip))
 

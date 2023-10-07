@@ -66,29 +66,29 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         ver.save()
         self.ver1 = ver
 
-        sporter = Sporter()
-        sporter.lid_nr = 100042
-        sporter.geslacht = "M"
-        sporter.voornaam = "Beh"
-        sporter.achternaam = "eerder"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_beh2
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100042,
+                    geslacht="M",
+                    voornaam="Beh",
+                    achternaam="eerder",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.account_beh2,
+                    email=self.account_beh2.email)
         sporter.save()
         self.sporter_100042 = sporter
 
-        sporter = Sporter()
-        sporter.lid_nr = 100043
-        sporter.geslacht = "M"
-        sporter.voornaam = "Beh"
-        sporter.achternaam = "eerder"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100043,
+                    geslacht="M",
+                    voornaam="Beh",
+                    achternaam="eerder",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.account_normaal,
+                    email=self.account_normaal.email)
         sporter.save()
         self.sporter_100043 = sporter
 
@@ -122,16 +122,16 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.functie_hwl2.vereniging = ver2
         self.functie_hwl2.save()
 
-        sporter = Sporter()
-        sporter.lid_nr = 100024
-        sporter.geslacht = "V"
-        sporter.voornaam = "Ander"
-        sporter.achternaam = "Lid"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=5)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=11)
-        sporter.bij_vereniging = ver2
-        sporter.account = self.account_ander
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100024,
+                    geslacht="V",
+                    voornaam="Ander",
+                    achternaam="Lid",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=5),
+                    sinds_datum=datetime.date(year=2010, month=11, day=11),
+                    bij_vereniging=ver2,
+                    account=self.account_ander,
+                    email=self.account_ander.email)
         sporter.save()
         self.sporter_100024 = sporter
 

@@ -19,7 +19,7 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
                                     INSCHRIJVING_STATUS_CHOICES, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                    INSCHRIJVING_STATUS_TO_STR)
+                                    INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
 from decimal import Decimal
 
 
@@ -154,6 +154,9 @@ class Wedstrijd(models.Model):
     # hoe lang voor het begin van hun sessie moeten de sporters aanwezig zijn
     minuten_voor_begin_sessie_aanwezig_zijn = models.PositiveSmallIntegerField(default=45)
 
+    # benodigde scheidsrechters
+    aantal_scheids = models.IntegerField(default=AANTAL_SCHEIDS_GEEN_KEUZE)
+
     # tekstveld voor namen scheidsrechters door organisatie aangedragen
     scheidsrechters = models.TextField(max_length=500, default='',
                                        blank=True)      # mag leeg zijn
@@ -169,6 +172,9 @@ class Wedstrijd(models.Model):
     # de sessies van deze wedstrijd
     sessies = models.ManyToManyField(WedstrijdSessie,
                                      blank=True)        # mag leeg zijn
+
+    # moeten kwalificatie-scores opgegeven worden voor deze wedstrijd?
+    eis_kwalificatie_scores = models.BooleanField(default=False)
 
     # de losse uitslagen van deze wedstrijd
     # deeluitslagen = models.ManyToManyField(WedstrijdDeeluitslag,
@@ -289,5 +295,27 @@ class WedstrijdInschrijving(models.Model):
             models.UniqueConstraint(fields=('sessie', 'sporterboog'),
                                     name='Geen dubbele wedstrijd inschrijving'),
         ]
+
+
+class Kwalificatiescore(models.Model):
+
+    # voor welke inschrijving is dit?
+    inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.CASCADE)
+
+    # wanneer was de wedstrijd
+    datum = models.DateField(default='2000-01-01')
+
+    # naam van de wedstrijd
+    naam = models.CharField(max_length=50)
+
+    # locatie van de wedstrijd (plaats + land)
+    waar = models.CharField(max_length=50)
+
+    # behaald resultaat
+    resultaat = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return "[%s] %s: %s (%s)" % (self.datum, self.resultaat, self.naam, self.waar)
+
 
 # end of file

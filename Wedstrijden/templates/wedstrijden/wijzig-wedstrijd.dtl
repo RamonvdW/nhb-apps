@@ -157,7 +157,15 @@
                                         <span>&nbsp;&nbsp;</span>
                                     {% endif %}
                                     {% if url_next_tekst %}
-                                        <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
+                                        {% if wed.wacht_op_keuze_scheids %}
+                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
+                                            <br><p class="sv-rood-text">Eerst een keuze maken voor de scheidsrechters behoefte.</p>
+                                        {% elif wed.wacht_op_sessies %}
+                                            <button class="btn-sv-rood" disabled>{{ url_next_tekst }}</button>
+                                            <br><p class="sv-rood-text">Eerst sessies aanmaken.</p>
+                                        {% else %}
+                                            <button form="form_next" class="btn-sv-rood vertrek_knop" id="submit_knop1" type="submit">{{ url_next_tekst }}</button>
+                                        {% endif %}
                                     {% endif %}
                                     {% if not wed.verkoopvoorwaarden_status_acceptatie %}
                                         <br><span style="margin-top:16px">Goedkeuring kan aangevraagd worden als de voorwaarden voor gebruik MijnHandboogsport geaccepteerd zijn.</span>
@@ -178,6 +186,27 @@
                                             </li>
                                         </ul>
                                     </td>
+                                </tr>
+                            {% endif %}
+
+                            {% if wijzig_kwalificatie_scores %}
+                                <tr>
+                                    <th>Kwalificatie scores nodig?</th>
+                                    <td>
+                                        <ul id="id_kwalificatie_scores">
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" class="filled-in" name="kwalificatie_scores" onchange="gewijzigd()"{% if wed.eis_kwalificatie_scores %} checked{% endif %}>
+                                                    <span class="black-text">&nbsp;Ja, vraag om kwalificatie scores</span>
+                                                </label>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% elif wed.eis_kwalificatie_scores %}
+                                <tr>
+                                    <th>Kwalificatie scores nodig?</th>
+                                    <td>Ja, vraag om kwalificatie scores</td>
                                 </tr>
                             {% endif %}
 
@@ -476,6 +505,25 @@
                                         <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
                                     {% else %}
                                         <textarea name="scheidsrechters" class="materialize-textarea" oninput="gewijzigd()">{{ wed.scheidsrechters }}</textarea>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th{% if wed.wacht_op_keuze_scheids and keuze_aantal_scheids %} class="sv-rood"{% endif %}>Toekenning scheidsrechters</th>
+                                <td>
+                                    {% if keuze_aantal_scheids %}
+                                        <select name="aantal_scheids" onchange="gewijzigd()">
+                                            {% for value, tekst in keuze_aantal_scheids %}
+                                                <option value="{{ value }}"{% if wed.aantal_scheids == value %} selected{% endif %}>{{ tekst }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        {% if wed.aantal_scheids_str %}
+                                            <span>{{ wed.aantal_scheids_str }}</span>
+                                        {% else %}
+                                            <i>Nog niet bekend</i>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                             </tr>

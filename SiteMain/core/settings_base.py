@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2023-10-03'
+SITE_VERSIE = '2023-10-07'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'Records.apps.RecordsConfig',
     'Registreer.apps.RegistreerConfig',
     'Score.apps.ScoreConfig',
+    'Scheidsrechter.apps.ScheidsrechterConfig',
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',
     'TijdelijkeCodes.apps.TijdelijkeCodesConfig',
@@ -558,5 +559,9 @@ TEST_VALIDATE_HTML = False
 
 # JS validation using ESprima
 TEST_VALIDATE_JAVASCRIPT = False
+
+# use the complete font files or the subset files?
+USE_SUBSET_FONT_FILES = True
+
 
 # end of file

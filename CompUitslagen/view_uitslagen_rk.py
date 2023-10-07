@@ -12,6 +12,7 @@ from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
                                Kampioenschap)
+from seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from Sporter.models import Sporter
@@ -75,7 +76,7 @@ class UitslagenRayonIndivView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -102,7 +103,7 @@ class UitslagenRayonIndivView(TemplateView):
         self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
 
         context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-indiv-n',
-                                         kwargs={'comp_pk': comp.pk,
+                                         kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                  'comp_boog': '~1',
                                                  'rayon_nr': '~2'})
 
@@ -282,8 +283,8 @@ class UitslagenRayonIndivView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK individueel')
         )
 
@@ -392,7 +393,7 @@ class UitslagenRayonTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
+            comp_pk = get_comp_pk(kwargs['comp_pk_of_seizoen'])
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -416,7 +417,7 @@ class UitslagenRayonTeamsView(TemplateView):
         self._maak_filter_knoppen(context, comp, rayon_nr, teamtype_afkorting)
 
         context['url_filters'] = reverse('CompUitslagen:uitslagen-rk-teams-n',
-                                         kwargs={'comp_pk': comp.pk,
+                                         kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url(),
                                                  'team_type': '~1',
                                                  'rayon_nr': '~2'})
 
@@ -613,8 +614,8 @@ class UitslagenRayonTeamsView(TemplateView):
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht',
-                     kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK teams')
         )
 

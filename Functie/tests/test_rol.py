@@ -13,6 +13,7 @@ from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie,
                          rol_get_huidige, rol_get_huidige_functie)
+from Functie.scheids import gebruiker_is_scheids, SESSIONVAR_SCHEIDS
 from Geo.models import Regio
 from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -85,6 +86,12 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertEqual(rol, Rollen.ROL_NONE)
         self.assertIsNone(functie)
 
+        self.assertTrue(SESSIONVAR_SCHEIDS in request.session.keys())
+        self.assertFalse(gebruiker_is_scheids(request))
+
+        del request.session[SESSIONVAR_SCHEIDS]
+        self.assertFalse(gebruiker_is_scheids(request))
+
     def test_geen_sessie(self):
         # probeer beveiliging tegen afwezigheid sessie variabelen
         # typisch tweedelijns, want views checken user.is_authenticated
@@ -111,6 +118,9 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         self.assertTrue(SESSIONVAR_ROL_BESCHRIJVING not in request.session.keys())
         self.assertEqual(rol_get_beschrijving(request), "?")
+
+        self.assertTrue(SESSIONVAR_SCHEIDS not in request.session.keys())
+        self.assertFalse(gebruiker_is_scheids(request))
 
     def test_anon(self):
         # zorg dan request.user.is_authenticated op False staat

@@ -22,6 +22,7 @@ from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige
+from Kalender.view_maand import maak_compacte_wanneer_str
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 
@@ -253,6 +254,28 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
                 context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
                                                    kwargs={'bestel_nr': bestelling.bestel_nr})
+
+        kwalificatie_scores = list()
+        for product in (bestelling
+                        .producten
+                        .exclude(wedstrijd_inschrijving=None)
+                        .select_related('wedstrijd_inschrijving',
+                                        'wedstrijd_inschrijving__wedstrijd',
+                                        'wedstrijd_inschrijving__wedstrijd__locatie',
+                                        'wedstrijd_inschrijving__sporterboog__sporter',)
+                        .all()):
+            inschrijving = product.wedstrijd_inschrijving
+            wedstrijd = inschrijving.wedstrijd
+            if wedstrijd.eis_kwalificatie_scores:       # TODO: einddatum voor wijzigingen
+                wedstrijd.url_kwalificatie_scores = reverse('Wedstrijden:inschrijven-kwalificatie-scores',
+                                                            kwargs={'inschrijving_pk': inschrijving.pk})
+                wedstrijd.datum_str = maak_compacte_wanneer_str(wedstrijd.datum_begin, wedstrijd.datum_einde)
+                wedstrijd.plaats_str = wedstrijd.locatie.plaats
+                wedstrijd.sporter_str = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
+                kwalificatie_scores.append(wedstrijd)
+        # for
+        context['toon_kwalificatie_scores'] = len(kwalificatie_scores) > 0
+        context['kwalificatie_scores'] = kwalificatie_scores
 
         context['url_voorwaarden_wedstrijden'] = settings.VERKOOPVOORWAARDEN_WEDSTRIJDEN_URL
         context['url_voorwaarden_webwinkel'] = settings.VERKOOPVOORWAARDEN_WEBWINKEL_URL

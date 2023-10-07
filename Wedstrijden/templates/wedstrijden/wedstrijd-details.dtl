@@ -22,6 +22,9 @@
                     <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
                 {% elif not kan_inschrijven %}
                     <p>Het is niet meer mogelijk om te schrijven</p>
+                {% else %}
+                    <a class="btn-sv-rood" href="#inschrijven">
+                        <i class="material-icons-round left">close</i>Inschrijven</a>
                 {% endif %}
             {% endif %}
         </div>
@@ -87,6 +90,13 @@
                     <tr>
                         <th>WA-status</th>
                         <td>{{ wed.wa_status_str }}</td>
+                    </tr>
+                {% endif %}
+
+                {% if wed.eis_kwalificatie_scores %}
+                    <tr>
+                        <th>Kwalificatie scores</th>
+                        <td>Voor deze wedstrijd vragen we je om kwalificatie-scores door te geven.<br>Hogere scores plaatst je hoger op de deelnemerslijst.<br>Na inschrijving kan je deze doorgeven.</td>
                     </tr>
                 {% endif %}
 
@@ -203,7 +213,7 @@
                                     <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
                                 {% endif %}
                                 <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
-                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in site_content --></i>
+                                <i class="material-icons-round notranslate sv-rood-text secondary-content"><!-- wordt gezet in in/uitklappen_klaar() in Plein/js/site_layout.js --></i>
                             </div>
                             <div class="collapsible-body white center">
                                 <span>
@@ -227,7 +237,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Inschrijven</h4>
+                <h4 id="inschrijven">Inschrijven</h4>
             </div>
         </div>
 

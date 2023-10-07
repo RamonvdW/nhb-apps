@@ -58,7 +58,7 @@ class CompetitieTijdlijnView(UserPassesTestMixin, TemplateView):
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             comp_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         else:
-            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+            comp_url = reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
 
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_HWL):
             context['kruimels'] = (

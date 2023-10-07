@@ -50,7 +50,7 @@
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-sv-rood" onclick="keuze_gemaakt('status')">Activeer</a>
+                    <button class="btn-sv-rood" onclick="keuze_gemaakt('status')">Activeer</button>
                 </p>
             </div>
         </div>

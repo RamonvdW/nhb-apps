@@ -218,7 +218,8 @@ class Competitie(models.Model):
         return "%s/%s" % (self.begin_jaar, self.begin_jaar + 1)
 
     def maak_seizoen_url(self):
-        return '%s-%s-%s' % (AFSTAND2URL[self.afstand], self.begin_jaar, self.begin_jaar + 1)
+        return self.pk
+        # return '%s-%s-%s' % (AFSTAND2URL[self.afstand], self.begin_jaar, self.begin_jaar + 1)
 
     objects = models.Manager()      # for the editor only
 

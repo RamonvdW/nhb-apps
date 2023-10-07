@@ -124,8 +124,8 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 comp = regiocompetitie.competitie
                 context['kruimels'] = (
                     (reverse('Competitie:kies'), 'Bondscompetities'),
-                    (reverse('Competitie:overzicht',
-                             kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace('competitie ', '')),
+                    (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
+                        comp.beschrijving.replace('competitie ', '')),
                     (None, 'Clusters')
                 )
             else:
@@ -235,7 +235,8 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         else:
             # link terug naar de specifieke competitie
             if regiocompetitie:
-                url = reverse('Competitie:overzicht', kwargs={'comp_pk': regiocompetitie.competitie.pk})
+                url = reverse('Competitie:overzicht',
+                              kwargs={'comp_pk_of_seizoen': regiocompetitie.competitie.maak_seizoen_url()})
 
         return HttpResponseRedirect(url)
 

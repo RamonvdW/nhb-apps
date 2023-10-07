@@ -942,6 +942,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
             mandje_tel_inhoud(self.request)
 
+        # render de pagina "toegevoegd aan mandje"
+
         context = dict()
 
         wedstrijd = inschrijving.wedstrijd

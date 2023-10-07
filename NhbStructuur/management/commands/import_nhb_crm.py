@@ -1398,23 +1398,23 @@ class Command(BaseCommand):
                     self._count_lid_no_email += 1
                     lid_email = ""  # convert invalid email to no email
 
-                obj = Sporter()
-                obj.lid_nr = lid_nr
-                obj.wa_id = lid_wa_id
-                obj.voornaam = lid_voornaam
-                obj.achternaam = lid_achternaam
-                obj.email = lid_email
-                obj.telefoon = lid_tel_nr
-                obj.geboorte_datum = lid_geboorte_datum
-                obj.geboorteplaats = lid_geboorteplaats
-                obj.geslacht = lid_geslacht
-                obj.para_classificatie = lid_para
-                obj.sinds_datum = lid_sinds
-                obj.bij_vereniging = lid_ver
-                obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
-                obj.adres_code = lid_adres_code
-                obj.is_overleden = lid_is_overleden
-                obj.scheids = lid_scheids
+                obj = Sporter(
+                            lid_nr=lid_nr,
+                            wa_id=lid_wa_id,
+                            voornaam=lid_voornaam,
+                            achternaam=lid_achternaam,
+                            email=lid_email,
+                            telefoon=lid_tel_nr,
+                            geboorte_datum=lid_geboorte_datum,
+                            geboorteplaats=lid_geboorteplaats,
+                            geslacht=lid_geslacht,
+                            para_classificatie=lid_para,
+                            sinds_datum=lid_sinds,
+                            bij_vereniging=lid_ver,
+                            lid_tot_einde_jaar=self.lidmaatschap_jaar,
+                            adres_code=lid_adres_code,
+                            is_overleden=lid_is_overleden,
+                            scheids=lid_scheids)
                 if not lid_ver:
                     obj.lid_tot_einde_jaar -= 1
                     obj.is_actief_lid = False
@@ -1785,7 +1785,7 @@ class Command(BaseCommand):
             self.stdout.write("\nDRY RUN")
         else:
             schrijf_in_logboek(
-                        None, 'NhbStructuur',
+                        None, 'CRM-import',
                         'Import van CRM data is uitgevoerd\n' +
                         samenvatting)
             self.stdout.write("\n")

@@ -66,9 +66,11 @@ class CompetitieKiesView(TemplateView):
                     comp.img_src = static('plein/badge_discipline_25m1p.png')
 
                 if link_naar_beheer:
-                    comp.card_url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
+                    comp.card_url = reverse('CompBeheer:overzicht',
+                                            kwargs={'comp_pk': comp.pk})
                 else:
-                    comp.card_url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+                    comp.card_url = reverse('Competitie:overzicht',
+                                            kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()})
 
                 if comp.fase_indiv < 'C':
                     comp.text = "Hier worden de voorbereidingen voor getroffen voor de volgende bondscompetitie."

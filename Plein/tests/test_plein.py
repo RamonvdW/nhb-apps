@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from BasisTypen.definities import SCHEIDS_VERENIGING
 from Bestel.models import BestelMandje, BestelProduct
 from Functie.operations import maak_functie
 from Geo.models import Rayon, Regio
@@ -30,6 +31,7 @@ class TestPlein(E2EHelpers, TestCase):
     url_speciale_pagina = '/plein/test-speciale-pagina/%s/'     # code
     url_mandje = '/bestel/mandje/'
     url_registreer_meer_vragen = '/account/registreer/gast/meer-vragen/'
+    url_scheids = '/scheidsrechter/'
 
     @classmethod
     def setUpTestData(cls):
@@ -71,35 +73,37 @@ class TestPlein(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak een test lid aan
-        sporter = Sporter()
-        sporter.lid_nr = 100001
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ramon"
-        sporter.achternaam = "de Tester"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.account_100001
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100001,
+                    geslacht="M",
+                    voornaam="Ramon",
+                    achternaam="de Tester",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.account_100001,
+                    email=self.account_100001.email)
         sporter.save()
+        self.sporter_100001 = sporter
 
         # maak een lid aan voor de admin
-        sporter = Sporter()
-        sporter.lid_nr = 100002
-        sporter.geslacht = "M"
-        sporter.voornaam = "Ad"
-        sporter.achternaam = "Min"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = ver
-        sporter.account = self.testdata.account_admin
-        sporter.email = sporter.account.email
+        sporter = Sporter(
+                    lid_nr=100002,
+                    geslacht="M",
+                    voornaam="Ad",
+                    achternaam="Min",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=ver,
+                    account=self.testdata.account_admin,
+                    email=self.testdata.account_admin.email)
         sporter.save()
 
         self.functie_mo = maak_functie('Manager Opleidingen', 'MO')
         self.functie_mwz = maak_functie('Manager Wedstrijdzaken', 'MWZ')
         self.functie_mww = maak_functie('Manager Webwinkel', 'MWW')
         self.functie_sup = maak_functie('Support', 'SUP')
+        self.functie_cs = maak_functie('Commissie Scheidsrechters', 'CS')
 
     def test_plein_anon(self):
         self.e2e_logout()
@@ -113,6 +117,10 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_handleidingen)
         self.assert_is_redirect(resp, '/account/login/')
 
+        # check dat de het scheidsrechters kaartje er niet bij zit
+        urls = self.extract_all_urls(resp)
+        self.assertNotIn(self.url_scheids, urls)
+
     def test_plein_normaal(self):
         self.e2e_login(self.account_normaal)        # account, maar geen Sporter
 
@@ -123,6 +131,10 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+
+        # check dat de het scheidsrechters kaartje er niet bij zit
+        urls = self.extract_all_urls(resp)
+        self.assertNotIn(self.url_scheids, urls)
 
     def test_plein_sporter(self):
         # leg iets in het mandje
@@ -143,6 +155,25 @@ class TestPlein(E2EHelpers, TestCase):
         # check dat de mandje-knop erbij zit
         urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_mandje in urls)
+
+        # check dat de het scheidsrechters kaartje er niet bij zit
+        urls = self.extract_all_urls(resp)
+        self.assertNotIn(self.url_scheids, urls)
+
+    def test_plein_scheids(self):
+        # sporter met scheidsrechter opleiding
+        self.sporter_100001.scheids = SCHEIDS_VERENIGING
+        self.sporter_100001.save(update_fields=['scheids'])
+
+        self.account_100001.scheids = self.sporter_100001.scheids
+        self.account_100001.save(update_fields=['scheids'])
+
+        self.e2e_login(self.account_100001)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp)
+        #self.assertIn(self.url_scheids, urls)
 
     def test_plein_admin(self):
         self.functie_mo.accounts.add(self.testdata.account_admin)
@@ -248,6 +279,15 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Manager Webwinkel')
+
+        # cs
+        self.e2e_wissel_naar_functie(self.functie_cs)
+        self.e2e_check_rol('CS')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        #self.assertContains(resp, 'Commissie Scheidsrechters')
 
         # support
         self.e2e_wissel_naar_functie(self.functie_sup)

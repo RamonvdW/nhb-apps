@@ -276,6 +276,50 @@
     {% endif %}
 
 
+    {% if toon_wedstrijden %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Jouw wedstrijden</h4>
+                <p>Wedstrijden waar je op ingeschreven bent.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie -->
+        <div class="row-sv-blauw">
+            <div class="col s12">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Wanneer</th>
+                            <th>Beschrijving</th>
+                            <th>Locatie</th>
+                            <th><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in wedstrijden %}
+                        <tr>
+                            <td>{{ obj.datum_str }}</td>
+                            <td>{{ obj.wedstrijd.titel }}</td>
+                            <td>{{ obj.plaats_str }}</td>
+                            <td>
+                                <a class="btn-sv-blauw" href="{{ obj.url_details }}">Details</a>
+                                {% if obj.url_kwalificatie_scores %}
+                                    <br>
+                                    <a style="margin-top:10px" class="btn-sv-rood" href="{{ obj.url_kwalificatie_scores }}">Kwalificatiescores</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% endif %}
+
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">

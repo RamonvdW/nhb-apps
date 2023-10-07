@@ -12,7 +12,7 @@ from Locatie.models import Locatie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
-from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD
+from Wedstrijden.definities import WEDSTRIJD_STATUS_GEANNULEERD, AANTAL_SCHEIDS_GEEN_KEUZE
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 import datetime
 
@@ -22,6 +22,9 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
     """ tests voor de Wedstrijden applicatie, module wedstrijd wijzigen """
 
     url_wedstrijden_manager = '/wedstrijden/manager/'
+    url_wedstrijden_manager_wacht = url_wedstrijden_manager + 'wacht/'
+    url_wedstrijden_manager_ontwerp = url_wedstrijden_manager + 'ontwerp/'
+    url_wedstrijden_manager_geaccepteerd = url_wedstrijden_manager + 'geaccepteerd/'
     url_wedstrijden_vereniging = '/wedstrijden/vereniging/lijst/'
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_wedstrijden_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'  # wedstrijd_pk
@@ -162,7 +165,8 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
                                           'scheidsrechters': 'Scheids1\nScheids2',
                                           'begrenzing': 'begrenzing_L',
                                           'extern': 'ja',
-                                          'sluit': 'sluit_5'})
+                                          'sluit': 'sluit_5',
+                                          'kwalificatie_scores': 'X'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
@@ -180,6 +184,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.begrenzing, 'L')
         self.assertEqual(wedstrijd.inschrijven_tot, 5)
         self.assertTrue(wedstrijd.extern_beheerd)
+        self.assertTrue(wedstrijd.eis_kwalificatie_scores)
 
         datum = '%s-1-1' % (wedstrijd.datum_begin.year + 1)
         with self.assert_max_queries(20):
@@ -241,7 +246,8 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
                                           'scheidsrechters': 'Scheids4',
                                           'begrenzing': 'begrenzing_V',         # mag wel
                                           'extern': 'nee',
-                                          'sluit': 'sluit_9999'})
+                                          'sluit': 'sluit_9999',
+                                          'aantal_scheids': '2'})
         self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.titel, 'Test Titel 3')
@@ -257,8 +263,10 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.begrenzing, 'V')
         self.assertEqual(wedstrijd.inschrijven_tot, 5)
         self.assertTrue(wedstrijd.extern_beheerd)
+        self.assertEqual(wedstrijd.aantal_scheids, AANTAL_SCHEIDS_GEEN_KEUZE)     # mag niet
 
         # zet de wedstrijd door 'Geaccepteerd' en haal de pagina opnieuw op
+        wedstrijd.aantal_scheids = 0
         wedstrijd.status = 'A'
         wedstrijd.save()
         with self.assert_max_queries(20):
@@ -267,9 +275,28 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
+        # variaties op aantal scheids
+        wedstrijd.aantal_scheids = 1
+        wedstrijd.save(update_fields=['aantal_scheids'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+        # variaties op aantal scheids
+        wedstrijd.aantal_scheids = 5
+        wedstrijd.save(update_fields=['aantal_scheids'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
         # zet de wedstrijd door 'Geannuleerd' en haal de pagina opnieuw op
+        wedstrijd.aantal_scheids = AANTAL_SCHEIDS_GEEN_KEUZE
         wedstrijd.status = WEDSTRIJD_STATUS_GEANNULEERD
-        wedstrijd.save()
+        wedstrijd.save(update_fields=['aantal_scheids', 'status'])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -330,6 +357,20 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
+        # stel het aantal scheidsrechters in
+        self.assertEqual(wedstrijd.aantal_scheids, AANTAL_SCHEIDS_GEEN_KEUZE)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal_scheids': '1'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_manager_wacht)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertEqual(wedstrijd.aantal_scheids, 1)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'aantal_scheids': '50'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_manager_wacht)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertEqual(wedstrijd.aantal_scheids, 1)
+
         wedstrijd.status = 'A'      # geaccepteerd
         wedstrijd.save()
         with self.assert_max_queries(20):
@@ -338,7 +379,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'titel': 'Aangepast door BB'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_manager)
+        self.assert_is_redirect(resp, self.url_wedstrijden_manager_geaccepteerd)
 
         wedstrijd.status = 'X'      # geannuleerd
         wedstrijd.save()
@@ -352,7 +393,7 @@ class TestWedstrijdenWijzigWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(1, Wedstrijd.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verwijder_wedstrijd': 'ja'})
-        self.assert_is_redirect(resp, self.url_wedstrijden_manager)
+        self.assert_is_redirect(resp, self.url_wedstrijden_manager_ontwerp)
         self.assertEqual(0, Wedstrijd.objects.count())
 
         wedstrijd.datum_begin = datetime.date(2022, 1, 1)

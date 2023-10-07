@@ -65,7 +65,7 @@
                         {% endfor %}
                     </ul>
                     <p style="margin-left:35px">
-                        <a class="btn-sv-rood" onclick="keuze_gemaakt('rayon')">Activeer</a>
+                        <button class="btn-sv-rood" onclick="keuze_gemaakt('rayon')">Activeer</button>
                     </p>
                 </div>
             </div>

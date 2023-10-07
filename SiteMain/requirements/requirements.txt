@@ -12,7 +12,7 @@ certifi==2023.7.22
     # via requests
 charset-normalizer==3.3.0
     # via requests
-django==4.2.5
+django==4.2.6
     # via
     #   -c constraints.in
     #   -r requirements.in
@@ -20,7 +20,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.12.0
     # via google-api-python-client
-google-api-python-client==2.101.0
+google-api-python-client==2.102.0
     # via -r requirements.in
 google-auth==2.23.2
     # via
@@ -48,7 +48,7 @@ openpyxl==3.1.2
     # via -r requirements.in
 pillow==10.0.1
     # via -r requirements.in
-protobuf==4.24.3
+protobuf==4.24.4
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -87,7 +87,7 @@ typing-extensions==4.8.0
     #   qrcode
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==2.0.5
+urllib3==2.0.6
     # via
     #   mollie-api-python
     #   requests
