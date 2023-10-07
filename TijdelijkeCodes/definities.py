@@ -12,6 +12,6 @@ RECEIVER_BEVESTIG_EMAIL_REG_LID = 'reg_lid_email'        # 13
 RECEIVER_WACHTWOORD_VERGETEN = 'wachtwoord_vergeten'     # 19
 RECEIVER_DEELNAME_KAMPIOENSCHAP = 'deelname_rk_bk'       # 14
 RECEIVER_ACCOUNT_WISSEL = 'account_wissel'               # 14
-
+RECEIVER_SCHEIDS_BESCHIKBAAR = 'scheids_beschikbaar'     # 19
 
 # end of file

@@ -9,7 +9,7 @@ from django.conf import settings
 from TijdelijkeCodes.definities import (RECEIVER_BEVESTIG_EMAIL_ACCOUNT, RECEIVER_BEVESTIG_EMAIL_FUNCTIE,
                                         RECEIVER_BEVESTIG_EMAIL_REG_GAST, RECEIVER_BEVESTIG_EMAIL_REG_LID,
                                         RECEIVER_ACCOUNT_WISSEL, RECEIVER_WACHTWOORD_VERGETEN,
-                                        RECEIVER_DEELNAME_KAMPIOENSCHAP)
+                                        RECEIVER_DEELNAME_KAMPIOENSCHAP, RECEIVER_SCHEIDS_BESCHIKBAAR)
 from uuid import uuid5, NAMESPACE_URL
 
 
