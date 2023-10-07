@@ -7,13 +7,13 @@
 from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from HistComp.definities import (HISTCOMP_BK, HISTCOMP_TYPE_18,
                                  HISTCOMP_TYPE2URL, URL2HISTCOMP_TYPE, HISTCOMP_TYPE2STR,
                                  HIST_BOOG_DEFAULT, HIST_BOOG2URL, URL2HIST_BOOG, HIST_BOOG2STR,
                                  HIST_TEAM_DEFAULT, HIST_TEAM2URL, URL2HIST_TEAM, HIST_TEAM2STR,
                                  HIST_KLASSE2VOLGORDE, HISTCOMP_TITEL2STR)
 from HistComp.models import HistCompSeizoen, HistKampIndivBK, HistKampTeam
-from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
 
@@ -191,12 +191,11 @@ class HistBkIndivView(TemplateView):
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (url_top, 'Uitslag vorig seizoen'),
             (None, 'Uitslagen BK individueel')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -336,12 +335,11 @@ class HistBkTeamsView(TemplateView):
         url_top = reverse('HistComp:seizoen-top', kwargs={'seizoen': seizoen_url, 'histcomp_type': histcomp_type_url})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (url_top, 'Uitslag vorig seizoen'),
             (None, 'Uitslagen BK teams')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

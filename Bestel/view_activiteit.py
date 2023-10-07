@@ -15,7 +15,6 @@ from Bestel.forms import ZoekBestellingForm
 from Bestel.models import Bestelling
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 import datetime
 
 TEMPLATE_BESTEL_ACTIVITEIT = 'bestel/activiteit.dtl'
@@ -213,7 +212,6 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                 (None, 'Bestellingen en Betalingen'),
             )
 
-        menu_dynamics(self.request, context)
         return context
 
 

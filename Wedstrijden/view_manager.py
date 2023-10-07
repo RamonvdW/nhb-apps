@@ -12,7 +12,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import ORGANISATIES2SHORT_STR
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 from Wedstrijden.definities import (ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
                                     WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING,
                                     WEDSTRIJD_STATUS2URL, WEDSTRIJD_URL2STATUS)
@@ -114,7 +113,6 @@ class KalenderManagerView(UserPassesTestMixin, View):
             (None, 'Wedstrijdkalender'),
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
 

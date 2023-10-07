@@ -15,7 +15,6 @@ from Competitie.tijdlijn import maak_comp_fase_beschrijvingen, is_open_voor_insc
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
 from Locatie.definities import BAAN_TYPE_EXTERN
-from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 from types import SimpleNamespace
 
@@ -292,7 +291,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             (None, 'Beheer Vereniging'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

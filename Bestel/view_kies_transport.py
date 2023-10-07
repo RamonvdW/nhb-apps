@@ -16,7 +16,6 @@ from Bestel.models import BestelMandje
 from Bestel.operations.mutaties import bestel_mutatieverzoek_transport
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Vereniging.models import Vereniging
 
 
@@ -75,7 +74,6 @@ class KiesTransportView(UserPassesTestMixin, TemplateView):
             (None, 'Keuze transport')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

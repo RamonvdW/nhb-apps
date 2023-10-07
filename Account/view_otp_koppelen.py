@@ -17,8 +17,6 @@ from Account.operations.maak_qrcode import qrcode_get
 from Account.operations.otp import otp_prepare_koppelen, otp_koppel_met_code
 from Functie.rol import (rol_bepaal_beschikbare_rollen, rol_bepaal_beschikbare_rollen_opnieuw,
                          rol_get_huidige_functie, rol_mag_wisselen)
-from Plein.menu import menu_dynamics
-
 
 TEMPLATE_OTP_KOPPELEN = 'account/otp-koppelen-stap2-scan-qr-code.dtl'
 TEMPLATE_OTP_KOPPELEN_STAP1 = 'account/otp-koppelen-stap1-uitleg.dtl'
@@ -74,7 +72,6 @@ class OTPKoppelenStap1View(OTPKoppelenStapView):
 
         context['url_stap_2'] = reverse('Account:otp-koppelen-stap2')
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -102,7 +99,6 @@ class OTPKoppelenStap2View(OTPKoppelenStapView):
         tmp = self.account.otp_code.lower()
         context['otp_secret'] = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -121,7 +117,6 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         context['form'] = OTPControleForm()
         context['now'] = timezone.now()
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -138,9 +133,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
                 rol_bepaal_beschikbare_rollen(request, self.account)
 
                 # geef de succes pagina
-                context = dict()
-                menu_dynamics(request, context)
-                return render(request, TEMPLATE_OTP_GEKOPPELD, context)
+                return render(request, TEMPLATE_OTP_GEKOPPELD)
 
             # controle is mislukt - is al gelogd
             form.add_error(None, 'verkeerde code. Probeer het nog eens.')
@@ -156,7 +149,6 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         context['form'] = form
         context['now'] = timezone.now()
 
-        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 # end of file

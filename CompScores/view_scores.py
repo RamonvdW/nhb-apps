@@ -8,8 +8,9 @@ from django.http import HttpResponseRedirect, JsonResponse, Http404, UnreadableP
 from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Count
-from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
+from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
@@ -18,7 +19,6 @@ from Competitie.models import (Regiocompetitie, RegiocompetitieRonde, Regiocompe
                                CompetitieMatch, update_uitslag_teamcompetitie)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Score.definities import SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
@@ -129,13 +129,12 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         context['aantal_regels'] = matches.count() + 2
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
              comp.beschrijving.replace(' competitie', '')),
             (None, 'Scores')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -313,7 +312,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
             comp = deelcomp.competitie
             context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                     comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk}), 'Scores'),
@@ -327,7 +326,6 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
                 (None, self.kruimel)
             )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -768,7 +766,6 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
             (None, 'Uitslag'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -1078,13 +1075,12 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:start-volgende-team-ronde', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Ronde'),
             (None, 'Team scores')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

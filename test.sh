@@ -103,9 +103,11 @@ then
 fi
 
 echo "[INFO] Provided  arguments: $ARGS"
-# convert a path to a test file into a test case
-ARGS=${ARGS//\//.}    # replace all (//) occurrences of / with .
-ARGS=${ARGS/.py/}   # string .py at the end
+
+# convert a path to a module or test.py file into a test case
+ARGS=${ARGS//\//.}                              # replace all (//) occurrences of / with .
+[ "${ARGS: -1}" == "." ] && ARGS=${ARGS:0:-1}   # strip last . (case: Plein/)
+ARGS=${ARGS/.py/}                               # strip .py at the end
 echo "[INFO] Converted arguments: $ARGS"
 
 FOCUS=""

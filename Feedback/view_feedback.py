@@ -13,7 +13,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 from Feedback.forms import FeedbackForm
 from Feedback.models import Feedback
 from Feedback.operations import store_feedback
@@ -73,7 +72,6 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
         #     (None, 'Geef feedback'),
         # )
 
-        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -112,7 +110,6 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
 
         # bewust geen broodkruimels (behalve de "vorige" knop)
 
-        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 
@@ -127,7 +124,6 @@ class BedanktView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -164,7 +160,6 @@ class InzichtView(UserPassesTestMixin, ListView):
             (None, 'Feedback'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

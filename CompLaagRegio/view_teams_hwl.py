@@ -10,6 +10,7 @@ from django.db.models import Count
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from BasisTypen.models import TeamType
@@ -18,7 +19,6 @@ from Competitie.models import (CompetitieTeamKlasse, Regiocompetitie,
                                update_uitslag_teamcompetitie)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL, AG_DOEL_TEAM
 from Score.models import AanvangsgemiddeldeHist
 from Score.operations import score_teams_ag_opslaan
@@ -213,7 +213,6 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             (None, 'Teams Regio')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -385,13 +384,12 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             )
         else:
             context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
                 (None, 'Teams'),    # TODO: details invullen
                 (None, 'Wijzig team')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -561,7 +559,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         else:
             # RCL
             context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
                 (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                  comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRegio:regio-ag-controle',
@@ -571,7 +569,6 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                 (None, 'Wijzig AG')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -762,7 +759,6 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             (None, 'Koppel teamleden')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -993,7 +989,6 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             (None, 'Team Invallers')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -1190,7 +1185,6 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             (None, 'Invallers Koppelen')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

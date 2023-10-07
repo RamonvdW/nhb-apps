@@ -13,7 +13,6 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Competitie.definities import INSCHRIJF_METHODE_1
 from Competitie.models import RegiocompetitieRonde, RegiocompetitieSporterBoog, CompetitieMatch
-from Plein.menu import menu_dynamics
 
 
 TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN = 'complaagregio/keuze-zeven-wedstrijden-methode1.dtl'
@@ -140,7 +139,6 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
                 (None, 'Aanpassen')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
     @staticmethod

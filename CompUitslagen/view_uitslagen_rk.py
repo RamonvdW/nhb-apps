@@ -4,19 +4,20 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
+from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Account.models import get_account
 from Competitie.definities import DEEL_RK, DEELNAME_NEE, KAMP_RANK_RESERVE, KAMP_RANK_NO_SHOW, KAMP_RANK_BLANCO
 from Competitie.models import (Competitie, Regiocompetitie, KampioenschapIndivKlasseLimiet, CompetitieMatch,
                                RegiocompetitieSporterBoog, KampioenschapSporterBoog, KampioenschapTeam,
-                               Kampioenschap, get_comp_pk)
+                               Kampioenschap)
+from Competitie.seizoenen import get_comp_pk
 from Functie.rol import rol_get_huidige_functie
 from Geo.models import Rayon
 from Sporter.models import Sporter
 from Sporter.operations import get_request_rayon_nr
-from Plein.menu import menu_dynamics
 import datetime
 
 TEMPLATE_COMPUITSLAGEN_RK_INDIV = 'compuitslagen/uitslagen-rk-indiv.dtl'
@@ -281,13 +282,12 @@ class UitslagenRayonIndivView(TemplateView):
         context['heeft_deelnemers'] = (len(deelnemers) > 0)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK individueel')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -612,13 +612,12 @@ class UitslagenRayonTeamsView(TemplateView):
             context['geen_teams'] = True
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Uitslagen RK teams')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

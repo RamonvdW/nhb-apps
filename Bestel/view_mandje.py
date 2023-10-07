@@ -19,7 +19,6 @@ from Bestel.plugins.product_info import beschrijf_product, beschrijf_korting
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Vereniging.models import Vereniging
 from decimal import Decimal
@@ -207,7 +206,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             (None, 'Mandje'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

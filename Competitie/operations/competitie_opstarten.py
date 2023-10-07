@@ -8,7 +8,8 @@ from django.utils import timezone
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.definities import AFSTANDEN, DEEL_RK, DEEL_BK
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               Regiocompetitie, Kampioenschap, RegiocompetitieRonde, seizoen_cache)
+                               Regiocompetitie, Kampioenschap, RegiocompetitieRonde)
+from Competitie.seizoenen import seizoen_cache
 from Functie.models import Functie
 from Geo.models import Rayon, Regio
 from Score.definities import AG_NUL

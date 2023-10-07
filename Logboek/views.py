@@ -11,7 +11,6 @@ from django.db.models.functions import Concat
 from django.urls import reverse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Logboek.models import LogboekRegel
 from urllib.parse import quote_plus
 
@@ -155,7 +154,6 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             (None, 'Logboek'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

@@ -13,7 +13,6 @@ from Bestel.models import Bestelling
 from Bestel.operations.mutaties import bestel_overboeking_ontvangen
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from decimal import Decimal, InvalidOperation
 
 TEMPLATE_OVERBOEKING_ONTVANGEN = 'bestel/overboeking-ontvangen.dtl'
@@ -83,7 +82,6 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                 (None, 'Overboekingen'),
             )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -161,7 +159,6 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                 (None, 'Overboekingen'),
             )
 
-        menu_dynamics(self.request, context)
         return render(request, TEMPLATE_OVERBOEKING_ONTVANGEN, context)
 
 

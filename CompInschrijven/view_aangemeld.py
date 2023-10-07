@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.http import HttpResponse, Http404
 from django.utils.formats import date_format
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.definities import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
                                    BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
@@ -19,7 +20,6 @@ from Competitie.models import (Competitie, Regiocompetitie, RegiocompetitieRonde
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Geo.models import Rayon, Regio
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from Vereniging.models import Vereniging
 from codecs import BOM_UTF8
@@ -169,13 +169,12 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         maak_regiocomp_zoom_knoppen(context, comp_pk)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -236,13 +235,12 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=rayon)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -330,13 +328,12 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         maak_regiocomp_zoom_knoppen(context, comp.pk, regio=regio)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Inschrijvingen')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -636,7 +633,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                                   'regio_pk': regio.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompInschrijven:lijst-regiocomp-regio',
@@ -645,7 +642,6 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             (None, 'Benodigde dagdelen')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -867,7 +863,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                                   'regio_pk': regio.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompInschrijven:lijst-regiocomp-regio',
@@ -876,7 +872,6 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
             (None, 'Gekozen wedstrijden')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

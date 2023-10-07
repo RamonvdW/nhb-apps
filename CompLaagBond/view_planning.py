@@ -8,6 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView, View
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_RK, DEEL_BK, MUTATIE_KAMP_CUT, DEELNAME_NEE
@@ -20,7 +21,6 @@ from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 from Vereniging.models import Vereniging
 from types import SimpleNamespace
 import datetime
@@ -213,12 +213,11 @@ class PlanningView(UserPassesTestMixin, TemplateView):
         comp = deelkamp.competitie
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Planning')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -479,13 +478,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                                              kwargs={'match_pk': match.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagBond:planning', kwargs={'deelkamp_pk': deelkamp.pk}), 'Planning BK'),
             (None, 'Wijzig BK wedstrijd')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -752,12 +750,11 @@ class WijzigLimietenView(UserPassesTestMixin, TemplateView):
 
         comp = deelkamp.competitie
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'BK limieten')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

@@ -7,13 +7,12 @@
 from django.urls import reverse
 from django.db.models import Q
 from django.views.generic import ListView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
-
 
 TEMPLATE_OVERZICHT = 'functie/beheerders.dtl'
 
@@ -186,11 +185,10 @@ class LijstBeheerdersView(UserPassesTestMixin, ListView):
             context['url_rcl'] = reverse('Functie:emails-rcl')
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, 'Beheerders'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 # end of file

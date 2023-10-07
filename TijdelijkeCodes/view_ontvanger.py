@@ -11,7 +11,6 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from TijdelijkeCodes.models import TijdelijkeCode
 from TijdelijkeCodes.operations import beschrijving_activiteit, do_dispatch
-from Plein.menu import menu_dynamics
 
 TEMPLATE_CODE_GOED = 'tijdelijkecodes/code-goed.dtl'
 TEMPLATE_CODE_FOUT = 'tijdelijkecodes/code-fout.dtl'
@@ -58,7 +57,6 @@ class OntvangerView(View):
         else:
             template = TEMPLATE_CODE_GOED
 
-        menu_dynamics(request, context)
         return render(request, template, context)
 
     @staticmethod

@@ -13,7 +13,6 @@ from Competitie.models import RegiocompetitieTeam, CompetitieMatch
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from codecs import BOM_UTF8
 import csv
 
@@ -112,7 +111,6 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             (None, 'Deelnemers')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

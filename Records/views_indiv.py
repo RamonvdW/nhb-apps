@@ -6,7 +6,6 @@
 
 from django.urls import reverse
 from django.views.generic import TemplateView
-from Plein.menu import menu_dynamics
 from Records.definities import (url2gesl, url2disc, url2lcat, url2makl, url2verb, url2para,
                                 gesl2url, disc2url, lcat2url, makl2url, verb2url, para2url,
                                 gesl2str, disc2str, lcat2str, makl2str, verb2str,
@@ -282,7 +281,6 @@ class RecordsIndivView(TemplateView):
             (reverse('Records:overzicht'), 'Records'),
             (None, 'Filteren')
         )
-        menu_dynamics(self.request, context)
         return context
 
 # end of file

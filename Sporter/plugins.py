@@ -7,7 +7,6 @@
 from django.shortcuts import render
 from Account.plugin_manager import account_add_plugin_login_gate
 from Logboek.models import schrijf_in_logboek
-from Plein.menu import menu_dynamics
 import logging
 
 
@@ -41,7 +40,6 @@ def sporter_login_plugin(request, from_ip, account):
                 my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(account.username)))
 
                 context = {'account': account, 'verberg_login_knop': True}
-                menu_dynamics(request, context)
                 return render(request, TEMPLATE_SPORTER_LOGIN_GEBLOKKEERD, context)
 
         updated = list()

@@ -14,8 +14,6 @@ from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import MAAND2URL
-from Plein.menu import menu_dynamics
-from Sporter.models import get_sporter
 from Wedstrijden.models import WedstrijdInschrijving, Kwalificatiescore
 import datetime
 
@@ -128,7 +126,6 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             (None, 'Kwalificatie scores'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def render_toegevoegd_aan_mandje(self, request, inschrijving):
@@ -155,8 +152,6 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             (url, 'Inschrijven'),
             (None, 'Toegevoegd aan mandje')
         )
-
-        menu_dynamics(self.request, context)
 
         return render(request, TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE, context)
 

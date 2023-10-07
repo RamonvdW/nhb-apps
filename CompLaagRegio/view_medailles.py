@@ -7,11 +7,11 @@
 from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPREGIO_MEDAILLES = 'complaagregio/medailles.dtl'
@@ -182,12 +182,11 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         context['deelnemers'] = self.bepaal_uitslag(deelcomp, min_aantal_scores)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Medailles')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

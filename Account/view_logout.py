@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,6 @@ from django.urls import reverse
 from django.contrib.auth import logout
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
 from Overig.helpers import get_safe_from_ip
 import logging
 
@@ -47,7 +46,6 @@ class LogoutView(UserPassesTestMixin, TemplateView):
             (None, 'Uitloggen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     @staticmethod

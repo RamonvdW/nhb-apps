@@ -14,7 +14,6 @@ from BasisTypen.definities import (GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
                                    ORGANISATIE_IFAA)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_mag_wisselen
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, get_sporter
 from Sporter.operations import get_sporter_voorkeuren, get_sporterboog
 from types import SimpleNamespace
@@ -267,7 +266,6 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 (None, 'Voorkeuren')
             )
 
-        menu_dynamics(self.request, context)
         return context
 
 

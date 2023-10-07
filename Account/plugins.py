@@ -12,7 +12,6 @@ from Account.plugin_manager import account_add_plugin_login_gate
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
-from Plein.menu import menu_dynamics
 from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_ACCOUNT
 from TijdelijkeCodes.operations import set_tijdelijke_codes_receiver
 import logging
@@ -40,7 +39,6 @@ def account_check_nieuwe_email(request, from_ip, account):
         account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url)
 
         context = {'partial_email': mailer_obfuscate_email(mailadres)}
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_EMAIL_BEVESTIG_NIEUWE, context)
 
     # geen wijziging van e-mailadres - gewoon doorgaan
@@ -64,7 +62,6 @@ def account_check_email_is_bevestigd(request, from_ip, account):
 
         # FUTURE: knop maken om een paar keer per uur een nieuwe mail te kunnen krijgen
         context = {'partial_email': mailer_obfuscate_email(account.nieuwe_email)}
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_EMAIL_BEVESTIG_HUIDIGE, context)
 
     # we wachten niet op bevestiging email - ga gewoon door
@@ -98,7 +95,6 @@ def receive_bevestiging_account_email(request, account):
 
     context['verberg_login_knop'] = True
 
-    menu_dynamics(request, context)
     return render(request, TEMPLATE_EMAIL_BEVESTIGD, context)
 
 

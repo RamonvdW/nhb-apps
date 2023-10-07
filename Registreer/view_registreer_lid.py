@@ -13,7 +13,6 @@ from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email, mailer_queue_email, render_email_template
 from Overig.helpers import get_safe_from_ip
-from Plein.menu import menu_dynamics
 from Registreer.forms import RegistreerNormaalForm
 from Sporter.models import Sporter, SporterGeenEmail, SporterInactief
 from TijdelijkeCodes.definities import RECEIVER_BEVESTIG_EMAIL_REG_LID
@@ -54,7 +53,6 @@ def registreer_receive_bevestiging_aanmaken_account(request, account):
 
     context['verberg_login_knop'] = True
 
-    menu_dynamics(request, context)
     return render(request, TEMPLATE_REGISTREER_EMAIL_BEVESTIGD, context)
 
 
@@ -149,7 +147,6 @@ class RegistreerLidView(TemplateView):
                 (None, 'KHSN lid')),
         }
 
-        menu_dynamics(request, context)
         return render(request, TEMPLATE_REGISTREER_LID, context)
 
     @staticmethod
@@ -170,8 +167,6 @@ class RegistreerLidView(TemplateView):
                 (reverse('Registreer:begin'), 'Account aanmaken'),
                 (None, 'KHSN lid')),
         }
-
-        menu_dynamics(request, context)
 
         if form.is_valid():
             # compleetheid en wachtwoord sterkte worden gecontroleerd door het formulier

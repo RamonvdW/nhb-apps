@@ -15,7 +15,6 @@ from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, Kamp
                                KampioenschapSporterBoog, KampioenschapTeam, CompetitieMatch)
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from tempfile import NamedTemporaryFile
 from copy import copy
@@ -231,7 +230,6 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
             (None, 'RK programma')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

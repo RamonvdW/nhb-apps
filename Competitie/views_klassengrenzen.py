@@ -4,14 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import View
 from django.http import Http404
 from django.shortcuts import render, reverse
+from django.views.generic import View
+from django.utils.safestring import mark_safe
 from BasisTypen.definities import BLAZOEN2STR
 from Competitie.models import Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Score.definities import AG_NUL
 
 
@@ -119,13 +119,12 @@ class KlassengrenzenTonenView(View):
             context['aantal_team_regels'] = 2 + len(context['team_klassen']) - (context['aantal_team_rk_bk_regels'] - 2)
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
-            (reverse('Competitie:overzicht', kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}),
-                comp.beschrijving.replace(' competitie', '')),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
+            (reverse('Competitie:overzicht',
+                     kwargs={'comp_pk_of_seizoen': comp.maak_seizoen_url()}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Wedstrijdklassen')
         )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
 

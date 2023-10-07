@@ -7,11 +7,12 @@
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from Account.models import get_account
-from Competitie.models import Competitie, get_competitie_boog_typen, get_comp_pk
+from Competitie.models import Competitie, get_competitie_boog_typen
+from Competitie.seizoenen import get_comp_pk
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterBoog
 
 
@@ -138,11 +139,10 @@ class CompetitieOverzichtView(TemplateView):
             context['url_beheer'] = reverse('CompBeheer:overzicht', kwargs={'comp_pk': self.comp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (None, self.comp.beschrijving.replace(' competitie', ''))
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

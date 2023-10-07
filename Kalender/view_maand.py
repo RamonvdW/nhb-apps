@@ -15,7 +15,6 @@ from django.views.generic import TemplateView
 from Account.models import get_account
 from Bestel.operations.mandje import eval_mandje_inhoud
 from Kalender.definities import MAANDEN, MAAND2URL
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterBoog, get_sporter
 from Wedstrijden.definities import (WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
                                     ORGANISATIE_IFAA, ORGANISATIE_WA, ORGANISATIE_KHSN,
@@ -319,7 +318,6 @@ class KalenderMaandView(TemplateView):
             (None, 'Wedstrijdkalender'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def get_context_data(self, **kwargs):

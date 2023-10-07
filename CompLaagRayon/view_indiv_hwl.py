@@ -12,7 +12,6 @@ from Competitie.definities import DEEL_RK, DEELNAME_JA, DEELNAME_NEE
 from Competitie.models import Kampioenschap, KampioenschapSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
-from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPRAYON_LIJST_RK = 'complaagrayon/hwl-rk-selectie.dtl'
@@ -122,7 +121,6 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             (None, 'Deelnemers RK'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

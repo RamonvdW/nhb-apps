@@ -23,7 +23,6 @@ from Functie.models import Functie
 from Functie.rol import rol_get_huidige_functie
 from Locatie.definities import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Locatie.models import Locatie
-from Plein.menu import menu_dynamics
 from Sporter.models import get_sporter
 from Taken.operations import maak_taak
 from Vereniging.models import Vereniging
@@ -401,7 +400,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                 (None, 'Wijzig wedstrijd')
             )
 
-        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod

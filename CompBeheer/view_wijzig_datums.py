@@ -7,11 +7,11 @@
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
-from Plein.menu import menu_dynamics
 import datetime
 
 
@@ -62,13 +62,12 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.datum12 = comp.einde_fase_P_teams
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Fase datums'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     @staticmethod

@@ -15,7 +15,6 @@ from Functie.models import Functie
 from Functie.operations import account_needs_vhpg
 from Functie.rol import (rol_mag_wisselen, rol_enum_pallet, rol_get_huidige, rol_get_huidige_functie,
                          rol_get_beschrijving, rol_bepaal_beschikbare_rollen_opnieuw)
-from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
 from Vereniging.models import Vereniging
 
@@ -371,7 +370,6 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             (None, 'Wissel van rol'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -416,7 +414,6 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
             (None, 'Secretaris')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

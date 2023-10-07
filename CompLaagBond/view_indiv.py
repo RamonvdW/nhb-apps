@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import (DEEL_BK,
@@ -19,7 +20,6 @@ from Competitie.models import (Kampioenschap, KampioenschapSporterBoog, Kampioen
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from codecs import BOM_UTF8
 import textwrap
@@ -184,12 +184,11 @@ class LijstBkSelectieView(UserPassesTestMixin, TemplateView):
         context['aantal_attentie'] = aantal_attentie
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'BK selectie')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -365,13 +364,12 @@ class WijzigStatusBkDeelnemerView(UserPassesTestMixin, TemplateView):
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagBond:bk-selectie', kwargs={'deelkamp_pk': deelnemer.kampioenschap.pk}), 'BK selectie'),
             (None, 'Wijzig sporter status')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

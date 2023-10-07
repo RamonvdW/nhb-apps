@@ -813,7 +813,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
         urls = [url for url in urls if url.startswith('/wedstrijden/inschrijven/kwalificatie-scores-doorgeven/')]
-        self.assertEquals(1, len(urls))
+        self.assertEqual(1, len(urls))
 
     def test_mutatie(self):
         # een paar corner cases

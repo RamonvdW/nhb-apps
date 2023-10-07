@@ -21,7 +21,6 @@ from Bestel.operations.mutaties import bestel_mutatieverzoek_inschrijven_wedstri
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Kalender.view_maand import MAAND2URL
-from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
@@ -151,7 +150,6 @@ class WedstrijdDetailsView(TemplateView):
             (None, 'Wedstrijd details'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -445,7 +443,6 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
             (None, 'Inschrijven sporter')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -646,7 +643,6 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             (None, 'Inschrijven groepje')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -845,7 +841,6 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             (None, 'Inschrijven familie'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -985,8 +980,6 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             (url, inschrijven_str),
             (None, 'Toegevoegd aan mandje')
         )
-
-        menu_dynamics(self.request, context)
 
         return render(request, TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE, context)
 
@@ -1171,7 +1164,6 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
             (None, 'Handmatig toevoegen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import (MUTATIE_DOORZETTEN_REGIO_NAAR_RK,
@@ -19,7 +20,6 @@ from Competitie.models import Competitie, Regiocompetitie, CompetitieMutatie, Co
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
@@ -110,13 +110,12 @@ class DoorzettenRegioNaarRKView(UserPassesTestMixin, TemplateView):
                                                 kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}),
                 comp.beschrijving.replace(' competitie', '')),
             (None, 'Doorzetten')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -310,13 +309,12 @@ class KlassengrenzenVaststellenRkBkTeamsView(UserPassesTestMixin, TemplateView):
                                              kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Doorzetten')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -472,13 +470,12 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
                                             kwargs={'comp_pk': comp.pk})
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht',
                      kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Competitie doorzetten')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
     def doorzetten(self, account, comp):

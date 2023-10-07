@@ -8,7 +8,6 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
-from Plein.menu import menu_dynamics
 from Records.definities import (disc2str, disc2url, url2disc,
                                 gesl2str, gesl2url, url2gesl,
                                 makl2str, makl2url, url2makl,
@@ -66,7 +65,6 @@ class RecordsVerbeterbaarKiesDisc(ListView):
             (None, 'Verbeterbaar')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -231,7 +229,6 @@ class RecordsVerbeterbaarInDiscipline(TemplateView):
             (None, context['beschrijving'])
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 # end of file

@@ -4,7 +4,6 @@ from django.views.generic import ListView
 from Functie.definities import Rollen
 from Functie.models import Functie
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
 
 TEMPLATE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
 
@@ -98,7 +97,6 @@ class BeheerdersVerenigingView(UserPassesTestMixin, ListView):
             (None, 'Beheerders'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 # end of file

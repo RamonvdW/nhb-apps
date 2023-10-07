@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import JsonResponse, Http404, UnreadablePostError
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
+from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
 from Competitie.definities import DEEL_BK, MUTATIE_KLEINE_KLASSE_INDIV
@@ -18,7 +19,6 @@ from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 import json
 
 
@@ -154,12 +154,11 @@ class KleineKlassenIndivView(UserPassesTestMixin, TemplateView):
         context['url_verplaats'] = reverse('CompLaagBond:verplaats-deelnemer')
 
         context['kruimels'] = (
-            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:kies'), mark_safe('Bonds<wbr>competities')),
             (reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
             (None, 'Kleine klassen individueel')
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
