@@ -22,6 +22,9 @@
                     <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
                 {% elif not kan_inschrijven %}
                     <p>Het is niet meer mogelijk om te schrijven</p>
+                {% else %}
+                    <a class="btn-sv-rood" href="#inschrijven">
+                        <i class="material-icons-round left notranslate">arrow_downward</i>Inschrijven</a>
                 {% endif %}
             {% endif %}
         </div>
@@ -234,7 +237,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Inschrijven</h4>
+                <h4 id="inschrijven">Inschrijven</h4>
             </div>
         </div>
 
