@@ -14,6 +14,8 @@ ENABLE_DEBUG_TOOLBAR = False
 ENABLE_DJANGO_EXTENSIONS = False
 DEBUG = True
 
+# disable use of subset files in dev, to simplify introduction of new icons
+USE_SUBSET_FONT_FILES = False
 
 # debug toolbar for database access analysis
 #ENABLE_DEBUG_TOOLBAR = True

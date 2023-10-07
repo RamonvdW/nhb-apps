@@ -6,6 +6,7 @@ alternate_email
 api
 arrow_back
 arrow_back_ios
+arrow_downward
 arrow_forward
 arrow_forward_ios
 article

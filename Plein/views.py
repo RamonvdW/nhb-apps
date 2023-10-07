@@ -14,7 +14,6 @@ from Bestel.operations.mandje import eval_mandje_inhoud
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
 from Functie.scheids import gebruiker_is_scheids
-from Plein.menu import menu_dynamics
 from Registreer.definities import REGISTRATIE_FASE_COMPLEET
 from Taken.operations import eval_open_taken
 
@@ -172,7 +171,6 @@ class PleinView(View):
         context['email_support'] = settings.EMAIL_SUPPORT
         context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
 
-        menu_dynamics(self.request, context)
         return render(request, template, context)
 
 
@@ -194,7 +192,6 @@ class PrivacyView(TemplateView):
             (None, 'Privacy'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 
@@ -224,7 +221,6 @@ class HandleidingenView(UserPassesTestMixin, TemplateView):
             (None, 'Handleidingen'),
         )
 
-        menu_dynamics(self.request, context)
         return context
 
 

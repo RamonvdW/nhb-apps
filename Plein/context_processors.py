@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.shortcuts import reverse
 from django.utils.safestring import mark_safe
+from django.templatetags.static import static
 from Account.models import get_account
 from Account.operations.otp import otp_is_controle_gelukt
 from Functie.definities import Rollen
@@ -15,10 +16,12 @@ from Bestel.operations.mandje import cached_aantal_in_mandje_get
 from Taken.operations import aantal_open_taken
 
 
-def menu_dynamics(request, context):
-    """ Deze functie update the template context voor het dynamische gedrag van
-        menu zoals de 'Andere rollen' en het menu-item dat actief is.
+def site_layout(request):
+    """ Deze functie geeft context variabelen terug die gebruikt worden in site_layout.dtl
+        zoals voor het menu.
     """
+
+    context = dict()
 
     # test server banner tonen?
     context['is_test_server'] = settings.IS_TEST_SERVER
@@ -65,15 +68,10 @@ def menu_dynamics(request, context):
     # het label met de schermgrootte boven aan het scherm
     context['menu_toon_schermgrootte'] = settings.DEBUG
 
-    if 'kruimels' in context.keys():
-        kruimels = list()
-        for url, tekst in context['kruimels']:
-            # insert line-break opportunities
-            if tekst == 'Bondscompetities':
-                tekst = mark_safe('Bonds<wbr>competities')
-            tup = (url, tekst)
-            kruimels.append(tup)
-        # for
-        context['kruimels'] = kruimels
+    # subset of volledige fonts gebruiken in site_layout_fonts.dtl?
+    context['font_use_subset_files'] = settings.USE_SUBSET_FONT_FILES
+
+    return context
+
 
 # end of file
