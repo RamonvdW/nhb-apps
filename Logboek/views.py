@@ -24,7 +24,7 @@ TEMPLATE_LOGBOEK_ACCOUNTS = 'logboek/accounts.dtl'
 TEMPLATE_LOGBOEK_CLUSTERS = 'logboek/clusters.dtl'
 TEMPLATE_LOGBOEK_BETALINGEN = 'logboek/betalingen.dtl'
 TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/competitie.dtl'
-TEMPLATE_LOGBOEK_NHBSTRUCTUUR = 'logboek/nhbstructuur.dtl'
+TEMPLATE_LOGBOEK_CRM_IMPORT = 'logboek/crm-import.dtl'
 TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/accommodaties.dtl'
 
 RESULTS_PER_PAGE = 50
@@ -174,22 +174,21 @@ class LogboekRestView(LogboekBasisView):
         return (LogboekRegel
                 .objects
                 .select_related('actie_door_account')
-                .exclude(Q(gebruikte_functie='Records') |           # Records
-                         Q(gebruikte_functie='maak_beheerder') |    # Accounts
-                         Q(gebruikte_functie='Wachtwoord') |        # Accounts
-                         Q(gebruikte_functie='Inloggen') |
-                         Q(gebruikte_functie='Inlog geblokkeerd') |
-                         Q(gebruikte_functie='OTP controle') |
-                         Q(gebruikte_functie='Bevestig e-mail') |
-                         Q(gebruikte_functie='Registreer met bondsnummer') |
-                         Q(gebruikte_functie='Registreer gast-account') |
-                         Q(gebruikte_functie='Rollen') |            # Rollen
-                         Q(gebruikte_functie='NhbStructuur') |      # NhbStructuur
+                .exclude(Q(gebruikte_functie='Records') |
+                         Q(gebruikte_functie='maak_beheerder') |     # Accounts
+                         Q(gebruikte_functie='Wachtwoord') |         # Accounts
+                         Q(gebruikte_functie='Inloggen') |           # Accounts
+                         Q(gebruikte_functie='Inlog geblokkeerd') |  # Accounts
+                         Q(gebruikte_functie='OTP controle') |       # Accounts
+                         Q(gebruikte_functie='Bevestig e-mail') |               # Registreer
+                         Q(gebruikte_functie='Registreer met bondsnummer') |    # Registreer
+                         Q(gebruikte_functie='Registreer gast-account') |       # Registreer
+                         Q(gebruikte_functie='Rollen') |            # Functie
+                         Q(gebruikte_functie='CRM-import') |        # NhbStructuur
                          Q(gebruikte_functie='Competitie') |        # Competitie
-                         Q(gebruikte_functie='Accommodaties') |     # Accommodatie
-                         Q(gebruikte_functie='Clusters') |          # Clusters
-                         Q(gebruikte_functie='Uitrol') |            # Uitrol
-                         Q(gebruikte_functie='oude_site_overnemen (command line)'))     # Import
+                         Q(gebruikte_functie='Accommodaties') |     # Locatie
+                         Q(gebruikte_functie='Clusters') |
+                         Q(gebruikte_functie='Uitrol'))
                 .order_by('-toegevoegd_op'))
 
 
@@ -256,11 +255,11 @@ class LogboekRollenView(LogboekBasisView):
                 .order_by('-toegevoegd_op'))
 
 
-class LogboekNhbStructuurView(LogboekBasisView):
+class LogboekCrmImportView(LogboekBasisView):
     """ Deze view toont de logboek regels die met het importeren van de CRM data te maken hebben """
 
-    template_name = TEMPLATE_LOGBOEK_NHBSTRUCTUUR
-    filter = 'nhbstructuur'
+    template_name = TEMPLATE_LOGBOEK_CRM_IMPORT
+    filter = 'crm-import'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -271,7 +270,7 @@ class LogboekNhbStructuurView(LogboekBasisView):
         return (LogboekRegel
                 .objects
                 .select_related('actie_door_account')
-                .filter(gebruikte_functie='NhbStructuur')
+                .filter(gebruikte_functie='CRM-import')
                 .order_by('-toegevoegd_op'))
 
 

@@ -33,7 +33,7 @@ urlpatterns = [
          name='rollen'),
 
     path('crm-import/',
-         views.LogboekNhbStructuurView.as_view(),
+         views.LogboekCrmImportView.as_view(),
          name='import'),
 
     path('competitie/',

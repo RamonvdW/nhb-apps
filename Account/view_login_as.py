@@ -69,7 +69,7 @@ def receiver_account_wissel(request, account):
 
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
-                       gebruikte_functie="Inloggen",
+                       gebruikte_functie="Inloggen (code)",
                        activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username), from_ip))
 
     # zorg dat de rollen meteen beschikbaar zijn

@@ -1785,7 +1785,7 @@ class Command(BaseCommand):
             self.stdout.write("\nDRY RUN")
         else:
             schrijf_in_logboek(
-                        None, 'NhbStructuur',
+                        None, 'CRM-import',
                         'Import van CRM data is uitgevoerd\n' +
                         samenvatting)
             self.stdout.write("\n")
