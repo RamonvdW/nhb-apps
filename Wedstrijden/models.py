@@ -33,7 +33,7 @@ from decimal import Decimal
 #     bestandsnaam = models.CharField(max_length=100, default='', blank=True)
 #
 #     # wanneer toegevoegd?
-#     toegevoegd_op = models.DateTimeField(auto_now=True)
+#     toegevoegd_op = models.DateTimeField(auto_now_add=True)
 #
 #     class Meta:
 #         verbose_name = "Wedstrijd deeluitslag"
@@ -127,14 +127,14 @@ class Wedstrijd(models.Model):
 
     # acceptatie verkoopvoorwaarden wedstrijdkalender
     verkoopvoorwaarden_status_acceptatie = models.BooleanField(default=False)
-    verkoopvoorwaarden_status_when = models.DateTimeField(auto_now=True)
-    verkoopvoorwaarden_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
+    verkoopvoorwaarden_status_when = models.DateTimeField(auto_now_add=True)
+    verkoopvoorwaarden_status_who = models.CharField(max_length=100, default='',          # [lid_nr] Volledige Naam
                                                      blank=True)     # mag leeg zijn
 
     # acceptatie voorwaarden WA A-status
     voorwaarden_a_status_acceptatie = models.BooleanField(default=False)
-    voorwaarden_a_status_when = models.DateTimeField(auto_now=True)
-    voorwaarden_a_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
+    voorwaarden_a_status_when = models.DateTimeField(auto_now_add=True)
+    voorwaarden_a_status_who = models.CharField(max_length=100, default='',               # [lid_nr] Volledige Naam
                                                 blank=True)     # mag leeg zijn
 
     # wordt deze wedstrijd door de organiserende vereniging buiten deze website om beheerd?

@@ -132,7 +132,7 @@ class Bestelling(models.Model):
 
     # wanneer aangemaakt?
     # hiermee kunnen onbetaalde bestellingen na een tijdje opgeruimd worden
-    aangemaakt = models.DateTimeField(auto_now=True)        # TODO: verander in auto_now_add ?
+    aangemaakt = models.DateTimeField(auto_now_add=True)
 
     # van wie is deze bestelling
     account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
