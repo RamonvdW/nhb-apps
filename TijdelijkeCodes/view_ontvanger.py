@@ -4,11 +4,12 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views import View
-from django.shortcuts import render
+from django.db import transaction
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
+from django.views import View
 from django.utils import timezone
+from django.shortcuts import render
 from TijdelijkeCodes.models import TijdelijkeCode
 from TijdelijkeCodes.operations import beschrijving_activiteit, do_dispatch
 
@@ -68,25 +69,26 @@ class OntvangerView(View):
         """
         url_code = kwargs['code']
 
-        # TODO: voorkom parallelle afhandeling van dezelfde eenmalig code
-        # atomic transaction? select_for_update?
-
         url_or_response = None
         now = timezone.now()
-        for obj in TijdelijkeCode.objects.filter(url_code=url_code):
-            # kijk of deze tijdelijke url al verlopen is
-            if obj.geldig_tot > now:
-                # dispatch naar de juiste applicatie waar deze bij hoort
-                # de callbacks staan in de dispatcher
-                url_or_response = do_dispatch(request, obj)
 
-            # verwijder de gebruikte tijdelijke url
-            try:
-                obj.delete()
-            except TijdelijkeCode.DoesNotExist:                 # pragma: no cover
-                # waarschijnlijk door concurrency - ignore
-                pass
-        # for
+        # voorkom parallelle afhandeling van dezelfde eenmalig code met select_for_update en transaction.atomic
+        codes = TijdelijkeCode.objects.select_for_update().filter(url_code=url_code)
+        with transaction.atomic():
+            for obj in codes:
+                # kijk of deze tijdelijke url al verlopen is
+                if obj.geldig_tot > now:
+                    # dispatch naar de juiste applicatie waar deze bij hoort
+                    # de callbacks staan in de dispatcher
+                    url_or_response = do_dispatch(request, obj)
+
+                # verwijder de gebruikte tijdelijke url
+                try:
+                    obj.delete()
+                except TijdelijkeCode.DoesNotExist:                 # pragma: no cover
+                    # waarschijnlijk door concurrency - ignore
+                    pass
+            # for
 
         if isinstance(url_or_response, HttpResponse):
             response = url_or_response
