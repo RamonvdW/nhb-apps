@@ -14,12 +14,14 @@ from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import MAAND2URL
-from Wedstrijden.models import WedstrijdInschrijving, Kwalificatiescore
+from Wedstrijden.definities import KWALIFICATIE_CHECK_NOG_DOEN
+from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
 import datetime
 
 
 TEMPLATE_WEDSTRIJDEN_KWALIFICATIE_SCORES = 'wedstrijden/inschrijven-kwalificatie-scores.dtl'
 TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE = 'wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl'
+TEMPLATE_WEDSTRIJDEN_CHECK_KWALIFICATIE_SCORES = 'wedstrijden/check-kwalificatie-scores.dtl'
 
 
 class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
@@ -102,7 +104,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         context['eerste_keer'] = len(kwalificatie_scores) == 0
 
         while len(kwalificatie_scores) < 3:
-            score = Kwalificatiescore(inschrijving=inschrijving, datum=datetime.date(jaar, 9, 1))       # 1 september
+            score = Kwalificatiescore(inschrijving=inschrijving, datum=datetime.date(jaar, 12, 31))     # 31 december
             kwalificatie_scores.append(score)
         # while
         for nr, score in enumerate(kwalificatie_scores):
@@ -128,7 +130,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
 
         return context
 
-    def render_toegevoegd_aan_mandje(self, request, inschrijving):
+    @staticmethod
+    def render_toegevoegd_aan_mandje(request, inschrijving):
         # render de pagina "toegevoegd aan mandje"
 
         context = dict()
@@ -179,7 +182,11 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         eind_datum = wedstrijd.datum_begin - datetime.timedelta(days=1 + wedstrijd.datum_begin.weekday())
 
         eerste_keer = False
-        qset = Kwalificatiescore.objects.filter(inschrijving=inschrijving)
+        qset = (Kwalificatiescore
+                .objects
+                .filter(inschrijving=inschrijving)
+                .order_by('datum'))         # zelfde als voor de GET
+
         if qset.count() > 3:
             # uitzondering: te veel scores.
             # verwijder ze allemaal
@@ -190,7 +197,7 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
             eerste_keer = len(kwalificatie_scores) == 0
 
         while len(kwalificatie_scores) < 3:
-            score = Kwalificatiescore(inschrijving=inschrijving)
+            score = Kwalificatiescore(inschrijving=inschrijving, datum=datetime.date(jaar, 12, 31))     # 31 december
             kwalificatie_scores.append(score)
         # while
 
@@ -224,10 +231,15 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                     result = 0
 
             # opslaan
+            if datum != score.datum or score.naam != naam_str or score.waar != waar_str or score.resultaat != result:
+                # gewijzigd, dus check moet opnieuw gedaan worden
+                score.check_status = KWALIFICATIE_CHECK_NOG_DOEN
+
             score.datum = datum
             score.naam = naam_str
             score.waar = waar_str
             score.resultaat = result
+
             score.save()
         # for
 
@@ -238,6 +250,51 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
         url = reverse('Plein:plein')
 
         return HttpResponseRedirect(url)
+
+
+class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de Manager Wedstrijdzaken de opgegeven kwalificatie-scores controleren """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WEDSTRIJDEN_CHECK_KWALIFICATIE_SCORES
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+
+        context = super().get_context_data(**kwargs)
+
+        try:
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])      # afkappen voor de veiligheid
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+        except (ValueError, Wedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        context['wed'] = wedstrijd
+
+        jaar = wedstrijd.datum_begin.year - 1
+
+        # einddatum is de zondag van het weekend voor de wedstrijd
+        # weekday 0 = maandag
+        context['eind_datum'] = wedstrijd.datum_begin - datetime.timedelta(days=1+wedstrijd.datum_begin.weekday())
+        context['begin_datum'] = datetime.date(jaar, 9, 1)      # 1 september
+
+        scores = Kwalificatiescore.objects.filter(inschrijving__wedstrijd=wedstrijd)
+
+
+
+        return context
 
 
 # end of file

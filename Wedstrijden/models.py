@@ -19,7 +19,8 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
                                     INSCHRIJVING_STATUS_CHOICES, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                    INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
+                                    INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE,
+                                    KWALIFICATIE_CHECK_CHOICES, KWALIFICATIE_CHECK_NOG_DOEN)
 from decimal import Decimal
 
 
@@ -313,6 +314,10 @@ class Kwalificatiescore(models.Model):
 
     # behaald resultaat
     resultaat = models.PositiveSmallIntegerField(default=0)
+
+    # controle status
+    check_status = models.CharField(max_length=1, default=KWALIFICATIE_CHECK_NOG_DOEN,
+                                    choices=KWALIFICATIE_CHECK_CHOICES)
 
     def __str__(self):
         return "[%s] %s: %s (%s)" % (self.datum, self.resultaat, self.naam, self.waar)

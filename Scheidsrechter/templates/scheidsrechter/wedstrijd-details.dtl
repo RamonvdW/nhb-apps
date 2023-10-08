@@ -130,10 +130,10 @@
         </div>
     </div>
 
-    <!-- blauwe balk met dialoog venster -->
+    <!-- blauwe balk met informatie tabel -->
     <div class="row-sv-blauw">
-        <div class="col s12">
-            <table class="white">        <!--style="table-layout:fixed"-->
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="white">
 
                 <tr>
                     <td colspan="2" class="center sv-blauw-text">
