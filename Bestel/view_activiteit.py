@@ -18,6 +18,7 @@ from Functie.rol import rol_get_huidige
 import datetime
 
 TEMPLATE_BESTEL_ACTIVITEIT = 'bestel/activiteit.dtl'
+TEMPLATE_BESTEL_ACTIVITEIT_HIST = 'bestel/activiteit-hist.dtl'
 
 
 class BestelActiviteitView(UserPassesTestMixin, TemplateView):
@@ -32,10 +33,13 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = None
+        self.is_staff = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
+        if self.rol_nu == Rollen.ROL_BB:
+            self.is_staff = self.request.user.is_staff
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWW)
 
     def get_context_data(self, **kwargs):
@@ -105,7 +109,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                             Q(producten__webwinkel_keuze__product__omslag_titel__icontains=zoekterm))
                                     .order_by('-bestel_nr'))            # nieuwste eerst
         else:
-            # toon de 50 nieuwste bestellingen
+            # toon de nieuwste bestellingen
             context['nieuwste'] = True
             bestellingen = (Bestelling
                             .objects
@@ -202,6 +206,9 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
         # for
 
+        if self.is_staff:
+            context['url_activiteit_hist'] = reverse('Bestel:activiteit-hist')
+
         if self.rol_nu == Rollen.ROL_MWW:
             context['kruimels'] = (
                 (reverse('Webwinkel:manager'), 'Webwinkel'),
@@ -211,6 +218,71 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (None, 'Bestellingen en Betalingen'),
             )
+
+        return context
+
+
+class BestelActiviteitHistView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view voor de activiteiten van de gebruikers """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_BESTEL_ACTIVITEIT_HIST
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB and self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        bestellingen = (Bestelling
+                        .objects
+                        .select_related('ontvanger__vereniging'))
+
+        aantal = dict()     # [(jaar, maand)] = integer     (aantal verkopen)
+        omzet = dict()      # [(jaar, maand)] = Decimal
+        vers = dict()       # [(jaar, maand)] = [ver_nr, ..]
+        for bestelling in bestellingen:
+            tup = (bestelling.aangemaakt.year, bestelling.aangemaakt.month)
+            ver_nr = bestelling.ontvanger.vereniging.ver_nr
+
+            if bestelling.totaal_euro > 0:
+                try:
+                    aantal[tup] += 1
+                    omzet[tup] += bestelling.totaal_euro
+                    if ver_nr not in vers[tup]:
+                        vers[tup].append(ver_nr)
+                except KeyError:
+                    aantal[tup] = 1
+                    omzet[tup] = bestelling.totaal_euro
+                    vers[tup] = [ver_nr]
+        # for
+
+        lijst = [(datetime.date(tup[0], tup[1], 1), aantal[tup], omzet[tup], len(vers[tup])) for tup in aantal.keys()]
+        lijst.sort(reverse=True)        # nieuwste bovenaan
+        context['lijst'] = lijst
+
+        context['totaal_aantal'] = sum(aantal.values())
+        context['totaal_omzet'] = sum(omzet.values())
+
+        uniek_vers = list()
+        for ver_nrs in vers.values():
+            for ver_nr in ver_nrs:
+                if ver_nr not in uniek_vers:
+                    uniek_vers.append(ver_nr)
+            # for
+        # for
+        context['totaal_vers'] = len(uniek_vers)
+
+        context['kruimels'] = (
+            (reverse('Bestel:activiteit'), 'Bestellingen en Betalingen'),
+            (None, 'Meer geschiedenis')
+        )
 
         return context
 
