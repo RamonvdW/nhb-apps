@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils import timezone
 from Account.models import Account
 from Bestel.definities import (BESTELLING_STATUS_CHOICES, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS2STR,
                                BESTEL_MUTATIE_TO_STR, BESTEL_TRANSPORT_NVT, BESTEL_TRANSPORT_OPTIES)
@@ -193,7 +194,7 @@ class Bestelling(models.Model):
         """ beschrijving voor de admin interface """
         msg = "%s" % self.bestel_nr
         msg += " %s" % BESTELLING_STATUS2STR[self.status]
-        msg += " [%s]" % self.aangemaakt.strftime('%Y-%m-%d %H:%M:%S')
+        msg += " [%s]" % timezone.localtime(self.aangemaakt).strftime('%Y-%m-%d %H:%M:%S')
         msg += " koper=%s" % self.account.username
 
         bedrag = " € %s" % self.totaal_euro

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  Copyright (c) 2020-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,7 +41,7 @@ class MailQueue(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        msg = "[%s] to:%s subj:'%s'" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
+        msg = "[%s] to:%s subj:'%s'" % (timezone.localtime(self.toegevoegd_op).strftime('%Y-%m-%d %H:%M'),
                                         self.mail_to,
                                         self.mail_subj)
         if self.is_verstuurd:
