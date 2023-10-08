@@ -250,7 +250,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('registreer/registreer-gast.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Fout: voer een valide e-mailadres in')
+        self.assertContains(resp, 'Fout: de gegevens worden niet geaccepteerd')
 
     def test_bad_create(self):
         # trigger een AccountCreateError met een slechte e-mail

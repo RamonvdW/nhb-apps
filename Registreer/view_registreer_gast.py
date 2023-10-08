@@ -25,7 +25,7 @@ from Registreer.definities import (REGISTRATIE_FASE_EMAIL, REGISTRATIE_FASE_PASS
                                    REGISTRATIE_FASE_LAND, REGISTRATIE_FASE_AGE, REGISTRATIE_FASE_TEL,
                                    REGISTRATIE_FASE_WA_ID, REGISTRATIE_FASE_GENDER,
                                    REGISTRATIE_FASE_CONFIRM, REGISTRATIE_FASE_COMPLEET)
-from Registreer.forms import RegistreerGastForm
+from Registreer.forms import RegistreerGastForm, scrub_input_name
 from Registreer.models import GastRegistratie, GastRegistratieRateTracker
 from Registreer.operations import registratie_gast_volgende_lid_nr, registratie_gast_is_open
 from Sporter.models import Sporter
@@ -515,6 +515,9 @@ class RegistreerGastVolgendeVraagView(View):
             club = request.POST.get('club', '')[:100]       # afkappen voor extra veiligheid
             plaats = request.POST.get('plaats', '')[:50]    # afkappen voor extra veiligheid
 
+            club = scrub_input_name(club)
+            plaats = scrub_input_name(plaats)
+
             # naam: ARC, NHB, OGIO
             # plaats: Epe, Ede, Ee, As
             is_valid = len(club) >= 3 and len(plaats) >= 2
@@ -540,6 +543,9 @@ class RegistreerGastVolgendeVraagView(View):
             land = request.POST.get('land', '')[:100]      # afkappen voor extra veiligheid
             bond = request.POST.get('bond', '')[:100]      # afkappen voor extra veiligheid
             lid_nr = request.POST.get('lid_nr', '')[:25]   # afkappen voor extra veiligheid
+
+            land = scrub_input_name(land)
+            bond = scrub_input_name(bond)
 
             # land: Chad, Cuba, Iran, Fiji
             # bond: Afkortingen, zoals RBA en DSB

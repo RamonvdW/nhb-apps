@@ -6,8 +6,6 @@
 
 from django.conf import settings
 from django.shortcuts import reverse
-from django.utils.safestring import mark_safe
-from django.templatetags.static import static
 from Account.models import get_account
 from Account.operations.otp import otp_is_controle_gelukt
 from Functie.definities import Rollen

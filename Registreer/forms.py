@@ -5,9 +5,22 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import forms
-
 from Account.operations.wachtwoord import account_test_wachtwoord_sterkte
 from Mailer.operations import mailer_email_is_valide
+
+
+def scrub_input_name(name):
+    """ Remove garbage from form parameter that is supposed to contain a name.
+        We allow a few special characters (UTF-8) but input that looks like HTML is not allowed.
+
+        Used for: first name, last name, club name, city name, federation name
+    """
+
+    # remove characters typically not found in name
+    for char in '<>#/()*&^%$@!=+_{}[]:;"\\|<>.?~`\'':        # TODO: add digits?
+        name = name.replace(char, '')
+    # for
+    return name
 
 
 class RegistreerNormaalForm(forms.Form):
@@ -71,21 +84,24 @@ class RegistreerGastForm(forms.Form):
                         label='E-mail adres',
                         required=True)
 
+    def clean_voornaam(self):
+        return scrub_input_name(self.cleaned_data['voornaam'])
+
+    def clean_achternaam(self):
+        return scrub_input_name(self.cleaned_data['achternaam'])
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        # standaard EmailValidator checkt al heel wat, maar laat bijvoorbeeld x@localhost door
+        if not mailer_email_is_valide(email):
+            self.add_error('email', 'voer een geldig e-mailadres in')       # wordt nooit getoond
+        return email
+
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
-        if valid:
-            # alle velden zijn 'required' en dus niet leeg
-
-            # voornaam = self.cleaned_data.get('voornaam')
-            # achternaam = self.cleaned_data.get('achternaam')
-            email = self.cleaned_data.get('email')
-
-            if not mailer_email_is_valide(email):
-                self.add_error(None, 'voer een valide e-mailadres in')
-                valid = False
-        else:
+        if not valid:
+            # None, want we tonen in de template alleen niet-field-specific errors
             self.add_error(None, 'de gegevens worden niet geaccepteerd')
-
         return valid
 
 
