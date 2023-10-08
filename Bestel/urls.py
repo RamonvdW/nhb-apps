@@ -60,9 +60,9 @@ urlpatterns = [
          view_activiteit.BestelActiviteitView.as_view(),
          name='activiteit'),
 
-    path('activiteit/hist/',
-         view_activiteit.BestelActiviteitHistView.as_view(),
-         name='activiteit-hist'),
+    path('omzet/',
+         view_activiteit.BestelOmzetView.as_view(),
+         name='omzet'),
 ]
 
 # end of file

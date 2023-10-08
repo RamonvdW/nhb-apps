@@ -18,7 +18,7 @@ from Functie.rol import rol_get_huidige
 import datetime
 
 TEMPLATE_BESTEL_ACTIVITEIT = 'bestel/activiteit.dtl'
-TEMPLATE_BESTEL_ACTIVITEIT_HIST = 'bestel/activiteit-hist.dtl'
+TEMPLATE_BESTEL_OMZET = 'bestel/omzet.dtl'
 
 
 class BestelActiviteitView(UserPassesTestMixin, TemplateView):
@@ -191,10 +191,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             if aantal_wedstrijd:
                 beschrijvingen.append('%sx %s' % (aantal_wedstrijd, laatste_wedstrijd_beschrijving))
 
-            if len(beschrijvingen):
-                bestelling.beschrijving_kort = " + ".join(beschrijvingen)
-            else:
-                bestelling.beschrijving_kort = '?'
+            bestelling.beschrijving_kort = " + ".join(beschrijvingen) if len(beschrijvingen) else "?"
 
             bestelling.trans_list = list(bestelling
                                          .transacties
@@ -207,7 +204,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         if self.is_staff:
-            context['url_activiteit_hist'] = reverse('Bestel:activiteit-hist')
+            context['url_omzet'] = reverse('Bestel:omzet')
 
         if self.rol_nu == Rollen.ROL_MWW:
             context['kruimels'] = (
@@ -222,12 +219,12 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class BestelActiviteitHistView(UserPassesTestMixin, TemplateView):
+class BestelOmzetView(UserPassesTestMixin, TemplateView):
 
-    """ Django class-based view voor de activiteiten van de gebruikers """
+    """ Django class-based view voor overzicht omzet over de afgelopen maanden """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_BESTEL_ACTIVITEIT_HIST
+    template_name = TEMPLATE_BESTEL_OMZET
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -281,7 +278,7 @@ class BestelActiviteitHistView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Bestel:activiteit'), 'Bestellingen en Betalingen'),
-            (None, 'Meer geschiedenis')
+            (None, 'Omzet')
         )
 
         return context
