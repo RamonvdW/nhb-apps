@@ -121,6 +121,7 @@ urlpatterns = [
          view_kwalificatie_scores.CheckKwalificatieScoresWedstrijdView.as_view(),
          name='check-kwalificatie-scores-wedstrijd'),
 
+
     # gedeeld
     path('<wedstrijd_pk>/wijzig/',
          view_wijzig_wedstrijd.WijzigWedstrijdView.as_view(),
