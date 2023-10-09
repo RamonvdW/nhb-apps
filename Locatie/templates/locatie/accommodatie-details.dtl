@@ -15,15 +15,15 @@
             // het formulier is aangepast en moet opgeslagen worden
 
             // disable alle knoppen waarmee de invoer verloren zou gaan
-            const els = document.getElementsByClassName("wijzig_knop")
+            const els = document.getElementsByClassName("wijzig_knop");
             Array.prototype.forEach.call(els, function (el) {
-                el.classList.add('disabled')
+                el.classList.add('disabled');
             })
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("submit_knop2")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("submit_knop2");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
         }
     </script>
 
