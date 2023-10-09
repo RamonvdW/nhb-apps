@@ -1,0 +1,142 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Check kwalificatie-scores{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Check kwalificatiescores</h3>
+            <p>Voor de wedstrijd <b>{{ wed.titel }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Datum</th>
+                    <td>{{ ref_score.datum }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijd</th>
+                    <td>{{ ref_score.naam }}</td>
+                </tr>
+                <tr>
+                    <th>Waar</th>
+                    <td>{{ ref_score.waar}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function wijzig(groep, keuze) {
+            const el1 = document.getElementById(groep + '-ja');
+            const el2 = document.getElementById(groep + '-mss');
+            const el3 = document.getElementById(groep + '-nee');
+            const el5 = document.getElementById(groep)
+
+            el1.classList.remove('keuze-ja');
+            el2.classList.remove('keuze-mss');
+            el3.classList.remove('keuze-nee');
+
+            if (keuze < 2) {
+                el1.classList.add('keuze-ja');
+            } else if (keuze > 2) {
+                el3.classList.add('keuze-nee');
+            } else {
+                el2.classList.add('keuze-mss');
+            }
+
+            // voer een POST uit om de keuze door te geven
+            const obj = { keuze: keuze };
+            const data = JSON.stringify(obj);
+            const url = el5.dataset.url;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", url, false);     // false = sync
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhr.send(data);
+        }
+
+        // stel all keuzeknoppen in op de juiste kleur
+        const init = [
+            {% for score in scores %}
+                ["{{ score.id }}", {{ score.keuze }}],
+            {% endfor %}
+        ];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            init.forEach(function(tup) {
+                const groep = tup[0];
+                const el1 = document.getElementById(groep + '-ja');
+                const el2 = document.getElementById(groep + '-mss');
+                const el3 = document.getElementById(groep + '-nee');
+
+                const keuze = tup[1];
+                if (keuze < 2) {
+                    el1.classList.add('keuze-ja');
+                } else if (keuze > 2) {
+                    el3.classList.add('keuze-nee');
+                } else {
+                    el2.classList.add('keuze-mss');
+                }
+            });
+        })
+    </script>
+
+
+    <div class="row-sv-blauw">
+        <div class="col s12">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div class="form-padding">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sporter</th>
+                                <th>Boogtype</th>
+                                <th class="center">Resultaat</th>
+                                <th class="center">Controle status</th>
+                            </tr>
+                        </thead>
+
+                        {% for score in scores %}
+                            <tr>
+                                <td>{{ score.sporter_str }}</td>
+                                <td>{{ score.boog_str }}</td>
+                                <td class="center">{{ score.resultaat }}</td>
+                                <td class="center" id="{{ score.id }}" data-url="{{ score.url_status }}">
+                                    <button type="button" class="btn-sv-keuze" id="{{ score.id }}-ja" onclick="wijzig('{{ score.id }}', 1)">
+                                        <i class="material-icons-round notranslate">done</i>
+                                    </button>
+                                    <button type="button" class="btn-sv-keuze" id="{{ score.id }}-mss" onclick="wijzig('{{ score.id }}', 2)">
+                                        <i class="material-icons-round notranslate">question_mark</i>
+                                    </button>
+                                    <button type="button" class="btn-sv-keuze" id="{{ score.id }}-nee" onclick="wijzig('{{ score.id }}', 3)">
+                                        <i class="material-icons-round notranslate">close</i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-check-kwalificatie-scores-wedstrijd" %}
+
+{% endblock %}

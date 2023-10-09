@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, UnreadablePostError, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -14,14 +15,18 @@ from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige
 from Kalender.view_maand import MAAND2URL
-from Wedstrijden.definities import KWALIFICATIE_CHECK_NOG_DOEN
+from Wedstrijden.definities import (KWALIFICATIE_CHECK_GOED, KWALIFICATIE_CHECK_NOG_DOEN, KWALIFICATIE_CHECK_AFGEKEURD,
+                                    KWALIFICATIE_CHECK2STR, WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD)
 from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
+from collections import OrderedDict
+from types import SimpleNamespace
 import datetime
-
+import json
 
 TEMPLATE_WEDSTRIJDEN_KWALIFICATIE_SCORES = 'wedstrijden/inschrijven-kwalificatie-scores.dtl'
 TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE = 'wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl'
 TEMPLATE_WEDSTRIJDEN_CHECK_KWALIFICATIE_SCORES = 'wedstrijden/check-kwalificatie-scores.dtl'
+TEMPLATE_WEDSTRIJDEN_CHECK_KWALIFICATIE_WEDSTRIJD = 'wedstrijden/check-kwalificatie-scores-wedstrijd.dtl'
 
 
 class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
@@ -203,6 +208,13 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
 
         # print('post:%s' % repr(request.POST))
 
+        now = timezone.now()
+        now = timezone.localtime(now)
+        now_str = now.strftime("%Y-%m-%d %H:%M")
+
+        account = get_account(self.request)
+        door_str = "sporter [%s] %s" % (account.username, account.volledige_naam())
+
         for nr, score in enumerate(kwalificatie_scores):
             name_str = 'score%s' % (nr + 1)
 
@@ -231,14 +243,32 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                     result = 0
 
             # opslaan
-            if datum != score.datum or score.naam != naam_str or score.waar != waar_str or score.resultaat != result:
-                # gewijzigd, dus check moet opnieuw gedaan worden
-                score.check_status = KWALIFICATIE_CHECK_NOG_DOEN
+            changes = list()
+            if datum != score.datum:
+                changes.append("datum: %s -> %s" % (score.datum, datum))
+                score.datum = datum
 
-            score.datum = datum
-            score.naam = naam_str
-            score.waar = waar_str
-            score.resultaat = result
+            if score.naam != naam_str:
+                changes.append("naam: %s -> %s" % (score.naam, naam_str))
+                score.naam = naam_str
+
+            if score.waar != waar_str:
+                changes.append("waar: %s -> %s" % (score.waar, waar_str))
+                score.waar = waar_str
+
+            if score.resultaat != result:
+                changes.append("resultaat: %s -> %s" % (score.resultaat, result))
+                score.resultaat = result
+
+            if len(changes):
+                # schrijf in logboek
+                score.log += '[%s] Wijzigingen door %s: %s\n' % (now_str, door_str, "; ".join(changes))
+
+                # gewijzigd, dus check moet opnieuw gedaan worden
+                if score.check_status != KWALIFICATIE_CHECK_NOG_DOEN:
+                    score.log += "[%s] Check status automatisch terug gezet van %s naar 'Nog doen'\n" % (
+                                    now_str, repr(KWALIFICATIE_CHECK2STR[score.check_status]))
+                    score.check_status = KWALIFICATIE_CHECK_NOG_DOEN
 
             score.save()
         # for
@@ -290,11 +320,176 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
         context['eind_datum'] = wedstrijd.datum_begin - datetime.timedelta(days=1+wedstrijd.datum_begin.weekday())
         context['begin_datum'] = datetime.date(jaar, 9, 1)      # 1 september
 
-        scores = Kwalificatiescore.objects.filter(inschrijving__wedstrijd=wedstrijd)
+        wedstrijden = OrderedDict()        # [(datum, plaats)] = [Kwalificatiescore(), ..]
+        for score in (Kwalificatiescore
+                      .objects
+                      .filter(inschrijving__wedstrijd=wedstrijd)
+                      .exclude(resultaat=0)
+                      .select_related('inschrijving__sporterboog__boogtype',
+                                      'inschrijving__sporterboog__sporter')
+                      .order_by('datum',            # oudste eerst
+                                '-resultaat')):     # hoogste eerst
+            sporterboog = score.inschrijving.sporterboog
+            score.sporter_str = sporterboog.sporter.lid_nr_en_volledige_naam()
+            score.boog_str = sporterboog.boogtype.beschrijving
 
+            tup = (score.datum, score.waar)
 
+            try:
+                wedstrijden[tup].append(score)
+            except KeyError:
+                wedstrijden[tup] = [score]
+        # for
+
+        context['wedstrijden'] = lijst = list()
+
+        for tup, scores in wedstrijden.items():
+            datum, waar = tup
+
+            url_controle = reverse('Wedstrijden:check-kwalificatie-scores-wedstrijd',
+                                   kwargs={'score_pk': scores[0].pk})
+
+            obj = SimpleNamespace(
+                            datum=datum,
+                            waar=waar,
+                            scores=scores,
+                            url_controle=url_controle)
+            lijst.append(obj)
+        # for
+
+        context['kruimels'] = (
+            (reverse('Wedstrijden:manager-status',
+                     kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (None, 'Check kwalificatiescores'),
+        )
 
         return context
+
+
+class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de Manager Wedstrijdzaken de opgegeven kwalificatie-scores controleren """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WEDSTRIJDEN_CHECK_KWALIFICATIE_WEDSTRIJD
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_MWZ, Rollen.ROL_BB)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+
+        context = super().get_context_data(**kwargs)
+
+        try:
+            score_pk = int(str(kwargs['score_pk'])[:6])      # afkappen voor de veiligheid
+            ref_score = Kwalificatiescore.objects.select_related('inschrijving__wedstrijd').get(pk=score_pk)
+        except (ValueError, Kwalificatiescore.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        context['ref_score'] = ref_score
+        wedstrijd = ref_score.inschrijving.wedstrijd
+
+        scores = (Kwalificatiescore
+                  .objects
+                  .filter(inschrijving__wedstrijd=wedstrijd,
+                          datum=ref_score.datum,
+                          waar=ref_score.waar)
+                  .exclude(resultaat=0)
+                  .select_related('inschrijving__sporterboog__boogtype',
+                                  'inschrijving__sporterboog__sporter')
+                  .order_by('inschrijving__sporterboog__boogtype__volgorde',
+                            '-resultaat'))  # hoogste eerst
+
+        check_status2keuze = {
+            KWALIFICATIE_CHECK_GOED: 1,
+            KWALIFICATIE_CHECK_NOG_DOEN: 2,
+            KWALIFICATIE_CHECK_AFGEKEURD: 3,
+        }
+
+        for score in scores:
+            sporterboog = score.inschrijving.sporterboog
+            score.sporter_str = sporterboog.sporter.lid_nr_en_volledige_naam()
+            score.boog_str = sporterboog.boogtype.beschrijving
+            score.keuze = check_status2keuze[score.check_status]
+            score.url_status = reverse('Wedstrijden:check-kwalificatie-scores-wedstrijd',
+                                       kwargs={'score_pk': score.pk})
+            score.id = 'score%s' % score.pk
+        # for
+
+        context['scores'] = scores
+
+        context['kruimels'] = (
+            (reverse('Wedstrijden:manager-status',
+                     kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:wedstrijd-details',
+                     kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (reverse('Wedstrijden:check-kwalificatie-scores',
+                     kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Check kwalificatiescores'),
+        )
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, UnreadablePostError):
+            # garbage in
+            raise Http404('Geen valide verzoek')
+
+        try:
+            keuze = int(str(data['keuze'])[:6])
+        except (KeyError, ValueError):
+            # garbage in
+            raise Http404('Geen valide verzoek')
+
+        if keuze == 1:
+            check_status = KWALIFICATIE_CHECK_GOED
+        elif keuze == 2:
+            check_status = KWALIFICATIE_CHECK_NOG_DOEN
+        elif keuze == 3:
+            check_status = KWALIFICATIE_CHECK_AFGEKEURD
+        else:
+            raise Http404('Geen valide verzoek')
+
+        try:
+            score_pk = int(str(kwargs['score_pk'])[:6])      # afkappen voor de veiligheid
+            score = Kwalificatiescore.objects.select_related('inschrijving__wedstrijd').get(pk=score_pk)
+        except (ValueError, Kwalificatiescore.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        if score.check_status != check_status:
+
+            now = timezone.now()
+            now = timezone.localtime(now)
+            now_str = now.strftime("%Y-%m-%d %H:%M")
+
+            account = get_account(self.request)
+            door_str = "[%s] %s" % (account.username, account.volledige_naam())
+
+            if check_status == KWALIFICATIE_CHECK_AFGEKEURD:
+                score.log += "[%s] Kwalificatie score %s afgekeurd door %s (voor %s, %s)\n" % (
+                                now_str, score.resulaat, door_str, score.naam, score.waar)
+
+            if check_status == KWALIFICATIE_CHECK_GOED:
+                score.log += "[%s] Kwalificatie score %s goedgekeurd door %s (voor %s, %s)\n" % (
+                                now_str, score.resulaat, door_str, score.naam, score.waar)
+
+            score.check_status = check_status
+            score.save(update_fields=['check_status', 'log'])
+
+        out = dict()
+        return JsonResponse(out)
 
 
 # end of file

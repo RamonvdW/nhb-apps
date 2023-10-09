@@ -18,6 +18,61 @@
         </div>
     </div>
 
+    <!-- blauwe balk met informatie in tabel-vorm:  label - info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Waar</th>
+                        <th>Sporter</th>
+                        <th class="hide-on-small-only">Boogtype</th>
+                        <th class="center">Resultaat</th>
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for wed in wedstrijden %}
+                    <tr>
+                        <td>{{ wed.datum }}</td>
+                        <td>{{ wed.waar }}</td>
+                        <td>
+                            {% for score in wed.scores %}
+                                <span>{{ score.sporter_str }}</span><br>
+                            {% endfor %}
+                        </td>
+                        <td class="hide-on-small-only">
+                            {% for score in wed.scores %}
+                                <span>{{ score.boog_str }}</span><br>
+                            {% endfor %}
+                        </td>
+                        <td class="center">
+                            {% for score in wed.scores %}
+                                <span>{{ score.resultaat }}</span><br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a class="btn-sv-rood" href="{{ wed.url_controle }}">Controle</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Regels</h4>
+            <p>Zoals uitgelegd aan de sporters bij opgaaf scores</p>
+        </div>
+    </div>
+
+
     <!-- blauwe balk met informatie -->
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
@@ -29,89 +84,6 @@
         </div>
     </div>
 
-    <!-- blauwe balk met dialoog venster -->
-    <div class="row-sv-blauw">
-        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-
-            <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
-                <div class="form-padding">
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
-                        {% csrf_token %}
-
-                        <table>
-                            {% for score in kwalificatie_scores %}
-                                <tr>
-                                    <td colspan="2"><h6 class="sv-blauw-text center">Jouw resultaat van een 60-pijlen Indoor A-status wedstrijd</h6></td>
-                                </tr>
-
-                                <tr>
-                                    <th>Datum</th>
-                                    <td>
-                                        <input type="hidden" id="{{ score.datum_id }}b" name="{{ score.name_str }}_datum">
-                                        <input type="text" class="nl_datepicker" id="{{ score.datum_id }}" onchange="converteer_datum('{{ score.datum_id }}', '{{ score.datum_id }}b')">
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <th>Beschrijving</th>
-                                    <td>
-                                        <input type="text" name="{{ score.name_str }}_naam" value="{{ score.naam }}" maxlength="50" placeholder="Hoe heet de wedstrijd?">
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <th>Waar</th>
-                                    <td>
-                                        <input type="text" name="{{ score.name_str }}_waar" value="{{ score.waar }}" maxlength="50" placeholder="Plaats (en eventueel land)">
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <th>Resultaat (totaal 60 pijlen)</th>
-                                    <td>
-                                        <input type="number" name="{{ score.name_str }}_result" value="{{ score.resultaat }}" min="0" max="600">
-                                    </td>
-                                </tr>
-                            {% endfor %}
-
-                        </table>
-
-
-                        <div class="center" style="margin-top:30px">
-                            <!-- button -->
-                            <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
-    <!-- initialisatie van de datum pickers -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function()
-        {
-            const minDate = new Date("{{ begin_datum|date:'Y-m-d' }}");
-            const maxDate = new Date("{{ eind_datum|date:'Y-m-d' }}");
-            const jarenRange = [{{ begin_jaar }}, {{ eind_jaar }}];
-            let el = null;
-
-            {% for score in kwalificatie_scores %}
-                el = document.querySelector("#{{ score.datum_id }}");
-                M.Datepicker.init(el, { defaultDate: new Date("{{ score.datum|date:'Y-m-d' }}"),
-                                        setDefaultDate: true,
-                                        minDate: minDate, maxDate: maxDate,
-                                        yearRange: jarenRange});
-            {% endfor %}
-        })
-    </script>
-
-
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-kwalificatie-scores" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-check-kwalificatie-scores" %}
 
 {% endblock %}

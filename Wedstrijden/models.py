@@ -319,6 +319,8 @@ class Kwalificatiescore(models.Model):
     check_status = models.CharField(max_length=1, default=KWALIFICATIE_CHECK_NOG_DOEN,
                                     choices=KWALIFICATIE_CHECK_CHOICES)
 
+    log = models.TextField(default='')
+
     def __str__(self):
         return "[%s] %s: %s (%s)" % (self.datum, self.resultaat, self.naam, self.waar)
 
