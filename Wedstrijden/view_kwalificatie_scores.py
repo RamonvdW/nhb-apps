@@ -373,7 +373,6 @@ class CheckKwalificatieScoresView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Wedstrijden:manager-status',
                      kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (None, 'Check kwalificatiescores'),
         )
 
@@ -444,10 +443,9 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Wedstrijden:manager-status',
                      kwargs={'status': WEDSTRIJD_STATUS_URL_WACHT_OP_GEACCEPTEERD}), 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:wedstrijd-details',
-                     kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (reverse('Wedstrijden:check-kwalificatie-scores',
                      kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Check kwalificatiescores'),
+            (None, 'Controleer wedstrijd')
         )
 
         return context
