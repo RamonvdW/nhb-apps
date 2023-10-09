@@ -54,62 +54,62 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3" style="margin-top:30px">
                 <div class="form-padding">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Datum</th>
-                                    <th>Wedstrijd</th>
-                                    <th class="center">
-                                        <span class="hide-on-med-and-down">Scheidsrechters</span>
-                                        <span class="hide-on-large-and-up">#SR</span>
-                                    </th>
-                                    <th class="center">Maak je keuze</th>
-                                    <th class="center">Jouw beschikbaarheid</th>
-                                </tr>
-                            </thead>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Wedstrijd</th>
+                                <th class="center">
+                                    <span class="hide-on-med-and-down">Scheidsrechters</span>
+                                    <span class="hide-on-large-and-up">#SR</span>
+                                </th>
+                                <th class="center">Maak je keuze</th>
+                                <th class="center">Jouw beschikbaarheid</th>
+                            </tr>
+                        </thead>
 
-                            {% for dag in dagen %}
-                                <tr>
-                                    <td>{{ dag.datum }}</td>
+                        {% for dag in dagen %}
+                            <tr>
+                                <td>{{ dag.datum }}</td>
 
-                                    <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
+                                <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
 
-                                    <td class="center">{{ dag.wedstrijd.aantal_scheids }}</td>
+                                <td class="center">{{ dag.wedstrijd.aantal_scheids }}</td>
 
-                                    <td class="center">
-                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
-                                            <i class="material-icons-round notranslate">done</i>
-                                        </button>
-                                        <br class="hide-on-large-and-up">
-                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
-                                            <i class="material-icons-round notranslate">question_mark</i>
-                                        </button>
-                                        <br class="hide-on-large-and-up">
-                                        <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
-                                            <i class="material-icons-round notranslate">close</i>
-                                        </button>
-                                    </td>
+                                <td class="center">
+                                    <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-ja" onclick="wijzig('{{ dag.id }}', 1)">
+                                        <i class="material-icons-round notranslate">done</i>
+                                    </button>
+                                    <br class="hide-on-large-and-up">
+                                    <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-mss" onclick="wijzig('{{ dag.id }}', 2)">
+                                        <i class="material-icons-round notranslate">question_mark</i>
+                                    </button>
+                                    <br class="hide-on-large-and-up">
+                                    <button type="button" class="btn-sv-keuze" id="{{ dag.id }}-nee" onclick="wijzig('{{ dag.id }}', 3)">
+                                        <i class="material-icons-round notranslate">close</i>
+                                    </button>
+                                </td>
 
-                                    <td class="center" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
-                                </tr>
+                                <td class="center" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
+                            </tr>
 
-                            {% endfor %}
+                        {% endfor %}
 
-                        </table>
+                    </table>
 
-                        <!-- het is belangrijk dat de keuze knoppen niet in het formulier zitten
-                             anders krijgen ze extra (ongewenst) focus-gedrag, zie material _forms.scss button:focus -->
-                        <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
-                            {% csrf_token %}
-                            {% for dag in dagen %}
-                                <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">
-                            {% endfor %}
+                    <!-- het is belangrijk dat de keuze knoppen niet in het formulier zitten
+                         anders krijgen ze extra (ongewenst) focus-gedrag, zie material _forms.scss button:focus -->
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                        {% csrf_token %}
+                        {% for dag in dagen %}
+                            <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">
+                        {% endfor %}
 
-                            <div class="center" style="margin-top:30px">
-                                <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
-                                    <i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                            </div>
-                        </form>
+                        <div class="center" style="margin-top:30px">
+                            <button class="btn-sv-rood" id="submit_knop" type="submit" disabled>
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
