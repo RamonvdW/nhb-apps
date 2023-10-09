@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.models import Regiocompetitie
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie, rol_get_beschrijving
@@ -157,6 +158,8 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             except KeyError:
                 new_cluster = None
 
+            door_account = get_account(self.request)
+
             try:
                 huidige = ver.clusters.get(gebruik=gebruik)
             except Cluster.DoesNotExist:
@@ -165,7 +168,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 if new_cluster:
                     ver.clusters.add(new_cluster)
                     activiteit = "Vereniging %s toegevoegd aan cluster %s" % (ver, new_cluster)
-                    schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
+                    schrijf_in_logboek(door_account, 'Clusters', activiteit)
                 return
 
             # vereniging zit al in een cluster voor dit gebruik
@@ -173,13 +176,13 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 # nieuwe keuze is anders, dus verwijder de vereniging uit dit cluster
                 ver.clusters.remove(huidige)
                 activiteit = "Vereniging %s verwijderd uit cluster %s" % (ver, huidige)
-                schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
+                schrijf_in_logboek(door_account, 'Clusters', activiteit)
 
                 # stop de vereniging in het gevraagde cluster (if any)
                 if new_cluster:
                     ver.clusters.add(new_cluster)
                     activiteit = "Vereniging %s toegevoegd aan cluster %s" % (ver, new_cluster)
-                    schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
+                    schrijf_in_logboek(door_account, 'Clusters', activiteit)
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de RCL op de 'opslaan' knop drukt

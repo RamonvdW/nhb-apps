@@ -162,7 +162,8 @@ def otp_loskoppelen(request, account):
     my_logger.info('%s 2FA losgekoppeld voor account %s' % (from_ip, account.username))
 
     # schrijf in het logboek
-    schrijf_in_logboek(account=request.user,
+    door_account = get_account(request)
+    schrijf_in_logboek(account=door_account,
                        gebruikte_functie="OTP loskoppelen",
                        activiteit='OTP is losgekoppeld voor gebruiker %s' % account.username)
     return True

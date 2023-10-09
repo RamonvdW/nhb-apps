@@ -8,6 +8,7 @@ from django.http import Http404
 from django.shortcuts import redirect, reverse
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Competitie.menu import get_url_voor_competitie
 from Functie.definities import Rollen
 from Functie.models import Functie
@@ -39,11 +40,13 @@ class ActiveerRolView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         from_ip = get_safe_from_ip(self.request)
 
+        account = get_account(request)
+
         if 'rol' in kwargs:
             # activeer rol
             my_logger.info('%s ROL account %s wissel naar rol %s' % (
                                 from_ip,
-                                self.request.user.username,
+                                account.username,
                                 repr(kwargs['rol'])))
 
             rol_activeer_rol(request, kwargs['rol'])
@@ -59,7 +62,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
             my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
                             from_ip,
-                            self.request.user.username,
+                            account.username,
                             functie.pk,
                             functie))
 
@@ -78,14 +81,14 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
             my_logger.info('%s ROL account %s wissel naar functie %s (%s)' % (
                             from_ip,
-                            self.request.user.username,
+                            account.username,
                             functie.pk,
                             functie))
 
             rol_activeer_functie(request, functie)
 
         rol_beschrijving = rol_get_beschrijving(request)
-        my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
+        my_logger.info('%s ROL account %s is nu %s' % (from_ip, account.username, rol_beschrijving))
 
         # update het aantal open taken gemeld in het menu
         # want dit is afhankelijk van de huidige rol

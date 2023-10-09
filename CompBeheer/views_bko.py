@@ -478,10 +478,10 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
         return context
 
-    def doorzetten(self, account, comp):
+    def doorzetten(self, door_account, comp):
         # vraag de achtergrond taak alle stappen van het afsluiten uit te voeren
         # dit voorkomt ook race conditions / dubbel uitvoeren
-        door_str = "BKO %s" % account.volledige_naam()
+        door_str = "BKO %s" % door_account.volledige_naam()
 
         CompetitieMutatie(mutatie=self.mutatie_code,
                           door=door_str,
@@ -497,7 +497,8 @@ class DoorzettenBasisView(UserPassesTestMixin, TemplateView):
 
         comp = self._check_competitie_fase(kwargs['comp_pk'])
 
-        self.doorzetten(request.user, comp)
+        door_account = get_account(request)
+        self.doorzetten(door_account, comp)
 
         url = reverse('CompBeheer:overzicht', kwargs={'comp_pk': comp.pk})
         return HttpResponseRedirect(url)

@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Competitie.definities import INSCHRIJF_METHODE_1
@@ -52,7 +53,8 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         if rol_nu == Rollen.ROL_SPORTER:
-            if self.request.user != deelnemer.sporterboog.sporter.account:
+            account = get_account(self.request)
+            if account != deelnemer.sporterboog.sporter.account:
                 raise PermissionDenied()
         else:
             # HWL: sporter moet lid zijn van zijn vereniging
@@ -162,7 +164,8 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         # controleer dat ingelogde gebruiker deze wijziging mag maken
         if rol_nu == Rollen.ROL_SPORTER:
-            if request.user != deelnemer.sporterboog.sporter.account:
+            account = get_account(request)
+            if account != deelnemer.sporterboog.sporter.account:
                 raise PermissionDenied()
         else:
             # HWL: sporter moet lid zijn van zijn vereniging

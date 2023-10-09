@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from BasisTypen.definities import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                                    BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.definities import DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3
@@ -500,6 +501,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # bepaal in welke wedstrijdklasse de sporter komt
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
+                door_account = get_account(request)
                 aanmelding = RegiocompetitieSporterBoog(
                                     regiocompetitie=deelcomp,
                                     sporterboog=sporterboog,
@@ -507,7 +509,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                     ag_voor_indiv=AG_NUL,
                                     ag_voor_team=AG_NUL,
                                     ag_voor_team_mag_aangepast_worden=True,
-                                    aangemeld_door=request.user)
+                                    aangemeld_door=door_account)
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 for ag in Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,

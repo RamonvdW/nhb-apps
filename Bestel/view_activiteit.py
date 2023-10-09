@@ -9,6 +9,7 @@ from django.db.models.query_utils import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import TemplateView
 from django.urls import reverse
+from Account.models import get_account
 from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING,
                                BESTELLING_STATUS_MISLUKT)
 from Bestel.forms import ZoekBestellingForm
@@ -39,7 +40,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
         if self.rol_nu == Rollen.ROL_BB:
-            self.is_staff = self.request.user.is_staff
+            account = get_account(self.request)
+            self.is_staff = account.is_staff
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWW)
 
     def get_context_data(self, **kwargs):
@@ -231,7 +233,10 @@ class BestelOmzetView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB and self.request.user.is_staff
+        if rol_nu == Rollen.ROL_BB:
+            account = get_account(self.request)
+            return account.is_staff
+        return False
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

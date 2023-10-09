@@ -9,6 +9,7 @@ from django.http import Http404
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
@@ -44,7 +45,8 @@ class LijstView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
         if self.rol_nu == Rollen.ROL_BB:
-            self.is_staff = self.request.user.is_staff
+            account = get_account(self.request)
+            self.is_staff = account.is_staff
 
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_CS,
                                Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,

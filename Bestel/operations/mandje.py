@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2022 Ramon van der Winkel.
+#  Copyright (c) 2022-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from datetime import timedelta
+from Account.models import get_account
 from Bestel.models import BestelMandje
 
 
@@ -31,11 +32,12 @@ def cached_aantal_in_mandje_get(request):
 def mandje_tel_inhoud(request):
     """ tel het aantal producten in het mandje en cache het resultaat in een sessie variabele """
 
+    account = get_account(request)
     try:
         mandje = (BestelMandje
                   .objects
                   .prefetch_related('producten')
-                  .get(account=request.user))
+                  .get(account=account))
     except BestelMandje.DoesNotExist:
         # geen mandje gevonden
         aantal = 0

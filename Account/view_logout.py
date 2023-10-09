@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.contrib.auth import logout
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Overig.helpers import get_safe_from_ip
 import logging
 
@@ -54,7 +55,8 @@ class LogoutView(UserPassesTestMixin, TemplateView):
             we zorgen voor het uitloggen en sturen door naar een andere pagina
         """
         from_ip = get_safe_from_ip(request)
-        my_logger.info('%s LOGOUT voor account %s' % (from_ip, repr(request.user.username)))
+        account = get_account(request)
+        my_logger.info('%s LOGOUT voor account %s' % (from_ip, repr(account.username)))
 
         # integratie met de authenticatie laag van Django
         # dit wist ook de session data gekoppeld aan het cookie van de gebruiker

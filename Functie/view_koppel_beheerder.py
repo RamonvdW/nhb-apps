@@ -346,6 +346,7 @@ class OntvangBeheerderWijzigingenView(View):
             raise Http404('Verkeerde functie')
 
         mag_beheerder_wijzigen_of_403(request, functie)
+        door_account = get_account(request)
 
         form = WijzigBeheerdersForm(request.POST)
         form.full_clean()  # vult cleaned_data
@@ -379,7 +380,7 @@ class OntvangBeheerderWijzigingenView(View):
                     raise PermissionDenied('Geen lid van jouw vereniging')
 
             functie.accounts.add(account)
-            schrijf_in_logboek(request.user, 'Rollen',
+            schrijf_in_logboek(door_account, 'Rollen',
                                "%s is beheerder gemaakt voor functie %s" % (wie, functie.beschrijving))
 
             # TODO: functie_wijziging_stuur_email_notificatie geef False terug indien account geen e-mail kan ontvangen
@@ -390,7 +391,7 @@ class OntvangBeheerderWijzigingenView(View):
                 rol_activeer_wissel_van_rol_menu_voor_account(account)
         else:
             functie.accounts.remove(account)
-            schrijf_in_logboek(request.user, 'Rollen',
+            schrijf_in_logboek(door_account, 'Rollen',
                                "%s losgekoppeld van functie %s" % (wie, functie.beschrijving))
 
             functie_wijziging_stuur_email_notificatie(account, wie, functie.beschrijving, remove=True)

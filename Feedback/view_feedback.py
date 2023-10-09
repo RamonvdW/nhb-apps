@@ -153,7 +153,8 @@ class InzichtView(UserPassesTestMixin, ListView):
         context['count_aanwezig'] = count_aanwezig = Feedback.objects.count()
         context['count_afgehandeld'] = count_aanwezig - count_niet_afgehandeld
 
-        if self.request.user.is_staff:
+        account = get_account(self.request)
+        if account.is_staff:
             context['url_admin_site'] = reverse('admin:Feedback_feedback_changelist')
 
         context['kruimels'] = (
