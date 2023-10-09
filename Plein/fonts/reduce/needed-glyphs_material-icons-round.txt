@@ -124,6 +124,7 @@ thumb_up
 travel_explore
 tune
 undo
+verified
 verified_user
 view_comfy
 view_compact
