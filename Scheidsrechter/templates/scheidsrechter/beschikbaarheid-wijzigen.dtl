@@ -117,6 +117,7 @@
     </div>
 
     <script>
+        // stel all keuzeknoppen in op de juiste kleur
         const init = [
             {% for dag in dagen %}
                 ["{{ dag.id }}", {{ dag.keuze }}],

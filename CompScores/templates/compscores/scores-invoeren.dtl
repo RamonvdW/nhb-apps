@@ -144,39 +144,33 @@
 
             const el1 = document.getElementById('id_btn_toevoegen');
             const el2 = document.getElementById('id_zoekresultaten');
-            if (is_fail)
-            {
-                opzoeken_toon_status(btn.dataset, "niet gevonden", "red")
+            if (is_fail) {
+                opzoeken_toon_status(btn.dataset, "niet gevonden", "red");
 
-                el1.disabled = true
-                el2.classList.add("hide")
-            }
-            else
-            {
-                opzoeken_hide_status()
+                el1.disabled = true;
+                el2.classList.add("hide");
+            } else {
+                opzoeken_hide_status();
 
-                el1.disabled = false
-                el2.classList.remove("hide")
+                el1.disabled = false;
+                el2.classList.remove("hide");
             }
         }
 
-        function opzoeken_timeout(xhr)
-        {
+        function opzoeken_timeout(xhr) {
             // voorkom reactie bij ontvangst laat antwoord
-            xhr.abort()
+            xhr.abort();
 
             // note: opzoeken_klaar wordt zo aangeroepen met readyState=0
             // deze zet de foutmelding-status op het scherm
         }
 
-        function opzoeken(btn)
-        {
+        function opzoeken(btn) {
             // deze functie wordt aangeroepen bij druk op de knop
 
             // voorkom parallelle verzoeken
-            if (btn.dataset['xhr'] === undefined)
-            {
-                opzoeken_toon_status(btn.dataset, "bezig..", "gray")
+            if (btn.dataset['xhr'] === undefined) {
+                opzoeken_toon_status(btn.dataset, "bezig..", "gray");
 
                 const xhr = new XMLHttpRequest();
 
@@ -191,7 +185,10 @@
                         // zoek het DOM element met deze id
                         let el = document.getElementById(btn.dataset[d]);
                         let lid_nr = el.value.slice(0,6);
-                        if (lid_nr === '') return    // hanteer lege input
+                        // hanteer lege input
+                        if (lid_nr === '') {
+                            return;
+                        }
                         obj['lid_nr'] = lid_nr;
                     }
                 } // for
@@ -244,17 +241,21 @@
             {
                 const row = body.rows[i];
                 const filter_cmd = row.dataset["tablefilter"];
-                if (filter_cmd === "stop") break;              // from the for
+                if (filter_cmd === "stop") {
+                    break;           // from the for
+                }
 
                 const row_lid_nr = row.cells[0].innerText;
-                if (row_lid_nr < lid_nr) row_smaller = i;
+                if (row_lid_nr < lid_nr) {
+                    row_smaller = i;
+                }
             } // for
 
             // table filter uitzetten zodat de nieuwe regel getoond kan worden
             // maak zoekveld leeg; dit triggert myTableFilter()
-            const el_filter = document.getElementById("table1_zoeken_input")
-            el_filter.value = ""
-            myTableFilter(el_filter, 'table1')
+            const el_filter = document.getElementById("table1_zoeken_input");
+            el_filter.value = "";
+            myTableFilter(el_filter, 'table1');
 
             // voeg een regel(s) toe aan de tabel, op de juiste positie
             // doe dit door een kopie te maken
@@ -271,14 +272,16 @@
                     let peek_pk = peek_row.cells[0].dataset.pk;
                     if (peek_pk === deelnemer['pk']) {
                         // sla deze deelnemer en regel over
-                        row_smaller = row_smaller + 1
-                        insert_after_row = peek_row
+                        row_smaller = row_smaller + 1;
+                        insert_after_row = peek_row;
 
                         // geef deze regel focus als we een deelnemer met 1 boog nog een keer toevoegen
-                        if (!focus_row) focus_row = peek_row
+                        if (!focus_row) {
+                            focus_row = peek_row;
+                        }
                     } else {
                         // deze deelnemer toevoegen
-                        const new_row = base_row.cloneNode(true)
+                        const new_row = base_row.cloneNode(true);
 
                         // verwijder attributen van de template die toegevoegd zijn door de tabel filter
                         new_row.cells[0].removeAttribute("data-clean_text");
@@ -296,13 +299,15 @@
 
                         new_row.cells[1].innerHTML = rsp['naam'];
 
-                        let span = new_row.cells[2].firstChild
+                        let span = new_row.cells[2].firstChild;
                         span.innerHTML = "[" + rsp['ver_nr'] + "]";
                         span.nextSibling.innerHTML = " " + rsp['ver_naam'];    // hidden on small
 
                         new_row.cells[3].innerHTML = deelnemer['boog'];
                         let team_gem = deelnemer['team_gem'];
-                        if (team_gem !== '') new_row.cells[3].innerHTML += ' (' + team_gem + ')';
+                        if (team_gem !== '') {
+                            new_row.cells[3].innerHTML += ' (' + team_gem + ')';
+                        }
 
                         {% if deelcomp.regio_organiseert_teamcompetitie %}
                             let team_pk = deelnemer['team_pk'];
@@ -320,12 +325,13 @@
                         row_smaller = row_smaller + 1;
                         insert_after_row = new_row;
                     }
-                })
+                });
 
             // scroll nieuwe regel into view + zet focus op invoer score
             //body.rows[row_smaller + 1].cells[4].firstChild.focus();
-            if (focus_row)
+            if (focus_row) {
                 focus_row.cells[4].firstChild.focus();
+            }
 
             // zoekveld weer leeg maken
             document.getElementById('id_lid_nr').value = "";
@@ -369,7 +375,9 @@
             {
                 let row = body.rows[i];
                 const filter_cmd = row.dataset["tablefilter"];
-                if (filter_cmd === "stop") break;           // from the for
+                if (filter_cmd === "stop") {
+                    break;        // from the for
+                }
 
                 const pk = row.cells[0].dataset.pk;
                 const score = row.cells[4].firstChild.value;
@@ -388,8 +396,8 @@
             const xhr = new XMLHttpRequest();
 
             // POST voorkomt caching
-            xhr.open("POST", "{{ url_opslaan }}", true)         // true = async
-            xhr.timeout = 3000                                  // 3 sec
+            xhr.open("POST", "{{ url_opslaan }}", true);         // true = async
+            xhr.timeout = 3000;                                  // 3 sec
             xhr.onloadend = function() { btn.disabled = false; opslaan_klaar(xhr); };
             xhr.ontimeout = function() { btn.disabled = false; M.toast({html: 'Opslaan is NIET gelukt'}); };
             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
@@ -478,7 +486,9 @@
 
                     new_row.cells[3].innerHTML = deelnemer['boog'];
                     const team_gem = deelnemer['team_gem'];
-                    if (team_gem !== '') new_row.cells[3].innerHTML += ' (' + team_gem + ')';
+                    if (team_gem !== '') {
+                        new_row.cells[3].innerHTML += ' (' + team_gem + ')';
+                    }
 
                     {% if deelcomp.regio_organiseert_teamcompetitie %}
                     const team_pk = deelnemer['team_pk'];
@@ -492,9 +502,11 @@
 
                     row_nr += 1;         // ga verder op de zojuist toegevoegd regel
 
-                    if (first_added_row === undefined) first_added_row = row_nr;
+                    if (first_added_row === undefined) {
+                        first_added_row = row_nr;
+                    }
                 }
-            }) // forEach
+            }); // forEach
 
             // maak alle nieuwe regels in een blok operatie zichtbaar
             if (first_added_row !== undefined)
@@ -505,13 +517,16 @@
                 {
                     let row = body.rows[i];
                     const filter_cmd = row.dataset["tablefilter"];
-                    if (filter_cmd === "stop") break;   // from the for
+                    if (filter_cmd === "stop") {
+                        break;      // from the for
+                    }
 
                     // maak de nieuwe row zichtbaar
                     row.classList.remove('hide');
 
-                    if (i === first_added_row)
+                    if (i === first_added_row) {
                         row.cells[4].firstChild.focus();
+                    }
                 }
             }
         }
@@ -569,8 +584,9 @@
 
             // /\D/.test() matches digits and returns true if there are non-digits
             const value = el.value;
-            if (/\D/.test(value) || value < 0 || value > {{ wedstrijd.uitslag.max_score }})
+            if (/\D/.test(value) || value < 0 || value > {{ wedstrijd.uitslag.max_score }}) {
                 color = "red";
+            }
 
             el.style.color = color;
         }

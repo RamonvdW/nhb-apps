@@ -20,12 +20,12 @@
             // gebruik een POST om het verzoek door te zetten
             const obj = { deelnemer: ref.dataset['deelnemer'],
                           klasse: ref.dataset['klasse'] };
-            const data = JSON.stringify(obj)
+            const data = JSON.stringify(obj);
 
-            const xhr = new XMLHttpRequest()
-            xhr.open("POST", "{{ url_verplaats }}", true)     // true = async
-            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
-            xhr.send(data)
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "{{ url_verplaats }}", true);     // true = async
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhr.send(data);
         }
 
     </script>

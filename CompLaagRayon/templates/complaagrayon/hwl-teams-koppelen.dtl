@@ -22,16 +22,16 @@
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
             // enable/disable de 'opslaan' knop
-            const el = document.getElementById("submit_knop")
+            const el = document.getElementById("submit_knop");
 
-            const els = document.querySelectorAll('input[type=checkbox].filled-in')
-            let count = 0
+            const els = document.querySelectorAll('input[type=checkbox].filled-in');
+            let count = 0;
             els.forEach(checkbox => {
-                    if (checkbox.checked) count += 1
-                })
+                    if (checkbox.checked) count += 1;
+                });
 
-            el.disabled = (count > 4)
-            el.parentElement.style.display = "block"
+            el.disabled = (count > 4);
+            el.parentElement.style.display = "block";
         }
     </script>
 

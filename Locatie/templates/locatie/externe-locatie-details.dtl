@@ -19,50 +19,50 @@
 
     <script>
         function show_hide_binnenbanen() {
-            const el_indoor = document.getElementById('id_disc_indoor')
-            const el_25m1p = document.getElementById('id_disc_25m1p')
-            const els = document.getElementsByClassName('binnenbanen-kan-verstoppen')
+            const el_indoor = document.getElementById('id_disc_indoor');
+            const el_25m1p = document.getElementById('id_disc_25m1p');
+            const els = document.getElementsByClassName('binnenbanen-kan-verstoppen');
 
             if (el_indoor.checked || el_25m1p.checked) {
                 // toon de extra regels
                 Array.prototype.forEach.call(els, function (el) {
-                    el.classList.remove('hide')
+                    el.classList.remove('hide');
                 })
             } else {
                 // verstop de extra regels
                 Array.prototype.forEach.call(els, function (el) {
-                    el.classList.add('hide')
+                    el.classList.add('hide');
                 })
             }
         }
 
         function show_hide_buitenbanen() {
-            const el_outdoor = document.getElementById('id_disc_outdoor')
-            const els1 = document.getElementsByClassName('outdoor-kan-verstoppen')
+            const el_outdoor = document.getElementById('id_disc_outdoor');
+            const els1 = document.getElementsByClassName('outdoor-kan-verstoppen');
 
             if (el_outdoor.checked) {
                 // toon de extra regels
                 Array.prototype.forEach.call(els1, function (el) {
-                    el.classList.remove('hide')
+                    el.classList.remove('hide');
                 })
             } else {
                 // verstop de extra regels
                 Array.prototype.forEach.call(els1, function (el) {
-                    el.classList.add('hide')
+                    el.classList.add('hide');
                 })
             }
 
-            const el_veld = document.getElementById('id_disc_veld')
-            const els2 = document.getElementsByClassName('outdoor-veld-kan-verstoppen')
+            const el_veld = document.getElementById('id_disc_veld');
+            const els2 = document.getElementsByClassName('outdoor-veld-kan-verstoppen');
             if (el_outdoor.checked || el_veld.checked) {
                 // toon de extra regels
                 Array.prototype.forEach.call(els2, function (el) {
-                    el.classList.remove('hide')
+                    el.classList.remove('hide');
                 })
             } else {
                 // verstop de extra regels
                 Array.prototype.forEach.call(els2, function (el) {
-                    el.classList.add('hide')
+                    el.classList.add('hide');
                 })
             }
 
@@ -72,18 +72,18 @@
             // het formulier is aangepast en moet opgeslagen worden
 
             // disable alle knoppen waarmee de invoer verloren zou gaan
-            const els = document.getElementsByClassName("wijzig_knop")
+            const els = document.getElementsByClassName("wijzig_knop");
             Array.prototype.forEach.call(els, function (el) {
-                el.classList.add('disabled')
+                el.classList.add('disabled');
             })
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("submit_knop1")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("submit_knop1");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
 
-            show_hide_buitenbanen()
-            show_hide_binnenbanen()
+            show_hide_buitenbanen();
+            show_hide_binnenbanen();
         }
     </script>
 
@@ -328,8 +328,8 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            show_hide_buitenbanen()
-            show_hide_binnenbanen()
+            show_hide_buitenbanen();
+            show_hide_binnenbanen();
         })
     </script>
 
