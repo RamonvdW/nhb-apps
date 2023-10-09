@@ -165,6 +165,8 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
 
+        # print(list(request.POST.items()))
+
         try:
             inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
             inschrijving = (WedstrijdInschrijving
@@ -243,32 +245,43 @@ class KwalificatieScoresOpgevenView(UserPassesTestMixin, TemplateView):
                     result = 0
 
             # opslaan
-            changes = list()
-            if datum != score.datum:
-                changes.append("datum: %s -> %s" % (score.datum, datum))
+            if score.naam == '' and score.waar == '' and score.resultaat == 0:
+                # eerste keer
+                score.check_status = KWALIFICATIE_CHECK_NOG_DOEN
                 score.datum = datum
-
-            if score.naam != naam_str:
-                changes.append("naam: %s -> %s" % (score.naam, naam_str))
                 score.naam = naam_str
-
-            if score.waar != waar_str:
-                changes.append("waar: %s -> %s" % (score.waar, waar_str))
                 score.waar = waar_str
-
-            if score.resultaat != result:
-                changes.append("resultaat: %s -> %s" % (score.resultaat, result))
                 score.resultaat = result
+                score.log += '[%s] Eerste opgaaf door %s: datum: %s, naam: %s, waar: %s, resultaat: %s\n' % (
+                            now_str, door_str, datum, repr(naam_str), repr(waar_str), result)
 
-            if len(changes):
-                # schrijf in logboek
-                score.log += '[%s] Wijzigingen door %s: %s\n' % (now_str, door_str, "; ".join(changes))
+            else:
+                changes = list()
+                if datum != score.datum:
+                    changes.append("datum: %s -> %s" % (score.datum, datum))
+                    score.datum = datum
 
-                # gewijzigd, dus check moet opnieuw gedaan worden
-                if score.check_status != KWALIFICATIE_CHECK_NOG_DOEN:
-                    score.log += "[%s] Check status automatisch terug gezet van %s naar 'Nog doen'\n" % (
-                                    now_str, repr(KWALIFICATIE_CHECK2STR[score.check_status]))
-                    score.check_status = KWALIFICATIE_CHECK_NOG_DOEN
+                if score.naam != naam_str:
+                    changes.append("naam: %s -> %s" % (score.naam, repr(naam_str)))
+                    score.naam = naam_str
+
+                if score.waar != waar_str:
+                    changes.append("waar: %s -> %s" % (score.waar, repr(waar_str)))
+                    score.waar = waar_str
+
+                if score.resultaat != result:
+                    changes.append("resultaat: %s -> %s" % (score.resultaat, result))
+                    score.resultaat = result
+
+                if len(changes):
+                    # schrijf in logboek
+                    score.log += '[%s] Wijzigingen door %s: %s\n' % (now_str, door_str, "; ".join(changes))
+
+                    # gewijzigd, dus check moet opnieuw gedaan worden
+                    if score.check_status != KWALIFICATIE_CHECK_NOG_DOEN:
+                        score.log += "[%s] Check status automatisch terug gezet van %s naar 'Nog doen'\n" % (
+                                        now_str, repr(KWALIFICATIE_CHECK2STR[score.check_status]))
+                        score.check_status = KWALIFICATIE_CHECK_NOG_DOEN
 
             score.save()
         # for
@@ -464,7 +477,10 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
 
         try:
             score_pk = int(str(kwargs['score_pk'])[:6])      # afkappen voor de veiligheid
-            score = Kwalificatiescore.objects.select_related('inschrijving__wedstrijd').get(pk=score_pk)
+            score = (Kwalificatiescore
+                     .objects
+                     .select_related('inschrijving__sporterboog__sporter')
+                     .get(pk=score_pk))
         except (ValueError, Kwalificatiescore.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -478,12 +494,13 @@ class CheckKwalificatieScoresWedstrijdView(UserPassesTestMixin, TemplateView):
             door_str = "[%s] %s" % (account.username, account.volledige_naam())
 
             if check_status == KWALIFICATIE_CHECK_AFGEKEURD:
-                score.log += "[%s] Kwalificatie score %s afgekeurd door %s (voor %s, %s)\n" % (
-                                now_str, score.resulaat, door_str, score.naam, score.waar)
+                score.log += "[%s] Afgekeurd door %s\n" % (now_str, door_str)
 
             if check_status == KWALIFICATIE_CHECK_GOED:
-                score.log += "[%s] Kwalificatie score %s goedgekeurd door %s (voor %s, %s)\n" % (
-                                now_str, score.resulaat, door_str, score.naam, score.waar)
+                score.log += "[%s] Goedgekeurd door %s\n" % (now_str, door_str)
+
+            if check_status == KWALIFICATIE_CHECK_NOG_DOEN:
+                score.log += "[%s] Terug gezet naar 'nog te doen' door %s\n" % (now_str, door_str)
 
             score.check_status = check_status
             score.save(update_fields=['check_status', 'log'])
