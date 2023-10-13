@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
+from Competitie.models import Competitie, CompetitieIndivKlasse, Regiocompetitie, RegiocompetitieSporterBoog
 from Functie.operations import maak_functie
 from Geo.models import Regio
 from Locatie.models import Locatie
@@ -16,7 +17,7 @@ from Sporter.operations import get_sporter_voorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
 from Wedstrijden.definities import INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING
-from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
+from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting, Kwalificatiescore
 from datetime import timedelta
 
 
@@ -47,11 +48,13 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
+        self.regio112 = Regio.objects.get(regio_nr=112)
+
         # maak een test vereniging
         self.ver1 = Vereniging(
                             ver_nr=1000,
                             naam="Grote Club",
-                            regio=Regio.objects.get(regio_nr=112))
+                            regio=self.regio112)
         self.ver1.save()
 
         self.functie_hwl = maak_functie('HWL Ver 1000', 'HWL')
@@ -81,7 +84,7 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
                     bij_vereniging=self.ver1)
         sporter1.save()
         self.sporter1 = sporter1
-        self.sporter_voorkeuren = get_sporter_voorkeuren(sporter1, mag_database_wijzigen=True)
+        self.sporter1_voorkeuren = get_sporter_voorkeuren(sporter1, mag_database_wijzigen=True)
         resp = self.client.post(self.url_sporter_voorkeuren, {'sporter_pk': sporter1.pk})   # maak alle SporterBoog aan
         self.assert_is_redirect_not_plein(resp)
 
@@ -434,6 +437,82 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert200_is_bestand_csv(resp)
 
+        # zet para voorwerpen
+        self.sporter1_voorkeuren.para_voorwerpen = True
+        self.sporter1_voorkeuren.save()
+
+        # wedstrijd met kwalificatiescores
+        self.wedstrijd.eis_kwalificatie_scores = True
+        self.wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
+
+        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_is_bestand_csv(resp)
+
+        # geef echte kwalificatiescores op
+        Kwalificatiescore(
+                inschrijving=self.inschrijving1r,
+                resultaat=200,
+                datum=self.wedstrijd.datum_begin - timedelta(days=3),
+                naam='Bovengemiddeld 1',
+                waar='Doeldorp').save()
+
+        Kwalificatiescore(
+                inschrijving=self.inschrijving1r,
+                resultaat=201,
+                datum=self.wedstrijd.datum_begin - timedelta(days=4),
+                naam='Bovengemiddeld 2',
+                waar='Doeldorp').save()
+
+        # bondscompetitie uitslagen
+        competitie = Competitie(
+                        beschrijving='',
+                        afstand='18',
+                        begin_jaar=1999)
+        competitie.save()
+
+        klasse = CompetitieIndivKlasse(
+                        competitie=competitie,
+                        volgorde=1,
+                        min_ag=0,
+                        boogtype=self.boog_r)
+        klasse.save()
+
+        regiocomp = Regiocompetitie(
+                        competitie=competitie,
+                        regio=self.regio112,
+                        functie=self.functie_hwl)
+        regiocomp.save()
+
+        deelnemer = RegiocompetitieSporterBoog(
+                        regiocompetitie=regiocomp,
+                        sporterboog=self.sporterboog1r,
+                        bij_vereniging=self.ver1,
+                        indiv_klasse=klasse,
+                        score1=220,
+                        score2=221,
+                        score3=210,
+                        score4=0,
+                        score5=0,
+                        score6=230,
+                        score7=240)
+        deelnemer.save()
+
+        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_is_bestand_csv(resp)
+
+        # minder bondscompetitie scores
+        deelnemer.score1 = deelnemer.score2 = deelnemer.score3 = deelnemer.score6 = deelnemer.score7 = 0
+        deelnemer.save()
+
+        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_is_bestand_csv(resp)
+
         # als verkeerde HWL
         ver2 = Vereniging(
                             ver_nr=2000,
@@ -458,8 +537,8 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
         self.sporter1.save(update_fields=['bij_vereniging'])
 
         # sporter zonder gekozen geslacht
-        self.sporter_voorkeuren.wedstrijd_geslacht_gekozen = False
-        self.sporter_voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
+        self.sporter1_voorkeuren.wedstrijd_geslacht_gekozen = False
+        self.sporter1_voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
@@ -467,6 +546,14 @@ class TestWedstrijdenAanmeldingen(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
+        self.assert200_is_bestand_csv(resp)
+
+        # uitzondering: geen voorkeuren
+        self.sporter1_voorkeuren.delete()
+
+        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert200_is_bestand_csv(resp)
 
         # wedstrijd niet gevonden

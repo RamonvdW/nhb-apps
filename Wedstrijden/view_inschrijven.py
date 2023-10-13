@@ -937,9 +937,9 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
             mandje_tel_inhoud(self.request)
 
-        if wedstrijd.eis_kwalificatie_scores:
-            url = reverse('Wedstrijden:inschrijven-kwalificatie-scores', kwargs={'inschrijving_pk': inschrijving.pk})
-            return HttpResponseRedirect(url)
+            if wedstrijd.eis_kwalificatie_scores:
+                url = reverse('Wedstrijden:inschrijven-kwalificatie-scores', kwargs={'inschrijving_pk': inschrijving.pk})
+                return HttpResponseRedirect(url)
 
         # render de pagina "toegevoegd aan mandje"
 

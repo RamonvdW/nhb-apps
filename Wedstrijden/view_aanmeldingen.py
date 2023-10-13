@@ -14,13 +14,15 @@ from Account.models import get_account
 from BasisTypen.definities import GESLACHT2STR
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_afmelden_wedstrijd,
                                         bestel_mutatieverzoek_verwijder_product_uit_mandje)
+from Competitie.models import RegiocompetitieSporterBoog
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige, rol_get_huidige_functie
 from Sporter.models import SporterVoorkeuren, get_sporter
 from Sporter.operations import get_sporter_voorkeuren
 from Wedstrijden.definities import (INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD,
-                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF)
-from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving
+                                    INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
+                                    KWALIFICATIE_CHECK2STR)
+from Wedstrijden.models import Wedstrijd, WedstrijdInschrijving, Kwalificatiescore
 from decimal import Decimal
 from codecs import BOM_UTF8
 import csv
@@ -36,17 +38,78 @@ CONTENT_TYPE_CSV = 'text/csv; charset=UTF-8'
 
 
 def get_inschrijving_mh_bestel_nr(inschrijving):
-    try:
-        bestel_product = inschrijving.bestelproduct_set.all()[0]
-    except IndexError:
-        return ""
+    bestel_product = inschrijving.bestelproduct_set.first()
+    if bestel_product:
+        bestelling = bestel_product.bestelling_set.first()
+        if bestelling:
+            return bestelling.mh_bestel_nr()
 
-    try:
-        bestelling = bestel_product.bestelling_set.all()[0]
-    except IndexError:
-        return ""
+    return ""
 
-    return bestelling.mh_bestel_nr()
+
+def get_kwalificatie_scores(inschrijving):
+
+    unsorted = list()
+
+    # pak de handmatig opgegeven kwalificatiescores erbij
+    scores = (Kwalificatiescore
+              .objects
+              .filter(inschrijving=inschrijving)
+              .exclude(resultaat=0)
+              .order_by('-resultaat'))  # hoogste eerst
+
+    for score in scores:
+        score.naam = '?' if score.naam == '' else score.naam
+        score.waar = '?' if score.waar == '' else score.waar
+        score.check_str = KWALIFICATIE_CHECK2STR[score.check_status]
+        tup = (score.resultaat, score.datum, score)
+        unsorted.append(tup)
+    # for
+
+    now = timezone.now().date()
+
+    # zoek de bondscompetitie Indoor scores erbij
+    try:
+        deelnemer = (RegiocompetitieSporterBoog
+                     .objects
+                     .get(sporterboog=inschrijving.sporterboog,
+                          regiocompetitie__competitie__afstand='18'))
+    except RegiocompetitieSporterBoog.DoesNotExist:
+        pass
+    else:
+        scores = [deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4,
+                  deelnemer.score5, deelnemer.score6, deelnemer.score7]
+        scores = [score for score in scores if score > 0]
+        scores.sort(reverse=True)  # hoogste eerst
+        scores = scores[:4]  # top 4
+        scores.extend([0, 0, 0, 0])  # minimaal 4
+
+        # eerste 60 pijlen score uit de bondscompetitie
+        score = Kwalificatiescore(
+                    inschrijving=inschrijving,
+                    datum=now,
+                    naam='Bondscompetitie Indoor',
+                    waar='',
+                    resultaat=scores[0] + scores[1])
+        if score.resultaat > 0:
+            score.check_str = 'Automatisch'
+            tup = (score.resultaat, score.datum, score)
+            unsorted.append(tup)
+
+        # tweede 60 pijlen score uit de bondscompetitie
+        score = Kwalificatiescore(
+                    inschrijving=inschrijving,
+                    datum=now,
+                    naam='Bondscompetitie Indoor',
+                    waar='',
+                    resultaat=scores[2] + scores[3])
+        if score.resultaat > 0:
+            score.check_str = 'Automatisch'
+            tup = (score.resultaat, score.datum, score)
+            unsorted.append(tup)
+
+    unsorted.sort(reverse=True)     # hoogste resultaat eerst
+    return [score for _, _, score in unsorted]
 
 
 class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
@@ -330,11 +393,20 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
 
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
-                         'Bestelnummer', 'Prijs', 'Korting', 'Ontvangen', 'Retour',
-                         'Sessie', 'Code', 'Wedstrijdklasse',
-                         'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Ver nr', 'Vereniging',
-                         'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
+
+        if wedstrijd.eis_kwalificatie_scores:
+            writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
+                             'Bestelnummer', 'Prijs', 'Korting', 'Ontvangen', 'Retour',
+                             'Sessie', 'Code', 'Wedstrijdklasse',
+                             'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Ver nr', 'Vereniging',
+                             'Kwalificatie 180p', 'Kwalificatie 60p', 'Kwalificatie 60p', 'Kwalificatie 60p',
+                             'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
+        else:
+            writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
+                             'Bestelnummer', 'Prijs', 'Korting', 'Ontvangen', 'Retour',
+                             'Sessie', 'Code', 'Wedstrijdklasse',
+                             'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Ver nr', 'Vereniging',
+                             'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
 
         for aanmelding in aanmeldingen:
             sporterboog = aanmelding.sporterboog
@@ -378,28 +450,72 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             else:
                 korting_str = 'Geen'
 
-            writer.writerow([
-                str(reserveringsnummer),
-                timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
-                INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
-                bestelnummer_str,
-                prijs_str,
-                korting_str,
-                '€ %s' % aanmelding.ontvangen_euro,
-                '€ %s' % aanmelding.retour_euro,
-                aanmelding.sessie.beschrijving,
-                aanmelding.wedstrijdklasse.afkorting,
-                aanmelding.wedstrijdklasse.beschrijving,
-                str(sporter.lid_nr),
-                sporter.volledige_naam(),
-                sporter.email,
-                GESLACHT2STR[wedstrijd_geslacht],
-                sporterboog.boogtype.beschrijving,
-                str(ver_nr),
-                ver_str,
-                sporter.para_classificatie,
-                para_materiaal,
-                para_notitie])
+            if wedstrijd.eis_kwalificatie_scores:
+                # FUTURE: deze individuele queries maken het erg duur (wordt bijna nooit gebruikt)
+                scores = get_kwalificatie_scores(aanmelding)
+
+                score1_60p = score2_60p = score3_60p = 0
+
+                if len(scores) >= 1:
+                    score1_60p = scores[0].resultaat
+
+                if len(scores) >= 2:
+                    score2_60p = scores[1].resultaat
+
+                if len(scores) >= 3:
+                    score3_60p = scores[2].resultaat
+
+                score_180p = score1_60p + score2_60p + score3_60p
+
+                writer.writerow([
+                    str(reserveringsnummer),
+                    timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
+                    INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                    bestelnummer_str,
+                    prijs_str,
+                    korting_str,
+                    '€ %s' % aanmelding.ontvangen_euro,
+                    '€ %s' % aanmelding.retour_euro,
+                    aanmelding.sessie.beschrijving,
+                    aanmelding.wedstrijdklasse.afkorting,
+                    aanmelding.wedstrijdklasse.beschrijving,
+                    str(sporter.lid_nr),
+                    sporter.volledige_naam(),
+                    sporter.email,
+                    GESLACHT2STR[wedstrijd_geslacht],
+                    sporterboog.boogtype.beschrijving,
+                    str(ver_nr),
+                    ver_str,
+                    score_180p,
+                    score1_60p,
+                    score2_60p,
+                    score3_60p,
+                    sporter.para_classificatie,
+                    para_materiaal,
+                    para_notitie])
+            else:
+                writer.writerow([
+                    str(reserveringsnummer),
+                    timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
+                    INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                    bestelnummer_str,
+                    prijs_str,
+                    korting_str,
+                    '€ %s' % aanmelding.ontvangen_euro,
+                    '€ %s' % aanmelding.retour_euro,
+                    aanmelding.sessie.beschrijving,
+                    aanmelding.wedstrijdklasse.afkorting,
+                    aanmelding.wedstrijdklasse.beschrijving,
+                    str(sporter.lid_nr),
+                    sporter.volledige_naam(),
+                    sporter.email,
+                    GESLACHT2STR[wedstrijd_geslacht],
+                    sporterboog.boogtype.beschrijving,
+                    str(ver_nr),
+                    ver_str,
+                    sporter.para_classificatie,
+                    para_materiaal,
+                    para_notitie])
         # for
 
         return response
@@ -489,6 +605,12 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving.bestelproduct = qset[0]
         else:
             inschrijving.bestelproduct = None
+
+        wedstrijd = inschrijving.wedstrijd
+        if wedstrijd.eis_kwalificatie_scores:
+            inschrijving.scores = get_kwalificatie_scores(inschrijving)
+        else:
+            inschrijving.scores = list()
 
         url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
                                    kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})

@@ -71,6 +71,33 @@
                     <th>Ingeschreven</th>
                     <td>op {{ inschrijving.wanneer }}<br>door {{ inschrijving.koper }}</td>
                 </tr>
+
+                {% if inschrijving.wedstrijd.eis_kwalificatie_scores %}
+                    <tr>
+                        <th>Kwalificatiescores</th>
+                        <td>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="center">Resultaat</th>
+                                        <th class="center">Controle</th>
+                                        <th class="center">Datum</th>
+                                        <th>Waar</th>
+                                    </tr>
+                                </thead>
+                                {% for score in inschrijving.scores %}
+                                    <tr>
+                                        <td class="center">{{ score.resultaat }}</td>
+                                        <td class="center">{{ score.check_str }}</td>
+                                        <td class="center">{{ score.datum }}</td>
+                                        <td>{{ score.naam }}{% if score.waar %}<br>({{ score.waar }}){% endif %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    </tr>
+                {% endif %}
+
                 <tr>
                     <th>Status</th>
                     <td>{% if inschrijving.status == 'R' %}
