@@ -10,6 +10,7 @@ from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import get_account
 from Functie.definities import Rollen
 from Functie.rol import rol_get_huidige_functie
 from Locatie.models import Locatie
@@ -202,6 +203,8 @@ class ExterneLocatieDetailsView(TemplateView):
         if readonly:
             raise PermissionDenied('Wijzigen alleen door HWL van de vereniging')
 
+        door_account = get_account(request)
+
         if request.POST.get('verwijder', ''):
             locatie.zichtbaar = False
             locatie.save(update_fields=['zichtbaar'])
@@ -216,7 +219,7 @@ class ExterneLocatieDetailsView(TemplateView):
         if locatie.naam != data:
             activiteit = "Aanpassing naam externe locatie van vereniging %s: %s (was %s)" % (
                             ver, repr(data), repr(locatie.naam))
-            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
             locatie.naam = data
 
         data = request.POST.get('adres', '')
@@ -226,7 +229,7 @@ class ExterneLocatieDetailsView(TemplateView):
                             locatie.naam, ver,
                             repr(data.replace('\n', ', ')),
                             repr(locatie.adres.replace('\n', ', ')))
-            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
             locatie.adres = data
 
         data = request.POST.get('plaats', '')[:50]
@@ -235,7 +238,7 @@ class ExterneLocatieDetailsView(TemplateView):
                             locatie.naam, ver,
                             repr(data),
                             repr(locatie.plaats))
-            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
             locatie.plaats = data
 
         disc_old = locatie.disciplines_str()
@@ -250,7 +253,7 @@ class ExterneLocatieDetailsView(TemplateView):
         if disc_old != disc_new:
             activiteit = "Aanpassing disciplines van externe locatie %s van vereniging %s: [%s] (was [%s])" % (
                             locatie.naam, ver, disc_new, disc_old)
-            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
 
         # extra velden voor indoor locaties
         if locatie.discipline_indoor or locatie.discipline_25m1pijl:
@@ -263,7 +266,7 @@ class ExterneLocatieDetailsView(TemplateView):
             if locatie.banen_18m != banen:
                 activiteit = "Aanpassing aantal 18m banen van externe locatie %s" % locatie.naam
                 activiteit += " van vereniging %s naar %s (was %s)" % (ver, banen, locatie.banen_18m)
-                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
                 locatie.banen_18m = banen
 
             try:
@@ -275,7 +278,7 @@ class ExterneLocatieDetailsView(TemplateView):
             if locatie.banen_25m != banen:
                 activiteit = "Aanpassing aantal 25m banen van externe locatie %s" % locatie.naam
                 activiteit += " van vereniging %s naar %s (was %s)" % (ver, banen, locatie.banen_25m)
-                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
                 locatie.banen_25m = banen
 
             try:
@@ -287,7 +290,7 @@ class ExterneLocatieDetailsView(TemplateView):
             if locatie.max_sporters_18m != sporters:
                 activiteit = "Aanpassing maximum sporters 18m van externe locatie %s" % locatie.naam
                 activiteit += " van vereniging %s naar %s (was %s)" % (ver, sporters, locatie.max_sporters_18m)
-                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
                 locatie.max_sporters_18m = sporters
 
             try:
@@ -299,7 +302,7 @@ class ExterneLocatieDetailsView(TemplateView):
             if locatie.max_sporters_25m != sporters:
                 activiteit = "Aanpassing maximum sporters 25m van externe locatie %s" % locatie.naam
                 activiteit += " van vereniging %s naar %s (was %s)" % (ver, sporters, locatie.max_sporters_25m)
-                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
                 locatie.max_sporters_25m = sporters
 
         # extra velden voor outdoor locaties
@@ -324,7 +327,7 @@ class ExterneLocatieDetailsView(TemplateView):
                                 ver,
                                 banen, max_afstand,
                                 locatie.buiten_banen, locatie.buiten_max_afstand)
-                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
                 locatie.buiten_max_afstand = max_afstand
                 locatie.buiten_banen = banen
 
@@ -336,7 +339,7 @@ class ExterneLocatieDetailsView(TemplateView):
                             ver,
                             repr(data.replace('\n', ' / ')),
                             repr(locatie.notities.replace('\n', ' / ')))
-            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            schrijf_in_logboek(door_account, 'Accommodaties', activiteit)
             locatie.notities = data
 
         locatie.save()

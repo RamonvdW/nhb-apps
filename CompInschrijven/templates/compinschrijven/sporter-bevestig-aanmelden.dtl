@@ -13,22 +13,22 @@
     <script>
         function tel_wedstrijden() {
             // tel hoeveel checkboxes aangekruist zijn
-            const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length
-            const el_aantal = document.getElementById('aantal')
-            el_aantal.innerText = count.toString() + ' wedstrijden'
+            const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length;
+            const el_aantal = document.getElementById('aantal');
+            el_aantal.innerText = count.toString() + ' wedstrijden';
 
-            const el = document.getElementById('submit_knop')
-            el.disabled = (count > 7)
+            const el = document.getElementById('submit_knop');
+            el.disabled = (count > 7);
             if (count > 7) {
-                el_aantal.classList.add('sv-rood-text')
+                el_aantal.classList.add('sv-rood-text');
             } else {
-                el_aantal.classList.remove('sv-rood-text')
+                el_aantal.classList.remove('sv-rood-text');
             }
         }
 
         function toon_wedstrijden_2() {
-            document.getElementById('id_wedstrijden_2').classList.remove('hide')
-            document.getElementById('id_wedstrijden_2_knop').classList.add('hide')
+            document.getElementById('id_wedstrijden_2').classList.remove('hide');
+            document.getElementById('id_wedstrijden_2_knop').classList.add('hide');
         }
     </script>
 
@@ -200,9 +200,8 @@
     {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
         <!-- initialisatie -->
         <script>
-            document.addEventListener('DOMContentLoaded', function()
-            {
-                tel_wedstrijden()
+            document.addEventListener('DOMContentLoaded', function() {
+                tel_wedstrijden();
             })
         </script>
     {% endif %}

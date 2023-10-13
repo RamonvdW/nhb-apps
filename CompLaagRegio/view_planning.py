@@ -1415,7 +1415,6 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             now = timezone.now()
             stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
             taak_deadline = now
-            assert isinstance(account, Account)
             taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (
                             str(deelcomp), account.volledige_naam())
             taak_tekst += "\nAls RKO kan je onder Bondscompetities, Planning Rayon de status van elke regio zien."
@@ -1435,7 +1434,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             # schrijf in het logboek
             msg = "Deelcompetitie '%s' is afgesloten" % str(deelcomp)
             msg += '\nDe %s is geïnformeerd via een taak' % functie_rko.beschrijving
-            schrijf_in_logboek(request.user, "Competitie", msg)
+            schrijf_in_logboek(account, "Competitie", msg)
 
         url = reverse('Competitie:kies')
         return HttpResponseRedirect(url)

@@ -337,7 +337,8 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         if not comp.klassengrenzen_vastgesteld:
             competitie_klassengrenzen_vaststellen(comp)
 
-            schrijf_in_logboek(request.user,
+            account_log = get_account(request)
+            schrijf_in_logboek(account_log,
                                'Competitie',
                                'Klassengrenzen vastgesteld voor %s' % comp.beschrijving)
 

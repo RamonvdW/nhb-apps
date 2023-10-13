@@ -30,6 +30,13 @@
                     <th>Aantal verkopers actief</th>
                     <td>{{ aantal_verkopers }}</td>
                 </tr>
+                {% if url_omzet %}
+                    <tr>
+                        <td colspan="2" class="btn-sv-rood center" style="margin:10px">
+                            <a href="{{ url_omzet }}">Meer omzet</a>
+                        </td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>

@@ -8,6 +8,12 @@
 
 {% block title %}{{ naam_site }}{% endblock %}
 
+{% block extraheader %}
+    <!-- extra headers voor SEO -->
+    <meta name="keywords" content="MijnHandboogsport, Mijn handboogsport">
+    <meta name="description" content="Informatie over de handboogsport">
+{% endblock %}
+
 <!-- geen broodkruimels op de voorpagina -->
 {% block broodkruimels %}{% endblock %}
 

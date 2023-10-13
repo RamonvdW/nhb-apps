@@ -49,7 +49,7 @@
     <div class="row-sv-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
             <div class="white" style="padding:10px">
-                <p>Je kan je scores van 180 pijlen opgeven. Het totaal bepaalt je ranking op de deelnemerlijst.</p>
+                <p>Je kan je scores van 180 pijlen opgeven. Het totaal bepaalt je ranking op de deelnemerslijst.</p>
                 <p>Je kan 3 resultaten van een 60 pijlen A-status Indoor wedstrijd doorgeven.<br>De wedstrijden moeten tussen {{ begin_datum }} en {{ eind_datum }} gehouden zijn.</p>
                 <p>Je mag ook 4 scores uit de bondscompetitie Indoor gebruiken. Dit gaat automatisch.{% if indoor_scores %}<br>(jouw 4 beste scores op dit moment zijn: {{ indoor_scores }}){% else %}<br>(we hebben nog geen scores gevonden){% endif %}</p>
             </div>
@@ -65,9 +65,10 @@
             el2.value = el1.M_Datepicker.toString('yyyy-mm-dd');
         }
     </script>
+
     <!-- blauwe balk met dialoog venster -->
     <div class="row-sv-blauw">
-        <div class="col s12">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
@@ -111,15 +112,14 @@
                                 </tr>
                             {% endfor %}
 
-                            <!-- button -->
-                            <tr>
-                                <td colspan="2" class="center">
-                                    <button class="btn-sv-rood" id="submit_knop" type="submit">
-                                        <i class="notranslate material-icons-round left">check</i>Opslaan</button>
-                                </td>
-                            </tr>
-
                         </table>
+
+
+                        <div class="center" style="margin-top:30px">
+                            <!-- button -->
+                            <button class="btn-sv-rood" id="submit_knop" type="submit">
+                                <i class="notranslate material-icons-round left">check</i>Opslaan</button>
+                        </div>
 
                     </form>
                 </div>

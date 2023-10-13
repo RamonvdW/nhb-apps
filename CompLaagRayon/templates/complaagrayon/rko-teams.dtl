@@ -23,13 +23,12 @@
     <script>
         function keuze_gemaakt(groep) {
 
-            const selector = "input[type='radio'][name=" + groep + "]:checked"
-            const el = document.querySelector(selector)
-            const url = el.dataset.url
+            const selector = "input[type='radio'][name=" + groep + "]:checked";
+            const el = document.querySelector(selector);
+            const url = el.dataset.url;
 
             // de radiobutton die bij het geladen geselecteerd werd heeft geen url
-            if (url.length > 0)
-                window.location.href = url
+            if (url.length > 0) window.location.href = url;
         }
     </script>
 

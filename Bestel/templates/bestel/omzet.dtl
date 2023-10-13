@@ -1,0 +1,59 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2023 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bestellingen en omzet{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bestellingen en omzet</h3>
+            <p>(exclusief gratis producten)</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-sv-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="white" style="padding:0 15px 0 15px">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Periode</th>
+                            <th class="right-align">Omzet</th>
+                            <th class="right-align">Aantal verkopen</th>
+                            <th class="right-align">Aantal verkopers</th>
+                        </tr>
+                    </thead>
+
+                    {% for datum, aantal, omzet, vers in lijst %}
+                        <tr>
+                            <td>{{ datum|date:"F Y" }}</td>
+                            <td class="right-align">&euro;&nbsp;{{ omzet }}</td>
+                            <td class="right-align">{{ aantal }}</td>
+                            <td class="right-align">{{ vers }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    <tr>
+                        <th class="right-align">Totalen:</th>
+                        <th class="right-align">&euro;&nbsp;{{ totaal_omzet }}</th>
+                        <th class="right-align">{{ totaal_aantal }}</th>
+                        <th class="right-align">{{ totaal_vers }}</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-activiteit-hist" %}
+
+{% endblock %}
+

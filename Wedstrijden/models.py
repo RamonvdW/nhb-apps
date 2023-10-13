@@ -19,7 +19,8 @@ from Wedstrijden.definities import (WEDSTRIJD_STATUS_CHOICES, WEDSTRIJD_STATUS_O
                                     WEDSTRIJD_KORTING_SOORT_CHOICES, WEDSTRIJD_KORTING_VERENIGING,
                                     WEDSTRIJD_KORTING_SOORT_TO_STR,
                                     INSCHRIJVING_STATUS_CHOICES, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                                    INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE)
+                                    INSCHRIJVING_STATUS_TO_STR, AANTAL_SCHEIDS_GEEN_KEUZE,
+                                    KWALIFICATIE_CHECK_CHOICES, KWALIFICATIE_CHECK_NOG_DOEN)
 from decimal import Decimal
 
 
@@ -33,7 +34,7 @@ from decimal import Decimal
 #     bestandsnaam = models.CharField(max_length=100, default='', blank=True)
 #
 #     # wanneer toegevoegd?
-#     toegevoegd_op = models.DateTimeField(auto_now=True)
+#     toegevoegd_op = models.DateTimeField(auto_now_add=True)
 #
 #     class Meta:
 #         verbose_name = "Wedstrijd deeluitslag"
@@ -127,14 +128,14 @@ class Wedstrijd(models.Model):
 
     # acceptatie verkoopvoorwaarden wedstrijdkalender
     verkoopvoorwaarden_status_acceptatie = models.BooleanField(default=False)
-    verkoopvoorwaarden_status_when = models.DateTimeField(auto_now=True)
-    verkoopvoorwaarden_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
+    verkoopvoorwaarden_status_when = models.DateTimeField(auto_now_add=True)
+    verkoopvoorwaarden_status_who = models.CharField(max_length=100, default='',          # [lid_nr] Volledige Naam
                                                      blank=True)     # mag leeg zijn
 
     # acceptatie voorwaarden WA A-status
     voorwaarden_a_status_acceptatie = models.BooleanField(default=False)
-    voorwaarden_a_status_when = models.DateTimeField(auto_now=True)
-    voorwaarden_a_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
+    voorwaarden_a_status_when = models.DateTimeField(auto_now_add=True)
+    voorwaarden_a_status_who = models.CharField(max_length=100, default='',               # [lid_nr] Volledige Naam
                                                 blank=True)     # mag leeg zijn
 
     # wordt deze wedstrijd door de organiserende vereniging buiten deze website om beheerd?
@@ -313,6 +314,12 @@ class Kwalificatiescore(models.Model):
 
     # behaald resultaat
     resultaat = models.PositiveSmallIntegerField(default=0)
+
+    # controle status
+    check_status = models.CharField(max_length=1, default=KWALIFICATIE_CHECK_NOG_DOEN,
+                                    choices=KWALIFICATIE_CHECK_CHOICES)
+
+    log = models.TextField(default='')
 
     def __str__(self):
         return "[%s] %s: %s (%s)" % (self.datum, self.resultaat, self.naam, self.waar)

@@ -113,6 +113,14 @@ urlpatterns = [
          view_manager.KalenderManagerView.as_view(),
          name='manager-status'),
 
+    path('manager/check-kwalificatie-scores/<wedstrijd_pk>/',
+         view_kwalificatie_scores.CheckKwalificatieScoresView.as_view(),
+         name='check-kwalificatie-scores'),
+
+    path('manager/check-kwalificatie-scores/wedstrijd/<score_pk>/',
+         view_kwalificatie_scores.CheckKwalificatieScoresWedstrijdView.as_view(),
+         name='check-kwalificatie-scores-wedstrijd'),
+
 
     # gedeeld
     path('<wedstrijd_pk>/wijzig/',

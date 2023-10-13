@@ -104,7 +104,7 @@ class TestRegistreerGast(E2EHelpers, TestCase):
         post_url = urls[0]
 
         # gebruik de POST
-        with self.assert_max_queries(37):
+        with self.assert_max_queries(39):
             resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

@@ -23,10 +23,10 @@
             let bezette_nrs = Array()
             document.querySelectorAll('input[type=radio]:checked').forEach(el => {
                 bezette_nrs.push(el.dataset["nr"]);
-            })
+            });
             //console.log('bezette nrs:', bezette_nrs)
 
-            const uls = document.querySelectorAll('ul[data-uitvaller="1"]')
+            const uls = document.querySelectorAll('ul[data-uitvaller="1"]');
             uls.forEach(el_ul => {
                 const invallers = el_ul.querySelectorAll('input');
                 invallers.forEach(invaller => {
@@ -42,8 +42,8 @@
                     //const isUitvaller = (invaller.dataset["isUitvaller"] === "1")
 
                     if (invaller.checked) bezette_nrs.push(nr);
-                })
-            })
+                });
+            });
         }
 
         function gewijzigd() {
@@ -194,7 +194,7 @@
     </div>
 
     <script>
-        window.addEventListener("load", function() { invallers_grijs_maken() })
+        window.addEventListener("load", function() { invallers_grijs_maken() });
     </script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-hwl-teams-invallers-koppelen" %}

@@ -21,6 +21,7 @@ from Wedstrijden.definities import WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_KORT
 from Wedstrijden.models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKorting
 from Webwinkel.models import WebwinkelProduct, WebwinkelKeuze
 from decimal import Decimal
+import datetime
 
 
 class TestBestelActiviteit(E2EHelpers, TestCase):
@@ -30,6 +31,9 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
     test_after = ('Bestel.tests.test_mandje',)
 
     url_activiteit = '/bestel/activiteit/'
+    url_omzet = '/bestel/omzet/'
+
+    volgende_bestel_nr = 1234567
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -197,7 +201,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
     def _maak_bestellingen(self):
         bestel = Bestelling(
-                    bestel_nr=1234567,
+                    bestel_nr=self.volgende_bestel_nr,
                     # account=       # van wie is deze bestelling
                     ontvanger=self.instellingen,
                     verkoper_naam='Test',
@@ -235,6 +239,8 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
         # de afgeronde betalingen: ontvangst en restitutie
         #transacties = models.ManyToManyField(BetaalTransactie, blank=True)
+
+        self.volgende_bestel_nr += 1
 
     def test_activiteit(self):
         # inlog vereist
@@ -282,6 +288,13 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/activiteit.dtl', 'plein/site_layout.dtl'))
 
+        # zoekterm nog te betalen / mislukte betalingen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit + '?zoekterm=**')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/activiteit.dtl', 'plein/site_layout.dtl'))
+
         # toon de nieuwste bestellingen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit)
@@ -296,6 +309,69 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/activiteit.dtl', 'plein/site_layout.dtl'))
+
+    def test_omzet(self):
+        # inlog vereist
+        self.client.logout()
+        resp = self.client.get(self.url_omzet)
+        self.assert403(resp)
+
+        ver2 = Vereniging(
+                    ver_nr=1001,
+                    naam="Tweede Club",
+                    regio=Regio.objects.get(regio_nr=112),
+                    bank_iban='IBAN123456789',
+                    bank_bic='BIC2BIC',
+                    kvk_nummer='KvK1234',
+                    website='www.bb.not',
+                    contact_email='info@bb.not',
+                    telefoonnummer='12345678')
+        ver2.save()
+
+        instellingen = BetaalInstellingenVereniging(
+                            vereniging=ver2,
+                            akkoord_via_bond=True)
+        instellingen.save()
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_omzet)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/omzet.dtl', 'plein/site_layout.dtl'))
+
+        self._maak_bestellingen()
+        bestelling1 = Bestelling.objects.first()
+        bestelling1.aangemaakt -= datetime.timedelta(days=60)
+        bestelling1.ontvanger = instellingen
+        bestelling1.save(update_fields=['aangemaakt', 'ontvanger'])
+
+        self._maak_bestellingen()
+        bestelling2 = Bestelling.objects.exclude(pk=bestelling1.pk).first()
+        bestelling2.totaal_euro = 0
+        bestelling2.save(update_fields=['totaal_euro'])
+
+        self._maak_bestellingen()
+        bestelling3 = Bestelling.objects.exclude(pk__in=(bestelling1.pk, bestelling2.pk)).first()
+        bestelling3.aangemaakt -= datetime.timedelta(days=60)
+        bestelling3.save(update_fields=['aangemaakt'])
+
+        self._maak_bestellingen()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_omzet)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/omzet.dtl', 'plein/site_layout.dtl'))
+
+        # geen is_staff vlag
+        self.account_admin.is_staff = False
+        self.account_admin.save(update_fields=['is_staff'])
+
+        resp = self.client.get(self.url_omzet)
+        self.assert403(resp)
 
 
 # end of file

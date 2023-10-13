@@ -21,25 +21,25 @@
     <script>
         function keuze(optie) {
             // voer een POST uit om de keuze door te geven
-            const form = document.createElement('form')
-            form.setAttribute('method', 'post')
-            form.setAttribute('action', '{{ url_nieuwe_korting }}')
+            const form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', '{{ url_nieuwe_korting }}');
 
-            let inp = document.createElement('input')
-            inp.type = "hidden"
-            inp.name = "keuze"
-            inp.value = optie
-            form.appendChild(inp)
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "keuze";
+            inp.value = optie;
+            form.appendChild(inp);
 
-            inp = document.createElement('input')
-            inp.type = "hidden"
-            inp.name = "csrfmiddlewaretoken"
-            inp.value = getCookie('csrftoken')
-            form.appendChild(inp)
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
 
             form.style.display = 'hidden'
-            document.body.appendChild(form)
-            form.submit()
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 

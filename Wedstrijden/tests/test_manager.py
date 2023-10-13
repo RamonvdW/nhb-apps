@@ -10,6 +10,7 @@ from Geo.models import Regio
 from Locatie.models import Locatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from Vereniging.models import Vereniging
+from Wedstrijden.models import Wedstrijd
 
 
 class TestWedstrijdenManager(E2EHelpers, TestCase):
@@ -69,6 +70,19 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
 
         # wissel terug naar BB
         self.e2e_wisselnaarrol_bb()
+
+        # haal het overzicht op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden_manager)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+
+        wedstrijd = Wedstrijd.objects.first()
+        wedstrijd.eis_kwalificatie_scores = True
+        wedstrijd.save(update_fields=['eis_kwalificatie_scores'])
+
+        # haal het overzicht op
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden_manager)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

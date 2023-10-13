@@ -59,6 +59,10 @@ urlpatterns = [
     path('activiteit/',
          view_activiteit.BestelActiviteitView.as_view(),
          name='activiteit'),
+
+    path('omzet/',
+         view_activiteit.BestelOmzetView.as_view(),
+         name='omzet'),
 ]
 
 # end of file

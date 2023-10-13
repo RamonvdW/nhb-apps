@@ -465,7 +465,8 @@ def rol_mag_wisselen(request):
 
     if check == "nieuw":
         # dit wordt gebruikt om nieuwe beheerders het wissel-van-rol menu te laten krijgen
-        rol_zet_sessionvars(request.user, request)
+        account = get_account(request)
+        rol_zet_sessionvars(account, request)
         check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
 
     return check

@@ -101,6 +101,10 @@ class KalenderManagerView(UserPassesTestMixin, View):
             wed.status_val_op = (wed.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
             wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
+
+            if wed.eis_kwalificatie_scores:
+                wed.url_check_kwalificatie_scores = reverse('Wedstrijden:check-kwalificatie-scores',
+                                                            kwargs={'wedstrijd_pk': wed.pk})
         # for
 
         context['wedstrijden'] = wedstrijden

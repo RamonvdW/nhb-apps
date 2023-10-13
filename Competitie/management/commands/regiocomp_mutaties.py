@@ -32,6 +32,7 @@ from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe
                                    uitslag_regio_indiv_naar_histcomp, uitslag_regio_teams_naar_histcomp,
                                    uitslag_rk_indiv_naar_histcomp, uitslag_rk_teams_naar_histcomp,
                                    uitslag_bk_indiv_naar_histcomp, uitslag_bk_teams_naar_histcomp)
+from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_notify_internal_error
 from Overig.background_sync import BackgroundSync
@@ -371,7 +372,8 @@ class Command(BaseCommand):
 
             if len(objs):
                 # invoegen na de reserve-sporter met gelijk of hoger gemiddelde
-                self.stdout.write('[INFO] Gemiddelde=%s, limiet=%s; 1e reserve heeft rank=%s, volgorde=%s' % (deelnemer.gemiddelde, limiet, objs[0].rank, objs[0].volgorde))
+                self.stdout.write('[INFO] Gemiddelde=%s, limiet=%s; 1e reserve heeft rank=%s, volgorde=%s' % (
+                                    deelnemer.gemiddelde, limiet, objs[0].rank, objs[0].volgorde))
                 nieuwe_rank = objs[0].rank + 1
             else:
                 # er zijn geen reserve-sporters met gelijk of hoger gemiddelde
@@ -640,6 +642,34 @@ class Command(BaseCommand):
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             competities_aanmaken(jaar)
 
+    @staticmethod
+    def _geef_hwl_taak_team_ronde(comp, ronde_nr, taak_ver):
+        """ maak een taak aan voor de HWL van de verenigingen
+            om door te geven dat de volgende team ronde gestart is en team invallers gekoppeld moeten worden
+            alleen verenigingen met een team staan in taak_ver
+        """
+
+        # TODO: onderdruk taak generatie aan het einde van de competitie (als dit administratief is)
+
+        now = timezone.now()
+        stamp_str = timezone.localtime(now).strftime('%Y-%m-%d om %H:%M')
+
+        taak_log = "[%s] Taak aangemaakt" % stamp_str
+
+        taak_tekst = "De teamcompetitie van de %s is zojuist doorgezet naar ronde %s.\n" % (comp.beschrijving, ronde_nr)
+        taak_tekst += "Als HWL kan je nu invallers koppelen voor elk van de teams van jouw vereniging."
+
+        taak_deadline = now + datetime.timedelta(days=5)
+
+        for functie_hwl in Functie.objects.filter(rol='HWL', vereniging__ver_nr__in=taak_ver):
+            # maak een taak aan voor deze BKO
+            maak_taak(toegekend_aan_functie=functie_hwl,
+                      deadline=taak_deadline,
+                      aangemaakt_door=None,  # systeem
+                      beschrijving=taak_tekst,
+                      log=taak_log)
+        # for
+
     def _verwerk_mutatie_regio_team_ronde(self, deelcomp):
         # bepaal de volgende ronde
         if deelcomp.huidige_team_ronde > 7:
@@ -668,12 +698,14 @@ class Command(BaseCommand):
                            .filter(team__regiocompetitie=deelcomp,
                                    ronde_nr=deelcomp.huidige_team_ronde))
             if ronde_teams.count() == 0:
-                self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want 0 ronde teams' % deelcomp)
+                self.stdout.write(
+                    '[WARNING] Team ronde doorzetten voor regio %s geweigerd want 0 ronde teams' % deelcomp)
                 return
 
             aantal_scores = ronde_teams.filter(team_score__gt=0).count()
             if aantal_scores == 0:
-                self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want alle team_scores zijn 0' % deelcomp)
+                self.stdout.write(
+                    '[WARNING] Team ronde doorzetten voor regio %s geweigerd want alle team_scores zijn 0' % deelcomp)
                 return
 
         now = timezone.now()
@@ -711,6 +743,8 @@ class Command(BaseCommand):
         for team_lid in ver_dict.values():
             team_lid.sort()
         # for
+
+        taak_ver = list()
 
         # maak voor elk team een 'ronde instantie' aan waarin de invallers en score bijgehouden worden
         # verdeel ook de sporters volgens VSG
@@ -768,11 +802,17 @@ class Command(BaseCommand):
                     ronde_team.logboek += '   ' + str(deelnemer.sporterboog.sporter) + '\n'
                 # for
                 ronde_team.save(update_fields=['logboek'])
+
+                if team.vereniging.ver_nr not in taak_ver:
+                    taak_ver.append(team.vereniging.ver_nr)
             # for
         # for
 
         deelcomp.huidige_team_ronde = ronde_nr
         deelcomp.save(update_fields=['huidige_team_ronde'])
+
+        # geef de HWL's een taak om de invallers te koppelen
+        self._geef_hwl_taak_team_ronde(deelcomp.competitie, ronde_nr, taak_ver)
 
     @staticmethod
     def _get_regio_sporters_rayon(competitie, rayon_nr):
@@ -861,7 +901,8 @@ class Command(BaseCommand):
         return deelnemers
 
     def _maak_deelnemerslijst_rks(self, comp):
-        """ stel de deelnemerslijsten voor de kampioenschappen op aan de hand van gerechtigde deelnemers uit de regiocompetitie.
+        """ stel de deelnemerslijsten voor de kampioenschappen op
+            aan de hand van gerechtigde deelnemers uit de regiocompetitie.
             ook wordt hier de vereniging van de sporter bevroren.
         """
 
@@ -912,7 +953,8 @@ class Command(BaseCommand):
                         KampioenschapSporterBoog.objects.bulk_create(bulk_lijst)
                         bulk_lijst = list()
                 else:
-                    self.stdout.write('[WARNING] Sporter %s is geen RK deelnemer want heeft geen vereniging' % deelnemer.sporterboog)
+                    self.stdout.write(
+                        '[WARNING] Sporter %s is geen RK deelnemer want heeft geen vereniging' % deelnemer.sporterboog)
             # for
 
             if len(bulk_lijst) > 0:
@@ -1141,7 +1183,7 @@ class Command(BaseCommand):
         # bepaal nu voor elke klasse de volgorde van de deelnemers
         self._verwerk_mutatie_initieel_deelkamp(deelkamp_bk)
 
-        # behoud maximaal 48 sporters in elke klasse: 24 deelnemers en 24 reserven
+        # behoud maximaal 48 sporters in elke klasse: 24 deelnemers en 24 reserves
         qset = KampioenschapSporterBoog.objects.filter(kampioenschap=deelkamp_bk, volgorde__gt=48)
         qset.delete()
 
@@ -1320,7 +1362,9 @@ class Command(BaseCommand):
                     teams_per_ver[ver_nr] = 1
                 else:
                     if teams_per_ver[ver_nr] > 2:
-                        self.stdout.write('[WARNING] Vereniging %s heeft maximum bereikt. Team %s wordt niet opgenomen.' % (ver_nr, rk_team.team_naam))
+                        self.stdout.write(
+                            '[WARNING] Vereniging %s heeft maximum bereikt. Team %s wordt niet opgenomen.' % (
+                                ver_nr, rk_team.team_naam))
                         skip = True
 
                 if not skip:

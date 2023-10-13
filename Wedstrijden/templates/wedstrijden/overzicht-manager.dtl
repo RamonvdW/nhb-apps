@@ -13,13 +13,12 @@
     <script>
         function keuze_gemaakt(groep) {
 
-            const selector = "input[type='radio'][name=" + groep + "]:checked"
-            const el = document.querySelector(selector)
-            const url = el.dataset.url
+            const selector = "input[type='radio'][name=" + groep + "]:checked";
+            const el = document.querySelector(selector);
+            const url = el.dataset.url;
 
             // de radiobutton die bij het geladen geselecteerd werd heeft geen url
-            if (url.length > 0)
-                window.location.href = url
+            if (url.length > 0) window.location.href = url;
         }
     </script>
 
@@ -90,8 +89,13 @@
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                 <a class="btn-sv-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
                                     <i class="notranslate material-icons-round">edit</i></a>
-                                <a class="btn-sv-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px">
+                                <a class="btn-sv-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
                                     <i class="notranslate material-icons-round">schedule</i></a>
+
+                                {% if wed.url_check_kwalificatie_scores %}
+                                    <a class="btn-sv-blauw" href="{{ wed.url_check_kwalificatie_scores }}" style="padding:0; width:35px; margin-right:5px">
+                                        <i class="notranslate material-icons-round">verified</i></a>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

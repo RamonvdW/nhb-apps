@@ -45,7 +45,7 @@ def site_layout(request):
         if rol_mag_wisselen(request):
             context['menu_url_wissel_van_rol'] = reverse('Functie:wissel-van-rol')
 
-            if request.user.is_staff:
+            if account.is_staff:
                 if otp_is_controle_gelukt(request):
                     context['menu_url_admin_site'] = reverse('admin:index')
 

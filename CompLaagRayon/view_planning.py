@@ -876,8 +876,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # for
 
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
-        account = get_account(request)
-        door_str = "RKO %s" % account.volledige_naam()
+        door_account = get_account(request)
+        door_str = "RKO %s" % door_account.volledige_naam()
 
         mutatie = None
         for indiv_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_indiv:
@@ -885,7 +885,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             if oude_limiet != nieuwe_limiet:
                 msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
                         str(indiv_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
-                schrijf_in_logboek(self.request.user, "Competitie", msg)
+                schrijf_in_logboek(door_account, "Competitie", msg)
 
                 mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
                                             door=door_str,
@@ -901,7 +901,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             if oude_limiet != nieuwe_limiet:
                 msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
                         str(team_klasse), str(deelkamp), oude_limiet, nieuwe_limiet)
-                schrijf_in_logboek(self.request.user, "Competitie", msg)
+                schrijf_in_logboek(door_account, "Competitie", msg)
 
                 mutatie = CompetitieMutatie(mutatie=MUTATIE_KAMP_CUT,
                                             door=door_str,

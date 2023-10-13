@@ -601,11 +601,13 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             if nieuw_ag < 1.0 or nieuw_ag >= 10.0:
                 raise Http404('Geen goed AG')
 
+            door_account = get_account(request)
+
             score_teams_ag_opslaan(
                     deelnemer.sporterboog,
                     deelnemer.regiocompetitie.competitie.afstand,
                     nieuw_ag,
-                    request.user,
+                    door_account,
                     "Nieuw handmatig AG voor teams")
 
             deelnemer.ag_voor_team = nieuw_ag

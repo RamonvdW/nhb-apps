@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2019-2023 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -60,7 +60,7 @@ class Feedback(models.Model):
         short_feedback = self.feedback[:60]
         if len(self.feedback) > 60:
             short_feedback += "..."
-        msg = "[%s] %s [%s] %s" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
+        msg = "[%s] %s [%s] %s" % (timezone.localtime(self.toegevoegd_op).strftime('%Y-%m-%d %H:%M'),
                                    self.gebruiker,
                                    self.bev2str[self.bevinding],
                                    short_feedback)

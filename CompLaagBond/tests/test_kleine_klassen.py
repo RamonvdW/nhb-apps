@@ -141,7 +141,6 @@ class TestCompLaagBondKleineKlassen(E2EHelpers, TestCase):
         resp = self.client.post(self.url_verplaats,
                                 json.dumps(json_data),
                                 content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
         self.assert200_json(resp)
         self.assertEqual(1, CompetitieMutatie.objects.count())
 

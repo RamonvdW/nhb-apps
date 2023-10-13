@@ -289,6 +289,10 @@ class MyTestAsserts(TestCase):
             if pos >= 0:        # pragma: no cover
                 self.fail(msg='Found block comment in script from template %s' % template_name)
 
+            # tel het aantal newlines in het script
+            if script.count('\n') >= 3:
+                self.fail(msg='Missing semi-colons in script in template %s' % template_name)
+
             html = html[pos+9:]
             pos = html.find('<script ')
         # while

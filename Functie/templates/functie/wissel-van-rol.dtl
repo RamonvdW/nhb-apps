@@ -23,25 +23,25 @@
     <script>
         function wissel_naar_rol() {
             // vind de gekozen radiobutton
-            const el = document.querySelector("input[type='radio'][name='rol']:checked")
+            const el = document.querySelector("input[type='radio'][name='rol']:checked");
 
             // haal de url op van het input element
-            const url = el.dataset.url
+            const url = el.dataset.url;
 
             // do een form post met de url
-            const form = document.createElement('form')
-            form.method = 'post'
-            form.action = url
-            form.style.display = 'hidden'
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = url;
+            form.style.display = 'hidden';
 
-            let inp = document.createElement('input')
-            inp.type = "hidden"
-            inp.name = "csrfmiddlewaretoken"
-            inp.value = getCookie('csrftoken')
-            form.appendChild(inp)
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
 
-            document.body.appendChild(form)
-            form.submit()
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 

@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.sites import AdminSite
 from django.contrib.admin.templatetags import admin_list
+from Account.models import get_account
 from Account.operations.otp import otp_is_controle_gelukt
 from collections import OrderedDict
 import datetime
@@ -56,7 +57,8 @@ class BeheerAdminSite(AdminSite):
 
         # send the user to the login page only when required
         # send the 2FA page otherwise
-        if request.user.is_active and request.user.is_staff and request.user.is_authenticated:
+        account = get_account(request)
+        if account.is_active and account.is_staff and account.is_authenticated:
             # well, login is not needed
             if otp_is_controle_gelukt(request):
                 # what are we doing here?
@@ -86,10 +88,8 @@ class BeheerAdminSite(AdminSite):
 
     def has_permission(self, request):
         """ geef True terug als de gebruiker bij de admin pagina mag """
-        return (request.user.is_active
-                and request.user.is_staff
-                and request.user.is_authenticated
-                and otp_is_controle_gelukt(request))
+        account = get_account(request)
+        return account.is_active and account.is_staff and account.is_authenticated and otp_is_controle_gelukt(request)
 
     # overrides django/contrib/admin/sites.py:AdminSite:get_app_list
     def get_app_list(self, request, app_label=None):
