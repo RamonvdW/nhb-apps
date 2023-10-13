@@ -78,14 +78,14 @@
                                     </tr>
 
                                     <tr>
-                                        <th>Hulpscheidsrechter</th>
+                                        <th>Scheidsrechter</th>
                                         <td>{{ dag.datum }}</td>
                                         <td>
                                             <ul>
                                                 {% for beschikbaar in dag.beschikbaar_sr %}
                                                     <li>
                                                         <label class="black-text" for="{{ beschikbaar.id_li2 }}">
-                                                            <input class="with-gap" type="radio" name="{{ dag.nr_sr }}" value="{{ beschikbaar.pk }}" id="{{ beschikbaar.id_li2 }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
+                                                            <input class="filled-in" type="checkbox" name="{{ beschikbaar.sel }}" id="{{ beschikbaar.id_li2 }}"{% if beschikbaar.is_onzeker %} disabled{% else %}{% if beschikbaar.is_selected %} checked{% endif %} onchange="gewijzigd()"{% endif %}>
                                                             <span>{{ beschikbaar.scheids.volledige_naam }}{% if beschikbaar.is_onzeker %} (overweegt){% endif %}</span>
                                                         </label>
                                                     </li>
@@ -95,6 +95,12 @@
                                                     </li>
                                                 {% endfor %}
                                             </ul>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td class="center" colspan="2">
+                                            <i>Nog niemand beschikbaar</i>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -256,7 +262,7 @@
         </div>
 
         {% if toon_sessies %}
-            <div class="col s12">
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
                                         <!-- not: popout !! -->
                 <ul id="sessies" class="collapsible z-depth-0 white" style="margin-top:30px; margin-bottom:0">
                     <li>

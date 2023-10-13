@@ -24,59 +24,8 @@ from Wedstrijden.models import Wedstrijd, WedstrijdSessie
 from types import SimpleNamespace
 import datetime
 
-TEMPLATE_OVERZICHT = 'scheidsrechter/overzicht.dtl'
 TEMPLATE_WEDSTRIJDEN = 'scheidsrechter/wedstrijden.dtl'
 TEMPLATE_WEDSTRIJD_DETAILS = 'scheidsrechter/wedstrijd-details.dtl'
-
-
-class OverzichtView(UserPassesTestMixin, TemplateView):
-
-    """ Django class-based view voor de scheidsrechters """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_OVERZICHT
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
-        if self.rol_nu == Rollen.ROL_CS:
-            return True
-        if self.rol_nu == Rollen.ROL_SPORTER and gebruiker_is_scheids(self.request):
-            return True
-        return False
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        if self.rol_nu == Rollen.ROL_SPORTER:
-            context['url_korps'] = reverse('Scheidsrechter:korps')
-            context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters."
-
-            context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-wijzigen')
-            context['tekst_beschikbaarheid'] = "Pas je beschikbaarheid aan voor wedstrijden."
-
-            context['rol'] = 'sporter / scheidsrechter'
-        else:
-            context['url_korps'] = reverse('Scheidsrechter:korps-met-contactgegevens')
-            context['tekst_korps'] = "Bekijk de lijst van de scheidsrechters met contactgegevens."
-
-            context['url_beschikbaarheid'] = reverse('Scheidsrechter:beschikbaarheid-inzien')
-            context['tekst_beschikbaarheid'] = "Bekijk de opgegeven beschikbaarheid."
-
-            context['rol'] = 'Commissie Scheidsrechters'
-
-        context['kruimels'] = (
-            (None, 'Scheidsrechters'),
-        )
-
-        return context
 
 
 class WedstrijdenView(UserPassesTestMixin, TemplateView):
@@ -280,6 +229,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                     beschikbaar.id_li1 = 'id_%s_1' % beschikbaar.pk
                     beschikbaar.id_li2 = 'id_%s_2' % beschikbaar.pk
                     beschikbaar.is_onzeker = (beschikbaar.opgaaf == BESCHIKBAAR_DENK)
+                    beschikbaar.sel = 'sr_%s_%s' % (dag_offset, beschikbaar.pk)
 
                     sr.append(beschikbaar)
                     if beschikbaar.scheids.scheids != SCHEIDS_VERENIGING:
@@ -290,7 +240,6 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                     dag = SimpleNamespace(
                             datum=datum,
                             nr_hsr="hsr_%s" % dag_offset,
-                            nr_sr="sr_%s" % dag_offset,
                             beschikbaar_hoofd_sr=hsr,
                             beschikbaar_sr=sr)
                     dagen.append(dag)
