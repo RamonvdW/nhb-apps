@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Bestel.definities import BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_AFGEROND
+from Bestel.definities import BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_AFGEROND
 from Bestel.models import BestelProduct, Bestelling, BestelMutatie
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.models import Functie
@@ -100,7 +100,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
                         verkoper_bic='VER2BIC',
                         verkoper_heeft_mollie=False,
                         totaal_euro='10.00',
-                        status=BESTELLING_STATUS_WACHT_OP_BETALING,
+                        status=BESTELLING_STATUS_BETALING_ACTIEF,
                         log='Een beginnetje\n')
         bestelling.save()
         bestelling.producten.add(product)
@@ -113,7 +113,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         self.assertEqual(0, MailQueue.objects.count())
         self.assertEqual(0, self.bestelling.transacties.count())
-        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(self.bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_overboeking_ontvangen,

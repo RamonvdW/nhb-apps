@@ -14,7 +14,7 @@ from django.core.management.base import BaseCommand
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db.models import Count
 from django.db import transaction
-from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
+from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF,
                                BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD,
                                BESTELLING_STATUS2STR, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
                                BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEBWINKEL_KEUZE,
@@ -149,7 +149,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
     status = bestelling.status
     if status == BESTELLING_STATUS_NIEUW:
-        status = BESTELLING_STATUS_WACHT_OP_BETALING
+        status = BESTELLING_STATUS_BETALING_ACTIEF
 
     totaal_euro_str = "%.2f" % bestelling.totaal_euro
     totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
@@ -750,7 +750,7 @@ class Command(BaseCommand):
         is_gelukt = mutatie.betaling_is_gelukt
 
         status = bestelling.status
-        if status != BESTELLING_STATUS_WACHT_OP_BETALING:
+        if status != BESTELLING_STATUS_BETALING_ACTIEF:
             self.stdout.write('[WARNING] Bestelling %s (pk=%s) wacht niet op een betaling (status=%s)' % (
                                 bestelling.mh_bestel_nr(), bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
             return
@@ -917,7 +917,7 @@ class Command(BaseCommand):
         bestelling = mutatie.bestelling
 
         status = bestelling.status
-        if status not in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+        if status not in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
             self.stdout.write('[WARNING] Kan bestelling %s (pk=%s) niet annuleren, want status = %s' % (
                                 bestelling.mh_bestel_nr(), bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
             return

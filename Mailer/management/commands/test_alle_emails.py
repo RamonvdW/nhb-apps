@@ -15,7 +15,7 @@ from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.operations.email import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
-from Bestel.definities import BESTELLING_STATUS_WACHT_OP_BETALING
+from Bestel.definities import BESTELLING_STATUS_BETALING_ACTIEF
 from Bestel.models import Bestelling, BestelProduct
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
@@ -210,7 +210,7 @@ class Command(BaseCommand):
                         verkoper_email=ver.contact_email,
                         verkoper_telefoon=ver.telefoonnummer,
                         totaal_euro=Decimal("142.42"),
-                        status=BESTELLING_STATUS_WACHT_OP_BETALING)
+                        status=BESTELLING_STATUS_BETALING_ACTIEF)
         bestelling.save()
         bestelling.producten.add(product_r)
         bestelling.producten.add(product_c)

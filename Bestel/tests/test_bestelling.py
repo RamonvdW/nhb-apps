@@ -10,7 +10,7 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.definities import ORGANISATIE_IFAA
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
-from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
+from Bestel.definities import (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_BETALING_ACTIEF, BESTELLING_STATUS_NIEUW,
                                BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS_GEANNULEERD)
 from Bestel.models import BestelMandje, BestelMutatie, Bestelling
 from Bestel.operations.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd,
@@ -413,7 +413,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
         bestelling.betaal_actief = betaalactief
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # betaling mislukt
@@ -435,7 +435,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # dubbel verzoek heeft geen effect
@@ -584,7 +584,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
         bestelling.betaal_actief = betaalactief
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # betaling mislukt
@@ -642,7 +642,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
         bestelling.betaal_actief = betaalactief
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # deze betaling is 1 cent te weinig
@@ -698,7 +698,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # maak een transactie geschiedenis aan met een restitutie, maar toch genoeg betaald
@@ -913,7 +913,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             payment_status='paid',
                             log='test')
         betaalactief.save()
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.betaal_actief = betaalactief
         bestelling.save(update_fields=['betaal_actief', 'status'])
         BetaalTransactie(
@@ -931,7 +931,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
-        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_BETALING_ACTIEF)
 
         inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
@@ -978,7 +978,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
         BetaalTransactie(
@@ -1236,7 +1236,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(status, 'afgerond')
 
         # wacht op betaling, zonder betaal_mutatie
-        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
         bestelling.save(update_fields=['status'])
 
         with self.assert_max_queries(20):

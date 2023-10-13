@@ -11,7 +11,7 @@ from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import get_account
-from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
+from Bestel.definities import (BESTELLING_STATUS2STR, BESTELLING_STATUS_BETALING_ACTIEF,
                                BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT,
                                BESTELLING_STATUS_GEANNULEERD,
                                BESTEL_TRANSPORT_OPHALEN)
@@ -81,10 +81,10 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
             if status == BESTELLING_STATUS_NIEUW:
                 # nieuw is een interne state. Na een verlopen/mislukte betalen wordt deze status ook gezet.
                 # toon daarom als "te betalen"
-                status = BESTELLING_STATUS_WACHT_OP_BETALING
+                status = BESTELLING_STATUS_BETALING_ACTIEF
 
             bestelling.status_str = BESTELLING_STATUS2STR[status]
-            bestelling.status_aandacht = (status == BESTELLING_STATUS_WACHT_OP_BETALING)
+            bestelling.status_aandacht = (status == BESTELLING_STATUS_BETALING_ACTIEF)
 
             bestelling.url_details = reverse('Bestel:toon-bestelling-details',
                                              kwargs={'bestel_nr': bestelling.bestel_nr})
@@ -249,7 +249,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                     context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
                                                        kwargs={'bestel_nr': bestelling.bestel_nr})
 
-            if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+            if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
                 context['url_annuleren'] = reverse('Bestel:annuleer-bestelling',
                                                    kwargs={'bestel_nr': bestelling.bestel_nr})
 
@@ -428,7 +428,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
                         # snel == '1',
                         snel=True)          # niet wachten op reactie
 
-        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
+        elif bestelling.status == BESTELLING_STATUS_BETALING_ACTIEF:
             if bestelling.betaal_mutatie:
                 url = bestelling.betaal_mutatie.url_checkout
                 if url:
@@ -507,7 +507,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
         if bestelling.status == BESTELLING_STATUS_AFGEROND:
             context['is_afgerond'] = True
 
-        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
+        elif bestelling.status == BESTELLING_STATUS_BETALING_ACTIEF:
             # hier komen we als de betaling uitgevoerd is, maar de payment-status-changed nog niet
             # binnen is of nog niet verwerkt door de achtergrondtaak.
             # blijf pollen
@@ -552,7 +552,7 @@ class AnnuleerBestellingView(UserPassesTestMixin, View):
         except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
             raise Http404('Niet gevonden')
 
-        if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_WACHT_OP_BETALING):
+        if bestelling.status in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
             # verzoek de achtergrondtaak om de annulering te verwerken
             bestel_mutatieverzoek_annuleer(bestelling, snel == '1')
 

@@ -10,7 +10,7 @@ from Bestel.definities import (BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTA
                                BESTEL_MUTATIE_MAAK_BESTELLINGEN, BESTEL_MUTATIE_VERWIJDER,
                                BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN, BESTEL_MUTATIE_BETALING_AFGEROND,
                                BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN, BESTEL_MUTATIE_ANNULEER, BESTEL_MUTATIE_TRANSPORT,
-                               BESTELLING_STATUS_WACHT_OP_BETALING)
+                               BESTELLING_STATUS_BETALING_ACTIEF)
 from Bestel.models import BestelMutatie, Bestelling
 from Overig.background_sync import BackgroundSync
 import time
@@ -208,7 +208,7 @@ def bestel_betaling_is_gestart(bestelling, actief):
         is en de checkout_url beschikbaar is in dit betaal_actief record
     """
     bestelling.betaal_actief = actief
-    bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+    bestelling.status = BESTELLING_STATUS_BETALING_ACTIEF
 
     when_str = timezone.localtime(actief.when).strftime('%Y-%m-%d om %H:%M')
 
