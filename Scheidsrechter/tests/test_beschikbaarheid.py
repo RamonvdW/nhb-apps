@@ -21,7 +21,7 @@ from Wedstrijden.models import WedstrijdSessie, Wedstrijd
 import datetime
 
 
-class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
+class TestScheidsrechterBeschikbaarheid(E2EHelpers, TestCase):
 
     """ tests voor de Scheidsrechter applicatie; module Overzicht """
 

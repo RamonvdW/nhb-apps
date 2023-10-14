@@ -29,7 +29,7 @@ class WedstrijdDagScheidsrechtersAdmin(admin.ModelAdmin):
 
     @staticmethod
     def label_voor_scheids_met_niveau(inst):
-        return "%s %s" % (SCHEIDS2LEVEL[inst.scheids], inst.lid_nr_en_volledige_naam())
+        return "%s %s" % (SCHEIDS2LEVEL[inst.scheids], inst.lid_nr_en_volledige_naam())     # pragma: no cover
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
         """ initialisatie van het admin formulier

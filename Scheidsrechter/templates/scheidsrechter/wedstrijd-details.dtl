@@ -125,15 +125,24 @@
 
             </div>
         </div>
-    {% endif %}
 
-
-    <!-- banner -->
-    <div class="row center">
-        <div class="col s12">
-            <h3 class="page-banner">Wedstrijd details</h3>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Wedstrijd details</h4>
+            </div>
         </div>
-    </div>
+
+    {% else %}
+
+        <!-- banner -->
+        <div class="row center">
+            <div class="col s12">
+                <h3 class="page-banner">Wedstrijd details</h3>
+            </div>
+        </div>
+
+    {% endif %}
 
     <!-- blauwe balk met informatie tabel -->
     <div class="row-sv-blauw">

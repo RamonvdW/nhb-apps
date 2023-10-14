@@ -12,7 +12,7 @@ from TestHelpers import testdata
 from Sporter.models import Sporter
 
 
-class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
+class TestScheidsrechterKorps(E2EHelpers, TestCase):
 
     """ tests voor de Scheidsrechter applicatie; module Overzicht """
 

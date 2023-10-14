@@ -74,8 +74,7 @@ class BeschikbaarheidOpvragenView(UserPassesTestMixin, View):
             if is_new:
                 # voor deze dag een verzoek versturen
                 datum = wedstrijd.datum_begin + datetime.timedelta(days=dag_nr)
-                if datum not in vraag:
-                    vraag.append(datum)
+                vraag.append(datum)
         # for
 
         # TODO: stuur e-mails naar SR

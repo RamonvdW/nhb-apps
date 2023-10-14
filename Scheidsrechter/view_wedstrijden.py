@@ -256,6 +256,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                 if not hsr_nog_beschikbaar and dag.gekozen_hoofd_sr:
                     # gekozen hoofdscheidsrechter is niet meer beschikbaar
                     niet_meer_hsr = SimpleNamespace(
+                                        pk=0,       # wordt gebruikt als value
                                         id_li='id_hsr_niet_%s' % dag.gekozen_hoofd_sr.pk,
                                         scheids=dag.gekozen_hoofd_sr,
                                         is_selected=True,
@@ -370,7 +371,7 @@ class WedstrijdDetailsView(UserPassesTestMixin, TemplateView):
                                        .select_related('scheids')
                                        .get(pk=pk))
                     except (ValueError, ScheidsBeschikbaarheid.DoesNotExist):
-                        raise Http404('Slechte parameter(1)')
+                        raise Http404('Slechte parameter (1)')
 
                     dag.gekozen_hoofd_sr = beschikbaar.scheids
 
