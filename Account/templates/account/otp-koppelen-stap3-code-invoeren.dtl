@@ -51,7 +51,7 @@
             <div style="padding:20px">
                 <p class="left-align">Voer de 6 cijfers in om de koppeling te voltooien</p>
 
-                <form action="{{ url_controleer }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ url_controleer }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
 
                     <div class="row">

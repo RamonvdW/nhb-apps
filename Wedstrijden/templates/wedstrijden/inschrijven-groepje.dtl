@@ -122,7 +122,7 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
-                    <form action="{{ url_zoek }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
+                    <form action="{{ url_zoek }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
 
                         <div class="input-field">
                             <label for="id_bondsnr">Bondsnummer</label>

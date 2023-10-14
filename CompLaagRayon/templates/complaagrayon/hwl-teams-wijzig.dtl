@@ -25,7 +25,7 @@
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
 
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -94,7 +94,7 @@
                 <h5>Verwijder dit RK team?</h5>
                 <p>Wil je dit RK team van vereniging<br><b>{{ rk_team.vereniging }}</b><br>verwijderen?</p>
 
-                <form action="{{ url_verwijderen }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijderen" value="1">
 

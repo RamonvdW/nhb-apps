@@ -104,7 +104,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
-        context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
+        context['email_support'] = settings.EMAIL_SUPPORT
 
         try:
             regiocompetitie = (Regiocompetitie

@@ -25,7 +25,7 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; {% if was_foutvrij %}submit_knop2.disabled=true; {% endif %}return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; {% if was_foutvrij %}document.getElementById('submit_knop2').disabled=true; {% endif %}return true;">
                         {% csrf_token %}
                         <input id="id_actie" type="hidden" name="actie" value="{% if was_foutvrij %}registreer{% else %}check{% endif %}">
 

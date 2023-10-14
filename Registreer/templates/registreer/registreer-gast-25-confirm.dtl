@@ -24,7 +24,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px" class="left-align">
-                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="bevestigd" value="Nee">
 
@@ -122,7 +122,7 @@
             <p>Door op 'Ja' te drukken geef je toestemming om de door jou ingevoerde gegevens op te slaan in ons systeem en te gebruiken voor de dienstverlening.<br>Details staan beschreven in het document Privacyverklaring.</p>
             <p>Wijzigen van de gegevens kan alleen door contact op te nemen met het Bondsbureau.<br>Contactgegevens kan je vinden op 'Mijn Pagina'.</p>
 
-            <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+            <form action="{% url 'Registreer:gast-volgende-vraag' %}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                 {% csrf_token %}
                 <input type="hidden" name="bevestigd" value="Ja">
 

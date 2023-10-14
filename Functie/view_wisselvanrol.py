@@ -160,9 +160,9 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             obj.ver_naam = ''
             if obj.vereniging and obj.rol != 'MWW':
-                if obj.vereniging.plaats == '':
-                    obj.vereniging.plaats = 'onbekend'
-                obj.ver_naam = '%s (%s)' % (obj.vereniging.naam, obj.vereniging.plaats)
+                obj.ver_naam = obj.vereniging.naam
+                if obj.vereniging.plaats:
+                    obj.ver_naam += ' (' + obj.vereniging.plaats + ')'
 
             if self.functie_nu:
                 obj.selected = (obj.pk == self.functie_nu.pk)

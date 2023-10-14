@@ -23,7 +23,7 @@
                 {% else %}
                     <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd controleren en accorderen, waarna de HWL/WL de uitslag niet meer aan kan passen. De RCL kan de uitslag altijd nog corrigeren.</p>
                     <p>
-                        <form action="{{ url_geef_akkoord }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                        <form action="{{ url_geef_akkoord }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
                             <button class="btn-sv-rood" id="submit_knop" type="submit">Ik geef akkoord voor deze uitslag</button>
                         </form>

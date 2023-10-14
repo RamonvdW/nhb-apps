@@ -32,7 +32,7 @@
                     <br>
                 </div>
 
-                <form action="{{ records_zoek_url }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ records_zoek_url }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     <!-- form field -->
                     <div class="input-field">
                         {{ form.zoekterm.label_tag }} {{ form.zoekterm }}

@@ -86,7 +86,7 @@
                         {% if deelnemer.deelname != 'J' %}
                             <p>Klik op de blauwe knop om mogelijkheid tot deelname aan het RK te bevestigen</p>
                             <br>
-                            <form action="{{ url_wijzig }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                            <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                                 {% csrf_token %}
                                 <input name="bevestig" type="hidden" value="1">
                                 <button class="btn-sv-blauw" id="submit_knop1" type="submit">
@@ -97,7 +97,7 @@
                         {% if deelnemer.deelname != 'N' %}
                             <p>Klik op de rode knop om de sporter af te melden voor het RK</p>
                             <br>
-                            <form action="{{ url_wijzig }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                            <form action="{{ url_wijzig }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                                 {% csrf_token %}
                                 <input name="afmelden" type="hidden" value="1">
                                 <button class="btn-sv-rood" id="submit_knop2" type="submit">

@@ -61,7 +61,7 @@
                 {% if taak.url_sluiten %}
                     <tr>
                         <td colspan="2" class="center" style="padding-top:50px">Als de taak afgehandeld is, dan kan je deze sluiten:<br><br>
-                            <form action="{{ taak.url_sluiten }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                            <form action="{{ taak.url_sluiten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                 {% csrf_token %}
                                 <input class="btn-sv-rood" name="button_sluit_taak" id="submit_knop" type="submit" value="Taak sluiten">
                             </form>

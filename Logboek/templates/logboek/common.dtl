@@ -51,7 +51,7 @@
     <div class="col s12 m7">
         <div class="white left-align z-depth-3" style="padding:50px 30px 30px 30px">
             <!-- dialoog venster -->
-            <form action="{{ filter_url }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
+            <form action="{{ filter_url }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                 <div class="input-text">
                     <span>Zoek naar:</span>
                     <input type="text" name="zoekterm" value="{{ zoekterm }}">

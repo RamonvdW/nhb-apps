@@ -187,7 +187,7 @@
                 <p>Je hebt gecontroleerd dat het gast-account overeenkomt met een bekend lid.</p>
                 <p>We blokkeren het gast-account en sturen een automatische e-mail waarin we kort uitleggen dat een normaal account gemaakt moet worden.</p>
 
-                <form action="{{ gast.url_ophef }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ gast.url_ophef }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="lid_nr" value="{{ gast.lid_nr }}">
 

@@ -27,7 +27,7 @@
                 <p>Dit is een eenmalige maar belangrijke actie, waardoor de sporters doorgezet worden naar het RK.</p>
                 <p>Hiermee bevestig je ook dat alle scores ingevoerd zijn en er geen klachten meer in behandeling zijn die invloed kunnen hebben op de top-24 van elke wedstrijdklasse.</p>
 
-                <form action="{{ url_afsluiten }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ url_afsluiten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
                     <input class="btn-sv-rood" name="button_afsluiten" id="submit_knop" type="submit" value="Sluit mijn regiocompetitie af">
                 </form>

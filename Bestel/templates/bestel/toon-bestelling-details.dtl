@@ -126,7 +126,7 @@
                                 <td class="hide-on-small-only"></td>
                                 <td class="right-align">
                                     <!-- voorkom dubbelklikken op de submit knop -->
-                                    <form action="{{ url_afrekenen }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                                    <form action="{{ url_afrekenen }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                                         {% csrf_token %}
                                         <button class="btn-sv-rood" id="submit_knop1" type="submit">
                                             <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Betalen</button>
@@ -192,7 +192,7 @@
                 <p>Gemaakte reserveringen voor wedstrijden / evenementen / producten vervallen.</p>
                 <p>Doet dit alleen als je nog geen betaling gedaan hebt.</p>
 
-                <form action="{{ url_annuleren }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                <form action="{{ url_annuleren }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
 
                     <div class="modal-footer" style="text-align:center; display:block">

@@ -22,12 +22,12 @@
         <div class="col s12">
             <div class="white left-align center" style="padding:10px">
 
-                <p>Als Manager Competitiezaken wil je seizoen {{ seizoen }} van de bondscompetities afsluiten.</p>
+                <p>Je wilt seizoen {{ seizoen }} van de bondscompetities afsluiten.</p>
                 <p>Hierdoor wordt de competitie niet meer getoond en is de uitslag alleen nog te zien onder de historische competitie.</p>
 
                 {% if url_afsluiten %}
 
-                    <form action="{{ url_afsluiten }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                    <form action="{{ url_afsluiten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
                         <input class="btn-sv-rood" name="afsluiten" id="submit_knop" type="submit" value="Seizoen afsluiten">
                     </form>

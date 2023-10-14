@@ -89,8 +89,7 @@ class E2EHelpers(MyTestAsserts, MyMgmtCommandHelper, TestCase):
         self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_wisselnaarrol_bb(self):
-        # self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
-        self._wissel_naar_rol('BB', '/plein/')
+        self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_sporter(self):
         self._wissel_naar_rol('sporter', '/plein/')

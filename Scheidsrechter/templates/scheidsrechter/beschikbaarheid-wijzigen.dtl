@@ -92,14 +92,19 @@
 
                                 <td class="center" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
                             </tr>
-
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="center">
+                                    <i>Geen verzoeken over beschikbaarheid gevonden</i>
+                                </td>
+                            </tr>
                         {% endfor %}
 
                     </table>
 
                     <!-- het is belangrijk dat de keuze knoppen niet in het formulier zitten
                          anders krijgen ze extra (ongewenst) focus-gedrag, zie material _forms.scss button:focus -->
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                         {% csrf_token %}
                         {% for dag in dagen %}
                             <input type="hidden" id="{{ dag.id }}" name="{{ dag.name }}" value="{{ dag.keuze }}">

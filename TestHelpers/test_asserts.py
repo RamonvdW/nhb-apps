@@ -456,7 +456,7 @@ class MyTestAsserts(TestCase):
     def html_assert_dubbelklik_bescherming(self, html, dtl):
         """ controleer het gebruik onsubmit in forms
 
-            <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+            <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
 
             <button class="btn-sv-rood" id="submit_knop" type="submit">
         """
@@ -469,25 +469,23 @@ class MyTestAsserts(TestCase):
             form = html[:form_end]
 
             # varianten:
-            #  onsubmit="submit_knop.disabled=true; return true;"
-            #  onsubmit="submit_knop1.disabled=true; return true;"
+            #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
+            #  onsubmit="document.getElementById('submit_knop1').disabled=true; return true;"
             #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
             #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
-            ok = True
             pos1 = form.find(' onsubmit="')
             if pos1 < 0:                                # pragma: no cover
-                ok = False
                 submit = 'form heeft geen onsubmit=".."'
             else:
                 pos2 = form.find('"', pos1+11)
                 submit = form[pos1+11:pos2]
-                if '.disabled=true;' not in submit:     # pragma: no cover
-                    ok = False
-                if 'return true;' not in submit:        # pragma: no cover
-                    ok = False
-            if not ok:                                  # pragma: no cover
-                self.fail('Form without onsubmit for dubbelklik bescherming in template %s\n%s' % (repr(dtl),
-                                                                                                   repr(submit)))
+                if '.disabled=true;' not in submit or 'return true;' not in submit:            # pragma: no cover
+                    self.fail('Form onsubmit zonder met dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                      repr(submit)))
+
+                if 'document.getElementById(' not in submit:
+                    self.fail('Form onsubmit met slechte dubbelklik bescherming in template %s\n%s' % (repr(dtl),
+                                                                                                       repr(submit)))
 
             pos_button = form.find('<button')
             button_count = 0

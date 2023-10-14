@@ -27,7 +27,7 @@
                 {% if url_doorzetten %}
 
                     <div style="margin:30px">
-                        <form action="{{ url_doorzetten }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                        <form action="{{ url_doorzetten }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
                             <input class="btn-sv-rood" name="button_afsluiten" id="submit_knop" type="submit" value="Doorzetten naar de volgende fase">
                         </form>

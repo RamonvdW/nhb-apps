@@ -64,7 +64,7 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
                 <div class="form-padding">
-                    <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                    <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                         {% csrf_token %}
 
                         <table class="white">
@@ -164,7 +164,7 @@
                 <h5>Verwijder sessie?</h5>
                 <p>Wil je deze sessie echt verwijderen?</p>
 
-                <form action="{{ url_verwijder }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                <form action="{{ url_verwijder }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder_sessie" value="ja">
 

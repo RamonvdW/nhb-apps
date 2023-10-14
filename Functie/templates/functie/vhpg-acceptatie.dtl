@@ -29,7 +29,7 @@
                     <div class="row">
                         <div class="col s12">
                             <h5 class="center sv-rood white-text" style="padding:10px 0 10px 0">Voorwaarden voor het hanteren van persoonsgegevens</h5>
-                            <form action="{% url 'Functie:vhpg-acceptatie' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                            <form action="{% url 'Functie:vhpg-acceptatie' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                 {% csrf_token %}
 
                                 {% include 'functie/vhpg-tekst.dtl' %}

@@ -26,7 +26,7 @@
                 <div class="form-padding">
 
                     {% if not readonly %}
-                        <form action="{{ url_opslaan }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+                        <form action="{{ url_opslaan }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                             {% csrf_token %}
                     {% endif %}
 
@@ -112,7 +112,7 @@
                 <h5>Verwijder dit team?</h5>
                 <p>Wil je dit team van vereniging<br><b>{{ team.vereniging }}</b><br>verwijderen?</p>
 
-                <form action="{{ url_verwijderen }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+                <form action="{{ url_verwijderen }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijderen" value="1">
 

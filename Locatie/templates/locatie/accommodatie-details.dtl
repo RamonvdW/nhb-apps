@@ -37,13 +37,13 @@
 
     {% if opslaan_url %}
         {% if not buiten_locatie %}
-            <form id="form1" action="{{ opslaan_url }}" method="post" onsubmit="submit_knop1.disabled=true; return true;">
+            <form id="form1" action="{{ opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop1').disabled=true; return true;">
                 {% csrf_token %}
                 <input hidden name="maak_buiten_locatie" value="1">
             </form>
         {% endif %}
 
-        <form id="form2" action="{{ opslaan_url }}" method="post" onsubmit="submit_knop2.disabled=true; return true;">
+        <form id="form2" action="{{ opslaan_url }}" method="post" onsubmit="document.getElementById('submit_knop2').disabled=true; return true;">
             {% csrf_token %}
     {% endif %}
 
@@ -483,7 +483,7 @@
                 <h5>Verwijder buitenbaan?</h5>
                 <p>Wil je de buitenbaan van vereniging<br><b>{{ ver }}</b><br>verwijderen uit het systeem?</p>
 
-                <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="submit_knop3.disabled=true; return true;">
+                <form action="{{ url_verwijder_buitenbaan }}" method="post" onsubmit="document.getElementById('submit_knop3').disabled=true; return true;">
                     {% csrf_token %}
                     <input type="hidden" name="verwijder_buitenbaan" value="1">
 

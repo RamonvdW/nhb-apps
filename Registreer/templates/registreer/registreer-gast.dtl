@@ -39,7 +39,7 @@
                 <div class="white left-align z-depth-3">
                     <div class="form-padding">
 
-                        <form action="{{ url_aanmaken }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                        <form action="{{ url_aanmaken }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                             {% csrf_token %}
 
                             <div class="input-field">

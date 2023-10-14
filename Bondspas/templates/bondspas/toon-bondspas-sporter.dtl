@@ -17,7 +17,7 @@
 
             <!-- download knop wordt pas zichtbaar nadat het plaatje opgehaald is -->
             <div id="id_download_knop" style="display:none">
-                <form action="{{ url_download }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ url_download }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {% csrf_token %}
                     <button class="btn-sv-rood" id="submit_knop" type="submit">Download</button>
                 </form>

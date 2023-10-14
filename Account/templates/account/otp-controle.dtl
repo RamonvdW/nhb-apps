@@ -24,7 +24,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px">
-                <form action="{% url 'Account:otp-controle' %}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{% url 'Account:otp-controle' %}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                     {{ form.next_url }}
                     {% csrf_token %}
 

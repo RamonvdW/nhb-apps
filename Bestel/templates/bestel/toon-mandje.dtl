@@ -164,7 +164,7 @@
                             <p class="center sv-rood-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
                         {% else %}
                             <div class="center" style="margin-top:30px">
-                                <form action="{{ url_bestellen }}" method="post" onsubmit="submit_knop.disabled=true; return true;">
+                                <form action="{{ url_bestellen }}" method="post" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
                                     {% csrf_token %}
                                     <button class="btn-sv-rood" id="submit_knop" type="submit">
                                         <i class="notranslate material-icons-round left">shopping_cart_checkout</i>Bestelling afronden</button>
