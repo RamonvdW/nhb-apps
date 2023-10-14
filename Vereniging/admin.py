@@ -28,11 +28,16 @@ class SecretarisAdmin(admin.ModelAdmin):
         self.obj = None
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
         if obj:
             self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name == 'sporters' and self.obj:
             kwargs['queryset'] = (Sporter
                                   .objects

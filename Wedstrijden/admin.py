@@ -36,12 +36,17 @@ class WedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
                                   'sessies')
                 .all())
 
-    def get_form(self, request, obj=None, **kwargs):
-        if obj:                 # pragma: no branch
-            self.obj = obj      # pragma: no cover
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        """ initialisatie van het admin formulier
+            hier "vangen" we het database object waar we mee bezig gaan
+        """
+        if obj:
+            self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        """ bepaal de relevante keuzemogelijkheden voor specifieke velden
+        """
         if db_field.name == 'locatie' and self.obj:
             ver = self.obj.organiserende_vereniging
             kwargs['queryset'] = ver.locatie_set.all()
