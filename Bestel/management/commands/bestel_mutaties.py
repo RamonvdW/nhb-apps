@@ -147,10 +147,6 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
     producten = _beschrijf_bestelling(bestelling)
 
-    status = bestelling.status
-    if status == BESTELLING_STATUS_NIEUW:
-        status = BESTELLING_STATUS_BETALING_ACTIEF
-
     totaal_euro_str = "%.2f" % bestelling.totaal_euro
     totaal_euro_str = totaal_euro_str.replace('.', ',')       # nederlandse komma
 
@@ -160,9 +156,12 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
         'bestelling': bestelling,
         'totaal_euro_str': totaal_euro_str,
         'producten': producten,
-        'bestel_status': BESTELLING_STATUS2STR[status],
+        'bestel_status': BESTELLING_STATUS2STR[bestelling.status],
         'kan_betalen': bestelling.status not in (BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_GEANNULEERD),
     }
+
+    if bestelling.status == BESTELLING_STATUS_NIEUW:
+        context['bestel_status'] = 'Te betalen'
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
 
@@ -919,7 +918,8 @@ class Command(BaseCommand):
         status = bestelling.status
         if status not in (BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_BETALING_ACTIEF):
             self.stdout.write('[WARNING] Kan bestelling %s (pk=%s) niet annuleren, want status = %s' % (
-                                bestelling.mh_bestel_nr(), bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
+                                bestelling.mh_bestel_nr(), bestelling.pk,
+                                BESTELLING_STATUS2STR[bestelling.status]))
             return
 
         self.stdout.write('[INFO] Bestelling %s (pk=%s) wordt nu geannuleerd' % (bestelling.bestel_nr, bestelling.pk))
