@@ -38,12 +38,15 @@
             if (keuze === 1) {
                 el1.classList.add('keuze-ja');
                 el4.innerHTML = "Ja, ik kan";
+                el4.classList.remove('sv-rood-text')
             } else if (keuze === 2) {
                 el2.classList.add('keuze-mss');
                 el4.innerHTML = "Nog niet zeker";
+                el4.classList.remove('sv-rood-text')
             } else if (keuze === 3) {
                 el3.classList.add('keuze-nee');
                 el4.innerHTML = "Niet beschikbaar";
+                el4.classList.remove('sv-rood-text')
             }
         }
     </script>
@@ -70,7 +73,7 @@
 
                         {% for dag in dagen %}
                             <tr>
-                                <td>{{ dag.datum }}</td>
+                                <td>{{ dag.datum|date:'l' }}<br>{{ dag.datum }}</td>
 
                                 <td>{{ dag.wedstrijd.titel }}<br>{{ dag.wedstrijd.locatie.plaats }}</td>
 
@@ -90,7 +93,7 @@
                                     </button>
                                 </td>
 
-                                <td class="center" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
+                                <td class="center sv-rood-text" id="{{ dag.id }}-gekozen">Nog geen keuze</td>
                             </tr>
                         {% empty %}
                             <tr>

@@ -42,7 +42,7 @@
                                 <a class="btn-sv-blauw" href="{{ obj.url_details }}">
                                     <i class="material-icons-round left notranslate">priority_high</i>Nieuw</a>
                             {% else %}
-                                <a class="btn-sv-rood" href="{{ obj.url_details }}">Details</a>
+                                <a class="btn-sv-rood" href="{{ obj.url_details }}">{% if is_cs %}Wijzig{% else %}Details{% endif %}</a>
                             {% endif %}
                         </td>
                     </tr>

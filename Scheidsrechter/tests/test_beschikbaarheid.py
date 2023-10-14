@@ -12,7 +12,7 @@ from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie
 from Scheidsrechter.definities import BESCHIKBAAR_LEEG
-from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheids
+from Scheidsrechter.models import ScheidsBeschikbaarheid, WedstrijdDagScheidsrechters
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -160,12 +160,11 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_cs)
         self.e2e_check_rol('CS')
 
-        self.assertEqual(0, WedstrijdDagScheids.objects.count())
+        self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        # +4, want 1 dag, 2 scheidsrechters
-        self.assertEqual(0+4, WedstrijdDagScheids.objects.count())
+        self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         self.client.logout()
         self.e2e_login(self.sr3_met_account.account)
@@ -221,21 +220,19 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_cs)
         self.e2e_check_rol('CS')
 
-        self.assertEqual(0, WedstrijdDagScheids.objects.count())
+        self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        # +4, want 2 dagen, 2 scheidsrechters
-        self.assertEqual(0+4, WedstrijdDagScheids.objects.count())
-
-        dag = WedstrijdDagScheids.objects.first()
-        self.assertTrue(str(dag) != '')
+        self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd2.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        # +1, want 1 dag, 1 scheidsrechter
-        self.assertEqual(4+1, WedstrijdDagScheids.objects.count())
+        self.assertEqual(3, WedstrijdDagScheidsrechters.objects.count())
+
+        dag = WedstrijdDagScheidsrechters.objects.first()
+        self.assertTrue(str(dag) != '')
 
         self.e2e_login(self.sr4_met_account.account)
 
@@ -292,20 +289,20 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.e2e_check_rol('CS')
 
         # beschikbaarheid opvragen voor een wedstrijd
-        self.assertEqual(0, WedstrijdDagScheids.objects.count())
+        self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        self.assertEqual(4, WedstrijdDagScheids.objects.count())
+        self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         # verhoog het aantal scheidsrechters en stuur nieuwe verzoeken
         self.wedstrijd.aantal_scheids += 1
         self.wedstrijd.save(update_fields=['aantal_scheids'])
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        self.assertEqual(8, WedstrijdDagScheids.objects.count())
+        self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         # corner cases
         resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': 'x'})
@@ -330,11 +327,11 @@ class TestScheidsrechterOverzicht(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('scheidsrechter/beschikbaarheid-inzien.dtl', 'plein/site_layout.dtl'))
 
         # beschikbaarheid opvragen voor een wedstrijd
-        self.assertEqual(0, WedstrijdDagScheids.objects.count())
+        self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        self.assertEqual(4, WedstrijdDagScheids.objects.count())
+        self.assertEqual(2, WedstrijdDagScheidsrechters.objects.count())
 
         # beschikbaarheid inzien voor een wedstrijd
         with self.assert_max_queries(20):

@@ -6,12 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.definities import SCHEIDS_BOND, SCHEIDS_INTERNATIONAAL
+from BasisTypen.definities import SCHEIDS_BOND
 from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.models import Functie
 from Geo.models import Regio
 from Locatie.models import Locatie
-from Scheidsrechter.models import WedstrijdDagScheids
+from Scheidsrechter.models import WedstrijdDagScheidsrechters
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 from Vereniging.models import Vereniging
@@ -154,12 +154,11 @@ class TestScheidsrechterWedstrijden(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('scheidsrechter/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
 
         # beschikbaarheid opvragen
-        self.assertEqual(0, WedstrijdDagScheids.objects.count())
+        self.assertEqual(0, WedstrijdDagScheidsrechters.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_beschikbaarheid_opvragen, {'wedstrijd': self.wedstrijd.pk})
         self.assert_is_redirect(resp, self.url_overzicht)
-        # +2, want 1 dag, 2 scheidsrechters
-        self.assertEqual(0+2, WedstrijdDagScheids.objects.count())
+        self.assertEqual(1, WedstrijdDagScheidsrechters.objects.count())
 
         # wedstrijd details (beschikbaarheid opgevraagd)
         url = self.url_wedstrijd_details % self.wedstrijd.pk
