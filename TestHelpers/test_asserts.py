@@ -472,8 +472,9 @@ class MyTestAsserts(TestCase):
             #  onsubmit="submit_knop.disabled=true; return true;"
             #  onsubmit="submit_knop1.disabled=true; return true;"
             #  onsubmit="submit_knop1.disabled=true; submit_knop2.disabled=true; return true;"
+            #  onsubmit="document.getElementById('submit_knop').disabled=true; return true;"
             ok = True
-            pos1 = form.find(' onsubmit="submit_knop')
+            pos1 = form.find(' onsubmit="')
             if pos1 < 0:                                # pragma: no cover
                 ok = False
                 submit = 'form heeft geen onsubmit=".."'

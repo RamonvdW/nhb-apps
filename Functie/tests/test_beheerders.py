@@ -137,7 +137,7 @@ class TestFunctieBeheerders(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get('/plein/')
         self.assert_html_ok(resp)
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         with self.assert_max_queries(6):

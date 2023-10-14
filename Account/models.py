@@ -57,7 +57,7 @@ class Account(AbstractUser):
     # speciale vlag om dit account alle rechten te geven
     is_BB = models.BooleanField(
                         default=False,
-                        help_text="Manager Competitiezaken")
+                        help_text="Manager MH")
 
     # TOTP ondersteuning
     otp_code = models.CharField(

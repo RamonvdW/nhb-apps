@@ -50,7 +50,7 @@
 
             <!-- dialoog venster -->
             <div style="padding:20px">
-                <form action="{{ url }}" method="get" onsubmit="submit_knop.disabled=true; return true;">
+                <form action="{{ url }}" method="get" onsubmit="document.getElementById('submit_knop').disabled=true; return true;">
 
                     <div class="input-field">
                         {{ form.zoekterm.label_tag }}{{ form.zoekterm }}

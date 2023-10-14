@@ -113,7 +113,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             # rollen die je altijd aan moet kunnen nemen als je ze hebt
             if rol == Rollen.ROL_BB:
-                obj = Functie(beschrijving='Manager Competitiezaken')
+                obj = Functie(beschrijving='Manager MH')
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = 90002

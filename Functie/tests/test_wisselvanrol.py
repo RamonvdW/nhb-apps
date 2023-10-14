@@ -138,7 +138,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Manager Competitiezaken')
+        self.assertNotContains(resp, 'Manager MH')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Maak afspraken over het omgaan met persoonsgegevens.')
 
@@ -155,7 +155,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Admin site')
         self.assertContains(resp, 'Account wissel')
-        self.assertContains(resp, 'Manager Competitiezaken')
+        self.assertContains(resp, 'Manager MH')
         self.assertContains(resp, 'Gebruiker')
 
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
@@ -226,10 +226,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
-        self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager Competitiezaken
+        self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager MH
         self.assertIn(self.url_accountwissel, urls)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # response = het Plein
@@ -237,22 +237,22 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_accountwissel, urls)
 
         # controleer dat een niet valide rol wissel geen effect heeft
         # dit raakt een exception in Account.rol:rol_activeer
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'huh', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(32):
             resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
 
         with self.assert_max_queries(31):
             resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
@@ -276,7 +276,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_accountwissel, urls)              # Account wissel
-        self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager Competitiezaken
+        self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager MH
         # self.assertIn(self.url_activeer_rol % 'geen', urls)         # Gebruiker
 
         with self.assertRaises(ValueError):

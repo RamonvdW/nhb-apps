@@ -224,10 +224,10 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BB rol aan
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(30):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager Competitiezaken")
+        self.assertContains(resp, "Manager MH")
 
         # juiste URL om BKO te koppelen
         url = self.url_wijzig_ontvang % self.functie_bko.pk

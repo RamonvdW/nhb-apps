@@ -69,7 +69,7 @@
 
                 {% if accounts_bb %}
                     <tr>
-                        <td style="vertical-align: top">Manager Competitiezaken</td>
+                        <td style="vertical-align: top">Manager MH</td>
                         <td>
                             {% for obj in accounts_bb %}
                                 {% if not forloop.first %}

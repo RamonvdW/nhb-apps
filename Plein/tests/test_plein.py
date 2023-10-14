@@ -206,7 +206,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Manager Competitiezaken')
+        self.assertContains(resp, 'Manager MH')
 
         # bko
         self.e2e_wissel_naar_functie(self.functie_bko)
